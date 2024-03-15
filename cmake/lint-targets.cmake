@@ -3,7 +3,6 @@ set(
     source/*.cpp source/*.hpp
     include/*.hpp
     test/*.cpp test/*.hpp
-    example/*.cpp example/*.hpp
     CACHE STRING
     "; separated patterns relative to the project source dir to format"
 )

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "graphql--/graphql--_export.hpp"
+#include "gql/gql_export.hpp"
 
 /**
  * A note about the MSVC warning C4251:
@@ -51,7 +51,7 @@
  *
  * Please see the note above for considerations when creating shared libraries.
  */
-class GRAPHQL___EXPORT exported_class
+class GQL_EXPORT exported_class
 {
 public:
   /**
@@ -65,6 +65,6 @@ public:
   auto name() const -> char const*;
 
 private:
-  GRAPHQL___SUPPRESS_C4251
+  GQL_SUPPRESS_C4251
   std::string m_name;
 };

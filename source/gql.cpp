@@ -1,11 +1,11 @@
 #include <string>
 
-#include "graphql--/graphql--.hpp"
+#include "gql/gql.hpp"
 
 #include <fmt/core.h>
 
 exported_class::exported_class()
-    : m_name {fmt::format("{}", "graphql--")}
+    : m_name {fmt::format("{}", "gql")}
 {
 }
 

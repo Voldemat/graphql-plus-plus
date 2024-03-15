@@ -9,7 +9,7 @@ guide.
 ## Developer mode
 
 Build system targets that are only useful for developers of this project are
-hidden if the `graphql--_DEVELOPER_MODE` option is disabled. Enabling this
+hidden if the `gql_DEVELOPER_MODE` option is disabled. Enabling this
 option makes tests and other developer targets and options available. Not
 enabling this option means that you are a consumer of this project and thus you
 have no need for these targets and options.
@@ -23,7 +23,7 @@ the project. As a developer, you are recommended to always have the [latest
 CMake version][2] installed to make use of the latest Quality-of-Life
 additions.
 
-You have a few options to pass `graphql--_DEVELOPER_MODE` to the configure
+You have a few options to pass `gql_DEVELOPER_MODE` to the configure
 command, but this project prefers to use presets.
 
 As a developer, you should create a `CMakeUserPresets.json` file at the root of
@@ -152,10 +152,6 @@ Doxygen and m.css. The output will go to `<binary-dir>/docs` by default
 These targets run the clang-format tool on the codebase to check errors and to
 fix them respectively. Customization available using the `FORMAT_PATTERNS` and
 `FORMAT_COMMAND` cache variables.
-
-#### `run-examples`
-
-Runs all the examples created by the `add_example` command.
 
 #### `spell-check` and `spell-fix`
 

@@ -65,18 +65,18 @@ cmake --install build --config Release
 This project exports a CMake package to be used with the [`find_package`][3]
 command of CMake:
 
-* Package name: `graphql--`
-* Target name: `graphql--::graphql--`
+* Package name: `gql`
+* Target name: `gql::gql`
 
 Example usage:
 
 ```cmake
-find_package(graphql-- REQUIRED)
+find_package(gql REQUIRED)
 # Declare the imported target as a build requirement using PRIVATE, where
 # project_target is a target created in the consuming project
 target_link_libraries(
     project_target PRIVATE
-    graphql--::graphql--
+    gql::gql
 )
 ```
 

@@ -26,7 +26,7 @@
       "hidden": true,
       "inherits": "cmake-pedantic",
       "cacheVariables": {
-        "graphql--_DEVELOPER_MODE": "ON"
+        "gql_DEVELOPER_MODE": "ON"
       }
     },
     {

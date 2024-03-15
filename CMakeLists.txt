@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.14)
 include(cmake/prelude.cmake)
 
 project(
-    graphql--
+    gql
     VERSION 0.0.1
-    DESCRIPTION "Graphql++"
+    DESCRIPTION "Short description"
     HOMEPAGE_URL "https://example.com/"
     LANGUAGES CXX
 )
@@ -16,49 +16,49 @@ include(cmake/variables.cmake)
 # ---- Declare library ----
 
 add_library(
-    graphql--_graphql--
-    source/graphql--.cpp
+    gql_gql
+    source/gql.cpp
 )
-add_library(graphql--::graphql-- ALIAS graphql--_graphql--)
+add_library(gql::gql ALIAS gql_gql)
 
 include(GenerateExportHeader)
 generate_export_header(
-    graphql--_graphql--
-    BASE_NAME graphql--
-    EXPORT_FILE_NAME export/graphql--/graphql--_export.hpp
+    gql_gql
+    BASE_NAME gql
+    EXPORT_FILE_NAME export/gql/gql_export.hpp
     CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
 )
 
 if(NOT BUILD_SHARED_LIBS)
-  target_compile_definitions(graphql--_graphql-- PUBLIC GRAPHQL___STATIC_DEFINE)
+  target_compile_definitions(gql_gql PUBLIC GQL_STATIC_DEFINE)
 endif()
 
 set_target_properties(
-    graphql--_graphql-- PROPERTIES
+    gql_gql PROPERTIES
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN YES
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
-    EXPORT_NAME graphql--
-    OUTPUT_NAME graphql--
+    EXPORT_NAME gql
+    OUTPUT_NAME gql
 )
 
 target_include_directories(
-    graphql--_graphql-- ${warning_guard}
+    gql_gql ${warning_guard}
     PUBLIC
     "\$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
 )
 
 target_include_directories(
-    graphql--_graphql-- SYSTEM
+    gql_gql SYSTEM
     PUBLIC
     "\$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
 )
 
-target_compile_features(graphql--_graphql-- PUBLIC cxx_std_20)
+target_compile_features(gql_gql PUBLIC cxx_std_20)
 
 find_package(fmt REQUIRED)
-target_link_libraries(graphql--_graphql-- PRIVATE fmt::fmt)
+target_link_libraries(gql_gql PRIVATE fmt::fmt)
 
 # ---- Install rules ----
 
@@ -66,23 +66,14 @@ if(NOT CMAKE_SKIP_INSTALL_RULES)
   include(cmake/install-rules.cmake)
 endif()
 
-# ---- Examples ----
-
-if(PROJECT_IS_TOP_LEVEL)
-  option(BUILD_EXAMPLES "Build examples tree." "${graphql--_DEVELOPER_MODE}")
-  if(BUILD_EXAMPLES)
-    add_subdirectory(example)
-  endif()
-endif()
-
 # ---- Developer mode ----
 
-if(NOT graphql--_DEVELOPER_MODE)
+if(NOT gql_DEVELOPER_MODE)
   return()
 elseif(NOT PROJECT_IS_TOP_LEVEL)
   message(
       AUTHOR_WARNING
-      "Developer mode is intended for developers of graphql--"
+      "Developer mode is intended for developers of gql"
   )
 endif()
 

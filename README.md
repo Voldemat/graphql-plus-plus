@@ -1,6 +1,6 @@
-# graphql--
+# gql
 
-This is the graphql-- project.
+This is the gql project.
 
 # Building and installing
 

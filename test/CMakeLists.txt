@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(graphql--Tests LANGUAGES CXX)
+project(gqlTests LANGUAGES CXX)
 
 include(../cmake/project-is-top-level.cmake)
 include(../cmake/folders.cmake)
@@ -8,7 +8,7 @@ include(../cmake/folders.cmake)
 # ---- Dependencies ----
 
 if(PROJECT_IS_TOP_LEVEL)
-  find_package(graphql-- REQUIRED)
+  find_package(gql REQUIRED)
   enable_testing()
 endif()
 
@@ -17,15 +17,15 @@ include(Catch)
 
 # ---- Tests ----
 
-add_executable(graphql--_test source/graphql--_test.cpp)
+add_executable(gql_test source/gql_test.cpp)
 target_link_libraries(
-    graphql--_test PRIVATE
-    graphql--::graphql--
+    gql_test PRIVATE
+    gql::gql
     Catch2::Catch2WithMain
 )
-target_compile_features(graphql--_test PRIVATE cxx_std_20)
+target_compile_features(gql_test PRIVATE cxx_std_20)
 
-catch_discover_tests(graphql--_test)
+catch_discover_tests(gql_test)
 
 # ---- End-of-file commands ----
 
