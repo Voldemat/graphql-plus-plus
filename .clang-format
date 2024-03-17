@@ -1,0 +1,11 @@
+BasedOnStyle: Google
+IndentWidth: 4
+DerivePointerAlignment: false
+PointerAlignment: Right
+ColumnLimit: 80
+AccessModifierOffset: -4
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '.src/*'
+    Priority:        4
+    SortPriority:    4
