@@ -1,0 +1,78 @@
+{
+    "$schema": "case.schema.json",
+    "schema": "type Product {\nname: String!\ntext: String!\n}",
+    "tokens": [
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "line": 1,
+            "pos": 1
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Product",
+            "line": 1,
+            "pos": 6
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "line": 1,
+            "pos": 14
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "name",
+            "line": 2,
+            "pos": 1
+        },
+        {
+            "type": "SEMICOLON",
+            "lexeme": ":",
+            "line": 2,
+            "pos": 5
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "line": 2,
+            "pos": 7
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "line": 2,
+            "pos": 13
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "text",
+            "line": 3,
+            "pos": 1
+        },
+        {
+            "type": "SEMICOLON",
+            "lexeme": ":",
+            "line": 3,
+            "pos": 5
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "line": 3,
+            "pos": 7
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "line": 3,
+            "pos": 13
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "line": 4,
+            "pos": 1
+        }
+    ]
+}

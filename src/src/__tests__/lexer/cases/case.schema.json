@@ -1,0 +1,49 @@
+{
+    "$id": "case.schema.json",
+    "title": "Case",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "schema": {
+            "type": "string"
+        },
+        "tokens": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "EQUAL",
+                            "LEFT_PAREN",
+                            "RIGHT_PAREN",
+                            "LEFT_BRACE",
+                            "RIGHT_BRACE",
+                            "BANG",
+                            "IDENTIFIER",
+                            "STRING",
+                            "NUMBER",
+                            "SEMICOLON"
+                        ]
+                    },
+                    "lexeme": {
+                        "type": "string"
+                    },
+                    "line": {
+                        "type": "number",
+                        "minimum": 1
+                    },
+                    "pos": {
+                        "type": "number",
+                        "minimum": 1
+                    }
+                }
+            }
+        }
+    }
+}

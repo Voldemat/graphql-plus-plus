@@ -1,0 +1,22 @@
+{
+    "$schema": "case.schema.json",
+    "schema": "extend type Query {\n    getNumber(limit: String = \"0\"): BaseError!\n}",
+    "tokens": [
+        { "type": "IDENTIFIER", "lexeme": "extend", "pos": 1, "line": 1 },
+        { "type": "IDENTIFIER", "lexeme": "type", "pos": 8, "line": 1 },
+        { "type": "IDENTIFIER", "lexeme": "Query", "pos": 13, "line": 1 },
+        { "type": "LEFT_BRACE", "lexeme": "{", "pos": 19, "line": 1 },
+        { "type": "IDENTIFIER", "lexeme": "getNumber", "pos": 5, "line": 2 },
+        { "type": "LEFT_PAREN", "lexeme": "(", "pos": 14, "line": 2 },
+        { "type": "IDENTIFIER", "lexeme": "limit", "pos": 15, "line": 2 },
+        { "type": "SEMICOLON", "lexeme": ":", "pos": 20, "line": 2 },
+        { "type": "IDENTIFIER", "lexeme": "String", "pos": 22, "line": 2 },
+        { "type": "EQUAL", "lexeme": "=", "pos": 29, "line": 2 },
+        { "type": "STRING", "lexeme": "0", "pos": 31, "line": 2 },
+        { "type": "RIGHT_PAREN", "lexeme": ")", "pos": 34, "line": 2 },
+        { "type": "SEMICOLON", "lexeme": ":", "pos": 35, "line": 2 },
+        { "type": "IDENTIFIER", "lexeme": "BaseError", "pos": 37, "line": 2 },
+        { "type": "BANG", "lexeme": "!", "pos": 46, "line": 2 },
+        { "type": "RIGHT_BRACE", "lexeme": "}", "pos": 1, "line": 3 }
+    ]
+}

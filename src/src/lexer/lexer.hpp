@@ -2,32 +2,60 @@
 #define GRAPHQL_LEXER
 #include <_ctype.h>
 
-#include <functional>
 #include <optional>
+#include <ostream>
 #include <sstream>
 #include <string>
-#include <variant>
+#include <vector>
 
-struct GQLVariable {
-    std::string name;
+enum GQLTokenType {
+    EQUAL = 1,
+    LEFT_PAREN = 2,
+    RIGHT_PAREN = 3,
+    LEFT_BRACE = 4,
+    RIGHT_BRACE = 5,
+    BANG = 6,
+    IDENTIFIER = 7,
+    STRING = 8,
+    NUMBER = 9,
+    SEMICOLON = 10
 };
-struct GQLNumberLiteral {
-    long value;
+
+std::optional<GQLTokenType> gqlTokenTypeFromString(std::string t) noexcept;
+std::string gqlTokenTypeToString(GQLTokenType type) noexcept;
+
+struct GQLToken {
+    GQLTokenType type;
+    std::string lexeme;
+    unsigned int line = 1;
+    unsigned int pos = 1;
+
+    bool operator==(const GQLToken &token) const {
+        return type == token.type && lexeme == token.lexeme &&
+               line == token.line && token.pos;
+    };
 };
-enum GQL_OP_TYPE { EQUAL };
-struct GQLOperator {
-    GQL_OP_TYPE type;
-};
-using GQL_TOKEN = std::variant<GQLVariable, GQLOperator, GQLNumberLiteral>;
 
 class Lexer {
+    unsigned int line = 1;
+    unsigned int pos = 0;
+    std::optional<GQLToken> saved;
     std::istringstream stream;
-    GQLNumberLiteral buildNumber(char start) noexcept;
-    GQLVariable buildIdentifier(char start) noexcept;
-    std::string readWhilePredicateIsTrue(
-        char start, const std::function<bool(char)> predicate);
+    std::optional<GQLToken> changeStateAndNextToken(
+        char c, GQLTokenType type, std::optional<GQLToken> state) noexcept;
+    char nextChar() noexcept;
+    std::optional<GQLToken> returnOrSaveToken(
+        GQLTokenType type,
+        std::string lexeme,
+        std::optional<GQLToken> state
+    ) noexcept;
+
 public:
     Lexer(std::istringstream s);
-    std::optional<GQL_TOKEN*> nextToken() noexcept;
+    std::optional<GQLToken> nextToken(
+        std::optional<GQLToken> state = std::nullopt) noexcept;
+    std::vector<GQLToken> getTokens() noexcept;
 };
+std::ostream &operator<<(std::ostream &os, const GQLToken &self);
+std::ostream &operator<<(std::ostream &os, const GQLTokenType &type);
 #endif
