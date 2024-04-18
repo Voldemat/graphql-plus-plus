@@ -1,18 +1,78 @@
 {
     "$schema": "case.schema.json",
-    "schema": "input ProductIn {\nname: String!\ntext: String!\n}",
+    "schema": "input ProductIn {\nprice: Int!\n}",
     "tokens": [
-        { "type": "IDENTIFIER",  "lexeme": "input",  "line": 1,  "pos": 1 },
-        { "type": "IDENTIFIER",  "lexeme": "ProductIn",  "line": 1,  "pos": 7 },
-        { "type": "LEFT_BRACE",  "lexeme": "{",  "line": 1,  "pos": 17 },
-        { "type": "IDENTIFIER",  "lexeme": "name",  "line": 2,  "pos": 1 },
-        { "type": "SEMICOLON",  "lexeme": ":",  "line": 2,  "pos": 5 },
-        { "type": "IDENTIFIER",  "lexeme": "String",  "line": 2,  "pos": 7 },
-        { "type": "BANG",  "lexeme": "!",  "line": 2,  "pos": 13 },
-        { "type": "IDENTIFIER",  "lexeme": "text",  "line": 3,  "pos": 1 },
-        { "type": "SEMICOLON",  "lexeme": ":",  "line": 3,  "pos": 5 },
-        { "type": "IDENTIFIER",  "lexeme": "String",  "line": 3,  "pos": 7 },
-        { "type": "BANG",  "lexeme": "!",  "line": 3,  "pos": 13 },
-        { "type": "RIGHT_BRACE",  "lexeme": "}",  "line": 4, "pos": 1 }
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "input",
+            "location": {
+                "line": 1,
+                "start": 0,
+                "end": 4
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ProductIn",
+            "location": {
+                "line": 1,
+                "start": 6,
+                "end": 14
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 1,
+                "start": 16,
+                "end": 16
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "price",
+            "location": {
+                "line": 2,
+                "start": 0,
+                "end": 4
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 2,
+                "start": 5,
+                "end": 5
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Int",
+            "location": {
+                "line": 2,
+                "start": 7,
+                "end": 9
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 2,
+                "start": 10,
+                "end": 10
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 3,
+                "start": 0,
+                "end": 0
+            }
+        }
     ]
 }

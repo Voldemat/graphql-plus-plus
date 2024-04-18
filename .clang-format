@@ -5,7 +5,5 @@ PointerAlignment: Right
 ColumnLimit: 80
 AccessModifierOffset: -4
 IncludeBlocks: Regroup
-IncludeCategories:
-  - Regex:           '.src/*'
-    Priority:        4
-    SortPriority:    4
+BreakBeforeBinaryOperators: All
+Cpp11BracedListStyle: false

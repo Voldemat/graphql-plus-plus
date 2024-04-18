@@ -1,0 +1,15 @@
+{
+    "$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "default",
+            "environment": {
+                "CC": "/Users/vladimir/code/opensource/llvm-project/builds/clang/bin/clang",
+                "CXX": "/Users/vladimir/code/opensource/llvm-project/builds/clang/bin/clang++",
+                "CXXFLAGS": "-isystem /Users/vladimir/code/opensource/llvm-project/libcxx-prefix/include/c++/v1/ -nostdinc++ -nostdlib++",
+                "LDFLAGS": "-L /Users/vladimir/code/opensource/llvm-project/libcxx-prefix/lib/ -Wl,-rpath,/Users/vladimir/code/opensource/llvm-project/libcxx-prefix/lib/ -lc++"
+            }
+        }
+    ]
+}

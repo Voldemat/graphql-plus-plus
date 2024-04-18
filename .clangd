@@ -1,6 +1,6 @@
 CompileFlags:
   CompilationDatabase: build/
-  Compiler: /opt/homebrew/opt/llvm/bin/clang
+  Compiler: /Users/vladimir/code/opensource/llvm-project/builds/clang/bin/clang
 Diagnostics:
   UnusedIncludes: Strict
   MissingIncludes: Strict

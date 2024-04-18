@@ -1,22 +1,159 @@
 {
     "$schema": "case.schema.json",
-    "schema": "extend type Query {\n    getNumber(limit: String = \"0\"): BaseError!\n}",
+    "schema": "extend type Query {\ngetA(b: Int! = 0): BaseError!\n}",
     "tokens": [
-        { "type": "IDENTIFIER", "lexeme": "extend", "pos": 1, "line": 1 },
-        { "type": "IDENTIFIER", "lexeme": "type", "pos": 8, "line": 1 },
-        { "type": "IDENTIFIER", "lexeme": "Query", "pos": 13, "line": 1 },
-        { "type": "LEFT_BRACE", "lexeme": "{", "pos": 19, "line": 1 },
-        { "type": "IDENTIFIER", "lexeme": "getNumber", "pos": 5, "line": 2 },
-        { "type": "LEFT_PAREN", "lexeme": "(", "pos": 14, "line": 2 },
-        { "type": "IDENTIFIER", "lexeme": "limit", "pos": 15, "line": 2 },
-        { "type": "SEMICOLON", "lexeme": ":", "pos": 20, "line": 2 },
-        { "type": "IDENTIFIER", "lexeme": "String", "pos": 22, "line": 2 },
-        { "type": "EQUAL", "lexeme": "=", "pos": 29, "line": 2 },
-        { "type": "STRING", "lexeme": "0", "pos": 31, "line": 2 },
-        { "type": "RIGHT_PAREN", "lexeme": ")", "pos": 34, "line": 2 },
-        { "type": "SEMICOLON", "lexeme": ":", "pos": 35, "line": 2 },
-        { "type": "IDENTIFIER", "lexeme": "BaseError", "pos": 37, "line": 2 },
-        { "type": "BANG", "lexeme": "!", "pos": 46, "line": 2 },
-        { "type": "RIGHT_BRACE", "lexeme": "}", "pos": 1, "line": 3 }
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "extend",
+            "location": {
+                "line": 1,
+                "start": 0,
+                "end": 5
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": {
+                "line": 1,
+                "start": 7,
+                "end": 10
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Query",
+            "location": {
+                "start": 12,
+                "line": 1,
+                "end": 16
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "start": 18,
+                "end": 18,
+                "line": 1
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "getA",
+            "location": {
+                "line": 2,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "LEFT_PAREN",
+            "lexeme": "(",
+            "location": {
+                "line": 2,
+                "start": 4,
+                "end": 4
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "b",
+            "location": {
+                "line": 2,
+                "start": 5,
+                "end": 5
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 2,
+                "start": 6,
+                "end": 6
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Int",
+            "location": {
+                "line": 2,
+                "start": 8,
+                "end": 10
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 2,
+                "start": 11,
+                "end": 11
+            }
+        },
+        {
+            "type": "EQUAL",
+            "lexeme": "=",
+            "location": {
+                "line": 2,
+                "start": 13,
+                "end": 13
+            }
+        },
+        {
+            "type": "NUMBER",
+            "lexeme": "0",
+            "location": {
+                "line": 2,
+                "start": 15,
+                "end": 15
+            }
+        },
+        {
+            "type": "RIGHT_PAREN",
+            "lexeme": ")",
+            "location": {
+                "line": 2,
+                "start": 16,
+                "end": 16
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 2,
+                "start": 17,
+                "end": 17
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "BaseError",
+            "location": {
+                "line": 2,
+                "start": 19,
+                "end": 27
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 2,
+                "start": 28,
+                "end": 28
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 3,
+                "start": 0,
+                "end": 0
+            }
+        }
     ]
 }

@@ -1,61 +1,54 @@
 #ifndef GRAPHQL_LEXER
 #define GRAPHQL_LEXER
-#include <_ctype.h>
 
+#include <exception>
+#include <memory>
 #include <optional>
-#include <ostream>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
-enum GQLTokenType {
-    EQUAL = 1,
-    LEFT_PAREN = 2,
-    RIGHT_PAREN = 3,
-    LEFT_BRACE = 4,
-    RIGHT_BRACE = 5,
-    BANG = 6,
-    IDENTIFIER = 7,
-    STRING = 8,
-    NUMBER = 9,
-    SEMICOLON = 10
+#include "./token.hpp"
+
+namespace lexer {
+class LexerError : public std::exception {
+    const std::string message;
+public:
+    LexerError(const std::string message, const Location location) noexcept;
+    const Location location;
+    const char* what() const noexcept;
 };
 
-std::optional<GQLTokenType> gqlTokenTypeFromString(std::string t) noexcept;
-std::string gqlTokenTypeToString(GQLTokenType type) noexcept;
-
-struct GQLToken {
-    GQLTokenType type;
-    std::string lexeme;
-    unsigned int line = 1;
-    unsigned int pos = 1;
-
-    bool operator==(const GQLToken &token) const {
-        return type == token.type && lexeme == token.lexeme &&
-               line == token.line && token.pos;
-    };
-};
-
-class Lexer {
-    unsigned int line = 1;
-    unsigned int pos = 0;
-    std::optional<GQLToken> saved;
-    std::istringstream stream;
-    std::optional<GQLToken> changeStateAndNextToken(
-        char c, GQLTokenType type, std::optional<GQLToken> state) noexcept;
-    char nextChar() noexcept;
-    std::optional<GQLToken> returnOrSaveToken(
-        GQLTokenType type,
-        std::string lexeme,
-        std::optional<GQLToken> state
+class LexerState {
+    std::string buffer;
+    std::optional<ComplexTokenType> type;
+    Location location;
+    std::tuple<bool, std::optional<GQLToken>> feedNew(char c);
+    std::optional<GQLTokenType> getTypeForChar(char c) const noexcept;
+    std::tuple<bool, std::optional<GQLToken>> feedWithType(
+        char c, ComplexTokenType tokenType);
+    GQLToken extractToken();
+    std::optional<GQLToken> maybeExtractToken() noexcept;
+    void adjustLocation(char c);
+    std::tuple<bool, std::optional<GQLToken>> returnTuple(
+        bool isAcknowledged, bool shouldReturnToken, char c
     ) noexcept;
 
 public:
-    Lexer(std::istringstream s);
-    std::optional<GQLToken> nextToken(
-        std::optional<GQLToken> state = std::nullopt) noexcept;
-    std::vector<GQLToken> getTokens() noexcept;
+    LexerState(std::shared_ptr<SourceFile> source) noexcept {
+        location.source = source;
+    };
+    std::tuple<bool, std::optional<GQLToken>> feed(char c);
 };
-std::ostream &operator<<(std::ostream &os, const GQLToken &self);
-std::ostream &operator<<(std::ostream &os, const GQLTokenType &type);
+
+class Lexer {
+    LexerState state;
+    std::istringstream stream;
+
+public:
+    Lexer(std::istringstream stream, std::shared_ptr<SourceFile> source);
+    std::vector<GQLToken> getTokens();
+};
+};  // namespace lexer
 #endif
