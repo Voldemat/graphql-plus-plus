@@ -28,7 +28,8 @@ enum class SimpleTokenType {
     RIGHT_BRACE = 5,
     BANG = 6,
     SEMICOLON = 7,
-    COLON = 8
+    COLON = 8,
+    COMMA = 9
 };
 enum class ComplexTokenType {
     IDENTIFIER = 1,

@@ -4,8 +4,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <cstdio>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -73,7 +71,7 @@ void LexerState::adjustLocation(char c) {
 };
 
 std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
-    if (isalpha(c)) return ComplexTokenType::IDENTIFIER;
+    if (isalpha(c) || c == '_') return ComplexTokenType::IDENTIFIER;
     if (isnumber(c)) return ComplexTokenType::NUMBER;
     if (c == '"') return ComplexTokenType::STRING;
     switch (c) {
@@ -93,6 +91,8 @@ std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
             return SimpleTokenType::SEMICOLON;
         case ':':
             return SimpleTokenType::COLON;
+        case ',':
+            return SimpleTokenType::COMMA;
     };
     return std::nullopt;
 };
@@ -118,7 +118,7 @@ std::tuple<bool, std::optional<GQLToken>> LexerState::feedWithType(
             if (c == '"') return returnTuple(true, true, c);
         }
         case ComplexTokenType::IDENTIFIER: {
-            if (!isalpha(c)) return returnTuple(false, true, c);
+            if (!(isalpha(c) || c == '_' || c == '-')) return returnTuple(false, true, c);
         }
         default: {
             buffer += c;

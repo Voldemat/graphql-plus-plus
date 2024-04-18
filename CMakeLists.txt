@@ -26,9 +26,11 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 include("${CMAKE_SOURCE_DIR}/src/vendor/rapidjson.cmake")
 include("${CMAKE_SOURCE_DIR}/src/vendor/absl.cmake")
+include("${CMAKE_SOURCE_DIR}/src/vendor/cli11.cmake")
 
 file(GLOB_RECURSE GQL_HEADERS src/*.hpp src/*.h )
 file(GLOB_RECURSE GQL_SOURCES src/*.cpp src/*.c )
+cmake_print_variables(GQL_SOURCES)
 file(GLOB_RECURSE GQL_TESTS_SOURCES src/*.cc)
 file(GLOB_RECURSE GQL_TESTS_HEADERS src/*.cc src/src/__tests__/*.hpp)
 list(REMOVE_ITEM GQL_SOURCES src/main.cpp)
@@ -43,13 +45,14 @@ add_executable(
     gql
     src/main.cpp
 )
-target_link_libraries(gql gql_lib) 
+target_link_libraries(gql PRIVATE gql_lib PRIVATE CLI11::CLI11)
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/
     ${CMAKE_CURRENT_SOURCE_DIR}/src/src/
     ${CMAKE_CURRENT_SOURCE_DIR}/src/include/
     SYSTEM ${RAPIDJSON_INCLUDE_DIR}
     SYSTEM ${ABSL_INCLUDE_DIR}
+    SYSTEM ${CLI11_INCLUDE_DIR}
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases-lock.ls
@@ -69,7 +72,7 @@ target_link_libraries(
     PRIVATE GTest::gtest_main
     PRIVATE GTest::gmock_main
     PRIVATE gql_lib
-    #PRIVATE absl
+    PRIVATE absl
 )
 add_dependencies(main_test rapidjson)
 include(GoogleTest)

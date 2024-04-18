@@ -30,6 +30,8 @@ std::optional<GQLTokenType> gqlTokenTypeFromString(
         return ComplexTokenType::NUMBER;
     else if (t == "COLON")
         return SimpleTokenType::COLON;
+    else if (t == "COMMA")
+        return SimpleTokenType::COMMA;
     return std::nullopt;
 };
 
@@ -63,6 +65,8 @@ std::string gqlTokenTypeToString(GQLTokenType type) noexcept {
                 return "SEMICOLON";
             case SimpleTokenType::COLON:
                 return "COLON";
+            case SimpleTokenType::COMMA:
+                return "COMMA";
         };
     };
 };
