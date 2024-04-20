@@ -1,0 +1,10 @@
+{
+    "$id": "ast.schema.json",
+    "title": "AST",
+    "type": "object",
+    "definitions": {
+        "Ast": {
+            "type": "object"
+        }
+    }
+}

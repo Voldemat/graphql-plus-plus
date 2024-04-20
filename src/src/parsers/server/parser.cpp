@@ -1,4 +1,4 @@
-#include "parser/parser.hpp"
+#include "parsers/server/parser.hpp"
 
 #include <iostream>
 #include <map>
@@ -8,7 +8,7 @@
 
 #include "lexer/token.hpp"
 
-using namespace parser;
+using namespace parsers::server;
 
 Parser::Parser(std::vector<GQLToken> tokens) noexcept
     : tokens{ tokens }, currentToken{ tokens[0] } {
@@ -131,12 +131,12 @@ const ASTGQLType Parser::parseGQLType() {
     return (ASTGQLReferenceType){ .name = currentToken.lexeme };
 };
 
-void parser::assertIsNotKeyword(const GQLToken token) {
+void parsers::server::assertIsNotKeyword(const GQLToken token) {
     if (isKeyword(token.lexeme))
         throw ParserError::identifierIsKeyword(token);
 };
 
-const bool parser::isKeyword(const std::string lexeme) noexcept {
+const bool parsers::server::isKeyword(const std::string lexeme) noexcept {
     return (lexeme == "type" || lexeme == "query" || lexeme == "input"
             || lexeme == "extend");
 };

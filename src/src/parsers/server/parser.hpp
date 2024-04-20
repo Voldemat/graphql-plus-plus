@@ -9,7 +9,8 @@
 
 #include "lexer/token.hpp"
 
-namespace parser {
+namespace parsers {
+namespace server {
 enum class ASTGQLSimpleType { STRING, INT, FLOAT, BOOLEAN };
 struct ASTGQLReferenceType {
     std::string name;
@@ -104,5 +105,6 @@ public:
 };
 void assertIsNotKeyword(const GQLToken token);
 const bool isKeyword(const std::string lexeme) noexcept;
-};  // namespace parser
+};  // namespace server
+};  // namespace parsers
 #endif

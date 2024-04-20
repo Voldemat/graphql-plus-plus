@@ -1,0 +1,45 @@
+{
+    "$id": "case.schema.json",
+    "title": "ParserCase",
+    "type": "object",
+    "additionalProperties": false,
+    "oneOf": [
+        {
+            "required": [
+                "tokens",
+                "ast"
+            ]
+        },
+        {
+            "required": [
+                "tokens",
+                "error"
+            ]
+        }
+    ],
+    "properties": {
+        "tokens": {
+            "type":"array",
+            "items": {
+                "$ref": "../../token.schema.json#/definitions/Token"
+            }
+        },
+        "error": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "$ref": "../../token.schema.json#/definitions/Token"
+                },
+                "message": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false,
+            "required": ["token", "message"]
+        },
+        "ast": {
+            "$ref": "../ast.schema.json#/definitions/Ast"
+        }
+    }
+}
+

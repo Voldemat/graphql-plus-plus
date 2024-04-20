@@ -12,11 +12,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-add_link_options(
-    -L /Users/vladimir/code/opensource/llvm-project/libcxx-prefix/lib/
-    -Wl,-rpath,/Users/vladimir/code/opensource/llvm-project/libcxx-prefix/lib/
-    -lc++
-)
 FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
@@ -28,13 +23,14 @@ include("${CMAKE_SOURCE_DIR}/src/vendor/rapidjson.cmake")
 include("${CMAKE_SOURCE_DIR}/src/vendor/absl.cmake")
 include("${CMAKE_SOURCE_DIR}/src/vendor/cli11.cmake")
 
-file(GLOB_RECURSE GQL_HEADERS src/*.hpp src/*.h )
-file(GLOB_RECURSE GQL_SOURCES src/*.cpp src/*.c )
-cmake_print_variables(GQL_SOURCES)
+file(GLOB_RECURSE GQL_HEADERS src/*.hpp src/*.h)
+file(GLOB_RECURSE GQL_SOURCES src/*.cpp src/*.c)
+file(GLOB_RECURSE GQL_CLI_SOURCES src/src/cli/*.cpp src/src/cli/*.c)
+file(GLOB_RECURSE GQL_CLI_HEADERS src/src/cli/*.hpp src/src/cli/*.h)
 file(GLOB_RECURSE GQL_TESTS_SOURCES src/*.cc)
 file(GLOB_RECURSE GQL_TESTS_HEADERS src/*.cc src/src/__tests__/*.hpp)
-list(REMOVE_ITEM GQL_SOURCES src/main.cpp)
-list(REMOVE_ITEM GQL_HEADERS ${GQL_TESTS_HEADERS})
+list(REMOVE_ITEM GQL_SOURCES src/main.cpp ${GQL_CLI_SOURCES})
+list(REMOVE_ITEM GQL_HEADERS ${GQL_TESTS_HEADERS} ${GQL_CLI_HEADERS})
 file(GLOB_RECURSE LEXER_TESTS src/src/__tests__/lexer/cases/*.json)
 add_library(
     gql_lib
@@ -44,8 +40,13 @@ add_library(
 add_executable(
     gql
     src/main.cpp
+    ${GQL_CLI_HEADERS}
+    ${GQL_CLI_SOURCES}
 )
-target_link_libraries(gql PRIVATE gql_lib PRIVATE CLI11::CLI11)
+target_link_libraries(gql
+    PRIVATE CLI11::CLI11
+    PRIVATE gql_lib
+)
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/
     ${CMAKE_CURRENT_SOURCE_DIR}/src/src/

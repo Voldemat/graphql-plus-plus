@@ -1,99 +1,72 @@
 {
-  "$id": "case.schema.json",
-  "title": "Case",
-  "type": "object",
-  "additionalProperties": false,
-  "oneOf": [
-    {
-      "required": ["tokens", "schema", "$schema"]
-    },
-    {
-      "required": ["error", "schema", "$schema"]
-    }
-  ],
-  "properties": {
-    "$schema": {
-      "type": "string"
-    },
-    "schema": {
-      "type": "string"
-    },
-    "error": {
-      "type": "object",
-      "properties": {
-        "location": {
-          "type": "object",
-          "properties": {
-            "start": {
-              "type": "number",
-              "minimum": 0
-            },
-            "end": {
-              "type": "number",
-              "minimum": 0
-            },
-            "line": {
-              "type": "number",
-              "minimum": 1
-            }
-          },
-          "required": ["start", "end", "line"],
-          "additionalProperties": false
-        },
-        "message": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "required": ["location", "message"]
-    },
-    "tokens": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "EQUAL",
-              "LEFT_PAREN",
-              "RIGHT_PAREN",
-              "LEFT_BRACE",
-              "RIGHT_BRACE",
-              "BANG",
-              "IDENTIFIER",
-              "STRING",
-              "NUMBER",
-              "SEMICOLON",
-              "COLON"
+    "$id": "case.schema.json",
+    "title": "Case",
+    "type": "object",
+    "additionalProperties": false,
+    "oneOf": [
+        {
+            "required": [
+                "tokens",
+                "schema",
+                "$schema"
             ]
-          },
-          "lexeme": {
+        },
+        {
+            "required": [
+                "error",
+                "schema",
+                "$schema"
+            ]
+        }
+    ],
+    "properties": {
+        "$schema": {
             "type": "string"
-          },
-          "location": {
+        },
+        "schema": {
+            "type": "string"
+        },
+        "error": {
             "type": "object",
             "properties": {
-              "start": {
-                "type": "number",
-                "minimum": 0
-              },
-              "end": {
-                "type": "number",
-                "minimum": 0
-              },
-              "line": {
-                "type": "number",
-                "minimum": 1
-              }
+                "location": {
+                    "type": "object",
+                    "properties": {
+                        "start": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "end": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "line": {
+                            "type": "number",
+                            "minimum": 1
+                        }
+                    },
+                    "required": [
+                        "start",
+                        "end",
+                        "line"
+                    ],
+                    "additionalProperties": false
+                },
+                "message": {
+                    "type": "string"
+                }
             },
-            "required": ["start", "end", "line"],
-            "additionalProperties": false
-          }
+            "additionalProperties": false,
+            "required": [
+                "location",
+                "message"
+            ]
         },
-        "required": ["type", "lexeme", "location"]
-      }
+        "tokens": {
+            "type": "array",
+            "items": {
+                "$ref": "../../token.schema.json#/definitions/Token"
+            }
+        }
     }
-  }
 }
