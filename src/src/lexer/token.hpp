@@ -29,7 +29,8 @@ enum class SimpleTokenType {
     BANG = 6,
     SEMICOLON = 7,
     COLON = 8,
-    COMMA = 9
+    COMMA = 9,
+    VSLASH = 10
 };
 enum class ComplexTokenType {
     IDENTIFIER = 1,
