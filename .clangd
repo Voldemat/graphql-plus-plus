@@ -1,6 +1,8 @@
 CompileFlags:
   CompilationDatabase: build/
   Compiler: /Users/vladimir/code/opensource/llvm-project/builds/clang/bin/clang
+  CompileFlags:
+    Add: [-isystem /Users/vladimir/code/opensource/llvm-project/libcxx-prefix/include/c++/v1/, -nostdinc++, -nostdlib++]
 Diagnostics:
   UnusedIncludes: Strict
   MissingIncludes: Strict

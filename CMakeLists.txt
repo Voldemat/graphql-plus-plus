@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28.1)
 project(graphql++ VERSION 0.0.1)
-
+mark_as_advanced(CMAKE_MAKE_PROGRAM)
 include(GNUInstallDirs)
 include(CMakePrintHelpers)
 include(FetchContent)

@@ -12,6 +12,7 @@
 namespace parsers {
 namespace server {
 enum class ASTGQLSimpleType { STRING, INT, FLOAT, BOOLEAN };
+std::string astGQLSimpleTypeToString(const ASTGQLSimpleType &type) noexcept;
 struct ASTGQLReferenceType {
     std::string name;
 };

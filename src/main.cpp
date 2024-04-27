@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <memory>
 
-#include "cli/gql_cli.hpp"
+#include "gql_cli/gql_cli.hpp"
 
 int main(int argc, char **argv) {
     std::unique_ptr<CLI::App> app = createCLIApp();
