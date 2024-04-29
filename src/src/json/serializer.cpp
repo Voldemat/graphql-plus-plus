@@ -61,7 +61,7 @@ void json::serializer::ASTJSONWriter::writeNode(const ASTNode &node) noexcept {
                    [this](const ASTTypeDefinition &node) {
                        writeTypeDefinitionNode(node);
                    },
-                   [this](const ASTTypeSpec &node) { writeTypeSpecNode(node); },
+                   [this](const ASTTrivialTypeSpec &node) { writeTypeSpecNode(node); },
                    [this](const ASTUnionNode &node) { writeUnionNode(node); },
                    [this](const ASTEnumNode &node) { writeEnumNode(node); },
                    [this](const ASTExtendNode &node) { writeExtendNode(node); },
@@ -83,6 +83,7 @@ void json::serializer::ASTJSONWriter::writeUnionNode(
     writer.EndArray();
     writer.EndObject();
 };
+
 void json::serializer::ASTJSONWriter::writeEnumNode(
     const ASTEnumNode &node) noexcept {
     writer.StartObject();
@@ -98,13 +99,38 @@ void json::serializer::ASTJSONWriter::writeEnumNode(
     writer.EndArray();
     writer.EndObject();
 };
-void json::serializer::ASTJSONWriter::writeTypeSpecNode(
-    const ASTTypeSpec &node) noexcept {
+
+void json::serializer::ASTJSONWriter::writeTrivialTypeSpecNode(
+    const ASTTrivialTypeSpec &node) noexcept {
     writer.StartObject();
     writer.String("type");
     writeASTGQLType(node.type);
+    writer.String("nullable");
+    writer.Bool(node.nullable);
     writer.EndObject();
 };
+
+void json::serializer::ASTJSONWriter::writeArrayTypeSpecNode(
+    const ASTArrayTypeSpec &node) noexcept {
+    writer.StartObject();
+    writer.String("type");
+    writer.String("array");
+    writer.String("items");
+    writeTrivialTypeSpecNode(node.type);
+    writer.String("nullable");
+    writer.Bool(node.nullable);
+    writer.EndObject();
+};
+
+void json::serializer::ASTJSONWriter::writeTypeSpecNode(
+    const ASTTypeSpec &node) noexcept {
+    if (std::holds_alternative<ASTArrayTypeSpec>(node)) {
+        return writeArrayTypeSpecNode(std::get<ASTArrayTypeSpec>(node));
+    } else {
+        return writeTrivialTypeSpecNode(std::get<ASTTrivialTypeSpec>(node));
+    };
+};
+
 void json::serializer::ASTJSONWriter::writeASTGQLType(
     const ASTGQLType &type) noexcept {
     std::visit(
@@ -134,6 +160,7 @@ void json::serializer::ASTJSONWriter::writeTypeDefinitionNode(
     writer.EndObject();
     writer.EndObject();
 };
+
 void json::serializer::ASTJSONWriter::writeReferenceTypeNode(
     const ASTGQLReferenceType &node) noexcept {
     writer.StartObject();

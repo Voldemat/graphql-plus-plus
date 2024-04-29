@@ -29,6 +29,8 @@ public:
     void writeNode(const parsers::server::ASTNode &node) noexcept;
     void writeUnionNode(const parsers::server::ASTUnionNode &node) noexcept;
     void writeEnumNode(const parsers::server::ASTEnumNode &node) noexcept;
+    void writeTrivialTypeSpecNode(const parsers::server::ASTTrivialTypeSpec &node) noexcept;
+    void writeArrayTypeSpecNode(const parsers::server::ASTArrayTypeSpec &node) noexcept;
     void writeTypeSpecNode(const parsers::server::ASTTypeSpec &node) noexcept;
     void writeASTGQLType(const parsers::server::ASTGQLType &type) noexcept;
     void writeTypeDefinitionNode(

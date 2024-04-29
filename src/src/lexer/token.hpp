@@ -2,6 +2,8 @@
 #define GRAPHQL_TOKEN
 
 #include <filesystem>
+#include <format>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -10,15 +12,23 @@
 
 struct SourceFile {
     const std::filesystem::path filepath;
+    SourceFile(const std::filesystem::path path): filepath{path} {};
+    SourceFile(const SourceFile &) = delete;
+    SourceFile &operator=(SourceFile const &) = delete;
 };
 struct Location {
     std::shared_ptr<SourceFile> source;
     unsigned int line = 1;
     unsigned int start = -1;
     unsigned int end = -1;
+
+    explicit operator std::string() const {
+        return std::format("{}:{} {}:{}", source->filepath.filename().string(),
+                           line, start, end);
+    };
 };
-bool operator==(const Location& self, const Location &another) noexcept;
-std::ostream& operator<<(std::ostream& os, const Location& self) noexcept;
+bool operator==(const Location &self, const Location &another) noexcept;
+std::ostream &operator<<(std::ostream &os, const Location &self) noexcept;
 
 enum class SimpleTokenType {
     EQUAL,
@@ -33,13 +43,9 @@ enum class SimpleTokenType {
     VSLASH,
     LEFT_BRACKET,
     RIGHT_BRACKET
-   
+
 };
-enum class ComplexTokenType {
-    IDENTIFIER = 1,
-    STRING = 2,
-    NUMBER = 3
-};
+enum class ComplexTokenType { IDENTIFIER = 1, STRING = 2, NUMBER = 3 };
 
 using GQLTokenType = std::variant<SimpleTokenType, ComplexTokenType>;
 
@@ -51,7 +57,7 @@ struct GQLToken {
     std::string lexeme;
     Location location;
 };
-bool operator==(const GQLToken& self, const GQLToken &token) noexcept;
+bool operator==(const GQLToken &self, const GQLToken &token) noexcept;
 std::ostream &operator<<(std::ostream &os, const GQLToken &self);
 std::ostream &operator<<(std::ostream &os, const GQLTokenType &type);
 

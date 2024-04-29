@@ -10,6 +10,7 @@
 #include <CLI/Option.hpp>
 #include <CLI/Validators.hpp>
 #include <cstdio>
+#include <exception>
 #include <filesystem>
 #include <iostream>
 #include <memory>
@@ -49,7 +50,7 @@ std::unique_ptr<CLI::App> createCLIApp() noexcept {
         if (result.has_value()) {
             throw result.value();
         };
-        const auto tokens = accum.getTokens(); 
+        const auto tokens = accum.getTokens();
         rapidjson::StringBuffer sb;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
         writer.StartArray();
@@ -62,14 +63,14 @@ std::unique_ptr<CLI::App> createCLIApp() noexcept {
     CLI::App *parserCmd = app->add_subcommand("parser", "Parser");
     CLI::App *parserParseCmd = parserCmd->add_subcommand(
         "parse", "Parse input stream of json serialized tokens into ast tree");
-    std::string sourceFilename;
+    std::shared_ptr<std::string> sourceFilename = std::make_shared<std::string>("check");
     parserParseCmd
-        ->add_option("--source-filename", sourceFilename,
+        ->add_option("--source-filename", *sourceFilename,
                      "Virtual source filename used in error reports")
         ->required();
-    parserParseCmd->callback([&sourceFilename]() {
+    parserParseCmd->callback([sourceFilename]() {
         std::shared_ptr<SourceFile> sourceFile
-            = std::make_shared<SourceFile>(sourceFilename);
+            = std::make_shared<SourceFile>(*sourceFilename);
         const auto buffer = getAllStdin();
         rapidjson::Document d;
         d.Parse(buffer.c_str());
@@ -80,8 +81,18 @@ std::unique_ptr<CLI::App> createCLIApp() noexcept {
             throw CLI::RuntimeError(1);
         };
         auto tokens = result.value();
+        if (tokens.size() == 0) {
+            std::cerr << "Warning: No tokens was provided in array" << std::endl;
+            throw CLI::RuntimeError(1);
+        };
         auto parser = parsers::server::Parser(tokens);
-        auto ast = parser.getAstTree();
+        parsers::server::ASTProgram ast;
+        try {
+            ast = parser.getAstTree();
+        } catch (const std::exception &exc) {
+            std::cerr << "Parsing error: " << exc.what() << std::endl;
+            throw CLI::RuntimeError(1);
+        };
         rapidjson::StringBuffer sb;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
         json::serializer::ASTJSONWriter astWriter(writer);

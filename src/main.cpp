@@ -2,6 +2,7 @@
 #include <rapidjson/stringbuffer.h>
 
 #include <CLI/App.hpp>
+#include <CLI/Option.hpp>
 #include <cstdlib>
 #include <memory>
 

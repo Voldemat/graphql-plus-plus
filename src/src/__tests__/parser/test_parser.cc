@@ -65,7 +65,7 @@ TEST(ParserTest, BasicTest) {
     ASSERT_EQ(typeDefinition.isInput, false);
     ASSERT_EQ(typeDefinition.fields.size(), 1);
     ASSERT_TRUE(typeDefinition.fields.contains("amount"));
-    ASTTypeSpec typeSpec = typeDefinition.fields["amount"];
+    ASTTrivialTypeSpec typeSpec = std::get<ASTTrivialTypeSpec>(typeDefinition.fields["amount"]);
     ASTGQLSimpleType type = std::get<ASTGQLSimpleType>(typeSpec.type);
     ASSERT_EQ(type, ASTGQLSimpleType::INT);
     ASSERT_EQ(typeSpec.nullable, false);

@@ -19,36 +19,43 @@ struct ASTGQLReferenceType {
 
 using ASTGQLType = std::variant<ASTGQLSimpleType, ASTGQLReferenceType>;
 
-struct ASTTypeSpec {
+struct ASTTrivialTypeSpec {
     ASTGQLType type;
     bool nullable;
 };
 
+struct ASTArrayTypeSpec {
+    ASTTrivialTypeSpec type;
+    bool nullable;
+};
+
+using ASTTypeSpec = std::variant<ASTTrivialTypeSpec, ASTArrayTypeSpec>;
+
 struct ASTTypeDefinition {
-    const std::string name;
+    std::string name;
     std::map<std::string, ASTTypeSpec> fields;
-    const bool isInput;
+    bool isInput;
 };
 
 struct ASTExtendNode {
-    const ASTTypeDefinition type;
+    ASTTypeDefinition type;
 };
 
 struct ASTEnumNode {
-    const std::string name;
-    const std::vector<std::string> items;
+    std::string name;
+    std::vector<std::string> items;
 };
 
 struct ASTUnionNode {
-    const std::string name;
-    const std::vector<ASTGQLReferenceType> items;
+    std::string name;
+    std::vector<ASTGQLReferenceType> items;
 };
 
-using ASTNode = std::variant<ASTTypeDefinition, ASTTypeSpec, ASTExtendNode,
-                             ASTUnionNode, ASTEnumNode>;
+using ASTNode = std::variant<ASTTypeDefinition, ASTTrivialTypeSpec,
+                             ASTExtendNode, ASTUnionNode, ASTEnumNode>;
 
 struct ASTProgram {
-    const std::vector<ASTNode> nodes;
+    std::vector<ASTNode> nodes;
 };
 
 class ParserError : public std::exception {
@@ -67,7 +74,8 @@ public:
         const GQLToken token, const GQLTokenType expectedType) noexcept {
         return ParserError(
             token, std::string("Expected ") + gqlTokenTypeToString(expectedType)
-                       + " type, got " + gqlTokenTypeToString(token.type));
+                       + " type, got " + gqlTokenTypeToString(token.type)
+                       + ", at: " + (std::string)token.location);
     };
 
     const static ParserError identifierIsKeyword(
@@ -87,7 +95,7 @@ class Parser {
     const std::vector<GQLToken> tokens;
     GQLToken currentToken;
     const ASTNode parseNode();
-    const ASTTypeSpec getTypeSpec();
+    const ASTTrivialTypeSpec getTypeSpec();
     const GQLToken lookahead();
     void consume(const GQLTokenType expectedType);
     const ASTNode parseComplexToken();
@@ -97,8 +105,10 @@ class Parser {
     const ASTExtendNode parseExtendNode();
     const ASTGQLType parseGQLType();
     const std::string parseIdentifier();
-    const ASTTypeSpec parseTypeSpecNode();
     void consumeIdentifier();
+    const ASTTypeSpec parseTypeSpecNode();
+    const ASTArrayTypeSpec parseArrayTypeSpecNode();
+    const ASTTrivialTypeSpec parseTrivialTypeSpecNode();
 
 public:
     Parser(std::vector<GQLToken> tokens) noexcept;

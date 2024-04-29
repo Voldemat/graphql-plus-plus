@@ -94,8 +94,7 @@ std::ostream &operator<<(std::ostream &os, const GQLTokenType &type) {
 };
 
 std::ostream& operator<<(std::ostream& os, const Location& self) noexcept {
-    os << self.source->filepath.filename().string() << ":" << self.line << " ";
-    os << self.start << ":" << self.end;
+    os << self << std::endl;
     return os;
 };
 

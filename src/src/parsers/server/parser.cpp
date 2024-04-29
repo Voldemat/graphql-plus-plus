@@ -126,6 +126,24 @@ const std::string Parser::parseIdentifier() {
 };
 
 const ASTTypeSpec Parser::parseTypeSpecNode() {
+    if (lookahead().type == (GQLTokenType)SimpleTokenType::LEFT_BRACKET) {
+        return parseArrayTypeSpecNode();
+    } else {
+        return parseTrivialTypeSpecNode();
+    };
+};
+const ASTArrayTypeSpec Parser::parseArrayTypeSpecNode() {
+    consume(SimpleTokenType::LEFT_BRACKET);
+    const auto& trivialType = parseTrivialTypeSpecNode();
+    consume(SimpleTokenType::RIGHT_BRACKET);
+    bool nullable = true;
+    if (lookahead().type == (GQLTokenType)SimpleTokenType::BANG) {
+        consume(SimpleTokenType::BANG);
+        nullable = false;
+    };
+    return { .type = trivialType, .nullable = nullable };
+};
+const ASTTrivialTypeSpec Parser::parseTrivialTypeSpecNode() {
     const ASTGQLType type = parseGQLType();
     const bool nullable
         = lookahead().type != (GQLTokenType)SimpleTokenType::BANG;
