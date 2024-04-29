@@ -21,7 +21,10 @@
                         "STRING",
                         "NUMBER",
                         "SEMICOLON",
-                        "COLON"
+                        "COLON",
+                        "VSLASH",
+                        "RIGHT_BRACKET",
+                        "LEFT_BRACKET"
                     ]
                 },
                 "lexeme": {

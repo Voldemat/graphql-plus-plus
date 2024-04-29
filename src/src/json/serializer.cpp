@@ -5,7 +5,6 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include <iostream>
 #include <variant>
 
 #include "lexer/token.hpp"
@@ -71,7 +70,6 @@ void json::serializer::ASTJSONWriter::writeNode(const ASTNode &node) noexcept {
 };
 void json::serializer::ASTJSONWriter::writeUnionNode(
     const ASTUnionNode &node) noexcept {
-    std::cout << "writeUnionNode" << std::endl;
     writer.StartObject();
     writer.String("_nodeType");
     writer.String("union");

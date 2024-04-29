@@ -6,7 +6,6 @@
 #include <rapidjson/istreamwrapper.h>
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -22,9 +21,11 @@ using namespace lexer;
 TEST_P(Fixture, TestLexer) {
     auto testCase = GetParam();
     std::istringstream buffer(testCase.schema);
-    Lexer lexer(std::move(buffer), testCase.sourceFile);
-    try {
-        const std::vector<GQLToken> tokens = lexer.getTokens();
+    VectorTokensAccumulator accumulator;
+    Lexer lexer(std::move(buffer), testCase.sourceFile, accumulator);
+    const auto& result = lexer.parse();
+    if (!result.has_value()) {
+        const std::vector<GQLToken> tokens = accumulator.getTokens();
         EXPECT_EQ(tokens.size(), testCase.expectedTokens.size());
         int index = 0;
         for (const auto &token : tokens) {
@@ -37,7 +38,8 @@ TEST_P(Fixture, TestLexer) {
                 << "token: " << token << "\nexpectedToken: " << expectedToken;
             index++;
         };
-    } catch (LexerError &error) {
+    } else {
+        const auto error = result.value();
         ASSERT_TRUE(testCase.error.has_value())
             << error.what();
         const auto expectedError = *testCase.error.value();

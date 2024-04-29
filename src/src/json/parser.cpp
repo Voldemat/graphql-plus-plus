@@ -5,7 +5,6 @@
 #include <rapidjson/document.h>
 #include <rapidjson/encodings.h>
 
-#include <exception>
 #include <format>
 #include <memory>
 #include <string>

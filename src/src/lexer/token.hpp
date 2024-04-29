@@ -21,16 +21,19 @@ bool operator==(const Location& self, const Location &another) noexcept;
 std::ostream& operator<<(std::ostream& os, const Location& self) noexcept;
 
 enum class SimpleTokenType {
-    EQUAL = 1,
-    LEFT_PAREN = 2,
-    RIGHT_PAREN = 3,
-    LEFT_BRACE = 4,
-    RIGHT_BRACE = 5,
-    BANG = 6,
-    SEMICOLON = 7,
-    COLON = 8,
-    COMMA = 9,
-    VSLASH = 10
+    EQUAL,
+    LEFT_PAREN,
+    RIGHT_PAREN,
+    LEFT_BRACE,
+    RIGHT_BRACE,
+    BANG,
+    SEMICOLON,
+    COLON,
+    COMMA,
+    VSLASH,
+    LEFT_BRACKET,
+    RIGHT_BRACKET
+   
 };
 enum class ComplexTokenType {
     IDENTIFIER = 1,

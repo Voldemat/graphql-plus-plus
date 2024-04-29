@@ -32,6 +32,12 @@ std::optional<GQLTokenType> gqlTokenTypeFromString(
         return SimpleTokenType::COLON;
     else if (t == "COMMA")
         return SimpleTokenType::COMMA;
+    else if (t == "VSLASH")
+        return SimpleTokenType::VSLASH;
+    else if (t == "RIGHT_BRACKET")
+        return SimpleTokenType::RIGHT_BRACKET;
+    else if (t == "LEFT_BRACKET")
+        return SimpleTokenType::LEFT_BRACKET;
     return std::nullopt;
 };
 
@@ -67,6 +73,12 @@ std::string gqlTokenTypeToString(GQLTokenType type) noexcept {
                 return "COLON";
             case SimpleTokenType::COMMA:
                 return "COMMA";
+            case SimpleTokenType::VSLASH:
+                return "VSLASH";
+            case SimpleTokenType::LEFT_BRACKET:
+                return "LEFT_BRACKET";
+            case SimpleTokenType::RIGHT_BRACKET:
+                return "RIGHT_BRACKET";
         };
     };
 };

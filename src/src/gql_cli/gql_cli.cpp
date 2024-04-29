@@ -43,8 +43,13 @@ std::unique_ptr<CLI::App> createCLIApp() noexcept {
         std::istringstream stream(buffer);
         std::shared_ptr<SourceFile> sourceFile
             = std::make_shared<SourceFile>(std::filesystem::path("in-memory"));
-        lexer::Lexer lexer(std::move(stream), sourceFile);
-        auto tokens = lexer.getTokens();
+        lexer::VectorTokensAccumulator accum;
+        lexer::Lexer lexer(std::move(stream), sourceFile, accum);
+        auto result = lexer.parse();
+        if (result.has_value()) {
+            throw result.value();
+        };
+        const auto tokens = accum.getTokens(); 
         rapidjson::StringBuffer sb;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
         writer.StartArray();

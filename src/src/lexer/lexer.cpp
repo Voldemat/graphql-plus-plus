@@ -8,10 +8,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
-#include <tuple>
-#include <utility>
 #include <variant>
-#include <vector>
 
 #include "./token.hpp"
 
@@ -23,51 +20,42 @@ LexerError::LexerError(const std::string message,
 const char* LexerError::what() const noexcept {
     return message.c_str();
 };
-Lexer::Lexer(std::istringstream s, std::shared_ptr<SourceFile> source)
-    : state{ source } {
+Lexer::Lexer(
+    std::istringstream s,
+    std::shared_ptr<SourceFile> source,
+    ITokensAccumulator& tokensAccumulator
+)
+    : state{ source, tokensAccumulator } {
     stream.swap(s);
 };
 
-std::vector<GQLToken> Lexer::getTokens() {
-    std::vector<GQLToken> tokensList;
-    bool isAcknowledged = false;
-    std::optional<GQLToken> token;
-    char c;
-    while (true) {
-        c = stream.get();
-        do {
-            std::tie(isAcknowledged, token) = state.feed(c);
-            if (token.has_value()) {
-                tokensList.push_back(token.value());
-            }
-        } while (!isAcknowledged);
-        isAcknowledged = false;
-        token = std::nullopt;
-        if (c == -1) break;
-    };
-    return tokensList;
-};
-
-std::tuple<bool, std::optional<GQLToken>> LexerState::feed(char c) {
+std::optional<LexerError> LexerState::feed(char c) noexcept{
     if (c == -1) {
-        return std::make_pair(true, maybeExtractToken());
-    };
-    adjustLocation(c);
-    std::tuple<bool, std::optional<GQLToken>> result;
-    if (type.has_value()) {
-        result = feedWithType(c, type.value());
-    } else {
-        result = feedNew(c);
-    };
-    return result;
-};
-
-void LexerState::adjustLocation(char c) {
-    if (c == '\n') {
+        const auto& maybeToken = maybeExtractToken();
+        if (maybeToken.has_value()) tokensAccumulator.addToken(maybeToken.value());
+        return std::nullopt;
+    } else if (c == '\n') {
+        const auto& maybeToken = maybeExtractToken();
+        if (maybeToken.has_value()) tokensAccumulator.addToken(maybeToken.value());
         location.line += 1;
         location.start = -1;
         location.end = -1;
-    } else if (!type.has_value()) location.start += 1;
+        return std::nullopt;
+    };
+    std::optional<LexerError> result;
+    if (type.has_value()) {
+        result = feedWithType(c, type.value());
+        if (result.has_value()) return result;
+        if (!type.has_value()) {
+            location.start = location.end;
+        } else {
+            location.end += 1;
+            return std::nullopt;
+        };
+    };
+    result = feedNew(c);
+    if (result.has_value()) return result;
+    return result;
 };
 
 std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
@@ -93,36 +81,45 @@ std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
             return SimpleTokenType::COLON;
         case ',':
             return SimpleTokenType::COMMA;
+        case '|':
+            return SimpleTokenType::VSLASH;
+        case '[':
+            return SimpleTokenType::LEFT_BRACKET;
+        case ']':
+            return SimpleTokenType::RIGHT_BRACKET;
     };
     return std::nullopt;
 };
 
-std::tuple<bool, std::optional<GQLToken>> LexerState::returnTuple(
-    bool isAcknowledged, bool shouldReturnToken, char c 
-) noexcept {
-    if (isAcknowledged) location.end += 1;
-    return std::make_pair(
-            isAcknowledged,
-            (shouldReturnToken)
-                ? std::make_optional(extractToken())
-                : std::nullopt
-    );
+void LexerState::extractAndSaveToken() noexcept {
+    const auto& token = extractToken();
+    tokensAccumulator.addToken(token);
 };
-std::tuple<bool, std::optional<GQLToken>> LexerState::feedWithType(
-    char c, ComplexTokenType tokenType) {
+
+std::optional<LexerError> LexerState::feedWithType(
+    char c, ComplexTokenType tokenType) noexcept {
     switch (tokenType) {
         case ComplexTokenType::NUMBER: {
-            if (!isnumber(c)) return returnTuple(false, true, c);
+            if (!isnumber(c)) {
+                extractAndSaveToken();
+                return std::nullopt;
+            };
         }
         case ComplexTokenType::STRING: {
-            if (c == '"') return returnTuple(true, true, c);
+            if (c == '"') {
+                extractAndSaveToken();
+                return std::nullopt;
+            };
         }
         case ComplexTokenType::IDENTIFIER: {
-            if (!(isalpha(c) || c == '_' || c == '-')) return returnTuple(false, true, c);
+            if (!(isalpha(c) || c == '_' || c == '-')) {
+                extractAndSaveToken();
+                return std::nullopt;
+            };
         }
         default: {
             buffer += c;
-            return returnTuple(true, false, c);
+            return std::nullopt;
         }
     };
 };
@@ -139,28 +136,37 @@ std::optional<GQLToken> LexerState::maybeExtractToken() noexcept {
     if (!type.has_value()) return std::nullopt;
     return extractToken();
 };
-
-std::tuple<bool, std::optional<GQLToken>> LexerState::feedNew(char c) {
-    if (c == '\n') return std::make_pair(true, std::nullopt);
-    else if (c == ' ') return returnTuple(true, false, c);
+std::optional<LexerError> Lexer::parse() noexcept {
+    while (true) {
+        char c = stream.get();
+        auto result = state.feed(c);
+        if (result.has_value()) return result;
+        if (c == -1) break;
+    };
+    return std::nullopt;
+};
+std::optional<LexerError> LexerState::feedNew(char c) noexcept {
+    location.start += 1;
+    location.end += 1;
+    if (c == ' ') return std::nullopt;
     const auto optTokenType = getTypeForChar(c);
     if (!optTokenType.has_value()) {
         location.end = std::max((int)location.end, 0);
-        throw LexerError(
+        return LexerError(
             std::string("Cannot determine token type for char: \"") + c + '\"',
             location);
     };
     const auto tokenType = optTokenType.value();
     if (std::holds_alternative<SimpleTokenType>(tokenType)) {
-        location.end += 1;
-        return std::make_pair(true, (GQLToken){ .type = tokenType,
+        tokensAccumulator.addToken({ .type = tokenType,
                                                 .lexeme = std::string() + c,
                                                 .location = location });
+        return std::nullopt;
     };
     const auto complexTokenType = std::get<ComplexTokenType>(tokenType);
     type = complexTokenType;
     if (complexTokenType != ComplexTokenType::STRING) {
         buffer = std::string() + c;
     };
-    return returnTuple(true, false, c);
-};
+    return std::nullopt;
+}
