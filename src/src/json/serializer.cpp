@@ -124,6 +124,23 @@ void json::serializer::ASTJSONWriter::writeArrayTypeSpecNode(
 
 void json::serializer::ASTJSONWriter::writeTypeSpecNode(
     const ASTTypeSpec &node) noexcept {
+    if (std::holds_alternative<ASTLiteralTypeSpec>(node)) {
+        return writeLiteralTypeSpecNode(std::get<ASTLiteralTypeSpec>(node));
+    } else {
+        return writeCallableTypeSpecNode(std::get<ASTCallableTypeSpec>(node));
+    };
+};
+
+void json::serializer::ASTJSONWriter::writeCallableTypeSpecNode(
+    const ASTCallableTypeSpec &node) noexcept {
+    writer.StartObject();
+    writer.String("returnType");
+    writeLiteralTypeSpecNode(node.returnType);
+    writer.EndObject();
+};
+
+void json::serializer::ASTJSONWriter::writeLiteralTypeSpecNode(
+    const ASTLiteralTypeSpec &node) noexcept {
     if (std::holds_alternative<ASTArrayTypeSpec>(node)) {
         return writeArrayTypeSpecNode(std::get<ASTArrayTypeSpec>(node));
     } else {

@@ -1,5 +1,6 @@
 #include "parsers/server/parser.hpp"
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <variant>
@@ -113,7 +114,6 @@ const ASTTypeDefinition Parser::parseTypeNode(bool isInput) {
     std::map<std::string, ASTTypeSpec> definitions;
     while (lookahead().type != (GQLTokenType)SimpleTokenType::RIGHT_BRACE) {
         const std::string key = parseIdentifier();
-        consume(SimpleTokenType::COLON);
         definitions[key] = parseTypeSpecNode();
     };
     consume(SimpleTokenType::RIGHT_BRACE);
@@ -126,15 +126,45 @@ const std::string Parser::parseIdentifier() {
 };
 
 const ASTTypeSpec Parser::parseTypeSpecNode() {
-    if (lookahead().type == (GQLTokenType)SimpleTokenType::LEFT_BRACKET) {
+    const auto &token = lookahead();
+    if (token.type == (GQLTokenType)SimpleTokenType::LEFT_PAREN) {
+        return parseCallableTypeSpecNode();
+    } else {
+        return parseLiteralTypeSpecNode();
+    };
+};
+
+const ASTLiteralTypeSpec Parser::parseLiteralTypeSpecNode() {
+    consume(SimpleTokenType::COLON);
+    const auto &token = lookahead();
+    if (token.type == (GQLTokenType)SimpleTokenType::LEFT_BRACKET) {
         return parseArrayTypeSpecNode();
     } else {
         return parseTrivialTypeSpecNode();
     };
 };
+
+const ASTCallableTypeSpec Parser::parseCallableTypeSpecNode() {
+    std::map<std::string, ASTLiteralTypeSpec> arguments;
+    consume(SimpleTokenType::LEFT_PAREN);
+    while (lookahead().type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
+        consumeIdentifier();
+        assertIsNotKeyword(currentToken);
+        std::string name = currentToken.lexeme;
+        const auto &type = parseLiteralTypeSpecNode();
+        arguments[name] = type;
+        if (lookahead().type == (GQLTokenType)SimpleTokenType::COMMA) {
+            consume(SimpleTokenType::COMMA);
+        };
+    };
+    consume(SimpleTokenType::RIGHT_PAREN);
+    const auto &returnType = parseLiteralTypeSpecNode();
+    return { .returnType = returnType, .arguments = arguments };
+};
+
 const ASTArrayTypeSpec Parser::parseArrayTypeSpecNode() {
     consume(SimpleTokenType::LEFT_BRACKET);
-    const auto& trivialType = parseTrivialTypeSpecNode();
+    const auto &trivialType = parseTrivialTypeSpecNode();
     consume(SimpleTokenType::RIGHT_BRACKET);
     bool nullable = true;
     if (lookahead().type == (GQLTokenType)SimpleTokenType::BANG) {

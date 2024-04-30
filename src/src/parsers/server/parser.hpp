@@ -29,7 +29,14 @@ struct ASTArrayTypeSpec {
     bool nullable;
 };
 
-using ASTTypeSpec = std::variant<ASTTrivialTypeSpec, ASTArrayTypeSpec>;
+using ASTLiteralTypeSpec = std::variant<ASTTrivialTypeSpec, ASTArrayTypeSpec>;
+
+struct ASTCallableTypeSpec {
+    ASTLiteralTypeSpec returnType;
+    std::map<std::string, ASTLiteralTypeSpec> arguments;
+};
+
+using ASTTypeSpec = std::variant<ASTLiteralTypeSpec, ASTCallableTypeSpec>;
 
 struct ASTTypeDefinition {
     std::string name;
@@ -107,6 +114,8 @@ class Parser {
     const std::string parseIdentifier();
     void consumeIdentifier();
     const ASTTypeSpec parseTypeSpecNode();
+    const ASTCallableTypeSpec parseCallableTypeSpecNode();
+    const ASTLiteralTypeSpec parseLiteralTypeSpecNode();
     const ASTArrayTypeSpec parseArrayTypeSpecNode();
     const ASTTrivialTypeSpec parseTrivialTypeSpecNode();
 
