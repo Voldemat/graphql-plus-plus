@@ -1,6 +1,5 @@
 #include "parsers/server/parser.hpp"
 
-#include <iostream>
 #include <map>
 #include <string>
 #include <variant>
