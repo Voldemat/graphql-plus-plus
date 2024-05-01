@@ -1,39 +1,26 @@
-#include "parsers/server/parser.hpp"
+#include "./parser.hpp"
 
 #include <map>
 #include <string>
-#include <variant>
 #include <vector>
 
-#include "lexer/token.hpp"
+#include "./ast.hpp"
+#include "libgql/lexer/token.hpp"
 
 using namespace parsers::server;
 
-std::string parsers::server::astGQLSimpleTypeToString(
-    const ASTGQLSimpleType &type) noexcept {
-    switch (type) {
-        case parsers::server::ASTGQLSimpleType::INT:
-            return "Int";
-        case parsers::server::ASTGQLSimpleType::FLOAT:
-            return "Float";
-        case parsers::server::ASTGQLSimpleType::STRING:
-            return "String";
-        case parsers::server::ASTGQLSimpleType::BOOLEAN:
-            return "Boolean";
-    };
-};
 Parser::Parser(std::vector<GQLToken> tokens) noexcept
     : tokens{ tokens }, currentToken{ tokens[0] } {};
 
-const ASTProgram Parser::getAstTree() {
-    std::vector<ASTNode> nodes = {};
+const ast::ASTProgram Parser::getAstTree() {
+    std::vector<ast::ASTNode> nodes = {};
     while (index + 1 < tokens.size()) {
         nodes.push_back(parseNode());
     };
     return { .nodes = nodes };
 };
 
-const ASTNode Parser::parseNode() {
+const ast::ASTNode Parser::parseNode() {
     if (index != 0) {
         consume(ComplexTokenType::IDENTIFIER);
     };
@@ -50,7 +37,7 @@ void Parser::consume(const GQLTokenType type) {
     };
 };
 
-const ASTNode Parser::parseComplexToken() {
+const ast::ASTNode Parser::parseComplexToken() {
     const auto type = std::get<ComplexTokenType>(currentToken.type);
     if (type != ComplexTokenType::IDENTIFIER) {
         throw ParserError::wrongType(currentToken,
@@ -63,7 +50,7 @@ const ASTNode Parser::parseComplexToken() {
     } else if (currentToken.lexeme == "extend") {
         consume(ComplexTokenType::IDENTIFIER);
         const auto typeSpec = parseTypeNode(false);
-        return (ASTExtendNode){ .type = typeSpec };
+        return (ast::ASTExtendNode){ .type = typeSpec };
     } else if (currentToken.lexeme == "enum") {
         return parseEnumNode();
     } else if (currentToken.lexeme == "union") {
@@ -72,7 +59,7 @@ const ASTNode Parser::parseComplexToken() {
     throw ParserError::unexpectedIdentifier(currentToken);
 };
 
-const ASTEnumNode Parser::parseEnumNode() {
+const ast::ASTEnumNode Parser::parseEnumNode() {
     consumeIdentifier();
     const std::string name = currentToken.lexeme;
     std::vector<std::string> items;
@@ -86,12 +73,12 @@ const ASTEnumNode Parser::parseEnumNode() {
     return { .name = name, .items = items };
 };
 
-const ASTUnionNode Parser::parseUnionNode() {
+const ast::ASTUnionNode Parser::parseUnionNode() {
     consumeIdentifier();
     const std::string name = currentToken.lexeme;
     consume(SimpleTokenType::EQUAL);
     consumeIdentifier();
-    std::vector<ASTGQLReferenceType> items;
+    std::vector<ast::ASTGQLReferenceType> items;
     items.push_back({ .name = currentToken.lexeme });
     while (lookahead().type == (GQLTokenType)SimpleTokenType::VSLASH) {
         consume(SimpleTokenType::VSLASH);
@@ -106,11 +93,11 @@ void Parser::consumeIdentifier() {
     assertIsNotKeyword(currentToken);
 };
 
-const ASTTypeDefinition Parser::parseTypeNode(bool isInput) {
+const ast::ASTTypeDefinition Parser::parseTypeNode(bool isInput) {
     consumeIdentifier();
     const std::string name = currentToken.lexeme;
     consume(SimpleTokenType::LEFT_BRACE);
-    std::map<std::string, ASTTypeSpec> definitions;
+    std::map<std::string, ast::ASTTypeSpec> definitions;
     while (lookahead().type != (GQLTokenType)SimpleTokenType::RIGHT_BRACE) {
         const std::string key = parseIdentifier();
         definitions[key] = parseTypeSpecNode();
@@ -124,7 +111,7 @@ const std::string Parser::parseIdentifier() {
     return currentToken.lexeme;
 };
 
-const ASTTypeSpec Parser::parseTypeSpecNode() {
+const ast::ASTTypeSpec Parser::parseTypeSpecNode() {
     const auto &token = lookahead();
     if (token.type == (GQLTokenType)SimpleTokenType::LEFT_PAREN) {
         return parseCallableTypeSpecNode();
@@ -133,7 +120,7 @@ const ASTTypeSpec Parser::parseTypeSpecNode() {
     };
 };
 
-const ASTLiteralTypeSpec Parser::parseLiteralTypeSpecNode() {
+const ast::ASTLiteralTypeSpec Parser::parseLiteralTypeSpecNode() {
     consume(SimpleTokenType::COLON);
     const auto &token = lookahead();
     if (token.type == (GQLTokenType)SimpleTokenType::LEFT_BRACKET) {
@@ -143,8 +130,8 @@ const ASTLiteralTypeSpec Parser::parseLiteralTypeSpecNode() {
     };
 };
 
-const ASTCallableTypeSpec Parser::parseCallableTypeSpecNode() {
-    std::map<std::string, ASTLiteralTypeSpec> arguments;
+const ast::ASTCallableTypeSpec Parser::parseCallableTypeSpecNode() {
+    std::map<std::string, ast::ASTLiteralTypeSpec> arguments;
     consume(SimpleTokenType::LEFT_PAREN);
     while (lookahead().type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
         consumeIdentifier();
@@ -161,7 +148,7 @@ const ASTCallableTypeSpec Parser::parseCallableTypeSpecNode() {
     return { .returnType = returnType, .arguments = arguments };
 };
 
-const ASTArrayTypeSpec Parser::parseArrayTypeSpecNode() {
+const ast::ASTArrayTypeSpec Parser::parseArrayTypeSpecNode() {
     consume(SimpleTokenType::LEFT_BRACKET);
     const auto &trivialType = parseTrivialTypeSpecNode();
     consume(SimpleTokenType::RIGHT_BRACKET);
@@ -172,25 +159,25 @@ const ASTArrayTypeSpec Parser::parseArrayTypeSpecNode() {
     };
     return { .type = trivialType, .nullable = nullable };
 };
-const ASTTrivialTypeSpec Parser::parseTrivialTypeSpecNode() {
-    const ASTGQLType type = parseGQLType();
+const ast::ASTTrivialTypeSpec Parser::parseTrivialTypeSpecNode() {
+    const ast::ASTGQLType type = parseGQLType();
     const bool nullable
         = lookahead().type != (GQLTokenType)SimpleTokenType::BANG;
     if (!nullable) consume(SimpleTokenType::BANG);
     return { .type = type, .nullable = nullable };
 };
 
-const ASTGQLType Parser::parseGQLType() {
+const ast::ASTGQLType Parser::parseGQLType() {
     consumeIdentifier();
     if (currentToken.lexeme == "Int")
-        return ASTGQLSimpleType::INT;
+        return ast::ASTGQLSimpleType::INT;
     else if (currentToken.lexeme == "Float")
-        return ASTGQLSimpleType::FLOAT;
+        return ast::ASTGQLSimpleType::FLOAT;
     else if (currentToken.lexeme == "String")
-        return ASTGQLSimpleType::STRING;
+        return ast::ASTGQLSimpleType::STRING;
     else if (currentToken.lexeme == "Boolean")
-        return ASTGQLSimpleType::BOOLEAN;
-    return (ASTGQLReferenceType){ .name = currentToken.lexeme };
+        return ast::ASTGQLSimpleType::BOOLEAN;
+    return (ast::ASTGQLReferenceType){ .name = currentToken.lexeme };
 };
 
 void parsers::server::assertIsNotKeyword(const GQLToken token) {

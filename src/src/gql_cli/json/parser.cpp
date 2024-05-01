@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "lexer/token.hpp"
+#include "libgql/lexer/token.hpp"
 
 using namespace json::parser;
 std::expected<std::vector<GQLToken>, std::string>

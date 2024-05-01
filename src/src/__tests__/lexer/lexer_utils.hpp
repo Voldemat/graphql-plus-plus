@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 
-#include "lexer/lexer.hpp"
-#include "lexer/token.hpp"
+#include "libgql/lexer/lexer.hpp"
+#include "libgql/lexer/token.hpp"
 
 using namespace lexer;
 struct TestCase {

@@ -10,7 +10,7 @@
 #include <tuple>
 #include <vector>
 
-#include "lexer/token.hpp"
+#include "libgql/lexer/token.hpp"
 namespace json {
 namespace parser {
 enum class ParsingErrorType {

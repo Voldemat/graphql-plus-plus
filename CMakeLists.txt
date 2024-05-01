@@ -23,19 +23,17 @@ include("${CMAKE_SOURCE_DIR}/src/vendor/rapidjson.cmake")
 include("${CMAKE_SOURCE_DIR}/src/vendor/absl.cmake")
 include("${CMAKE_SOURCE_DIR}/src/vendor/cli11.cmake")
 
-file(GLOB_RECURSE GQL_HEADERS src/*.hpp src/*.h)
-file(GLOB_RECURSE GQL_SOURCES src/*.cpp src/*.c)
-file(GLOB_RECURSE GQL_CLI_SOURCES src/src/cli/*.cpp src/src/cli/*.c)
-file(GLOB_RECURSE GQL_CLI_HEADERS src/src/cli/*.hpp src/src/cli/*.h)
-file(GLOB_RECURSE GQL_TESTS_SOURCES src/*.cc)
-file(GLOB_RECURSE GQL_TESTS_HEADERS src/*.cc src/src/__tests__/*.hpp)
-list(REMOVE_ITEM GQL_SOURCES src/main.cpp ${GQL_CLI_SOURCES})
-list(REMOVE_ITEM GQL_HEADERS ${GQL_TESTS_HEADERS} ${GQL_CLI_HEADERS})
+file(GLOB_RECURSE GQL_LIB_HEADERS src/src/libgql/*.hpp src/src/libgql/*.h)
+file(GLOB_RECURSE GQL_LIB_SOURCES src/src/libgql/*.cpp src/src/libgql/*.c)
+file(GLOB_RECURSE GQL_CLI_HEADERS src/src/gql_cli/*.hpp src/src/gql_cli/*.h)
+file(GLOB_RECURSE GQL_CLI_SOURCES src/src/gql_cli/*.cpp src/src/gql_cli/*.c)
+file(GLOB_RECURSE GQL_TESTS_SOURCES src/src/__tests__/*.cc)
+file(GLOB_RECURSE GQL_TESTS_HEADERS src/src/__tests__/*.cc src/src/__tests__/*.hpp)
 file(GLOB_RECURSE LEXER_TESTS src/src/__tests__/lexer/cases/*.json)
 add_library(
     gql_lib
-    ${GQL_HEADERS}
-    ${GQL_SOURCES}
+    ${GQL_LIB_HEADERS}
+    ${GQL_LIB_SOURCES}
 )
 add_executable(
     gql

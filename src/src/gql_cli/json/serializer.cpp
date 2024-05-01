@@ -1,5 +1,4 @@
-
-#include "json/serializer.hpp"
+#include "./serializer.hpp"
 
 #include <rapidjson/encodings.h>
 #include <rapidjson/stringbuffer.h>
@@ -7,10 +6,10 @@
 
 #include <variant>
 
-#include "lexer/token.hpp"
-#include "parsers/server/parser.hpp"
+#include "libgql/lexer/token.hpp"
+#include "libgql/parsers/server/ast.hpp"
 
-using namespace parsers::server;
+using namespace parsers::server::ast;
 using namespace rapidjson;
 template <class... Ts>
 struct overloaded : Ts... {
@@ -43,7 +42,7 @@ json::serializer::ASTJSONWriter::ASTJSONWriter(
     Writer<GenericStringBuffer<UTF8<>>> &writer)
     : writer{ writer } {};
 void json::serializer::ASTJSONWriter::writeProgram(
-    const ASTProgram &program) noexcept {
+    const parsers::server::ast::ASTProgram &program) noexcept {
     writer.StartObject();
     writer.String("nodes");
     writer.StartArray();
@@ -57,16 +56,17 @@ void json::serializer::ASTJSONWriter::writeProgram(
 };
 
 void json::serializer::ASTJSONWriter::writeNode(const ASTNode &node) noexcept {
-    std::visit(overloaded{
-                   [this](const ASTTypeDefinition &node) {
-                       writeTypeDefinitionNode(node);
-                   },
-                   [this](const ASTTrivialTypeSpec &node) { writeTypeSpecNode(node); },
-                   [this](const ASTUnionNode &node) { writeUnionNode(node); },
-                   [this](const ASTEnumNode &node) { writeEnumNode(node); },
-                   [this](const ASTExtendNode &node) { writeExtendNode(node); },
-               },
-               node);
+    std::visit(
+        overloaded{
+            [this](const ASTTypeDefinition &node) {
+                writeTypeDefinitionNode(node);
+            },
+            [this](const ASTTrivialTypeSpec &node) { writeTypeSpecNode(node); },
+            [this](const ASTUnionNode &node) { writeUnionNode(node); },
+            [this](const ASTEnumNode &node) { writeEnumNode(node); },
+            [this](const ASTExtendNode &node) { writeExtendNode(node); },
+        },
+        node);
 };
 void json::serializer::ASTJSONWriter::writeUnionNode(
     const ASTUnionNode &node) noexcept {
@@ -170,7 +170,7 @@ void json::serializer::ASTJSONWriter::writeTypeDefinitionNode(
     writer.Bool(node.isInput);
     writer.String("fields");
     writer.StartObject();
-    for (const auto& [name, field] : node.fields) {
+    for (const auto &[name, field] : node.fields) {
         writer.String(name.c_str());
         writeTypeSpecNode(field);
     };

@@ -18,11 +18,12 @@
 #include <string>
 #include <utility>
 
-#include "json/parser.hpp"
-#include "json/serializer.hpp"
-#include "lexer/lexer.hpp"
-#include "lexer/token.hpp"
-#include "parsers/server/parser.hpp"
+#include "./json/parser.hpp"
+#include "./json/serializer.hpp"
+#include "libgql/lexer/lexer.hpp"
+#include "libgql/lexer/token.hpp"
+#include "libgql/parsers/server/ast.hpp"
+#include "libgql/parsers/server/parser.hpp"
 
 std::string getAllStdin() noexcept {
     std::string lineInput;
@@ -63,7 +64,8 @@ std::unique_ptr<CLI::App> createCLIApp() noexcept {
     CLI::App *parserCmd = app->add_subcommand("parser", "Parser");
     CLI::App *parserParseCmd = parserCmd->add_subcommand(
         "parse", "Parse input stream of json serialized tokens into ast tree");
-    std::shared_ptr<std::string> sourceFilename = std::make_shared<std::string>("check");
+    std::shared_ptr<std::string> sourceFilename
+        = std::make_shared<std::string>("check");
     parserParseCmd
         ->add_option("--source-filename", *sourceFilename,
                      "Virtual source filename used in error reports")
@@ -82,11 +84,12 @@ std::unique_ptr<CLI::App> createCLIApp() noexcept {
         };
         auto tokens = result.value();
         if (tokens.size() == 0) {
-            std::cerr << "Warning: No tokens was provided in array" << std::endl;
+            std::cerr << "Warning: No tokens was provided in array"
+                      << std::endl;
             throw CLI::RuntimeError(1);
         };
         auto parser = parsers::server::Parser(tokens);
-        parsers::server::ASTProgram ast;
+        parsers::server::ast::ASTProgram ast;
         try {
             ast = parser.getAstTree();
         } catch (const std::exception &exc) {

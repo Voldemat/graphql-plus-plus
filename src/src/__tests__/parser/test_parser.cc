@@ -5,47 +5,41 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "lexer/token.hpp"
-#include "parsers/server/parser.hpp"
+#include "libgql/lexer/token.hpp"
+#include "libgql/parsers/server/ast.hpp"
+#include "libgql/parsers/server/parser.hpp"
 
 using namespace parsers::server;
+using namespace parsers::server::ast;
 
 TEST(ParserTest, BasicTest) {
     std::shared_ptr<SourceFile> source
         = std::make_shared<SourceFile>(std::filesystem::path("check.graphql"));
     const std::vector<GQLToken> tokens = {
-        (GQLToken){ .type = ComplexTokenType::IDENTIFIER,
-                    .lexeme = "type",
-                    .location
-                    = { .source = source, .line = 1, .start = 1, .end = 1 } },
-        (GQLToken){ .type = ComplexTokenType::IDENTIFIER,
-                    .lexeme = "Product",
-                    .location
-                    = { .source = source, .line = 1, .start = 1, .end = 1 } },
-        (GQLToken){ .type = SimpleTokenType::LEFT_BRACE,
-                    .lexeme = "{",
-                    .location
-                    = { .source = source, .line = 1, .start = 1, .end = 1 } },
-        (GQLToken){ .type = ComplexTokenType::IDENTIFIER,
-                    .lexeme = "amount",
-                    .location
-                    = { .source = source, .line = 1, .start = 1, .end = 1 } },
-        (GQLToken){ .type = SimpleTokenType::COLON,
-                    .lexeme = ":",
-                    .location
-                    = { .source = source, .line = 1, .start = 1, .end = 1 } },
-        (GQLToken){ .type = ComplexTokenType::IDENTIFIER,
-                    .lexeme = "Int",
-                    .location
-                    = { .source = source, .line = 1, .start = 1, .end = 1 } },
-        (GQLToken){ .type = SimpleTokenType::BANG,
-                    .lexeme = "!",
-                    .location
-                    = { .source = source, .line = 1, .start = 1, .end = 1 } },
-        (GQLToken){ .type = SimpleTokenType::RIGHT_BRACE,
-                    .lexeme = "}",
-                    .location
-                    = { .source = source, .line = 1, .start = 1, .end = 1 } }
+        { .type = ComplexTokenType::IDENTIFIER,
+          .lexeme = "type",
+          .location = { .source = source, .line = 1, .start = 1, .end = 1 } },
+        { .type = ComplexTokenType::IDENTIFIER,
+          .lexeme = "Product",
+          .location = { .source = source, .line = 1, .start = 1, .end = 1 } },
+        { .type = SimpleTokenType::LEFT_BRACE,
+          .lexeme = "{",
+          .location = { .source = source, .line = 1, .start = 1, .end = 1 } },
+        { .type = ComplexTokenType::IDENTIFIER,
+          .lexeme = "amount",
+          .location = { .source = source, .line = 1, .start = 1, .end = 1 } },
+        { .type = SimpleTokenType::COLON,
+          .lexeme = ":",
+          .location = { .source = source, .line = 1, .start = 1, .end = 1 } },
+        { .type = ComplexTokenType::IDENTIFIER,
+          .lexeme = "Int",
+          .location = { .source = source, .line = 1, .start = 1, .end = 1 } },
+        { .type = SimpleTokenType::BANG,
+          .lexeme = "!",
+          .location = { .source = source, .line = 1, .start = 1, .end = 1 } },
+        { .type = SimpleTokenType::RIGHT_BRACE,
+          .lexeme = "}",
+          .location = { .source = source, .line = 1, .start = 1, .end = 1 } }
     };
     Parser parser(tokens);
     const auto ast = parser.getAstTree();

@@ -1,4 +1,4 @@
-#include "lexer/lexer.hpp"
+#include "libgql/lexer/lexer.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -11,9 +11,9 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest.h"
-#include "lexer/token.hpp"
 #include "./lexer_utils.hpp"
+#include "gtest/gtest.h"
+#include "libgql/lexer/token.hpp"
 
 class Fixture : public testing::TestWithParam<TestCase> {};
 
@@ -23,7 +23,7 @@ TEST_P(Fixture, TestLexer) {
     std::istringstream buffer(testCase.schema);
     VectorTokensAccumulator accumulator;
     Lexer lexer(std::move(buffer), testCase.sourceFile, accumulator);
-    const auto& result = lexer.parse();
+    const auto &result = lexer.parse();
     if (!result.has_value()) {
         const std::vector<GQLToken> tokens = accumulator.getTokens();
         EXPECT_EQ(tokens.size(), testCase.expectedTokens.size());
@@ -40,8 +40,7 @@ TEST_P(Fixture, TestLexer) {
         };
     } else {
         const auto error = result.value();
-        ASSERT_TRUE(testCase.error.has_value())
-            << error.what();
+        ASSERT_TRUE(testCase.error.has_value()) << error.what();
         const auto expectedError = *testCase.error.value();
         ASSERT_EQ(error.location.line, expectedError.location.line);
         ASSERT_EQ(error.location.start, expectedError.location.start);
