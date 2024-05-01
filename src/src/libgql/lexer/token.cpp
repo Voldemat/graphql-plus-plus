@@ -94,7 +94,7 @@ std::ostream &operator<<(std::ostream &os, const GQLTokenType &type) {
 };
 
 std::ostream& operator<<(std::ostream& os, const Location& self) noexcept {
-    os << self << std::endl;
+    os << (std::string)self << std::endl;
     return os;
 };
 

@@ -1,6 +1,6 @@
 {
     "$schema": "case.schema.json",
-    "schema": "input ProductIn {\nprice: Int!\n}",
+    "schema": "input ProductIn {\nprice: Int! = 10\n}",
     "tokens": [
         {
             "type": "IDENTIFIER",
@@ -63,6 +63,24 @@
                 "line": 2,
                 "start": 10,
                 "end": 10
+            }
+        },
+        {
+            "type": "EQUAL",
+            "lexeme": "=",
+            "location": {
+                "line": 2,
+                "start": 12,
+                "end": 12
+            }
+        },
+        {
+            "type": "NUMBER",
+            "lexeme": "10",
+            "location": {
+                "line": 2,
+                "start": 14,
+                "end": 15
             }
         },
         {

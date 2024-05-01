@@ -1,7 +1,9 @@
 #include "./parser.hpp"
 
 #include <map>
+#include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "./ast.hpp"
@@ -10,7 +12,8 @@
 using namespace parsers::server;
 
 Parser::Parser(std::vector<GQLToken> tokens) noexcept
-    : tokens{ tokens }, currentToken{ tokens[0] } {};
+    : tokens{ tokens }, currentToken{ tokens[0] } {
+};
 
 const ast::ASTProgram Parser::getAstTree() {
     std::vector<ast::ASTNode> nodes = {};
@@ -157,14 +160,28 @@ const ast::ASTArrayTypeSpec Parser::parseArrayTypeSpecNode() {
         consume(SimpleTokenType::BANG);
         nullable = false;
     };
-    return { .type = trivialType, .nullable = nullable };
+    std::optional<ast::ASTArrayLiteral> defaultValue;
+    if (std::holds_alternative<ast::ASTGQLSimpleType>(trivialType.type)) {
+        defaultValue = maybeParseArrayLiteralNode(
+            std::get<ast::ASTGQLSimpleType>(trivialType.type));
+    };
+    return { .type = trivialType,
+             .nullable = nullable,
+             .defaultValue = defaultValue };
 };
 const ast::ASTTrivialTypeSpec Parser::parseTrivialTypeSpecNode() {
     const ast::ASTGQLType type = parseGQLType();
-    const bool nullable
-        = lookahead().type != (GQLTokenType)SimpleTokenType::BANG;
-    if (!nullable) consume(SimpleTokenType::BANG);
-    return { .type = type, .nullable = nullable };
+    bool nullable = true;
+    if (lookahead().type == (GQLTokenType)SimpleTokenType::BANG) {
+        consume(SimpleTokenType::BANG);
+        nullable = false;
+    };
+    std::optional<ast::ASTLiteral> defaultValue;
+    if (std::holds_alternative<ast::ASTGQLSimpleType>(type)) {
+        defaultValue
+            = maybeParseLiteralNode(std::get<ast::ASTGQLSimpleType>(type));
+    };
+    return { .type = type, .nullable = nullable, .defaultValue = defaultValue };
 };
 
 const ast::ASTGQLType Parser::parseGQLType() {
@@ -180,6 +197,96 @@ const ast::ASTGQLType Parser::parseGQLType() {
     return (ast::ASTGQLReferenceType){ .name = currentToken.lexeme };
 };
 
+const std::optional<ast::ASTLiteral> Parser::maybeParseLiteralNode(
+    ast::ASTGQLSimpleType t) {
+    if (lookahead().type == (GQLTokenType)SimpleTokenType::EQUAL) {
+        consume(SimpleTokenType::EQUAL);
+        return parseLiteralNode(t);
+    };
+    return std::nullopt;
+};
+
+const std::optional<ast::ASTArrayLiteral> Parser::maybeParseArrayLiteralNode(
+    ast::ASTGQLSimpleType t) {
+    if (lookahead().type == (GQLTokenType)SimpleTokenType::EQUAL) {
+        consume(SimpleTokenType::EQUAL);
+        return parseArrayLiteralNode(t);
+    };
+    return std::nullopt;
+};
+
+const ast::ASTLiteral Parser::parseLiteralNode(ast::ASTGQLSimpleType t) {
+    switch (t) {
+        case ast::ASTGQLSimpleType::INT: {
+            consume(ComplexTokenType::NUMBER);
+            return (ast::ASTIntLiteral){ .value
+                                         = std::stoi(currentToken.lexeme) };
+        };
+        case ast::ASTGQLSimpleType::FLOAT: {
+            consume(ComplexTokenType::NUMBER);
+            return (ast::ASTFloatLiteral){ .value
+                                           = std::stof(currentToken.lexeme) };
+        };
+        case ast::ASTGQLSimpleType::BOOLEAN: {
+            throw ParserError(currentToken,
+                              "Boolean default values are not supported");
+        };
+        case ast::ASTGQLSimpleType::STRING: {
+            consume(ComplexTokenType::STRING);
+            return (ast::ASTStringLiteral){ .value = currentToken.lexeme };
+        };
+        case ast::ASTGQLSimpleType::ID: {
+            throw ParserError(currentToken, "ID default values are not supported");
+        };
+    };
+};
+
+void Parser::maybeConsumeComma() {
+    if (lookahead().type == (GQLTokenType)SimpleTokenType::COMMA) {
+        consume(SimpleTokenType::COMMA);
+    };
+};
+const ast::ASTArrayLiteral Parser::parseArrayLiteralNode(
+    ast::ASTGQLSimpleType t) {
+    consume(SimpleTokenType::LEFT_BRACKET);
+    switch (t) {
+        case ast::ASTGQLSimpleType::INT: {
+            ast::ASTIntArrayLiteral items;
+            while (lookahead().type == (GQLTokenType)ComplexTokenType::NUMBER) {
+                items.push_back(
+                    std::get<ast::ASTIntLiteral>(parseLiteralNode(t)));
+                maybeConsumeComma();
+            };
+            return items;
+        };
+        case ast::ASTGQLSimpleType::FLOAT: {
+            ast::ASTFloatArrayLiteral items;
+            while (lookahead().type == (GQLTokenType)ComplexTokenType::NUMBER) {
+                items.push_back(
+                    std::get<ast::ASTFloatLiteral>(parseLiteralNode(t)));
+                maybeConsumeComma();
+            };
+            return items;
+        };
+        case ast::ASTGQLSimpleType::BOOLEAN: {
+            ast::ASTBooleanArrayLiteral items;
+            return items;
+        };
+        case ast::ASTGQLSimpleType::STRING: {
+            ast::ASTStringArrayLiteral items;
+            while (lookahead().type == (GQLTokenType)ComplexTokenType::STRING) {
+                items.push_back(
+                    std::get<ast::ASTStringLiteral>(parseLiteralNode(t)));
+                maybeConsumeComma();
+            };
+            return items;
+        };
+        case ast::ASTGQLSimpleType::ID: {
+            throw ParserError(currentToken, "ID default values are not supported");
+        };
+    };
+    consume(SimpleTokenType::RIGHT_BRACKET);
+};
 void parsers::server::assertIsNotKeyword(const GQLToken token) {
     if (isKeyword(token.lexeme)) throw ParserError::identifierIsKeyword(token);
 };

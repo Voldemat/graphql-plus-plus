@@ -6,6 +6,7 @@
 #include <rapidjson/reader.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <optional>
 
 #include "libgql/lexer/token.hpp"
 #include "libgql/parsers/server/ast.hpp"
@@ -44,6 +45,14 @@ public:
     void writeReferenceTypeNode(
         const parsers::server::ast::ASTGQLReferenceType &node) noexcept;
     void writeExtendNode(const parsers::server::ast::ASTExtendNode &node) noexcept;
+    void writeMaybeASTLiteralType(const std::optional<parsers::server::ast::ASTLiteral>& node) noexcept;
+    void writeASTLiteralType(const parsers::server::ast::ASTLiteral& node) noexcept;
+    void writeASTArrayLiteralType(
+        const parsers::server::ast::ASTArrayLiteral& node
+    ) noexcept;
+    void writeMaybeASTArrayLiteralType(
+        const std::optional<parsers::server::ast::ASTArrayLiteral>& node
+    ) noexcept;
 };
 };  // namespace serializer
 };  // namespace json

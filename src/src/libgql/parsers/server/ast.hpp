@@ -2,6 +2,7 @@
 #define GRAPHQL_PARSERS_SERVER_AST
 
 #include <map>
+#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
@@ -9,22 +10,51 @@
 namespace parsers {
 namespace server {
 namespace ast {
-enum class ASTGQLSimpleType { STRING, INT, FLOAT, BOOLEAN };
-std::string astGQLSimpleTypeToString(const ASTGQLSimpleType &type) noexcept;
+
+enum class ASTGQLSimpleType { ID, STRING, INT, FLOAT, BOOLEAN };
 struct ASTGQLReferenceType {
     std::string name;
 };
-
 using ASTGQLType = std::variant<ASTGQLSimpleType, ASTGQLReferenceType>;
+
+struct ASTStringLiteral {
+    std::string value;
+};
+
+struct ASTFloatLiteral {
+    float value;
+};
+
+struct ASTIntLiteral {
+    int value;
+};
+
+struct ASTBooleanLiteral {
+    bool value;
+};
+
+using ASTLiteral = std::variant<ASTStringLiteral, ASTFloatLiteral,
+                                ASTIntLiteral, ASTBooleanLiteral>;
+
+using ASTStringArrayLiteral = std::vector<ASTStringLiteral>;
+using ASTFloatArrayLiteral = std::vector<ASTFloatLiteral>;
+using ASTIntArrayLiteral = std::vector<ASTIntLiteral>;
+using ASTBooleanArrayLiteral = std::vector<ASTBooleanLiteral>;
+
+using ASTArrayLiteral
+    = std::variant<ASTStringArrayLiteral, ASTFloatArrayLiteral,
+                   ASTIntArrayLiteral, ASTBooleanArrayLiteral>;
 
 struct ASTTrivialTypeSpec {
     ASTGQLType type;
     bool nullable;
+    std::optional<ASTLiteral> defaultValue;
 };
 
 struct ASTArrayTypeSpec {
     ASTTrivialTypeSpec type;
     bool nullable;
+    std::optional<ASTArrayLiteral> defaultValue;
 };
 
 using ASTLiteralTypeSpec = std::variant<ASTTrivialTypeSpec, ASTArrayTypeSpec>;
@@ -62,6 +92,7 @@ using ASTNode = std::variant<ASTTypeDefinition, ASTTrivialTypeSpec,
 struct ASTProgram {
     std::vector<ASTNode> nodes;
 };
+std::string astGQLSimpleTypeToString(const ASTGQLSimpleType &type) noexcept;
 };  // namespace ast
 };  // namespace server
 };  // namespace parsers

@@ -65,7 +65,7 @@ std::unique_ptr<CLI::App> createCLIApp() noexcept {
     CLI::App *parserParseCmd = parserCmd->add_subcommand(
         "parse", "Parse input stream of json serialized tokens into ast tree");
     std::shared_ptr<std::string> sourceFilename
-        = std::make_shared<std::string>("check");
+        = std::make_shared<std::string>();
     parserParseCmd
         ->add_option("--source-filename", *sourceFilename,
                      "Virtual source filename used in error reports")

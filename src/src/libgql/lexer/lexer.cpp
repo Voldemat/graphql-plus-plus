@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -56,6 +57,7 @@ std::optional<LexerError> LexerState::feed(char c) noexcept{
     result = feedNew(c);
     if (result.has_value()) return result;
     return result;
+    return std::nullopt;
 };
 
 std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
@@ -104,24 +106,25 @@ std::optional<LexerError> LexerState::feedWithType(
                 extractAndSaveToken();
                 return std::nullopt;
             };
+            break;
         }
         case ComplexTokenType::STRING: {
             if (c == '"') {
                 extractAndSaveToken();
                 return std::nullopt;
             };
+            break;
         }
         case ComplexTokenType::IDENTIFIER: {
             if (!(isalpha(c) || c == '_' || c == '-')) {
                 extractAndSaveToken();
                 return std::nullopt;
             };
-        }
-        default: {
-            buffer += c;
-            return std::nullopt;
-        }
+            break;
+        };
     };
+    buffer += c;
+    return std::nullopt;
 };
 
 GQLToken LexerState::extractToken() {

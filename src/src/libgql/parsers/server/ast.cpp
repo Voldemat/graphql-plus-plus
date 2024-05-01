@@ -12,5 +12,7 @@ std::string parsers::server::ast::astGQLSimpleTypeToString(
             return "String";
         case ASTGQLSimpleType::BOOLEAN:
             return "Boolean";
+        case ASTGQLSimpleType::ID:
+            return "Id";
     };
 };

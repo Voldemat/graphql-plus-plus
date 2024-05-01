@@ -2,6 +2,7 @@
 #define GRAPHQL_PARSER
 
 #include <exception>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -13,10 +14,10 @@ namespace server {
 class ParserError : public std::exception {
     const GQLToken token;
     const std::string error;
-    explicit ParserError(const GQLToken t, const std::string e)
-        : token{ t }, error{ e } {};
 
 public:
+    explicit ParserError(const GQLToken t, const std::string e)
+        : token{ t }, error{ e } {};
     const char *what() const noexcept { return error.c_str(); };
     const static ParserError createEOF(const GQLToken token) noexcept {
         return ParserError(token, "EOF");
@@ -61,8 +62,13 @@ class Parser {
     const ast::ASTTypeSpec parseTypeSpecNode();
     const ast::ASTCallableTypeSpec parseCallableTypeSpecNode();
     const ast::ASTLiteralTypeSpec parseLiteralTypeSpecNode();
+    const ast::ASTLiteral parseLiteralNode(ast::ASTGQLSimpleType type);
+    const std::optional<ast::ASTLiteral> maybeParseLiteralNode(ast::ASTGQLSimpleType type);
     const ast::ASTArrayTypeSpec parseArrayTypeSpecNode();
+    const std::optional<ast::ASTArrayLiteral> maybeParseArrayLiteralNode(ast::ASTGQLSimpleType type);
+    const ast::ASTArrayLiteral parseArrayLiteralNode(ast::ASTGQLSimpleType type);
     const ast::ASTTrivialTypeSpec parseTrivialTypeSpecNode();
+    void maybeConsumeComma();
 
 public:
     Parser(std::vector<GQLToken> tokens) noexcept;

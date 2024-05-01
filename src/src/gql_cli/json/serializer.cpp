@@ -4,6 +4,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <optional>
 #include <variant>
 
 #include "libgql/lexer/token.hpp"
@@ -107,6 +108,8 @@ void json::serializer::ASTJSONWriter::writeTrivialTypeSpecNode(
     writeASTGQLType(node.type);
     writer.String("nullable");
     writer.Bool(node.nullable);
+    writer.String("defaultValue");
+    writeMaybeASTLiteralType(node.defaultValue);
     writer.EndObject();
 };
 
@@ -119,7 +122,68 @@ void json::serializer::ASTJSONWriter::writeArrayTypeSpecNode(
     writeTrivialTypeSpecNode(node.type);
     writer.String("nullable");
     writer.Bool(node.nullable);
+    writer.String("defaultType");
+    writeMaybeASTArrayLiteralType(node.defaultValue);
     writer.EndObject();
+};
+
+void json::serializer::ASTJSONWriter::writeMaybeASTArrayLiteralType(
+    const std::optional<ASTArrayLiteral>& node
+) noexcept {
+    if (!node.has_value()) {
+        writer.Null();
+        return;
+    };
+    writeASTArrayLiteralType(node.value());
+};
+
+void json::serializer::ASTJSONWriter::writeASTArrayLiteralType(
+    const ASTArrayLiteral& node
+) noexcept {
+    writer.StartArray();
+    std::visit(overloaded{
+        [this](const ASTStringArrayLiteral& v){
+            for (const auto& item : v) {
+                writer.String(item.value.c_str());
+            };
+        },
+        [this](const ASTIntArrayLiteral& v){
+            for (const auto& item : v) {
+                writer.Int(item.value);
+            };
+        },
+        [this](const ASTFloatArrayLiteral& v){
+            for (const auto& item : v) {
+                writer.Double(item.value);
+            };
+        },
+        [this](const ASTBooleanArrayLiteral& v){
+            for (const auto& item : v) {
+                writer.Bool(item.value);
+            };
+        }
+    }, node);
+    writer.EndArray();
+};
+void json::serializer::ASTJSONWriter::writeMaybeASTLiteralType(
+    const std::optional<ASTLiteral>& node
+) noexcept {
+    if (!node.has_value()) {
+        writer.Null();
+        return;
+    };
+    writeASTLiteralType(node.value());
+};
+
+void json::serializer::ASTJSONWriter::writeASTLiteralType(
+    const ASTLiteral& node
+) noexcept {
+    std::visit(overloaded{
+        [this](const ASTStringLiteral& v){ writer.String(v.value.c_str()); },
+        [this](const ASTIntLiteral& v){ writer.Int(v.value); },
+        [this](const ASTFloatLiteral& v){ writer.Double(v.value); },
+        [this](const ASTBooleanLiteral& v){ writer.Bool(v.value); },
+    }, node);
 };
 
 void json::serializer::ASTJSONWriter::writeTypeSpecNode(
@@ -134,6 +198,13 @@ void json::serializer::ASTJSONWriter::writeTypeSpecNode(
 void json::serializer::ASTJSONWriter::writeCallableTypeSpecNode(
     const ASTCallableTypeSpec &node) noexcept {
     writer.StartObject();
+    writer.String("arguments");
+    writer.StartObject();
+    for (const auto& [name, arg] : node.arguments) {
+        writer.String(name.c_str());
+        writeLiteralTypeSpecNode(arg);
+    };
+    writer.EndObject();
     writer.String("returnType");
     writeLiteralTypeSpecNode(node.returnType);
     writer.EndObject();
