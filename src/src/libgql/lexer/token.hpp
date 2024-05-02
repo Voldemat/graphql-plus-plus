@@ -43,9 +43,8 @@ enum class SimpleTokenType {
     VSLASH,
     LEFT_BRACKET,
     RIGHT_BRACKET
-
 };
-enum class ComplexTokenType { IDENTIFIER = 1, STRING = 2, NUMBER = 3 };
+enum class ComplexTokenType { IDENTIFIER, STRING, NUMBER, BOOLEAN };
 
 using GQLTokenType = std::variant<SimpleTokenType, ComplexTokenType>;
 

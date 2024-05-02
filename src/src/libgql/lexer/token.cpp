@@ -38,6 +38,8 @@ std::optional<GQLTokenType> gqlTokenTypeFromString(
         return SimpleTokenType::RIGHT_BRACKET;
     else if (t == "LEFT_BRACKET")
         return SimpleTokenType::LEFT_BRACKET;
+    else if (t == "BOOLEAN")
+        return ComplexTokenType::BOOLEAN;
     return std::nullopt;
 };
 
@@ -51,6 +53,8 @@ std::string gqlTokenTypeToString(GQLTokenType type) noexcept {
                 return "NUMBER";
             case ComplexTokenType::IDENTIFIER:
                 return "IDENTIFIER";
+            case ComplexTokenType::BOOLEAN:
+                return "BOOLEAN";
         };
     } else {
         const auto &simpleType = std::get<SimpleTokenType>(type);

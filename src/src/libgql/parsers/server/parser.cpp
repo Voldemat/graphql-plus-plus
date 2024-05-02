@@ -12,8 +12,7 @@
 using namespace parsers::server;
 
 Parser::Parser(std::vector<GQLToken> tokens) noexcept
-    : tokens{ tokens }, currentToken{ tokens[0] } {
-};
+    : tokens{ tokens }, currentToken{ tokens[0] } {};
 
 const ast::ASTProgram Parser::getAstTree() {
     std::vector<ast::ASTNode> nodes = {};
@@ -228,15 +227,17 @@ const ast::ASTLiteral Parser::parseLiteralNode(ast::ASTGQLSimpleType t) {
                                            = std::stof(currentToken.lexeme) };
         };
         case ast::ASTGQLSimpleType::BOOLEAN: {
-            throw ParserError(currentToken,
-                              "Boolean default values are not supported");
+            consume(ComplexTokenType::BOOLEAN);
+            return (ast::ASTBooleanLiteral){ .value
+                                             = currentToken.lexeme == "true" };
         };
         case ast::ASTGQLSimpleType::STRING: {
             consume(ComplexTokenType::STRING);
             return (ast::ASTStringLiteral){ .value = currentToken.lexeme };
         };
         case ast::ASTGQLSimpleType::ID: {
-            throw ParserError(currentToken, "ID default values are not supported");
+            throw ParserError(currentToken,
+                              "ID default values are not supported");
         };
     };
 };
@@ -270,6 +271,11 @@ const ast::ASTArrayLiteral Parser::parseArrayLiteralNode(
         };
         case ast::ASTGQLSimpleType::BOOLEAN: {
             ast::ASTBooleanArrayLiteral items;
+            while (lookahead().type == (GQLTokenType)ComplexTokenType::BOOLEAN) {
+                items.push_back(
+                    std::get<ast::ASTBooleanLiteral>(parseLiteralNode(t)));
+                maybeConsumeComma();
+            };
             return items;
         };
         case ast::ASTGQLSimpleType::STRING: {
@@ -282,7 +288,8 @@ const ast::ASTArrayLiteral Parser::parseArrayLiteralNode(
             return items;
         };
         case ast::ASTGQLSimpleType::ID: {
-            throw ParserError(currentToken, "ID default values are not supported");
+            throw ParserError(currentToken,
+                              "ID default values are not supported");
         };
     };
     consume(SimpleTokenType::RIGHT_BRACKET);

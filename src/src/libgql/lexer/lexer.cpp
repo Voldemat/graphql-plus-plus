@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -17,27 +16,24 @@ using namespace lexer;
 
 LexerError::LexerError(const std::string message,
                        const Location location) noexcept
-    : location{ location }, message{message}{};
-const char* LexerError::what() const noexcept {
-    return message.c_str();
-};
-Lexer::Lexer(
-    std::istringstream s,
-    std::shared_ptr<SourceFile> source,
-    ITokensAccumulator& tokensAccumulator
-)
+    : location{ location }, message{ message } {};
+const char *LexerError::what() const noexcept { return message.c_str(); };
+Lexer::Lexer(std::istringstream s, std::shared_ptr<SourceFile> source,
+             ITokensAccumulator &tokensAccumulator)
     : state{ source, tokensAccumulator } {
     stream.swap(s);
 };
 
-std::optional<LexerError> LexerState::feed(char c) noexcept{
+std::optional<LexerError> LexerState::feed(char c) noexcept {
     if (c == -1) {
-        const auto& maybeToken = maybeExtractToken();
-        if (maybeToken.has_value()) tokensAccumulator.addToken(maybeToken.value());
+        const auto &maybeToken = maybeExtractToken();
+        if (maybeToken.has_value())
+            tokensAccumulator.addToken(maybeToken.value());
         return std::nullopt;
     } else if (c == '\n') {
-        const auto& maybeToken = maybeExtractToken();
-        if (maybeToken.has_value()) tokensAccumulator.addToken(maybeToken.value());
+        const auto &maybeToken = maybeExtractToken();
+        if (maybeToken.has_value())
+            tokensAccumulator.addToken(maybeToken.value());
         location.line += 1;
         location.start = -1;
         location.end = -1;
@@ -94,7 +90,7 @@ std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
 };
 
 void LexerState::extractAndSaveToken() noexcept {
-    const auto& token = extractToken();
+    const auto &token = extractToken();
     tokensAccumulator.addToken(token);
 };
 
@@ -115,6 +111,7 @@ std::optional<LexerError> LexerState::feedWithType(
             };
             break;
         }
+        case ComplexTokenType::BOOLEAN:
         case ComplexTokenType::IDENTIFIER: {
             if (!(isalpha(c) || c == '_' || c == '-')) {
                 extractAndSaveToken();
@@ -128,6 +125,9 @@ std::optional<LexerError> LexerState::feedWithType(
 };
 
 GQLToken LexerState::extractToken() {
+    if (buffer == "true" || buffer == "false") {
+        type = ComplexTokenType::BOOLEAN;
+    };
     const GQLToken token
         = { .type = type.value(), .lexeme = buffer, .location = location };
     location.start = location.end;
@@ -162,8 +162,8 @@ std::optional<LexerError> LexerState::feedNew(char c) noexcept {
     const auto tokenType = optTokenType.value();
     if (std::holds_alternative<SimpleTokenType>(tokenType)) {
         tokensAccumulator.addToken({ .type = tokenType,
-                                                .lexeme = std::string() + c,
-                                                .location = location });
+                                     .lexeme = std::string() + c,
+                                     .location = location });
         return std::nullopt;
     };
     const auto complexTokenType = std::get<ComplexTokenType>(tokenType);

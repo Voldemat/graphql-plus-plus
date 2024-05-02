@@ -24,7 +24,9 @@
                         "COLON",
                         "VSLASH",
                         "RIGHT_BRACKET",
-                        "LEFT_BRACKET"
+                        "LEFT_BRACKET",
+                        "BOOLEAN",
+                        "COMMA"
                     ]
                 },
                 "lexeme": {

@@ -1,6 +1,6 @@
 {
     "$schema": "case.schema.json",
-    "schema": "type A {b: [Error!]!}",
+    "schema": "type A {b: [Error!]!, flag: Boolean! = true}",
     "tokens": [
         {
             "type": "IDENTIFIER",
@@ -93,12 +93,75 @@
             }
         },
         {
-            "type": "RIGHT_BRACE",
-            "lexeme": "}",
+            "type": "COMMA",
+            "lexeme": ",",
             "location": {
                 "line": 1,
                 "start": 20,
                 "end": 20
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "flag",
+            "location": {
+                "line": 1,
+                "start": 22,
+                "end": 25
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 1,
+                "start": 26,
+                "end": 26
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Boolean",
+            "location": {
+                "line": 1,
+                "start": 28,
+                "end": 34
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 1,
+                "start": 35,
+                "end": 35
+            }
+        },
+        {
+            "type": "EQUAL",
+            "lexeme": "=",
+            "location": {
+                "line": 1,
+                "start": 37,
+                "end": 37
+            }
+        },
+        {
+            "type": "BOOLEAN",
+            "lexeme": "true",
+            "location": {
+                "line": 1,
+                "start": 39,
+                "end": 42
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 1,
+                "start": 43,
+                "end": 43
             }
         }
     ]
