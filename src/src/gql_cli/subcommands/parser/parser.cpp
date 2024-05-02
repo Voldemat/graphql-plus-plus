@@ -7,31 +7,48 @@
 #include <CLI/App.hpp>
 #include <CLI/Error.hpp>
 #include <exception>
+#include <filesystem>
+#include <format>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <string>
 
-#include "gql_cli/utils.hpp"
 #include "gql_cli/json/parser.hpp"
 #include "gql_cli/json/serializer.hpp"
+#include "gql_cli/utils.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/parsers/server/ast.hpp"
 #include "libgql/parsers/server/parser.hpp"
 
 void createParserSubcommand(CLI::App *app) {
     CLI::App *parserCmd = app->add_subcommand("parser", "Parser");
-    CLI::App *parserParseCmd = parserCmd->add_subcommand(
-        "parse", "Parse input stream of json serialized tokens into ast tree");
+    CLI::App *parserParseCmd
+        = parserCmd->add_subcommand("parse", "Parse ast tree");
     std::shared_ptr<std::string> sourceFilename
         = std::make_shared<std::string>();
     parserParseCmd
-        ->add_option("--source-filename", *sourceFilename,
-                     "Virtual source filename used in error reports")
+        ->add_option("--source-filename", *sourceFilename, "Source filename")
         ->required();
     parserParseCmd->callback([sourceFilename]() {
+        std::string buffer;
+        if (*sourceFilename == "-") {
+            *sourceFilename = "in-memory";
+            buffer = getAllStdin();
+        } else {
+            if (!std::filesystem::exists(*sourceFilename)) {
+                std::cerr << std::format("File {} does not exists",
+                                         *sourceFilename)
+                          << std::endl;
+                throw CLI::RuntimeError(1);
+            };
+            std::ifstream file(*sourceFilename);
+            buffer = std::string((std::istreambuf_iterator<char>(file)),
+                                 std::istreambuf_iterator<char>());
+        };
         std::shared_ptr<SourceFile> sourceFile
             = std::make_shared<SourceFile>(*sourceFilename);
-        const auto buffer = getAllStdin();
         rapidjson::Document d;
         d.Parse(buffer.c_str());
         auto result = json::parser::parseTokensArray(d, sourceFile);

@@ -17,7 +17,8 @@
 std::unique_ptr<CLI::App> createCLIApp() noexcept {
     std::unique_ptr<CLI::App> app = std::make_unique<CLI::App>("Graphql++ cli");
     app->require_subcommand(1);
-    createLexerSubcommand(app.get());
-    createParserSubcommand(app.get());
+    CLI::App* internal = app->add_subcommand("internal", "Internal commands for debugging");
+    createLexerSubcommand(internal);
+    createParserSubcommand(internal);
     return app;
 };
