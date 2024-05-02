@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -45,9 +46,9 @@ TEST(ParserTest, BasicTest) {
     const auto ast = parser.getAstTree();
     ASSERT_EQ(ast.nodes.size(), 1);
     const auto node = ast.nodes[0];
-    ASTTypeDefinition typeDefinition = std::get<ASTTypeDefinition>(node);
+    ASTGQLTypeDefinition typeDefinition
+        = std::get<ASTGQLTypeDefinition>(std::get<ASTTypeDefinition>(node));
     ASSERT_STREQ(typeDefinition.name.c_str(), "Product");
-    ASSERT_EQ(typeDefinition.isInput, false);
     ASSERT_EQ(typeDefinition.fields.size(), 1);
     ASSERT_TRUE(typeDefinition.fields.contains("amount"));
     ASTTrivialTypeSpec typeSpec = std::get<ASTTrivialTypeSpec>(
@@ -55,4 +56,5 @@ TEST(ParserTest, BasicTest) {
     ASTGQLSimpleType type = std::get<ASTGQLSimpleType>(typeSpec.type);
     ASSERT_EQ(type, ASTGQLSimpleType::INT);
     ASSERT_EQ(typeSpec.nullable, false);
+    ASSERT_EQ(typeDefinition.implements, std::nullopt);
 };

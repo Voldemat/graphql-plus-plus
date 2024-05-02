@@ -46,12 +46,14 @@ const ast::ASTNode Parser::parseComplexToken() {
                                      ComplexTokenType::IDENTIFIER);
     };
     if (currentToken.lexeme == "type") {
-        return parseTypeNode(false);
+        return parseTypeNode();
+    } else if (currentToken.lexeme == "interface") {
+        return parseInterfaceNode();
     } else if (currentToken.lexeme == "input") {
-        return parseTypeNode(true);
+        return ast::ASTInputDefinition(parseInterfaceNode());
     } else if (currentToken.lexeme == "extend") {
         consume(ComplexTokenType::IDENTIFIER);
-        const auto typeSpec = parseTypeNode(false);
+        const auto typeSpec = parseTypeNode();
         return (ast::ASTExtendNode){ .type = typeSpec };
     } else if (currentToken.lexeme == "enum") {
         return parseEnumNode();
@@ -95,7 +97,31 @@ void Parser::consumeIdentifier() {
     assertIsNotKeyword(currentToken);
 };
 
-const ast::ASTTypeDefinition Parser::parseTypeNode(bool isInput) {
+const ast::ASTTypeDefinition Parser::parseTypeNode() {
+    consumeIdentifier();
+    const std::string name = currentToken.lexeme;
+    std::optional<std::string> implements;
+    const auto &lookaheadToken = lookahead();
+    if (lookaheadToken.type == (GQLTokenType)ComplexTokenType::IDENTIFIER
+        && lookaheadToken.lexeme == "implements") {
+        consume(ComplexTokenType::IDENTIFIER);
+        consumeIdentifier();
+        assertIsNotKeyword(currentToken);
+        implements = currentToken.lexeme;
+    };
+    consume(SimpleTokenType::LEFT_BRACE);
+    std::map<std::string, ast::ASTTypeSpec> definitions;
+    while (lookahead().type != (GQLTokenType)SimpleTokenType::RIGHT_BRACE) {
+        const std::string key = parseIdentifier();
+        definitions[key] = parseTypeSpecNode();
+    };
+    consume(SimpleTokenType::RIGHT_BRACE);
+    return (ast::ASTGQLTypeDefinition){ .name = name,
+                                        .fields = definitions,
+                                        .implements = implements };
+};
+
+const ast::ASTInterfaceDefinition Parser::parseInterfaceNode() {
     consumeIdentifier();
     const std::string name = currentToken.lexeme;
     consume(SimpleTokenType::LEFT_BRACE);
@@ -105,7 +131,7 @@ const ast::ASTTypeDefinition Parser::parseTypeNode(bool isInput) {
         definitions[key] = parseTypeSpecNode();
     };
     consume(SimpleTokenType::RIGHT_BRACE);
-    return { .name = name, .fields = definitions, .isInput = isInput };
+    return (ast::ASTInterfaceDefinition){ .name = name, .fields = definitions };
 };
 
 const std::string Parser::parseIdentifier() {
@@ -271,7 +297,8 @@ const ast::ASTArrayLiteral Parser::parseArrayLiteralNode(
         };
         case ast::ASTGQLSimpleType::BOOLEAN: {
             ast::ASTBooleanArrayLiteral items;
-            while (lookahead().type == (GQLTokenType)ComplexTokenType::BOOLEAN) {
+            while (lookahead().type
+                   == (GQLTokenType)ComplexTokenType::BOOLEAN) {
                 items.push_back(
                     std::get<ast::ASTBooleanLiteral>(parseLiteralNode(t)));
                 maybeConsumeComma();

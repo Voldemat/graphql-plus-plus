@@ -6,6 +6,7 @@
 #include <rapidjson/reader.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+
 #include <optional>
 
 #include "libgql/lexer/token.hpp"
@@ -28,7 +29,8 @@ public:
             &writer);
     void writeProgram(const parsers::server::ast::ASTProgram &program) noexcept;
     void writeNode(const parsers::server::ast::ASTNode &node) noexcept;
-    void writeUnionNode(const parsers::server::ast::ASTUnionNode &node) noexcept;
+    void writeUnionNode(
+        const parsers::server::ast::ASTUnionNode &node) noexcept;
     void writeEnumNode(const parsers::server::ast::ASTEnumNode &node) noexcept;
     void writeTrivialTypeSpecNode(
         const parsers::server::ast::ASTTrivialTypeSpec &node) noexcept;
@@ -38,21 +40,30 @@ public:
         const parsers::server::ast::ASTArrayTypeSpec &node) noexcept;
     void writeCallableTypeSpecNode(
         const parsers::server::ast::ASTCallableTypeSpec &node) noexcept;
-    void writeTypeSpecNode(const parsers::server::ast::ASTTypeSpec &node) noexcept;
+    void writeTypeSpecNode(
+        const parsers::server::ast::ASTTypeSpec &node) noexcept;
     void writeASTGQLType(const parsers::server::ast::ASTGQLType &type) noexcept;
     void writeTypeDefinitionNode(
         const parsers::server::ast::ASTTypeDefinition &node) noexcept;
     void writeReferenceTypeNode(
         const parsers::server::ast::ASTGQLReferenceType &node) noexcept;
-    void writeExtendNode(const parsers::server::ast::ASTExtendNode &node) noexcept;
-    void writeMaybeASTLiteralType(const std::optional<parsers::server::ast::ASTLiteral>& node) noexcept;
-    void writeASTLiteralType(const parsers::server::ast::ASTLiteral& node) noexcept;
+    void writeExtendNode(
+        const parsers::server::ast::ASTExtendNode &node) noexcept;
+    void writeMaybeASTLiteralType(
+        const std::optional<parsers::server::ast::ASTLiteral> &node) noexcept;
+    void writeASTLiteralType(
+        const parsers::server::ast::ASTLiteral &node) noexcept;
     void writeASTArrayLiteralType(
-        const parsers::server::ast::ASTArrayLiteral& node
-    ) noexcept;
+        const parsers::server::ast::ASTArrayLiteral &node) noexcept;
     void writeMaybeASTArrayLiteralType(
-        const std::optional<parsers::server::ast::ASTArrayLiteral>& node
-    ) noexcept;
+        const std::optional<parsers::server::ast::ASTArrayLiteral>
+            &node) noexcept;
+    void writeInterfaceDefinitionNode(
+        const parsers::server::ast::ASTInterfaceDefinition &node);
+    void writeInputDefinitionNode(
+        const parsers::server::ast::ASTInputDefinition &node);
+    void writeGQLTypeDefinitionNode(
+        const parsers::server::ast::ASTGQLTypeDefinition &node);
 };
 };  // namespace serializer
 };  // namespace json

@@ -52,7 +52,8 @@ class Parser {
     const GQLToken lookahead();
     void consume(const GQLTokenType expectedType);
     const ast::ASTNode parseComplexToken();
-    const ast::ASTTypeDefinition parseTypeNode(bool isInput);
+    const ast::ASTTypeDefinition parseTypeNode();
+    const ast::ASTInterfaceDefinition parseInterfaceNode();
     const ast::ASTEnumNode parseEnumNode();
     const ast::ASTUnionNode parseUnionNode();
     const ast::ASTExtendNode parseExtendNode();

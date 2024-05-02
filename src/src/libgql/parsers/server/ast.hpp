@@ -66,11 +66,30 @@ struct ASTCallableTypeSpec {
 
 using ASTTypeSpec = std::variant<ASTLiteralTypeSpec, ASTCallableTypeSpec>;
 
-struct ASTTypeDefinition {
+struct ASTInterfaceDefinition {
     std::string name;
     std::map<std::string, ASTTypeSpec> fields;
-    bool isInput;
 };
+struct ASTInputDefinition {
+    std::string name;
+    std::map<std::string, ASTTypeSpec> fields;
+
+    ASTInputDefinition(const ASTInterfaceDefinition& node) {
+        name = node.name;
+        fields = node.fields;
+    };
+};
+struct ASTGQLTypeDefinition {
+    std::string name;
+    std::map<std::string, ASTTypeSpec> fields;
+    std::optional<std::string> implements;
+};
+
+using ASTTypeDefinition = std::variant<
+    ASTInterfaceDefinition,
+    ASTInputDefinition,
+    ASTGQLTypeDefinition
+>;
 
 struct ASTExtendNode {
     ASTTypeDefinition type;

@@ -232,13 +232,63 @@ void json::serializer::ASTJSONWriter::writeASTGQLType(
 };
 void json::serializer::ASTJSONWriter::writeTypeDefinitionNode(
     const ASTTypeDefinition &node) noexcept {
+    std::visit(overloaded{
+        [this](const ASTGQLTypeDefinition& node) { writeGQLTypeDefinitionNode(node); },
+        [this](const ASTInputDefinition& node) { writeInputDefinitionNode(node); },
+        [this](const ASTInterfaceDefinition& node) { writeInterfaceDefinitionNode(node); },
+    }, node);
+};
+
+void json::serializer::ASTJSONWriter::writeGQLTypeDefinitionNode(
+    const ASTGQLTypeDefinition& node
+) {
     writer.StartObject();
     writer.String("_nodeType");
     writer.String("typeDefinition");
     writer.String("name");
     writer.String(node.name.c_str());
-    writer.String("isInput");
-    writer.Bool(node.isInput);
+    writer.String("fields");
+    writer.StartObject();
+    for (const auto &[name, field] : node.fields) {
+        writer.String(name.c_str());
+        writeTypeSpecNode(field);
+    };
+    writer.String("implements");
+    if (node.implements.has_value()) {
+        writer.String(node.implements.value().c_str());
+    } else {
+        writer.Null();
+    };
+    writer.EndObject();
+    writer.EndObject();
+};
+
+void json::serializer::ASTJSONWriter::writeInputDefinitionNode(
+    const ASTInputDefinition& node
+) {
+    writer.StartObject();
+    writer.String("_nodeType");
+    writer.String("inputDefinition");
+    writer.String("name");
+    writer.String(node.name.c_str());
+    writer.String("fields");
+    writer.StartObject();
+    for (const auto &[name, field] : node.fields) {
+        writer.String(name.c_str());
+        writeTypeSpecNode(field);
+    };
+    writer.EndObject();
+    writer.EndObject();
+};
+
+void json::serializer::ASTJSONWriter::writeInterfaceDefinitionNode(
+    const ASTInterfaceDefinition& node
+) {
+    writer.StartObject();
+    writer.String("_nodeType");
+    writer.String("interfaceDefinition");
+    writer.String("name");
+    writer.String(node.name.c_str());
     writer.String("fields");
     writer.StartObject();
     for (const auto &[name, field] : node.fields) {
