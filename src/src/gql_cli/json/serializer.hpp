@@ -3,6 +3,7 @@
 
 #include <rapidjson/document.h>
 #include <rapidjson/encodings.h>
+#include <rapidjson/prettywriter.h>
 #include <rapidjson/reader.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
@@ -14,10 +15,8 @@
 
 namespace json {
 namespace serializer {
-void writeTokenAsJSON(
-    rapidjson::Writer<rapidjson::GenericStringBuffer<rapidjson::UTF8<>>>
-        &writer,
-    const GQLToken &token);
+void writeTokenAsJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer,
+                      const GQLToken &token);
 
 class ASTJSONWriter {
     rapidjson::Writer<rapidjson::GenericStringBuffer<rapidjson::UTF8<>>>

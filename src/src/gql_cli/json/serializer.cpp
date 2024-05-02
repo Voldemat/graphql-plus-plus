@@ -1,6 +1,7 @@
 #include "./serializer.hpp"
 
 #include <rapidjson/encodings.h>
+#include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
@@ -19,7 +20,7 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 void json::serializer::writeTokenAsJSON(
-    Writer<GenericStringBuffer<UTF8<>>> &writer, const GQLToken &token) {
+    PrettyWriter<StringBuffer> &writer, const GQLToken &token) {
     writer.StartObject();
     writer.String("type");
     writer.String(gqlTokenTypeToString(token.type).c_str());
