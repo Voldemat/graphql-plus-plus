@@ -12,13 +12,13 @@
 namespace parsers {
 namespace server {
 class ParserError : public std::exception {
-    const GQLToken token;
-    const std::string error;
+    GQLToken token;
+    std::string error;
 
 public:
     explicit ParserError(const GQLToken t, const std::string e)
         : token{ t }, error{ e } {};
-    const char *what() const noexcept { return error.c_str(); };
+    [[nodiscard]] const char *what() const noexcept override { return error.c_str(); };
     const static ParserError createEOF(const GQLToken token) noexcept {
         return ParserError(token, "EOF");
     };
@@ -45,7 +45,7 @@ public:
 
 class Parser {
     unsigned int index = 0;
-    const std::vector<GQLToken> tokens;
+    std::vector<GQLToken> tokens;
     GQLToken currentToken;
     const ast::ASTNode parseNode();
     const ast::ASTTrivialTypeSpec getTypeSpec();

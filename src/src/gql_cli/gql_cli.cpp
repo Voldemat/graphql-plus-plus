@@ -12,7 +12,7 @@
 #include <memory>
 
 #include "./subcommands/parser/parser.hpp"
-#include "gql_cli/subcommands/lexer/lexer.hpp"
+#include "./subcommands/lexer/lexer.hpp"
 
 std::unique_ptr<CLI::App> createCLIApp() noexcept {
     std::unique_ptr<CLI::App> app = std::make_unique<CLI::App>("Graphql++ cli");

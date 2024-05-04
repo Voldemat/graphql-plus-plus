@@ -30,31 +30,29 @@ void json::serializer::writeTokenAsJSON(
     {
         writer.StartObject();
         writer.String("line");
-        writer.Int(token.location.line);
+        writer.Uint(token.location.line);
         writer.String("start");
-        writer.Int(token.location.start);
+        writer.Uint(token.location.start);
         writer.String("end");
-        writer.Int(token.location.end);
+        writer.Uint(token.location.end);
         writer.EndObject();
     };
     writer.EndObject();
 };
 
 json::serializer::ASTJSONWriter::ASTJSONWriter(
-    Writer<GenericStringBuffer<UTF8<>>> &writer)
+    Writer<GenericStringBuffer<UTF8<>>> *writer)
     : writer{ writer } {};
 void json::serializer::ASTJSONWriter::writeProgram(
     const parsers::server::ast::ASTProgram &program) noexcept {
-    writer.StartObject();
-    writer.String("nodes");
-    writer.StartArray();
-    int index = 0;
+    writer->StartObject();
+    writer->String("nodes");
+    writer->StartArray();
     for (const auto &node : program.nodes) {
         writeNode(node);
-        index++;
     };
-    writer.EndArray();
-    writer.EndObject();
+    writer->EndArray();
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeNode(const ASTNode &node) noexcept {
@@ -72,67 +70,67 @@ void json::serializer::ASTJSONWriter::writeNode(const ASTNode &node) noexcept {
 };
 void json::serializer::ASTJSONWriter::writeUnionNode(
     const ASTUnionNode &node) noexcept {
-    writer.StartObject();
-    writer.String("_nodeType");
-    writer.String("union");
-    writer.String("name");
-    writer.String(node.name.c_str());
-    writer.String("items");
-    writer.StartArray();
+    writer->StartObject();
+    writer->String("_nodeType");
+    writer->String("union");
+    writer->String("name");
+    writer->String(node.name.c_str());
+    writer->String("items");
+    writer->StartArray();
     for (const auto &item : node.items) {
         writeReferenceTypeNode(item);
     };
-    writer.EndArray();
-    writer.EndObject();
+    writer->EndArray();
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeEnumNode(
     const ASTEnumNode &node) noexcept {
-    writer.StartObject();
-    writer.String("_nodeType");
-    writer.String("enum");
-    writer.String("name");
-    writer.String(node.name.c_str());
-    writer.String("items");
-    writer.StartArray();
+    writer->StartObject();
+    writer->String("_nodeType");
+    writer->String("enum");
+    writer->String("name");
+    writer->String(node.name.c_str());
+    writer->String("items");
+    writer->StartArray();
     for (const auto &item : node.items) {
-        writer.String(item.c_str());
+        writer->String(item.c_str());
     };
-    writer.EndArray();
-    writer.EndObject();
+    writer->EndArray();
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeTrivialTypeSpecNode(
     const ASTTrivialTypeSpec &node) noexcept {
-    writer.StartObject();
-    writer.String("type");
+    writer->StartObject();
+    writer->String("type");
     writeASTGQLType(node.type);
-    writer.String("nullable");
-    writer.Bool(node.nullable);
-    writer.String("defaultValue");
+    writer->String("nullable");
+    writer->Bool(node.nullable);
+    writer->String("defaultValue");
     writeMaybeASTLiteralType(node.defaultValue);
-    writer.EndObject();
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeArrayTypeSpecNode(
     const ASTArrayTypeSpec &node) noexcept {
-    writer.StartObject();
-    writer.String("type");
-    writer.String("array");
-    writer.String("items");
+    writer->StartObject();
+    writer->String("type");
+    writer->String("array");
+    writer->String("items");
     writeTrivialTypeSpecNode(node.type);
-    writer.String("nullable");
-    writer.Bool(node.nullable);
-    writer.String("defaultType");
+    writer->String("nullable");
+    writer->Bool(node.nullable);
+    writer->String("defaultType");
     writeMaybeASTArrayLiteralType(node.defaultValue);
-    writer.EndObject();
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeMaybeASTArrayLiteralType(
     const std::optional<ASTArrayLiteral>& node
 ) noexcept {
     if (!node.has_value()) {
-        writer.Null();
+        writer->Null();
         return;
     };
     writeASTArrayLiteralType(node.value());
@@ -141,36 +139,36 @@ void json::serializer::ASTJSONWriter::writeMaybeASTArrayLiteralType(
 void json::serializer::ASTJSONWriter::writeASTArrayLiteralType(
     const ASTArrayLiteral& node
 ) noexcept {
-    writer.StartArray();
+    writer->StartArray();
     std::visit(overloaded{
         [this](const ASTStringArrayLiteral& v){
             for (const auto& item : v) {
-                writer.String(item.value.c_str());
+                writer->String(item.value.c_str());
             };
         },
         [this](const ASTIntArrayLiteral& v){
             for (const auto& item : v) {
-                writer.Int(item.value);
+                writer->Int(item.value);
             };
         },
         [this](const ASTFloatArrayLiteral& v){
             for (const auto& item : v) {
-                writer.Double(item.value);
+                writer->Double(item.value);
             };
         },
         [this](const ASTBooleanArrayLiteral& v){
             for (const auto& item : v) {
-                writer.Bool(item.value);
+                writer->Bool(item.value);
             };
         }
     }, node);
-    writer.EndArray();
+    writer->EndArray();
 };
 void json::serializer::ASTJSONWriter::writeMaybeASTLiteralType(
     const std::optional<ASTLiteral>& node
 ) noexcept {
     if (!node.has_value()) {
-        writer.Null();
+        writer->Null();
         return;
     };
     writeASTLiteralType(node.value());
@@ -180,10 +178,10 @@ void json::serializer::ASTJSONWriter::writeASTLiteralType(
     const ASTLiteral& node
 ) noexcept {
     std::visit(overloaded{
-        [this](const ASTStringLiteral& v){ writer.String(v.value.c_str()); },
-        [this](const ASTIntLiteral& v){ writer.Int(v.value); },
-        [this](const ASTFloatLiteral& v){ writer.Double(v.value); },
-        [this](const ASTBooleanLiteral& v){ writer.Bool(v.value); },
+        [this](const ASTStringLiteral& v){ writer->String(v.value.c_str()); },
+        [this](const ASTIntLiteral& v){ writer->Int(v.value); },
+        [this](const ASTFloatLiteral& v){ writer->Double(v.value); },
+        [this](const ASTBooleanLiteral& v){ writer->Bool(v.value); },
     }, node);
 };
 
@@ -198,17 +196,17 @@ void json::serializer::ASTJSONWriter::writeTypeSpecNode(
 
 void json::serializer::ASTJSONWriter::writeCallableTypeSpecNode(
     const ASTCallableTypeSpec &node) noexcept {
-    writer.StartObject();
-    writer.String("arguments");
-    writer.StartObject();
+    writer->StartObject();
+    writer->String("arguments");
+    writer->StartObject();
     for (const auto& [name, arg] : node.arguments) {
-        writer.String(name.c_str());
+        writer->String(name.c_str());
         writeLiteralTypeSpecNode(arg);
     };
-    writer.EndObject();
-    writer.String("returnType");
+    writer->EndObject();
+    writer->String("returnType");
     writeLiteralTypeSpecNode(node.returnType);
-    writer.EndObject();
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeLiteralTypeSpecNode(
@@ -224,7 +222,7 @@ void json::serializer::ASTJSONWriter::writeASTGQLType(
     const ASTGQLType &type) noexcept {
     std::visit(
         overloaded{ [this](const ASTGQLSimpleType &sType) {
-                       writer.String(astGQLSimpleTypeToString(sType).c_str());
+                       writer->String(astGQLSimpleTypeToString(sType).c_str());
                    },
                     [this](const ASTGQLReferenceType &rType) {
                         writeReferenceTypeNode(rType);
@@ -243,77 +241,77 @@ void json::serializer::ASTJSONWriter::writeTypeDefinitionNode(
 void json::serializer::ASTJSONWriter::writeGQLTypeDefinitionNode(
     const ASTGQLTypeDefinition& node
 ) {
-    writer.StartObject();
-    writer.String("_nodeType");
-    writer.String("typeDefinition");
-    writer.String("name");
-    writer.String(node.name.c_str());
-    writer.String("fields");
-    writer.StartObject();
+    writer->StartObject();
+    writer->String("_nodeType");
+    writer->String("typeDefinition");
+    writer->String("name");
+    writer->String(node.name.c_str());
+    writer->String("fields");
+    writer->StartObject();
     for (const auto &[name, field] : node.fields) {
-        writer.String(name.c_str());
+        writer->String(name.c_str());
         writeTypeSpecNode(field);
     };
-    writer.String("implements");
+    writer->String("implements");
     if (node.implements.has_value()) {
-        writer.String(node.implements.value().c_str());
+        writer->String(node.implements.value().c_str());
     } else {
-        writer.Null();
+        writer->Null();
     };
-    writer.EndObject();
-    writer.EndObject();
+    writer->EndObject();
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeInputDefinitionNode(
     const ASTInputDefinition& node
 ) {
-    writer.StartObject();
-    writer.String("_nodeType");
-    writer.String("inputDefinition");
-    writer.String("name");
-    writer.String(node.name.c_str());
-    writer.String("fields");
-    writer.StartObject();
+    writer->StartObject();
+    writer->String("_nodeType");
+    writer->String("inputDefinition");
+    writer->String("name");
+    writer->String(node.name.c_str());
+    writer->String("fields");
+    writer->StartObject();
     for (const auto &[name, field] : node.fields) {
-        writer.String(name.c_str());
+        writer->String(name.c_str());
         writeTypeSpecNode(field);
     };
-    writer.EndObject();
-    writer.EndObject();
+    writer->EndObject();
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeInterfaceDefinitionNode(
     const ASTInterfaceDefinition& node
 ) {
-    writer.StartObject();
-    writer.String("_nodeType");
-    writer.String("interfaceDefinition");
-    writer.String("name");
-    writer.String(node.name.c_str());
-    writer.String("fields");
-    writer.StartObject();
+    writer->StartObject();
+    writer->String("_nodeType");
+    writer->String("interfaceDefinition");
+    writer->String("name");
+    writer->String(node.name.c_str());
+    writer->String("fields");
+    writer->StartObject();
     for (const auto &[name, field] : node.fields) {
-        writer.String(name.c_str());
+        writer->String(name.c_str());
         writeTypeSpecNode(field);
     };
-    writer.EndObject();
-    writer.EndObject();
+    writer->EndObject();
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeReferenceTypeNode(
     const ASTGQLReferenceType &node) noexcept {
-    writer.StartObject();
-    writer.String("_nodeType");
-    writer.String("referenceType");
-    writer.String("name");
-    writer.String(node.name.c_str());
-    writer.EndObject();
+    writer->StartObject();
+    writer->String("_nodeType");
+    writer->String("referenceType");
+    writer->String("name");
+    writer->String(node.name.c_str());
+    writer->EndObject();
 };
 
 void json::serializer::ASTJSONWriter::writeExtendNode(
     const ASTExtendNode &node) noexcept {
-    writer.StartObject();
-    writer.String("type");
+    writer->StartObject();
+    writer->String("type");
     writeTypeDefinitionNode(node.type);
-    writer.EndObject();
+    writer->EndObject();
 };

@@ -47,13 +47,13 @@ using ASTArrayLiteral
 
 struct ASTTrivialTypeSpec {
     ASTGQLType type;
-    bool nullable;
+    bool nullable = true;
     std::optional<ASTLiteral> defaultValue;
 };
 
 struct ASTArrayTypeSpec {
     ASTTrivialTypeSpec type;
-    bool nullable;
+    bool nullable = true;
     std::optional<ASTArrayLiteral> defaultValue;
 };
 
@@ -74,10 +74,7 @@ struct ASTInputDefinition {
     std::string name;
     std::map<std::string, ASTTypeSpec> fields;
 
-    ASTInputDefinition(const ASTInterfaceDefinition& node) {
-        name = node.name;
-        fields = node.fields;
-    };
+    ASTInputDefinition(const ASTInterfaceDefinition& node): name {node.name}, fields {node.fields} {};
 };
 struct ASTGQLTypeDefinition {
     std::string name;

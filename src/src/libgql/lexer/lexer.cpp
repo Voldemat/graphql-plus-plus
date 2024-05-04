@@ -16,10 +16,13 @@ using namespace lexer;
 
 LexerError::LexerError(const std::string message,
                        const Location location) noexcept
-    : location{ location }, message{ message } {};
+    : message{ message }, location{ location } {};
 const char *LexerError::what() const noexcept { return message.c_str(); };
+Location LexerError::getLocation() const noexcept {
+    return location;
+};
 Lexer::Lexer(std::istringstream s, std::shared_ptr<SourceFile> source,
-             ITokensAccumulator &tokensAccumulator)
+             ITokensAccumulator *tokensAccumulator)
     : state{ source, tokensAccumulator } {
     stream.swap(s);
 };
@@ -28,12 +31,12 @@ std::optional<LexerError> LexerState::feed(char c) noexcept {
     if (c == -1) {
         const auto &maybeToken = maybeExtractToken();
         if (maybeToken.has_value())
-            tokensAccumulator.addToken(maybeToken.value());
+            tokensAccumulator->addToken(maybeToken.value());
         return std::nullopt;
     } else if (c == '\n') {
         const auto &maybeToken = maybeExtractToken();
         if (maybeToken.has_value())
-            tokensAccumulator.addToken(maybeToken.value());
+            tokensAccumulator->addToken(maybeToken.value());
         location.line += 1;
         location.start = -1;
         location.end = -1;
@@ -91,7 +94,7 @@ std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
 
 void LexerState::extractAndSaveToken() noexcept {
     const auto &token = extractToken();
-    tokensAccumulator.addToken(token);
+    tokensAccumulator->addToken(token);
 };
 
 std::optional<LexerError> LexerState::feedWithType(
@@ -141,7 +144,7 @@ std::optional<GQLToken> LexerState::maybeExtractToken() noexcept {
 };
 std::optional<LexerError> Lexer::parse() noexcept {
     while (true) {
-        char c = stream.get();
+        char c = static_cast<char>(stream.get());
         auto result = state.feed(c);
         if (result.has_value()) return result;
         if (c == -1) break;
@@ -161,7 +164,7 @@ std::optional<LexerError> LexerState::feedNew(char c) noexcept {
     };
     const auto tokenType = optTokenType.value();
     if (std::holds_alternative<SimpleTokenType>(tokenType)) {
-        tokensAccumulator.addToken({ .type = tokenType,
+        tokensAccumulator->addToken({ .type = tokenType,
                                      .lexeme = std::string() + c,
                                      .location = location });
         return std::nullopt;

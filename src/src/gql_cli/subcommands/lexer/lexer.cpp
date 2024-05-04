@@ -25,7 +25,7 @@ void createLexerSubcommand(CLI::App *app) {
         std::shared_ptr<SourceFile> sourceFile
             = std::make_shared<SourceFile>(std::filesystem::path("in-memory"));
         lexer::VectorTokensAccumulator accum;
-        lexer::Lexer lexer(std::move(stream), sourceFile, accum);
+        lexer::Lexer lexer(std::move(stream), sourceFile, &accum);
         auto result = lexer.parse();
         if (result.has_value()) {
             throw result.value();

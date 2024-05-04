@@ -22,7 +22,7 @@ TEST_P(Fixture, TestLexer) {
     auto testCase = GetParam();
     std::istringstream buffer(testCase.schema);
     VectorTokensAccumulator accumulator;
-    Lexer lexer(std::move(buffer), testCase.sourceFile, accumulator);
+    Lexer lexer(std::move(buffer), testCase.sourceFile, &accumulator);
     const auto &result = lexer.parse();
     if (!result.has_value()) {
         const std::vector<GQLToken> tokens = accumulator.getTokens();
@@ -40,11 +40,13 @@ TEST_P(Fixture, TestLexer) {
         };
     } else {
         const auto error = result.value();
+        const auto errorLocation = error.getLocation();
         ASSERT_TRUE(testCase.error.has_value()) << error.what();
-        const auto expectedError = *testCase.error.value();
-        ASSERT_EQ(error.location.line, expectedError.location.line);
-        ASSERT_EQ(error.location.start, expectedError.location.start);
-        ASSERT_EQ(error.location.end, expectedError.location.end);
+        const auto expectedError = testCase.error.value();
+        const auto expectedErrorLocation = expectedError.getLocation();
+        ASSERT_EQ(errorLocation.line, expectedErrorLocation.line);
+        ASSERT_EQ(errorLocation.start, expectedErrorLocation.start);
+        ASSERT_EQ(errorLocation.end, expectedErrorLocation.end);
         ASSERT_STREQ(error.what(), expectedError.what());
         return;
     };

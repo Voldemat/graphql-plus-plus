@@ -73,7 +73,7 @@ void createParserSubcommand(CLI::App *app) {
         };
         rapidjson::StringBuffer sb;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-        json::serializer::ASTJSONWriter astWriter(writer);
+        json::serializer::ASTJSONWriter astWriter(&writer);
         astWriter.writeProgram(ast);
         std::cout << sb.GetString() << std::endl;
     });

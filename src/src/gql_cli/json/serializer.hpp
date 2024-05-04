@@ -20,12 +20,12 @@ void writeTokenAsJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer,
 
 class ASTJSONWriter {
     rapidjson::Writer<rapidjson::GenericStringBuffer<rapidjson::UTF8<>>>
-        &writer;
+        *writer;
 
 public:
     ASTJSONWriter(
         rapidjson::Writer<rapidjson::GenericStringBuffer<rapidjson::UTF8<>>>
-            &writer);
+            *writer);
     void writeProgram(const parsers::server::ast::ASTProgram &program) noexcept;
     void writeNode(const parsers::server::ast::ASTNode &node) noexcept;
     void writeUnionNode(

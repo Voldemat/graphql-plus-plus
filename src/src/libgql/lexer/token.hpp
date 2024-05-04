@@ -11,10 +11,13 @@
 #include <variant>
 
 struct SourceFile {
-    const std::filesystem::path filepath;
+    std::filesystem::path filepath;
     SourceFile(const std::filesystem::path path): filepath{path} {};
     SourceFile(const SourceFile &) = delete;
+    SourceFile(SourceFile&&) = delete;
+    SourceFile& operator=(SourceFile&& other) = delete;
     SourceFile &operator=(SourceFile const &) = delete;
+    ~SourceFile() = default;
 };
 struct Location {
     std::shared_ptr<SourceFile> source;

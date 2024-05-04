@@ -19,10 +19,10 @@
 using namespace lexer;
 struct TestCase {
     std::shared_ptr<SourceFile> sourceFile;
-    const std::string filename;
-    const std::string schema;
-    const std::vector<GQLToken> expectedTokens;
-    const std::optional<LexerError *> error;
+    std::string filename;
+    std::string schema;
+    std::vector<GQLToken> expectedTokens;
+    std::optional<LexerError> error;
 };
 inline std::ostream &operator<<(std::ostream &os, const TestCase &self) {
     os << "TestCase(filename: " << self.filename << ", schema: ";
@@ -51,7 +51,7 @@ inline std::vector<TestCase> getCases() noexcept {
         assert(d.IsObject());
         std::string schema = d["schema"].GetString();
         std::vector<GQLToken> expectedTokens;
-        std::optional<LexerError *> error;
+        std::optional<LexerError> error;
         std::shared_ptr<SourceFile> sourceFile
             = std::make_shared<SourceFile>(filepath);
         if (d.HasMember("tokens")) {
@@ -68,7 +68,7 @@ inline std::vector<TestCase> getCases() noexcept {
         } else {
             const auto &errorObj = d["error"];
             const auto &location = errorObj["location"];
-            error = new LexerError(
+            error = LexerError(
                 errorObj["message"].GetString(),
                 (Location){ .source = sourceFile,
                             .line = location["line"].GetUint(),
