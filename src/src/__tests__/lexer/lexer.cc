@@ -22,7 +22,7 @@ TEST_P(Fixture, TestLexer) {
     auto testCase = GetParam();
     std::istringstream buffer(testCase.schema);
     VectorTokensAccumulator accumulator;
-    Lexer lexer(std::move(buffer), testCase.sourceFile, &accumulator);
+    Lexer lexer(std::move(buffer), &accumulator);
     const auto &result = lexer.parse();
     if (!result.has_value()) {
         const std::vector<GQLToken> tokens = accumulator.getTokens();

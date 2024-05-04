@@ -2,7 +2,6 @@
 #define GRAPHQL_LEXER
 
 #include <exception>
-#include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -59,10 +58,8 @@ class LexerState {
     void extractAndSaveToken() noexcept;
 public:
     LexerState(
-        std::shared_ptr<SourceFile> source,
         ITokensAccumulator* tokensAccumulator
     ) noexcept : tokensAccumulator{tokensAccumulator} {
-        location.source = source;
     };
     std::optional<LexerError> feed(char c) noexcept;
 };
@@ -73,7 +70,6 @@ class Lexer {
 public:
     Lexer(
         std::istringstream stream,
-        std::shared_ptr<SourceFile> source,
         ITokensAccumulator* tokensAccumulator
     );
     std::optional<LexerError> parse() noexcept;

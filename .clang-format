@@ -5,5 +5,4 @@ PointerAlignment: Right
 ColumnLimit: 80
 AccessModifierOffset: -4
 IncludeBlocks: Regroup
-BreakBeforeBinaryOperators: All
 Cpp11BracedListStyle: false

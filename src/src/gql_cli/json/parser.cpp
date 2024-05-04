@@ -6,7 +6,6 @@
 #include <rapidjson/encodings.h>
 
 #include <format>
-#include <memory>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -16,11 +15,9 @@
 
 using namespace json::parser;
 std::expected<std::vector<GQLToken>, std::string>
-json::parser::parseTokensArray(
-    rapidjson::Document const &document,
-    std::shared_ptr<SourceFile> sourceFile) noexcept {
+json::parser::parseTokensArray(rapidjson::Document const &document) noexcept {
     if (!document.IsArray())
-        return std::unexpected("Json root is not an array");
+        return std::unexpected("JSON root is not an array");
     unsigned int index = 0;
     std::vector<GQLToken> tokens;
     for (const auto &item : document.GetArray()) {
@@ -47,8 +44,7 @@ json::parser::parseTokensArray(
             return std::unexpected(
                 std::format("Element {} doesn`t have \"location\" key", index));
         };
-        const auto locationOrError
-            = parseLocation(item["location"], sourceFile);
+        const auto locationOrError = parseLocation(item["location"]);
         if (!locationOrError.has_value()) {
             const auto &[key, eType] = locationOrError.error();
             if (eType == ParsingErrorType::INVALID_MEMBER) {
@@ -72,15 +68,14 @@ json::parser::parseTokensArray(
             std::make_pair(key, ParsingErrorType::NO_MEMBER)); \
     }
 
-#define ASSERT_MEMBER_IS_VALID(key, isValid)\
-    if (!isValid) {\
+#define ASSERT_MEMBER_IS_VALID(key, isValid)                        \
+    if (!isValid) {                                                 \
         return std::unexpected(                                     \
             std::make_pair(key, ParsingErrorType::INVALID_MEMBER)); \
     }
 std::expected<Location, std::tuple<std::string, ParsingErrorType>>
 json::parser::parseLocation(
-    rapidjson::GenericValue<rapidjson::UTF8<>> const &value,
-    std::shared_ptr<SourceFile> sourceFile) noexcept {
+    rapidjson::GenericValue<rapidjson::UTF8<>> const &value) noexcept {
     ASSERT_HAS_MEMBER("line");
     ASSERT_MEMBER_IS_VALID("line", value["line"].IsUint());
     unsigned int line = value["line"].GetUint();
@@ -90,7 +85,5 @@ json::parser::parseLocation(
     ASSERT_HAS_MEMBER("end");
     ASSERT_MEMBER_IS_VALID("end", value["end"].IsUint());
     unsigned int end = value["end"].GetUint();
-    return (Location){
-        .source = sourceFile, .line = line, .start = start, .end = end
-    };
+    return (Location){ .line = line, .start = start, .end = end };
 };

@@ -14,13 +14,15 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "gql_cli/json/parser.hpp"
 #include "gql_cli/json/serializer.hpp"
 #include "gql_cli/utils.hpp"
-#include "libgql/lexer/token.hpp"
 #include "libgql/parsers/server/ast.hpp"
 #include "libgql/parsers/server/parser.hpp"
+
+using namespace parsers::server;
 
 void createParserSubcommand(CLI::App *app) {
     CLI::App *parserCmd = app->add_subcommand("parser", "Parser");
@@ -47,11 +49,9 @@ void createParserSubcommand(CLI::App *app) {
             buffer = std::string((std::istreambuf_iterator<char>(file)),
                                  std::istreambuf_iterator<char>());
         };
-        std::shared_ptr<SourceFile> sourceFile
-            = std::make_shared<SourceFile>(*sourceFilename);
         rapidjson::Document d;
         d.Parse(buffer.c_str());
-        auto result = json::parser::parseTokensArray(d, sourceFile);
+        auto result = json::parser::parseTokensArray(d);
         if (!result.has_value()) {
             std::string error = result.error();
             std::cerr << error << std::endl;
@@ -63,10 +63,11 @@ void createParserSubcommand(CLI::App *app) {
                       << std::endl;
             throw CLI::RuntimeError(1);
         };
-        auto parser = parsers::server::Parser(tokens);
-        parsers::server::ast::ASTProgram ast;
+        std::shared_ptr<ast::SourceFile> source = std::make_shared<ast::SourceFile>();
+        auto parser = Parser(tokens, source);
+        std::vector<ast::ASTNode> ast;
         try {
-            ast = parser.getAstTree();
+            ast = parser.parse();
         } catch (const std::exception &exc) {
             std::cerr << "Parsing error: " << exc.what() << std::endl;
             throw CLI::RuntimeError(1);
@@ -74,7 +75,6 @@ void createParserSubcommand(CLI::App *app) {
         rapidjson::StringBuffer sb;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
         json::serializer::ASTJSONWriter astWriter(&writer);
-        astWriter.writeProgram(ast);
         std::cout << sb.GetString() << std::endl;
     });
 };

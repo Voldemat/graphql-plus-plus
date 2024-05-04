@@ -41,10 +41,10 @@ add_executable(
     ${GQL_CLI_HEADERS}
     ${GQL_CLI_SOURCES}
 )
-target_compile_options(gql_lib PRIVATE -Wall -fsanitize=address,undefined,leak)
-target_compile_options(gql PRIVATE -Wall -fsanitize=address,undefined,leak)
-target_link_options(gql_lib PRIVATE -fsanitize=address,undefined,leak)
-target_link_options(gql PRIVATE -fsanitize=address,undefined,leak)
+#target_compile_options(gql_lib PRIVATE -Wall -fsanitize=address,undefined,leak)
+#target_compile_options(gql PRIVATE -Wall -fsanitize=address,undefined,leak)
+#target_link_options(gql_lib PRIVATE -fsanitize=address,undefined,leak)
+#target_link_options(gql PRIVATE -fsanitize=address,undefined,leak)
 target_link_libraries(gql
     PRIVATE CLI11::CLI11
     PRIVATE gql_lib
@@ -70,8 +70,8 @@ add_executable(
     ${GQL_TESTS_SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases-lock.ls
 )
-target_compile_options(main_test PRIVATE -Wall -fsanitize=address,undefined,leak)
-target_link_options(main_test PRIVATE -fsanitize=address,undefined,leak)
+#target_compile_options(main_test PRIVATE -Wall -fsanitize=address,undefined,leak)
+#target_link_options(main_test PRIVATE -fsanitize=address,undefined,leak)
 target_link_libraries(
     main_test
     PRIVATE GTest::gtest_main

@@ -2,7 +2,7 @@
 #define GRAPHQL_PARSER
 
 #include <exception>
-#include <optional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -46,34 +46,33 @@ public:
 class Parser {
     unsigned int index = 0;
     std::vector<GQLToken> tokens;
+    std::shared_ptr<ast::SourceFile> source;
     GQLToken currentToken;
-    const ast::ASTNode parseNode();
-    const ast::ASTTrivialTypeSpec getTypeSpec();
     const GQLToken lookahead();
+    void advance();
     void consume(const GQLTokenType expectedType);
-    const ast::ASTNode parseComplexToken();
-    const ast::ASTTypeDefinition parseTypeNode();
-    const ast::ASTInterfaceDefinition parseInterfaceNode();
-    const ast::ASTEnumNode parseEnumNode();
-    const ast::ASTUnionNode parseUnionNode();
-    const ast::ASTExtendNode parseExtendNode();
-    const ast::ASTGQLType parseGQLType();
-    const std::string parseIdentifier();
     void consumeIdentifier();
-    const ast::ASTTypeSpec parseTypeSpecNode();
-    const ast::ASTCallableTypeSpec parseCallableTypeSpecNode();
-    const ast::ASTLiteralTypeSpec parseLiteralTypeSpecNode();
-    const ast::ASTLiteral parseLiteralNode(ast::ASTGQLSimpleType type);
-    const std::optional<ast::ASTLiteral> maybeParseLiteralNode(ast::ASTGQLSimpleType type);
-    const ast::ASTArrayTypeSpec parseArrayTypeSpecNode();
-    const std::optional<ast::ASTArrayLiteral> maybeParseArrayLiteralNode(ast::ASTGQLSimpleType type);
-    const ast::ASTArrayLiteral parseArrayLiteralNode(ast::ASTGQLSimpleType type);
-    const ast::ASTTrivialTypeSpec parseTrivialTypeSpecNode();
-    void maybeConsumeComma();
+    bool consumeIfIsAhead(GQLTokenType expectedType);
+    bool isAhead(GQLTokenType expectedType);
+    ast::NameNode parseNameNode();
+    ast::ScalarDefinitionNode parseScalarTypeDefinitionNode();
+    ast::UnionDefinitionNode parseUnionTypeDefinitionNode();
+    ast::ASTNode parseASTNode();
+    ast::ExtendTypeNode parseExtendTypeNode();
+    ast::EnumDefinitionNode parseEnumTypeDefinitionNode();
+    ast::EnumValueDefinitionNode parseEnumValueDefinitionNode();
+    ast::InterfaceDefinitionNode parseInterfaceTypeDefinitionNode();
+    ast::FieldDefinitionNode parseFieldDefinitionNode();
+    ast::TypeNode parseTypeNode();
+    ast::NamedTypeNode parseNamedTypeNode();
+    ast::ListTypeNode parseListTypeNode();
+    ast::InputValueDefinitionNode parseInputValueDefinitionNode();
+    ast::LiteralNode parseLiteralNode();
+    ast::ObjectDefinitionNode parseObjectTypeDefinitionNode ();
 
 public:
-    Parser(std::vector<GQLToken> tokens) noexcept;
-    const ast::ASTProgram getAstTree();
+    Parser(std::vector<GQLToken> tokens, std::shared_ptr<ast::SourceFile> source) noexcept;
+    std::vector<ast::ASTNode> parse();
 };
 void assertIsNotKeyword(const GQLToken token);
 const bool isKeyword(const std::string lexeme) noexcept;

@@ -5,7 +5,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <memory>
 #include <optional>
 #include <ostream>
 #include <ranges>
@@ -18,7 +17,6 @@
 
 using namespace lexer;
 struct TestCase {
-    std::shared_ptr<SourceFile> sourceFile;
     std::string filename;
     std::string schema;
     std::vector<GQLToken> expectedTokens;
@@ -52,8 +50,6 @@ inline std::vector<TestCase> getCases() noexcept {
         std::string schema = d["schema"].GetString();
         std::vector<GQLToken> expectedTokens;
         std::optional<LexerError> error;
-        std::shared_ptr<SourceFile> sourceFile
-            = std::make_shared<SourceFile>(filepath);
         if (d.HasMember("tokens")) {
             for (const auto &jsonToken : d["tokens"].GetArray()) {
                 assert(jsonToken.IsObject());
@@ -63,19 +59,19 @@ inline std::vector<TestCase> getCases() noexcept {
                       = gqlTokenTypeFromString(jsonToken["type"].GetString())
                             .value(),
                       .lexeme = jsonToken["lexeme"].GetString(),
-                      .location = { .source = sourceFile, .line = location["line"].GetUint(), .start=location["start"].GetUint(), .end=location["end"].GetUint() } });
+                      .location = { .line = location["line"].GetUint(), .start=location["start"].GetUint(), .end=location["end"].GetUint() } });
             };
         } else {
             const auto &errorObj = d["error"];
             const auto &location = errorObj["location"];
             error = LexerError(
                 errorObj["message"].GetString(),
-                (Location){ .source = sourceFile,
+                (Location){ 
                             .line = location["line"].GetUint(),
                             .start = location["start"].GetUint(),
                             .end = location["end"].GetUint() });
         };
-        cases.push_back({ .sourceFile = sourceFile,
+        cases.push_back({ 
                           .filename = filepath.filename(),
                           .schema = schema,
                           .expectedTokens = expectedTokens,

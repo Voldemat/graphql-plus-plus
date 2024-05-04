@@ -1,114 +1,145 @@
 #ifndef GRAPHQL_PARSERS_SERVER_AST
 #define GRAPHQL_PARSERS_SERVER_AST
 
-#include <map>
+#include <filesystem>
+#include <memory>
 #include <optional>
 #include <string>
 #include <variant>
 #include <vector>
-
+#include "libgql/lexer/token.hpp"
 namespace parsers {
 namespace server {
 namespace ast {
 
-enum class ASTGQLSimpleType { ID, STRING, INT, FLOAT, BOOLEAN };
-struct ASTGQLReferenceType {
+struct SourceFile {
+    std::filesystem::path filepath;
+    std::string buffer;
+};
+
+struct NodeLocation {
+    GQLToken startToken;
+    GQLToken endToken;
+    std::shared_ptr<SourceFile> source;
+};
+
+struct NameNode {
+    NodeLocation location;
     std::string name;
 };
-using ASTGQLType = std::variant<ASTGQLSimpleType, ASTGQLReferenceType>;
 
-struct ASTStringLiteral {
-    std::string value;
-};
-
-struct ASTFloatLiteral {
-    float value;
-};
-
-struct ASTIntLiteral {
+struct LiteralIntNode {
+    NodeLocation location;
     int value;
 };
 
-struct ASTBooleanLiteral {
-    bool value;
+struct LiteralFloatNode {
+    NodeLocation location;
+    float value = 0.0;
 };
 
-using ASTLiteral = std::variant<ASTStringLiteral, ASTFloatLiteral,
-                                ASTIntLiteral, ASTBooleanLiteral>;
-
-using ASTStringArrayLiteral = std::vector<ASTStringLiteral>;
-using ASTFloatArrayLiteral = std::vector<ASTFloatLiteral>;
-using ASTIntArrayLiteral = std::vector<ASTIntLiteral>;
-using ASTBooleanArrayLiteral = std::vector<ASTBooleanLiteral>;
-
-using ASTArrayLiteral
-    = std::variant<ASTStringArrayLiteral, ASTFloatArrayLiteral,
-                   ASTIntArrayLiteral, ASTBooleanArrayLiteral>;
-
-struct ASTTrivialTypeSpec {
-    ASTGQLType type;
-    bool nullable = true;
-    std::optional<ASTLiteral> defaultValue;
+struct LiteralStringNode {
+    NodeLocation location;
+    std::string value;
 };
 
-struct ASTArrayTypeSpec {
-    ASTTrivialTypeSpec type;
-    bool nullable = true;
-    std::optional<ASTArrayLiteral> defaultValue;
+struct LiteralBooleanNode {
+    NodeLocation location;
+    bool value = false;
 };
 
-using ASTLiteralTypeSpec = std::variant<ASTTrivialTypeSpec, ASTArrayTypeSpec>;
-
-struct ASTCallableTypeSpec {
-    ASTLiteralTypeSpec returnType;
-    std::map<std::string, ASTLiteralTypeSpec> arguments;
-};
-
-using ASTTypeSpec = std::variant<ASTLiteralTypeSpec, ASTCallableTypeSpec>;
-
-struct ASTInterfaceDefinition {
-    std::string name;
-    std::map<std::string, ASTTypeSpec> fields;
-};
-struct ASTInputDefinition {
-    std::string name;
-    std::map<std::string, ASTTypeSpec> fields;
-
-    ASTInputDefinition(const ASTInterfaceDefinition& node): name {node.name}, fields {node.fields} {};
-};
-struct ASTGQLTypeDefinition {
-    std::string name;
-    std::map<std::string, ASTTypeSpec> fields;
-    std::optional<std::string> implements;
-};
-
-using ASTTypeDefinition = std::variant<
-    ASTInterfaceDefinition,
-    ASTInputDefinition,
-    ASTGQLTypeDefinition
+using LiteralNode = std::variant<
+    LiteralIntNode,
+    LiteralFloatNode,
+    LiteralStringNode,
+    LiteralBooleanNode
 >;
 
-struct ASTExtendNode {
-    ASTTypeDefinition type;
+struct NamedTypeNode {
+    NodeLocation location;
+    NameNode name;
+    bool nullable = true;
 };
 
-struct ASTEnumNode {
-    std::string name;
-    std::vector<std::string> items;
+struct ListTypeNode {
+    NodeLocation location;
+    NamedTypeNode type;
+    bool nullable = true;
 };
 
-struct ASTUnionNode {
-    std::string name;
-    std::vector<ASTGQLReferenceType> items;
+using TypeNode = std::variant<NamedTypeNode, ListTypeNode>;
+
+struct InputValueDefinitionNode {
+    NodeLocation location;
+    NameNode name;
+    TypeNode type;
+    std::optional<LiteralNode> defaultValue;
 };
 
-using ASTNode = std::variant<ASTTypeDefinition, ASTTrivialTypeSpec,
-                             ASTExtendNode, ASTUnionNode, ASTEnumNode>;
-
-struct ASTProgram {
-    std::vector<ASTNode> nodes;
+struct FieldDefinitionNode {
+    NodeLocation location;
+    NameNode name;
+    TypeNode type;
+    std::vector<InputValueDefinitionNode> arguments;
 };
-std::string astGQLSimpleTypeToString(const ASTGQLSimpleType &type) noexcept;
+
+struct InterfaceDefinitionNode {
+    NodeLocation location;
+    NameNode name;
+    std::vector<FieldDefinitionNode> fields;
+};
+
+struct ObjectDefinitionNode {
+    NodeLocation location;
+    NameNode name;
+    std::vector<NameNode> interfaces;
+    std::vector<FieldDefinitionNode> fields;
+};
+
+struct InputObjectDefinitionNode {
+    NodeLocation location;
+    NameNode name;
+    std::vector<FieldDefinitionNode> fields;
+};
+
+struct EnumValueDefinitionNode {
+    NodeLocation location;
+    NameNode value;
+};
+
+struct EnumDefinitionNode {
+    NodeLocation location;
+    NameNode name;
+    std::vector<EnumValueDefinitionNode> values;
+};
+
+struct UnionDefinitionNode {
+    NodeLocation location;
+    NameNode name;
+    std::vector<NameNode> values;
+};
+
+struct ScalarDefinitionNode {
+    NodeLocation location;
+    NameNode name;
+};
+
+using TypeDefinitionNode = std::variant<
+    ScalarDefinitionNode,
+    UnionDefinitionNode,
+    EnumDefinitionNode,
+    InputObjectDefinitionNode,
+    ObjectDefinitionNode,
+    InterfaceDefinitionNode
+>;
+
+struct ExtendTypeNode {
+    NodeLocation location;
+    ObjectDefinitionNode typeNode;
+};
+
+using ASTNode = std::variant<TypeDefinitionNode, ExtendTypeNode>;
+
 };  // namespace ast
 };  // namespace server
 };  // namespace parsers

@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -21,9 +20,9 @@ const char *LexerError::what() const noexcept { return message.c_str(); };
 Location LexerError::getLocation() const noexcept {
     return location;
 };
-Lexer::Lexer(std::istringstream s, std::shared_ptr<SourceFile> source,
+Lexer::Lexer(std::istringstream s,
              ITokensAccumulator *tokensAccumulator)
-    : state{ source, tokensAccumulator } {
+    : state{ tokensAccumulator } {
     stream.swap(s);
 };
 

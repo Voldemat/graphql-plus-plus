@@ -5,7 +5,6 @@
 #include <rapidjson/document.h>
 #include <rapidjson/encodings.h>
 
-#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -18,11 +17,10 @@ enum class ParsingErrorType {
     INVALID_MEMBER,
 };
 std::expected<std::vector<GQLToken>, std::string> parseTokensArray(
-    rapidjson::Document const &document,
-    std::shared_ptr<SourceFile> sourceFile) noexcept;
-std::expected<Location, std::tuple<std::string, ParsingErrorType>> parseLocation(
-    rapidjson::GenericValue<rapidjson::UTF8<>> const &document,
-    std::shared_ptr<SourceFile> sourceFile) noexcept;
+    rapidjson::Document const &document) noexcept;
+std::expected<Location, std::tuple<std::string, ParsingErrorType>>
+parseLocation(
+    rapidjson::GenericValue<rapidjson::UTF8<>> const &document) noexcept;
 };  // namespace parser
 };  // namespace json
 #endif

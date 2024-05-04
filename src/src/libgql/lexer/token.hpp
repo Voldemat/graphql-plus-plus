@@ -1,32 +1,20 @@
 #ifndef GRAPHQL_TOKEN
 #define GRAPHQL_TOKEN
 
-#include <filesystem>
 #include <format>
 #include <iostream>
-#include <memory>
 #include <optional>
 #include <ostream>
 #include <string>
 #include <variant>
 
-struct SourceFile {
-    std::filesystem::path filepath;
-    SourceFile(const std::filesystem::path path): filepath{path} {};
-    SourceFile(const SourceFile &) = delete;
-    SourceFile(SourceFile&&) = delete;
-    SourceFile& operator=(SourceFile&& other) = delete;
-    SourceFile &operator=(SourceFile const &) = delete;
-    ~SourceFile() = default;
-};
 struct Location {
-    std::shared_ptr<SourceFile> source;
     unsigned int line = 1;
     unsigned int start = -1;
     unsigned int end = -1;
 
     explicit operator std::string() const {
-        return std::format("{}:{} {}:{}", source->filepath.filename().string(),
+        return std::format("Line {} {}:{}",
                            line, start, end);
     };
 };
