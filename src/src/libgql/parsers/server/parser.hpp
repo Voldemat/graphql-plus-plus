@@ -1,5 +1,5 @@
-#ifndef GRAPHQL_PARSER
-#define GRAPHQL_PARSER
+#ifndef GRAPHQL_SERVER_PARSER
+#define GRAPHQL_SERVER_PARSER
 
 #include <exception>
 #include <memory>
@@ -18,17 +18,20 @@ class ParserError : public std::exception {
 public:
     explicit ParserError(const GQLToken t, const std::string e)
         : token{ t }, error{ e } {};
-    [[nodiscard]] const char *what() const noexcept override { return error.c_str(); };
+    [[nodiscard]] const char *what() const noexcept override {
+        return error.c_str();
+    };
     const static ParserError createEOF(const GQLToken token) noexcept {
         return ParserError(token, "EOF");
     };
 
     const static ParserError wrongType(
         const GQLToken token, const GQLTokenType expectedType) noexcept {
-        return ParserError(
-            token, std::string("Expected ") + gqlTokenTypeToString(expectedType)
-                       + " type, got " + gqlTokenTypeToString(token.type)
-                       + ", at: " + (std::string)token.location);
+        return ParserError(token, std::string("Expected ") +
+                                      gqlTokenTypeToString(expectedType) +
+                                      " type, got " +
+                                      gqlTokenTypeToString(token.type) +
+                                      ", at: " + (std::string)token.location);
     };
 
     const static ParserError identifierIsKeyword(
@@ -68,11 +71,12 @@ class Parser {
     ast::ListTypeNode parseListTypeNode();
     ast::InputValueDefinitionNode parseInputValueDefinitionNode();
     ast::LiteralNode parseLiteralNode();
-    ast::ObjectDefinitionNode parseObjectTypeDefinitionNode ();
+    ast::ObjectDefinitionNode parseObjectTypeDefinitionNode();
 
 public:
-    Parser(std::vector<GQLToken> tokens, std::shared_ptr<ast::SourceFile> source) noexcept;
-    std::vector<ast::ASTNode> parse();
+    Parser(std::vector<GQLToken> tokens,
+           std::shared_ptr<ast::SourceFile> source) noexcept;
+    ast::FileNodes parse();
 };
 void assertIsNotKeyword(const GQLToken token);
 const bool isKeyword(const std::string lexeme) noexcept;

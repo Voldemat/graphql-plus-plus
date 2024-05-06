@@ -18,13 +18,23 @@ Parser::Parser(std::vector<GQLToken> tokens,
       source{ std::move(source) },
       currentToken{ tokens[0] } {};
 
-std::vector<ast::ASTNode> Parser::parse() {
-    std::vector<ast::ASTNode> nodes;
+ast::FileNodes Parser::parse() {
+    std::vector<ast::TypeDefinitionNode> definitions;
+    std::vector<ast::ExtendTypeNode> extensions;
     while (currentToken != tokens.back()) {
         if (index != 0) consume(ComplexTokenType::IDENTIFIER);
-        nodes.push_back(parseASTNode());
+        const auto &node = parseASTNode();
+        if (std::holds_alternative<ast::TypeDefinitionNode>(node)) {
+            definitions.push_back(std::get<ast::TypeDefinitionNode>(node));
+        } else if (std::holds_alternative<ast::ExtendTypeNode>(node)) {
+            extensions.push_back(std::get<ast::ExtendTypeNode>(node));
+        } else {
+            throw ParserError(currentToken, "Unexpected node type");
+        };
     };
-    return nodes;
+    return { .source = source,
+             .definitions = definitions,
+             .extensions = extensions };
 };
 
 ast::ASTNode Parser::parseASTNode() {

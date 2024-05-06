@@ -140,6 +140,12 @@ struct ExtendTypeNode {
 
 using ASTNode = std::variant<TypeDefinitionNode, ExtendTypeNode>;
 
+struct FileNodes {
+    std::shared_ptr<SourceFile> source;
+    std::vector<TypeDefinitionNode> definitions;
+    std::vector<ExtendTypeNode> extensions;
+};
+
 };  // namespace ast
 };  // namespace server
 };  // namespace parsers

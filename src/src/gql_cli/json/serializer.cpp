@@ -8,12 +8,6 @@
 #include "libgql/lexer/token.hpp"
 
 using namespace rapidjson;
-template <class... Ts>
-struct overloaded : Ts... {
-    using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
 void json::serializer::writeTokenAsJSON(
     PrettyWriter<StringBuffer> &writer, const GQLToken &token) {
     writer.StartObject();

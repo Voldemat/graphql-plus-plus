@@ -42,9 +42,11 @@ TEST(ParserTest, BasicTest) {
         std::make_shared<ast::SourceFile>();
     Parser parser(tokens, source);
     const auto ast = parser.parse();
-    ASSERT_EQ(ast.size(), 1);
-    const ast::ObjectDefinitionNode def = std::get<ast::ObjectDefinitionNode>(
-        std::get<ast::TypeDefinitionNode>(ast[0]));
+    ASSERT_EQ(ast.definitions.size(), 1);
+    ASSERT_EQ(ast.extensions.size(), 0);
+    ASSERT_EQ(ast.source, source);
+    const ast::ObjectDefinitionNode def =
+        std::get<ast::ObjectDefinitionNode>(ast.definitions[0]);
     ASSERT_EQ(def.name.name, "Product");
     ASSERT_EQ(def.name.location.startToken, tokens[1]);
     ASSERT_EQ(def.name.location.endToken, tokens[1]);

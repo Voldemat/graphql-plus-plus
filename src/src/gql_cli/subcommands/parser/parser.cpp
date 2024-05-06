@@ -65,7 +65,7 @@ void createParserSubcommand(CLI::App *app) {
         };
         std::shared_ptr<ast::SourceFile> source = std::make_shared<ast::SourceFile>();
         auto parser = Parser(tokens, source);
-        std::vector<ast::ASTNode> ast;
+        ast::FileNodes ast;
         try {
             ast = parser.parse();
         } catch (const std::exception &exc) {
