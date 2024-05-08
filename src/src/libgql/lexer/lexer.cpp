@@ -115,7 +115,7 @@ std::optional<LexerError> LexerState::feedWithType(
         }
         case ComplexTokenType::BOOLEAN:
         case ComplexTokenType::IDENTIFIER: {
-            if (!(isalpha(c) || c == '_' || c == '-')) {
+            if (!(isalpha(c) || isnumber(c) || c == '_' || c == '-')) {
                 extractAndSaveToken();
                 return std::nullopt;
             };

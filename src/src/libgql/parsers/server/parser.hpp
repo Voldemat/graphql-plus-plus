@@ -14,8 +14,10 @@ namespace server {
 class ParserError : public std::exception {
     GQLToken token;
     std::string error;
-
 public:
+    [[nodiscard]] Location getLocation() const noexcept {
+        return token.location;
+    };
     explicit ParserError(const GQLToken t, const std::string e)
         : token{ t }, error{ e } {};
     [[nodiscard]] const char *what() const noexcept override {
@@ -57,7 +59,7 @@ class Parser {
     void consumeIdentifier();
     bool consumeIfIsAhead(GQLTokenType expectedType);
     bool isAhead(GQLTokenType expectedType);
-    ast::NameNode parseNameNode();
+    ast::NameNode parseNameNode(bool raiseOnKeyword = false);
     ast::ScalarDefinitionNode parseScalarTypeDefinitionNode();
     ast::UnionDefinitionNode parseUnionTypeDefinitionNode();
     ast::ASTNode parseASTNode();

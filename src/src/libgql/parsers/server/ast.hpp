@@ -48,11 +48,17 @@ struct LiteralBooleanNode {
     bool value = false;
 };
 
+struct LiteralEnumValueNode {
+    NodeLocation location;
+    std::string value;
+};
+
 using LiteralNode = std::variant<
     LiteralIntNode,
     LiteralFloatNode,
     LiteralStringNode,
-    LiteralBooleanNode
+    LiteralBooleanNode,
+    LiteralEnumValueNode
 >;
 
 struct NamedTypeNode {

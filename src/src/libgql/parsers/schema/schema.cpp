@@ -1,5 +1,6 @@
 #include "./schema.hpp"
 
+#include <array>
 #include <format>
 #include <map>
 #include <memory>
@@ -51,7 +52,14 @@ ASTSchema::ASTSchema(std::vector<ast::FileNodes> astList) {
     };
 };
 
+static const std::array builtinScalars = { Scalar("ID"), Scalar("Int"),
+                                           Scalar("Float"), Scalar("String"),
+                                           Scalar("Boolean") };
+
 Schema::Schema(ASTSchema astSchema) {
+    for (const auto &builtinScalar : builtinScalars) {
+        scalars[builtinScalar.name] = std::make_shared<Scalar>(builtinScalar);
+    };
     for (const auto &[name, scalarNode] : astSchema.scalars) {
         if (scalars.contains(name)) {
             throw std::runtime_error(std::format("Duplicate type: {}", name));
@@ -156,6 +164,14 @@ FieldSpec<ObjectTypeKind> Schema::parseObjectFieldSpec(
                            return { .spec = { .type = enums[node.name.name],
                                               .nullable = node.nullable } };
                        };
+                       if (objects.contains(node.name.name)) {
+                           return { .spec = { .type = objects[node.name.name],
+                                              .nullable = node.nullable } };
+                       };
+                       if (unions.contains(node.name.name)) {
+                           return { .spec = { .type = objects[node.name.name],
+                                              .nullable = node.nullable } };
+                       };
                        if (!scalars.contains(node.name.name)) {
                            throw std::runtime_error(
                                std::format("Unknown type: {}", node.name.name));
@@ -188,6 +204,7 @@ Literal Schema::parseLiteral(const ast::LiteralNode &literalNode) {
             [](const ast::LiteralIntNode &node) { return node.value; },
             [](const ast::LiteralFloatNode &node) { return node.value; },
             [](const ast::LiteralStringNode &node) { return node.value; },
-            [](const ast::LiteralBooleanNode &node) { return node.value; } },
+            [](const ast::LiteralBooleanNode &node) { return node.value; },
+            [](const ast::LiteralEnumValueNode &node) { return node.value; } },
         literalNode);
 };
