@@ -173,7 +173,12 @@ void createParserSubcommand(CLI::App *app) {
                 throw CLI::RuntimeError(1);
             };
         };
-        parsers::schema::ASTSchema astSchema(astList);
-        parsers::schema::Schema schema(astSchema);
+        try {
+            const auto& schema = parsers::schema::parseSchema(astList);
+            std::cout << "Schema: " << schema.size() << std::endl;
+        } catch(const std::exception& exc) {
+            std::cerr << exc.what() << std::endl;
+            throw CLI::RuntimeError(1);
+        };
     });
 };

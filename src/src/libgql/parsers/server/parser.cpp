@@ -23,7 +23,7 @@ ast::FileNodes Parser::parse() {
     std::vector<ast::ExtendTypeNode> extensions;
     while (currentToken != tokens.back()) {
         if (index != 0) consume(ComplexTokenType::IDENTIFIER);
-        const auto &node = parseASTNode();
+        const auto &[name, node] = parseASTNode();
         if (std::holds_alternative<ast::TypeDefinitionNode>(node)) {
             definitions.push_back(std::get<ast::TypeDefinitionNode>(node));
         } else if (std::holds_alternative<ast::ExtendTypeNode>(node)) {
@@ -32,34 +32,43 @@ ast::FileNodes Parser::parse() {
             throw ParserError(currentToken, "Unexpected node type");
         };
     };
-    return { .source = source,
-             .definitions = definitions,
-             .extensions = extensions };
+    return {
+        .source = source,
+        .definitions = definitions,
+        .extensions = extensions,
+    };
 };
 
-ast::ASTNode Parser::parseASTNode() {
+std::pair<std::string, ast::ASTNode> Parser::parseASTNode() {
     if (currentToken.type != (GQLTokenType)ComplexTokenType::IDENTIFIER) {
         throw ParserError::wrongType(currentToken,
                                      ComplexTokenType::IDENTIFIER);
     };
-    if (currentToken.lexeme == "scalar")
-        return parseScalarTypeDefinitionNode();
-    else if (currentToken.lexeme == "union")
-        return parseUnionTypeDefinitionNode();
-    else if (currentToken.lexeme == "enum")
-        return parseEnumTypeDefinitionNode();
-    else if (currentToken.lexeme == "interface")
-        return parseInterfaceTypeDefinitionNode();
-    else if (currentToken.lexeme == "type")
-        return parseObjectTypeDefinitionNode();
-    else if (currentToken.lexeme == "input") {
+    if (currentToken.lexeme == "scalar") {
+        const auto &node = parseScalarTypeDefinitionNode();
+        return { node.name.name, node };
+    } else if (currentToken.lexeme == "union") {
+        const auto &node = parseUnionTypeDefinitionNode();
+        return { node.name.name, node };
+    } else if (currentToken.lexeme == "enum") {
+        const auto &node = parseEnumTypeDefinitionNode();
+        return { node.name.name, node };
+    } else if (currentToken.lexeme == "interface") {
+        const auto &node = parseInterfaceTypeDefinitionNode();
+        return { node.name.name, node };
+    } else if (currentToken.lexeme == "type") {
+        const auto &node = parseObjectTypeDefinitionNode();
+        return { node.name.name, node };
+    } else if (currentToken.lexeme == "input") {
         const auto &interfaceNode = parseInterfaceTypeDefinitionNode();
-        return (
-            ast::InputObjectDefinitionNode){ .location = interfaceNode.location,
-                                             .name = interfaceNode.name,
-                                             .fields = interfaceNode.fields };
+        return { interfaceNode.name.name,
+                 (ast::InputObjectDefinitionNode){
+                     .location = interfaceNode.location,
+                     .name = interfaceNode.name,
+                     .fields = interfaceNode.fields } };
     } else if (currentToken.lexeme == "extend") {
-        return parseExtendTypeNode();
+        const auto &node = parseExtendTypeNode();
+        return { node.typeNode.name.name, node };
     };
     throw ParserError(currentToken, "Unknown identifier");
 };

@@ -8,7 +8,7 @@
                 "CC": "/Users/vladimir/code/opensource/llvm-project/builds/clang/bin/clang",
                 "CXX": "/Users/vladimir/code/opensource/llvm-project/builds/clang/bin/clang++",
                 "CXXFLAGS": "-isystem /Users/vladimir/code/opensource/llvm-project/libcxx-prefix/include/c++/v1/ -nostdinc++ -nostdlib++",
-                "LDFLAGS": "-L /Users/vladimir/code/opensource/llvm-project/libcxx-prefix/lib/ -Wl,-rpath,/Users/vladimir/code/opensource/llvm-project/libcxx-prefix/lib/ -lc++"
+                "LDFLAGS": "-L/Users/vladimir/code/opensource/llvm-project/libcxx-prefix/lib/ -Wl,-rpath,/Users/vladimir/code/opensource/llvm-project/libcxx-prefix/lib/ -lc++ -nostdinc++ -nostdlib++"
             }
         }
     ]

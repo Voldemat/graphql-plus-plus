@@ -7,7 +7,9 @@
 #include <string>
 #include <variant>
 #include <vector>
+
 #include "libgql/lexer/token.hpp"
+
 namespace parsers {
 namespace server {
 namespace ast {
@@ -53,13 +55,9 @@ struct LiteralEnumValueNode {
     std::string value;
 };
 
-using LiteralNode = std::variant<
-    LiteralIntNode,
-    LiteralFloatNode,
-    LiteralStringNode,
-    LiteralBooleanNode,
-    LiteralEnumValueNode
->;
+using LiteralNode =
+    std::variant<LiteralIntNode, LiteralFloatNode, LiteralStringNode,
+                 LiteralBooleanNode, LiteralEnumValueNode>;
 
 struct NamedTypeNode {
     NodeLocation location;
@@ -130,14 +128,10 @@ struct ScalarDefinitionNode {
     NameNode name;
 };
 
-using TypeDefinitionNode = std::variant<
-    ScalarDefinitionNode,
-    UnionDefinitionNode,
-    EnumDefinitionNode,
-    InputObjectDefinitionNode,
-    ObjectDefinitionNode,
-    InterfaceDefinitionNode
->;
+using TypeDefinitionNode =
+    std::variant<ScalarDefinitionNode, UnionDefinitionNode, EnumDefinitionNode,
+                 InputObjectDefinitionNode, ObjectDefinitionNode,
+                 InterfaceDefinitionNode>;
 
 struct ExtendTypeNode {
     NodeLocation location;

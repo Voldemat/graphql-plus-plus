@@ -4,6 +4,7 @@
 #include <exception>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "./ast.hpp"
@@ -62,7 +63,7 @@ class Parser {
     ast::NameNode parseNameNode(bool raiseOnKeyword = false);
     ast::ScalarDefinitionNode parseScalarTypeDefinitionNode();
     ast::UnionDefinitionNode parseUnionTypeDefinitionNode();
-    ast::ASTNode parseASTNode();
+    std::pair<std::string, ast::ASTNode> parseASTNode();
     ast::ExtendTypeNode parseExtendTypeNode();
     ast::EnumDefinitionNode parseEnumTypeDefinitionNode();
     ast::EnumValueDefinitionNode parseEnumValueDefinitionNode();

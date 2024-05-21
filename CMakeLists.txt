@@ -20,7 +20,6 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 enable_testing()
 include("${CMAKE_SOURCE_DIR}/src/vendor/rapidjson.cmake")
-include("${CMAKE_SOURCE_DIR}/src/vendor/absl.cmake")
 include("${CMAKE_SOURCE_DIR}/src/vendor/cli11.cmake")
 
 file(GLOB_RECURSE GQL_LIB_HEADERS src/src/libgql/*.hpp src/src/libgql/*.h)
@@ -54,7 +53,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/src/
     ${CMAKE_CURRENT_SOURCE_DIR}/src/include/
     SYSTEM ${RAPIDJSON_INCLUDE_DIR}
-    SYSTEM ${ABSL_INCLUDE_DIR}
     SYSTEM ${CLI11_INCLUDE_DIR}
 )
 add_custom_command(
@@ -77,7 +75,6 @@ target_link_libraries(
     PRIVATE GTest::gtest_main
     PRIVATE GTest::gmock_main
     PRIVATE gql_lib
-    PRIVATE absl
 )
 add_dependencies(main_test rapidjson)
 include(GoogleTest)
