@@ -31,7 +31,7 @@
 using namespace parsers::server;
 
 std::string formatLine(const std::string &line, const unsigned int &currentLine,
-                       const Location &location, const ParserError& exc){
+                       const Location &location, const ParserError &exc) {
     std::string linestr = std::to_string(currentLine);
     std::string buffer = std::format("{}: {}\n", linestr, line);
     if (currentLine == location.line) {
@@ -173,10 +173,15 @@ void createParserSubcommand(CLI::App *app) {
                 throw CLI::RuntimeError(1);
             };
         };
+
         try {
-            const auto& schema = parsers::schema::parseSchema(astList);
-            std::cout << "Schema: " << schema.size() << std::endl;
-        } catch(const std::exception& exc) {
+            const auto &nodes = parsers::schema::parseSchema(astList);
+
+            rapidjson::StringBuffer sb;
+            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+            json::serializer::writeSchemaNodes(writer, nodes);
+            std::cout << sb.GetString() << std::endl;
+        } catch (const std::exception &exc) {
             std::cerr << exc.what() << std::endl;
             throw CLI::RuntimeError(1);
         };
