@@ -12,6 +12,7 @@
 namespace lexer {
 class LexerError : public std::exception {
     std::string message;
+    std::string finalMessage;
     Location location;
 public:
     LexerError(const std::string message, const Location location) noexcept;

@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <ranges>
 #include <sstream>
@@ -24,14 +25,18 @@
 #include "gql_cli/utils.hpp"
 #include "libgql/lexer/lexer.hpp"
 #include "libgql/lexer/token.hpp"
+#include "libgql/parsers/client/ast.hpp"
+#include "libgql/parsers/client/parser.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/server/ast.hpp"
 #include "libgql/parsers/server/parser.hpp"
+#include "libgql/parsers/shared/shared.hpp"
 
-using namespace parsers::server;
+using namespace parsers;
 
 std::string formatLine(const std::string &line, const unsigned int &currentLine,
-                       const Location &location, const ParserError &exc) {
+                       const Location &location,
+                       const shared::ParserError &exc) {
     std::string linestr = std::to_string(currentLine);
     std::string buffer = std::format("{}: {}\n", linestr, line);
     if (currentLine == location.line) {
@@ -48,11 +53,13 @@ std::string formatLine(const std::string &line, const unsigned int &currentLine,
     return buffer;
 };
 
-std::string formatError(const ParserError &exc,
-                        const std::shared_ptr<ast::SourceFile> &source) {
-    std::string buffer;
+std::string formatError(
+    const shared::ParserError &exc,
+    const std::shared_ptr<shared::ast::SourceFile> &source) {
+    std::string buffer = std::format("{}\n", source->filepath.string());
     const Location &location = exc.getLocation();
-    unsigned int firstLineToShow = std::max(location.line - 4, (unsigned int)1);
+    unsigned int firstLineToShow =
+        std::clamp((int)location.line - 4, 1, std::numeric_limits<int>::max());
     unsigned int lastLineToShow = location.line + 4;
     std::string line;
     unsigned int currentLine = 1;
@@ -105,10 +112,10 @@ void createParserSubcommand(CLI::App *app) {
                       << std::endl;
             throw CLI::RuntimeError(1);
         };
-        std::shared_ptr<ast::SourceFile> source =
-            std::make_shared<ast::SourceFile>();
-        auto parser = Parser(tokens, source);
-        ast::FileNodes ast;
+        std::shared_ptr<shared::ast::SourceFile> source =
+            std::make_shared<shared::ast::SourceFile>();
+        auto parser = server::Parser(tokens, source);
+        server::ast::FileNodes ast;
         try {
             ast = parser.parse();
         } catch (const std::exception &exc) {
@@ -122,25 +129,43 @@ void createParserSubcommand(CLI::App *app) {
     });
 
     CLI::App *parseDirectoryCmd = app->add_subcommand(
-        "parse-dir", "Parse directory with server definitions");
-    std::shared_ptr<std::string> directory = std::make_shared<std::string>();
-    parseDirectoryCmd->add_option("--dir", *directory, "Directory")->required();
-    parseDirectoryCmd->callback([directory]() {
-        if (!std::filesystem::exists(*directory)) {
+        "parse-dir", "Parse directory with server and client definitions");
+    std::shared_ptr<std::string> serverDir = std::make_shared<std::string>();
+    std::shared_ptr<std::string> clientDir = std::make_shared<std::string>();
+    parseDirectoryCmd
+        ->add_option("--server-dir", *serverDir, "Server directory")
+        ->required();
+    parseDirectoryCmd
+        ->add_option("--client-dir", *clientDir, "Server directory")
+        ->required();
+    parseDirectoryCmd->callback([serverDir, clientDir]() {
+        if (!std::filesystem::exists(*serverDir)) {
             std::cerr << std::format("Directory \"{}\" does not exists",
-                                     *directory)
+                                     *serverDir)
                       << std::endl;
             throw CLI::RuntimeError(1);
         };
         if (!std::filesystem::is_directory(
-                std::filesystem::status(*directory))) {
-            std::cerr << std::format("Path {} is not directory", *directory)
+                std::filesystem::status(*serverDir))) {
+            std::cerr << std::format("Path {} is not directory", *serverDir)
                       << std::endl;
             throw CLI::RuntimeError(1);
         };
-        std::vector<ast::FileNodes> astList;
+        if (!std::filesystem::exists(*clientDir)) {
+            std::cerr << std::format("Directory \"{}\" does not exists",
+                                     *clientDir)
+                      << std::endl;
+            throw CLI::RuntimeError(1);
+        };
+        if (!std::filesystem::is_directory(
+                std::filesystem::status(*clientDir))) {
+            std::cerr << std::format("Path {} is not directory", *clientDir)
+                      << std::endl;
+            throw CLI::RuntimeError(1);
+        };
+        std::vector<server::ast::FileNodes> astList;
         for (const std::filesystem::path &filepath :
-             std::filesystem::recursive_directory_iterator(*directory) |
+             std::filesystem::recursive_directory_iterator(*serverDir) |
                  std::views::filter(
                      [](const std::filesystem::directory_entry &entry) {
                          return entry.path().extension() == ".graphql";
@@ -153,8 +178,8 @@ void createParserSubcommand(CLI::App *app) {
             std::stringstream fileStream;
             fileStream << file.rdbuf();
             std::string buffer = fileStream.str();
-            std::shared_ptr<ast::SourceFile> source =
-                std::make_shared<ast::SourceFile>(filepath, buffer);
+            std::shared_ptr<shared::ast::SourceFile> source =
+                std::make_shared<shared::ast::SourceFile>(filepath, buffer);
             lexer::VectorTokensAccumulator tokensAccumulator;
             lexer::Lexer lexer((std::istringstream)buffer, &tokensAccumulator);
             const auto &error = lexer.parse();
@@ -164,16 +189,51 @@ void createParserSubcommand(CLI::App *app) {
                 throw CLI::RuntimeError(1);
             };
             const auto &tokens = tokensAccumulator.getTokens();
-            Parser parser(tokens, source);
+            server::Parser parser(tokens, source);
             try {
                 const auto &ast = parser.parse();
                 astList.push_back(ast);
-            } catch (const ParserError &exc) {
+            } catch (const shared::ParserError &exc) {
                 std::cerr << formatError(exc, source) << std::endl;
                 throw CLI::RuntimeError(1);
             };
         };
-
+        std::vector<client::ast::ClientDefinition> operations;
+        for (const auto &filepath :
+             std::filesystem::recursive_directory_iterator(*clientDir) |
+                 std::views::filter(
+                     [](const std::filesystem::directory_entry &entry) {
+                         return entry.path().extension() == ".graphql";
+                     }) |
+                 std::views::transform(
+                     [](const std::filesystem::directory_entry &entry) {
+                         return entry.path();
+                     })) {
+            std::ifstream file(filepath);
+            std::stringstream fileStream;
+            fileStream << file.rdbuf();
+            std::string buffer = fileStream.str();
+            std::shared_ptr<shared::ast::SourceFile> source =
+                std::make_shared<shared::ast::SourceFile>(filepath, buffer);
+            lexer::VectorTokensAccumulator tokensAccumulator;
+            lexer::Lexer lexer((std::istringstream)buffer, &tokensAccumulator);
+            const auto &error = lexer.parse();
+            if (error.has_value()) {
+                std::cerr << std::format("LexerParserError({}): {}",
+                                         source->filepath.filename().string(),
+                                         error.value().what())
+                          << std::endl;
+                throw CLI::RuntimeError(1);
+            };
+            const auto &tokens = tokensAccumulator.getTokens();
+            client::Parser parser(tokens, source);
+            try {
+                operations.append_range(parser.parse());
+            } catch (const shared::ParserError &exc) {
+                std::cerr << formatError(exc, source) << std::endl;
+                throw CLI::RuntimeError(1);
+            };
+        };
         try {
             const auto &nodes = parsers::schema::parseSchema(astList);
 

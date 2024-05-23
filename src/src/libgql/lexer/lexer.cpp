@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <format>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -15,13 +16,13 @@ using namespace lexer;
 
 LexerError::LexerError(const std::string message,
                        const Location location) noexcept
-    : message{ message }, location{ location } {};
-const char *LexerError::what() const noexcept { return message.c_str(); };
-Location LexerError::getLocation() const noexcept {
-    return location;
-};
-Lexer::Lexer(std::istringstream s,
-             ITokensAccumulator *tokensAccumulator)
+    : message{ message },
+      location{ location },
+      finalMessage{ std::format("{}:{}:{}: {}", location.line, location.start,
+                                location.end, message) } {};
+const char *LexerError::what() const noexcept { return finalMessage.c_str(); };
+Location LexerError::getLocation() const noexcept { return location; };
+Lexer::Lexer(std::istringstream s, ITokensAccumulator *tokensAccumulator)
     : state{ tokensAccumulator } {
     stream.swap(s);
 };
@@ -79,6 +80,10 @@ std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
             return SimpleTokenType::SEMICOLON;
         case ':':
             return SimpleTokenType::COLON;
+        case '.':
+            return ComplexTokenType::SPREAD;
+        case '$':
+            return ComplexTokenType::IDENTIFIER;
         case ',':
             return SimpleTokenType::COMMA;
         case '|':
@@ -113,6 +118,13 @@ std::optional<LexerError> LexerState::feedWithType(
             };
             break;
         }
+        case ComplexTokenType::SPREAD: {
+            if (c != '.') {
+                extractAndSaveToken();
+                return std::nullopt;
+            };
+            break;
+        };
         case ComplexTokenType::BOOLEAN:
         case ComplexTokenType::IDENTIFIER: {
             if (!(isalpha(c) || isnumber(c) || c == '_' || c == '-')) {
@@ -130,8 +142,9 @@ GQLToken LexerState::extractToken() {
     if (buffer == "true" || buffer == "false") {
         type = ComplexTokenType::BOOLEAN;
     };
-    const GQLToken token
-        = { .type = type.value(), .lexeme = buffer, .location = location };
+    const GQLToken token = { .type = type.value(),
+                             .lexeme = buffer,
+                             .location = location };
     location.start = location.end;
     type = std::nullopt;
     buffer = "";
@@ -164,8 +177,8 @@ std::optional<LexerError> LexerState::feedNew(char c) noexcept {
     const auto tokenType = optTokenType.value();
     if (std::holds_alternative<SimpleTokenType>(tokenType)) {
         tokensAccumulator->addToken({ .type = tokenType,
-                                     .lexeme = std::string() + c,
-                                     .location = location });
+                                      .lexeme = std::string() + c,
+                                      .location = location });
         return std::nullopt;
     };
     const auto complexTokenType = std::get<ComplexTokenType>(tokenType);

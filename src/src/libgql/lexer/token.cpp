@@ -55,6 +55,8 @@ std::string gqlTokenTypeToString(GQLTokenType type) noexcept {
                 return "IDENTIFIER";
             case ComplexTokenType::BOOLEAN:
                 return "BOOLEAN";
+            case ComplexTokenType::SPREAD:
+                return "SPREAD";
         };
     } else {
         const auto &simpleType = std::get<SimpleTokenType>(type);

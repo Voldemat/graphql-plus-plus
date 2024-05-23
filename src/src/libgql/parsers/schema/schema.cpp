@@ -12,8 +12,10 @@
 #include <vector>
 
 #include "libgql/parsers/server/ast.hpp"
+#include "libgql/parsers/shared/shared.hpp"
 #include "utils.hpp"
 
+using namespace parsers;
 using namespace parsers::schema;
 using namespace parsers::server;
 
@@ -114,7 +116,7 @@ std::shared_ptr<Union> parseUnion(const ast::UnionDefinitionNode &node,
     return std::make_shared<Union>(
         node.name.name,
         node.values |
-            std::views::transform([&registry](const ast::NameNode &nNode) {
+            std::views::transform([&registry](const shared::ast::NameNode &nNode) {
                 return registry.getObjectOrLazy(nNode.name);
             }) |
             std::ranges::to<std::vector>());
@@ -122,16 +124,16 @@ std::shared_ptr<Union> parseUnion(const ast::UnionDefinitionNode &node,
 
 template <typename T>
 std::pair<NonCallableFieldSpec<T>, bool> parseNonCallableTypeSpec(
-    const ast::TypeNode astNode,
+    const shared::ast::TypeNode astNode,
     std::function<NodeOrLazy<T>(const std::string &)> typeGetter) {
     return std::visit<std::pair<NonCallableFieldSpec<T>, bool>>(
-        overloaded{ [&typeGetter](const ast::NamedTypeNode &node)
+        overloaded{ [&typeGetter](const shared::ast::NamedTypeNode &node)
                         -> std::pair<LiteralFieldSpec<T>, bool> {
                        return { (LiteralFieldSpec<T>){
                                     .type = typeGetter(node.name.name) },
                                 node.nullable };
                    },
-                    [&typeGetter](const ast::ListTypeNode &node)
+                    [&typeGetter](const shared::ast::ListTypeNode &node)
                         -> std::pair<ArrayFieldSpec<T>, bool> {
                         return { (ArrayFieldSpec<T>){
                                      .type = typeGetter(node.type.name.name),
@@ -157,7 +159,7 @@ std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
         .arguments =
             astNode.arguments |
             std::views::transform([&registry](
-                                      const ast::InputValueDefinitionNode &node)
+                                      const shared::ast::InputValueDefinitionNode &node)
                                       -> FieldDefinition<InputFieldSpec> {
                 const auto &[returnType, nullable] = parseNonCallableTypeSpec(
                     node.type, (std::function<NodeOrLazy<InputTypeSpec>(

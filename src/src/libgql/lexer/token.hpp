@@ -35,7 +35,7 @@ enum class SimpleTokenType {
     LEFT_BRACKET,
     RIGHT_BRACKET
 };
-enum class ComplexTokenType { IDENTIFIER, STRING, NUMBER, BOOLEAN };
+enum class ComplexTokenType { IDENTIFIER, STRING, NUMBER, BOOLEAN, SPREAD };
 
 using GQLTokenType = std::variant<SimpleTokenType, ComplexTokenType>;
 

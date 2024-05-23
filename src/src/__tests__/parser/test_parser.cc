@@ -7,7 +7,9 @@
 #include "libgql/lexer/token.hpp"
 #include "libgql/parsers/server/ast.hpp"
 #include "libgql/parsers/server/parser.hpp"
+#include "libgql/parsers/shared/shared.hpp"
 
+using namespace parsers;
 using namespace parsers::server;
 using namespace parsers::server::ast;
 
@@ -38,8 +40,8 @@ TEST(ParserTest, BasicTest) {
           .lexeme = "}",
           .location = { .line = 1, .start = 1, .end = 1 } }
     };
-    std::shared_ptr<ast::SourceFile> source =
-        std::make_shared<ast::SourceFile>();
+    std::shared_ptr<shared::ast::SourceFile> source =
+        std::make_shared<shared::ast::SourceFile>();
     Parser parser(tokens, source);
     const auto ast = parser.parse();
     ASSERT_EQ(ast.definitions.size(), 1);

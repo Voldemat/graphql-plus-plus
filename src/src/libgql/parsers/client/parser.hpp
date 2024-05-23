@@ -1,17 +1,16 @@
-#ifndef GRAPHQL_SERVER_PARSER
-#define GRAPHQL_SERVER_PARSER
+#ifndef LIBGQL_PARSERS_CLIENT
+#define LIBGQL_PARSERS_CLIENT
 
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
-#include "./ast.hpp"
 #include "libgql/lexer/token.hpp"
+#include "libgql/parsers/client/ast.hpp"
 #include "libgql/parsers/shared/shared.hpp"
 
 namespace parsers {
-namespace server {
+namespace client {
 
 class Parser {
     unsigned int index = 0;
@@ -22,29 +21,31 @@ class Parser {
     void advance();
     void consume(const GQLTokenType expectedType);
     void consumeIdentifier();
+    void consumeIdentifierByLexeme(const std::string& lexeme);
+    bool consumeIdentifierByLexemeIfIsAhead(const std::string& lexeme);
     bool consumeIfIsAhead(GQLTokenType expectedType);
     bool isAhead(GQLTokenType expectedType);
     shared::ast::NameNode parseNameNode(bool raiseOnKeyword = false);
-    ast::ScalarDefinitionNode parseScalarTypeDefinitionNode();
-    ast::UnionDefinitionNode parseUnionTypeDefinitionNode();
-    std::pair<std::string, ast::ASTNode> parseASTNode();
-    ast::ExtendTypeNode parseExtendTypeNode();
-    ast::EnumDefinitionNode parseEnumTypeDefinitionNode();
-    ast::EnumValueDefinitionNode parseEnumValueDefinitionNode();
-    ast::InterfaceDefinitionNode parseInterfaceTypeDefinitionNode();
-    ast::FieldDefinitionNode parseFieldDefinitionNode();
+    ast::OperationDefinition parseOperationDefinition();
+    ast::OpType parseOpType(const std::string& lexeme);
+    shared::ast::InputValueDefinitionNode parseInputValueDefinitionNode();
     shared::ast::TypeNode parseTypeNode();
     shared::ast::NamedTypeNode parseNamedTypeNode();
     shared::ast::ListTypeNode parseListTypeNode();
-    shared::ast::InputValueDefinitionNode parseInputValueDefinitionNode();
     shared::ast::LiteralNode parseLiteralNode();
-    ast::ObjectDefinitionNode parseObjectTypeDefinitionNode();
-
+    ast::Argument parseArgument();
+    ast::FragmentSpec parseFragmentSpec();
+    ast::ClientDefinition parseClientDefinition();
+    ast::FragmentDefinition parseFragmentDefinition();
+    ast::SelectionNode parseSelectionNode();
+    ast::FieldSelectionNode parseFieldSelectionNode();
+    ast::ConditionalSpreadSelectionNode parseConditionalSpreadSelectionNode();
+    ast::ObjectFieldSpec parseObjectFieldSpec();
 public:
     Parser(std::vector<GQLToken> tokens,
            std::shared_ptr<shared::ast::SourceFile> source) noexcept;
-    ast::FileNodes parse();
+    std::vector<ast::ClientDefinition> parse();
 };
-};  // namespace server
+};  // namespace client
 };  // namespace parsers
 #endif
