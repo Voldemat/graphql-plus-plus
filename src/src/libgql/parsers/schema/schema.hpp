@@ -1,6 +1,7 @@
 #ifndef GRAPHQL_SCHEMA
 #define GRAPHQL_SCHEMA
 
+#include <map>
 #include <memory>
 #include <optional>
 #include <string>
@@ -8,6 +9,7 @@
 #include <variant>
 #include <vector>
 
+#include "libgql/parsers/client/ast.hpp"
 #include "libgql/parsers/server/ast.hpp"
 
 namespace parsers {
@@ -55,8 +57,8 @@ struct DefaultValueMixin {
 
 template <typename T>
 struct LiteralFieldSpec
-    : public std::conditional_t<std::is_same_v<InputTypeSpec, T>, DefaultValueMixin,
-                                EmptyMixin> {
+    : public std::conditional_t<std::is_same_v<InputTypeSpec, T>,
+                                DefaultValueMixin, EmptyMixin> {
     NodeOrLazy<T> type;
 };
 
@@ -87,8 +89,8 @@ struct CallableFieldSpec {
 };
 
 using ObjectFieldSpec =
-    std::variant<LiteralFieldSpec<ObjectTypeSpec>, ArrayFieldSpec<ObjectTypeSpec>,
-                 CallableFieldSpec>;
+    std::variant<LiteralFieldSpec<ObjectTypeSpec>,
+                 ArrayFieldSpec<ObjectTypeSpec>, CallableFieldSpec>;
 
 template <typename T>
 struct FieldDefinition {
@@ -114,17 +116,61 @@ struct ObjectType {
 };
 
 using SchemaNode =
-    std::variant<
-        std::shared_ptr<ObjectType>,
-        std::shared_ptr<Interface>,
-        std::shared_ptr<Scalar>,
-        std::shared_ptr<Union>,
-        std::shared_ptr<Enum>,
-        std::shared_ptr<InputType>
-    >;
+    std::variant<std::shared_ptr<ObjectType>, std::shared_ptr<Interface>,
+                 std::shared_ptr<Scalar>, std::shared_ptr<Union>,
+                 std::shared_ptr<Enum>, std::shared_ptr<InputType>>;
 
-std::vector<SchemaNode> parseSchema(
-    std::vector<parsers::server::ast::FileNodes> astArray);
+struct Fragment;
+struct FieldSelection;
+struct ConditionalSpreadSelection;
+struct SpreadSelection {
+    NodeOrLazy<std::shared_ptr<Fragment>> fragment;
+};
+using Selection =
+    std::variant<FieldSelection, SpreadSelection, ConditionalSpreadSelection>;
+
+struct FragmentSpec {
+    std::vector<Selection> selections;
+};
+
+struct ConditionalSpreadSelection {
+    std::variant<std::shared_ptr<ObjectType>, std::shared_ptr<Union>> type;
+    std::shared_ptr<FragmentSpec> selection;
+};
+
+struct FieldSelection {
+    std::string name;
+    std::string alias;
+    std::optional<std::shared_ptr<FragmentSpec>> selection;
+};
+
+struct Fragment {
+    std::string name;
+    std::string typeName;
+    std::shared_ptr<FragmentSpec> spec;
+};
+
+struct Operation {
+    client::ast::OpType type;
+    std::string name;
+    std::vector<FieldDefinition<InputFieldSpec>> arguments;
+    std::string opName;
+    std::string returnFieldName;
+    std::map<std::string, std::string> argumentsMapping;
+    std::shared_ptr<FragmentSpec> fragmentSpec;
+};
+
+using ClientSchemaNode =
+    std::variant<std::shared_ptr<Fragment>, std::shared_ptr<Operation>>;
+
+struct Schema {
+    std::vector<SchemaNode> serverNodes;
+    std::vector<ClientSchemaNode> clientNodes;
+};
+
+Schema parseSchema(
+    std::vector<parsers::server::ast::FileNodes> astArray,
+    std::vector<parsers::client::ast::ClientDefinition> definitions);
 
 };  // namespace schema
 };  // namespace parsers

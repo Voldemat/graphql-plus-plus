@@ -39,14 +39,54 @@ ast::ClientDefinition Parser::parseClientDefinition() {
 };
 
 ast::FragmentDefinition Parser::parseFragmentDefinition() {
+    shared::ast::NodeLocation location = {
+        .startToken = currentToken,
+        .source = source,
+    };
     const auto &name = parseNameNode();
     consumeIdentifierByLexeme("on");
     const auto &typeName = parseNameNode();
     const auto &spec = parseFragmentSpec();
-    return { .name = name, .typeName = typeName, .spec = spec };
+    location.endToken = spec.location.endToken;
+    return {
+        .location = location, .name = name, .typeName = typeName, .spec = spec
+    };
+};
+
+ast::OperationArg Parser::parseOperationArg() {
+    const auto &name = parseNameNode();
+    consume(SimpleTokenType::COLON);
+    const auto &paramName = parseNameNode();
+    shared::ast::NodeLocation location = { .startToken =
+                                               name.location.startToken,
+                                           .endToken =
+                                               paramName.location.endToken,
+                                           .source = source };
+    return { .location = location, .name = name, .paramName = paramName };
+};
+
+ast::OperationSpec Parser::parseOperationSpec() {
+    const auto &[name, selectionName] = parseNameAndSelectionName();
+    shared::ast::NodeLocation location = {
+        .startToken = selectionName.location.startToken, .source = source
+    };
+    std::vector<ast::OperationArg> args;
+    if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
+        while (isAhead(ComplexTokenType::IDENTIFIER)) {
+            args.push_back(parseOperationArg());
+            consumeIfIsAhead(SimpleTokenType::COMMA);
+        };
+        consume(SimpleTokenType::RIGHT_PAREN);
+    };
+    return { .location = location,
+             .selectionName = selectionName,
+             .name = name,
+             .args = args };
 };
 
 ast::OperationDefinition Parser::parseOperationDefinition() {
+    shared::ast::NodeLocation location = { .startToken = currentToken,
+                                           .source = source };
     const auto &type = parseOpType(currentToken.lexeme);
     const auto &name = parseNameNode();
     std::vector<shared::ast::InputValueDefinitionNode> parameters;
@@ -58,13 +98,15 @@ ast::OperationDefinition Parser::parseOperationDefinition() {
         consume(SimpleTokenType::RIGHT_PAREN);
     };
     consume(SimpleTokenType::LEFT_BRACE);
-    const auto &fieldSpec = parseObjectFieldSpec();
+    const auto &spec = parseOperationSpec();
     ast::FragmentSpec fragment = parseFragmentSpec();
     consume(SimpleTokenType::RIGHT_BRACE);
-    return { .type = type,
+    location.endToken = currentToken;
+    return { .location = location,
+             .type = type,
              .name = name,
              .parameters = parameters,
-             .fieldSpec = fieldSpec,
+             .spec = spec,
              .fragment = fragment };
 };
 
@@ -77,43 +119,72 @@ ast::Argument Parser::parseArgument() {
 
 ast::FragmentSpec Parser::parseFragmentSpec() {
     consume(SimpleTokenType::LEFT_BRACE);
+    shared::ast::NodeLocation location = {
+        .startToken = currentToken,
+        .source = source,
+    };
     ast::FragmentSpec spec;
     while (isAhead(ComplexTokenType::IDENTIFIER) ||
            isAhead(ComplexTokenType::SPREAD)) {
-        spec.selection.emplace_back(parseSelectionNode());
+        spec.selections.emplace_back(parseSelectionNode());
         consumeIfIsAhead(SimpleTokenType::COMMA);
     };
     consume(SimpleTokenType::RIGHT_BRACE);
+    location.endToken = currentToken;
+    spec.location = location;
     return spec;
 };
 
 ast::ConditionalSpreadSelectionNode
 Parser::parseConditionalSpreadSelectionNode() {
+    shared::ast::NodeLocation location = { .startToken = currentToken,
+                                           .source = source };
+    consumeIdentifierByLexeme("on");
     const auto &typeName = parseNameNode();
-    return { .typeName = typeName,
-             .fragment =
-                 std::make_shared<ast::FragmentSpec>(parseFragmentSpec()) };
+    const auto &fragmentSpec = parseFragmentSpec();
+    location.endToken = fragmentSpec.location.endToken;
+    return { .location = location,
+             .typeName = typeName,
+             .fragment = std::make_shared<ast::FragmentSpec>(fragmentSpec) };
 }
 
 ast::SelectionNode Parser::parseSelectionNode() {
-    if (consumeIfIsAhead(ComplexTokenType::SPREAD)) {
-        if (consumeIdentifierByLexemeIfIsAhead("on")) {
-            return parseConditionalSpreadSelectionNode();
-        } else {
-            return (ast::SpreadSelectionNode){ .fragmentName =
-                                                   parseNameNode() };
-        };
+    if (!isAhead(ComplexTokenType::SPREAD)) {
+        return parseFieldSelectionNode();
     };
-    return parseFieldSelectionNode();
+    consume(ComplexTokenType::SPREAD);
+    if (isAheadByLexeme("on")) {
+        return parseConditionalSpreadSelectionNode();
+    }
+    shared::ast::NodeLocation location = { .startToken = currentToken,
+                                           .source = source };
+    const auto &fragmentName = parseNameNode();
+    location.endToken = fragmentName.location.endToken;
+    return (ast::SpreadSelectionNode){ .fragmentName = fragmentName };
 };
 
-ast::ObjectFieldSpec Parser::parseObjectFieldSpec() {
+bool Parser::isAheadByLexeme(const std::string &lexeme) {
+    return lookahead().lexeme == lexeme;
+};
+
+std::pair<shared::ast::NameNode, shared::ast::NameNode>
+Parser::parseNameAndSelectionName() {
     shared::ast::NameNode selectionName = parseNameNode();
     shared::ast::NameNode fieldName = selectionName;
     std::optional<std::vector<shared::ast::InputValueDefinitionNode>> arguments;
     if (consumeIfIsAhead(SimpleTokenType::COLON)) {
         fieldName = parseNameNode();
     };
+    return { fieldName, selectionName };
+};
+
+ast::ObjectFieldSpec Parser::parseObjectFieldSpec() {
+    shared::ast::NodeLocation location = { .startToken = currentToken,
+                                           .source = source };
+
+    const auto &[fieldName, selectionName] = parseNameAndSelectionName();
+    location.endToken = fieldName.location.endToken;
+    std::optional<std::vector<shared::ast::InputValueDefinitionNode>> arguments;
     if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
         std::vector<shared::ast::InputValueDefinitionNode> args;
         while (isAhead(ComplexTokenType::IDENTIFIER)) {
@@ -122,6 +193,7 @@ ast::ObjectFieldSpec Parser::parseObjectFieldSpec() {
         };
         arguments = args;
         consume(SimpleTokenType::RIGHT_PAREN);
+        location.endToken = currentToken;
     };
     return { .selectionName = selectionName,
              .name = fieldName,
@@ -134,7 +206,12 @@ ast::FieldSelectionNode Parser::parseFieldSelectionNode() {
     if (isAhead(SimpleTokenType::LEFT_BRACE)) {
         spec = std::make_shared<ast::FragmentSpec>(parseFragmentSpec());
     };
-    return { .field = fieldSpec, .spec = spec };
+    shared::ast::NodeLocation location = { .startToken =
+                                               fieldSpec.location.startToken,
+                                           .endToken =
+                                               fieldSpec.location.endToken,
+                                           .source = source };
+    return { .location = location, .field = fieldSpec, .spec = spec };
 };
 
 bool Parser::consumeIdentifierByLexemeIfIsAhead(const std::string &lexeme) {

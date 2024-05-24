@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "libgql/lexer/token.hpp"
@@ -25,6 +26,7 @@ class Parser {
     bool consumeIdentifierByLexemeIfIsAhead(const std::string& lexeme);
     bool consumeIfIsAhead(GQLTokenType expectedType);
     bool isAhead(GQLTokenType expectedType);
+    bool isAheadByLexeme(const std::string& lexeme);
     shared::ast::NameNode parseNameNode(bool raiseOnKeyword = false);
     ast::OperationDefinition parseOperationDefinition();
     ast::OpType parseOpType(const std::string& lexeme);
@@ -41,6 +43,10 @@ class Parser {
     ast::FieldSelectionNode parseFieldSelectionNode();
     ast::ConditionalSpreadSelectionNode parseConditionalSpreadSelectionNode();
     ast::ObjectFieldSpec parseObjectFieldSpec();
+    ast::OperationSpec parseOperationSpec();
+    ast::OperationArg parseOperationArg();
+
+    std::pair<shared::ast::NameNode, shared::ast::NameNode> parseNameAndSelectionName();
 public:
     Parser(std::vector<GQLToken> tokens,
            std::shared_ptr<shared::ast::SourceFile> source) noexcept;

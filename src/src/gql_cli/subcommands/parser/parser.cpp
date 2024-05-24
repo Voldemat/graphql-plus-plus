@@ -235,11 +235,11 @@ void createParserSubcommand(CLI::App *app) {
             };
         };
         try {
-            const auto &nodes = parsers::schema::parseSchema(astList);
+            const auto &nodes = parsers::schema::parseSchema(astList, operations);
 
             rapidjson::StringBuffer sb;
             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-            json::serializer::writeSchemaNodes(writer, nodes);
+            json::serializer::writeSchemaNodes(writer, nodes.serverNodes);
             std::cout << sb.GetString() << std::endl;
         } catch (const std::exception &exc) {
             std::cerr << exc.what() << std::endl;

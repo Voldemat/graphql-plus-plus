@@ -4,6 +4,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <ranges>
 #include <stdexcept>
 #include <string>
@@ -11,6 +12,7 @@
 #include <variant>
 #include <vector>
 
+#include "libgql/parsers/client/ast.hpp"
 #include "libgql/parsers/server/ast.hpp"
 #include "libgql/parsers/shared/shared.hpp"
 #include "utils.hpp"
@@ -26,6 +28,7 @@ struct TypeRegistry {
     std::map<std::string, std::shared_ptr<Scalar>> scalars;
     std::map<std::string, std::shared_ptr<Enum>> enums;
     std::map<std::string, std::shared_ptr<Union>> unions;
+    std::map<std::string, std::shared_ptr<Fragment>> fragments;
 
     explicit TypeRegistry() {
         scalars["String"] = std::make_shared<Scalar>("String");
@@ -83,9 +86,33 @@ struct TypeRegistry {
         return interfaces.at(name);
     };
 
-    [[nodiscard]] std::shared_ptr<ObjectType> getObject(
+    [[nodiscard]] std::variant<std::shared_ptr<ObjectType>,
+                               std::shared_ptr<Union>>
+    getObjectOrUnion(const std::string &name) const {
+        if (objects.contains(name)) return objects.at(name);
+        if (unions.contains(name)) return unions.at(name);
+        throw std::runtime_error(
+            std::format("Object or Union with name {} is not found", name));
+    };
+
+    [[nodiscard]] std::shared_ptr<ObjectType> getObject(const std::string& name) const {
+        if (objects.contains(name)) return objects.at(name);
+        throw std::runtime_error(
+            std::format("Object with name {} is not found", name));
+    };
+
+    [[nodiscard]] NodeOrLazy<std::shared_ptr<Fragment>> getFragmentOrLazy(
         const std::string &name) const {
-        return objects.at(name);
+        if (fragments.contains(name)) return fragments.at(name);
+        return (LazySchemaNode){ .name = name };
+    };
+
+    [[nodiscard]] std::shared_ptr<Fragment> getFragment(
+        const std::string &name) const {
+        if (!fragments.contains(name)) {
+            throw std::runtime_error("NOt fragment with name: " + name);
+        };
+        return fragments.at(name);
     };
 
     void addNode(const SchemaNode &schemaNode) {
@@ -109,6 +136,10 @@ struct TypeRegistry {
                                } },
                    schemaNode);
     };
+
+    void addFragment(const std::shared_ptr<Fragment> &fragment) {
+        fragments[fragment->name] = fragment;
+    };
 };
 
 std::shared_ptr<Union> parseUnion(const ast::UnionDefinitionNode &node,
@@ -116,9 +147,10 @@ std::shared_ptr<Union> parseUnion(const ast::UnionDefinitionNode &node,
     return std::make_shared<Union>(
         node.name.name,
         node.values |
-            std::views::transform([&registry](const shared::ast::NameNode &nNode) {
-                return registry.getObjectOrLazy(nNode.name);
-            }) |
+            std::views::transform(
+                [&registry](const shared::ast::NameNode &nNode) {
+                    return registry.getObjectOrLazy(nNode.name);
+                }) |
             std::ranges::to<std::vector>());
 };
 
@@ -143,6 +175,23 @@ std::pair<NonCallableFieldSpec<T>, bool> parseNonCallableTypeSpec(
         astNode);
 };
 
+FieldDefinition<InputFieldSpec> parseInputFieldDefinition(
+    const shared::ast::InputValueDefinitionNode &node,
+    const TypeRegistry &registry) {
+    const auto &[returnType, nullable] = parseNonCallableTypeSpec(
+        node.type,
+        (std::function<NodeOrLazy<InputTypeSpec>(
+             const std::string &)>)[&registry](const std::string &name) {
+            return registry.getTypeForInputOrLazy(name);
+        });
+    const InputFieldSpec &returnTypeSpec = std::visit(
+        [](auto &&arg) -> InputFieldSpec { return arg; }, returnType);
+
+    return { .name = node.name.name,
+             .spec = returnTypeSpec,
+             .nullable = nullable };
+};
+
 std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
     const ast::FieldDefinitionNode &astNode, const TypeRegistry &registry) {
     const auto &[returnType, nullable] = parseNonCallableTypeSpec(
@@ -158,23 +207,11 @@ std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
         .returnType = returnType,
         .arguments =
             astNode.arguments |
-            std::views::transform([&registry](
-                                      const shared::ast::InputValueDefinitionNode &node)
-                                      -> FieldDefinition<InputFieldSpec> {
-                const auto &[returnType, nullable] = parseNonCallableTypeSpec(
-                    node.type, (std::function<NodeOrLazy<InputTypeSpec>(
-                                    const std::string &)>)[&registry](
-                                   const std::string &name) {
-                        return registry.getTypeForInputOrLazy(name);
-                    });
-                const InputFieldSpec &returnTypeSpec =
-                    std::visit([](auto &&arg) -> InputFieldSpec { return arg; },
-                               returnType);
-
-                return { .name = node.name.name,
-                         .spec = returnTypeSpec,
-                         .nullable = nullable };
-            }) |
+            std::views::transform(
+                [&registry](const shared::ast::InputValueDefinitionNode &node)
+                    -> FieldDefinition<InputFieldSpec> {
+                    return parseInputFieldDefinition(node, registry);
+                }) |
             std::ranges::to<std::vector>()
     };
     return { callableSpec, nullable };
@@ -245,52 +282,48 @@ std::shared_ptr<ObjectType> parseObject(const ast::ObjectDefinitionNode &node,
             std::ranges::to<std::vector>());
 };
 
-std::pair<std::string, SchemaNode> parseServerNode(
-    const ast::TypeDefinitionNode &astNode, const TypeRegistry &registry) {
-    return std::visit<std::pair<std::string, SchemaNode>>(
+SchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
+                           const TypeRegistry &registry) {
+    return std::visit<SchemaNode>(
         overloaded{
             [&registry](const ast::ScalarDefinitionNode &node)
-                -> std::pair<std::string, std::shared_ptr<Scalar>> {
+                -> std::shared_ptr<Scalar> {
                 if (registry.scalars.contains(node.name.name)) {
                     throw std::runtime_error(std::format(
                         "Scalar with name {} already exists", node.name.name));
                 };
-                return { node.name.name,
-                         std::make_shared<Scalar>(node.name.name) };
+                return std::make_shared<Scalar>(node.name.name);
             },
-            [&registry](const ast::EnumDefinitionNode &node)
-                -> std::pair<std::string, std::shared_ptr<Enum>> {
+            [&registry](
+                const ast::EnumDefinitionNode &node) -> std::shared_ptr<Enum> {
                 if (registry.enums.contains(node.name.name)) {
                     throw std::runtime_error(std::format(
                         "Enum with name {} already exists", node.name.name));
                 };
-                return {
+                return std::make_shared<Enum>(
                     node.name.name,
-                    std::make_shared<Enum>(
-                        node.name.name,
-                        node.values |
-                            std::views::transform(
-                                [](const ast::EnumValueDefinitionNode &vNode) {
-                                    return vNode.value.name;
-                                }) |
-                            std::ranges::to<std::vector>())
-                };
+                    node.values |
+                        std::views::transform(
+                            [](const ast::EnumValueDefinitionNode &vNode) {
+                                return vNode.value.name;
+                            }) |
+                        std::ranges::to<std::vector>());
             },
             [&registry](const ast::UnionDefinitionNode &node)
-                -> std::pair<std::string, std::shared_ptr<Union>> {
-                return { node.name.name, parseUnion(node, registry) };
+                -> std::shared_ptr<Union> {
+                return parseUnion(node, registry);
             },
             [&registry](const ast::InterfaceDefinitionNode &node)
-                -> std::pair<std::string, std::shared_ptr<Interface>> {
-                return { node.name.name, parseInterface(node, registry) };
+                -> std::shared_ptr<Interface> {
+                return parseInterface(node, registry);
             },
             [&registry](const ast::InputObjectDefinitionNode &node)
-                -> std::pair<std::string, std::shared_ptr<InputType>> {
-                return { node.name.name, parseInput(node, registry) };
+                -> std::shared_ptr<InputType> {
+                return parseInput(node, registry);
             },
             [&registry](const ast::ObjectDefinitionNode &node)
-                -> std::pair<std::string, std::shared_ptr<ObjectType>> {
-                return { node.name.name, parseObject(node, registry) };
+                -> std::shared_ptr<ObjectType> {
+                return parseObject(node, registry);
             },
         },
         astNode);
@@ -458,21 +491,192 @@ SchemaNode replaceLazyNodes(const SchemaNode &sNode,
         sNode);
 };
 
-std::vector<SchemaNode> parsers::schema::parseSchema(
-    std::vector<ast::FileNodes> astArray) {
-    std::vector<SchemaNode> nodes;
+Selection parseSelectionNode(const client::ast::SelectionNode &sNode,
+                             const TypeRegistry &registry);
+
+FragmentSpec parseFragmentSpec(const client::ast::FragmentSpec &spec,
+                               const TypeRegistry &registry) {
+    return { .selections =
+                 spec.selections |
+                 std::views::transform([&registry](const auto &selection) {
+                     return parseSelectionNode(selection, registry);
+                 }) |
+                 std::ranges::to<std::vector>() };
+};
+
+Selection parseSelectionNode(const client::ast::SelectionNode &sNode,
+                             const TypeRegistry &registry) {
+    return std::visit<Selection>(
+        overloaded{
+            [&registry](
+                const client::ast::FieldSelectionNode &node) -> FieldSelection {
+                return (FieldSelection){
+                    .name = node.field.selectionName.name,
+                    .alias = node.field.name.name,
+                    .selection = node.spec.transform(
+                        [&registry](const auto &fragmentSpec) {
+                            return std::make_shared<FragmentSpec>(
+                                parseFragmentSpec(*fragmentSpec.get(),
+                                                  registry));
+                        })
+                };
+            },
+            [&registry](const client::ast::SpreadSelectionNode &node)
+                -> SpreadSelection {
+                return (SpreadSelection){ .fragment =
+                                              registry.getFragmentOrLazy(
+                                                  node.fragmentName.name) };
+            },
+            [&registry](const client::ast::ConditionalSpreadSelectionNode &node)
+                -> ConditionalSpreadSelection {
+                return (ConditionalSpreadSelection){
+                    .type = registry.getObjectOrUnion(node.typeName.name),
+                    .selection = std::make_shared<FragmentSpec>(
+                        parseFragmentSpec(*node.fragment.get(), registry))
+                };
+            } },
+        sNode);
+};
+
+ClientSchemaNode parseClientDefinition(
+    const client::ast::ClientDefinition &definition,
+    const TypeRegistry &registry) {
+    return std::visit<ClientSchemaNode>(
+        overloaded{
+            [&registry](const client::ast::FragmentDefinition &node) {
+                return std::make_shared<Fragment>(
+                    node.name.name, node.typeName.name,
+                    std::make_shared<FragmentSpec>(
+                        node.spec.selections |
+                        std::views::transform([&registry](const auto &sNode) {
+                            return parseSelectionNode(sNode, registry);
+                        }) |
+                        std::ranges::to<std::vector>()));
+            },
+            [&registry](const client::ast::OperationDefinition &node) {
+                return std::make_shared<Operation>(
+                    node.type, node.name.name,
+                    node.parameters |
+                        std::views::transform([&registry](const auto &arg) {
+                            return parseInputFieldDefinition(arg, registry);
+                        }) |
+                        std::ranges::to<std::vector>(),
+                    node.spec.name.name, node.spec.selectionName.name,
+                    node.spec.args |
+                        std::views::transform(
+                            [](const auto &arg)
+                                -> std::pair<std::string, std::string> {
+                                return { arg.paramName.name, arg.name.name };
+                            }) |
+                        std::ranges::to<std::map>(),
+                    std::make_shared<FragmentSpec>(
+                        parseFragmentSpec(node.fragment, registry)));
+            } },
+        definition);
+};
+
+std::shared_ptr<FragmentSpec> replaceFragmentSpecLazyNodes(
+    const std::shared_ptr<FragmentSpec> &fSpec, const TypeRegistry &registry);
+
+Selection replaceSelectionNodeLazyNodes(const Selection &sNode,
+                                        const TypeRegistry &registry) {
+    return std::visit<Selection>(
+        overloaded{
+            [&registry](const FieldSelection &node) {
+                return (FieldSelection){
+                    .name = node.name,
+                    .alias = node.alias,
+                    .selection = node.selection.transform(
+                        [&registry](const auto &fSpec) {
+                            return replaceFragmentSpecLazyNodes(fSpec,
+                                                                registry);
+                        })
+                };
+            },
+            [&registry](const SpreadSelection &node) {
+                if (std::holds_alternative<LazySchemaNode>(node.fragment)) {
+                    return (SpreadSelection){
+                        .fragment = registry.getFragment(
+                            std::get<LazySchemaNode>(node.fragment).name)
+                    };
+                };
+                return node;
+            },
+            [&registry](const ConditionalSpreadSelection &node) {
+                return (ConditionalSpreadSelection){
+                    .type = node.type,
+                    .selection =
+                        replaceFragmentSpecLazyNodes(node.selection, registry)
+                };
+            } },
+        sNode);
+}
+
+std::shared_ptr<FragmentSpec> replaceFragmentSpecLazyNodes(
+    const std::shared_ptr<FragmentSpec> &fSpec, const TypeRegistry &registry) {
+    return std::make_shared<FragmentSpec>(
+        fSpec->selections |
+        std::views::transform([&registry](const auto &sNode) {
+            return replaceSelectionNodeLazyNodes(sNode, registry);
+        }) |
+        std::ranges::to<std::vector>());
+};
+
+ClientSchemaNode replaceClientLazyNodes(const ClientSchemaNode &sNode,
+                                        const TypeRegistry &registry) {
+    return std::visit<ClientSchemaNode>(
+        overloaded{
+            [&registry](const std::shared_ptr<Fragment> &node) {
+                return std::make_shared<Fragment>(
+                    node->name, node->typeName,
+                    replaceFragmentSpecLazyNodes(node->spec, registry));
+            },
+            [&registry](const std::shared_ptr<Operation> &node) {
+                return std::make_shared<Operation>(
+                    node->type, node->name,
+                    node->arguments |
+                        std::views::transform([&registry](const auto &arg) {
+                            return replaceInputFieldLazyNodes(arg, registry);
+                        }) |
+                        std::ranges::to<std::vector>(),
+                    node->opName, node->returnFieldName, node->argumentsMapping,
+                    replaceFragmentSpecLazyNodes(node->fragmentSpec, registry));
+            } },
+        sNode);
+};
+
+Schema parsers::schema::parseSchema(
+    std::vector<ast::FileNodes> astArray,
+    std::vector<client::ast::ClientDefinition> clientDefinitions) {
+    Schema schema;
     TypeRegistry registry;
-    for (const auto &ast : astArray) {
-        for (const auto &astNode : ast.definitions) {
-            const auto &[name, node] = parseServerNode(astNode, registry);
-            nodes.emplace_back(node);
+    schema.serverNodes =
+        astArray |
+        std::views::transform([](const auto &ast) { return ast.definitions; }) |
+        std::views::join |
+        std::views::transform([&registry](const auto &astNode) {
+            const auto &node = parseServerNode(astNode, registry);
             registry.addNode(node);
-        };
-    };
-    std::vector<SchemaNode> finalNodes =
-        nodes | std::views::transform([&registry](auto &sNode) {
+            return node;
+        }) |
+        std::ranges::to<std::vector>() |
+        std::views::transform([&registry](auto &sNode) {
             return replaceLazyNodes(sNode, registry);
         }) |
         std::ranges::to<std::vector>();
-    return finalNodes;
+    schema.clientNodes =
+        clientDefinitions |
+        std::views::transform([&registry](const auto &definition) {
+            const auto &node = parseClientDefinition(definition, registry);
+            if (std::holds_alternative<std::shared_ptr<Fragment>>(node)) {
+                registry.addFragment(std::get<std::shared_ptr<Fragment>>(node));
+            };
+            return node;
+        }) |
+        std::ranges::to<std::vector>() |
+        std::views::transform([&registry](const auto &node) {
+            return replaceClientLazyNodes(node, registry);
+        }) |
+        std::ranges::to<std::vector>();
+    return schema;
 };
