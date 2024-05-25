@@ -1,7 +1,5 @@
 #include "./lexer.hpp"
 
-#include <_ctype.h>
-
 #include <algorithm>
 #include <cctype>
 #include <format>
@@ -60,8 +58,8 @@ std::optional<LexerError> LexerState::feed(char c) noexcept {
 };
 
 std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
-    if (isalpha(c) || c == '_') return ComplexTokenType::IDENTIFIER;
-    if (isnumber(c)) return ComplexTokenType::NUMBER;
+    if (std::isalpha(c) || c == '_') return ComplexTokenType::IDENTIFIER;
+    if (std::isdigit(c)) return ComplexTokenType::NUMBER;
     if (c == '"') return ComplexTokenType::STRING;
     switch (c) {
         case '!':
@@ -105,7 +103,7 @@ std::optional<LexerError> LexerState::feedWithType(
     char c, ComplexTokenType tokenType) noexcept {
     switch (tokenType) {
         case ComplexTokenType::NUMBER: {
-            if (!isnumber(c)) {
+            if (!std::isdigit(c)) {
                 extractAndSaveToken();
                 return std::nullopt;
             };
@@ -127,7 +125,7 @@ std::optional<LexerError> LexerState::feedWithType(
         };
         case ComplexTokenType::BOOLEAN:
         case ComplexTokenType::IDENTIFIER: {
-            if (!(isalpha(c) || isnumber(c) || c == '_' || c == '-')) {
+            if (!(std::isalpha(c) || std::isdigit(c) || c == '_' || c == '-')) {
                 extractAndSaveToken();
                 return std::nullopt;
             };
