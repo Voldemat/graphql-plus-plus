@@ -1,7 +1,7 @@
 #ifndef GRAPHQL_JSON_PARSER
 #define GRAPHQL_JSON_PARSER
 
-#include <__expected/expected.h>
+#include <expected>
 #include <rapidjson/document.h>
 #include <rapidjson/encodings.h>
 
