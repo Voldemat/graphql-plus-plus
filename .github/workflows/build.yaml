@@ -9,9 +9,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: wget https://apt.llvm.org/llvm.sh && sudo chmod +x ./llvm.sh && sudo ./llvm.sh 19 && ls /usr/local/include/
+      run: wget https://apt.llvm.org/llvm.sh && sudo chmod +x ./llvm.sh && sudo ./llvm.sh 19
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
+      env:
+        CC: clang
+        CXX: clang++
       with:
         args: -DCMAKE_CXX_FLAGS='-D__cpp_concepts=202002L -fexperimental-library' -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
         run-build: true
