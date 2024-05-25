@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: wget https://apt.llvm.org/llvm.sh && sudo chmod +x ./llvm.sh && sudo ./llvm.sh 19
+      run: wget https://apt.llvm.org/llvm.sh && sudo chmod +x ./llvm.sh && sudo ./llvm.sh 19 && ls /usr/include/c++ && clang --version && printenv
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       with:
