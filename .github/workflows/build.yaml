@@ -17,7 +17,7 @@ jobs:
         save-always: true
     - name: Install llvm
       if: steps.cache-primes.outputs.cache-hit != 'true'
-      run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ninja-build && cd ./scripts/ && wget --quiet -O clang.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.6/clang+llvm-18.1.6-armv7a-linux-gnueabihf.tar.gz && tar -xzf clang.tar.xz && ls && mv clang+llvm-18.1.6-armv7a-linux-gnueabihf.tar.gz llvm
+      run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ninja-build && cd ./scripts/ && wget --quiet -O clang.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.6/clang+llvm-18.1.6-armv7a-linux-gnueabihf.tar.gz && tar -xzf clang.tar.xz && mv clang+llvm-18.1.6-armv7a-linux-gnueabihf llvm
     - name: Check
       run: ls ./scripts/ && ls ./scripts/llvm/ && ls ./scripts/llvm/bin/
     - name: CMake Action
