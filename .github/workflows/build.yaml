@@ -12,12 +12,11 @@ jobs:
       run: sudo apt update && sudo apt-get install --no-install-recommends -y libc++-18-dev clang-18
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
-      env:
-        CC: clang-18
-        CXX: clang++-18
       with:
-        args: -DCMAKE_POLICY_DEFAULT_CMP0025=NEW -DCMAKE_CXX_COMPILER_FORCED=1 -DCMAKE_C_COMPILER_FORCED=1
+        args: -DCMAKE_POLICY_DEFAULT_CMP0025=NEW
         run-build: true
+        c-compiler: clang-18
+        cxx-compiler: clang++-18
     - uses: actions/upload-artifact@v4
       with:
         name: 'ubuntu-cli'
