@@ -26,6 +26,7 @@ jobs:
         CC: ./scripts/llvm/bin/clang
         CXX: ./scripts/llvm/bin/clang++
       with:
+        args: -DCMAKE_CXX_COMPILER_FORCED=1 -DCMAKE_C_COMPILER_FORCED=1
         run-build: true
     - uses: actions/upload-artifact@v4
       with:
