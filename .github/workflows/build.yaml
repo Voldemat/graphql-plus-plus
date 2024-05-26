@@ -8,29 +8,21 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v3
-    - name: Cache LLVM Build
-      id: cache-llvm-build
-      uses: actions/cache@v4
+    - name: "Install clang"
+      run: sudo apt update && sudo apt-get install --no-install-recommends -y libc++-18-dev clang-18
+    - name: CMake Action
+      uses: threeal/cmake-action@v1.3.0
+      env:
+        CC: clang-18
+        CXX: clang++-18
       with:
-        path: ./scripts/llvm/build/
-        key: ${{ runner.os }}-llvm-build
-        save-always: true
-    - name: Install llvm
-      if: steps.cache-primes.outputs.cache-hit != 'true'
-      run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ninja-build && sh ./scripts/build-llvm-from-source.sh
-        #- name: CMake Action
-        #  uses: threeal/cmake-action@v1.3.0
-        #  env:
-        #    CC: ./scripts/llvm/bin/clang
-        #    CXX: ./scripts/llvm/bin/clang++
-        #  with:
-        #    args: -DCMAKE_CXX_COMPILER_FORCED=1 -DCMAKE_C_COMPILER_FORCED=1
-        #    run-build: true
-        #- uses: actions/upload-artifact@v4
-        #  with:
-        #    name: 'ubuntu-cli'
-        #    path: build/gql
-        #    if-no-files-found: error
-        #    retention-days: 90
-        #    compression-level: 6
-        #    overwrite: true
+        args: -DCMAKE_CXX_COMPILER_FORCED=1 -DCMAKE_C_COMPILER_FORCED=1
+        run-build: true
+    - uses: actions/upload-artifact@v4
+      with:
+        name: 'ubuntu-cli'
+        path: build/gql
+        if-no-files-found: error
+        retention-days: 90
+        compression-level: 6
+        overwrite: true
