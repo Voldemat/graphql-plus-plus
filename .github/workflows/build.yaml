@@ -13,7 +13,7 @@ jobs:
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       with:
-        args: -DCMAKE_POLICY_DEFAULT_CMP0025=NEW
+        args: -D__cpp_concepts=202002L
         run-build: true
         c-compiler: clang-18
         cxx-compiler: clang++-18
