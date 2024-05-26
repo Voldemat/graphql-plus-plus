@@ -16,7 +16,7 @@ jobs:
         key: ${{ runner.os }}-llvm-build
     - name: Install llvm
       if: steps.cache-primes.outputs.cache-hit != 'true'
-      run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ninja && sh ./scripts/build-llvm-from-source.sh
+      run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ninja-build && sh ./scripts/build-llvm-from-source.sh
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       env:
