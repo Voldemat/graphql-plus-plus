@@ -12,27 +12,25 @@ jobs:
       id: cache-llvm-build
       uses: actions/cache@v4
       with:
-        path: ./scripts/llvm/
+        path: ./scripts/llvm/build/
         key: ${{ runner.os }}-llvm-build
         save-always: true
     - name: Install llvm
       if: steps.cache-primes.outputs.cache-hit != 'true'
-      run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ninja-build && cd ./scripts/ && wget --quiet -O clang.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.6/clang+llvm-18.1.6-armv7a-linux-gnueabihf.tar.gz && tar -xzf clang.tar.xz && mv clang+llvm-18.1.6-armv7a-linux-gnueabihf llvm
-    - name: Check
-      run: echo 'int main() { return 0; };' > check.c && clang check.c -o main && ./main
-    - name: CMake Action
-      uses: threeal/cmake-action@v1.3.0
-      env:
-        CC: ./scripts/llvm/bin/clang
-        CXX: ./scripts/llvm/bin/clang++
-      with:
-        args: -DCMAKE_CXX_COMPILER_FORCED=1 -DCMAKE_C_COMPILER_FORCED=1
-        run-build: true
-    - uses: actions/upload-artifact@v4
-      with:
-        name: 'ubuntu-cli'
-        path: build/gql
-        if-no-files-found: error
-        retention-days: 90
-        compression-level: 6
-        overwrite: true
+      run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ninja-build && sh ./scripts/build-llvm-from-source.sh
+        #- name: CMake Action
+        #  uses: threeal/cmake-action@v1.3.0
+        #  env:
+        #    CC: ./scripts/llvm/bin/clang
+        #    CXX: ./scripts/llvm/bin/clang++
+        #  with:
+        #    args: -DCMAKE_CXX_COMPILER_FORCED=1 -DCMAKE_C_COMPILER_FORCED=1
+        #    run-build: true
+        #- uses: actions/upload-artifact@v4
+        #  with:
+        #    name: 'ubuntu-cli'
+        #    path: build/gql
+        #    if-no-files-found: error
+        #    retention-days: 90
+        #    compression-level: 6
+        #    overwrite: true
