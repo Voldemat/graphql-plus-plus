@@ -228,7 +228,9 @@ void createParserSubcommand(CLI::App *app) {
             const auto &tokens = tokensAccumulator.getTokens();
             client::Parser parser(tokens, source);
             try {
-                operations.append_range(parser.parse());
+                for (const auto& el : parser.parse()) {
+                    operations.push_back(el);
+                };
             } catch (const shared::ParserError &exc) {
                 std::cerr << formatError(exc, source) << std::endl;
                 throw CLI::RuntimeError(1);
