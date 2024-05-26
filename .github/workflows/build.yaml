@@ -13,7 +13,7 @@ jobs:
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       with:
-        args: -DCMAKE_CXX_FLAGS='-fexperimental-library -D__cpp_concepts=202002L'
+        args: -DCMAKE_CXX_FLAGS="-fexperimental-library -D__cpp_concepts=202002L"
         run-build: true
         c-compiler: clang-18
         cxx-compiler: clang++-18
