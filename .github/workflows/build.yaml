@@ -16,7 +16,7 @@ jobs:
         CC: clang-18
         CXX: clang++-18
       with:
-        args: -DCMAKE_INSTALL_LIBDIR=/usr/ -DCMAKE_CXX_COMPILER_FORCED=1 -DCMAKE_C_COMPILER_FORCED=1
+        args: -DCMAKE_POLICY_DEFAULT_CMP0025=NEW -DCMAKE_CXX_COMPILER_FORCED=1 -DCMAKE_C_COMPILER_FORCED=1
         run-build: true
     - uses: actions/upload-artifact@v4
       with:
