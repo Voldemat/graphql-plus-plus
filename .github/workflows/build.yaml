@@ -19,7 +19,7 @@ jobs:
       if: steps.cache-primes.outputs.cache-hit != 'true'
       run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ninja-build && cd ./scripts/ && wget --quiet -O clang.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.6/clang+llvm-18.1.6-armv7a-linux-gnueabihf.tar.gz && tar -xzf clang.tar.xz && mv clang+llvm-18.1.6-armv7a-linux-gnueabihf llvm
     - name: Check
-      run: echo 'int main() { return 0; };' > check.c && clang check.c -o main ./main
+      run: echo 'int main() { return 0; };' > check.c && clang check.c -o main && ./main
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       env:
