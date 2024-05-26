@@ -17,6 +17,8 @@ jobs:
     - name: Install llvm
       if: steps.cache-primes.outputs.cache-hit != 'true'
       run: sudo apt-get update && sudo apt-get install --no-install-recommends -y ninja-build && sh ./scripts/build-llvm-from-source.sh
+    - name: Check
+      run: ls ./scripts/ && ls ./scripts/llvm/ && ls ./scripts/llvm/build/ && ls ./scripts/llvm/build/bin/
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       env:
