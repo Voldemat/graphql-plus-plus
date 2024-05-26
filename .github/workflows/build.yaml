@@ -8,15 +8,14 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v3
-    - name: Install dependencies
-      run: wget https://apt.llvm.org/llvm.sh && sudo chmod +x ./llvm.sh && sudo ./llvm.sh 19
+    - name: Install llvm
+      run: sh ./scripts/build-llvm-from-source.sh
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       env:
-        CC: clang
-        CXX: clang++
+        CC: ./scripts/llvm/build/bin/clang
+        CXX: ./scripts/llvm/build/bin/clang++
       with:
-        args: -DCMAKE_CXX_FLAGS='-D__cpp_concepts=202002L -fexperimental-library' -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
         run-build: true
     - uses: actions/upload-artifact@v4
       with:

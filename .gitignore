@@ -1,3 +1,5 @@
 build
 .cache
 cases-lock.ls
+CMakeUserPresets.json
+.clangd
