@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28.1)
-project(graphql++ VERSION 0.0.1 LANGUAGE C CXX)
+project(graphql++ VERSION 0.0.1 LANGUAGES C CXX)
 mark_as_advanced(CMAKE_MAKE_PROGRAM)
 include(GNUInstallDirs)
 include(CMakePrintHelpers)
