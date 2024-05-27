@@ -115,6 +115,10 @@ struct ObjectType {
     std::vector<NodeOrLazy<std::shared_ptr<Interface>>> implements;
 };
 
+struct ExtendObjectType {
+    ObjectType type;
+};
+
 using SchemaNode =
     std::variant<std::shared_ptr<ObjectType>, std::shared_ptr<Interface>,
                  std::shared_ptr<Scalar>, std::shared_ptr<Union>,

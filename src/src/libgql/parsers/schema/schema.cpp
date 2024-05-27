@@ -1,5 +1,6 @@
 #include "./schema.hpp"
 
+#include <algorithm>
 #include <format>
 #include <functional>
 #include <map>
@@ -22,6 +23,10 @@ using namespace parsers::schema;
 using namespace parsers::server;
 
 struct TypeRegistry {
+    std::map<std::string, const FieldDefinition<ObjectFieldSpec> *> queries;
+    std::map<std::string, const FieldDefinition<ObjectFieldSpec> *> mutations;
+    std::map<std::string, const FieldDefinition<ObjectFieldSpec> *>
+        subscriptions;
     std::map<std::string, std::shared_ptr<ObjectType>> objects;
     std::map<std::string, std::shared_ptr<InputType>> inputs;
     std::map<std::string, std::shared_ptr<Interface>> interfaces;
@@ -95,7 +100,8 @@ struct TypeRegistry {
             std::format("Object or Union with name {} is not found", name));
     };
 
-    [[nodiscard]] std::shared_ptr<ObjectType> getObject(const std::string& name) const {
+    [[nodiscard]] std::shared_ptr<ObjectType> getObject(
+        const std::string &name) const {
         if (objects.contains(name)) return objects.at(name);
         throw std::runtime_error(
             std::format("Object with name {} is not found", name));
@@ -115,8 +121,20 @@ struct TypeRegistry {
         return fragments.at(name);
     };
 
+    void addOpIfNotExists(
+        const FieldDefinition<ObjectFieldSpec> *field,
+        std::map<std::string, const FieldDefinition<ObjectFieldSpec> *>
+            mapping) {
+        if (mapping.contains(field->name)) {
+            throw std::runtime_error(std::format(
+                "Operation with name: \"{}\" already exists", field->name));
+        };
+        mapping[field->name] = field;
+    };
+
     void addNode(const SchemaNode &schemaNode) {
         std::visit(overloaded{ [this](const std::shared_ptr<ObjectType> &node) {
+                                  appendOpsIfSpecialObject(*node);
                                   objects[node->name] = node;
                               },
                                [this](const std::shared_ptr<Interface> &node) {
@@ -139,6 +157,41 @@ struct TypeRegistry {
 
     void addFragment(const std::shared_ptr<Fragment> &fragment) {
         fragments[fragment->name] = fragment;
+    };
+
+    void appendOpsIfSpecialObject(const ObjectType &obj) {
+        if (obj.name == "Query") {
+            for (auto &field : obj.fields) {
+                addOpIfNotExists(&field, queries);
+            };
+        } else if (obj.name == "Mutation") {
+            for (auto &field : obj.fields) {
+                addOpIfNotExists(&field, mutations);
+            };
+        } else if (obj.name == "Subscription") {
+            for (auto &field : obj.fields) {
+                addOpIfNotExists(&field, subscriptions);
+            };
+        };
+    };
+
+    void patchObject(const ExtendObjectType &node) {
+        if (!objects.contains(node.type.name)) {
+            throw std::runtime_error(std::format(
+                "Type with name \"{}\" does not exists", node.type.name));
+        };
+        auto &object = objects[node.type.name];
+        for (auto &newField : node.type.fields) {
+            if (std::find_if(object->fields.begin(), object->fields.end(),
+                             [&newField](const auto &field) {
+                                 return field.name == newField.name;
+                             }) != object->fields.end()) {
+                throw std::runtime_error(std::format(
+                    "Field with name \"{}\" already exists", newField.name));
+            };
+            object->fields.push_back(newField);
+        };
+        appendOpsIfSpecialObject(node.type);
     };
 };
 
@@ -265,21 +318,20 @@ std::shared_ptr<InputType> parseInput(
             std::ranges::to<std::vector>());
 };
 
-std::shared_ptr<ObjectType> parseObject(const ast::ObjectDefinitionNode &node,
-                                        const TypeRegistry &registry) {
-    return std::make_shared<ObjectType>(
-        node.name.name,
-        node.fields |
-            std::views::transform(
-                [&registry](const ast::FieldDefinitionNode &defNode)
-                    -> FieldDefinition<ObjectFieldSpec> {
-                    const auto &[typeSpec, nullable] =
-                        parseObjectTypeSpec(defNode, registry);
-                    return { .name = defNode.name.name,
-                             .spec = typeSpec,
-                             .nullable = nullable };
-                }) |
-            std::ranges::to<std::vector>());
+ObjectType parseObject(const ast::ObjectDefinitionNode &node,
+                       const TypeRegistry &registry) {
+    return { .name = node.name.name,
+             .fields = node.fields |
+                       std::views::transform(
+                           [&registry](const ast::FieldDefinitionNode &defNode)
+                               -> FieldDefinition<ObjectFieldSpec> {
+                               const auto &[typeSpec, nullable] =
+                                   parseObjectTypeSpec(defNode, registry);
+                               return { .name = defNode.name.name,
+                                        .spec = typeSpec,
+                                        .nullable = nullable };
+                           }) |
+                       std::ranges::to<std::vector>() };
 };
 
 SchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
@@ -323,7 +375,8 @@ SchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
             },
             [&registry](const ast::ObjectDefinitionNode &node)
                 -> std::shared_ptr<ObjectType> {
-                return parseObject(node, registry);
+                return std::make_shared<ObjectType>(
+                    parseObject(node, registry));
             },
         },
         astNode);
@@ -645,6 +698,11 @@ ClientSchemaNode replaceClientLazyNodes(const ClientSchemaNode &sNode,
         sNode);
 };
 
+ExtendObjectType parseExtendObjectType(const ast::ExtendTypeNode &node,
+                                       const TypeRegistry &registry) {
+    return { .type = parseObject(node.typeNode, registry) };
+};
+
 Schema parsers::schema::parseSchema(
     std::vector<ast::FileNodes> astArray,
     std::vector<client::ast::ClientDefinition> clientDefinitions) {
@@ -664,6 +722,11 @@ Schema parsers::schema::parseSchema(
             return replaceLazyNodes(sNode, registry);
         }) |
         std::ranges::to<std::vector>();
+    for (const auto &ast : astArray) {
+        for (const auto &node : ast.extensions) {
+            registry.patchObject(parseExtendObjectType(node, registry));
+        };
+    };
     schema.clientNodes =
         clientDefinitions |
         std::views::transform([&registry](const auto &definition) {
