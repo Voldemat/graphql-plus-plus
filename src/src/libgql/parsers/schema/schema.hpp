@@ -158,7 +158,7 @@ struct Operation {
     client::ast::OpType type;
     std::string name;
     std::vector<FieldDefinition<InputFieldSpec>> arguments;
-    std::string opName;
+    const FieldDefinition<ObjectFieldSpec>* operation;
     std::string returnFieldName;
     std::map<std::string, std::string> argumentsMapping;
     std::shared_ptr<FragmentSpec> fragmentSpec;
@@ -172,7 +172,7 @@ struct Schema {
     std::vector<ClientSchemaNode> clientNodes;
 };
 
-Schema parseSchema(
+const Schema parseSchema(
     std::vector<parsers::server::ast::FileNodes> astArray,
     std::vector<parsers::client::ast::ClientDefinition> definitions);
 

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <format>
 #include <functional>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -121,10 +122,33 @@ struct TypeRegistry {
         return fragments.at(name);
     };
 
+    [[nodiscard]] const std::map<std::string,
+                                 const FieldDefinition<ObjectFieldSpec> *> &
+    getMappingForOp(client::ast::OpType type) const {
+        switch (type) {
+            case client::ast::OpType::QUERY:
+                return queries;
+            case client::ast::OpType::MUTATION:
+                return mutations;
+            case client::ast::OpType::SUBSCRIPTION:
+                return subscriptions;
+        };
+    };
+
+    [[nodiscard]] const FieldDefinition<ObjectFieldSpec> *getOp(
+        client::ast::OpType type, const std::string &name) const {
+        const auto &mapping = getMappingForOp(type);
+        if (!mapping.contains(name)) {
+            throw std::runtime_error(
+                std::format("Operation \"{}\" does not exists", name));
+        };
+        return mapping.at(name);
+    };
+
     void addOpIfNotExists(
         const FieldDefinition<ObjectFieldSpec> *field,
         std::map<std::string, const FieldDefinition<ObjectFieldSpec> *>
-            mapping) {
+            &mapping) {
         if (mapping.contains(field->name)) {
             throw std::runtime_error(std::format(
                 "Operation with name: \"{}\" already exists", field->name));
@@ -162,6 +186,7 @@ struct TypeRegistry {
     void appendOpsIfSpecialObject(const ObjectType &obj) {
         if (obj.name == "Query") {
             for (auto &field : obj.fields) {
+                std::cout << "Appending query op: " << field.name << std::endl;
                 addOpIfNotExists(&field, queries);
             };
         } else if (obj.name == "Mutation") {
@@ -614,7 +639,8 @@ ClientSchemaNode parseClientDefinition(
                             return parseInputFieldDefinition(arg, registry);
                         }) |
                         std::ranges::to<std::vector>(),
-                    node.spec.name.name, node.spec.selectionName.name,
+                    registry.getOp(node.type, node.spec.name.name),
+                    node.spec.selectionName.name,
                     node.spec.args |
                         std::views::transform(
                             [](const auto &arg)
@@ -692,7 +718,8 @@ ClientSchemaNode replaceClientLazyNodes(const ClientSchemaNode &sNode,
                             return replaceInputFieldLazyNodes(arg, registry);
                         }) |
                         std::ranges::to<std::vector>(),
-                    node->opName, node->returnFieldName, node->argumentsMapping,
+                    node->operation, node->returnFieldName,
+                    node->argumentsMapping,
                     replaceFragmentSpecLazyNodes(node->fragmentSpec, registry));
             } },
         sNode);
@@ -703,7 +730,7 @@ ExtendObjectType parseExtendObjectType(const ast::ExtendTypeNode &node,
     return { .type = parseObject(node.typeNode, registry) };
 };
 
-Schema parsers::schema::parseSchema(
+const Schema parsers::schema::parseSchema(
     std::vector<ast::FileNodes> astArray,
     std::vector<client::ast::ClientDefinition> clientDefinitions) {
     Schema schema;
