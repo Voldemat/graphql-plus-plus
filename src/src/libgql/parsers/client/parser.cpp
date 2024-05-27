@@ -1,5 +1,7 @@
 #include "./parser.hpp"
 
+#include <algorithm>
+#include <format>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -65,7 +67,8 @@ ast::OperationArg Parser::parseOperationArg() {
     return { .location = location, .name = name, .paramName = paramName };
 };
 
-ast::OperationSpec Parser::parseOperationSpec() {
+ast::OperationSpec Parser::parseOperationSpec(
+    const std::vector<shared::ast::InputValueDefinitionNode> &parameters) {
     const auto &[name, selectionName] = parseNameAndSelectionName();
     shared::ast::NodeLocation location = {
         .startToken = selectionName.location.startToken, .source = source
@@ -73,7 +76,19 @@ ast::OperationSpec Parser::parseOperationSpec() {
     std::vector<ast::OperationArg> args;
     if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
         while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            args.push_back(parseOperationArg());
+            const auto &arg = parseOperationArg();
+            if (std::find_if(
+                    parameters.begin(), parameters.end(),
+                    [&arg](const shared::ast::InputValueDefinitionNode &param) {
+                        return param.name.name == arg.paramName.name;
+                    }) == parameters.end()) {
+                throw shared::ParserError(
+                    arg.paramName.location.startToken,
+                    std::format("No param with name \"{}\" is defined in "
+                                "operation definition",
+                                arg.paramName.name));
+            };
+            args.push_back(arg);
             consumeIfIsAhead(SimpleTokenType::COMMA);
         };
         consume(SimpleTokenType::RIGHT_PAREN);
@@ -98,7 +113,7 @@ ast::OperationDefinition Parser::parseOperationDefinition() {
         consume(SimpleTokenType::RIGHT_PAREN);
     };
     consume(SimpleTokenType::LEFT_BRACE);
-    const auto &spec = parseOperationSpec();
+    const auto &spec = parseOperationSpec(parameters);
     ast::FragmentSpec fragment = parseFragmentSpec();
     consume(SimpleTokenType::RIGHT_BRACE);
     location.endToken = currentToken;

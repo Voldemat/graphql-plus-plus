@@ -43,7 +43,7 @@ class Parser {
     ast::FieldSelectionNode parseFieldSelectionNode();
     ast::ConditionalSpreadSelectionNode parseConditionalSpreadSelectionNode();
     ast::ObjectFieldSpec parseObjectFieldSpec();
-    ast::OperationSpec parseOperationSpec();
+    ast::OperationSpec parseOperationSpec(const std::vector<shared::ast::InputValueDefinitionNode> &parameters);
     ast::OperationArg parseOperationArg();
 
     std::pair<shared::ast::NameNode, shared::ast::NameNode> parseNameAndSelectionName();
