@@ -8,8 +8,11 @@
 
 #include <cstdlib>
 #include <memory>
+#include <variant>
 
 #include "gql_cli/gql_cli.hpp"
+
+using A = std::variant<int, float>;
 
 int main(int argc, char **argv) {
     std::unique_ptr<CLI::App> app = createCLIApp();

@@ -53,17 +53,16 @@ std::string formatLine(const std::string &line, const unsigned int &currentLine,
     return buffer;
 };
 
-std::string formatError(
-    const shared::ParserError &exc,
-    const std::shared_ptr<shared::ast::SourceFile> &source) {
-    std::string buffer = std::format("{}\n", source->filepath.string());
+std::string formatError(const shared::ParserError &exc) {
+    std::string buffer =
+        std::format("{}\n", exc.getSource()->filepath.string());
     const Location &location = exc.getLocation();
     unsigned int firstLineToShow =
         std::clamp((int)location.line - 4, 1, std::numeric_limits<int>::max());
     unsigned int lastLineToShow = location.line + 4;
     std::string line;
     unsigned int currentLine = 1;
-    std::istringstream stream = (std::istringstream)source->buffer;
+    std::istringstream stream = (std::istringstream)exc.getSource()->buffer;
     while (std::getline(stream, line)) {
         if (firstLineToShow <= currentLine && currentLine <= lastLineToShow) {
             buffer += formatLine(line, currentLine, location, exc);
@@ -194,7 +193,7 @@ void createParserSubcommand(CLI::App *app) {
                 const auto &ast = parser.parse();
                 astList.push_back(ast);
             } catch (const shared::ParserError &exc) {
-                std::cerr << formatError(exc, source) << std::endl;
+                std::cerr << formatError(exc) << std::endl;
                 throw CLI::RuntimeError(1);
             };
         };
@@ -226,23 +225,33 @@ void createParserSubcommand(CLI::App *app) {
                 throw CLI::RuntimeError(1);
             };
             const auto &tokens = tokensAccumulator.getTokens();
+            if (tokens.empty()) {
+                std::cout << std::format("Warning: No tokens for file {}",
+                                         source->filepath.string())
+                          << std::endl;
+                continue;
+            };
             client::Parser parser(tokens, source);
             try {
-                for (const auto& el : parser.parse()) {
+                for (const auto &el : parser.parse()) {
                     operations.push_back(el);
                 };
             } catch (const shared::ParserError &exc) {
-                std::cerr << formatError(exc, source) << std::endl;
+                std::cerr << formatError(exc) << std::endl;
                 throw CLI::RuntimeError(1);
             };
         };
         try {
-            const auto &nodes = parsers::schema::parseSchema(astList, operations);
+            const auto &nodes =
+                parsers::schema::parseSchema(astList, operations);
 
             rapidjson::StringBuffer sb;
             rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
             json::serializer::writeSchemaNodes(writer, nodes.serverNodes);
-            std::cout << sb.GetString() << std::endl;
+            //std::cout << sb.GetString() << std::endl;
+        } catch (const shared::ParserError &error) {
+            std::cerr << formatError(error) << std::endl;
+            throw CLI::RuntimeError(1);
         } catch (const std::exception &exc) {
             std::cerr << exc.what() << std::endl;
             throw CLI::RuntimeError(1);

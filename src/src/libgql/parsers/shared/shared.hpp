@@ -84,48 +84,65 @@ struct InputValueDefinitionNode {
 class ParserError : public std::exception {
     GQLToken token;
     std::string error;
+    std::shared_ptr<const ast::SourceFile> source;
 
 public:
+    [[nodiscard]] const std::shared_ptr<const ast::SourceFile> getSource()
+        const {
+        return source;
+    };
+
     [[nodiscard]] Location getLocation() const noexcept {
         return token.location;
     };
-    explicit ParserError(const GQLToken t, const std::string e)
-        : token{ t }, error{ e } {};
+    explicit ParserError(const GQLToken t, const std::string e,
+                         const std::shared_ptr<const ast::SourceFile> &source)
+        : token{ t }, error{ e }, source{ source } {};
     [[nodiscard]] const char *what() const noexcept override {
         return error.c_str();
     };
-    const static ParserError createEOF(const GQLToken token) noexcept {
-        return ParserError(token, "EOF");
+    const static ParserError createEOF(
+        const GQLToken token,
+        const std::shared_ptr<const ast::SourceFile> &source) noexcept {
+        return ParserError(token, "EOF", source);
     };
 
     const static ParserError wrongType(
-        const GQLToken token, const GQLTokenType expectedType) noexcept {
-        return ParserError(token, std::string("Expected ") +
-                                      gqlTokenTypeToString(expectedType) +
-                                      " type, got " +
-                                      gqlTokenTypeToString(token.type) +
-                                      ", at: " + (std::string)token.location);
+        const GQLToken token, const GQLTokenType expectedType,
+        const std::shared_ptr<const ast::SourceFile> &source) noexcept {
+        return ParserError(
+            token,
+            std::string("Expected ") + gqlTokenTypeToString(expectedType) +
+                " type, got " + gqlTokenTypeToString(token.type) +
+                ", at: " + (std::string)token.location,
+            source);
     };
 
     const static ParserError identifierIsKeyword(
-        const GQLToken token) noexcept {
-        return ParserError(token, token.lexeme + " is reserved keyword");
+        const GQLToken token,
+        const std::shared_ptr<const ast::SourceFile> &source) noexcept {
+        return ParserError(token, token.lexeme + " is reserved keyword",
+                           source);
     };
 
     const static ParserError unexpectedIdentifier(
-        const GQLToken token) noexcept {
-        return ParserError(token,
-                           "Unexpected identifier: \"" + token.lexeme + "\"");
+        const GQLToken token,
+        const std::shared_ptr<const ast::SourceFile> &source) noexcept {
+        return ParserError(
+            token, "Unexpected identifier: \"" + token.lexeme + "\"", source);
     };
 
-    const static ParserError wrongLexeme(const GQLToken &token,
-                                         const std::string &expectedLexeme) {
-        return ParserError(token, std::format(R"((Expected: "{}", got "{}"))",
-                                              expectedLexeme, token.lexeme));
+    const static ParserError wrongLexeme(
+        const GQLToken &token, const std::string &expectedLexeme,
+        const std::shared_ptr<ast::SourceFile> &source) {
+        return ParserError(token,
+                           std::format(R"((Expected: "{}", got "{}"))",
+                                       expectedLexeme, token.lexeme),
+                           source);
     };
 };
 
-void assertIsNotKeyword(const GQLToken token);
+void assertIsNotKeyword(const GQLToken token, const std::shared_ptr<ast::SourceFile>& source);
 const bool isKeyword(const std::string lexeme) noexcept;
 };  // namespace shared
 };  // namespace parsers

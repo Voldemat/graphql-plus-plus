@@ -77,11 +77,8 @@ void writeSchemaNode(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer,
                 writer.String(node->name.c_str());
                 writer.String("items");
                 writer.StartArray();
-                for (const auto &item : node->items) {
-                    writer.String(
-                        std::get<std::shared_ptr<parsers::schema::ObjectType>>(
-                            item)
-                            ->name.c_str());
+                for (const auto &[name, _] : node->items) {
+                    writer.String(name.c_str());
                 };
                 writer.EndArray();
             },
@@ -92,11 +89,8 @@ void writeSchemaNode(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer,
                 writer.String(node->name.c_str());
                 writer.String("implements");
                 writer.StartArray();
-                for (const auto &interface : node->implements) {
-                    writer.String(
-                        std::get<std::shared_ptr<parsers::schema::Interface>>(
-                            interface)
-                            ->name.c_str());
+                for (const auto &[name, _] : node->implements) {
+                    writer.String(name.c_str());
                 };
                 writer.EndArray();
                 writer.String("fields");
@@ -111,7 +105,8 @@ void writeSchemaNode(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer,
                 writer.String(node->name.c_str());
                 writer.String("fields");
                 writer.StartObject();
-                for (const auto& field : node -> fields) {};
+                for (const auto &field : node->fields) {
+                };
                 writer.EndObject();
             },
         },

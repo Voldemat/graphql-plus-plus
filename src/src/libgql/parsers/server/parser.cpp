@@ -31,7 +31,8 @@ ast::FileNodes Parser::parse() {
         } else if (std::holds_alternative<ast::ExtendTypeNode>(node)) {
             extensions.push_back(std::get<ast::ExtendTypeNode>(node));
         } else {
-            throw shared::ParserError(currentToken, "Unexpected node type");
+            throw shared::ParserError(currentToken, "Unexpected node type",
+                                      source);
         };
     };
     return {
@@ -43,8 +44,8 @@ ast::FileNodes Parser::parse() {
 
 std::pair<std::string, ast::ASTNode> Parser::parseASTNode() {
     if (currentToken.type != (GQLTokenType)ComplexTokenType::IDENTIFIER) {
-        throw shared::ParserError::wrongType(currentToken,
-                                     ComplexTokenType::IDENTIFIER);
+        throw shared::ParserError::wrongType(
+            currentToken, ComplexTokenType::IDENTIFIER, source);
     };
     if (currentToken.lexeme == "scalar") {
         const auto &node = parseScalarTypeDefinitionNode();
@@ -72,14 +73,15 @@ std::pair<std::string, ast::ASTNode> Parser::parseASTNode() {
         const auto &node = parseExtendTypeNode();
         return { node.typeNode.name.name, node };
     };
-    throw shared::ParserError(currentToken, "Unknown identifier");
+    throw shared::ParserError(currentToken, "Unknown identifier", source);
 };
 
 ast::ExtendTypeNode Parser::parseExtendTypeNode() {
     const GQLToken startToken = currentToken;
     consume(ComplexTokenType::IDENTIFIER);
     if (currentToken.lexeme != "type") {
-        throw shared::ParserError(currentToken, "Expected \"type\" identifier");
+        throw shared::ParserError(currentToken, "Expected \"type\" identifier",
+                                  source);
     };
     const auto &typeNode = parseObjectTypeDefinitionNode();
     return { .location = { .startToken = startToken,
@@ -90,7 +92,7 @@ ast::ExtendTypeNode Parser::parseExtendTypeNode() {
 
 shared::ast::NameNode Parser::parseNameNode(bool raiseOnKeyword) {
     consume(ComplexTokenType::IDENTIFIER);
-    if (raiseOnKeyword) shared::assertIsNotKeyword(currentToken);
+    if (raiseOnKeyword) shared::assertIsNotKeyword(currentToken, source);
     return { .location = { .startToken = currentToken,
                            .endToken = currentToken,
                            .source = source },
@@ -249,7 +251,8 @@ void Parser::advance() {
 shared::ast::LiteralNode Parser::parseLiteralNode() {
     advance();
     if (!std::holds_alternative<ComplexTokenType>(currentToken.type)) {
-        throw shared::ParserError(currentToken, "Expected literal node");
+        throw shared::ParserError(currentToken, "Expected literal node",
+                                  source);
     };
     switch (std::get<ComplexTokenType>(currentToken.type)) {
         case ComplexTokenType::NUMBER: {
@@ -257,9 +260,10 @@ shared::ast::LiteralNode Parser::parseLiteralNode() {
                                                    .endToken = currentToken,
                                                    .source = source };
             try {
-                return (shared::ast::LiteralIntNode){ .location = location,
-                                              .value = std::stoi(
-                                                  currentToken.lexeme) };
+                return (shared::ast::LiteralIntNode){
+                    .location = location,
+                    .value = std::stoi(currentToken.lexeme)
+                };
             } catch (...) {
             };
             return (shared::ast::LiteralFloatNode){
@@ -290,6 +294,10 @@ shared::ast::LiteralNode Parser::parseLiteralNode() {
                 .value = currentToken.lexeme
             };
         };
+        case ComplexTokenType::SPREAD: {
+            throw shared::ParserError(currentToken,
+                                      "Unexpected spread operator", source);
+        }
     };
 };
 
@@ -333,13 +341,13 @@ void Parser::consume(const GQLTokenType type) {
     index += 1;
     currentToken = tokens[index];
     if (currentToken.type != type) {
-        throw shared::ParserError::wrongType(currentToken, type);
+        throw shared::ParserError::wrongType(currentToken, type, source);
     };
 };
 
 void Parser::consumeIdentifier() {
     consume(ComplexTokenType::IDENTIFIER);
-    shared::assertIsNotKeyword(currentToken);
+    shared::assertIsNotKeyword(currentToken, source);
 };
 
 bool Parser::consumeIfIsAhead(GQLTokenType expectedType) {

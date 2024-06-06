@@ -1,8 +1,10 @@
 #ifndef LIBGQL_PARSERS_CLIENT_AST
 #define LIBGQL_PARSERS_CLIENT_AST
 
+#include <map>
 #include <memory>
 #include <optional>
+#include <string>
 #include <variant>
 #include <vector>
 
@@ -15,17 +17,27 @@ namespace ast {
 struct Argument {
     shared::ast::NodeLocation location;
     shared::ast::NameNode name;
-    shared::ast::NameNode argAliasName;
+    shared::ast::NameNode paramName;
 };
 
 struct FragmentSpec;
 
-struct ObjectFieldSpec {
+struct ObjectLiteralFieldSpec {
     shared::ast::NodeLocation location;
     shared::ast::NameNode selectionName;
     shared::ast::NameNode name;
-    std::optional<std::vector<shared::ast::InputValueDefinitionNode>> arguments;
 };
+
+struct ObjectCallableFieldSpec {
+    shared::ast::NodeLocation location;
+    shared::ast::NameNode selectionName;
+    shared::ast::NameNode name;
+    std::vector<Argument> arguments;
+    std::shared_ptr<FragmentSpec> fragmentSpec;
+};
+
+using ObjectFieldSpec =
+    std::variant<ObjectLiteralFieldSpec, ObjectCallableFieldSpec>;
 
 struct FieldSelectionNode {
     shared::ast::NodeLocation location;
@@ -55,25 +67,14 @@ struct FragmentSpec {
 
 enum class OpType { MUTATION, QUERY, SUBSCRIPTION };
 
-struct OperationArg {
-    shared::ast::NodeLocation location;
-    shared::ast::NameNode name;
-    shared::ast::NameNode paramName;
-};
-
-struct OperationSpec {
-    shared::ast::NodeLocation location;
-    shared::ast::NameNode selectionName;
-    shared::ast::NameNode name;
-    std::vector<OperationArg> args;
-};
+std::optional<OpType> opTypeFromObjectName(const std::string &value);
+std::optional<OpType> opTypeFromClientOp(const std::string &value);
 
 struct OperationDefinition {
     shared::ast::NodeLocation location;
     OpType type;
     shared::ast::NameNode name;
-    std::vector<shared::ast::InputValueDefinitionNode> parameters;
-    OperationSpec spec;
+    std::map<std::string, shared::ast::InputValueDefinitionNode> parameters;
     FragmentSpec fragment;
 };
 

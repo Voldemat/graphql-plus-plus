@@ -1,10 +1,8 @@
 #include "./parser.hpp"
 
-#include <algorithm>
-#include <format>
+#include <map>
 #include <memory>
 #include <optional>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <variant>
@@ -55,81 +53,44 @@ ast::FragmentDefinition Parser::parseFragmentDefinition() {
     };
 };
 
-ast::OperationArg Parser::parseOperationArg() {
-    const auto &name = parseNameNode();
-    consume(SimpleTokenType::COLON);
-    const auto &paramName = parseNameNode();
-    shared::ast::NodeLocation location = { .startToken =
-                                               name.location.startToken,
-                                           .endToken =
-                                               paramName.location.endToken,
-                                           .source = source };
-    return { .location = location, .name = name, .paramName = paramName };
-};
-
-ast::OperationSpec Parser::parseOperationSpec(
-    const std::vector<shared::ast::InputValueDefinitionNode> &parameters) {
-    const auto &[name, selectionName] = parseNameAndSelectionName();
-    shared::ast::NodeLocation location = {
-        .startToken = selectionName.location.startToken, .source = source
-    };
-    std::vector<ast::OperationArg> args;
-    if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
-        while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            const auto &arg = parseOperationArg();
-            if (std::find_if(
-                    parameters.begin(), parameters.end(),
-                    [&arg](const shared::ast::InputValueDefinitionNode &param) {
-                        return param.name.name == arg.paramName.name;
-                    }) == parameters.end()) {
-                throw shared::ParserError(
-                    arg.paramName.location.startToken,
-                    std::format("No param with name \"{}\" is defined in "
-                                "operation definition",
-                                arg.paramName.name));
-            };
-            args.push_back(arg);
-            consumeIfIsAhead(SimpleTokenType::COMMA);
-        };
-        consume(SimpleTokenType::RIGHT_PAREN);
-    };
-    return { .location = location,
-             .selectionName = selectionName,
-             .name = name,
-             .args = args };
-};
-
 ast::OperationDefinition Parser::parseOperationDefinition() {
     shared::ast::NodeLocation location = { .startToken = currentToken,
                                            .source = source };
-    const auto &type = parseOpType(currentToken.lexeme);
+    const auto &type = client::ast::opTypeFromClientOp(currentToken.lexeme);
+    if (!type.has_value()) {
+        throw shared::ParserError(currentToken,
+                                  "Unexpected client operation type", source);
+    };
     const auto &name = parseNameNode();
-    std::vector<shared::ast::InputValueDefinitionNode> parameters;
+    std::map<std::string, shared::ast::InputValueDefinitionNode> parameters;
     if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
         while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            parameters.push_back(parseInputValueDefinitionNode());
+            const auto &node = parseInputValueDefinitionNode();
+            if (parameters.contains(node.name.name)) {
+                throw shared::ParserError(
+                    node.name.location.startToken,
+                    "Parameter with this name already exists",
+                    node.name.location.source);
+            };
+            parameters[node.name.name] = node;
             consumeIfIsAhead(SimpleTokenType::COMMA);
         };
         consume(SimpleTokenType::RIGHT_PAREN);
     };
-    consume(SimpleTokenType::LEFT_BRACE);
-    const auto &spec = parseOperationSpec(parameters);
     ast::FragmentSpec fragment = parseFragmentSpec();
-    consume(SimpleTokenType::RIGHT_BRACE);
-    location.endToken = currentToken;
+    location.endToken = fragment.location.endToken;
     return { .location = location,
-             .type = type,
+             .type = type.value(),
              .name = name,
              .parameters = parameters,
-             .spec = spec,
              .fragment = fragment };
 };
 
 ast::Argument Parser::parseArgument() {
     const auto &name = parseNameNode();
     consume(SimpleTokenType::COLON);
-    const auto &argAliasName = parseNameNode();
-    return { .name = name, .argAliasName = argAliasName };
+    const auto &paramName = parseNameNode();
+    return { .name = name, .paramName = paramName };
 };
 
 ast::FragmentSpec Parser::parseFragmentSpec() {
@@ -164,10 +125,9 @@ Parser::parseConditionalSpreadSelectionNode() {
 }
 
 ast::SelectionNode Parser::parseSelectionNode() {
-    if (!isAhead(ComplexTokenType::SPREAD)) {
+    if (!consumeIfIsAhead(ComplexTokenType::SPREAD)) {
         return parseFieldSelectionNode();
     };
-    consume(ComplexTokenType::SPREAD);
     if (isAheadByLexeme("on")) {
         return parseConditionalSpreadSelectionNode();
     }
@@ -199,33 +159,31 @@ ast::ObjectFieldSpec Parser::parseObjectFieldSpec() {
 
     const auto &[fieldName, selectionName] = parseNameAndSelectionName();
     location.endToken = fieldName.location.endToken;
-    std::optional<std::vector<shared::ast::InputValueDefinitionNode>> arguments;
-    if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
-        std::vector<shared::ast::InputValueDefinitionNode> args;
-        while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            args.push_back(parseInputValueDefinitionNode());
-            consumeIfIsAhead(SimpleTokenType::COMMA);
-        };
-        arguments = args;
-        consume(SimpleTokenType::RIGHT_PAREN);
-        location.endToken = currentToken;
+    if (!consumeIfIsAhead(SimpleTokenType::LEFT_PAREN))
+        return (ast::ObjectLiteralFieldSpec){ .location = location,
+                                              .selectionName = selectionName,
+                                              .name = fieldName };
+    std::vector<ast::Argument> args;
+    while (isAhead(ComplexTokenType::IDENTIFIER)) {
+        args.push_back(parseArgument());
+        consumeIfIsAhead(SimpleTokenType::COMMA);
     };
-    return { .selectionName = selectionName,
-             .name = fieldName,
-             .arguments = arguments };
+    consume(SimpleTokenType::RIGHT_PAREN);
+    location.endToken = currentToken;
+    return (ast::ObjectCallableFieldSpec){ .selectionName = selectionName,
+                                           .name = fieldName,
+                                           .arguments = args };
 };
 
 ast::FieldSelectionNode Parser::parseFieldSelectionNode() {
+    shared::ast::NodeLocation location = { .startToken = currentToken,
+                                           .source = source };
     const auto &fieldSpec = parseObjectFieldSpec();
     std::optional<std::shared_ptr<ast::FragmentSpec>> spec;
     if (isAhead(SimpleTokenType::LEFT_BRACE)) {
         spec = std::make_shared<ast::FragmentSpec>(parseFragmentSpec());
     };
-    shared::ast::NodeLocation location = { .startToken =
-                                               fieldSpec.location.startToken,
-                                           .endToken =
-                                               fieldSpec.location.endToken,
-                                           .source = source };
+    location.endToken = currentToken;
     return { .location = location, .field = fieldSpec, .spec = spec };
 };
 
@@ -240,15 +198,8 @@ bool Parser::consumeIdentifierByLexemeIfIsAhead(const std::string &lexeme) {
 void Parser::consumeIdentifierByLexeme(const std::string &lexeme) {
     consumeIdentifier();
     if (currentToken.lexeme != lexeme) {
-        throw shared::ParserError::wrongLexeme(currentToken, lexeme);
+        throw shared::ParserError::wrongLexeme(currentToken, lexeme, source);
     };
-};
-
-ast::OpType Parser::parseOpType(const std::string &lexeme) {
-    if (lexeme == "mutation") return ast::OpType::MUTATION;
-    if (lexeme == "query") return ast::OpType::QUERY;
-    if (lexeme == "subscription") return ast::OpType::SUBSCRIPTION;
-    throw std::runtime_error("Unexpected token " + lexeme);
 };
 
 const GQLToken Parser::lookahead() { return tokens[index + 1]; };
@@ -257,13 +208,13 @@ void Parser::consume(const GQLTokenType type) {
     index += 1;
     currentToken = tokens[index];
     if (currentToken.type != type) {
-        throw shared::ParserError::wrongType(currentToken, type);
+        throw shared::ParserError::wrongType(currentToken, type, source);
     };
 };
 
 void Parser::consumeIdentifier() {
     consume(ComplexTokenType::IDENTIFIER);
-    shared::assertIsNotKeyword(currentToken);
+    shared::assertIsNotKeyword(currentToken, source);
 };
 
 bool Parser::consumeIfIsAhead(GQLTokenType expectedType) {
@@ -298,7 +249,7 @@ shared::ast::InputValueDefinitionNode Parser::parseInputValueDefinitionNode() {
 
 shared::ast::NameNode Parser::parseNameNode(bool raiseOnKeyword) {
     consume(ComplexTokenType::IDENTIFIER);
-    if (raiseOnKeyword) shared::assertIsNotKeyword(currentToken);
+    if (raiseOnKeyword) shared::assertIsNotKeyword(currentToken, source);
     return { .location = { .startToken = currentToken,
                            .endToken = currentToken,
                            .source = source },
@@ -342,7 +293,8 @@ shared::ast::ListTypeNode Parser::parseListTypeNode() {
 shared::ast::LiteralNode Parser::parseLiteralNode() {
     advance();
     if (!std::holds_alternative<ComplexTokenType>(currentToken.type)) {
-        throw shared::ParserError(currentToken, "Expected literal node");
+        throw shared::ParserError(currentToken, "Expected literal node",
+                                  source);
     };
     switch (std::get<ComplexTokenType>(currentToken.type)) {
         case ComplexTokenType::NUMBER: {
@@ -385,7 +337,8 @@ shared::ast::LiteralNode Parser::parseLiteralNode() {
             };
         };
         case ComplexTokenType::SPREAD: {
-            throw shared::ParserError(currentToken, "Unexpected spread usage");
+            throw shared::ParserError(currentToken, "Unexpected spread usage",
+                                      source);
         };
     };
 };

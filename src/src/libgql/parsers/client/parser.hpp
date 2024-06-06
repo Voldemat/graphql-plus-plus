@@ -29,7 +29,6 @@ class Parser {
     bool isAheadByLexeme(const std::string& lexeme);
     shared::ast::NameNode parseNameNode(bool raiseOnKeyword = false);
     ast::OperationDefinition parseOperationDefinition();
-    ast::OpType parseOpType(const std::string& lexeme);
     shared::ast::InputValueDefinitionNode parseInputValueDefinitionNode();
     shared::ast::TypeNode parseTypeNode();
     shared::ast::NamedTypeNode parseNamedTypeNode();
@@ -43,9 +42,6 @@ class Parser {
     ast::FieldSelectionNode parseFieldSelectionNode();
     ast::ConditionalSpreadSelectionNode parseConditionalSpreadSelectionNode();
     ast::ObjectFieldSpec parseObjectFieldSpec();
-    ast::OperationSpec parseOperationSpec(const std::vector<shared::ast::InputValueDefinitionNode> &parameters);
-    ast::OperationArg parseOperationArg();
-
     std::pair<shared::ast::NameNode, shared::ast::NameNode> parseNameAndSelectionName();
 public:
     Parser(std::vector<GQLToken> tokens,

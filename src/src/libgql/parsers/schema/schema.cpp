@@ -1,6 +1,5 @@
 #include "./schema.hpp"
 
-#include <algorithm>
 #include <format>
 #include <functional>
 #include <iostream>
@@ -24,9 +23,11 @@ using namespace parsers::schema;
 using namespace parsers::server;
 
 struct TypeRegistry {
-    std::map<std::string, const FieldDefinition<ObjectFieldSpec> *> queries;
-    std::map<std::string, const FieldDefinition<ObjectFieldSpec> *> mutations;
-    std::map<std::string, const FieldDefinition<ObjectFieldSpec> *>
+    std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>
+        queries;
+    std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>
+        mutations;
+    std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>
         subscriptions;
     std::map<std::string, std::shared_ptr<ObjectType>> objects;
     std::map<std::string, std::shared_ptr<InputType>> inputs;
@@ -43,48 +44,40 @@ struct TypeRegistry {
         scalars["Boolean"] = std::make_shared<Scalar>("Boolean");
     };
 
-    [[nodiscard]] NodeOrLazy<std::shared_ptr<ObjectType>> getObjectOrLazy(
-        const std::string &name) const {
-        if (objects.contains(name)) {
-            return objects.at(name);
-        };
-        return (LazySchemaNode){ .name = name };
+    [[nodiscard]] std::shared_ptr<ObjectType> getQueryObject() const {
+        return objects.at("Query");
     };
 
-    [[nodiscard]] NodeOrLazy<ObjectTypeSpec> getTypeForObjectOrLazy(
-        const std::string &name) const {
-        if (objects.contains(name)) return objects.at(name);
-        if (scalars.contains(name)) return scalars.at(name);
-        if (enums.contains(name)) return enums.at(name);
-        if (unions.contains(name)) return unions.at(name);
-        return (LazySchemaNode){ .name = name };
+    [[nodiscard]] std::shared_ptr<ObjectType> getMutationObject() const {
+        return objects.at("Mutation");
     };
 
-    [[nodiscard]] NodeOrLazy<InputTypeSpec> getTypeForInputOrLazy(
-        const std::string &name) const {
+    [[nodiscard]] std::shared_ptr<ObjectType> getSubscriptionObject() const {
+        return objects.at("Subscription");
+    };
+
+    [[nodiscard]] InputTypeSpec getTypeForInput(
+        const shared::ast::NameNode &node) const {
+        const auto &name = node.name;
         if (inputs.contains(name)) return inputs.at(name);
         if (scalars.contains(name)) return scalars.at(name);
         if (enums.contains(name)) return enums.at(name);
-        return (LazySchemaNode){ .name = name };
-    };
-
-    [[nodiscard]] InputTypeSpec getTypeForInput(const std::string &name) const {
-        const auto &type = getTypeForInputOrLazy(name);
-        if (std::holds_alternative<LazySchemaNode>(type)) {
-            throw std::runtime_error(
-                std::format("Type for input with name {} is not found", name));
-        };
-        return std::get<InputTypeSpec>(type);
+        throw shared::ParserError(node.location.startToken,
+                                  "Type with this name does not exists",
+                                  node.location.source);
     };
 
     [[nodiscard]] ObjectTypeSpec getTypeForObject(
-        const std::string &name) const {
-        const auto &type = getTypeForObjectOrLazy(name);
-        if (std::holds_alternative<LazySchemaNode>(type)) {
-            throw std::runtime_error(
-                std::format("Type for object with name {} is not found", name));
-        };
-        return std::get<ObjectTypeSpec>(type);
+        const shared::ast::NameNode &node) const {
+        const auto &name = node.name;
+        if (objects.contains(name)) return objects.at(name);
+        if (interfaces.contains(name)) return interfaces.at(name);
+        if (scalars.contains(name)) return scalars.at(name);
+        if (enums.contains(name)) return enums.at(name);
+        if (unions.contains(name)) return unions.at(name);
+        throw shared::ParserError(node.location.startToken,
+                                  "Type with this name does not exists",
+                                  node.location.source);
     };
 
     [[nodiscard]] std::shared_ptr<Interface> getInterface(
@@ -108,22 +101,27 @@ struct TypeRegistry {
             std::format("Object with name {} is not found", name));
     };
 
-    [[nodiscard]] NodeOrLazy<std::shared_ptr<Fragment>> getFragmentOrLazy(
-        const std::string &name) const {
-        if (fragments.contains(name)) return fragments.at(name);
-        return (LazySchemaNode){ .name = name };
-    };
-
     [[nodiscard]] std::shared_ptr<Fragment> getFragment(
         const std::string &name) const {
-        if (!fragments.contains(name)) {
-            throw std::runtime_error("NOt fragment with name: " + name);
-        };
-        return fragments.at(name);
+        if (fragments.contains(name)) return fragments.at(name);
+        throw std::runtime_error("Not fragment with name: " + name);
     };
 
-    [[nodiscard]] const std::map<std::string,
-                                 const FieldDefinition<ObjectFieldSpec> *> &
+    [[nodiscard]] std::map<std::string,
+                           std::shared_ptr<FieldDefinition<ObjectFieldSpec>>> &
+    getMappingForOp(client::ast::OpType type) {
+        switch (type) {
+            case client::ast::OpType::QUERY:
+                return queries;
+            case client::ast::OpType::MUTATION:
+                return mutations;
+            case client::ast::OpType::SUBSCRIPTION:
+                return subscriptions;
+        };
+    };
+
+    [[nodiscard]] const std::map<
+        std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>> &
     getMappingForOp(client::ast::OpType type) const {
         switch (type) {
             case client::ast::OpType::QUERY:
@@ -135,7 +133,7 @@ struct TypeRegistry {
         };
     };
 
-    [[nodiscard]] const FieldDefinition<ObjectFieldSpec> *getOp(
+    [[nodiscard]] std::shared_ptr<FieldDefinition<ObjectFieldSpec>> getOp(
         client::ast::OpType type, const std::string &name) const {
         const auto &mapping = getMappingForOp(type);
         if (!mapping.contains(name)) {
@@ -146,8 +144,8 @@ struct TypeRegistry {
     };
 
     void addOpIfNotExists(
-        const FieldDefinition<ObjectFieldSpec> *field,
-        std::map<std::string, const FieldDefinition<ObjectFieldSpec> *>
+        const std::shared_ptr<FieldDefinition<ObjectFieldSpec>> &field,
+        std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>
             &mapping) {
         if (mapping.contains(field->name)) {
             throw std::runtime_error(std::format(
@@ -158,7 +156,8 @@ struct TypeRegistry {
 
     void addNode(const SchemaNode &schemaNode) {
         std::visit(overloaded{ [this](const std::shared_ptr<ObjectType> &node) {
-                                  appendOpsIfSpecialObject(*node);
+                                  appendOpsIfSpecialObject(node->name,
+                                                           node->fields);
                                   objects[node->name] = node;
                               },
                                [this](const std::shared_ptr<Interface> &node) {
@@ -183,73 +182,67 @@ struct TypeRegistry {
         fragments[fragment->name] = fragment;
     };
 
-    void appendOpsIfSpecialObject(const ObjectType &obj) {
-        if (obj.name == "Query") {
-            for (auto &field : obj.fields) {
-                std::cout << "Appending query op: " << field.name << std::endl;
-                addOpIfNotExists(&field, queries);
-            };
-        } else if (obj.name == "Mutation") {
-            for (auto &field : obj.fields) {
-                addOpIfNotExists(&field, mutations);
-            };
-        } else if (obj.name == "Subscription") {
-            for (auto &field : obj.fields) {
-                addOpIfNotExists(&field, subscriptions);
-            };
+    void appendOpsIfSpecialObject(
+        const std::string &objName,
+        const std::map<std::string,
+                       std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>
+            &newFields) {
+        const auto &opType = client::ast::opTypeFromObjectName(objName);
+        if (!opType.has_value()) return;
+        auto &mapping = getMappingForOp(opType.value());
+        for (auto &[_, field] : newFields) {
+            addOpIfNotExists(field, mapping);
         };
     };
 
-    void patchObject(const ExtendObjectType &node) {
-        if (!objects.contains(node.type.name)) {
-            throw std::runtime_error(std::format(
-                "Type with name \"{}\" does not exists", node.type.name));
-        };
-        auto &object = objects[node.type.name];
-        for (auto &newField : node.type.fields) {
-            if (std::find_if(object->fields.begin(), object->fields.end(),
-                             [&newField](const auto &field) {
-                                 return field.name == newField.name;
-                             }) != object->fields.end()) {
-                throw std::runtime_error(std::format(
-                    "Field with name \"{}\" already exists", newField.name));
+    void patchObject(
+        const std::shared_ptr<ObjectType> &type,
+        const std::map<std::string,
+                       std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>
+            &newFields) {
+        for (auto &[name, newField] : newFields) {
+            if (type->fields.contains(name)) {
+                throw std::runtime_error(
+                    std::format("Field with name \"{}\" already exists", name));
             };
-            object->fields.push_back(newField);
+            type->fields[name] = newField;
         };
-        appendOpsIfSpecialObject(node.type);
+        appendOpsIfSpecialObject(type->name, newFields);
     };
 };
 
 std::shared_ptr<Union> parseUnion(const ast::UnionDefinitionNode &node,
                                   const TypeRegistry &registry) {
-    return std::make_shared<Union>(
-        node.name.name,
+    const auto &obj = registry.unions.at(node.name.name);
+    obj->items =
         node.values |
-            std::views::transform(
-                [&registry](const shared::ast::NameNode &nNode) {
-                    return registry.getObjectOrLazy(nNode.name);
-                }) |
-            std::ranges::to<std::vector>());
+        std::views::transform(
+            [&registry](const shared::ast::NameNode &nNode)
+                -> std::pair<std::string, std::shared_ptr<ObjectType>> {
+                return { nNode.name, registry.getObject(nNode.name) };
+            }) |
+        std::ranges::to<std::map>();
+    return obj;
 };
 
 template <typename T>
 std::pair<NonCallableFieldSpec<T>, bool> parseNonCallableTypeSpec(
     const shared::ast::TypeNode astNode,
-    std::function<NodeOrLazy<T>(const std::string &)> typeGetter) {
+    std::function<T(const shared::ast::NameNode &)> typeGetter) {
     return std::visit<std::pair<NonCallableFieldSpec<T>, bool>>(
-        overloaded{ [&typeGetter](const shared::ast::NamedTypeNode &node)
-                        -> std::pair<LiteralFieldSpec<T>, bool> {
-                       return { (LiteralFieldSpec<T>){
-                                    .type = typeGetter(node.name.name) },
-                                node.nullable };
-                   },
-                    [&typeGetter](const shared::ast::ListTypeNode &node)
-                        -> std::pair<ArrayFieldSpec<T>, bool> {
-                        return { (ArrayFieldSpec<T>){
-                                     .type = typeGetter(node.type.name.name),
-                                     .nullable = node.type.nullable },
-                                 node.nullable };
-                    } },
+        overloaded{
+            [&typeGetter](const shared::ast::NamedTypeNode &node)
+                -> std::pair<LiteralFieldSpec<T>, bool> {
+                return { (LiteralFieldSpec<T>){ .type = typeGetter(node.name) },
+                         node.nullable };
+            },
+            [&typeGetter](const shared::ast::ListTypeNode &node)
+                -> std::pair<ArrayFieldSpec<T>, bool> {
+                return { (ArrayFieldSpec<T>){ .type =
+                                                  typeGetter(node.type.name),
+                                              .nullable = node.type.nullable },
+                         node.nullable };
+            } },
         astNode);
 };
 
@@ -257,10 +250,10 @@ FieldDefinition<InputFieldSpec> parseInputFieldDefinition(
     const shared::ast::InputValueDefinitionNode &node,
     const TypeRegistry &registry) {
     const auto &[returnType, nullable] = parseNonCallableTypeSpec(
-        node.type,
-        (std::function<NodeOrLazy<InputTypeSpec>(
-             const std::string &)>)[&registry](const std::string &name) {
-            return registry.getTypeForInputOrLazy(name);
+        node.type, (std::function<InputTypeSpec(
+                        const shared::ast::NameNode &)>)[&registry](
+                       const shared::ast::NameNode &name) {
+            return registry.getTypeForInput(name);
         });
     const InputFieldSpec &returnTypeSpec = std::visit(
         [](auto &&arg) -> InputFieldSpec { return arg; }, returnType);
@@ -273,10 +266,10 @@ FieldDefinition<InputFieldSpec> parseInputFieldDefinition(
 std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
     const ast::FieldDefinitionNode &astNode, const TypeRegistry &registry) {
     const auto &[returnType, nullable] = parseNonCallableTypeSpec(
-        astNode.type,
-        (std::function<NodeOrLazy<ObjectTypeSpec>(
-             const std::string &)>)[&registry](const std::string &name) {
-            return registry.getTypeForObjectOrLazy(name);
+        astNode.type, (std::function<ObjectTypeSpec(
+                           const shared::ast::NameNode &)>)[&registry](
+                          const shared::ast::NameNode &name) {
+            return registry.getTypeForObject(name);
         });
     ObjectFieldSpec returnTypeSpec = std::visit(
         [](auto &&arg) -> ObjectFieldSpec { return arg; }, returnType);
@@ -287,10 +280,14 @@ std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
             astNode.arguments |
             std::views::transform(
                 [&registry](const shared::ast::InputValueDefinitionNode &node)
-                    -> FieldDefinition<InputFieldSpec> {
-                    return parseInputFieldDefinition(node, registry);
+                    -> std::pair<
+                        std::string,
+                        std::shared_ptr<FieldDefinition<InputFieldSpec>>> {
+                    return { node.name.name,
+                             std::make_shared<FieldDefinition<InputFieldSpec>>(
+                                 parseInputFieldDefinition(node, registry)) };
                 }) |
-            std::ranges::to<std::vector>()
+            std::ranges::to<std::map>()
     };
     return { callableSpec, nullable };
 };
@@ -298,10 +295,10 @@ std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
 std::pair<InputFieldSpec, bool> parseInputTypeSpec(
     const ast::FieldDefinitionNode &astNode, const TypeRegistry &registry) {
     const auto &[returnType, nullable] = parseNonCallableTypeSpec(
-        astNode.type,
-        (std::function<NodeOrLazy<InputTypeSpec>(
-             const std::string &)>)[&registry](const std::string &name) {
-            return registry.getTypeForInputOrLazy(name);
+        astNode.type, (std::function<InputTypeSpec(
+                           const shared::ast::NameNode &)>)[&registry](
+                          const shared::ast::NameNode &name) {
+            return registry.getTypeForInput(name);
         });
     InputFieldSpec returnTypeSpec = std::visit(
         [](auto &&arg) -> InputFieldSpec { return arg; }, returnType);
@@ -311,52 +308,70 @@ std::pair<InputFieldSpec, bool> parseInputTypeSpec(
 
 std::shared_ptr<Interface> parseInterface(
     const ast::InterfaceDefinitionNode &node, const TypeRegistry &registry) {
-    return std::make_shared<Interface>(
-        node.name.name,
+    const auto &obj = registry.interfaces.at(node.name.name);
+    obj->fields =
         node.fields |
-            std::views::transform(
-                [&registry](const ast::FieldDefinitionNode &defNode)
-                    -> FieldDefinition<ObjectFieldSpec> {
-                    const auto &[typeSpec, nullable] =
-                        parseObjectTypeSpec(defNode, registry);
-                    return { .name = defNode.name.name,
-                             .spec = typeSpec,
-                             .nullable = nullable };
-                }) |
-            std::ranges::to<std::vector>());
+        std::views::transform(
+            [&registry](const ast::FieldDefinitionNode &defNode)
+                -> std::pair<
+                    std::string,
+                    std::shared_ptr<FieldDefinition<ObjectFieldSpec>>> {
+                const auto &[typeSpec, nullable] =
+                    parseObjectTypeSpec(defNode, registry);
+                return { defNode.name.name,
+                         std::make_shared<FieldDefinition<ObjectFieldSpec>>(
+                             defNode.name.name, typeSpec, nullable) };
+            }) |
+        std::ranges::to<std::map>();
+    return obj;
 };
 
 std::shared_ptr<InputType> parseInput(
     const ast::InputObjectDefinitionNode &node, const TypeRegistry &registry) {
-    return std::make_shared<InputType>(
-        node.name.name,
+    const auto &obj = registry.inputs.at(node.name.name);
+    obj->fields =
         node.fields |
-            std::views::transform(
-                [&registry](const ast::FieldDefinitionNode &defNode)
-                    -> FieldDefinition<InputFieldSpec> {
-                    const auto &[typeSpec, nullable] =
-                        parseInputTypeSpec(defNode, registry);
-                    return { .name = defNode.name.name,
-                             .spec = typeSpec,
-                             .nullable = nullable };
-                }) |
-            std::ranges::to<std::vector>());
+        std::views::transform(
+            [&registry](const ast::FieldDefinitionNode &defNode)
+                -> std::pair<std::string, FieldDefinition<InputFieldSpec>> {
+                const auto &[typeSpec, nullable] =
+                    parseInputTypeSpec(defNode, registry);
+                return { defNode.name.name,
+                         { .name = defNode.name.name,
+                           .spec = typeSpec,
+                           .nullable = nullable } };
+            }) |
+        std::ranges::to<std::map>();
+    return obj;
 };
 
-ObjectType parseObject(const ast::ObjectDefinitionNode &node,
-                       const TypeRegistry &registry) {
-    return { .name = node.name.name,
-             .fields = node.fields |
-                       std::views::transform(
-                           [&registry](const ast::FieldDefinitionNode &defNode)
-                               -> FieldDefinition<ObjectFieldSpec> {
-                               const auto &[typeSpec, nullable] =
-                                   parseObjectTypeSpec(defNode, registry);
-                               return { .name = defNode.name.name,
-                                        .spec = typeSpec,
-                                        .nullable = nullable };
-                           }) |
-                       std::ranges::to<std::vector>() };
+std::shared_ptr<ObjectType> parseObject(const ast::ObjectDefinitionNode &node,
+                                        const TypeRegistry &registry) {
+    const auto &obj = registry.objects.at(node.name.name);
+    obj->fields =
+        node.fields |
+        std::views::transform(
+            [&registry](const ast::FieldDefinitionNode &defNode)
+                -> std::pair<
+                    std::string,
+                    std::shared_ptr<FieldDefinition<ObjectFieldSpec>>> {
+                const auto &[typeSpec, nullable] =
+                    parseObjectTypeSpec(defNode, registry);
+
+                return { defNode.name.name,
+                         std::make_shared<FieldDefinition<ObjectFieldSpec>>(
+                             defNode.name.name, typeSpec, nullable) };
+            }) |
+        std::ranges::to<std::map>();
+    obj->implements =
+        node.interfaces |
+        std::views::transform(
+            [&registry](const shared::ast::NameNode &node)
+                -> std::pair<std::string, std::shared_ptr<Interface>> {
+                return { node.name, registry.interfaces.at(node.name) };
+            }) |
+        std::ranges::to<std::map>();
+    return obj;
 };
 
 SchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
@@ -365,26 +380,11 @@ SchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
         overloaded{
             [&registry](const ast::ScalarDefinitionNode &node)
                 -> std::shared_ptr<Scalar> {
-                if (registry.scalars.contains(node.name.name)) {
-                    throw std::runtime_error(std::format(
-                        "Scalar with name {} already exists", node.name.name));
-                };
-                return std::make_shared<Scalar>(node.name.name);
+                return registry.scalars.at(node.name.name);
             },
             [&registry](
                 const ast::EnumDefinitionNode &node) -> std::shared_ptr<Enum> {
-                if (registry.enums.contains(node.name.name)) {
-                    throw std::runtime_error(std::format(
-                        "Enum with name {} already exists", node.name.name));
-                };
-                return std::make_shared<Enum>(
-                    node.name.name,
-                    node.values |
-                        std::views::transform(
-                            [](const ast::EnumValueDefinitionNode &vNode) {
-                                return vNode.value.name;
-                            }) |
-                        std::ranges::to<std::vector>());
+                return registry.enums.at(node.name.name);
             },
             [&registry](const ast::UnionDefinitionNode &node)
                 -> std::shared_ptr<Union> {
@@ -400,334 +400,554 @@ SchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
             },
             [&registry](const ast::ObjectDefinitionNode &node)
                 -> std::shared_ptr<ObjectType> {
-                return std::make_shared<ObjectType>(
-                    parseObject(node, registry));
+                return parseObject(node, registry);
             },
         },
         astNode);
 };
 
-template <typename T>
-NonCallableFieldSpec<T> replaceNonCallableFieldSpecLazyNodes(
-    const NonCallableFieldSpec<T> &fSpec,
-    const std::function<T(const std::string &)> typeGetter) {
-    return std::visit<NonCallableFieldSpec<T>>(
+std::pair<
+    std::shared_ptr<ObjectType>,
+    std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>>
+parseExtendObjectType(const ast::ExtendTypeNode &node,
+                      const TypeRegistry &registry) {
+    if (!registry.objects.contains(node.typeNode.name.name)) {
+        throw shared::ParserError(node.typeNode.name.location.startToken,
+                                  "Type with this name does not exists",
+                                  node.typeNode.name.location.source);
+    };
+    return {
+        registry.getObject(node.typeNode.name.name),
+        node.typeNode.fields |
+            std::views::transform(
+                [&registry](const auto &field)
+                    -> std::pair<
+                        std::string,
+                        std::shared_ptr<FieldDefinition<ObjectFieldSpec>>> {
+                    const auto &[typeSpec, nullable] =
+                        parseObjectTypeSpec(field, registry);
+
+                    return { field.name.name,
+                             std::make_shared<FieldDefinition<ObjectFieldSpec>>(
+                                 field.name.name, typeSpec, nullable) };
+                }) |
+            std::ranges::to<std::map>()
+    };
+};
+
+FragmentSpec fragmentSpecFromName(const shared::ast::NameNode &typeName,
+                                  const TypeRegistry &registry) {
+    if (registry.objects.contains(typeName.name)) {
+        return (ObjectFragmentSpec<ObjectType>){ .type = registry.getObject(
+                                                     typeName.name) };
+    } else if (registry.unions.contains(typeName.name)) {
+        return (UnionFragmentSpec){ .type = registry.unions.at(typeName.name) };
+    } else if (registry.interfaces.contains(typeName.name)) {
+        return (ObjectFragmentSpec<Interface>){ .type = registry.getInterface(
+                                                    typeName.name) };
+    };
+    throw shared::ParserError(
+        typeName.location.startToken,
+        "Object type or union with this name does not exists",
+        typeName.location.source);
+};
+
+std::shared_ptr<Fragment> parseFragmentFirstPass(
+    const client::ast::FragmentDefinition &definition,
+    const TypeRegistry &registry) {
+    const auto &name = definition.name.name;
+    if (registry.fragments.contains(name)) {
+        throw shared::ParserError(definition.name.location.startToken,
+                                  "Fragment with this name already exists",
+                                  definition.name.location.source);
+    };
+    return std::make_shared<Fragment>(
+        name, fragmentSpecFromName(definition.typeName, registry));
+};
+
+FragmentSpec parseFragmentSpec(const client::ast::FragmentSpec &defSpec,
+                               const FragmentSpec &spec,
+                               const TypeRegistry &registry);
+
+ObjectTypeSpec getReturnTypeFromNonCallableFieldSpec(
+    const NonCallableFieldSpec<ObjectTypeSpec> &fSpec) {
+    return std::visit<ObjectTypeSpec>(
         overloaded{
-            [&typeGetter](
-                const LiteralFieldSpec<T> &spec) -> LiteralFieldSpec<T> {
-                if (std::holds_alternative<LazySchemaNode>(spec.type)) {
-                    return { .type = typeGetter(
-                                 std::get<LazySchemaNode>(spec.type).name) };
-                };
-                return spec;
+            [](const LiteralFieldSpec<ObjectTypeSpec> &node) -> ObjectTypeSpec {
+                return node.type;
             },
-            [&typeGetter](const ArrayFieldSpec<T> &spec) -> ArrayFieldSpec<T> {
-                if (std::holds_alternative<LazySchemaNode>(spec.type)) {
-                    return { .type = typeGetter(
-                                 std::get<LazySchemaNode>(spec.type).name),
-                             .nullable = spec.nullable };
-                };
-                return spec;
+            [](const ArrayFieldSpec<ObjectTypeSpec> &node) -> ObjectTypeSpec {
+                return node.type;
             } },
         fSpec);
 };
 
-InputFieldSpec replaceInputSpecLazyNodes(const InputFieldSpec &iSpec,
-                                         const TypeRegistry &registry) {
-    return replaceNonCallableFieldSpecLazyNodes<InputTypeSpec>(
-        iSpec, [&registry](const std::string &name) {
-            return registry.getTypeForInput(name);
-        });
+ObjectTypeSpec getReturnTypeFromObjectFieldSpec(const ObjectFieldSpec &spec) {
+    return std::visit<ObjectTypeSpec>(
+        overloaded{ [](const LiteralFieldSpec<ObjectTypeSpec> &node) {
+                       return node.type;
+                   },
+                    [](const CallableFieldSpec &node) {
+                        return getReturnTypeFromNonCallableFieldSpec(
+                            node.returnType);
+                    },
+                    [](const ArrayFieldSpec<ObjectTypeSpec> &node) {
+                        return node.type;
+                    } },
+        spec);
 };
 
-FieldDefinition<InputFieldSpec> replaceInputFieldLazyNodes(
-    const FieldDefinition<InputFieldSpec> &definition,
-    const TypeRegistry &registry) {
-    return {
-        .name = definition.name,
-        .spec = replaceInputSpecLazyNodes(definition.spec, registry),
-        .nullable = definition.nullable,
+FragmentSpec fragmentSpecFromFieldDefinition(
+    const FieldDefinition<ObjectFieldSpec> &field,
+    const client::ast::FragmentSpec &sNode) {
+    const ObjectTypeSpec &typeSpec =
+        getReturnTypeFromObjectFieldSpec(field.spec);
+    if (std::holds_alternative<std::shared_ptr<ObjectType>>(typeSpec)) {
+        const auto &type = std::get<std::shared_ptr<ObjectType>>(typeSpec);
+        return (ObjectFragmentSpec<ObjectType>){ .type = type };
+    } else if (std::holds_alternative<std::shared_ptr<Interface>>(typeSpec)) {
+        const auto &type = std::get<std::shared_ptr<Interface>>(typeSpec);
+        return (ObjectFragmentSpec<Interface>){ .type = type };
+    } else if (std::holds_alternative<std::shared_ptr<Union>>(typeSpec)) {
+        const auto &type = std::get<std::shared_ptr<Union>>(typeSpec);
+        return (UnionFragmentSpec){ .type = type };
+    };
+    throw shared::ParserError(sNode.location.startToken,
+                              "Cannot have selection on literal type field",
+                              sNode.location.source);
+};
+
+void assertParamTypeIsValid(const client::ast::Argument &node,
+                            const FieldSelectionArgument &arg,
+                            const FieldDefinition<InputFieldSpec> &param) {
+    if (arg.type->spec != param.spec) {
+        throw shared::ParserError(
+            node.paramName.location.startToken,
+            std::format("Argument requires type {} while param type is {}",
+                        arg.type->name, param.name),
+            node.paramName.location.source);
+    };
+    if (arg.name == "skip") {
+        const auto &t =
+            std::get<LiteralFieldSpec<InputTypeSpec>>(arg.type->spec);
+        const auto &t2 = std::get<LiteralFieldSpec<InputTypeSpec>>(param.spec);
+        const auto &ts = std::get<std::shared_ptr<Scalar>>(t.type);
+        const auto &ts2 = std::get<std::shared_ptr<Scalar>>(t2.type);
+        std::cout << std::format("t: {}, t2: {}", ts->name, ts2->name)
+                  << std::endl;
     };
 };
 
-ObjectFieldSpec replaceObjectSpecLazyNodes(const ObjectFieldSpec &iSpec,
-                                           const TypeRegistry &registry) {
-    return std::visit<ObjectFieldSpec>(
+FieldSelectionArgument parseSelectionArgument(const client::ast::Argument &node,
+                                              const CallableFieldSpec &spec) {
+    if (!spec.arguments.contains(node.name.name)) {
+        throw shared::ParserError(node.name.location.startToken,
+                                  "Argument with this name does not exists",
+                                  node.name.location.source);
+    };
+    const FieldSelectionArgument &arg = { .name = node.name.name,
+                                          .parameterName = node.paramName.name,
+                                          .type = spec.arguments.at(
+                                              node.name.name) };
+    return arg;
+};
+
+template <typename T>
+FieldSelection parseFieldSelectionNode(
+    const client::ast::FieldSelectionNode &fNode,
+    const std::shared_ptr<T> &type, const TypeRegistry &registry) {
+    return std::visit<FieldSelection>(
         overloaded{
-            [&registry](const LiteralFieldSpec<ObjectTypeSpec> &spec)
-                -> LiteralFieldSpec<ObjectTypeSpec> {
-                if (std::holds_alternative<LazySchemaNode>(spec.type)) {
-                    return { .type = registry.getTypeForObject(
-                                 std::get<LazySchemaNode>(spec.type).name) };
+            [&type, &fNode,
+             &registry](const client::ast::ObjectLiteralFieldSpec &node)
+                -> FieldSelection {
+                if (!(type->fields.contains(node.name.name) ||
+                      node.name.name == "__typename")) {
+                    throw shared::ParserError(
+                        node.name.location.startToken,
+                        std::format("Unknown field {} on type {}",
+                                    node.name.name, type->name),
+                        node.name.location.source);
                 };
-                return spec;
+                const auto &spec = fNode.spec.transform(
+                    [&registry, &node,
+                     &type](const std::shared_ptr<client::ast::FragmentSpec>
+                                &sNode) {
+                        return std::make_shared<FragmentSpec>(parseFragmentSpec(
+                            *sNode,
+                            fragmentSpecFromFieldDefinition(
+                                *type->fields.at(node.name.name), *sNode),
+                            registry));
+                    });
+                return { .name = node.name.name,
+                         .alias = node.selectionName.name,
+                         .selection = spec };
             },
-            [&registry](const ArrayFieldSpec<ObjectTypeSpec> &spec)
-                -> ArrayFieldSpec<ObjectTypeSpec> {
-                if (std::holds_alternative<LazySchemaNode>(spec.type)) {
-                    return { .type = registry.getTypeForObject(
-                                 std::get<LazySchemaNode>(spec.type).name),
-                             .nullable = spec.nullable };
+            [&type, &registry](const client::ast::ObjectCallableFieldSpec &node)
+                -> FieldSelection {
+                if (!type->fields.contains(node.name.name)) {
+                    throw shared::ParserError(
+                        node.name.location.startToken,
+                        std::format("Unknown field {} on type {}",
+                                    node.name.name, type->name),
+                        node.name.location.source);
                 };
-                return spec;
-            },
-            [&registry](const CallableFieldSpec &spec) -> CallableFieldSpec {
-                NodeOrLazy<NonCallableFieldSpec<ObjectTypeSpec>> returnType =
-                    spec.returnType;
-                if (std::holds_alternative<LazySchemaNode>(returnType)) {
-                    returnType =
-                        replaceNonCallableFieldSpecLazyNodes<ObjectTypeSpec>(
-                            std::get<NonCallableFieldSpec<ObjectTypeSpec>>(
-                                returnType),
-                            [&registry](const std::string &name) {
-                                return registry.getTypeForObject(name);
-                            });
+                const std::shared_ptr<FieldDefinition<ObjectFieldSpec>> &fType =
+                    type->fields.at(node.name.name);
+                if (!std::holds_alternative<CallableFieldSpec>(fType->spec)) {
+                    throw shared::ParserError(
+                        node.location.startToken,
+                        "Callable selection is forbidden on uncallable fields",
+                        node.location.source);
                 };
-                const auto &arguments =
-                    spec.arguments |
-                    std::views::transform([&registry](const auto &arg) {
-                        return replaceInputFieldLazyNodes(arg, registry);
-                    }) |
-                    std::ranges::to<std::vector>();
-                return { .returnType = returnType, .arguments = arguments };
+                const auto &spec = std::get<CallableFieldSpec>(fType->spec);
+                return { .name = node.name.name,
+                         .alias = node.selectionName.name,
+                         .arguments =
+                             node.arguments |
+                             std::views::transform(
+                                 [&spec](const auto &arg)
+                                     -> std::pair<std::string,
+                                                  FieldSelectionArgument> {
+                                     return { arg.name.name,
+                                              parseSelectionArgument(arg,
+                                                                     spec) };
+                                 }) |
+                             std::ranges::to<std::map>() };
             } },
-        iSpec);
+        fNode.field);
 };
 
-FieldDefinition<ObjectFieldSpec> replaceObjectFieldLazyNodes(
-    const FieldDefinition<ObjectFieldSpec> &definition,
-    const TypeRegistry &registry) {
-    return {
-        .name = definition.name,
-        .spec = replaceObjectSpecLazyNodes(definition.spec, registry),
-        .nullable = definition.nullable,
+SpreadSelection parseSpreadSelectionNode(
+    const client::ast::SpreadSelectionNode &node,
+    const std::shared_ptr<Union> &type, const TypeRegistry &registry) {
+    if (!registry.fragments.contains(node.fragmentName.name)) {
+        throw shared::ParserError(node.fragmentName.location.startToken,
+                                  "Fragment with this name does not exists",
+                                  node.fragmentName.location.source);
     };
+    const auto &fragment = registry.fragments.at(node.fragmentName.name);
+    const bool isUnion =
+        std::holds_alternative<UnionFragmentSpec>(fragment->spec);
+    const bool isInterface =
+        std::holds_alternative<ObjectFragmentSpec<Interface>>(fragment->spec);
+    if (!isUnion && !isInterface) {
+        throw shared::ParserError(node.fragmentName.location.startToken,
+                                  "Fragment has invalid type",
+                                  node.fragmentName.location.source);
+    };
+    if (isUnion) {
+        const auto &unionFragment = std::get<UnionFragmentSpec>(fragment->spec);
+        const auto &fType = unionFragment.type;
+        if (fType != type) {
+            throw shared::ParserError(
+                node.fragmentName.location.startToken,
+                std::format("Fragment has type {} while expected {}",
+                            fType->name, type->name),
+                node.fragmentName.location.source);
+        };
+    } else {
+        const auto &objectFragment =
+            std::get<ObjectFragmentSpec<Interface>>(fragment->spec);
+        const auto &fType = objectFragment.type;
+        for (const auto &itemType : type->items | std::views::values) {
+            if (!itemType->implements.contains(fType->name)) {
+                throw shared::ParserError(
+                    node.fragmentName.location.startToken,
+                    std::format(
+                        "Fragment on interface {} cannot be used here, as not "
+                        "all types in union implement this interface",
+                        fType->name),
+                    node.fragmentName.location.source);
+            };
+        };
+    };
+    return (SpreadSelection){ .fragment = fragment };
 };
 
-SchemaNode replaceLazyNodes(const SchemaNode &sNode,
-                            const TypeRegistry &registry) {
-    return std::visit<SchemaNode>(
+SpreadSelection parseSpreadSelectionNode(
+    const client::ast::SpreadSelectionNode &node,
+    const std::shared_ptr<Interface> &type, const TypeRegistry &registry) {
+    if (!registry.fragments.contains(node.fragmentName.name)) {
+        throw shared::ParserError(node.fragmentName.location.startToken,
+                                  "Fragment with this name does not exists",
+                                  node.fragmentName.location.source);
+    };
+    const auto &fragment = registry.fragments.at(node.fragmentName.name);
+    if (!std::holds_alternative<ObjectFragmentSpec<Interface>>(
+            fragment->spec) ||
+        std::get<ObjectFragmentSpec<Interface>>(fragment->spec).type != type) {
+        throw shared::ParserError(
+            node.fragmentName.location.startToken,
+            std::format("Fragment has type {} while expected {}",
+                        fragment->name, type->name),
+            node.fragmentName.location.source);
+    };
+    return (SpreadSelection){ .fragment = fragment };
+};
+
+struct GetFieldSelection {};
+const auto getFieldSelection = GetFieldSelection();
+
+auto operator|(const std::vector<ObjectSelection> &items,
+               const GetFieldSelection &) {
+    return items | std::views::filter([](const auto &node) {
+               return std::holds_alternative<FieldSelection>(node);
+           }) |
+           std::views::transform(
+               [](const auto &node) { return std::get<FieldSelection>(node); });
+};
+
+SpreadSelection parseSpreadSelectionNode(
+    const client::ast::SpreadSelectionNode &node,
+    const std::shared_ptr<ObjectType> &type, const TypeRegistry &registry) {
+    if (!registry.fragments.contains(node.fragmentName.name)) {
+        throw shared::ParserError(node.fragmentName.location.startToken,
+                                  "Fragment with this name does not exists",
+                                  node.fragmentName.location.source);
+    };
+    const auto &fragment = registry.fragments.at(node.fragmentName.name);
+    bool isObjectType =
+        std::holds_alternative<ObjectFragmentSpec<ObjectType>>(fragment->spec);
+    bool isInterfaceType =
+        std::holds_alternative<ObjectFragmentSpec<Interface>>(fragment->spec);
+    if (!isObjectType && !isInterfaceType) {
+        throw shared::ParserError(node.fragmentName.location.startToken,
+                                  "Fragment has invalid type",
+                                  node.fragmentName.location.source);
+    };
+    if (isObjectType) {
+        const auto &fType =
+            std::get<ObjectFragmentSpec<ObjectType>>(fragment->spec).type;
+        if (fType != type) {
+            throw shared::ParserError(
+                node.fragmentName.location.startToken,
+                std::format("Fragment has type {} while expected {}",
+                            fType->name, type->name),
+                node.fragmentName.location.source);
+        };
+    } else {
+        const auto &fType =
+            std::get<ObjectFragmentSpec<Interface>>(fragment->spec).type;
+        if (!type->implements.contains(fType->name)) {
+            throw shared::ParserError(
+                node.fragmentName.location.startToken,
+                std::format(
+                    "Fragment has incompatible interface {} for type {}",
+                    fType->name, type->name),
+                node.fragmentName.location.source);
+        };
+    };
+    return (SpreadSelection){ .fragment = fragment };
+};
+
+template <typename T>
+ObjectSelection parseObjectSelectionNode(
+    const client::ast::SelectionNode &sNode, const std::shared_ptr<T> &type,
+    const TypeRegistry &registry) {
+    return std::visit<ObjectSelection>(
         overloaded{
-            [&registry](const std::shared_ptr<InputType> &node) {
-                return std::make_shared<InputType>(
-                    node->name,
-                    node->fields |
-                        std::views::transform([&registry](const auto &field) {
-                            return replaceInputFieldLazyNodes(field, registry);
-                        }) |
-                        std::ranges::to<std::vector>());
+            [&registry, &type](const client::ast::SpreadSelectionNode &node) {
+                const auto &check =
+                    parseSpreadSelectionNode(node, type, registry);
+                return check;
             },
-            [&registry](const std::shared_ptr<ObjectType> &node) {
-                return std::make_shared<ObjectType>(
-                    node->name,
-                    node->fields |
-                        std::views::transform([&registry](const auto &field) {
-                            return replaceObjectFieldLazyNodes(field, registry);
-                        }) |
-                        std::ranges::to<std::vector>(),
-                    node->implements |
-                        std::views::transform(
-                            [&registry](const auto &interfaceNode)
-                                -> NodeOrLazy<std::shared_ptr<Interface>> {
-                                if (std::holds_alternative<LazySchemaNode>(
-                                        interfaceNode)) {
-                                    return registry.getInterface(
-                                        std::get<LazySchemaNode>(interfaceNode)
-                                            .name);
-                                };
-                                return interfaceNode;
-                            }) |
-                        std::ranges::to<std::vector>());
+            [](const client::ast::ConditionalSpreadSelectionNode &node)
+                -> ObjectSelection {
+                throw shared::ParserError(node.location.startToken,
+                                          "Conditional spread selection is "
+                                          "disallowed on object fragments",
+                                          node.location.source);
             },
-            [](const std::shared_ptr<Enum> &node) { return node; },
-            [](const std::shared_ptr<Scalar> &node) { return node; },
-            [&registry](const std::shared_ptr<Interface> &node) {
-                return std::make_shared<Interface>(
-                    node->name,
-                    node->fields |
-                        std::views::transform([&registry](const auto &field) {
-                            return replaceObjectFieldLazyNodes(field, registry);
-                        }) |
-                        std::ranges::to<std::vector>());
-            },
-            [&registry](const std::shared_ptr<Union> &node) {
-                return std::make_shared<Union>(
-                    node->name,
-                    node->items |
-                        std::views::transform(
-                            [&registry](const auto &item)
-                                -> NodeOrLazy<std::shared_ptr<ObjectType>> {
-                                if (std::holds_alternative<LazySchemaNode>(
-                                        item)) {
-                                    return registry.getObject(
-                                        std::get<LazySchemaNode>(item).name);
-                                };
-                                return item;
-                            }) |
-                        std::ranges::to<std::vector>());
+            [&registry, &type](const client::ast::FieldSelectionNode &node) {
+                return parseFieldSelectionNode(node, type, registry);
             } },
         sNode);
 };
 
-Selection parseSelectionNode(const client::ast::SelectionNode &sNode,
-                             const TypeRegistry &registry);
+template <typename T>
+ObjectFragmentSpec<T> parseObjectFragmentSpec(
+    const std::vector<client::ast::SelectionNode> &selections,
+    const std::shared_ptr<T> &type, const TypeRegistry &registry) {
+    const auto &selectionNodes =
+        selections |
+        std::views::transform([&registry, &type](const auto &sNode) {
+            return parseObjectSelectionNode(sNode, type, registry);
+        }) |
+        std::ranges::to<std::vector>();
+    return { .type = type, .selections = selectionNodes };
+};
 
-FragmentSpec parseFragmentSpec(const client::ast::FragmentSpec &spec,
-                               const TypeRegistry &registry) {
-    return { .selections =
-                 spec.selections |
-                 std::views::transform([&registry](const auto &selection) {
-                     return parseSelectionNode(selection, registry);
+bool isObjectFieldSpecIsTypenameField(
+    const client::ast::ObjectFieldSpec &spec) {
+    return std::holds_alternative<client::ast::ObjectLiteralFieldSpec>(spec) &&
+           std::get<client::ast::ObjectLiteralFieldSpec>(spec).name.name ==
+               "__typename";
+};
+
+UnionSelection parseUnionSelectionNode(const client::ast::SelectionNode &sNode,
+                                       const std::shared_ptr<Union> &type,
+                                       const TypeRegistry &registry) {
+    return std::visit<UnionSelection>(
+        overloaded{
+            [&registry, &type](const client::ast::SpreadSelectionNode &node) {
+                return parseSpreadSelectionNode(node, type, registry);
+            },
+            [&registry, &type](const client::ast::FieldSelectionNode &node) {
+                if (isObjectFieldSpecIsTypenameField(node.field))
+                    return (TypenameField){};
+                throw shared::ParserError(
+                    node.location.startToken,
+                    "No fields selections are allowed on union fragments",
+                    node.location.source);
+            },
+            [&registry,
+             &type](const client::ast::ConditionalSpreadSelectionNode &node) {
+                if (!type->items.contains(node.typeName.name)) {
+                    throw shared::ParserError(
+                        node.typeName.location.startToken,
+                        std::format("Unknown type {} in union {}",
+                                    node.typeName.name, type->name),
+                        node.typeName.location.source);
+                };
+                const auto &itemType = type->items.at(node.typeName.name);
+                const auto &spec = parseObjectFragmentSpec(
+                    node.fragment->selections, itemType, registry);
+                return (ConditionalSpreadSelection){
+                    .type = itemType,
+                    .selection =
+                        std::make_shared<ObjectFragmentSpec<ObjectType>>(spec)
+                };
+            } },
+        sNode);
+};
+
+UnionFragmentSpec parseUnionFragmentSpec(
+    const std::vector<client::ast::SelectionNode> &selections,
+    const std::shared_ptr<Union> &type, const TypeRegistry &registry) {
+    return { .type = type,
+             .selections =
+                 selections |
+                 std::views::transform([&registry, &type](const auto &sNode) {
+                     return parseUnionSelectionNode(sNode, type, registry);
                  }) |
                  std::ranges::to<std::vector>() };
 };
 
-Selection parseSelectionNode(const client::ast::SelectionNode &sNode,
-                             const TypeRegistry &registry) {
-    return std::visit<Selection>(
+FragmentSpec parseFragmentSpec(const client::ast::FragmentSpec &defSpec,
+                               const FragmentSpec &spec,
+                               const TypeRegistry &registry) {
+    return std::visit<FragmentSpec>(
         overloaded{
-            [&registry](
-                const client::ast::FieldSelectionNode &node) -> FieldSelection {
-                return (FieldSelection){
-                    .name = node.field.selectionName.name,
-                    .alias = node.field.name.name,
-                    .selection = node.spec.transform(
-                        [&registry](const auto &fragmentSpec) {
-                            return std::make_shared<FragmentSpec>(
-                                parseFragmentSpec(*fragmentSpec.get(),
-                                                  registry));
-                        })
-                };
+            [&registry, &defSpec](
+                const ObjectFragmentSpec<Interface> &node) -> FragmentSpec {
+                return parseObjectFragmentSpec(defSpec.selections, node.type,
+                                               registry);
             },
-            [&registry](const client::ast::SpreadSelectionNode &node)
-                -> SpreadSelection {
-                return (SpreadSelection){ .fragment =
-                                              registry.getFragmentOrLazy(
-                                                  node.fragmentName.name) };
+            [&registry, &defSpec](
+                const ObjectFragmentSpec<ObjectType> &node) -> FragmentSpec {
+                return parseObjectFragmentSpec(defSpec.selections, node.type,
+                                               registry);
             },
-            [&registry](const client::ast::ConditionalSpreadSelectionNode &node)
-                -> ConditionalSpreadSelection {
-                return (ConditionalSpreadSelection){
-                    .type = registry.getObjectOrUnion(node.typeName.name),
-                    .selection = std::make_shared<FragmentSpec>(
-                        parseFragmentSpec(*node.fragment.get(), registry))
-                };
+            [&registry,
+             &defSpec](const UnionFragmentSpec &node) -> FragmentSpec {
+                return parseUnionFragmentSpec(defSpec.selections, node.type,
+                                              registry);
             } },
-        sNode);
+        spec);
+};
+
+std::shared_ptr<Fragment> parseFragmentSecondPass(
+    const client::ast::FragmentDefinition &definition,
+    const TypeRegistry &registry) {
+    const auto &fragment = registry.getFragment(definition.name.name);
+    fragment->spec =
+        parseFragmentSpec(definition.spec, fragment->spec, registry);
+    return fragment;
+};
+
+FragmentSpec fragmentSpecFromOpType(client::ast::OpType type,
+                                    const TypeRegistry &registry) {
+    switch (type) {
+        case client::ast::OpType::QUERY: {
+            return (ObjectFragmentSpec<ObjectType>){
+                .type = registry.getQueryObject()
+            };
+        }
+        case client::ast::OpType::MUTATION: {
+            return (ObjectFragmentSpec<ObjectType>){
+                .type = registry.getMutationObject()
+            };
+        }
+
+        case client::ast::OpType::SUBSCRIPTION: {
+            return (ObjectFragmentSpec<ObjectType>){
+                .type = registry.getSubscriptionObject()
+            };
+        }
+    };
+};
+
+std::shared_ptr<Operation> parseClientOperationDefinition(
+    const client::ast::OperationDefinition &definition,
+    const TypeRegistry &registry) {
+    const auto &fragment = fragmentSpecFromOpType(definition.type, registry);
+    const auto &parameters =
+        definition.parameters | std::views::values |
+        std::views::transform(
+            [&registry](const auto &param)
+                -> std::pair<std::string, FieldDefinition<InputFieldSpec>> {
+                return { param.name.name,
+                         parseInputFieldDefinition(param, registry) };
+            }) |
+        std::ranges::to<std::map>();
+    if (definition.name.name != "Check")
+        return std::make_shared<Operation>(definition.type,
+                                           definition.name.name);
+    return std::make_shared<Operation>(
+        definition.type, definition.name.name, parameters,
+        parseFragmentSpec(definition.fragment, fragment, registry));
 };
 
 ClientSchemaNode parseClientDefinition(
     const client::ast::ClientDefinition &definition,
     const TypeRegistry &registry) {
     return std::visit<ClientSchemaNode>(
-        overloaded{
-            [&registry](const client::ast::FragmentDefinition &node) {
-                return std::make_shared<Fragment>(
-                    node.name.name, node.typeName.name,
-                    std::make_shared<FragmentSpec>(
-                        node.spec.selections |
-                        std::views::transform([&registry](const auto &sNode) {
-                            return parseSelectionNode(sNode, registry);
-                        }) |
-                        std::ranges::to<std::vector>()));
-            },
-            [&registry](const client::ast::OperationDefinition &node) {
-                return std::make_shared<Operation>(
-                    node.type, node.name.name,
-                    node.parameters |
-                        std::views::transform([&registry](const auto &arg) {
-                            return parseInputFieldDefinition(arg, registry);
-                        }) |
-                        std::ranges::to<std::vector>(),
-                    registry.getOp(node.type, node.spec.name.name),
-                    node.spec.selectionName.name,
-                    node.spec.args |
-                        std::views::transform(
-                            [](const auto &arg)
-                                -> std::pair<std::string, std::string> {
-                                return { arg.paramName.name, arg.name.name };
-                            }) |
-                        std::ranges::to<std::map>(),
-                    std::make_shared<FragmentSpec>(
-                        parseFragmentSpec(node.fragment, registry)));
-            } },
+        overloaded{ [&registry](const client::ast::FragmentDefinition &node) {
+                       return parseFragmentSecondPass(node, registry);
+                   },
+                    [&registry](const client::ast::OperationDefinition &node) {
+                        return parseClientOperationDefinition(node, registry);
+                    } },
         definition);
 };
 
-std::shared_ptr<FragmentSpec> replaceFragmentSpecLazyNodes(
-    const std::shared_ptr<FragmentSpec> &fSpec, const TypeRegistry &registry);
-
-Selection replaceSelectionNodeLazyNodes(const Selection &sNode,
-                                        const TypeRegistry &registry) {
-    return std::visit<Selection>(
+SchemaNode parseServerNodeFirstPass(const ast::TypeDefinitionNode &astNode) {
+    return std::visit<SchemaNode>(
         overloaded{
-            [&registry](const FieldSelection &node) {
-                return (FieldSelection){
-                    .name = node.name,
-                    .alias = node.alias,
-                    .selection = node.selection.transform(
-                        [&registry](const auto &fSpec) {
-                            return replaceFragmentSpecLazyNodes(fSpec,
-                                                                registry);
-                        })
-                };
+            [](const ast::ScalarDefinitionNode &node) {
+                return std::make_shared<Scalar>(node.name.name);
             },
-            [&registry](const SpreadSelection &node) {
-                if (std::holds_alternative<LazySchemaNode>(node.fragment)) {
-                    return (SpreadSelection){
-                        .fragment = registry.getFragment(
-                            std::get<LazySchemaNode>(node.fragment).name)
-                    };
-                };
-                return node;
+            [](const ast::EnumDefinitionNode &node) {
+                return std::make_shared<Enum>(
+                    node.name.name,
+                    node.values | std::views::transform([](const auto &v) {
+                        return v.value.name;
+                    }) | std::ranges::to<std::vector>());
             },
-            [&registry](const ConditionalSpreadSelection &node) {
-                return (ConditionalSpreadSelection){
-                    .type = node.type,
-                    .selection =
-                        replaceFragmentSpecLazyNodes(node.selection, registry)
-                };
+            [](const ast::UnionDefinitionNode &node) {
+                return std::make_shared<Union>(node.name.name);
+            },
+            [](const ast::ObjectDefinitionNode &node) {
+                return std::make_shared<ObjectType>(node.name.name);
+            },
+            [](const ast::InputObjectDefinitionNode &node) {
+                return std::make_shared<InputType>(node.name.name);
+            },
+            [](const ast::InterfaceDefinitionNode &node) {
+                return std::make_shared<Interface>(node.name.name);
             } },
-        sNode);
-}
-
-std::shared_ptr<FragmentSpec> replaceFragmentSpecLazyNodes(
-    const std::shared_ptr<FragmentSpec> &fSpec, const TypeRegistry &registry) {
-    return std::make_shared<FragmentSpec>(
-        fSpec->selections |
-        std::views::transform([&registry](const auto &sNode) {
-            return replaceSelectionNodeLazyNodes(sNode, registry);
-        }) |
-        std::ranges::to<std::vector>());
-};
-
-ClientSchemaNode replaceClientLazyNodes(const ClientSchemaNode &sNode,
-                                        const TypeRegistry &registry) {
-    return std::visit<ClientSchemaNode>(
-        overloaded{
-            [&registry](const std::shared_ptr<Fragment> &node) {
-                return std::make_shared<Fragment>(
-                    node->name, node->typeName,
-                    replaceFragmentSpecLazyNodes(node->spec, registry));
-            },
-            [&registry](const std::shared_ptr<Operation> &node) {
-                return std::make_shared<Operation>(
-                    node->type, node->name,
-                    node->arguments |
-                        std::views::transform([&registry](const auto &arg) {
-                            return replaceInputFieldLazyNodes(arg, registry);
-                        }) |
-                        std::ranges::to<std::vector>(),
-                    node->operation, node->returnFieldName,
-                    node->argumentsMapping,
-                    replaceFragmentSpecLazyNodes(node->fragmentSpec, registry));
-            } },
-        sNode);
-};
-
-ExtendObjectType parseExtendObjectType(const ast::ExtendTypeNode &node,
-                                       const TypeRegistry &registry) {
-    return { .type = parseObject(node.typeNode, registry) };
+        astNode);
 };
 
 const Schema parsers::schema::parseSchema(
@@ -735,38 +955,39 @@ const Schema parsers::schema::parseSchema(
     std::vector<client::ast::ClientDefinition> clientDefinitions) {
     Schema schema;
     TypeRegistry registry;
+    for (const auto &ast : astArray) {
+        for (const auto &node : ast.definitions) {
+            registry.addNode(parseServerNodeFirstPass(node));
+        };
+    };
     schema.serverNodes =
         astArray |
         std::views::transform([](const auto &ast) { return ast.definitions; }) |
-        std::views::join |
-        std::views::transform([&registry](const auto &astNode) {
-            const auto &node = parseServerNode(astNode, registry);
-            registry.addNode(node);
-            return node;
-        }) |
-        std::ranges::to<std::vector>() |
-        std::views::transform([&registry](auto &sNode) {
-            return replaceLazyNodes(sNode, registry);
+        std::views::join | std::views::transform([&registry](auto &sNode) {
+            return parseServerNode(sNode, registry);
         }) |
         std::ranges::to<std::vector>();
     for (const auto &ast : astArray) {
         for (const auto &node : ast.extensions) {
-            registry.patchObject(parseExtendObjectType(node, registry));
+            const auto &[typeNode, newFields] =
+                parseExtendObjectType(node, registry);
+            registry.patchObject(typeNode, newFields);
         };
     };
-    schema.clientNodes =
-        clientDefinitions |
-        std::views::transform([&registry](const auto &definition) {
-            const auto &node = parseClientDefinition(definition, registry);
-            if (std::holds_alternative<std::shared_ptr<Fragment>>(node)) {
-                registry.addFragment(std::get<std::shared_ptr<Fragment>>(node));
-            };
-            return node;
-        }) |
-        std::ranges::to<std::vector>() |
-        std::views::transform([&registry](const auto &node) {
-            return replaceClientLazyNodes(node, registry);
-        }) |
-        std::ranges::to<std::vector>();
+    for (const auto &fragmentDefinition :
+         clientDefinitions | std::views::filter([](const auto &def) {
+             return std::holds_alternative<client::ast::FragmentDefinition>(
+                 def);
+         }) | std::views::transform([](const auto &def) {
+             return std::get<client::ast::FragmentDefinition>(def);
+         })) {
+        registry.addFragment(
+            parseFragmentFirstPass(fragmentDefinition, registry));
+    };
+    schema.clientNodes = clientDefinitions |
+                         std::views::transform([&registry](const auto &node) {
+                             return parseClientDefinition(node, registry);
+                         }) |
+                         std::ranges::to<std::vector>();
     return schema;
 };

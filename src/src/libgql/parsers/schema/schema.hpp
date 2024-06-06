@@ -15,17 +15,11 @@
 namespace parsers {
 namespace schema {
 
-struct LazySchemaNode {
-    std::string name;
-};
-
 struct Scalar {
     std::string name;
 };
 
-template <typename T>
-using NodeOrLazy = std::variant<T, LazySchemaNode>;
-
+struct Interface;
 struct ObjectType;
 struct InputType;
 struct Union;
@@ -36,8 +30,9 @@ struct Enum {
 };
 
 using ObjectTypeSpec =
-    std::variant<std::shared_ptr<ObjectType>, std::shared_ptr<Scalar>,
-                 std::shared_ptr<Enum>, std::shared_ptr<Union>>;
+    std::variant<std::shared_ptr<ObjectType>, std::shared_ptr<Interface>,
+                 std::shared_ptr<Scalar>, std::shared_ptr<Enum>,
+                 std::shared_ptr<Union>>;
 
 using InputTypeSpec =
     std::variant<std::shared_ptr<InputType>, std::shared_ptr<Scalar>,
@@ -45,7 +40,7 @@ using InputTypeSpec =
 
 struct Union {
     std::string name;
-    std::vector<NodeOrLazy<std::shared_ptr<ObjectType>>> items;
+    std::map<std::string, std::shared_ptr<ObjectType>> items;
 };
 
 using Literal = std::variant<int, float, std::string, bool>;
@@ -53,25 +48,32 @@ using Literal = std::variant<int, float, std::string, bool>;
 struct EmptyMixin {};
 struct DefaultValueMixin {
     std::optional<Literal> defaultValue;
+
+    inline bool operator==(const DefaultValueMixin &) const = default;
 };
 
 template <typename T>
 struct LiteralFieldSpec
     : public std::conditional_t<std::is_same_v<InputTypeSpec, T>,
                                 DefaultValueMixin, EmptyMixin> {
-    NodeOrLazy<T> type;
+    T type;
+    inline bool operator==(const LiteralFieldSpec<T> &) const = default;
 };
 
 struct ArrayDefaultValueMixin {
     std::optional<std::vector<Literal>> defaultValue;
+
+    inline bool operator==(const ArrayDefaultValueMixin &) const = default;
 };
 
 template <typename T>
 struct ArrayFieldSpec
     : public std::conditional_t<std::is_same_v<InputTypeSpec, T>,
                                 ArrayDefaultValueMixin, EmptyMixin> {
-    NodeOrLazy<T> type;
+    T type;
     bool nullable = true;
+
+    inline bool operator==(const ArrayFieldSpec<T> &) const = default;
 };
 
 template <typename T>
@@ -84,8 +86,10 @@ template <typename T>
 struct FieldDefinition;
 
 struct CallableFieldSpec {
-    NodeOrLazy<NonCallableFieldSpec<ObjectTypeSpec>> returnType;
-    std::vector<FieldDefinition<InputFieldSpec>> arguments;
+    NonCallableFieldSpec<ObjectTypeSpec> returnType;
+    std::map<std::string, std::shared_ptr<FieldDefinition<InputFieldSpec>>> arguments;
+
+    inline bool operator==(const CallableFieldSpec &) const = default;
 };
 
 using ObjectFieldSpec =
@@ -101,18 +105,20 @@ struct FieldDefinition {
 
 struct InputType {
     std::string name;
-    std::vector<FieldDefinition<InputFieldSpec>> fields;
+    std::map<std::string, FieldDefinition<InputFieldSpec>> fields;
 };
 
 struct Interface {
     std::string name;
-    std::vector<FieldDefinition<ObjectFieldSpec>> fields;
+    std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>
+        fields;
 };
 
 struct ObjectType {
     std::string name;
-    std::vector<FieldDefinition<ObjectFieldSpec>> fields;
-    std::vector<NodeOrLazy<std::shared_ptr<Interface>>> implements;
+    std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>
+        fields;
+    std::map<std::string, std::shared_ptr<Interface>> implements;
 };
 
 struct ExtendObjectType {
@@ -128,40 +134,58 @@ struct Fragment;
 struct FieldSelection;
 struct ConditionalSpreadSelection;
 struct SpreadSelection {
-    NodeOrLazy<std::shared_ptr<Fragment>> fragment;
+    std::shared_ptr<Fragment> fragment;
 };
-using Selection =
-    std::variant<FieldSelection, SpreadSelection, ConditionalSpreadSelection>;
 
-struct FragmentSpec {
-    std::vector<Selection> selections;
+struct TypenameField {};
+using UnionSelection =
+    std::variant<TypenameField, SpreadSelection, ConditionalSpreadSelection>;
+using ObjectSelection =
+    std::variant<TypenameField, SpreadSelection, FieldSelection>;
+
+struct UnionFragmentSpec {
+    std::shared_ptr<Union> type;
+    std::vector<UnionSelection> selections;
+};
+
+template <typename T>
+struct ObjectFragmentSpec {
+    std::shared_ptr<T> type;
+    std::vector<ObjectSelection> selections;
 };
 
 struct ConditionalSpreadSelection {
-    std::variant<std::shared_ptr<ObjectType>, std::shared_ptr<Union>> type;
-    std::shared_ptr<FragmentSpec> selection;
+    std::shared_ptr<ObjectType> type;
+    std::shared_ptr<ObjectFragmentSpec<ObjectType>> selection;
+};
+
+using FragmentSpec =
+    std::variant<UnionFragmentSpec, ObjectFragmentSpec<ObjectType>,
+                 ObjectFragmentSpec<Interface>>;
+
+struct FieldSelectionArgument {
+    std::string name;
+    std::string parameterName;
+    std::shared_ptr<FieldDefinition<InputFieldSpec>> type;
 };
 
 struct FieldSelection {
     std::string name;
     std::string alias;
+    std::optional<std::map<std::string, FieldSelectionArgument>> arguments;
     std::optional<std::shared_ptr<FragmentSpec>> selection;
 };
 
 struct Fragment {
     std::string name;
-    std::string typeName;
-    std::shared_ptr<FragmentSpec> spec;
+    FragmentSpec spec;
 };
 
 struct Operation {
     client::ast::OpType type;
     std::string name;
-    std::vector<FieldDefinition<InputFieldSpec>> arguments;
-    const FieldDefinition<ObjectFieldSpec>* operation;
-    std::string returnFieldName;
-    std::map<std::string, std::string> argumentsMapping;
-    std::shared_ptr<FragmentSpec> fragmentSpec;
+    std::map<std::string, FieldDefinition<InputFieldSpec>> parameters;
+    FragmentSpec fragmentSpec;
 };
 
 using ClientSchemaNode =
