@@ -1,7 +1,7 @@
 #include "./schema.hpp"
 
+#include <algorithm>
 #include <format>
-#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
@@ -20,6 +20,28 @@
 using namespace parsers;
 using namespace parsers::schema;
 using namespace parsers::server;
+
+bool InputFieldSpec_hasDefaultValue(const InputFieldSpec &spec) {
+    return std::visit<bool>(
+        overloaded{ [](const LiteralFieldSpec<InputTypeSpec> &node) {
+                       return node.hasDefaultValue();
+                   },
+                    [](const ArrayFieldSpec<InputTypeSpec> &node) {
+                        return node.hasDefaultValue();
+                    } },
+        spec);
+};
+
+InputTypeSpec extractInputTypeSpec(const InputFieldSpec &spec) {
+    return std::visit<InputTypeSpec>(
+        overloaded{ [](const LiteralFieldSpec<InputTypeSpec> &node) {
+                       return node.type;
+                   },
+                    [](const ArrayFieldSpec<InputTypeSpec> &node) {
+                        return node.type;
+                    } },
+        spec);
+};
 
 struct TypeRegistry {
     std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>
@@ -224,22 +246,77 @@ std::shared_ptr<Union> parseUnion(const ast::UnionDefinitionNode &node,
     return obj;
 };
 
-template <typename T>
-std::pair<NonCallableFieldSpec<T>, bool> parseNonCallableTypeSpec(
+Literal parseLiteralNode(const shared::ast::LiteralNode &literal,
+                         const InputTypeSpec &spec) {
+    return std::visit<Literal>(
+        overloaded{ [&spec](const shared::ast::LiteralEnumValueNode &node) {
+                       if (!std::holds_alternative<std::shared_ptr<Enum>>(
+                               spec)) {
+                           throw shared::ParserError(
+                               node.location.startToken,
+                               "Unexpected default value identifier",
+                               node.location.source);
+                       };
+                       const auto &type = std::get<std::shared_ptr<Enum>>(spec);
+                       if (std::find(type->values.begin(), type->values.end(),
+                                     node.value) == type->values.end()) {
+                           throw shared::ParserError(
+                               node.location.startToken,
+                               std::format("Enum {} doesn`t have value {}",
+                                           type->name, node.value),
+                               node.location.source);
+                       };
+                       return node.value;
+                   },
+                    [](const auto &node) -> Literal { return node.value; } },
+        literal);
+};
+
+std::pair<NonCallableFieldSpec<InputTypeSpec>, bool>
+parseNonCallableInputTypeSpec(
     const shared::ast::TypeNode astNode,
-    std::function<T(const shared::ast::NameNode &)> typeGetter) {
-    return std::visit<std::pair<NonCallableFieldSpec<T>, bool>>(
+    const std::optional<shared::ast::LiteralNode> defaultValueNode,
+    const TypeRegistry &registry) {
+    return std::visit<std::pair<NonCallableFieldSpec<InputTypeSpec>, bool>>(
         overloaded{
-            [&typeGetter](const shared::ast::NamedTypeNode &node)
-                -> std::pair<LiteralFieldSpec<T>, bool> {
-                return { (LiteralFieldSpec<T>){ .type = typeGetter(node.name) },
+            [&registry,
+             &defaultValueNode](const shared::ast::NamedTypeNode &node)
+                -> std::pair<LiteralFieldSpec<InputTypeSpec>, bool> {
+                const auto &type = registry.getTypeForInput(node.name);
+                return { (LiteralFieldSpec<InputTypeSpec>){
+                             { .defaultValue = defaultValueNode.transform(
+                                   [&type](const auto &literal) {
+                                       return parseLiteralNode(literal, type);
+                                   }) },
+                             .type = type },
                          node.nullable };
             },
-            [&typeGetter](const shared::ast::ListTypeNode &node)
-                -> std::pair<ArrayFieldSpec<T>, bool> {
-                return { (ArrayFieldSpec<T>){ .type =
-                                                  typeGetter(node.type.name),
-                                              .nullable = node.type.nullable },
+            [&registry](const shared::ast::ListTypeNode &node)
+                -> std::pair<ArrayFieldSpec<InputTypeSpec>, bool> {
+                return { (ArrayFieldSpec<InputTypeSpec>){
+                             .type = registry.getTypeForInput(node.type.name),
+                             .nullable = node.type.nullable },
+                         node.nullable };
+            } },
+        astNode);
+};
+
+std::pair<NonCallableFieldSpec<ObjectTypeSpec>, bool>
+parseNonCallableObjectTypeSpec(const shared::ast::TypeNode astNode,
+                               const TypeRegistry &registry) {
+    return std::visit<std::pair<NonCallableFieldSpec<ObjectTypeSpec>, bool>>(
+        overloaded{
+            [&registry](const shared::ast::NamedTypeNode &node)
+                -> std::pair<LiteralFieldSpec<ObjectTypeSpec>, bool> {
+                return { (LiteralFieldSpec<ObjectTypeSpec>){
+                             .type = registry.getTypeForObject(node.name) },
+                         node.nullable };
+            },
+            [&registry](const shared::ast::ListTypeNode &node)
+                -> std::pair<ArrayFieldSpec<ObjectTypeSpec>, bool> {
+                return { (ArrayFieldSpec<ObjectTypeSpec>){
+                             .type = registry.getTypeForObject(node.type.name),
+                             .nullable = node.type.nullable },
                          node.nullable };
             } },
         astNode);
@@ -248,12 +325,8 @@ std::pair<NonCallableFieldSpec<T>, bool> parseNonCallableTypeSpec(
 FieldDefinition<InputFieldSpec> parseInputFieldDefinition(
     const shared::ast::InputValueDefinitionNode &node,
     const TypeRegistry &registry) {
-    const auto &[returnType, nullable] = parseNonCallableTypeSpec(
-        node.type, (std::function<InputTypeSpec(
-                        const shared::ast::NameNode &)>)[&registry](
-                       const shared::ast::NameNode &name) {
-            return registry.getTypeForInput(name);
-        });
+    const auto &[returnType, nullable] =
+        parseNonCallableInputTypeSpec(node.type, node.defaultValue, registry);
     const InputFieldSpec &returnTypeSpec = std::visit(
         [](auto &&arg) -> InputFieldSpec { return arg; }, returnType);
 
@@ -264,12 +337,8 @@ FieldDefinition<InputFieldSpec> parseInputFieldDefinition(
 
 std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
     const ast::FieldDefinitionNode &astNode, const TypeRegistry &registry) {
-    const auto &[returnType, nullable] = parseNonCallableTypeSpec(
-        astNode.type, (std::function<ObjectTypeSpec(
-                           const shared::ast::NameNode &)>)[&registry](
-                          const shared::ast::NameNode &name) {
-            return registry.getTypeForObject(name);
-        });
+    const auto &[returnType, nullable] =
+        parseNonCallableObjectTypeSpec(astNode.type, registry);
     ObjectFieldSpec returnTypeSpec = std::visit(
         [](auto &&arg) -> ObjectFieldSpec { return arg; }, returnType);
     if (astNode.arguments.empty()) return { returnTypeSpec, nullable };
@@ -293,12 +362,8 @@ std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
 
 std::pair<InputFieldSpec, bool> parseInputTypeSpec(
     const ast::FieldDefinitionNode &astNode, const TypeRegistry &registry) {
-    const auto &[returnType, nullable] = parseNonCallableTypeSpec(
-        astNode.type, (std::function<InputTypeSpec(
-                           const shared::ast::NameNode &)>)[&registry](
-                          const shared::ast::NameNode &name) {
-            return registry.getTypeForInput(name);
-        });
+    const auto &[returnType, nullable] =
+        parseNonCallableInputTypeSpec(astNode.type, std::nullopt, registry);
     InputFieldSpec returnTypeSpec = std::visit(
         [](auto &&arg) -> InputFieldSpec { return arg; }, returnType);
 
@@ -1005,7 +1070,6 @@ std::vector<FieldSelection> getFieldSelectionsFromFragmentSpec(
         },
         spec);
 };
-
 void assertOperationIsValid(const std::shared_ptr<Operation> &op) {
     const auto &selections =
         getFieldSelectionsFromFragmentSpec(op->fragmentSpec);
@@ -1018,12 +1082,26 @@ void assertOperationIsValid(const std::shared_ptr<Operation> &op) {
                     "Operation {} doesn`t define required parameter {}",
                     op->name, arg.parameterName));
             };
-            const FieldDefinition<InputFieldSpec> &paramType =
+            const FieldDefinition<InputFieldSpec> &paramField =
                 op->parameters.at(arg.parameterName);
-            const FieldDefinition<InputFieldSpec> &argType = *arg.type.get();
-            if (paramType.spec != argType.spec) {
+            const FieldDefinition<InputFieldSpec> &argField = *arg.type.get();
+            if (extractInputTypeSpec(paramField.spec) !=
+                extractInputTypeSpec(argField.spec)) {
                 throw std::runtime_error(
                     std::format("Operation {} parameter {} has wrong type",
+                                op->name, arg.parameterName));
+            };
+            const auto &isArgNullable = argField.nullable;
+            const auto &argHasDefaultValue =
+                InputFieldSpec_hasDefaultValue(argField.spec);
+            const auto &isParamNullable = paramField.nullable;
+            const auto &paramHasDefaultValue =
+                InputFieldSpec_hasDefaultValue(paramField.spec);
+            if (!isArgNullable && !argHasDefaultValue && isParamNullable &&
+                !paramHasDefaultValue) {
+                throw std::runtime_error(
+                    std::format("Operation {} parameter {} must not be "
+                                "nullable or need to have default value",
                                 op->name, arg.parameterName));
             };
         };

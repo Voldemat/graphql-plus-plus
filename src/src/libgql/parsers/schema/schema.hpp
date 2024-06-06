@@ -11,6 +11,7 @@
 
 #include "libgql/parsers/client/ast.hpp"
 #include "libgql/parsers/server/ast.hpp"
+#include "utils.hpp"
 
 namespace parsers {
 namespace schema {
@@ -44,10 +45,16 @@ struct Union {
 };
 
 using Literal = std::variant<int, float, std::string, bool>;
+using ArrayLiteral = std::variant<std::vector<int>, std::vector<float>,
+                                  std::vector<std::string>, std::vector<bool>>;
 
-struct EmptyMixin {};
+struct EmptyMixin {
+    bool hasDefaultValue() const { return false; };
+};
 struct DefaultValueMixin {
     std::optional<Literal> defaultValue;
+
+    bool hasDefaultValue() const { return defaultValue.has_value(); };
 
     inline bool operator==(const DefaultValueMixin &) const = default;
 };
@@ -61,7 +68,9 @@ struct LiteralFieldSpec
 };
 
 struct ArrayDefaultValueMixin {
-    std::optional<std::vector<Literal>> defaultValue;
+    std::optional<ArrayLiteral> defaultValue;
+
+    bool hasDefaultValue() const { return defaultValue.has_value(); };
 
     inline bool operator==(const ArrayDefaultValueMixin &) const = default;
 };
@@ -79,7 +88,6 @@ struct ArrayFieldSpec
 template <typename T>
 using NonCallableFieldSpec =
     std::variant<LiteralFieldSpec<T>, ArrayFieldSpec<T>>;
-
 using InputFieldSpec = NonCallableFieldSpec<InputTypeSpec>;
 
 template <typename T>
@@ -87,7 +95,8 @@ struct FieldDefinition;
 
 struct CallableFieldSpec {
     NonCallableFieldSpec<ObjectTypeSpec> returnType;
-    std::map<std::string, std::shared_ptr<FieldDefinition<InputFieldSpec>>> arguments;
+    std::map<std::string, std::shared_ptr<FieldDefinition<InputFieldSpec>>>
+        arguments;
 
     inline bool operator==(const CallableFieldSpec &) const = default;
 };
