@@ -101,6 +101,8 @@ struct FieldDefinition {
     std::string name;
     T spec;
     bool nullable = true;
+
+    inline bool operator==(const FieldDefinition &) const = default;
 };
 
 struct InputType {

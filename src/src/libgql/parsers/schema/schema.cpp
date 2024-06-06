@@ -2,7 +2,6 @@
 
 #include <format>
 #include <functional>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -517,27 +516,6 @@ FragmentSpec fragmentSpecFromFieldDefinition(
                               sNode.location.source);
 };
 
-void assertParamTypeIsValid(const client::ast::Argument &node,
-                            const FieldSelectionArgument &arg,
-                            const FieldDefinition<InputFieldSpec> &param) {
-    if (arg.type->spec != param.spec) {
-        throw shared::ParserError(
-            node.paramName.location.startToken,
-            std::format("Argument requires type {} while param type is {}",
-                        arg.type->name, param.name),
-            node.paramName.location.source);
-    };
-    if (arg.name == "skip") {
-        const auto &t =
-            std::get<LiteralFieldSpec<InputTypeSpec>>(arg.type->spec);
-        const auto &t2 = std::get<LiteralFieldSpec<InputTypeSpec>>(param.spec);
-        const auto &ts = std::get<std::shared_ptr<Scalar>>(t.type);
-        const auto &ts2 = std::get<std::shared_ptr<Scalar>>(t2.type);
-        std::cout << std::format("t: {}, t2: {}", ts->name, ts2->name)
-                  << std::endl;
-    };
-};
-
 FieldSelectionArgument parseSelectionArgument(const client::ast::Argument &node,
                                               const CallableFieldSpec &spec) {
     if (!spec.arguments.contains(node.name.name)) {
@@ -901,9 +879,6 @@ std::shared_ptr<Operation> parseClientOperationDefinition(
                          parseInputFieldDefinition(param, registry) };
             }) |
         std::ranges::to<std::map>();
-    if (definition.name.name != "Check")
-        return std::make_shared<Operation>(definition.type,
-                                           definition.name.name);
     return std::make_shared<Operation>(
         definition.type, definition.name.name, parameters,
         parseFragmentSpec(definition.fragment, fragment, registry));
@@ -950,6 +925,105 @@ SchemaNode parseServerNodeFirstPass(const ast::TypeDefinitionNode &astNode) {
         astNode);
 };
 
+std::vector<FieldSelection> getFieldSelectionsFromFragmentSpec(
+    const FragmentSpec &spec);
+std::vector<FieldSelection> getFieldSelectionsFromObjectSelection(
+    const ObjectSelection &selection) {
+    return std::visit<std::vector<FieldSelection>>(
+        overloaded{
+            [](const TypenameField &) -> std::vector<FieldSelection> {
+                return {};
+            },
+            [](const FieldSelection &node) -> std::vector<FieldSelection> {
+                std::vector<FieldSelection> selections = { node };
+                if (node.selection.has_value()) {
+                    selections.append_range(getFieldSelectionsFromFragmentSpec(
+                        *node.selection.value().get()));
+                };
+                return selections;
+            },
+            [](const SpreadSelection &node) -> std::vector<FieldSelection> {
+                return getFieldSelectionsFromFragmentSpec(node.fragment->spec);
+            } },
+        selection);
+};
+
+std::vector<FieldSelection> getFieldSelectionsFromUnionSelection(
+    const UnionSelection &selection) {
+    return std::visit<std::vector<FieldSelection>>(
+        overloaded{
+            [](const TypenameField &) -> std::vector<FieldSelection> {
+                return {};
+            },
+            [](const ConditionalSpreadSelection &node)
+                -> std::vector<FieldSelection> {
+                return node.selection->selections |
+                       std::views::transform([](const auto &sNode) {
+                           return getFieldSelectionsFromObjectSelection(sNode);
+                       }) |
+                       std::views::join | std::ranges::to<std::vector>();
+            },
+            [](const SpreadSelection &node) -> std::vector<FieldSelection> {
+                return getFieldSelectionsFromFragmentSpec(node.fragment->spec);
+            } },
+        selection);
+};
+
+std::vector<FieldSelection> getFieldSelectionsFromFragmentSpec(
+    const FragmentSpec &spec) {
+    return std::visit<std::vector<FieldSelection>>(
+        overloaded{
+            [](const UnionFragmentSpec &node) -> std::vector<FieldSelection> {
+                return node.selections |
+                       std::views::transform([](const auto &sNode) {
+                           return getFieldSelectionsFromUnionSelection(sNode);
+                       }) |
+                       std::views::join | std::ranges::to<std::vector>();
+            },
+            [](const ObjectFragmentSpec<ObjectType> &node)
+                -> std::vector<FieldSelection> {
+                return node.selections |
+                       std::views::transform([](const auto &sNode) {
+                           return getFieldSelectionsFromObjectSelection(sNode);
+                       }) |
+                       std::views::join | std::ranges::to<std::vector>();
+            },
+            [](const ObjectFragmentSpec<Interface> &node)
+                -> std::vector<FieldSelection> {
+                return node.selections |
+                       std::views::transform([](const auto &sNode) {
+                           return getFieldSelectionsFromObjectSelection(sNode);
+                       }) |
+                       std::views::join | std::ranges::to<std::vector>();
+            },
+        },
+        spec);
+};
+
+void assertOperationIsValid(const std::shared_ptr<Operation> &op) {
+    const auto &selections =
+        getFieldSelectionsFromFragmentSpec(op->fragmentSpec);
+    for (const auto &field : selections) {
+        if (!field.arguments.has_value()) continue;
+        const auto &arguments = field.arguments.value();
+        for (const auto &arg : arguments | std::views::values) {
+            if (!op->parameters.contains(arg.parameterName)) {
+                throw std::runtime_error(std::format(
+                    "Operation {} doesn`t define required parameter {}",
+                    op->name, arg.parameterName));
+            };
+            const FieldDefinition<InputFieldSpec> &paramType =
+                op->parameters.at(arg.parameterName);
+            const FieldDefinition<InputFieldSpec> &argType = *arg.type.get();
+            if (paramType.spec != argType.spec) {
+                throw std::runtime_error(
+                    std::format("Operation {} parameter {} has wrong type",
+                                op->name, arg.parameterName));
+            };
+        };
+    };
+};
+
 const Schema parsers::schema::parseSchema(
     std::vector<ast::FileNodes> astArray,
     std::vector<client::ast::ClientDefinition> clientDefinitions) {
@@ -989,5 +1063,13 @@ const Schema parsers::schema::parseSchema(
                              return parseClientDefinition(node, registry);
                          }) |
                          std::ranges::to<std::vector>();
+    for (const auto &opNode :
+         schema.clientNodes | std::views::filter([](const auto &n) {
+             return std::holds_alternative<std::shared_ptr<Operation>>(n);
+         }) | std::views::transform([](const auto &n) {
+             return std::get<std::shared_ptr<Operation>>(n);
+         })) {
+        assertOperationIsValid(opNode);
+    };
     return schema;
 };
