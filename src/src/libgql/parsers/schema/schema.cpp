@@ -937,8 +937,14 @@ std::vector<FieldSelection> getFieldSelectionsFromObjectSelection(
             [](const FieldSelection &node) -> std::vector<FieldSelection> {
                 std::vector<FieldSelection> selections = { node };
                 if (node.selection.has_value()) {
-                    selections.append_range(getFieldSelectionsFromFragmentSpec(
-                        *node.selection.value().get()));
+                    const auto &nestedSelections =
+                        getFieldSelectionsFromFragmentSpec(
+                            *node.selection.value().get());
+                    selections.resize(selections.size() +
+                                      nestedSelections.size());
+                    selections.insert(std::end(selections),
+                                      std::begin(nestedSelections),
+                                      std::end(nestedSelections));
                 };
                 return selections;
             },
