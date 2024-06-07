@@ -136,7 +136,7 @@ struct ExtendObjectType {
     ObjectType type;
 };
 
-using SchemaNode =
+using ServerSchemaNode =
     std::variant<std::shared_ptr<ObjectType>, std::shared_ptr<Interface>,
                  std::shared_ptr<Scalar>, std::shared_ptr<Union>,
                  std::shared_ptr<Enum>, std::shared_ptr<InputType>>;
@@ -202,9 +202,72 @@ struct Operation {
 using ClientSchemaNode =
     std::variant<std::shared_ptr<Fragment>, std::shared_ptr<Operation>>;
 
+struct ServerSchema {
+    std::map<std::string, std::shared_ptr<ObjectType>> objects;
+    std::map<std::string, std::shared_ptr<InputType>> inputs;
+    std::map<std::string, std::shared_ptr<Interface>> interfaces;
+    std::map<std::string, std::shared_ptr<Scalar>> scalars;
+    std::map<std::string, std::shared_ptr<Enum>> enums;
+    std::map<std::string, std::shared_ptr<Union>> unions;
+
+    ServerSchema(){};
+
+    explicit ServerSchema(const std::vector<ServerSchemaNode>& nodes) {
+        for (const auto& node : nodes) {
+            addNode(node);
+        };
+    };
+    
+    void addNode(const ServerSchemaNode& sNode) {
+        std::visit(overloaded{
+            [this](const std::shared_ptr<ObjectType>& node){
+                objects[node->name] = node;
+            },
+            [this](const std::shared_ptr<Scalar>& node){
+                scalars[node->name] = node;
+            },
+            [this](const std::shared_ptr<InputType>& node){
+                inputs[node->name] = node;
+            },
+            [this](const std::shared_ptr<Enum>& node){
+                enums[node->name] = node;
+            },
+            [this](const std::shared_ptr<Union>& node){
+                unions[node->name] = node;
+            },
+            [this](const std::shared_ptr<Interface>& node){
+                interfaces[node->name] = node;
+            },
+        }, sNode);
+    };
+};
+
+struct ClientSchema {
+    std::map<std::string, std::shared_ptr<Fragment>> fragments;
+    std::map<std::string, std::shared_ptr<Operation>> operations;
+
+    ClientSchema(){};
+    explicit ClientSchema(const std::vector<ClientSchemaNode>& nodes) {
+        for (const auto& node : nodes) {
+            addNode(node);
+        };
+    };
+
+    void addNode(const ClientSchemaNode& sNode) {
+        std::visit(overloaded{
+            [this](const std::shared_ptr<Fragment>& node){
+                fragments[node->name] = node;
+            },
+            [this](const std::shared_ptr<Operation>& node) {
+                operations[node->name] = node;
+            }
+        }, sNode);
+    };
+};
+
 struct Schema {
-    std::vector<SchemaNode> serverNodes;
-    std::vector<ClientSchemaNode> clientNodes;
+    ServerSchema server;
+    ClientSchema client;
 };
 
 const Schema parseSchema(

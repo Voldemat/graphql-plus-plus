@@ -4,12 +4,13 @@ ExternalProject_Add(
     rapidjson
     PREFIX "vendor/rapidjson"
     GIT_REPOSITORY "https://github.com/Tencent/rapidjson.git"
-    GIT_TAG f54b0e47a08782a6131cc3d60f94d038fa6e0a51
+    GIT_TAG ab1842a2dae061284c0a62dca1cc6d5e7e37e346
     TIMEOUT 10
     CMAKE_ARGS
         -DRAPIDJSON_BUILD_TESTS=OFF
         -DRAPIDJSON_BUILD_DOC=OFF
         -DRAPIDJSON_BUILD_EXAMPLES=OFF
+        -DCMAKE_COMPILER_ARGS="-D RAPIDJSON_HAS_CXX11_RVALUE_REFS 1"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""

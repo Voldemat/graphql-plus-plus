@@ -175,7 +175,7 @@ struct TypeRegistry {
         mapping[field->name] = field;
     };
 
-    void addNode(const SchemaNode &schemaNode) {
+    void addNode(const ServerSchemaNode &schemaNode) {
         std::visit(overloaded{ [this](const std::shared_ptr<ObjectType> &node) {
                                   appendOpsIfSpecialObject(node->name,
                                                            node->fields);
@@ -438,9 +438,9 @@ std::shared_ptr<ObjectType> parseObject(const ast::ObjectDefinitionNode &node,
     return obj;
 };
 
-SchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
+ServerSchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
                            const TypeRegistry &registry) {
-    return std::visit<SchemaNode>(
+    return std::visit<ServerSchemaNode>(
         overloaded{
             [&registry](const ast::ScalarDefinitionNode &node)
                 -> std::shared_ptr<Scalar> {
@@ -962,8 +962,8 @@ ClientSchemaNode parseClientDefinition(
         definition);
 };
 
-SchemaNode parseServerNodeFirstPass(const ast::TypeDefinitionNode &astNode) {
-    return std::visit<SchemaNode>(
+ServerSchemaNode parseServerNodeFirstPass(const ast::TypeDefinitionNode &astNode) {
+    return std::visit<ServerSchemaNode>(
         overloaded{
             [](const ast::ScalarDefinitionNode &node) {
                 return std::make_shared<Scalar>(node.name.name);
@@ -1118,13 +1118,13 @@ const Schema parsers::schema::parseSchema(
             registry.addNode(parseServerNodeFirstPass(node));
         };
     };
-    schema.serverNodes =
+    schema.server = ServerSchema(
         astArray |
         std::views::transform([](const auto &ast) { return ast.definitions; }) |
         std::views::join | std::views::transform([&registry](auto &sNode) {
             return parseServerNode(sNode, registry);
         }) |
-        std::ranges::to<std::vector>();
+        std::ranges::to<std::vector>());
     for (const auto &ast : astArray) {
         for (const auto &node : ast.extensions) {
             const auto &[typeNode, newFields] =
@@ -1142,18 +1142,19 @@ const Schema parsers::schema::parseSchema(
         registry.addFragment(
             parseFragmentFirstPass(fragmentDefinition, registry));
     };
-    schema.clientNodes = clientDefinitions |
+    const auto& clientNodes = clientDefinitions |
                          std::views::transform([&registry](const auto &node) {
                              return parseClientDefinition(node, registry);
                          }) |
                          std::ranges::to<std::vector>();
     for (const auto &opNode :
-         schema.clientNodes | std::views::filter([](const auto &n) {
+         clientNodes | std::views::filter([](const auto &n) {
              return std::holds_alternative<std::shared_ptr<Operation>>(n);
          }) | std::views::transform([](const auto &n) {
              return std::get<std::shared_ptr<Operation>>(n);
          })) {
         assertOperationIsValid(opNode);
     };
+    schema.client = ClientSchema(clientNodes);
     return schema;
 };

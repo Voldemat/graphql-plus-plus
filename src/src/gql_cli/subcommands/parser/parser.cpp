@@ -3,6 +3,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <CLI/App.hpp>
 #include <CLI/Error.hpp>
@@ -33,6 +34,13 @@
 #include "libgql/parsers/shared/shared.hpp"
 
 using namespace parsers;
+
+rapidjson::Writer<rapidjson::StringBuffer> createWriter(
+    const bool& pretty, rapidjson::StringBuffer& buffer) {
+    if (!pretty)
+        return rapidjson::Writer(buffer);
+    return rapidjson::PrettyWriter(buffer);
+};
 
 std::string formatLine(const std::string &line, const unsigned int &currentLine,
                        const Location &location,
@@ -107,7 +115,7 @@ void createParserSubcommand(CLI::App *app) {
         };
         auto tokens = result.value();
         if (tokens.size() == 0) {
-            std::cerr << "Warning: No tokens was provided in array"
+            std::cerr << "No tokens was provided in array"
                       << std::endl;
             throw CLI::RuntimeError(1);
         };
@@ -225,12 +233,7 @@ void createParserSubcommand(CLI::App *app) {
                 throw CLI::RuntimeError(1);
             };
             const auto &tokens = tokensAccumulator.getTokens();
-            if (tokens.empty()) {
-                std::cout << std::format("Warning: No tokens for file {}",
-                                         source->filepath.string())
-                          << std::endl;
-                continue;
-            };
+            if (tokens.empty()) continue;
             client::Parser parser(tokens, source);
             try {
                 for (const auto &el : parser.parse()) {
@@ -242,13 +245,12 @@ void createParserSubcommand(CLI::App *app) {
             };
         };
         try {
-            const auto &nodes =
+            const auto &schema =
                 parsers::schema::parseSchema(astList, operations);
-
-            rapidjson::StringBuffer sb;
-            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-            json::serializer::writeSchemaNodes(writer, nodes.serverNodes);
-            //std::cout << sb.GetString() << std::endl;
+            rapidjson::StringBuffer buffer;
+            rapidjson::Writer writer(buffer);
+            json::serializer::writeSchemaNodes(writer, schema);
+            std::cout << buffer.GetString() << std::endl;
         } catch (const shared::ParserError &error) {
             std::cerr << formatError(error) << std::endl;
             throw CLI::RuntimeError(1);

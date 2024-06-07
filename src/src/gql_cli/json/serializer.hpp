@@ -8,8 +8,6 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include <vector>
-
 #include "libgql/lexer/token.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 
@@ -28,8 +26,10 @@ public:
             *writer);
 };
 
-void writeSchemaNodes(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer,
-                      const std::vector<parsers::schema::SchemaNode> &nodes);
+void writeSchemaNodes(rapidjson::Writer<rapidjson::StringBuffer>& writer,
+                      const parsers::schema::Schema &schema);
 };  // namespace serializer
 };  // namespace json
+    //
+
 #endif
