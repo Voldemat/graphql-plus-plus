@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "libgql/lexer/token.hpp"
+#include "libgql/parsers/schema/schema.hpp"
 
 using namespace json::parser;
 std::expected<std::vector<GQLToken>, std::string>
@@ -85,4 +86,14 @@ json::parser::parseLocation(
     ASSERT_MEMBER_IS_VALID("end", value["end"].IsUint());
     unsigned int end = value["end"].GetUint();
     return (Location){ .line = line, .start = start, .end = end };
+};
+
+
+const parsers::schema::Schema json::parser::parseSchema(const rapidjson::Document& document) {
+    return {};
+};
+
+
+const parsers::schema::Schema json::parser::parseIntrospectionSchema(const rapidjson::Document& document) {
+    return {};
 };

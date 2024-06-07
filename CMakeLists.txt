@@ -22,6 +22,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 include("${CMAKE_SOURCE_DIR}/src/vendor/rapidjson.cmake")
 include("${CMAKE_SOURCE_DIR}/src/vendor/cli11.cmake")
+include("${CMAKE_SOURCE_DIR}/src/vendor/httprequest.cmake")
 
 file(GLOB_RECURSE GQL_LIB_HEADERS src/src/libgql/*.hpp src/src/libgql/*.h)
 file(GLOB_RECURSE GQL_LIB_SOURCES src/src/libgql/*.cpp src/src/libgql/*.c)
@@ -54,6 +55,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/src/
     ${CMAKE_CURRENT_SOURCE_DIR}/src/include/
     SYSTEM ${RAPIDJSON_INCLUDE_DIR}
+    SYSTEM ${HTTPREQUEST_INCLUDE_DIR}
     SYSTEM ${CLI11_INCLUDE_DIR}
 )
 add_custom_command(
