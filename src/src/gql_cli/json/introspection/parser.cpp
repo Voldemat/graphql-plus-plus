@@ -3,6 +3,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <algorithm>
 #include <cstring>
@@ -158,7 +159,7 @@ InputFieldSpec parseInputFieldSpec(const JSONValue &value,
             { .defaultValue = parseArrayLiteral(defaultValue, type) },
             .type = type,
             .nullable =
-                strcmp(value["ofType"]["kind"].GetString(), "NON_NULL") == 0
+                strcmp(value["ofType"]["kind"].GetString(), "NON_NULL") != 0
         };
     };
     const auto &type = parseInputTypeSpec(value, registry);
@@ -173,7 +174,7 @@ FieldDefinition<InputFieldSpec> parseInputFieldDefinition(
              .spec = parseInputFieldSpec(value["type"], value["defaultValue"],
                                          registry),
              .nullable =
-                 strcmp(value["type"]["kind"].GetString(), "NON_NULL") == 0 };
+                 strcmp(value["type"]["kind"].GetString(), "NON_NULL") != 0 };
 };
 
 ObjectTypeSpec parseObjectTypeSpec(const JSONValue &value,
@@ -207,7 +208,7 @@ NonCallableFieldSpec<ObjectTypeSpec> parseNonCallableObjectFieldSpec(
         return (ArrayFieldSpec<ObjectTypeSpec>){
             .type = type,
             .nullable =
-                strcmp(value["ofType"]["kind"].GetString(), "NON_NULL") == 0
+                strcmp(value["ofType"]["kind"].GetString(), "NON_NULL") != 0
         };
     };
     const auto &type = parseObjectTypeSpec(value, registry);
@@ -226,7 +227,7 @@ ObjectFieldSpec parseObjectFieldSpec(const JSONValue &value,
         return (ArrayFieldSpec<ObjectTypeSpec>){
             .type = type,
             .nullable =
-                strcmp(value["ofType"]["kind"].GetString(), "NON_NULL") == 0
+                strcmp(value["ofType"]["kind"].GetString(), "NON_NULL") != 0
         };
     } else if (args.Size() != 0) {
         const auto &type = parseObjectTypeSpec(value, registry);
@@ -251,7 +252,7 @@ std::shared_ptr<FieldDefinition<ObjectFieldSpec>> parseObjectFieldDefinition(
     return std::make_shared<FieldDefinition<ObjectFieldSpec>>(
         value["name"].GetString(),
         parseObjectFieldSpec(value["type"], value["args"], registry),
-        strcmp(value["type"]["kind"].GetString(), "NON_NULL") == 0);
+        strcmp(value["type"]["kind"].GetString(), "NON_NULL") != 0);
 };
 
 ServerSchemaNode parseNodeSecondPass(const JSONValue &value,

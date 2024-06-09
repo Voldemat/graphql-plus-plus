@@ -50,6 +50,8 @@ using ArrayLiteral = std::variant<std::vector<int>, std::vector<float>,
 
 struct EmptyMixin {
     bool hasDefaultValue() const { return false; };
+
+    inline bool operator==(const EmptyMixin &) const = default;
 };
 struct DefaultValueMixin {
     std::optional<Literal> defaultValue;
