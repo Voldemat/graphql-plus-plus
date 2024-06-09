@@ -39,6 +39,7 @@ add_library(
 add_executable(
     gql
     src/main.cpp
+    src/src/utils.cpp
     ${GQL_CLI_HEADERS}
     ${GQL_CLI_SOURCES}
 )

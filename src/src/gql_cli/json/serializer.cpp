@@ -51,12 +51,16 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
         [&writer](const std::shared_ptr<schema::ObjectType>& node){
             writer.String("_type");
             writer.String("ObjectType");
+            writer.String("name");
+            writer.String(node->name.c_str());
             writer.String("$ref");
             writer.String(std::format("#/server/objects/{}", node->name).c_str());
         },
         [&writer](const std::shared_ptr<schema::Interface>& node){
             writer.String("_type");
             writer.String("InterfaceType");
+            writer.String("name");
+            writer.String(node->name.c_str());
             writer.String("$ref");
             writer.String(std::format("#/server/interfaces/{}", node->name).c_str());
         },
@@ -69,12 +73,16 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
         [&writer](const std::shared_ptr<schema::Enum>& node){
             writer.String("_type");
             writer.String("Enum");
+            writer.String("name");
+            writer.String(node->name.c_str());
             writer.String("$ref");
             writer.String(std::format("#/server/enums/{}", node->name).c_str());
         },
         [&writer](const std::shared_ptr<schema::Union>& node){
             writer.String("_type");
             writer.String("Union");
+            writer.String("name");
+            writer.String(node->name.c_str());
             writer.String("$ref");
             writer.String(std::format("#/server/unions/{}", node->name).c_str());
         },
@@ -90,14 +98,10 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
         [&writer](const std::shared_ptr<schema::InputType>& node){
             writer.String("_type");
             writer.String("InputType");
+            writer.String("name");
+            writer.String(node->name.c_str());
             writer.String("$ref");
             writer.String(std::format("#/server/inputs/{}", node->name).c_str());
-        },
-        [&writer](const std::shared_ptr<schema::Interface>& node){
-            writer.String("_type");
-            writer.String("Interface");
-            writer.String("$ref");
-            writer.String(std::format("#/server/interfaces/{}", node->name).c_str());
         },
         [&writer](const std::shared_ptr<schema::Scalar>& node){
             writer.String("_type");
@@ -108,14 +112,10 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
         [&writer](const std::shared_ptr<schema::Enum>& node){
             writer.String("_type");
             writer.String("Enum");
+            writer.String("name");
+            writer.String(node->name.c_str());
             writer.String("$ref");
             writer.String(std::format("#/server/enums/{}", node->name).c_str());
-        },
-        [&writer](const std::shared_ptr<schema::Union>& node){
-            writer.String("_type");
-            writer.String("Union");
-            writer.String("$ref");
-            writer.String(std::format("#/server/unions/{}", node->name).c_str());
         },
     }, field);
     writer.EndObject();
@@ -291,8 +291,9 @@ void writeServerType(
     writer.String("name");
     writer.String(node.name.c_str());
     writer.String("implements");
-    writer.StartArray();
+    writer.StartObject();
     for (const auto& interface : node.implements | std::views::values) {
+        writer.String(interface->name.c_str());
         writer.StartObject();
         writer.String("name");
         writer.String(interface->name.c_str());
@@ -300,7 +301,7 @@ void writeServerType(
         writer.String(std::format("#/server/interfaces/{}", interface->name).c_str());
         writer.EndObject();
     };
-    writer.EndArray();
+    writer.EndObject();
     writer.String("fields");
     writer.StartObject();
     for (const auto& field : node.fields | std::views::values) {

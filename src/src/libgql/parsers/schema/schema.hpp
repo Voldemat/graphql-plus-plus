@@ -210,12 +210,15 @@ struct ServerSchema {
     std::map<std::string, std::shared_ptr<Enum>> enums;
     std::map<std::string, std::shared_ptr<Union>> unions;
 
-    ServerSchema(){};
 
-    explicit ServerSchema(const std::vector<ServerSchemaNode>& nodes) {
+    inline bool operator==(const ServerSchema &) const = default;
+
+    static ServerSchema fromNodes(const std::vector<ServerSchemaNode>& nodes) {
+        ServerSchema schema;
         for (const auto& node : nodes) {
-            addNode(node);
+            schema.addNode(node);
         };
+        return schema;
     };
     
     void addNode(const ServerSchemaNode& sNode) {
@@ -263,11 +266,15 @@ struct ClientSchema {
             }
         }, sNode);
     };
+
+    inline bool operator==(const ClientSchema &) const = default;
 };
 
 struct Schema {
     ServerSchema server;
     ClientSchema client;
+
+    inline bool operator==(const Schema &) const = default;
 };
 
 const Schema parseSchema(

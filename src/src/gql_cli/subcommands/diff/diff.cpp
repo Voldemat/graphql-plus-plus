@@ -6,22 +6,30 @@
 
 #include <CLI/App.hpp>
 #include <CLI/Error.hpp>
+#include <algorithm>
+#include <ranges>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <iterator>
+#include <map>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "HTTPRequest.hpp"
+#include "gql_cli/json/introspection/parser.hpp"
 #include "gql_cli/json/parser.hpp"
 #include "gql_cli/utils.hpp"
+#include "libgql/parsers/schema/schema.hpp"
 
-const char* INTROSPECTION_QUERY = 
+const char *INTROSPECTION_QUERY =
 #include "./query.data"
-rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
-    http::HeaderFields headers {{"Accept", "application/json"}, {"Content-Type", "application/json"}};
+    rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
+    http::HeaderFields headers{ { "Accept", "application/json" },
+                                { "Content-Type", "application/json" } };
     http::Request request{ urlToApi };
     const auto &response = request.send("POST", INTROSPECTION_QUERY, headers);
     if (response.status.code != http::Status::Ok) {
@@ -30,7 +38,7 @@ rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
                   << std::endl;
         throw CLI::RuntimeError(1);
     };
-    std::string buffer{response.body.begin(), response.body.end()};
+    std::string buffer{ response.body.begin(), response.body.end() };
     rapidjson::Document d;
     d.Parse(buffer.c_str());
     return d;
@@ -78,12 +86,31 @@ void createDifSubcommand(CLI::App *app) {
     diffParseCmd->add_option("--url-to-api", *urlToApi, "Url to api")
         ->required();
     diffParseCmd->callback([pathToSchema, urlToApi]() {
-        const rapidjson::Document &schemaDocument =
-            getDocumentFromSchemaJson(*pathToSchema);
+        const auto &schemaDocument = getDocumentFromSchemaJson(*pathToSchema);
         const auto &schema = json::parser::parseSchema(schemaDocument);
-        const rapidjson::Document &introspectionDocument =
-            getIntrospectionDocument(*urlToApi);
+        const auto &introspectionDocument = getIntrospectionDocument(*urlToApi);
         const auto &secondSchema =
-            json::parser::parseIntrospectionSchema(introspectionDocument);
+            json::parser::introspection::parseIntrospectionSchema(
+                introspectionDocument);
+        const auto& schemaObjectsNames = schema.server.objects | std::views::keys | std::ranges::to<std::vector>();
+        const auto& serverObjectsNames = secondSchema.objects | std::views::keys | std::ranges::to<std::vector>();
+        std::vector<std::string>
+            serverOnlyObjects;
+        std::set_difference(
+            serverObjectsNames.begin(), serverObjectsNames.end(),
+            schemaObjectsNames.begin(), schemaObjectsNames.end(),
+            std::inserter(serverOnlyObjects, serverOnlyObjects.begin()));
+        for (const auto& name : serverOnlyObjects) {
+            std::cout << name << std::endl;
+        };
+        //std::cout << std::format("Number of objects: {} - {}",
+        //                         schema.server.objects.size(),
+        //                         secondSchema.objects.size())
+        //          << std::endl;
+        if (schema.server != secondSchema) {
+            std::cerr << "Schemas are different" << std::endl;
+            throw CLI::RuntimeError(1);
+        };
+        std::cout << "Schemas are identical" << std::endl;
     });
 };

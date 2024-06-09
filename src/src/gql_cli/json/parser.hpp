@@ -24,7 +24,6 @@ parseLocation(
     rapidjson::GenericValue<rapidjson::UTF8<>> const &document) noexcept;
 
 const parsers::schema::Schema parseSchema(const rapidjson::Document& document);
-const parsers::schema::Schema parseIntrospectionSchema(const rapidjson::Document& document);
 };  // namespace parser
 };  // namespace json
 #endif
