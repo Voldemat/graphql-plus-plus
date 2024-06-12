@@ -145,14 +145,16 @@ using ServerSchemaNode =
 
 struct Fragment;
 struct FieldSelection;
-struct ConditionalSpreadSelection;
+struct ObjectConditionalSpreadSelection;
+struct UnionConditionalSpreadSelection;
 struct SpreadSelection {
     std::shared_ptr<Fragment> fragment;
 };
 
 struct TypenameField {};
-using UnionSelection =
-    std::variant<TypenameField, SpreadSelection, ConditionalSpreadSelection>;
+using UnionSelection = std::variant<TypenameField, SpreadSelection,
+                                    ObjectConditionalSpreadSelection,
+                                    UnionConditionalSpreadSelection>;
 using ObjectSelection =
     std::variant<TypenameField, SpreadSelection, FieldSelection>;
 
@@ -167,9 +169,14 @@ struct ObjectFragmentSpec {
     std::vector<ObjectSelection> selections;
 };
 
-struct ConditionalSpreadSelection {
+struct ObjectConditionalSpreadSelection {
     std::shared_ptr<ObjectType> type;
     std::shared_ptr<ObjectFragmentSpec<ObjectType>> selection;
+};
+
+struct UnionConditionalSpreadSelection {
+    std::shared_ptr<Union> type;
+    std::shared_ptr<UnionFragmentSpec> selection;
 };
 
 using FragmentSpec =
@@ -212,38 +219,38 @@ struct ServerSchema {
     std::map<std::string, std::shared_ptr<Enum>> enums;
     std::map<std::string, std::shared_ptr<Union>> unions;
 
-
     inline bool operator==(const ServerSchema &) const = default;
 
-    static ServerSchema fromNodes(const std::vector<ServerSchemaNode>& nodes) {
+    static ServerSchema fromNodes(const std::vector<ServerSchemaNode> &nodes) {
         ServerSchema schema;
-        for (const auto& node : nodes) {
+        for (const auto &node : nodes) {
             schema.addNode(node);
         };
         return schema;
     };
-    
-    void addNode(const ServerSchemaNode& sNode) {
+
+    void addNode(const ServerSchemaNode &sNode) {
         std::visit(overloaded{
-            [this](const std::shared_ptr<ObjectType>& node){
-                objects[node->name] = node;
-            },
-            [this](const std::shared_ptr<Scalar>& node){
-                scalars[node->name] = node;
-            },
-            [this](const std::shared_ptr<InputType>& node){
-                inputs[node->name] = node;
-            },
-            [this](const std::shared_ptr<Enum>& node){
-                enums[node->name] = node;
-            },
-            [this](const std::shared_ptr<Union>& node){
-                unions[node->name] = node;
-            },
-            [this](const std::shared_ptr<Interface>& node){
-                interfaces[node->name] = node;
-            },
-        }, sNode);
+                       [this](const std::shared_ptr<ObjectType> &node) {
+                           objects[node->name] = node;
+                       },
+                       [this](const std::shared_ptr<Scalar> &node) {
+                           scalars[node->name] = node;
+                       },
+                       [this](const std::shared_ptr<InputType> &node) {
+                           inputs[node->name] = node;
+                       },
+                       [this](const std::shared_ptr<Enum> &node) {
+                           enums[node->name] = node;
+                       },
+                       [this](const std::shared_ptr<Union> &node) {
+                           unions[node->name] = node;
+                       },
+                       [this](const std::shared_ptr<Interface> &node) {
+                           interfaces[node->name] = node;
+                       },
+                   },
+                   sNode);
     };
 };
 
@@ -252,21 +259,20 @@ struct ClientSchema {
     std::map<std::string, std::shared_ptr<Operation>> operations;
 
     ClientSchema(){};
-    explicit ClientSchema(const std::vector<ClientSchemaNode>& nodes) {
-        for (const auto& node : nodes) {
+    explicit ClientSchema(const std::vector<ClientSchemaNode> &nodes) {
+        for (const auto &node : nodes) {
             addNode(node);
         };
     };
 
-    void addNode(const ClientSchemaNode& sNode) {
-        std::visit(overloaded{
-            [this](const std::shared_ptr<Fragment>& node){
-                fragments[node->name] = node;
-            },
-            [this](const std::shared_ptr<Operation>& node) {
-                operations[node->name] = node;
-            }
-        }, sNode);
+    void addNode(const ClientSchemaNode &sNode) {
+        std::visit(overloaded{ [this](const std::shared_ptr<Fragment> &node) {
+                                  fragments[node->name] = node;
+                              },
+                               [this](const std::shared_ptr<Operation> &node) {
+                                   operations[node->name] = node;
+                               } },
+                   sNode);
     };
 
     inline bool operator==(const ClientSchema &) const = default;

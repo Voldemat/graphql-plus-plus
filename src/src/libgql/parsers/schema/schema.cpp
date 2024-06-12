@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <format>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -650,6 +651,24 @@ bool isObjectFieldSpecIsTypenameField(
                "__typename";
 };
 
+std::optional<std::variant<std::shared_ptr<ObjectType>, std::shared_ptr<Union>>>
+getTypeForUnionConditionalSelection(
+    const client::ast::ConditionalSpreadSelectionNode &node,
+    const std::shared_ptr<Union> &type, const TypeRegistry &registry) {
+    if (type->items.contains(node.typeName.name))
+        return type->items.at(node.typeName.name);
+    if (!registry.unions.contains(node.typeName.name)) return std::nullopt;
+    const auto &unionNode = registry.unions.at(node.typeName.name);
+    for (const auto &item : unionNode->items | std::views::keys) {
+        if (!type->items.contains(item)) return std::nullopt;
+    };
+    return unionNode;
+};
+
+UnionFragmentSpec parseUnionFragmentSpec(
+    const std::vector<client::ast::SelectionNode> &selections,
+    const std::shared_ptr<Union> &type, const TypeRegistry &registry);
+
 UnionSelection parseUnionSelectionNode(const client::ast::SelectionNode &sNode,
                                        const std::shared_ptr<Union> &type,
                                        const TypeRegistry &registry) {
@@ -667,21 +686,39 @@ UnionSelection parseUnionSelectionNode(const client::ast::SelectionNode &sNode,
                     node.location.source);
             },
             [&registry,
-             &type](const client::ast::ConditionalSpreadSelectionNode &node) {
-                if (!type->items.contains(node.typeName.name)) {
+             &type](const client::ast::ConditionalSpreadSelectionNode &node)
+                -> UnionSelection {
+                const auto &itemTypeOptional =
+                    getTypeForUnionConditionalSelection(node, type, registry);
+                if (!itemTypeOptional.has_value()) {
                     throw shared::ParserError(
                         node.typeName.location.startToken,
-                        std::format("Unknown type {} in union {}",
-                                    node.typeName.name, type->name),
+                        std::format("No suitable union or type inside "
+                                    "union {} with name {} was found",
+                                    type->name, node.typeName.name),
                         node.typeName.location.source);
                 };
-                const auto &itemType = type->items.at(node.typeName.name);
-                const auto &spec = parseObjectFragmentSpec(
+                const auto &itemTypeVariant = itemTypeOptional.value();
+                if (std::holds_alternative<std::shared_ptr<ObjectType>>(
+                        itemTypeVariant)) {
+                    const auto &itemType =
+                        std::get<std::shared_ptr<ObjectType>>(itemTypeVariant);
+                    const auto &spec = parseObjectFragmentSpec(
+                        node.fragment->selections, itemType, registry);
+                    return (UnionSelection)(ObjectConditionalSpreadSelection){
+                        .type = itemType,
+                        .selection =
+                            std::make_shared<ObjectFragmentSpec<ObjectType>>(
+                                spec)
+                    };
+                };
+                const auto &itemType =
+                    std::get<std::shared_ptr<Union>>(itemTypeVariant);
+                const auto &spec = parseUnionFragmentSpec(
                     node.fragment->selections, itemType, registry);
-                return (ConditionalSpreadSelection){
+                return (UnionSelection)(UnionConditionalSpreadSelection){
                     .type = itemType,
-                    .selection =
-                        std::make_shared<ObjectFragmentSpec<ObjectType>>(spec)
+                    .selection = std::make_shared<UnionFragmentSpec>(spec)
                 };
             } },
         sNode);
@@ -853,11 +890,19 @@ std::vector<FieldSelection> getFieldSelectionsFromUnionSelection(
             [](const TypenameField &) -> std::vector<FieldSelection> {
                 return {};
             },
-            [](const ConditionalSpreadSelection &node)
+            [](const ObjectConditionalSpreadSelection &node)
                 -> std::vector<FieldSelection> {
                 return node.selection->selections |
                        std::views::transform([](const auto &sNode) {
                            return getFieldSelectionsFromObjectSelection(sNode);
+                       }) |
+                       std::views::join | std::ranges::to<std::vector>();
+            },
+            [](const UnionConditionalSpreadSelection &node)
+                -> std::vector<FieldSelection> {
+                return node.selection->selections |
+                       std::views::transform([](const auto &sNode) {
+                           return getFieldSelectionsFromUnionSelection(sNode);
                        }) |
                        std::views::join | std::ranges::to<std::vector>();
             },
