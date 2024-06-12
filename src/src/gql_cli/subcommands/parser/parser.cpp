@@ -250,7 +250,7 @@ void createParserSubcommand(CLI::App *app) {
             rapidjson::StringBuffer buffer;
             rapidjson::Writer writer(buffer);
             json::serializer::writeSchemaNodes(writer, schema);
-            //std::cout << buffer.GetString() << std::endl;
+            std::cout << buffer.GetString() << std::endl;
         } catch (const shared::ParserError &error) {
             std::cerr << formatError(error) << std::endl;
             throw CLI::RuntimeError(1);
