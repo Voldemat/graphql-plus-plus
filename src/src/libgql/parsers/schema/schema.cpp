@@ -438,7 +438,8 @@ FieldSelection parseFieldSelectionNode(
                          .alias = node.selectionName.name,
                          .selection = spec };
             },
-            [&type, &registry](const client::ast::ObjectCallableFieldSpec &node)
+            [&type, &registry,
+             &fNode](const client::ast::ObjectCallableFieldSpec &node)
                 -> FieldSelection {
                 if (!type->fields.contains(node.name.name)) {
                     throw shared::ParserError(
@@ -468,7 +469,16 @@ FieldSelection parseFieldSelectionNode(
                                               parseSelectionArgument(arg,
                                                                      spec) };
                                  }) |
-                             std::ranges::to<std::map>() };
+                             std::ranges::to<std::map>(),
+                         .selection = fNode.spec.transform(
+                             [&registry, &fType](const auto &selectionNode) {
+                                 return std::make_shared<FragmentSpec>(
+                                     parseFragmentSpec(
+                                         *selectionNode,
+                                         fragmentSpecFromFieldDefinition(
+                                             *fType, *selectionNode),
+                                         registry));
+                             }) };
             } },
         fNode.field);
 };
@@ -756,9 +766,13 @@ std::shared_ptr<Operation> parseClientOperationDefinition(
                          parseInputFieldDefinition(param, registry) };
             }) |
         std::ranges::to<std::map>();
-    return std::make_shared<Operation>(
-        definition.type, definition.name.name, parameters,
-        parseFragmentSpec(definition.fragment, fragment, registry));
+    const auto &node =
+        parseFragmentSpec(definition.fragment, fragment, registry);
+    const auto &objectNode = std::get<ObjectFragmentSpec<ObjectType>>(node);
+    const auto &sNode = std::get<FieldSelection>(objectNode.selections[0]);
+
+    return std::make_shared<Operation>(definition.type, definition.name.name,
+                                       parameters, node);
 };
 
 ClientSchemaNode parseClientDefinition(

@@ -33,7 +33,6 @@ struct ObjectCallableFieldSpec {
     shared::ast::NameNode selectionName;
     shared::ast::NameNode name;
     std::vector<Argument> arguments;
-    std::shared_ptr<FragmentSpec> fragmentSpec;
 };
 
 using ObjectFieldSpec =

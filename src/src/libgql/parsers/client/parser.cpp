@@ -172,7 +172,8 @@ ast::ObjectFieldSpec Parser::parseObjectFieldSpec() {
     location.endToken = currentToken;
     return (ast::ObjectCallableFieldSpec){ .selectionName = selectionName,
                                            .name = fieldName,
-                                           .arguments = args };
+                                           .arguments = args
+    };
 };
 
 ast::FieldSelectionNode Parser::parseFieldSelectionNode() {
