@@ -1,0 +1,36 @@
+gql:
+- internal
+- --help
+
+gql internal:
+- parser
+- lexer
+- parse-dir
+- diff
+- --help
+
+gql internal parser:
+- parse
+- --help
+
+gql internal parser parse:
+- --source-filename
+- --help
+
+gql internal lexer:
+- parse
+- --help
+
+gql internal parse-dir:
+- --server-dir
+- --client-dir
+- --help
+
+gql internal diff:
+- parse
+- --help
+
+gql internal diff parse:
+- --path-to-schema
+- --url-to-api
+- --help
