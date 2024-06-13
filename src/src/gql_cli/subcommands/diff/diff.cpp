@@ -78,7 +78,7 @@ rapidjson::Document getDocumentFromSchemaJson(const std::string &pathToSchema) {
 };
 
 bool compareTwoTypeSpecs(const ObjectTypeSpec &spec,
-                         const ObjectTypeSpec &spec2) {
+                         const ObjectTypeSpec &spec2, const std::string &path) {
     if (spec.index() != spec2.index()) return false;
     return std::visit(
         overloaded{
@@ -128,30 +128,39 @@ bool compareTwoTypeSpecs(const InputTypeSpec &spec,
         spec);
 };
 
-bool compareTwoFieldTypeSpecs(
-    const NonCallableFieldSpec<ObjectTypeSpec> &spec,
-    const NonCallableFieldSpec<ObjectTypeSpec> &spec2) {
-    if (spec.index() != spec2.index()) return false;
+bool compareTwoFieldTypeSpecs(const NonCallableFieldSpec<ObjectTypeSpec> &spec,
+                              const NonCallableFieldSpec<ObjectTypeSpec> &spec2,
+                              const std::string &path) {
+    if (spec.index() != spec2.index()) {
+        std::cerr << std::format("[{}] Change type from {} to {}", path,
+                                 spec.index() == 0 ? "Literal" : "Array",
+                                 spec2.index() == 0 ? "Literal" : "Array")
+                  << std::endl;
+        return false;
+    };
     return std::visit(
         overloaded{
-            [&spec2](const LiteralFieldSpec<ObjectTypeSpec> &node) {
+            [&spec2, &path](const LiteralFieldSpec<ObjectTypeSpec> &node) {
                 const auto &node2 =
                     std::get<LiteralFieldSpec<ObjectTypeSpec>>(spec2);
-                return compareTwoTypeSpecs(node.type, node2.type);
+                return compareTwoTypeSpecs(node.type, node2.type, path);
             },
-            [&spec2](const ArrayFieldSpec<ObjectTypeSpec> &node) {
+            [&spec2, &path](const ArrayFieldSpec<ObjectTypeSpec> &node) {
                 const auto &node2 =
                     std::get<ArrayFieldSpec<ObjectTypeSpec>>(spec2);
-                if (!node.nullable && node2.nullable) return false;
-                return compareTwoTypeSpecs(node.type, node2.type);
+                if (!node.nullable && node2.nullable) {
+                    std::cerr << std::format("[{}] Became nullable", path)
+                              << std::endl;
+                    return false;
+                };
+                return compareTwoTypeSpecs(node.type, node2.type, path);
             },
         },
         spec);
 };
 
-template <typename T>
-bool compareTwoFieldDefinitions(const FieldDefinition<T> &field,
-                                const FieldDefinition<T> &field2,
+bool compareTwoFieldDefinitions(const FieldDefinition<InputFieldSpec> &field,
+                                const FieldDefinition<InputFieldSpec> &field2,
                                 const std::string &typeName);
 bool compareArguments(
     const std::map<std::string,
@@ -175,29 +184,47 @@ bool compareArguments(
     return isValid;
 };
 
+std::string getFieldSpecName(const ObjectFieldSpec &spec) {
+    return std::visit(
+        overloaded{
+            [](const LiteralFieldSpec<ObjectTypeSpec> &) { return "Literal"; },
+            [](const ArrayFieldSpec<ObjectTypeSpec> &) { return "Array"; },
+            [](const CallableFieldSpec &) { return "Callable"; },
+        },
+        spec);
+};
+
 bool compareTwoFieldTypeSpecs(const ObjectFieldSpec &spec,
                               const ObjectFieldSpec &spec2,
                               const std::string &path) {
-    if (spec.index() != spec2.index()) return false;
+    if (spec.index() != spec2.index()) {
+        const auto &specName = getFieldSpecName(spec);
+        const auto &spec2Name = getFieldSpecName(spec2);
+        std::cerr << std::format("[{}] Change type from {} to {}", path,
+                                 specName, spec2Name)
+                  << std::endl;
+        return false;
+    };
     return std::visit(
-        overloaded{ [&spec2](const LiteralFieldSpec<ObjectTypeSpec> &node) {
-                       const auto &node2 =
-                           std::get<LiteralFieldSpec<ObjectTypeSpec>>(spec2);
-                       return compareTwoTypeSpecs(node.type, node2.type);
-                   },
-                    [&spec2](const ArrayFieldSpec<ObjectTypeSpec> &node) {
-                        const auto &node2 =
-                            std::get<ArrayFieldSpec<ObjectTypeSpec>>(spec2);
-                        if (!node.nullable && node2.nullable) return false;
-                        return compareTwoTypeSpecs(node.type, node2.type);
-                    },
-                    [&spec2, &path](const CallableFieldSpec &node) {
-                        const auto &node2 = std::get<CallableFieldSpec>(spec2);
-                        return compareTwoFieldTypeSpecs(node.returnType,
-                                                        node2.returnType) &&
-                               compareArguments(node.arguments, node2.arguments,
-                                                path);
-                    } },
+        overloaded{
+            [&spec2, &path](const LiteralFieldSpec<ObjectTypeSpec> &node) {
+                const auto &node2 =
+                    std::get<LiteralFieldSpec<ObjectTypeSpec>>(spec2);
+                return compareTwoTypeSpecs(node.type, node2.type, path);
+            },
+            [&spec2, &path](const ArrayFieldSpec<ObjectTypeSpec> &node) {
+                const auto &node2 =
+                    std::get<ArrayFieldSpec<ObjectTypeSpec>>(spec2);
+                if (!node.nullable && node2.nullable) return false;
+                return compareTwoTypeSpecs(node.type, node2.type, path);
+            },
+            [&spec2, &path](const CallableFieldSpec &node) {
+                const auto &node2 = std::get<CallableFieldSpec>(spec2);
+                return compareTwoFieldTypeSpecs(node.returnType,
+                                                node2.returnType,
+                                                path + ".returnType") &&
+                       compareArguments(node.arguments, node2.arguments, path);
+            } },
         spec);
 };
 
@@ -222,13 +249,33 @@ bool compareTwoFieldTypeSpecs(const InputFieldSpec &spec,
         spec);
 };
 
+bool compareTwoFieldDefinitions(const FieldDefinition<InputFieldSpec> &field,
+                                const FieldDefinition<InputFieldSpec> &field2,
+                                const std::string &typeName) {
+    bool isValid = true;
+    if (field.nullable && !field2.nullable) {
+        std::cerr << std::format("[{}.{}] Removed nullability", typeName,
+                                 field.name)
+                  << std::endl;
+        isValid = false;
+    };
+    if (!compareTwoFieldTypeSpecs(field.spec, field2.spec,
+                                  std::format("{}.{}", typeName, field.name))) {
+        std::cerr << std::format("[{}.{}] Changed type spec", typeName,
+                                 field.name)
+                  << std::endl;
+        isValid = false;
+    };
+    return isValid;
+};
+
 template <typename T>
 bool compareTwoFieldDefinitions(const FieldDefinition<T> &field,
                                 const FieldDefinition<T> &field2,
                                 const std::string &typeName) {
     bool isValid = true;
-    if (field.nullable && !field2.nullable) {
-        std::cerr << std::format("[{}.{}] Removed nullability", typeName,
+    if (!field.nullable && field2.nullable) {
+        std::cerr << std::format("[{}.{}] Became nullable", typeName,
                                  field.name)
                   << std::endl;
         isValid = false;
@@ -261,6 +308,7 @@ bool compareTwoObjects(const std::shared_ptr<ObjectType> &object,
                                      name)
                       << std::endl;
             isValid = false;
+            continue;
         };
         if (!compareTwoFieldDefinitions(*field, *object2->fields.at(name),
                                         object->name)) {
@@ -274,9 +322,13 @@ bool compareObjects(
     const std::map<std::string, std::shared_ptr<ObjectType>> &objects,
     const std::map<std::string, std::shared_ptr<ObjectType>> &objects2) {
     bool isValid = true;
-    for (const auto &name : objects | std::views::keys) {
+    for (const auto &[name, object] : objects) {
         if (!objects2.contains(name)) {
             std::cerr << std::format("Deleted object {}", name) << std::endl;
+            isValid = false;
+            continue;
+        };
+        if (!compareTwoObjects(object, objects2.at(name))) {
             isValid = false;
         };
     };
@@ -304,6 +356,7 @@ bool compareUnions(
         if (!unions2.contains(name)) {
             std::cerr << std::format("Deleted union {}", name) << std::endl;
             isValid = false;
+            continue;
         };
         if (!compareTwoUnions(unionNode, unions2.at(name))) {
             isValid = false;
@@ -320,6 +373,7 @@ bool compareTwoInputs(const std::shared_ptr<InputType> &input,
             std::cerr << std::format("[{}] Deleted field {}", input->name, name)
                       << std::endl;
             isValid = false;
+            continue;
         };
         if (!compareTwoFieldDefinitions(field, input2->fields.at(name),
                                         input->name)) {
@@ -337,6 +391,7 @@ bool compareInputs(
         if (!inputs2.contains(name)) {
             std::cerr << std::format("Deleted input {}", name) << std::endl;
             isValid = false;
+            continue;
         };
         if (!compareTwoInputs(input, inputs2.at(name))) {
             isValid = false;
@@ -354,6 +409,7 @@ bool compareTwoInterfaces(const std::shared_ptr<Interface> &interface,
                                      interface->name)
                       << std::endl;
             isValid = false;
+            continue;
         };
         if (!compareTwoFieldDefinitions(*field, *interface2->fields.at(name),
                                         interface->name)) {
@@ -371,6 +427,7 @@ bool compareInterfaces(
         if (!interfaces2.contains(name)) {
             std::cerr << std::format("Deleted interface {}", name) << std::endl;
             isValid = false;
+            continue;
         };
         if (!compareTwoInterfaces(interface, interfaces2.at(name))) {
             isValid = false;
@@ -413,6 +470,7 @@ bool compareEnums(const std::map<std::string, std::shared_ptr<Enum>> &enums,
         if (!enums2.contains(name)) {
             std::cerr << std::format("Deleted enum {}", name) << std::endl;
             isValid = false;
+            continue;
         };
         if (!compareTwoEnums(enumNode, enums2.at(name))) {
             isValid = false;
@@ -424,12 +482,15 @@ bool compareEnums(const std::map<std::string, std::shared_ptr<Enum>> &enums,
 void findDifferenceBetweenSchemas(
     const parsers::schema::ServerSchema &schema,
     const parsers::schema::ServerSchema &schema2) {
-    bool isValid = (compareObjects(schema.objects, schema2.objects) &&
-                    compareUnions(schema.unions, schema2.unions) &&
-                    compareInputs(schema.inputs, schema2.inputs) &&
-                    compareInterfaces(schema.interfaces, schema2.interfaces) &&
-                    compareScalars(schema.scalars, schema2.scalars) &&
-                    compareEnums(schema.enums, schema2.enums));
+    bool isObjectsValid = compareObjects(schema.objects, schema2.objects);
+    bool isUnionsValid = compareUnions(schema.unions, schema2.unions);
+    bool isInputsValid = compareInputs(schema.inputs, schema2.inputs);
+    bool isInterfacesValid =
+        compareInterfaces(schema.interfaces, schema2.interfaces);
+    bool isScalarsValid = compareScalars(schema.scalars, schema2.scalars);
+    bool isEnumsValid = compareEnums(schema.enums, schema2.enums);
+    bool isValid = (isObjectsValid && isUnionsValid && isInputsValid &&
+                    isInterfacesValid && isScalarsValid && isEnumsValid);
     if (!isValid) {
         std::cerr << "Schema is incompatible" << std::endl;
         throw CLI::RuntimeError(1);

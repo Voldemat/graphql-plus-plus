@@ -28,6 +28,7 @@ using namespace json::parser::introspection;
 using namespace parsers::schema;
 
 namespace json::parser::introspection {
+
 ServerSchemaNode parseNodeFirstPass(const JSONValue &value) {
     const std::string &kind = value["kind"].GetString();
     const std::string &name = value["name"].GetString();
@@ -222,15 +223,7 @@ ObjectFieldSpec parseObjectFieldSpec(const JSONValue &value,
     const auto &args = argsValue.GetArray();
     if (kind == "NON_NULL")
         return parseObjectFieldSpec(value["ofType"], argsValue, registry);
-    if (kind == "LIST") {
-        const auto &type = parseObjectTypeSpec(value["ofType"], registry);
-        return (ArrayFieldSpec<ObjectTypeSpec>){
-            .type = type,
-            .nullable =
-                strcmp(value["ofType"]["kind"].GetString(), "NON_NULL") != 0
-        };
-    } else if (args.Size() != 0) {
-        const auto &type = parseObjectTypeSpec(value, registry);
+    if (args.Size() != 0) {
         return (CallableFieldSpec){
             .returnType = parseNonCallableObjectFieldSpec(value, registry),
             .arguments =
@@ -241,6 +234,14 @@ ObjectFieldSpec parseObjectFieldSpec(const JSONValue &value,
                     return std::make_pair(field->name, field);
                 }) |
                 std::ranges::to<std::map>()
+        };
+    };
+    if (kind == "LIST") {
+        const auto &type = parseObjectTypeSpec(value["ofType"], registry);
+        return (ArrayFieldSpec<ObjectTypeSpec>){
+            .type = type,
+            .nullable =
+                strcmp(value["ofType"]["kind"].GetString(), "NON_NULL") != 0
         };
     };
     const auto &type = parseObjectTypeSpec(value, registry);
