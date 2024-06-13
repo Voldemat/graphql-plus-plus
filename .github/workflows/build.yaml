@@ -25,3 +25,20 @@ jobs:
         retention-days: 90
         compression-level: 6
         overwrite: true
+  build-completions:
+    name: Build bash completions
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: "Install completely"
+      run: sudo apt update && sudo apt-get install -y rubygems-integration && sudo gem install completely
+    - name: "Build completions"
+      run: cd autocomplete && completely generate
+    - uses: actions/upload-artifact@v4
+      with:
+        name: 'ubuntu-cli-completions'
+        path: autocomplete/completely.bash
+        if-no-files-found: error
+        retention-days: 90
+        compression-level: 6
+        overwrite: true
