@@ -175,6 +175,7 @@ bool compareArguments(
             std::cerr << std::format("[{}] Removed argument {}", path, name)
                       << std::endl;
             isValid = false;
+            continue;
         };
         if (!compareTwoFieldDefinitions(*field, *arguments2.at(name),
                                         path + ":args")) {
