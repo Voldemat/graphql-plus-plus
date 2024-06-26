@@ -8,8 +8,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v3
-    - name: "Install clang"
-      run: sudo apt update && sudo apt-get install --no-install-recommends -y libc++-18-dev clang-18
+    - uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: libc++-18-dev clang-18
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       with:
