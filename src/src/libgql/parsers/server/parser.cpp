@@ -174,16 +174,19 @@ ast::EnumValueDefinitionNode Parser::parseEnumValueDefinitionNode() {
 };
 
 ast::UnionDefinitionNode Parser::parseUnionTypeDefinitionNode() {
+    std::cout << "start parseUnionTypeDefinitionNode" << std::endl;
     const GQLToken startToken = currentToken;
     const auto &nameNode = parseNameNode();
+    std::cout << "parsed nameNode" << std::endl;
     consume(SimpleTokenType::EQUAL);
-    std::vector<shared::ast::NameNode> values;
-    values.push_back(parseNameNode());
-    while (lookahead().type == (GQLTokenType)SimpleTokenType::VSLASH) {
-        consume(SimpleTokenType::VSLASH);
+    std::vector<shared::ast::NameNode> values = {parseNameNode()};
+    std::cout << "parsed first type" << std::endl;
+    while (consumeIfIsAhead(SimpleTokenType::VSLASH)) {
         values.push_back(parseNameNode());
     };
+    std::cout << "parsed values" << std::endl;
     const GQLToken endToken = currentToken;
+    std::cout << "end parseUnionTypeDefinitionNode" << std::endl;
     return { .location = { .startToken = startToken,
                            .endToken = endToken,
                            .source = source },
