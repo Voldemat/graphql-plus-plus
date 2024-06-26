@@ -352,7 +352,10 @@ shared::ast::ListTypeNode Parser::parseListTypeNode() {
              .nullable = nullable };
 };
 
-const GQLToken Parser::lookahead() { return tokens[index + 1]; };
+const GQLToken Parser::lookahead() {
+    std::cout << "start lookahead: " << index << std::endl;
+    return tokens[index + 1];
+};
 
 void Parser::consume(const GQLTokenType type) {
     index += 1;
@@ -368,7 +371,9 @@ void Parser::consumeIdentifier() {
 };
 
 bool Parser::consumeIfIsAhead(GQLTokenType expectedType) {
-    std::cout << "start consumeIfIsAhead: " << expectedType << std::endl;
+    std::cout << "start consumeIfIsAhead: " << expectedType;
+    std::cout << ", currentToken: " << currentToken;
+    std::cout << ", index: " << index << std::endl;
     bool tokenIsAhead = isAhead(expectedType);
     std::cout << "after isAhead: " << tokenIsAhead << std::endl;
     if (tokenIsAhead) {
