@@ -44,7 +44,6 @@ const char *INTROSPECTION_QUERY =
         throw CLI::RuntimeError(1);
     };
     std::string buffer{ response.body.begin(), response.body.end() };
-    std::cout << buffer << std::endl;
     rapidjson::Document d;
     d.Parse(buffer.c_str());
     return d;
