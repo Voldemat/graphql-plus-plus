@@ -368,10 +368,14 @@ void Parser::consumeIdentifier() {
 };
 
 bool Parser::consumeIfIsAhead(GQLTokenType expectedType) {
+    std::cout << "start consumeIfIsAhead: " << expectedType << std::endl;
     bool tokenIsAhead = isAhead(expectedType);
+    std::cout << "after isAhead: " << tokenIsAhead << std::endl;
     if (tokenIsAhead) {
         consume(expectedType);
+        std::cout << "after consume(expectedType)" << std::endl;
     };
+    std::cout << "end consumeIfIsAhead: " << std::endl;
     return tokenIsAhead;
 };
 
