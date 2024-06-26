@@ -318,7 +318,7 @@ ServerSchemaNode parseNodeSecondPass(const JSONValue &value,
 };
 
 const ServerSchema parseIntrospectionSchema(
-    const rapidjson::Document &document) {
+    const JSONObject &document) {
     const auto &types = document["data"]["__schema"]["types"].GetArray();
     TypeRegistry registry;
     for (const auto &item :

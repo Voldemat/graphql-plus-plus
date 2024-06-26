@@ -38,6 +38,8 @@ std::optional<GQLTokenType> gqlTokenTypeFromString(
         return SimpleTokenType::RIGHT_BRACKET;
     else if (t == "LEFT_BRACKET")
         return SimpleTokenType::LEFT_BRACKET;
+    else if (t == "SPREAD")
+        return ComplexTokenType::SPREAD;
     else if (t == "BOOLEAN")
         return ComplexTokenType::BOOLEAN;
     return std::nullopt;

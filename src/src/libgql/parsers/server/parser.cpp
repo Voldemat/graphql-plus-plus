@@ -1,5 +1,6 @@
 #include "./parser.hpp"
 
+#include <format>
 #include <memory>
 #include <optional>
 #include <string>
@@ -73,7 +74,9 @@ std::pair<std::string, ast::ASTNode> Parser::parseASTNode() {
         const auto &node = parseExtendTypeNode();
         return { node.typeNode.name.name, node };
     };
-    throw shared::ParserError(currentToken, "Unknown identifier", source);
+    throw shared::ParserError(
+        currentToken,
+        std::format("Unknown identifier: {}", currentToken.lexeme), source);
 };
 
 ast::ExtendTypeNode Parser::parseExtendTypeNode() {
