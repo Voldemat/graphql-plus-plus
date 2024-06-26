@@ -15,10 +15,10 @@
 #include "gtest/gtest.h"
 #include "libgql/lexer/token.hpp"
 
-class Fixture : public testing::TestWithParam<TestCase> {};
+class LexerFixture : public testing::TestWithParam<LexerTestCase> {};
 
 using namespace lexer;
-TEST_P(Fixture, TestLexer) {
+TEST_P(LexerFixture, TestLexer) {
     auto testCase = GetParam();
     std::istringstream buffer(testCase.schema);
     VectorTokensAccumulator accumulator;
@@ -52,8 +52,8 @@ TEST_P(Fixture, TestLexer) {
     };
 };
 INSTANTIATE_TEST_SUITE_P(
-    LexerCasesTests, Fixture, testing::ValuesIn(getCases()),
-    [](const testing::TestParamInfo<Fixture::ParamType> &info) {
+    LexerCasesTests, LexerFixture, testing::ValuesIn(getLexerCases()),
+    [](const testing::TestParamInfo<LexerFixture::ParamType> &info) {
         std::string testname = info.param.filename;
         std::replace(testname.begin(), testname.end(), '.', '_');
         std::replace(testname.begin(), testname.end(), '-', '_');

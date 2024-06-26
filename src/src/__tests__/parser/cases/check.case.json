@@ -1,0 +1,4408 @@
+{
+    "$schema": "./case.schema.json",
+    "tokens": [
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "scalar",
+            "location": {
+                "line": 1,
+                "start": 0,
+                "end": 5
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Upload",
+            "location": {
+                "line": 1,
+                "start": 7,
+                "end": 12
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "enum",
+            "location": {
+                "line": 3,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ESortingDirection",
+            "location": {
+                "line": 3,
+                "start": 5,
+                "end": 21
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 3,
+                "start": 23,
+                "end": 23
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ASC",
+            "location": {
+                "line": 4,
+                "start": 2,
+                "end": 4
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "DESC",
+            "location": {
+                "line": 5,
+                "start": 2,
+                "end": 5
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 6,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "enum",
+            "location": {
+                "line": 8,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "PeriodType",
+            "location": {
+                "line": 8,
+                "start": 5,
+                "end": 14
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 8,
+                "start": 16,
+                "end": 16
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "LAST_WEEK",
+            "location": {
+                "line": 9,
+                "start": 2,
+                "end": 10
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "LAST_MONTH",
+            "location": {
+                "line": 10,
+                "start": 2,
+                "end": 11
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 11,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "enum",
+            "location": {
+                "line": 13,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "PrivacyType",
+            "location": {
+                "line": 13,
+                "start": 5,
+                "end": 15
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 13,
+                "start": 17,
+                "end": 17
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "FOR_EVERYONE",
+            "location": {
+                "line": 14,
+                "start": 2,
+                "end": 13
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ONLY_FOR_FOLLOWERS",
+            "location": {
+                "line": 15,
+                "start": 2,
+                "end": 19
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ONLY_FOR_FRIENDS",
+            "location": {
+                "line": 16,
+                "start": 2,
+                "end": 17
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 17,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "enum",
+            "location": {
+                "line": 19,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ErrorStatus",
+            "location": {
+                "line": 19,
+                "start": 5,
+                "end": 15
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 19,
+                "start": 17,
+                "end": 17
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "INVALID_INPUT_DATA",
+            "location": {
+                "line": 20,
+                "start": 2,
+                "end": 19
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "NOT_AUTHENTICATED",
+            "location": {
+                "line": 21,
+                "start": 2,
+                "end": 18
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "NOT_FOUND",
+            "location": {
+                "line": 22,
+                "start": 2,
+                "end": 10
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ALREADY_DONE",
+            "location": {
+                "line": 23,
+                "start": 2,
+                "end": 13
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ALREADY_EXIST",
+            "location": {
+                "line": 24,
+                "start": 2,
+                "end": 14
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "NOT_ENOUGH_PERMISSIONS",
+            "location": {
+                "line": 25,
+                "start": 2,
+                "end": 23
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 26,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "input",
+            "location": {
+                "line": 28,
+                "start": 0,
+                "end": 4
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "RecordTypeIn",
+            "location": {
+                "line": 28,
+                "start": 6,
+                "end": 17
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 28,
+                "start": 19,
+                "end": 19
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "key",
+            "location": {
+                "line": 29,
+                "start": 2,
+                "end": 4
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 29,
+                "start": 5,
+                "end": 5
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "location": {
+                "line": 29,
+                "start": 7,
+                "end": 12
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 29,
+                "start": 13,
+                "end": 13
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "value",
+            "location": {
+                "line": 30,
+                "start": 2,
+                "end": 6
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 30,
+                "start": 7,
+                "end": 7
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "location": {
+                "line": 30,
+                "start": 9,
+                "end": 14
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 30,
+                "start": 15,
+                "end": 15
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 31,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": {
+                "line": 33,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "RecordType",
+            "location": {
+                "line": 33,
+                "start": 5,
+                "end": 14
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 33,
+                "start": 16,
+                "end": 16
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "key",
+            "location": {
+                "line": 34,
+                "start": 2,
+                "end": 4
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 34,
+                "start": 5,
+                "end": 5
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "location": {
+                "line": 34,
+                "start": 7,
+                "end": 12
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 34,
+                "start": 13,
+                "end": 13
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "value",
+            "location": {
+                "line": 35,
+                "start": 2,
+                "end": 6
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 35,
+                "start": 7,
+                "end": 7
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "location": {
+                "line": 35,
+                "start": 9,
+                "end": 14
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 35,
+                "start": 15,
+                "end": 15
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 36,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": {
+                "line": 38,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "IntegerRecordType",
+            "location": {
+                "line": 38,
+                "start": 5,
+                "end": 21
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 38,
+                "start": 23,
+                "end": 23
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "key",
+            "location": {
+                "line": 39,
+                "start": 2,
+                "end": 4
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 39,
+                "start": 5,
+                "end": 5
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "location": {
+                "line": 39,
+                "start": 7,
+                "end": 12
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 39,
+                "start": 13,
+                "end": 13
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "value",
+            "location": {
+                "line": 40,
+                "start": 2,
+                "end": 6
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 40,
+                "start": 7,
+                "end": 7
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Int",
+            "location": {
+                "line": 40,
+                "start": 9,
+                "end": 11
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 40,
+                "start": 12,
+                "end": 12
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 41,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": {
+                "line": 43,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "BaseError",
+            "location": {
+                "line": 43,
+                "start": 5,
+                "end": 13
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 43,
+                "start": 15,
+                "end": 15
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "status",
+            "location": {
+                "line": 44,
+                "start": 2,
+                "end": 7
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 44,
+                "start": 8,
+                "end": 8
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ErrorStatus",
+            "location": {
+                "line": 44,
+                "start": 10,
+                "end": 20
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 44,
+                "start": 21,
+                "end": 21
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 45,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": {
+                "line": 47,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ErrorWithFields",
+            "location": {
+                "line": 47,
+                "start": 5,
+                "end": 19
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 47,
+                "start": 21,
+                "end": 21
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "status",
+            "location": {
+                "line": 48,
+                "start": 2,
+                "end": 7
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 48,
+                "start": 8,
+                "end": 8
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "ErrorStatus",
+            "location": {
+                "line": 48,
+                "start": 10,
+                "end": 20
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 48,
+                "start": 21,
+                "end": 21
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "fields",
+            "location": {
+                "line": 49,
+                "start": 2,
+                "end": 7
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 49,
+                "start": 8,
+                "end": 8
+            }
+        },
+        {
+            "type": "LEFT_BRACKET",
+            "lexeme": "[",
+            "location": {
+                "line": 49,
+                "start": 10,
+                "end": 10
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "location": {
+                "line": 49,
+                "start": 11,
+                "end": 16
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 49,
+                "start": 17,
+                "end": 17
+            }
+        },
+        {
+            "type": "RIGHT_BRACKET",
+            "lexeme": "]",
+            "location": {
+                "line": 49,
+                "start": 18,
+                "end": 18
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 49,
+                "start": 19,
+                "end": 19
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 50,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": {
+                "line": 52,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "BooleanObject",
+            "location": {
+                "line": 52,
+                "start": 5,
+                "end": 17
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 52,
+                "start": 19,
+                "end": 19
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "boolean",
+            "location": {
+                "line": 53,
+                "start": 2,
+                "end": 8
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 53,
+                "start": 9,
+                "end": 9
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Boolean",
+            "location": {
+                "line": 53,
+                "start": 11,
+                "end": 17
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 53,
+                "start": 18,
+                "end": 18
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 54,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": {
+                "line": 56,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "StringArray",
+            "location": {
+                "line": 56,
+                "start": 5,
+                "end": 15
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 56,
+                "start": 17,
+                "end": 17
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "array",
+            "location": {
+                "line": 57,
+                "start": 4,
+                "end": 8
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 57,
+                "start": 9,
+                "end": 9
+            }
+        },
+        {
+            "type": "LEFT_BRACKET",
+            "lexeme": "[",
+            "location": {
+                "line": 57,
+                "start": 11,
+                "end": 11
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "location": {
+                "line": 57,
+                "start": 12,
+                "end": 17
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 57,
+                "start": 18,
+                "end": 18
+            }
+        },
+        {
+            "type": "RIGHT_BRACKET",
+            "lexeme": "]",
+            "location": {
+                "line": 57,
+                "start": 19,
+                "end": 19
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 57,
+                "start": 20,
+                "end": 20
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 58,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": {
+                "line": 60,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "NumberObject",
+            "location": {
+                "line": 60,
+                "start": 5,
+                "end": 16
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 60,
+                "start": 18,
+                "end": 18
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "number",
+            "location": {
+                "line": 61,
+                "start": 2,
+                "end": 7
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 61,
+                "start": 8,
+                "end": 8
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Int",
+            "location": {
+                "line": 61,
+                "start": 10,
+                "end": 12
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 61,
+                "start": 13,
+                "end": 13
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 62,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "input",
+            "location": {
+                "line": 64,
+                "start": 0,
+                "end": 4
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "AttachmentsInUpdate",
+            "location": {
+                "line": 64,
+                "start": 6,
+                "end": 24
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 64,
+                "start": 26,
+                "end": 26
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "added",
+            "location": {
+                "line": 65,
+                "start": 4,
+                "end": 8
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 65,
+                "start": 9,
+                "end": 9
+            }
+        },
+        {
+            "type": "LEFT_BRACKET",
+            "lexeme": "[",
+            "location": {
+                "line": 65,
+                "start": 11,
+                "end": 11
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Upload",
+            "location": {
+                "line": 65,
+                "start": 12,
+                "end": 17
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 65,
+                "start": 18,
+                "end": 18
+            }
+        },
+        {
+            "type": "RIGHT_BRACKET",
+            "lexeme": "]",
+            "location": {
+                "line": 65,
+                "start": 19,
+                "end": 19
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "removed",
+            "location": {
+                "line": 66,
+                "start": 4,
+                "end": 10
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 66,
+                "start": 11,
+                "end": 11
+            }
+        },
+        {
+            "type": "LEFT_BRACKET",
+            "lexeme": "[",
+            "location": {
+                "line": 66,
+                "start": 13,
+                "end": 13
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "location": {
+                "line": 66,
+                "start": 14,
+                "end": 19
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 66,
+                "start": 20,
+                "end": 20
+            }
+        },
+        {
+            "type": "RIGHT_BRACKET",
+            "lexeme": "]",
+            "location": {
+                "line": 66,
+                "start": 21,
+                "end": 21
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 67,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "input",
+            "location": {
+                "line": 69,
+                "start": 0,
+                "end": 4
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "GeolocationIn",
+            "location": {
+                "line": 69,
+                "start": 6,
+                "end": 18
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 69,
+                "start": 20,
+                "end": 20
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "lat",
+            "location": {
+                "line": 70,
+                "start": 4,
+                "end": 6
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 70,
+                "start": 7,
+                "end": 7
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Float",
+            "location": {
+                "line": 70,
+                "start": 9,
+                "end": 13
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 70,
+                "start": 14,
+                "end": 14
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "lng",
+            "location": {
+                "line": 71,
+                "start": 4,
+                "end": 6
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 71,
+                "start": 7,
+                "end": 7
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Float",
+            "location": {
+                "line": 71,
+                "start": 9,
+                "end": 13
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 71,
+                "start": 14,
+                "end": 14
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 72,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": {
+                "line": 74,
+                "start": 0,
+                "end": 3
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Geolocation",
+            "location": {
+                "line": 74,
+                "start": 5,
+                "end": 15
+            }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": {
+                "line": 74,
+                "start": 17,
+                "end": 17
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "lat",
+            "location": {
+                "line": 75,
+                "start": 4,
+                "end": 6
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 75,
+                "start": 7,
+                "end": 7
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Float",
+            "location": {
+                "line": 75,
+                "start": 9,
+                "end": 13
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 75,
+                "start": 14,
+                "end": 14
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "lng",
+            "location": {
+                "line": 76,
+                "start": 4,
+                "end": 6
+            }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": {
+                "line": 76,
+                "start": 7,
+                "end": 7
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Float",
+            "location": {
+                "line": 76,
+                "start": 9,
+                "end": 13
+            }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": {
+                "line": 76,
+                "start": 14,
+                "end": 14
+            }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": {
+                "line": 77,
+                "start": 0,
+                "end": 0
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "union",
+            "location": {
+                "line": 79,
+                "start": 0,
+                "end": 4
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "StringArrayOrBE",
+            "location": {
+                "line": 79,
+                "start": 6,
+                "end": 20
+            }
+        },
+        {
+            "type": "EQUAL",
+            "lexeme": "=",
+            "location": {
+                "line": 79,
+                "start": 22,
+                "end": 22
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "StringArray",
+            "location": {
+                "line": 79,
+                "start": 24,
+                "end": 34
+            }
+        },
+        {
+            "type": "VSLASH",
+            "lexeme": "|",
+            "location": {
+                "line": 79,
+                "start": 36,
+                "end": 36
+            }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "BaseError",
+            "location": {
+                "line": 79,
+                "start": 38,
+                "end": 46
+            }
+        }
+    ],
+    "expectedFileNodes": {
+        "definitions": [
+            {
+                "_type": "ScalarDefinitionNode",
+                "name": {
+                    "name": "Upload",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "Upload",
+                            "location": { "line": 1, "start": 7, "end": 12 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "Upload",
+                            "location": { "line": 1, "start": 7, "end": 12 }
+                        }
+                    }
+                },
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "scalar",
+                        "location": { "line": 1, "start": 0, "end": 5 }
+                    },
+                    "endToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "Upload",
+                        "location": { "line": 1, "start": 7, "end": 12 }
+                    }
+                }
+            },
+            {
+                "_type": "EnumDefinitionNode",
+                "name": {
+                    "name": "ESortingDirection",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "ESortingDirection",
+                            "location": { "line": 3, "start": 5, "end": 21 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "ESortingDirection",
+                            "location": { "line": 3, "start": 5, "end": 21 }
+                        }
+                    }
+                },
+                "values": [
+                    {
+                        "value": {
+                            "name": "ASC",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ASC",
+                                    "location": {
+                                        "line": 4,
+                                        "start": 2,
+                                        "end": 4
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ASC",
+                                    "location": {
+                                        "line": 4,
+                                        "start": 2,
+                                        "end": 4
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 3,
+                                    "start": 23,
+                                    "end": 23
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "ASC",
+                                "location": { "line": 4, "start": 2, "end": 4 }
+                            }
+                        }
+                    },
+                    {
+                        "value": {
+                            "name": "DESC",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "DESC",
+                                    "location": {
+                                        "line": 5,
+                                        "start": 2,
+                                        "end": 5
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "DESC",
+                                    "location": {
+                                        "line": 5,
+                                        "start": 2,
+                                        "end": 5
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "ASC",
+                                "location": { "line": 4, "start": 2, "end": 4 }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "DESC",
+                                "location": { "line": 5, "start": 2, "end": 5 }
+                            }
+                        }
+                    }
+                ],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "enum",
+                        "location": { "line": 3, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 6, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "EnumDefinitionNode",
+                "name": {
+                    "name": "PeriodType",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "PeriodType",
+                            "location": { "line": 8, "start": 5, "end": 14 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "PeriodType",
+                            "location": { "line": 8, "start": 5, "end": 14 }
+                        }
+                    }
+                },
+                "values": [
+                    {
+                        "value": {
+                            "name": "LAST_WEEK",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "LAST_WEEK",
+                                    "location": {
+                                        "line": 9,
+                                        "start": 2,
+                                        "end": 10
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "LAST_WEEK",
+                                    "location": {
+                                        "line": 9,
+                                        "start": 2,
+                                        "end": 10
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 8,
+                                    "start": 16,
+                                    "end": 16
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "LAST_WEEK",
+                                "location": { "line": 9, "start": 2, "end": 10 }
+                            }
+                        }
+                    },
+                    {
+                        "value": {
+                            "name": "LAST_MONTH",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "LAST_MONTH",
+                                    "location": {
+                                        "line": 10,
+                                        "start": 2,
+                                        "end": 11
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "LAST_MONTH",
+                                    "location": {
+                                        "line": 10,
+                                        "start": 2,
+                                        "end": 11
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "LAST_WEEK",
+                                "location": { "line": 9, "start": 2, "end": 10 }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "LAST_MONTH",
+                                "location": {
+                                    "line": 10,
+                                    "start": 2,
+                                    "end": 11
+                                }
+                            }
+                        }
+                    }
+                ],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "enum",
+                        "location": { "line": 8, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 11, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "EnumDefinitionNode",
+                "name": {
+                    "name": "PrivacyType",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "PrivacyType",
+                            "location": { "line": 13, "start": 5, "end": 15 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "PrivacyType",
+                            "location": { "line": 13, "start": 5, "end": 15 }
+                        }
+                    }
+                },
+                "values": [
+                    {
+                        "value": {
+                            "name": "FOR_EVERYONE",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "FOR_EVERYONE",
+                                    "location": {
+                                        "line": 14,
+                                        "start": 2,
+                                        "end": 13
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "FOR_EVERYONE",
+                                    "location": {
+                                        "line": 14,
+                                        "start": 2,
+                                        "end": 13
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 13,
+                                    "start": 17,
+                                    "end": 17
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "FOR_EVERYONE",
+                                "location": {
+                                    "line": 14,
+                                    "start": 2,
+                                    "end": 13
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "value": {
+                            "name": "ONLY_FOR_FOLLOWERS",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ONLY_FOR_FOLLOWERS",
+                                    "location": {
+                                        "line": 15,
+                                        "start": 2,
+                                        "end": 19
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ONLY_FOR_FOLLOWERS",
+                                    "location": {
+                                        "line": 15,
+                                        "start": 2,
+                                        "end": 19
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "FOR_EVERYONE",
+                                "location": {
+                                    "line": 14,
+                                    "start": 2,
+                                    "end": 13
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "ONLY_FOR_FOLLOWERS",
+                                "location": {
+                                    "line": 15,
+                                    "start": 2,
+                                    "end": 19
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "value": {
+                            "name": "ONLY_FOR_FRIENDS",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ONLY_FOR_FRIENDS",
+                                    "location": {
+                                        "line": 16,
+                                        "start": 2,
+                                        "end": 17
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ONLY_FOR_FRIENDS",
+                                    "location": {
+                                        "line": 16,
+                                        "start": 2,
+                                        "end": 17
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "ONLY_FOR_FOLLOWERS",
+                                "location": {
+                                    "line": 15,
+                                    "start": 2,
+                                    "end": 19
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "ONLY_FOR_FRIENDS",
+                                "location": {
+                                    "line": 16,
+                                    "start": 2,
+                                    "end": 17
+                                }
+                            }
+                        }
+                    }
+                ],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "enum",
+                        "location": { "line": 13, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 17, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "EnumDefinitionNode",
+                "name": {
+                    "name": "ErrorStatus",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "ErrorStatus",
+                            "location": { "line": 19, "start": 5, "end": 15 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "ErrorStatus",
+                            "location": { "line": 19, "start": 5, "end": 15 }
+                        }
+                    }
+                },
+                "values": [
+                    {
+                        "value": {
+                            "name": "INVALID_INPUT_DATA",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "INVALID_INPUT_DATA",
+                                    "location": {
+                                        "line": 20,
+                                        "start": 2,
+                                        "end": 19
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "INVALID_INPUT_DATA",
+                                    "location": {
+                                        "line": 20,
+                                        "start": 2,
+                                        "end": 19
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 19,
+                                    "start": 17,
+                                    "end": 17
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "INVALID_INPUT_DATA",
+                                "location": {
+                                    "line": 20,
+                                    "start": 2,
+                                    "end": 19
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "value": {
+                            "name": "NOT_AUTHENTICATED",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "NOT_AUTHENTICATED",
+                                    "location": {
+                                        "line": 21,
+                                        "start": 2,
+                                        "end": 18
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "NOT_AUTHENTICATED",
+                                    "location": {
+                                        "line": 21,
+                                        "start": 2,
+                                        "end": 18
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "INVALID_INPUT_DATA",
+                                "location": {
+                                    "line": 20,
+                                    "start": 2,
+                                    "end": 19
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "NOT_AUTHENTICATED",
+                                "location": {
+                                    "line": 21,
+                                    "start": 2,
+                                    "end": 18
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "value": {
+                            "name": "NOT_FOUND",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "NOT_FOUND",
+                                    "location": {
+                                        "line": 22,
+                                        "start": 2,
+                                        "end": 10
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "NOT_FOUND",
+                                    "location": {
+                                        "line": 22,
+                                        "start": 2,
+                                        "end": 10
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "NOT_AUTHENTICATED",
+                                "location": {
+                                    "line": 21,
+                                    "start": 2,
+                                    "end": 18
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "NOT_FOUND",
+                                "location": {
+                                    "line": 22,
+                                    "start": 2,
+                                    "end": 10
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "value": {
+                            "name": "ALREADY_DONE",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ALREADY_DONE",
+                                    "location": {
+                                        "line": 23,
+                                        "start": 2,
+                                        "end": 13
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ALREADY_DONE",
+                                    "location": {
+                                        "line": 23,
+                                        "start": 2,
+                                        "end": 13
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "NOT_FOUND",
+                                "location": {
+                                    "line": 22,
+                                    "start": 2,
+                                    "end": 10
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "ALREADY_DONE",
+                                "location": {
+                                    "line": 23,
+                                    "start": 2,
+                                    "end": 13
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "value": {
+                            "name": "ALREADY_EXIST",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ALREADY_EXIST",
+                                    "location": {
+                                        "line": 24,
+                                        "start": 2,
+                                        "end": 14
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ALREADY_EXIST",
+                                    "location": {
+                                        "line": 24,
+                                        "start": 2,
+                                        "end": 14
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "ALREADY_DONE",
+                                "location": {
+                                    "line": 23,
+                                    "start": 2,
+                                    "end": 13
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "ALREADY_EXIST",
+                                "location": {
+                                    "line": 24,
+                                    "start": 2,
+                                    "end": 14
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "value": {
+                            "name": "NOT_ENOUGH_PERMISSIONS",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "NOT_ENOUGH_PERMISSIONS",
+                                    "location": {
+                                        "line": 25,
+                                        "start": 2,
+                                        "end": 23
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "NOT_ENOUGH_PERMISSIONS",
+                                    "location": {
+                                        "line": 25,
+                                        "start": 2,
+                                        "end": 23
+                                    }
+                                }
+                            }
+                        },
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "ALREADY_EXIST",
+                                "location": {
+                                    "line": 24,
+                                    "start": 2,
+                                    "end": 14
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "NOT_ENOUGH_PERMISSIONS",
+                                "location": {
+                                    "line": 25,
+                                    "start": 2,
+                                    "end": 23
+                                }
+                            }
+                        }
+                    }
+                ],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "enum",
+                        "location": { "line": 19, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 26, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "InputObjectDefinitionNode",
+                "name": {
+                    "name": "RecordTypeIn",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "RecordTypeIn",
+                            "location": { "line": 28, "start": 6, "end": 17 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "RecordTypeIn",
+                            "location": { "line": 28, "start": 6, "end": 17 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "key",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "key",
+                                    "location": {
+                                        "line": 29,
+                                        "start": 2,
+                                        "end": 4
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "key",
+                                    "location": {
+                                        "line": 29,
+                                        "start": 2,
+                                        "end": 4
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "String",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 29,
+                                            "start": 7,
+                                            "end": 12
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 29,
+                                            "start": 7,
+                                            "end": 12
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "String",
+                                    "location": {
+                                        "line": 29,
+                                        "start": 7,
+                                        "end": 12
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 29,
+                                        "start": 13,
+                                        "end": 13
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 28,
+                                    "start": 19,
+                                    "end": 19
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 29,
+                                    "start": 13,
+                                    "end": 13
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": {
+                            "name": "value",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "value",
+                                    "location": {
+                                        "line": 30,
+                                        "start": 2,
+                                        "end": 6
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "value",
+                                    "location": {
+                                        "line": 30,
+                                        "start": 2,
+                                        "end": 6
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "String",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 30,
+                                            "start": 9,
+                                            "end": 14
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 30,
+                                            "start": 9,
+                                            "end": 14
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "String",
+                                    "location": {
+                                        "line": 30,
+                                        "start": 9,
+                                        "end": 14
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 30,
+                                        "start": 15,
+                                        "end": 15
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 29,
+                                    "start": 13,
+                                    "end": 13
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 30,
+                                    "start": 15,
+                                    "end": 15
+                                }
+                            }
+                        }
+                    }
+                ],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "input",
+                        "location": { "line": 28, "start": 0, "end": 4 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 31, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "ObjectDefinitionNode",
+                "name": {
+                    "name": "RecordType",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "RecordType",
+                            "location": { "line": 33, "start": 5, "end": 14 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "RecordType",
+                            "location": { "line": 33, "start": 5, "end": 14 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "key",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "key",
+                                    "location": {
+                                        "line": 34,
+                                        "start": 2,
+                                        "end": 4
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "key",
+                                    "location": {
+                                        "line": 34,
+                                        "start": 2,
+                                        "end": 4
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "String",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 34,
+                                            "start": 7,
+                                            "end": 12
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 34,
+                                            "start": 7,
+                                            "end": 12
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "String",
+                                    "location": {
+                                        "line": 34,
+                                        "start": 7,
+                                        "end": 12
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 34,
+                                        "start": 13,
+                                        "end": 13
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 33,
+                                    "start": 16,
+                                    "end": 16
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 34,
+                                    "start": 13,
+                                    "end": 13
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": {
+                            "name": "value",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "value",
+                                    "location": {
+                                        "line": 35,
+                                        "start": 2,
+                                        "end": 6
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "value",
+                                    "location": {
+                                        "line": 35,
+                                        "start": 2,
+                                        "end": 6
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "String",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 35,
+                                            "start": 9,
+                                            "end": 14
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 35,
+                                            "start": 9,
+                                            "end": 14
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "String",
+                                    "location": {
+                                        "line": 35,
+                                        "start": 9,
+                                        "end": 14
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 35,
+                                        "start": 15,
+                                        "end": 15
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 34,
+                                    "start": 13,
+                                    "end": 13
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 35,
+                                    "start": 15,
+                                    "end": 15
+                                }
+                            }
+                        }
+                    }
+                ],
+                "interfaces": [],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "type",
+                        "location": { "line": 33, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 36, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "ObjectDefinitionNode",
+                "name": {
+                    "name": "IntegerRecordType",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "IntegerRecordType",
+                            "location": { "line": 38, "start": 5, "end": 21 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "IntegerRecordType",
+                            "location": { "line": 38, "start": 5, "end": 21 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "key",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "key",
+                                    "location": {
+                                        "line": 39,
+                                        "start": 2,
+                                        "end": 4
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "key",
+                                    "location": {
+                                        "line": 39,
+                                        "start": 2,
+                                        "end": 4
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "String",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 39,
+                                            "start": 7,
+                                            "end": 12
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 39,
+                                            "start": 7,
+                                            "end": 12
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "String",
+                                    "location": {
+                                        "line": 39,
+                                        "start": 7,
+                                        "end": 12
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 39,
+                                        "start": 13,
+                                        "end": 13
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 38,
+                                    "start": 23,
+                                    "end": 23
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 39,
+                                    "start": 13,
+                                    "end": 13
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": {
+                            "name": "value",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "value",
+                                    "location": {
+                                        "line": 40,
+                                        "start": 2,
+                                        "end": 6
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "value",
+                                    "location": {
+                                        "line": 40,
+                                        "start": 2,
+                                        "end": 6
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "Int",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Int",
+                                        "location": {
+                                            "line": 40,
+                                            "start": 9,
+                                            "end": 11
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Int",
+                                        "location": {
+                                            "line": 40,
+                                            "start": 9,
+                                            "end": 11
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "Int",
+                                    "location": {
+                                        "line": 40,
+                                        "start": 9,
+                                        "end": 11
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 40,
+                                        "start": 12,
+                                        "end": 12
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 39,
+                                    "start": 13,
+                                    "end": 13
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 40,
+                                    "start": 12,
+                                    "end": 12
+                                }
+                            }
+                        }
+                    }
+                ],
+                "interfaces": [],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "type",
+                        "location": { "line": 38, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 41, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "ObjectDefinitionNode",
+                "name": {
+                    "name": "BaseError",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "BaseError",
+                            "location": { "line": 43, "start": 5, "end": 13 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "BaseError",
+                            "location": { "line": 43, "start": 5, "end": 13 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "status",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "status",
+                                    "location": {
+                                        "line": 44,
+                                        "start": 2,
+                                        "end": 7
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "status",
+                                    "location": {
+                                        "line": 44,
+                                        "start": 2,
+                                        "end": 7
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "ErrorStatus",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "ErrorStatus",
+                                        "location": {
+                                            "line": 44,
+                                            "start": 10,
+                                            "end": 20
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "ErrorStatus",
+                                        "location": {
+                                            "line": 44,
+                                            "start": 10,
+                                            "end": 20
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ErrorStatus",
+                                    "location": {
+                                        "line": 44,
+                                        "start": 10,
+                                        "end": 20
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 44,
+                                        "start": 21,
+                                        "end": 21
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 43,
+                                    "start": 15,
+                                    "end": 15
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 44,
+                                    "start": 21,
+                                    "end": 21
+                                }
+                            }
+                        }
+                    }
+                ],
+                "interfaces": [],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "type",
+                        "location": { "line": 43, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 45, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "ObjectDefinitionNode",
+                "name": {
+                    "name": "ErrorWithFields",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "ErrorWithFields",
+                            "location": { "line": 47, "start": 5, "end": 19 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "ErrorWithFields",
+                            "location": { "line": 47, "start": 5, "end": 19 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "status",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "status",
+                                    "location": {
+                                        "line": 48,
+                                        "start": 2,
+                                        "end": 7
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "status",
+                                    "location": {
+                                        "line": 48,
+                                        "start": 2,
+                                        "end": 7
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "ErrorStatus",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "ErrorStatus",
+                                        "location": {
+                                            "line": 48,
+                                            "start": 10,
+                                            "end": 20
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "ErrorStatus",
+                                        "location": {
+                                            "line": 48,
+                                            "start": 10,
+                                            "end": 20
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "ErrorStatus",
+                                    "location": {
+                                        "line": 48,
+                                        "start": 10,
+                                        "end": 20
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 48,
+                                        "start": 21,
+                                        "end": 21
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 47,
+                                    "start": 21,
+                                    "end": 21
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 48,
+                                    "start": 21,
+                                    "end": 21
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": {
+                            "name": "fields",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "fields",
+                                    "location": {
+                                        "line": 49,
+                                        "start": 2,
+                                        "end": 7
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "fields",
+                                    "location": {
+                                        "line": 49,
+                                        "start": 2,
+                                        "end": 7
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "ListTypeNode",
+                            "type": {
+                                "_type": "NamedTypeNode",
+                                "name": {
+                                    "name": "String",
+                                    "location": {
+                                        "startToken": {
+                                            "type": "IDENTIFIER",
+                                            "lexeme": "String",
+                                            "location": {
+                                                "line": 49,
+                                                "start": 11,
+                                                "end": 16
+                                            }
+                                        },
+                                        "endToken": {
+                                            "type": "IDENTIFIER",
+                                            "lexeme": "String",
+                                            "location": {
+                                                "line": 49,
+                                                "start": 11,
+                                                "end": 16
+                                            }
+                                        }
+                                    }
+                                },
+                                "nullable": false,
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 49,
+                                            "start": 11,
+                                            "end": 16
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "BANG",
+                                        "lexeme": "!",
+                                        "location": {
+                                            "line": 49,
+                                            "start": 17,
+                                            "end": 17
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "LEFT_BRACKET",
+                                    "lexeme": "[",
+                                    "location": {
+                                        "line": 49,
+                                        "start": 10,
+                                        "end": 10
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 49,
+                                        "start": 19,
+                                        "end": 19
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 48,
+                                    "start": 21,
+                                    "end": 21
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 49,
+                                    "start": 19,
+                                    "end": 19
+                                }
+                            }
+                        }
+                    }
+                ],
+                "interfaces": [],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "type",
+                        "location": { "line": 47, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 50, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "ObjectDefinitionNode",
+                "name": {
+                    "name": "BooleanObject",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "BooleanObject",
+                            "location": { "line": 52, "start": 5, "end": 17 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "BooleanObject",
+                            "location": { "line": 52, "start": 5, "end": 17 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "boolean",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "boolean",
+                                    "location": {
+                                        "line": 53,
+                                        "start": 2,
+                                        "end": 8
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "boolean",
+                                    "location": {
+                                        "line": 53,
+                                        "start": 2,
+                                        "end": 8
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "Boolean",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Boolean",
+                                        "location": {
+                                            "line": 53,
+                                            "start": 11,
+                                            "end": 17
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Boolean",
+                                        "location": {
+                                            "line": 53,
+                                            "start": 11,
+                                            "end": 17
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "Boolean",
+                                    "location": {
+                                        "line": 53,
+                                        "start": 11,
+                                        "end": 17
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 53,
+                                        "start": 18,
+                                        "end": 18
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 52,
+                                    "start": 19,
+                                    "end": 19
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 53,
+                                    "start": 18,
+                                    "end": 18
+                                }
+                            }
+                        }
+                    }
+                ],
+                "interfaces": [],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "type",
+                        "location": { "line": 52, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 54, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "ObjectDefinitionNode",
+                "name": {
+                    "name": "StringArray",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "StringArray",
+                            "location": { "line": 56, "start": 5, "end": 15 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "StringArray",
+                            "location": { "line": 56, "start": 5, "end": 15 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "array",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "array",
+                                    "location": {
+                                        "line": 57,
+                                        "start": 4,
+                                        "end": 8
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "array",
+                                    "location": {
+                                        "line": 57,
+                                        "start": 4,
+                                        "end": 8
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "ListTypeNode",
+                            "type": {
+                                "_type": "NamedTypeNode",
+                                "name": {
+                                    "name": "String",
+                                    "location": {
+                                        "startToken": {
+                                            "type": "IDENTIFIER",
+                                            "lexeme": "String",
+                                            "location": {
+                                                "line": 57,
+                                                "start": 12,
+                                                "end": 17
+                                            }
+                                        },
+                                        "endToken": {
+                                            "type": "IDENTIFIER",
+                                            "lexeme": "String",
+                                            "location": {
+                                                "line": 57,
+                                                "start": 12,
+                                                "end": 17
+                                            }
+                                        }
+                                    }
+                                },
+                                "nullable": false,
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 57,
+                                            "start": 12,
+                                            "end": 17
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "BANG",
+                                        "lexeme": "!",
+                                        "location": {
+                                            "line": 57,
+                                            "start": 18,
+                                            "end": 18
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "LEFT_BRACKET",
+                                    "lexeme": "[",
+                                    "location": {
+                                        "line": 57,
+                                        "start": 11,
+                                        "end": 11
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 57,
+                                        "start": 20,
+                                        "end": 20
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 56,
+                                    "start": 17,
+                                    "end": 17
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 57,
+                                    "start": 20,
+                                    "end": 20
+                                }
+                            }
+                        }
+                    }
+                ],
+                "interfaces": [],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "type",
+                        "location": { "line": 56, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 58, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "ObjectDefinitionNode",
+                "name": {
+                    "name": "NumberObject",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "NumberObject",
+                            "location": { "line": 60, "start": 5, "end": 16 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "NumberObject",
+                            "location": { "line": 60, "start": 5, "end": 16 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "number",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "number",
+                                    "location": {
+                                        "line": 61,
+                                        "start": 2,
+                                        "end": 7
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "number",
+                                    "location": {
+                                        "line": 61,
+                                        "start": 2,
+                                        "end": 7
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "Int",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Int",
+                                        "location": {
+                                            "line": 61,
+                                            "start": 10,
+                                            "end": 12
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Int",
+                                        "location": {
+                                            "line": 61,
+                                            "start": 10,
+                                            "end": 12
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "Int",
+                                    "location": {
+                                        "line": 61,
+                                        "start": 10,
+                                        "end": 12
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 61,
+                                        "start": 13,
+                                        "end": 13
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 60,
+                                    "start": 18,
+                                    "end": 18
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 61,
+                                    "start": 13,
+                                    "end": 13
+                                }
+                            }
+                        }
+                    }
+                ],
+                "interfaces": [],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "type",
+                        "location": { "line": 60, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 62, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "InputObjectDefinitionNode",
+                "name": {
+                    "name": "AttachmentsInUpdate",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "AttachmentsInUpdate",
+                            "location": { "line": 64, "start": 6, "end": 24 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "AttachmentsInUpdate",
+                            "location": { "line": 64, "start": 6, "end": 24 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "added",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "added",
+                                    "location": {
+                                        "line": 65,
+                                        "start": 4,
+                                        "end": 8
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "added",
+                                    "location": {
+                                        "line": 65,
+                                        "start": 4,
+                                        "end": 8
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "ListTypeNode",
+                            "type": {
+                                "_type": "NamedTypeNode",
+                                "name": {
+                                    "name": "Upload",
+                                    "location": {
+                                        "startToken": {
+                                            "type": "IDENTIFIER",
+                                            "lexeme": "Upload",
+                                            "location": {
+                                                "line": 65,
+                                                "start": 12,
+                                                "end": 17
+                                            }
+                                        },
+                                        "endToken": {
+                                            "type": "IDENTIFIER",
+                                            "lexeme": "Upload",
+                                            "location": {
+                                                "line": 65,
+                                                "start": 12,
+                                                "end": 17
+                                            }
+                                        }
+                                    }
+                                },
+                                "nullable": false,
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Upload",
+                                        "location": {
+                                            "line": 65,
+                                            "start": 12,
+                                            "end": 17
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "BANG",
+                                        "lexeme": "!",
+                                        "location": {
+                                            "line": 65,
+                                            "start": 18,
+                                            "end": 18
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": true,
+                            "location": {
+                                "startToken": {
+                                    "type": "LEFT_BRACKET",
+                                    "lexeme": "[",
+                                    "location": {
+                                        "line": 65,
+                                        "start": 11,
+                                        "end": 11
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "RIGHT_BRACKET",
+                                    "lexeme": "]",
+                                    "location": {
+                                        "line": 65,
+                                        "start": 19,
+                                        "end": 19
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 64,
+                                    "start": 26,
+                                    "end": 26
+                                }
+                            },
+                            "endToken": {
+                                "type": "RIGHT_BRACKET",
+                                "lexeme": "]",
+                                "location": {
+                                    "line": 65,
+                                    "start": 19,
+                                    "end": 19
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": {
+                            "name": "removed",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "removed",
+                                    "location": {
+                                        "line": 66,
+                                        "start": 4,
+                                        "end": 10
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "removed",
+                                    "location": {
+                                        "line": 66,
+                                        "start": 4,
+                                        "end": 10
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "ListTypeNode",
+                            "type": {
+                                "_type": "NamedTypeNode",
+                                "name": {
+                                    "name": "String",
+                                    "location": {
+                                        "startToken": {
+                                            "type": "IDENTIFIER",
+                                            "lexeme": "String",
+                                            "location": {
+                                                "line": 66,
+                                                "start": 14,
+                                                "end": 19
+                                            }
+                                        },
+                                        "endToken": {
+                                            "type": "IDENTIFIER",
+                                            "lexeme": "String",
+                                            "location": {
+                                                "line": 66,
+                                                "start": 14,
+                                                "end": 19
+                                            }
+                                        }
+                                    }
+                                },
+                                "nullable": false,
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "String",
+                                        "location": {
+                                            "line": 66,
+                                            "start": 14,
+                                            "end": 19
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "BANG",
+                                        "lexeme": "!",
+                                        "location": {
+                                            "line": 66,
+                                            "start": 20,
+                                            "end": 20
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": true,
+                            "location": {
+                                "startToken": {
+                                    "type": "LEFT_BRACKET",
+                                    "lexeme": "[",
+                                    "location": {
+                                        "line": 66,
+                                        "start": 13,
+                                        "end": 13
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "RIGHT_BRACKET",
+                                    "lexeme": "]",
+                                    "location": {
+                                        "line": 66,
+                                        "start": 21,
+                                        "end": 21
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "RIGHT_BRACKET",
+                                "lexeme": "]",
+                                "location": {
+                                    "line": 65,
+                                    "start": 19,
+                                    "end": 19
+                                }
+                            },
+                            "endToken": {
+                                "type": "RIGHT_BRACKET",
+                                "lexeme": "]",
+                                "location": {
+                                    "line": 66,
+                                    "start": 21,
+                                    "end": 21
+                                }
+                            }
+                        }
+                    }
+                ],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "input",
+                        "location": { "line": 64, "start": 0, "end": 4 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 67, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "InputObjectDefinitionNode",
+                "name": {
+                    "name": "GeolocationIn",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "GeolocationIn",
+                            "location": { "line": 69, "start": 6, "end": 18 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "GeolocationIn",
+                            "location": { "line": 69, "start": 6, "end": 18 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "lat",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "lat",
+                                    "location": {
+                                        "line": 70,
+                                        "start": 4,
+                                        "end": 6
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "lat",
+                                    "location": {
+                                        "line": 70,
+                                        "start": 4,
+                                        "end": 6
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "Float",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Float",
+                                        "location": {
+                                            "line": 70,
+                                            "start": 9,
+                                            "end": 13
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Float",
+                                        "location": {
+                                            "line": 70,
+                                            "start": 9,
+                                            "end": 13
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "Float",
+                                    "location": {
+                                        "line": 70,
+                                        "start": 9,
+                                        "end": 13
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 70,
+                                        "start": 14,
+                                        "end": 14
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 69,
+                                    "start": 20,
+                                    "end": 20
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 70,
+                                    "start": 14,
+                                    "end": 14
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": {
+                            "name": "lng",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "lng",
+                                    "location": {
+                                        "line": 71,
+                                        "start": 4,
+                                        "end": 6
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "lng",
+                                    "location": {
+                                        "line": 71,
+                                        "start": 4,
+                                        "end": 6
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "Float",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Float",
+                                        "location": {
+                                            "line": 71,
+                                            "start": 9,
+                                            "end": 13
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Float",
+                                        "location": {
+                                            "line": 71,
+                                            "start": 9,
+                                            "end": 13
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "Float",
+                                    "location": {
+                                        "line": 71,
+                                        "start": 9,
+                                        "end": 13
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 71,
+                                        "start": 14,
+                                        "end": 14
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 70,
+                                    "start": 14,
+                                    "end": 14
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 71,
+                                    "start": 14,
+                                    "end": 14
+                                }
+                            }
+                        }
+                    }
+                ],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "input",
+                        "location": { "line": 69, "start": 0, "end": 4 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 72, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "ObjectDefinitionNode",
+                "name": {
+                    "name": "Geolocation",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "Geolocation",
+                            "location": { "line": 74, "start": 5, "end": 15 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "Geolocation",
+                            "location": { "line": 74, "start": 5, "end": 15 }
+                        }
+                    }
+                },
+                "fields": [
+                    {
+                        "name": {
+                            "name": "lat",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "lat",
+                                    "location": {
+                                        "line": 75,
+                                        "start": 4,
+                                        "end": 6
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "lat",
+                                    "location": {
+                                        "line": 75,
+                                        "start": 4,
+                                        "end": 6
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "Float",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Float",
+                                        "location": {
+                                            "line": 75,
+                                            "start": 9,
+                                            "end": 13
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Float",
+                                        "location": {
+                                            "line": 75,
+                                            "start": 9,
+                                            "end": 13
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "Float",
+                                    "location": {
+                                        "line": 75,
+                                        "start": 9,
+                                        "end": 13
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 75,
+                                        "start": 14,
+                                        "end": 14
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "LEFT_BRACE",
+                                "lexeme": "{",
+                                "location": {
+                                    "line": 74,
+                                    "start": 17,
+                                    "end": 17
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 75,
+                                    "start": 14,
+                                    "end": 14
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": {
+                            "name": "lng",
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "lng",
+                                    "location": {
+                                        "line": 76,
+                                        "start": 4,
+                                        "end": 6
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "lng",
+                                    "location": {
+                                        "line": 76,
+                                        "start": 4,
+                                        "end": 6
+                                    }
+                                }
+                            }
+                        },
+                        "type": {
+                            "_type": "NamedTypeNode",
+                            "name": {
+                                "name": "Float",
+                                "location": {
+                                    "startToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Float",
+                                        "location": {
+                                            "line": 76,
+                                            "start": 9,
+                                            "end": 13
+                                        }
+                                    },
+                                    "endToken": {
+                                        "type": "IDENTIFIER",
+                                        "lexeme": "Float",
+                                        "location": {
+                                            "line": 76,
+                                            "start": 9,
+                                            "end": 13
+                                        }
+                                    }
+                                }
+                            },
+                            "nullable": false,
+                            "location": {
+                                "startToken": {
+                                    "type": "IDENTIFIER",
+                                    "lexeme": "Float",
+                                    "location": {
+                                        "line": 76,
+                                        "start": 9,
+                                        "end": 13
+                                    }
+                                },
+                                "endToken": {
+                                    "type": "BANG",
+                                    "lexeme": "!",
+                                    "location": {
+                                        "line": 76,
+                                        "start": 14,
+                                        "end": 14
+                                    }
+                                }
+                            }
+                        },
+                        "arguments": [],
+                        "location": {
+                            "startToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 75,
+                                    "start": 14,
+                                    "end": 14
+                                }
+                            },
+                            "endToken": {
+                                "type": "BANG",
+                                "lexeme": "!",
+                                "location": {
+                                    "line": 76,
+                                    "start": 14,
+                                    "end": 14
+                                }
+                            }
+                        }
+                    }
+                ],
+                "interfaces": [],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "type",
+                        "location": { "line": 74, "start": 0, "end": 3 }
+                    },
+                    "endToken": {
+                        "type": "RIGHT_BRACE",
+                        "lexeme": "}",
+                        "location": { "line": 77, "start": 0, "end": 0 }
+                    }
+                }
+            },
+            {
+                "_type": "UnionDefinitionNode",
+                "name": {
+                    "name": "StringArrayOrBE",
+                    "location": {
+                        "startToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "StringArrayOrBE",
+                            "location": { "line": 79, "start": 6, "end": 20 }
+                        },
+                        "endToken": {
+                            "type": "IDENTIFIER",
+                            "lexeme": "StringArrayOrBE",
+                            "location": { "line": 79, "start": 6, "end": 20 }
+                        }
+                    }
+                },
+                "values": [
+                    {
+                        "name": "StringArray",
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "StringArray",
+                                "location": {
+                                    "line": 79,
+                                    "start": 24,
+                                    "end": 34
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "StringArray",
+                                "location": {
+                                    "line": 79,
+                                    "start": 24,
+                                    "end": 34
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "BaseError",
+                        "location": {
+                            "startToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "BaseError",
+                                "location": {
+                                    "line": 79,
+                                    "start": 38,
+                                    "end": 46
+                                }
+                            },
+                            "endToken": {
+                                "type": "IDENTIFIER",
+                                "lexeme": "BaseError",
+                                "location": {
+                                    "line": 79,
+                                    "start": 38,
+                                    "end": 46
+                                }
+                            }
+                        }
+                    }
+                ],
+                "location": {
+                    "startToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "union",
+                        "location": { "line": 79, "start": 0, "end": 4 }
+                    },
+                    "endToken": {
+                        "type": "IDENTIFIER",
+                        "lexeme": "BaseError",
+                        "location": { "line": 79, "start": 38, "end": 46 }
+                    }
+                }
+            }
+        ],
+        "extensions": []
+    }
+}

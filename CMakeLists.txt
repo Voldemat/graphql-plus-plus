@@ -31,6 +31,7 @@ file(GLOB_RECURSE GQL_CLI_SOURCES src/src/gql_cli/*.cpp src/src/gql_cli/*.c)
 file(GLOB_RECURSE GQL_TESTS_SOURCES src/src/__tests__/*.cc)
 file(GLOB_RECURSE GQL_TESTS_HEADERS src/src/__tests__/*.cc src/src/__tests__/*.hpp)
 file(GLOB_RECURSE LEXER_TESTS src/src/__tests__/lexer/cases/*.json)
+file(GLOB_RECURSE PARSER_TESTS src/src/__tests__/parser/cases/*.json)
 add_library(
     gql_lib
     ${GQL_LIB_HEADERS}
@@ -64,13 +65,22 @@ add_custom_command(
     COMMAND ls ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases/ > ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases-lock.ls
     DEPENDS ${LEXER_TESTS}
 )
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases-lock.ls
+    COMMAND ls ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases/ > ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases-lock.ls
+    DEPENDS ${PARSER_TESTS}
+)
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases-lock.ls PROPERTIES
+    GENERATED TRUE
+)
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases-lock.ls PROPERTIES
     GENERATED TRUE
 )
 add_executable(
     main_test
     ${GQL_TESTS_SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases-lock.ls
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases-lock.ls
 )
 #target_compile_options(main_test PRIVATE -Wall -fsanitize=address,undefined,leak)
 #target_link_options(main_test PRIVATE -fsanitize=address,undefined,leak)

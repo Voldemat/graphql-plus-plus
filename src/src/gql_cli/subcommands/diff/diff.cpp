@@ -21,9 +21,9 @@
 #include <vector>
 
 #include "HTTPRequest.hpp"
-#include "gql_cli/json/introspection/parser.hpp"
-#include "gql_cli/json/parser.hpp"
 #include "gql_cli/utils.hpp"
+#include "libgql/json/introspection/parser.hpp"
+#include "libgql/json/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "utils.hpp"
 
@@ -514,7 +514,7 @@ void createDifSubcommand(CLI::App *app) {
         ->required();
     diffParseCmd->callback([pathToSchema, urlToApi]() {
         const auto &schemaDocument = getDocumentFromSchemaJson(*pathToSchema);
-        const auto &schema = json::parser::parseSchema(schemaDocument);
+        const auto &schema = json::parsers::schema::parseSchema(schemaDocument);
         const auto &introspectionDocument = getIntrospectionDocument(*urlToApi);
         const auto &secondSchema =
             json::parser::introspection::parseIntrospectionSchema(

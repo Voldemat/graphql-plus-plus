@@ -1,4 +1,4 @@
-#include "./serializer.hpp"
+#include "./schema.hpp"
 
 #include <rapidjson/encodings.h>
 #include <rapidjson/prettywriter.h>
@@ -11,37 +11,11 @@
 #include <ranges>
 #include <variant>
 
-#include "libgql/lexer/token.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "utils.hpp"
 
 using namespace rapidjson;
 using namespace parsers;
-
-void json::serializer::writeTokenAsJSON(rapidjson::PrettyWriter<StringBuffer> &writer,
-                                        const GQLToken &token) {
-    writer.StartObject();
-    writer.String("type");
-    writer.String(gqlTokenTypeToString(token.type).c_str());
-    writer.String("lexeme");
-    writer.String(token.lexeme.c_str());
-    writer.String("location");
-    {
-        writer.StartObject();
-        writer.String("line");
-        writer.Uint(token.location.line);
-        writer.String("start");
-        writer.Uint(token.location.start);
-        writer.String("end");
-        writer.Uint(token.location.end);
-        writer.EndObject();
-    };
-    writer.EndObject();
-};
-
-json::serializer::ASTJSONWriter::ASTJSONWriter(
-    Writer<GenericStringBuffer<UTF8<>>> *writer)
-    : writer{ writer } {};
 
 void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                    const schema::ObjectTypeSpec &field) {
@@ -438,9 +412,9 @@ void writeServerSchema(
     writer.EndObject();
 };
 
-void json::serializer::writeSchemaNodes(
+void json::serializers::schema::writeSchemaNodes(
     rapidjson::Writer<rapidjson::StringBuffer> &writer,
-    const schema::Schema &schema) {
+    const parsers::schema::Schema &schema) {
     writer.StartObject();
     writer.String("server");
     writeServerSchema(writer, schema.server);

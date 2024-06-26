@@ -65,7 +65,7 @@
         "tokens": {
             "type": "array",
             "items": {
-                "$ref": "../../token.schema.json#/definitions/Token"
+                "$ref": "../token.schema.json#/definitions/Token"
             }
         }
     }

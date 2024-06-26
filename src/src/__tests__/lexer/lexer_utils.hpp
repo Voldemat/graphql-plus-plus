@@ -16,13 +16,13 @@
 #include "libgql/lexer/token.hpp"
 
 using namespace lexer;
-struct TestCase {
+struct LexerTestCase {
     std::string filename;
     std::string schema;
     std::vector<GQLToken> expectedTokens;
     std::optional<LexerError> error;
 };
-inline std::ostream &operator<<(std::ostream &os, const TestCase &self) {
+inline std::ostream &operator<<(std::ostream &os, const LexerTestCase &self) {
     os << "TestCase(filename: " << self.filename << ", schema: ";
     os << self.schema << ", tokens: " << self.expectedTokens.size();
     os << ")";
@@ -31,8 +31,8 @@ inline std::ostream &operator<<(std::ostream &os, const TestCase &self) {
 const std::filesystem::path casesPath
     = std::filesystem::path(__FILE__).parent_path().append("cases");
 const std::regex casesRegex = std::regex(".*\\.case\\.json");
-inline std::vector<TestCase> getCases() noexcept {
-    std::vector<TestCase> cases;
+inline std::vector<LexerTestCase> getLexerCases() noexcept {
+    std::vector<LexerTestCase> cases;
     for (const auto &filepath :
          std::filesystem::directory_iterator(casesPath)
              | std::ranges::views::transform(

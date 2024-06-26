@@ -21,9 +21,11 @@
 #include <string>
 #include <vector>
 
-#include "gql_cli/json/parser.hpp"
-#include "gql_cli/json/serializer.hpp"
 #include "gql_cli/utils.hpp"
+#include "libgql/json/parsers/lexer/lexer.hpp"
+#include "libgql/json/parsers/shared.hpp"
+#include "libgql/json/serializers/parser/parser.hpp"
+#include "libgql/json/serializers/schema/schema.hpp"
 #include "libgql/lexer/lexer.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/parsers/client/ast.hpp"
@@ -107,13 +109,13 @@ void createParserSubcommand(CLI::App *app) {
         };
         rapidjson::Document d;
         d.Parse(buffer.c_str());
-        auto result = json::parser::parseTokensArray(d);
-        if (!result.has_value()) {
-            std::string error = result.error();
-            std::cerr << error << std::endl;
+        std::vector<GQLToken> tokens;
+        try {
+            tokens = json::parsers::lexer::parseTokensArray(d.GetArray());
+        } catch (const json::parsers::shared::ParsingError& error) {
+            std::cerr << error.what() << std::endl;
             throw CLI::RuntimeError(1);
         };
-        auto tokens = result.value();
         if (tokens.size() == 0) {
             std::cerr << "No tokens was provided in array"
                       << std::endl;
@@ -131,7 +133,7 @@ void createParserSubcommand(CLI::App *app) {
         };
         rapidjson::StringBuffer sb;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-        json::serializer::ASTJSONWriter astWriter(&writer);
+        json::serializers::parser::writeFileNodes(writer, ast);
         std::cout << sb.GetString() << std::endl;
     });
 
@@ -249,7 +251,7 @@ void createParserSubcommand(CLI::App *app) {
                 parsers::schema::parseSchema(astList, operations);
             rapidjson::StringBuffer buffer;
             rapidjson::Writer writer(buffer);
-            json::serializer::writeSchemaNodes(writer, schema);
+            json::serializers::schema::writeSchemaNodes(writer, schema);
             std::cout << buffer.GetString() << std::endl;
         } catch (const shared::ParserError &error) {
             std::cerr << formatError(error) << std::endl;

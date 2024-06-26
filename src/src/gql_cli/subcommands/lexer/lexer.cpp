@@ -8,8 +8,8 @@
 #include <sstream>
 #include <utility>
 
-#include "gql_cli/json/serializer.hpp"
 #include "gql_cli/utils.hpp"
+#include "libgql/json/serializers/lexer/lexer.hpp"
 #include "libgql/lexer/lexer.hpp"
 
 void createLexerSubcommand(CLI::App *app) {
@@ -28,11 +28,7 @@ void createLexerSubcommand(CLI::App *app) {
         const auto tokens = accum.getTokens();
         rapidjson::StringBuffer sb;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-        writer.StartArray();
-        for (const auto &token : tokens) {
-            json::serializer::writeTokenAsJSON(writer, token);
-        };
-        writer.EndArray();
+        json::serializers::lexer::writeTokens(writer, tokens);
         std::cout << sb.GetString() << std::endl;
     });
 };

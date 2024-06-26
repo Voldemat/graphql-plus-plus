@@ -19,7 +19,7 @@
 #include <variant>
 #include <vector>
 
-#include "gql_cli/json/utils.hpp"
+#include "../utils.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "utils.hpp"
