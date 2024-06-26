@@ -115,7 +115,7 @@ ast::ObjectDefinitionNode Parser::parseObjectTypeDefinitionNode() {
     const GQLToken startToken = currentToken;
     const auto &nameNode = parseNameNode();
     std::vector<shared::ast::NameNode> interfaces;
-    if (lookahead().lexeme == "implements") {
+    if (lookahead()->lexeme == "implements") {
         consume(ComplexTokenType::IDENTIFIER);
         interfaces.push_back(parseNameNode());
         while (consumeIfIsAhead(SimpleTokenType::COMMA)) {
@@ -124,7 +124,7 @@ ast::ObjectDefinitionNode Parser::parseObjectTypeDefinitionNode() {
     };
     consume(SimpleTokenType::LEFT_BRACE);
     std::vector<ast::FieldDefinitionNode> fields;
-    while (lookahead().type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
+    while (lookahead()->type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
         fields.push_back(parseFieldDefinitionNode());
         consumeIfIsAhead(SimpleTokenType::COMMA);
     };
@@ -153,7 +153,7 @@ ast::EnumDefinitionNode Parser::parseEnumTypeDefinitionNode() {
     const auto &nameNode = parseNameNode();
     consume(SimpleTokenType::LEFT_BRACE);
     std::vector<ast::EnumValueDefinitionNode> values;
-    while (lookahead().type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
+    while (lookahead()->type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
         values.push_back(parseEnumValueDefinitionNode());
         consumeIfIsAhead(SimpleTokenType::COMMA);
     };
@@ -203,7 +203,7 @@ ast::InterfaceDefinitionNode Parser::parseInterfaceTypeDefinitionNode() {
     const auto &nameNode = parseNameNode();
     consume(SimpleTokenType::LEFT_BRACE);
     std::vector<ast::FieldDefinitionNode> fields;
-    while (lookahead().type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
+    while (lookahead()->type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
         fields.push_back(parseFieldDefinitionNode());
         consumeIfIsAhead(SimpleTokenType::COMMA);
     };
@@ -352,9 +352,9 @@ shared::ast::ListTypeNode Parser::parseListTypeNode() {
              .nullable = nullable };
 };
 
-const GQLToken Parser::lookahead() {
-    std::cout << "start lookahead: " << index << std::endl;
-    return tokens[index + 1];
+std::optional<GQLToken> Parser::lookahead() {
+    if (index + 1 >= tokens.size()) return std::nullopt;
+    return tokens.at(index + 1);
 };
 
 void Parser::consume(const GQLTokenType type) {
@@ -385,5 +385,7 @@ bool Parser::consumeIfIsAhead(GQLTokenType expectedType) {
 };
 
 bool Parser::isAhead(GQLTokenType expectedType) {
-    return lookahead().type == expectedType;
+    const auto& t = lookahead();
+    if (!t.has_value()) return false;
+    return t->type == expectedType;
 };

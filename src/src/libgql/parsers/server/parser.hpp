@@ -2,6 +2,7 @@
 #define GRAPHQL_SERVER_PARSER
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -18,7 +19,7 @@ class Parser {
     std::vector<GQLToken> tokens;
     std::shared_ptr<shared::ast::SourceFile> source;
     GQLToken currentToken;
-    const GQLToken lookahead();
+    std::optional<GQLToken> lookahead();
     void advance();
     void consume(const GQLTokenType expectedType);
     void consumeIdentifier();
