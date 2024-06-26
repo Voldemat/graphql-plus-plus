@@ -1,6 +1,7 @@
 #include "./parser.hpp"
 
 #include <format>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
@@ -26,11 +27,17 @@ ast::FileNodes Parser::parse() {
     std::vector<ast::ExtendTypeNode> extensions;
     while (currentToken != tokens.back()) {
         if (index != 0) consume(ComplexTokenType::IDENTIFIER);
+        std::cout << "before parseASTNode: " << currentToken << std::endl;
         const auto &[name, node] = parseASTNode();
+        std::cout << "after pastASTNode" << std::endl;
         if (std::holds_alternative<ast::TypeDefinitionNode>(node)) {
+            std::cout << "before type definition node" << std::endl;
             definitions.push_back(std::get<ast::TypeDefinitionNode>(node));
+            std::cout << "after type definition node" << std::endl;
         } else if (std::holds_alternative<ast::ExtendTypeNode>(node)) {
+            std::cout << "before extend type node" << std::endl;
             extensions.push_back(std::get<ast::ExtendTypeNode>(node));
+            std::cout << "after extend type node" << std::endl;
         } else {
             throw shared::ParserError(currentToken, "Unexpected node type",
                                       source);

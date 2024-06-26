@@ -12,8 +12,8 @@ jobs:
       with:
         packages: libc++-18-dev clang-18
     - name: Cache Build
-      id: cache-build
-      uses: actions/cache@v4
+      id: restore-cache-build
+      uses: actions/cache/restore@v4
       with:
         path: build
         key: ${{ runner.os }}-build
@@ -24,6 +24,11 @@ jobs:
         run-build: true
         c-compiler: clang-18
         cxx-compiler: clang++-18
+    - uses: actions/cache/save@v3
+      name: Save build cache
+      with:
+        path: build
+        key: ${{ runner.os }}-build
     - name: Run tests
       working-directory: ./build
       run: ctest --rerun-failed --output-on-failure .
