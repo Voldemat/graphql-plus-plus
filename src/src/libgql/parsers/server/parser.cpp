@@ -15,10 +15,10 @@
 using namespace parsers;
 using namespace parsers::server;
 
-Parser::Parser(std::vector<GQLToken> tokens,
-               std::shared_ptr<shared::ast::SourceFile> source) noexcept
+Parser::Parser(const std::vector<GQLToken> &tokens,
+               const std::shared_ptr<shared::ast::SourceFile> &source)
     : tokens{ tokens },
-      source{ std::move(source) },
+      source{ source },
       currentToken{ tokens[0] } {};
 
 ast::FileNodes Parser::parse() {

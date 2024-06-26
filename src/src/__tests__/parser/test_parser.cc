@@ -73,10 +73,11 @@ public:
 class ParserFixture : public testing::TestWithParam<ParserTestCase> {};
 TEST_P(ParserFixture, TestParser) {
     auto param = GetParam();
-    param.expectedNodes.source =
-        std::make_shared<shared::ast::SourceFile>(param.filepath, "");
+    std::cout << "before creating parser" << std::endl;
     Parser parser(param.tokens, param.expectedNodes.source);
+    std::cout << "before parse" << std::endl;
     const auto ast = parser.parse();
+    std::cout << "after parse" << std::endl;
     FileNodesComparator comparator;
     const auto &differences = comparator.compare(ast, param.expectedNodes);
     EXPECT_EQ(differences.size(), 0);

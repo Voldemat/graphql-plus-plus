@@ -41,8 +41,8 @@ class Parser {
     ast::ObjectDefinitionNode parseObjectTypeDefinitionNode();
 
 public:
-    Parser(std::vector<GQLToken> tokens,
-           std::shared_ptr<shared::ast::SourceFile> source) noexcept;
+    Parser(const std::vector<GQLToken>& tokens,
+           const std::shared_ptr<shared::ast::SourceFile>& source);
     ast::FileNodes parse();
 };
 };  // namespace server
