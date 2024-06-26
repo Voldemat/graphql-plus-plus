@@ -24,7 +24,6 @@
 #include "gql_cli/utils.hpp"
 #include "libgql/json/introspection/parser.hpp"
 #include "libgql/json/parsers/schema/schema.hpp"
-#include "libgql/json/utils.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "utils.hpp"
 
@@ -33,7 +32,7 @@ using namespace parsers::schema;
 const char *INTROSPECTION_QUERY =
 #include "./query.data"
 
-    JSONObject getIntrospectionDocument(const std::string &urlToApi) {
+    rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
     http::HeaderFields headers{ { "Accept", "application/json" },
                                 { "Content-Type", "application/json" } };
     http::Request request{ urlToApi };
@@ -45,10 +44,10 @@ const char *INTROSPECTION_QUERY =
         throw CLI::RuntimeError(1);
     };
     std::string buffer{ response.body.begin(), response.body.end() };
+    std::cout << buffer << std::endl;
     rapidjson::Document d;
     d.Parse(buffer.c_str());
-    if (!d.IsObject()) {};
-    return d.GetObject();
+    return d;
 };
 
 rapidjson::Document getDocumentFromSchemaJson(const std::string &pathToSchema) {

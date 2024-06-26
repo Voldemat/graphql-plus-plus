@@ -6,6 +6,7 @@
 #include <rapidjson/writer.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 #include <format>
 #include <map>
@@ -27,7 +28,6 @@ using namespace json::parser::introspection;
 using namespace parsers::schema;
 
 namespace json::parser::introspection {
-
 ServerSchemaNode parseNodeFirstPass(const JSONValue &value) {
     const std::string &kind = value["kind"].GetString();
     const std::string &name = value["name"].GetString();
@@ -315,8 +315,8 @@ ServerSchemaNode parseNodeSecondPass(const JSONValue &value,
         std::format("Unknown introspection type kind: {}", kind));
 };
 
-const ServerSchema parseIntrospectionSchema(
-    const JSONObject &document) {
+const ServerSchema json::parser::introspection::parseIntrospectionSchema(
+    const rapidjson::Document &document) {
     const auto &types = document["data"]["__schema"]["types"].GetArray();
     TypeRegistry registry;
     for (const auto &item :
@@ -336,4 +336,4 @@ const ServerSchema parseIntrospectionSchema(
         }) |
         std::ranges::to<std::vector>());
 };
-};  // namespace json::parser::introspection
+};
