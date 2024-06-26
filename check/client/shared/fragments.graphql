@@ -1,0 +1,4 @@
+fragment RecordType on RecordType {
+  key
+  value
+}

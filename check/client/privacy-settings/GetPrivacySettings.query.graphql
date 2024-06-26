@@ -1,0 +1,11 @@
+query GetPrivacySettings {
+    getPrivacySettings {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on PrivacySettings {
+            ...PrivacySettings
+        }
+    }
+}

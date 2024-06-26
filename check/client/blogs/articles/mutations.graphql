@@ -1,0 +1,31 @@
+mutation CreateArticle($article: ArticleIn!) {
+    createArticle(article: $article) {
+        __typename 
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on Article {
+            ...Article
+        }
+    }
+}
+
+mutation UpdateArticle($id: String! $article: ArticleInUpdate!) {
+    updateArticle(id: $id, article: $article) {
+        __typename 
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on Article {
+           ...Article
+        }
+    }
+}
+
+mutation DeleteArticle ($id: String!) {
+    deleteArticle(id: $id) {
+        status
+    }
+}

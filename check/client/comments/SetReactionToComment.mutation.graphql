@@ -1,0 +1,5 @@
+mutation SetReactionToComment ($id: String!,$reaction: CommentReactionType) {
+    setReactionToComment(id: $id, reaction: $reaction) {
+        status
+    }
+}

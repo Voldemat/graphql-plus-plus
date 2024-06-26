@@ -1,0 +1,17 @@
+query RetrieveFile($id: String!){
+    retrieveFile(id: $id) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on File {
+            ...Media
+            createdAt
+            updatedAt
+            name
+            type
+            checksum
+            size
+        }
+    }
+}

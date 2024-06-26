@@ -1,0 +1,11 @@
+query GetNotificationSettings {
+    getNotificationSettings {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on NotificationSettings {
+            ...NotificationSettings
+        }
+    }
+}

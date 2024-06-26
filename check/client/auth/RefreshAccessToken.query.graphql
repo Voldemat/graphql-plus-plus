@@ -1,0 +1,11 @@
+query RefreshAccessToken ($refreshToken:String!) {
+  refreshAccessToken(refreshToken:$refreshToken){
+       __typename
+        ... on BaseError {
+            status
+        }
+        ... on AccessToken {
+            accessToken
+        }
+  }
+  }

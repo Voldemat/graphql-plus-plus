@@ -1,0 +1,22 @@
+type File {
+    id: String!
+    createdAt: String!
+    updatedAt: String!
+    name: String
+    path: String!
+    type: String!
+    checksum: String
+    size: Int
+}
+
+union FileOrBE = File | BaseError
+
+extend type Query {
+    retrieveFile(id: String!): FileOrBE!
+}
+
+extend type Mutation {
+    uploadImage(file: Upload!): FileOrBE!
+    uploadVideo(file: Upload!): FileOrBE!
+    uploadFile(file: Upload!): FileOrBE!
+}

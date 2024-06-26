@@ -1,0 +1,11 @@
+query RetrieveProduct ($id: String!) {
+    retrieveProduct(id: $id) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on Product {
+            ...Product
+        }
+    }
+}

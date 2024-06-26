@@ -1,0 +1,24 @@
+fragment CartItemList on CartItemList {
+    total
+    items {
+        ...CartItem
+    }
+}
+
+fragment CartItem on CartItem {
+    id
+    selectedProperties {
+        key
+        value
+    }
+    product {
+        ...Product
+    }
+}
+
+fragment Cart on Cart { 
+    fullPrice
+    items {
+        ...CartItemList
+    }
+}

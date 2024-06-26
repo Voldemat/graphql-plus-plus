@@ -1,0 +1,5 @@
+mutation UnbanUser($id: String!) {
+  unbanUser(id: $id) {
+    status
+  }
+}

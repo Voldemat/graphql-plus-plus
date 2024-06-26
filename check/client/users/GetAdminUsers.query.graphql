@@ -1,0 +1,23 @@
+query GetAdminUsers (
+  $skip: Int! = 0,
+  $limit: Int! = 20,
+  $sortBy: EUsersSortBy! = BY_CREATED_AT,
+  $sortDirection: ESortingDirection! = DESC,
+  $query: String
+) {
+  getUsers(
+    skip: $skip,
+    limit: $limit,
+    sortBy: $sortBy,
+    sortDirection: $sortDirection,
+    query: $query
+  ) {
+    __typename
+    ... on BaseError {
+      status
+    }
+    ... on UserList {
+      ...AdminUserList
+    }
+  }
+}

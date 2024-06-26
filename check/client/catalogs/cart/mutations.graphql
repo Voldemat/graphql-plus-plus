@@ -1,0 +1,18 @@
+mutation CreateCartItem($item: CartItemIn!){
+    createCartItem(item: $item) {
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on CartItem {
+            ...CartItem
+        }
+    }
+}
+
+mutation DeleteCartItem ($productId: String!) {
+    deleteCartItem(productId: $productId) {
+        status
+    }
+}

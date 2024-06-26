@@ -1,0 +1,19 @@
+input PrivacySettingsIn {
+    hideSubscriptions: Boolean!
+    hideSubscribers: Boolean!
+}
+
+type PrivacySettings {
+    hideSubscriptions: Boolean!
+    hideSubscribers: Boolean!
+}
+
+union PrivacySettingsOrBE = PrivacySettings | BaseError
+
+extend type Query {
+    getPrivacySettings: PrivacySettingsOrBE!
+}
+
+extend type Mutation {
+    setPrivacySettings(settings: PrivacySettingsIn!): BaseError
+}

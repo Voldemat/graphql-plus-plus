@@ -1,0 +1,61 @@
+fragment Catalog on Catalog {
+    author {
+        ...ContentAuthor
+    }
+    createdAt
+    updatedAt
+    cover {
+        ...Media
+    }
+    categories {
+        ...Category
+    }
+    unviewedItemsCount
+}
+
+fragment CatalogList on CatalogList {
+    total
+    catalogs {
+        ...Catalog
+    }
+}
+
+fragment CatalogItemReviews on CatalogItemReviews {
+    enabled
+    total
+    averageRating
+}
+
+fragment CatalogItem on ICatalogItem {
+    id
+    author {
+        ...ContentAuthor
+    }
+    createdAt
+    updatedAt
+    isFavourite
+    attachments {
+        ...Media
+    }
+    category {
+        ...Category
+    }
+    name
+    price
+    oldPrice
+    is18Plus
+    reviews {
+        ...CatalogItemReviews
+    }
+}
+
+fragment CatalogItemList on CatalogItemList {
+    total
+    items {
+        ...CatalogItem
+    }
+}
+
+fragment OriginCountries on OriginCountries {
+    countries
+}

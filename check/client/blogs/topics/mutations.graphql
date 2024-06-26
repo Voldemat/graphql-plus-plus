@@ -1,0 +1,31 @@
+mutation CreateTopic($topic: TopicIn!) {
+    createTopic(topic: $topic) {
+        __typename 
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on Topic {
+            ...Topic
+        }
+    }
+}
+
+mutation UpdateTopic($id: String! $topic: TopicInUpdate!) {
+    updateTopic(id: $id, topic: $topic) {
+        __typename 
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on Topic {
+           ...Topic
+        }
+    }
+}
+
+mutation DeleteTopic ($id: String!) {
+    deleteTopic(id: $id) {
+        status
+    }
+}

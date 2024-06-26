@@ -1,0 +1,11 @@
+query RetrieveService ($id: String!) {
+    retrieveService(id: $id) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on Service {
+            ...Service
+        }
+    }
+}

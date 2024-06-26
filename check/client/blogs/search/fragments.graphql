@@ -1,0 +1,8 @@
+fragment BlogSearchResult on BlogSearchResult {
+    followed {
+        ...Blog
+    }
+    overall {
+        ...Blog
+    }
+}

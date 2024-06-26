@@ -1,0 +1,129 @@
+enum ForwardedContentType {
+  STORY
+  PRODUCT
+  SERVICE
+  PUBLICATION
+  ARTICLE
+}
+
+input ForwardedContentIn {
+  id: String!
+  type: ForwardedContentType!
+}
+
+input ForwardedContentMessageIn {
+  content: ForwardedContentIn!
+  text: String!
+}
+
+input RegularMessageIn {
+  text: String!
+  attachments: [Upload!]!
+  repliedMessageId: String
+}
+
+input AppointmentMessageIn {
+  serviceId: String!
+}
+
+input OrderMessageIn {
+  productId: String!
+  selectedProperties: [RecordTypeIn!]!
+}
+
+interface IMessage {
+  id: String!
+  chatId: String!
+  createdAt: String!
+  updatedAt: String!
+  isEdited: Boolean!
+  isIncoming: Boolean!
+  hasBeenRead: Boolean!
+}
+
+type RegularMessage implements IMessage {
+  id: String!
+  chatId: String!
+  createdAt: String!
+  updatedAt: String!
+  isEdited: Boolean!
+  isIncoming: Boolean!
+  hasBeenRead: Boolean!
+
+  text: String!
+  attachments: [File!]!
+  repliedMessageId: String
+}
+
+union ForwardedContent = Publication | Product | Service | Story | Article
+
+type ForwardedContentMessage implements IMessage {
+  id: String!
+  chatId: String!
+  createdAt: String!
+  updatedAt: String!
+  isEdited: Boolean!
+  isIncoming: Boolean!
+  hasBeenRead: Boolean!
+
+  text: String!
+  content: ForwardedContent
+}
+
+type AppointmentMessage implements IMessage {
+  id: String!
+  chatId: String!
+  createdAt: String!
+  updatedAt: String!
+  isEdited: Boolean!
+  isIncoming: Boolean!
+  hasBeenRead: Boolean!
+
+  service: Service
+}
+
+type OrderMessage implements IMessage {
+  id: String!
+  chatId: String!
+  createdAt: String!
+  updatedAt: String!
+  isEdited: Boolean!
+  isIncoming: Boolean!
+  hasBeenRead: Boolean!
+
+  product: Product
+  selectedProperties: [RecordType!]!
+}
+
+union Message = AppointmentMessage | OrderMessage | ForwardedContentMessage | RegularMessage
+
+type MessageList {
+  total: Int!
+  messages: [Message!]!
+}
+
+  union MessageOrBE =
+    AppointmentMessage
+  | OrderMessage
+  | ForwardedContentMessage
+  | RegularMessage
+  | BaseError
+
+union RegularMessageOrEWF = RegularMessage | ErrorWithFields
+union ForwardedContentMessageOrEWF = ForwardedContentMessage | ErrorWithFields
+union OrderMessageOrEWF = OrderMessage | ErrorWithFields
+union AppointmentMessageOrEWF = AppointmentMessage | ErrorWithFields
+union MessageListOrBE = MessageList | BaseError
+
+extend type Query {
+  getChatMessages(chatId: String!, skip: Int! = 0, limit: Int! = 20): MessageListOrBE!
+  retrieveMessage(id: String!): MessageOrBE!
+}
+
+extend type Mutation {
+  createRegularMessage(chatId: String!, message: RegularMessageIn!): RegularMessageOrEWF!
+  createForwardedContentMessage(chatId: String!, message: ForwardedContentMessageIn!): ForwardedContentMessageOrEWF!
+  createAppointmentMessage(chatId: String!, message: AppointmentMessageIn!): AppointmentMessageOrEWF!
+  createOrderMessage(chatId: String!, message: OrderMessageIn!): OrderMessageOrEWF!
+  deleteMessage(id: String!): BaseError
+}

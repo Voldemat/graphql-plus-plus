@@ -1,0 +1,72 @@
+type Service implements ICatalogItem {
+    id: String!
+    author: User!
+    createdAt: String!
+    updatedAt: String!
+    viewsCount: Int!
+    likesCount: Int!
+    reviews: CatalogItemReviews!
+    isFavourite: Boolean!
+    isLiked: Boolean!
+
+    attachments: [File!]!
+
+    category: Category!
+    name: String!
+    price: Int!
+    oldPrice: Int
+
+    tags: [String!]!
+    description: String
+    additionalInfo: String
+    link: String
+    is18Plus: Boolean!
+    relatedItems: [CatalogItem!]!
+}
+
+input ServiceIn {
+    attachments: [Upload!]!
+
+    categoryId: String!
+    name: String!
+    price: Int!
+    oldPrice: Int
+
+    tags: [String!]!
+    description: String
+    additionalInfo: String
+    link: String
+    is18Plus: Boolean! = false
+    reviewsEnabled: Boolean! = true
+    relatedItems: [String!]!
+}
+
+input ServiceInUpdate {
+    attachments: AttachmentsInUpdate!
+
+    categoryId: String
+    name: String
+    price: Int
+    oldPrice: Int
+
+    tags: [String!]
+    description: String
+    additionalInfo: String
+    link: String
+    is18Plus: Boolean
+    reviewsEnabled: Boolean
+    relatedItems: [String!]
+}
+
+union ServiceOrBE = Service | BaseError
+union ServiceOrEWF = Service | ErrorWithFields
+
+extend type Query {
+    retrieveService(id: String!): ServiceOrBE!
+}
+
+extend type Mutation {
+    createService(service: ServiceIn!): ServiceOrEWF!
+    updateService(id: String!, service: ServiceInUpdate!): ServiceOrEWF!
+    deleteService(id: String!): BaseError
+}

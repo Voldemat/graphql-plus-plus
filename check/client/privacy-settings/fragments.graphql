@@ -1,0 +1,4 @@
+fragment PrivacySettings on PrivacySettings {
+    hideSubscribers
+    hideSubscriptions
+}

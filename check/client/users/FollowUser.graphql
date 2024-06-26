@@ -1,0 +1,5 @@
+mutation FollowUser ($id: String!){
+    followUser(id: $id) {
+        status
+    }
+}

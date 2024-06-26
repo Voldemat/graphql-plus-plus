@@ -1,0 +1,38 @@
+enum Rating {
+    ONE
+    TWO
+    THREE
+    FOUR
+    FIVE
+}
+
+type Review {
+    id: String!
+    text: String!
+    rating: Rating!
+    author: User!
+    createdAt: String!
+    updatedAt: String!
+}
+
+type ReviewList {
+    total: Int!
+    reviews: [Review!]!
+}
+
+input ReviewIn {
+    id: String!
+    text: String!
+    rating: Rating!
+}
+
+union ReviewListOrBE = ReviewList | BaseError
+union ReviewOrEWF = Review | ErrorWithFields
+
+extend type Query {
+    getItemReviews(itemId: String!, limit: Int! = 20, skip: Int! = 0): ReviewListOrBE!
+}
+
+extend type Mutation {
+    createReview(review: ReviewIn!): ReviewOrEWF!
+}

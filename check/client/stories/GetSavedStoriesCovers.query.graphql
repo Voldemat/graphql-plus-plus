@@ -1,0 +1,16 @@
+query GetSavedStoriesCovers ($userId: String!, $skip: Int! = 0, $limit: Int! = 20){
+    getSavedStories (userId: $userId, skip: $skip, limit: $limit) { 
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on StoriesList {
+            total
+            stories {
+                file {
+                    ...Media
+                }
+            }
+        }
+    }
+}

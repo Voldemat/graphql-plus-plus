@@ -1,0 +1,14 @@
+mutation CreateStory($story: StoryIn!) {
+  createStory(story: $story) {
+    __typename
+    ... on ErrorWithFields {
+      status
+      fields
+    }
+
+    __typename
+    ... on Story {
+      ...Story
+    }
+  }
+}

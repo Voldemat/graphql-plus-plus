@@ -1,0 +1,5 @@
+mutation DeleteManyUsers ($ids: [String!]!) {
+    deleteManyUsers(ids: $ids) {
+        status
+    }
+}

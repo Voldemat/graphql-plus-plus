@@ -1,0 +1,11 @@
+query GetUnreadNotificationsCount {
+    getUnreadNotificationsCount {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on NumberObject {
+            number
+        }
+    }
+}

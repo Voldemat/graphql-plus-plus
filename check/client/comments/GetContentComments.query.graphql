@@ -1,0 +1,12 @@
+query GetContentComments($content: CommentContentIn!, $skip: Int, $limit: Int){
+    getContentComments(content: $content, skip: $skip, limit: $limit){
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ...on CommentList {
+            ...CommentList
+        }
+    }
+}

@@ -1,0 +1,24 @@
+query SearchBlogs($query: String!) {
+  searchBlogs(query: $query) {
+    __typename
+    ... on BaseError {
+      status
+    }
+    ... on BlogSearchResult {
+      ...BlogSearchResult
+    }
+  }
+}
+
+query GetRecentBlogs {
+  getRecentBlogs {
+    __typename
+    ... on BaseError {
+      status
+    }
+    ... on BlogList {
+      ...BlogList
+    }
+  }
+}
+

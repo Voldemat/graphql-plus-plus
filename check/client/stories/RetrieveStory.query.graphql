@@ -1,0 +1,13 @@
+query RetrieveStory($id: String!) {
+  retrieveStory(id: $id) {
+    __typename
+    ... on BaseError {
+      status
+    }
+
+    __typename
+    ... on Story {
+      ...Story
+    }
+  }
+}

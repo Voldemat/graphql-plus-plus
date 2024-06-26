@@ -1,0 +1,12 @@
+mutation CreateReview($review: ReviewIn!){
+    createReview(review: $review){
+        __typename
+        ... on ErrorWithFields{
+            status
+            fields
+        }
+        ... on Review{
+            ...Review
+        }
+    }
+}

@@ -1,0 +1,22 @@
+query GetReactionAuthors(
+    $commentId: String!,
+    $reactionType: CommentReactionType!,
+    $skip: Int,
+    $limit: Int
+    ){
+    getReactionAuthors(
+        commentId: $commentId,
+        reactionType: $reactionType,
+        skip: $skip,
+        limit: $limit
+    ){
+       __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on UserList {
+            ...UserList
+        }
+    }
+}

@@ -1,0 +1,14 @@
+mutation createUserFromSNS (
+    $user: SNSUserIn!
+) {
+    createUserFromSNS(user: $user) {
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on User {
+            id
+        }
+    } 
+}

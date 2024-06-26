@@ -1,0 +1,11 @@
+query RetrieveComplaint($id: String!) {
+    complaint: retrieveComplaint(id: $id) {
+    __typename
+    ... on BaseError {
+      status
+    }
+    ... on Complaint {
+      ...FullComplaint
+    }
+  }
+}

@@ -1,0 +1,77 @@
+input BlogIn {
+  name: String!
+  cover: Upload!
+  privacy: PrivacyType!
+}
+
+input BlogInUpdate {
+  name: String
+  cover: Upload
+  privacy: PrivacyType
+}
+
+type Blog {
+  author: User!
+  name: String!
+  cover: File!
+  topics(limit: Int! = 20): [Topic!]!
+  unreadArticlesCount: Int!
+  isHidden: Boolean
+  privacy: PrivacyType!
+}
+
+type BlogList {
+  total: Int!
+  blogs: [Blog!]!
+}
+
+type BlogFeedItem {
+  blog: Blog!
+  lastArticle: Article
+}
+
+type BlogFeed {
+  total: Int!
+  items: [BlogFeedItem!]!
+}
+
+union BlogOrBE = Blog | BaseError
+union BlogOrEWF = Blog | ErrorWithFields
+union ArticleOrEWF = Article | ErrorWithFields
+union ArticleOrBE = Article | BaseError
+union ArticleListOrBE = ArticleList | BaseError
+union TopicOrEWF = Topic | ErrorWithFields
+union TopicListOrBE = TopicList | BaseError
+union BlogFeedOrBE = BlogFeed | BaseError
+
+extend type Query {
+  getBlog(authorId: String!): BlogOrBE!
+  getBlogTopics(
+    authorId: String!,
+    skip: Int! = 0,
+    limit: Int! = 20): TopicListOrBE!
+  getBlogArticles(
+    authorId: String!,
+    topicIds: [String!],
+    skip: Int! = 20,
+    limit: Int! = 20
+  ): ArticleListOrBE!
+  getRecommendedArticles(
+    skip: Int! = 0,
+    limit: Int! = 20
+  ): ArticleListOrBE!
+  getFollowedBlogs(
+    skip: Int! = 0,
+    limit: Int! = 20
+  ): BlogFeedOrBE!
+}
+
+extend type Mutation {
+  createBlog(blog: BlogIn!): BlogOrEWF!
+  updateBlog(blog: BlogInUpdate!): BlogOrEWF!
+  deleteBlog: BaseError
+  hideBlog(authorId: String!): BaseError
+  showBlog(authorId: String!): BaseError
+  readManyBlogs(authorIds: [String!]!): BaseError
+  readAllBlogs: BaseError
+}

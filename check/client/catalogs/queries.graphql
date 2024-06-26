@@ -1,0 +1,84 @@
+query GetCatalog($authorId: String!) {
+    getCatalog(authorId: $authorId) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on Catalog {
+            ...Catalog
+        }
+    }
+}
+
+query GetCatalogCategories($authorId: String!, $skip: Int, $limit: Int) {
+    getCatalogCategories(authorId: $authorId, skip: $skip, limit: $limit) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on CategoryList {
+            ...CategoryList
+        }
+    }
+}
+
+query GetCatalogItems($authorId: String!, $skip: Int, $limit: Int, $categoryIds: [String!], $query: String) {
+    getCatalogItems(authorId: $authorId, skip: $skip, limit: $limit, categoryIds: $categoryIds, query: $query) {
+        __typename
+        ... on ErrorWithFields {
+            status
+             fields
+        }
+        ... on CatalogItemList {
+            ...CatalogItemList
+        }
+    }
+}
+
+query GetRecommendedCatalogItems($skip: Int, $limit: Int, $query: String, $filters: RecommendedCatalogItemsFilters!) {
+    getRecommendedCatalogItems(skip: $skip, limit: $limit, query: $query, filters: $filters) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on CatalogItemList {
+            ...CatalogItemList
+        }
+    }
+}
+
+query GetSubscribedCatalogItems($skip: Int, $limit: Int, $query: String) {
+    getSubscribedCatalogItems(skip: $skip, limit: $limit, query: $query) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on CatalogItemList {
+            ...CatalogItemList
+        }
+    }
+}
+
+query GetSubscribedCatalogs($skip: Int, $limit: Int, $query: String) {
+    getSubscribedCatalogs(skip: $skip, limit: $limit, query: $query) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on CatalogList {
+            ...CatalogList
+        }
+    }
+}
+
+query GetOriginCountries {
+    getOriginCountries {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on OriginCountries {
+            ...OriginCountries
+        }
+    }
+}

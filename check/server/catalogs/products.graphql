@@ -1,0 +1,92 @@
+type ProductProperty {
+  property: String!
+  values: [String!]!
+}
+
+input ProductPropertyIn {
+  property: String!
+  values: [String!]!
+}
+
+type Product implements ICatalogItem {
+    id: String!
+    author: User!
+    createdAt: String!
+    updatedAt: String!
+    viewsCount: Int!
+    likesCount: Int!
+    reviews: CatalogItemReviews!
+    isFavourite: Boolean!
+    isLiked: Boolean!
+    isInCart: Boolean!
+
+    attachments: [File!]!
+
+    category: Category!
+    name: String!
+    price: Int!
+    oldPrice: Int
+
+    tags: [String!]!
+    description: String
+    composition: String
+    properties: [ProductProperty!]!
+    originCountry: String
+    link: String
+    deliveryTerms: String
+    is18Plus: Boolean!
+    relatedItems: [CatalogItem!]!
+}
+
+input ProductIn {
+    attachments: [Upload!]!
+
+    categoryId: String!
+    name: String!
+    price: Int!
+    oldPrice: Int
+
+    tags: [String!]!
+    description: String
+    composition: String
+    properties: [ProductPropertyIn!]!
+    originCountry: String
+    link: String
+    deliveryTerms: String
+    is18Plus: Boolean! = false
+    reviewsEnabled: Boolean! = true
+    relatedItems: [String!]!
+}
+
+input ProductInUpdate {
+    attachments: AttachmentsInUpdate!
+    
+    categoryId: String
+    name: String
+    price: Int
+    oldPrice: Int
+
+    tags: [String!]
+    description: String
+    composition: String
+    properties: [ProductPropertyIn!]
+    originCountry: String
+    link: String
+    deliveryTerms: String
+    is18Plus: Boolean
+    reviewsEnabled: Boolean
+    relatedItems: [String!]
+}
+
+union ProductOrBE = Product | BaseError
+union ProductOrEWF = Product | ErrorWithFields
+
+extend type Query {
+    retrieveProduct(id: String!): ProductOrBE!
+}
+
+extend type Mutation {
+    createProduct(product: ProductIn!): ProductOrEWF!
+    updateProduct(id: String!, product: ProductInUpdate!): ProductOrEWF!
+    deleteProduct(id: String!): BaseError
+}

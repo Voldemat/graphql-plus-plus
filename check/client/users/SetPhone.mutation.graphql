@@ -1,0 +1,6 @@
+mutation SetPhone ($id: String!, $transport: CodeTransport!, $phone: String!) {
+    setPhone(id: $id, transport: $transport, phone: $phone) {
+        status
+        fields
+    }
+}

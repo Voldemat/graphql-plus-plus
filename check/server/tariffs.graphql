@@ -1,0 +1,42 @@
+input TariffIn {
+    mailingToAll: Boolean!
+    videoLengthS: Int!
+    productsCount: Int!
+    addressesCount: Int!
+    hashtagsCount: Int!
+    mailingRecipients: Int!
+}
+
+type Tariff {
+    id: String!
+    createdAt: String!
+    updatedAt: String!
+    mailingToAll: Boolean!
+    videoLengthS: Int!
+    productsCount: Int!
+    addressesCount: Int!
+    hashtagsCount: Int!
+    mailingRecipients: Int!
+    userId: String!
+    expiredAt: String!
+}
+
+type TagList {
+    total: Int!
+    tags: [String!]!
+}
+
+union TagListOrBE = TagList | BaseError
+union TariffOrBE = Tariff | BaseError
+union TariffOrEWF = Tariff | ErrorWithFields
+
+extend type Query {
+    getActiveTariff: TariffOrBE!
+    getTags: TagListOrBE!
+    getPopularTags(skip: Int! = 0, limit: Int! = 20): TagListOrBE!
+}
+
+extend type Mutation {
+    updateTariff(tariff: TariffIn!): TariffOrEWF!
+    setTags(tags: [String!]!): BaseError
+}

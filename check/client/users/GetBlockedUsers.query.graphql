@@ -1,0 +1,12 @@
+query GetBlockedUsers ($query: String, $skip: Int, $limit: Int) {
+    getBlockedUsers (query: $query, skip: $skip, limit: $limit) {
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on UserList {
+            ...UserList
+        }
+    }
+}

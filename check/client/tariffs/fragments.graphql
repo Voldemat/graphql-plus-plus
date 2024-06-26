@@ -1,0 +1,18 @@
+fragment TagList on TagList {
+    total
+    tags
+}
+
+fragment Tariff on Tariff {
+    id
+    createdAt
+    updatedAt
+    mailingToAll
+    videoLengthS
+    productsCount
+    addressesCount
+    hashtagsCount
+    mailingRecipients
+    userId
+    expiredAt
+}

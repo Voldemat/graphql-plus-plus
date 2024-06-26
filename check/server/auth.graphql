@@ -1,0 +1,40 @@
+enum CodeTransport {
+  PHONE
+  EMAIL
+}
+
+type TokenPair {
+  accessToken: String!
+  refreshToken: String!
+}
+
+type AccessToken {
+    accessToken: String!
+}
+
+type ExistingFields {
+    login: Boolean!
+    name: Boolean!
+    phone: Boolean!
+}
+
+union CreateTokensResponse = TokenPair | ErrorWithFields
+union RefreshAccessTokenResponse = AccessToken | BaseError
+union UserOrBE = User | BaseError
+union ExistingFieldsOrBE = ExistingFields | BaseError
+
+type Query {
+  createTokens(login:String!, password:String!, mustBeAdmin: Boolean! = false): CreateTokensResponse!
+  loginBySNS(accessToken: String!, SNSType: ESNSType!): CreateTokensResponse!
+  refreshAccessToken(refreshToken: String!): RefreshAccessTokenResponse!
+  deleteRefreshToken(refreshToken: String!): BaseError
+  getMe: UserOrBE!
+  getExistingSNSFields(accessToken: String!, SNSType: ESNSType!): ExistingFieldsOrBE!
+}
+
+type Mutation {
+  setAdminRole: BaseError
+  sendCode(target: String!, transport: CodeTransport!): ErrorWithFields
+  confirmCode(target: String!, transport: CodeTransport!, code: String!): ErrorWithFields
+  serverCleanup: BaseError
+}

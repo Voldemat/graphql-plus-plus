@@ -1,0 +1,12 @@
+mutation CreateComplaint($complaint: ComplaintIn!) {
+    complaint: createComplaint(complaint: $complaint) {
+    __typename
+    ... on ErrorWithFields {
+      fields
+      status
+    }
+    ... on Complaint {
+      ...SimpleComplaint
+    }
+  }
+}

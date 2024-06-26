@@ -1,0 +1,12 @@
+query HasNewStories($userId: String!) {
+  hasNewStories(userId: $userId) {
+    __typename
+    ... on BaseError {
+      status
+    }
+
+    ... on BooleanObject {
+      boolean
+    }
+  }
+}

@@ -1,0 +1,19 @@
+query getExistingSNSFields(
+    $accessToken: String!,
+    $SNSType: ESNSType!,
+) {
+    getExistingSNSFields(
+        accessToken: $accessToken,
+        SNSType: $SNSType
+    ) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on ExistingFields {
+            login
+            phone
+            name
+        }
+    }
+}

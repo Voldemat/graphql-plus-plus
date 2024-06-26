@@ -1,0 +1,10 @@
+input ContactsIn {
+  email: String!
+  name: String!
+  message: String!
+}
+
+extend type Mutation {
+  sendContactsToTechSupport(contacts: ContactsIn!): ErrorWithFields
+  sendContactsToPartnership(contacts: ContactsIn!): ErrorWithFields
+}

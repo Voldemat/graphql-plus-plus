@@ -1,0 +1,12 @@
+mutation UploadImage($file: Upload!){
+    uploadImage(file: $file) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on File {
+            ...Media
+            type
+        }
+    }
+}

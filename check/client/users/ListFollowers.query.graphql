@@ -1,0 +1,11 @@
+query ListFollowers ($id: String!, $q: String, $skip: Int, $limit: Int) {
+    listFollowers (id: $id, q: $q, skip: $skip, limit: $limit) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on UserList {
+            ...UserList
+        }
+    }
+}

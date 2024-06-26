@@ -1,0 +1,15 @@
+enum ViewsContentType {
+    ARTICLE
+    COMMENT
+    STORY
+    PRODUCT
+}
+
+input AddContentViewsIn {
+    ids: [String!]!
+    contentType: ViewsContentType!
+}
+
+extend type Mutation {
+    addContentViews(content: AddContentViewsIn!): ErrorWithFields
+}

@@ -1,0 +1,5 @@
+mutation SetIsLiked($isLiked: Boolean, $content: LikeContentIn!) {
+    setIsLiked(isLiked: $isLiked, content: $content) {
+        status
+    }
+}

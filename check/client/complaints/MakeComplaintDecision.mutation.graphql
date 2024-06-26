@@ -1,0 +1,6 @@
+mutation MakeComplaintDecision($decision: ComplaintDecisionIn!) {
+    error: makeComplaintDecision(decision: $decision) {
+        fields
+        status
+    }
+}

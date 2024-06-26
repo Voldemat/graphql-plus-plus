@@ -1,0 +1,17 @@
+fragment Review on Review {
+    id
+    text
+    rating
+    author {
+        ...ContentAuthor
+    }
+    createdAt
+    updatedAt
+}
+
+fragment ReviewList on ReviewList {
+    total
+    reviews {
+        ...Review
+    }
+}

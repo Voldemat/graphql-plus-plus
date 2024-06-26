@@ -1,0 +1,65 @@
+input ArticleIn {
+  topicId: String
+  title: String
+  text: String!
+  attachments: [Upload!]!
+  tags: [String!]!
+  is18Plus: Boolean! = false
+  commentsEnabled: Boolean! = true
+}
+
+input ArticleInUpdate {
+  title: String
+  text: String
+  attachments: AttachmentsInUpdate
+  topicId: String
+  tags: [String!]
+  is18Plus: Boolean
+  commentsEnabled: Boolean
+}
+
+type Article {
+    id: String!
+    createdAt: String!
+    updatedAt: String!
+    author: User!
+    blog: Blog!
+    topic: Topic
+    isLiked: Boolean!
+    isFavourite: Boolean!
+    likesCount: Int!
+    viewsCount: Int!
+    hasBeenRead: Boolean!
+    comments: ArticleComments!
+
+    title: String
+    text: String!
+    attachments: [File!]!
+    tags: [String!]!
+    is18Plus: Boolean!
+}
+
+type ArticleComments {
+    total: Int!
+    enabled: Boolean!
+    unreadCount: Int!
+}
+
+type ArticleList {
+  total: Int!
+  articles: [Article!]!
+}
+
+union ArticleOrEWF = Article | ErrorWithFields
+union ArticleOrBE = Article | BaseError
+union ArticleListOrBE = ArticleList | BaseError
+
+extend type Query {
+  retrieveArticle(id: String!): ArticleOrBE!
+}
+
+extend type Mutation {
+  createArticle(article: ArticleIn!): ArticleOrEWF!
+  updateArticle(id: String!, article: ArticleInUpdate!): ArticleOrEWF!
+  deleteArticle(id: String!): BaseError
+}

@@ -1,0 +1,209 @@
+enum ESNSType {
+    VK
+    YANDEX
+}
+
+enum EUsersSortBy {
+  BY_NAME
+  BY_EMAIL
+  BY_LOGIN
+  BY_PHONE
+  BY_CREATED_AT
+  BY_UPDATED_AT
+}
+
+input AdditionalInfoIn {
+  hasDelivery: Boolean! = false
+  advantage: String
+}
+
+input WorkingHoursIn {
+  opensAt: String!
+  closesAt: String!
+}
+
+input DayWorkingHoursIn {
+  status: WorkingDayStatus!
+  hours: WorkingHoursIn
+}
+
+input WeekWorkingHoursIn {
+  monday: DayWorkingHoursIn!
+  tuesday: DayWorkingHoursIn!
+  wednesday: DayWorkingHoursIn!
+  thursday: DayWorkingHoursIn!
+  friday: DayWorkingHoursIn!
+  saturday: DayWorkingHoursIn!
+  sunday: DayWorkingHoursIn!
+}
+
+input AddressIn {
+  city: String!
+  coordinates: [GeolocationIn!]!
+}
+
+type AddressOut {
+  city: String!
+  coordinates: [Geolocation!]!
+}
+
+enum WorkingDayStatus {
+  WORKING
+  DAY_OFF
+}
+
+type WorkingHours {
+  opensAt: String!
+  closesAt: String!
+}
+
+type DayWorkingHours {
+  status: WorkingDayStatus!
+  hours: WorkingHours
+}
+
+type WeekWorkingHours {
+  monday: DayWorkingHours!
+  tuesday: DayWorkingHours!
+  wednesday: DayWorkingHours!
+  thursday: DayWorkingHours!
+  friday: DayWorkingHours!
+  saturday: DayWorkingHours!
+  sunday: DayWorkingHours!
+}
+
+type AdditionalInfo {
+  hasDelivery: Boolean!
+  advantage: String
+}
+
+input UserIn {
+  login: String!
+  password: String!
+  phone: String!
+  address: AddressIn!
+  email: String
+  name: String!
+  dateOfBirth: String!
+  sex: UserSex!
+  shortDescription: String
+}
+
+type User {
+  id: String!
+  createdAt: String!
+  updatedAt: String!
+  login: String!
+  avatar: File
+  website: String
+  name: String!
+  sex: UserSex
+  dateOfBirth: String
+  email: String
+  phone: String!
+  phoneInProfile: String
+  description: String
+  address: AddressOut
+  workingHours: WeekWorkingHours
+  additionalInfo: AdditionalInfo
+  shortDescription: String
+  viewsCount: Int!
+  likesCount: Int!
+  subscriptionsCount: Int!
+  followersCount: Int!
+  savedStoriesCover: File
+  isFollowing: Boolean!
+  isFriend: Boolean!
+  isBlocked: Boolean!
+  isLiked: Boolean!
+  showWorkingHours: Boolean!
+}
+
+input UserInUpdate {
+    website: String
+    sex: UserSex
+    dateOfBirth: String
+    name: String
+    description: String
+    additionalInfo: AdditionalInfoIn
+    workingHours: WeekWorkingHoursIn
+    isPaided: Boolean
+    isBlocked: Boolean
+    address: AddressIn
+    avatarId: String
+    shortDescription: String
+    login: String
+    password: String
+    phoneInProfile: String
+    savedStoriesCover: Upload
+    showWorkingHours: Boolean
+}
+
+input PasswordInUpdate {
+  newPassword: String!
+  oldPassword: String!
+}
+
+enum UserSex {
+  MALE
+  FEMALE
+}
+
+type UserList {
+  total: Int!,
+  users: [User!]!
+}
+
+input SNSUserIn {
+    login: String
+    name: String
+    phone: String
+    accessToken: String!
+    SNSType: ESNSType!
+}
+
+union UserListOrBE = UserList | BaseError
+union UserListOrEWF = UserList | ErrorWithFields
+union UserOrEWF = User | ErrorWithFields
+union BooleanObjectOrBE = BooleanObject | BaseError
+union UserOrBE = User | BaseError
+
+extend type Query {
+  getBlockedUsers(query: String, skip: Int! = 0, limit: Int! = 20): UserListOrEWF!
+  getUsers(
+    skip: Int! = 0,
+    limit: Int! = 20,
+    sortBy: EUsersSortBy! = BY_CREATED_AT,
+    sortDirection: ESortingDirection! = DESC,
+    query: String,
+  ): UserListOrBE!
+  listSubscriptions(id: String!, q: String, skip: Int! = 0, limit: Int! = 20): UserListOrBE!
+  listFollowers(id: String!, q: String, skip: Int! = 0, limit: Int! = 20): UserListOrBE!
+  getFriends(q: String, skip: Int! = 0, limit: Int! = 20): UserListOrBE!
+  retrieveUser(id: String!): UserOrBE!
+  isPhoneExist(phone: String!): BooleanObjectOrBE!
+  isEmailExist(email: String!): BooleanObjectOrBE!
+  isLoginExist(login: String!): BooleanObjectOrBE!
+}
+
+extend type Mutation {
+  deleteManyUsers(ids: [String!]!): BaseError
+  blockUser(id: String!): BaseError
+  unblockUser(id: String!): BaseError
+  deleteUser(id: String!): BaseError
+  updateUser(id: String!, user: UserInUpdate!): ErrorWithFields
+  setPhone(id: String!, transport: CodeTransport!, phone: String!): ErrorWithFields
+  setEmail(id: String!, transport: CodeTransport!, email: String!): ErrorWithFields
+  updatePassword(id: String!, password: PasswordInUpdate!): ErrorWithFields
+  followUser(id: String!): BaseError
+  unfollowUser(id: String!): BaseError
+  unfollowManyUsers(ids: [String!]!): BaseError
+  setFriend(id: String!): BaseError
+  deleteFriend(id: String!): BaseError
+  resetPassword(target: String!, newPassword: String!, transport: CodeTransport!): ErrorWithFields
+  createUser(user: UserIn!): UserOrEWF!
+  banUser(id: String!): BaseError
+  unbanUser(id: String!): BaseError
+  createUserFromSNS(user: SNSUserIn!): UserOrEWF!
+  unfriendManyUsers(ids: [String!]!): BaseError
+}

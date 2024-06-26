@@ -1,0 +1,41 @@
+fragment Publication on Publication {
+    id
+    createdAt
+    updatedAt
+    author {
+        ...ContentAuthor
+    }
+    references {
+        ...RecordType
+    }
+    likesCount
+    viewsCount
+    comments {
+        ...PublicationsComments
+    }
+    isBlocked
+    isLiked
+    isFavourite
+
+    title
+    description
+    tags
+    attachments {
+        ...Media
+    }
+    is18Plus
+    showInFeed
+}
+
+fragment PublicationsComments on PublicationsComments {
+    total
+    enabled
+    unreadCount
+}
+
+fragment PublicationList on PublicationList {
+    total
+    publications {
+        ...Publication
+    }
+}

@@ -1,0 +1,25 @@
+fragment Album on Album {
+    id
+    author {
+        ...ContentAuthor
+    }
+    privacy
+    createdAt
+    name
+    cover {
+        ...Media
+    }
+    internalCover {
+        ...Media
+    }
+    description
+    type
+    unviewedContentCount
+}
+
+fragment AlbumList on AlbumList {
+    total
+    albums {
+        ...Album
+    }
+}

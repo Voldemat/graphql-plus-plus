@@ -1,0 +1,6 @@
+mutation SendContactsToTechSupport($contacts: ContactsIn!) {
+    sendContactsToTechSupport(contacts: $contacts) {
+        status
+        fields
+    }
+}

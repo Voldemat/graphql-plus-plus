@@ -1,0 +1,55 @@
+fragment NotificationAuthor on User {
+    id
+    name
+    login
+    avatar {
+        ...Media
+    }
+}
+
+fragment ContentNotification on ContentNotification {
+    id
+    type
+    text
+    author {
+        ...NotificationAuthor
+    }
+    cover {
+        ...Media
+    }
+    targetId
+    targetType
+    createdAt
+}
+
+
+fragment TechSupNotification on TechSupNotification {
+    id
+    type
+    text
+    createdAt
+}
+
+fragment Notification on Notification{
+    __typename
+    ... on ContentNotification {
+        ...ContentNotification
+    }
+    ... on TechSupNotification {
+        ...TechSupNotification
+    }
+}
+
+fragment NotificationSettings on NotificationSettings {
+    pushNotificationsEnabled
+    emailNotificationsEnabled
+    platformNewsEnabled
+}
+
+fragment UserNotificationSettings on UserNotificationSettings {
+    publications
+    albums
+    blog
+    catalog
+    stories
+}

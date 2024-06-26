@@ -1,0 +1,13 @@
+fragment Category on Category {
+    id
+    name
+    createdAt
+    updatedAt
+}
+
+fragment CategoryList on CategoryList {
+    total
+    categories {
+        ...Category
+    }
+}

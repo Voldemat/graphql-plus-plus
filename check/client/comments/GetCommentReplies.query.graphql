@@ -1,0 +1,20 @@
+query GetCommentReplies(
+    $id: String!,
+    $skip: Int,
+    $limit: Int
+    ){
+    getCommentReplies(
+        id: $id,
+        skip: $skip,
+        limit: $limit
+    ){
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on CommentList {
+            ...CommentList
+        }
+    }
+}

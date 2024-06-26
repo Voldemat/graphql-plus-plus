@@ -1,0 +1,5 @@
+mutation UnsaveStory($id: String!) {
+  unsaveStory(id: $id) {
+      status
+  }
+}

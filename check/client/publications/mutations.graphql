@@ -1,0 +1,31 @@
+mutation CreatePublication ($publication: PublicationIn!) {
+    createPublication(publication: $publication) {
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on Publication {
+            ...Publication
+        }
+    }
+}
+
+mutation DeletePublication ($id: String!) {
+    deletePublication(id: $id) {
+        status
+    }
+}
+
+mutation UpdatePublication ($id: String!, $publication: PublicationInUpdate!) {
+    updatePublication(id: $id, publication: $publication) {
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on Publication {
+            ...Publication
+        }
+    }
+}

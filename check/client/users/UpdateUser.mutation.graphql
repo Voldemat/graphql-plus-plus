@@ -1,0 +1,6 @@
+mutation UpdateUser ($id: String!, $user: UserInUpdate!) {
+    updateUser(id: $id, user: $user){
+        status
+        fields
+    }
+}

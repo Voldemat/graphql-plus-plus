@@ -1,0 +1,14 @@
+query GetNotifications($filterBy: ENotificationFilterType, $skip: Int, $limit: Int) {
+    getNotifications(filterBy: $filterBy, skip: $skip, limit: $limit) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on NotificationList {
+            total
+            notifications {
+                ...Notification
+            }
+        }
+    }
+}

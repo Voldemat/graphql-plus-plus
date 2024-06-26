@@ -1,0 +1,5 @@
+mutation SetNotificationSettings($settings: NotificationSettingsIn!) {
+    setNotificationSettings(settings: $settings) {
+        status
+    }
+}

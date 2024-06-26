@@ -1,0 +1,21 @@
+query GetRecentStories {
+  getRecentStories {
+    __typename
+    ... on BaseError {
+      status
+    }
+
+    __typename
+    ... on StoryFeedList {
+      total
+      items {
+        author {
+          ...ContentAuthor
+        }
+        stories {
+          ...Story
+        }
+      }
+    }
+  }
+}

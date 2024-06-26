@@ -1,0 +1,11 @@
+query GetUsers ($skip: Int!, $limit: Int!) {
+    getUsers (skip: $skip, limit: $limit) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on UserList {
+            ...UserList
+        }
+    }
+}

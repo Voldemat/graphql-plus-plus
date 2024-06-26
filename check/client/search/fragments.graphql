@@ -1,0 +1,15 @@
+fragment UserWithPublicationsList on UserWithPublicationsList {
+    total
+    users {
+        ...UserWithPublications
+    }
+}
+
+fragment UserWithPublications on UserWithPublications {
+    user {
+        ...ContentAuthor
+    }
+    publications(limit: $publicationsLimit) {
+        ...Publication
+    }
+}

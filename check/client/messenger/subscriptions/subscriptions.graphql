@@ -1,0 +1,17 @@
+subscription OnChatRead {
+    chatRead {
+        ...SubscriptionReadChat
+    }
+}
+
+subscription OnNewMessageReceived {
+    newMessageReceived {
+        ...SubscriptionNewMessage
+    }
+}
+
+subscription OnOnlineStatusChanged {
+    onlineStatusChanged {
+        ...SubscriptionOnlineStatus
+    }
+}

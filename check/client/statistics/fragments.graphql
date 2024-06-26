@@ -1,0 +1,20 @@
+fragment FullStatistics on Statistics {
+  views
+  shared
+  totalSubscribed
+  ageDistribution {
+    key
+    value
+  }
+  menPercentInGenderDistribution
+  geographyDistribution {
+    key
+    value
+  }
+  lineChartDistribution {
+    key
+    value
+  }
+  addedToFavourites
+  uniqueChats
+}

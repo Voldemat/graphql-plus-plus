@@ -1,0 +1,5 @@
+mutation UnfriendManyUsers ($ids: [String!]!){
+    unfriendManyUsers(ids: $ids) {
+        status
+    }
+}

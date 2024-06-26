@@ -1,0 +1,19 @@
+query loginBySNS(  
+    $accessToken: String!,
+    $SNSType: ESNSType!,
+) {
+    loginBySNS(
+        accessToken: $accessToken,
+        SNSType: $SNSType
+    ) {
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on TokenPair {
+            accessToken
+            refreshToken
+        }
+    }
+}

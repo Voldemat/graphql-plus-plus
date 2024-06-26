@@ -1,0 +1,11 @@
+query GetItemReviews($itemId: String!, $limit: Int, $skip: Int){
+    getItemReviews(itemId: $itemId, limit: $limit, skip: $skip){
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on ReviewList {
+            ...ReviewList
+        }
+    }
+}

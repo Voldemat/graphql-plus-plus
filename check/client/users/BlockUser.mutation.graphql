@@ -1,0 +1,5 @@
+mutation BlockUser ($id: String!) {
+    blockUser(id: $id) {
+        status
+    }
+}

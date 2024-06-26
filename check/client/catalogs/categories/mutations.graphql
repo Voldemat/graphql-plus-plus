@@ -1,0 +1,31 @@
+mutation CreateCategory($category: CategoryIn!){
+    createCategory(category: $category){
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on Category {
+            ...Category
+        }
+    }
+}
+
+mutation DeleteCategory($id: String!) {
+    deleteCategory(id: $id) {
+        status
+    }
+}
+
+mutation UpdateCategory($id: String!, $category: CategoryInUpdate!){
+    updateCategory(id: $id, category: $category) {
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on Category {
+            ...Category
+        }
+    }
+}

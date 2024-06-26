@@ -1,0 +1,38 @@
+fragment Blog on Blog {
+  author {
+    ...ContentAuthor
+  }
+  name
+  cover {
+    ...Media
+  }
+  topics {
+    ...Topic
+  }
+  unreadArticlesCount
+  isHidden
+  privacy
+}
+
+fragment BlogList on BlogList {
+  total
+  blogs {
+    ...Blog
+  }
+}
+
+fragment BlogFeedItem on BlogFeedItem {
+  blog {
+    ...Blog
+  }
+  lastArticle {
+    ...Article
+  }
+}
+
+fragment BlogFeed on BlogFeed {
+  total
+  items {
+    ...BlogFeedItem
+  }
+}

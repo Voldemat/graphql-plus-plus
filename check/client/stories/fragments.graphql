@@ -1,0 +1,113 @@
+fragment StoryObjectPosition on StoryObjectPosition {
+  x
+  y
+  angle
+  scale
+}
+
+fragment StoryProductLink on StoryProductLink {
+    position {
+        ...StoryObjectPosition
+      }
+      product {
+        ...CatalogItem
+      }
+}
+
+fragment StoryText on StoryText {
+    position {
+      ...StoryObjectPosition
+    }
+    backgroundColor
+    textColor
+    fontSize
+    font
+    value
+}
+
+fragment StoryUserReference on StoryUserReference {
+    position {
+        ...StoryObjectPosition
+    }
+    name
+    login
+    textColor
+    userId
+}
+
+
+fragment StoryGeolocation on StoryGeolocation {
+      position {
+        ...StoryObjectPosition
+      }
+      coordinate {
+        address
+        lat
+        lng
+      }
+}
+
+fragment StoryLink on StoryLink {
+      position {
+        ...StoryObjectPosition
+      }
+      linkName
+      link
+      textColor
+      isAccountLinkMatched
+      backgroundColor
+}
+
+fragment StoryObject on StoryObject {
+  ... on StoryText {
+    ...StoryText
+  }
+
+  ... on StoryProductLink {
+    ...StoryProductLink
+  }
+
+  ... on StoryUserReference {
+    ...StoryUserReference
+  }
+
+  ... on StoryGeolocation {
+    ...StoryGeolocation
+  }
+
+  ... on StoryLink {
+    ...StoryLink
+  }
+}
+
+fragment Story on Story {
+  id
+  isWatched
+  attachmentPosition {
+    ...StoryObjectPosition
+  }
+  privacy
+  file {
+    ...Media
+  }
+  isLiked
+  createdAt
+  updatedAt
+  user {
+    ...ContentAuthor
+  }
+  objects {
+    ...StoryObject
+  }
+  isSaved
+}
+
+fragment StoryFeed on StoryFeed {
+  author {
+    ...ContentAuthor
+  }
+  stories {
+    ...Story
+  }
+}
+

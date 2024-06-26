@@ -1,0 +1,59 @@
+query GetAlbumContent ($id: String! $skip: Int, $limit: Int){
+    getAlbumContent(id: $id, skip: $skip, limit: $limit) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on PublicationList {
+            ...PublicationList
+        }
+    }
+}
+
+query GetAlbumsByUserId ($id: String!, $skip: Int, $limit: Int){
+    getAlbumsByUserId (id: $id, skip: $skip, limit: $limit){ 
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on AlbumList {
+            ...AlbumList
+        }
+    }
+}
+
+query GetAlbumsCoverByUserId ($id: String!){
+    getAlbumsCoverByUserId (id: $id) { 
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on File {
+            ...Media
+        }
+    }
+}
+
+query GetSubscribedAlbums ($skip: Int, $limit: Int){
+    getSubscribedAlbums (skip: $skip, limit: $limit) { 
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on AlbumList {
+            ...AlbumList
+        }
+    }
+}
+
+query RetrieveAlbum ($id: String!){
+    retrieveAlbum (id: $id) { 
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on Album {
+            ...Album
+        }
+    }
+}

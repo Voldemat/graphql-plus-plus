@@ -1,0 +1,5 @@
+mutation SetUserNotificationSettings($id: String!, $settings: UserNotificationSettingsIn!) {
+    setUserNotificationSettings(id: $id, settings: $settings) {
+        status
+    }
+}

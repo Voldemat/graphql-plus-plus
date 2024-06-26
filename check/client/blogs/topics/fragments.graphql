@@ -1,0 +1,11 @@
+fragment Topic on Topic {
+    id
+    name
+}
+
+fragment TopicList on TopicList {
+  total
+  topics {
+    ...Topic
+  }
+}

@@ -1,0 +1,35 @@
+query GetActiveTariff {
+    getActiveTariff {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on Tariff {
+            ...Tariff
+        }
+    }
+}
+
+query GetTags {
+    getTags {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on TagList {
+            ...TagList
+        }
+    }
+}
+
+query GetPopularTags ($skip: Int, $limit: Int) {
+    getPopularTags (skip: $skip, limit: $limit) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on TagList {
+            ...TagList
+        }
+    }
+}

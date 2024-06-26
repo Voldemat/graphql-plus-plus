@@ -1,0 +1,6 @@
+mutation SendContactsToPartnership($contacts: ContactsIn!) {
+    sendContactsToPartnership(contacts: $contacts) {
+        status
+        fields
+    }
+}

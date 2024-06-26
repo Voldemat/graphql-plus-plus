@@ -1,0 +1,84 @@
+enum EComplaintContentType {
+  PRODUCT
+  SERVICE
+  PUBLICATION
+  STORY
+  ARTICLE
+}
+
+enum EComplaintDecision {
+  ACCEPTED
+  REJECTED
+}
+
+enum EComplaintType {
+   NOT_SET_AS_18_PLUS
+   PORNOGRAPHY
+   SPAM
+   MISINFORMATION
+   ILLEGAL_GOODS
+   VIOLENCE
+   VIOLATION_OF_INTELLECTUAL_RIGHTS
+   FRAUD
+   APPEALS_TO_VIOLENCE
+}
+
+union ComplaintContent = Article | Product | Service | Publication | Story
+
+type Complaint {
+    id: String!
+    createdAt: String!
+    updatedAt: String!
+    comment: String
+    decision: EComplaintDecision
+    author: User!
+    content: ComplaintContent
+    complaintType: EComplaintType!
+    complaintFinalType: EComplaintType
+    decisionMadeAt: String
+}
+
+type ComplaintsList {
+    complaints: [Complaint!]!
+    total: Int!
+    totalUnsolved: Int!
+}
+
+type ComplaintTypeWrapper {
+    type: EComplaintType!
+}
+
+input ComplaintIn {
+    comment: String
+    complaintType: EComplaintType!
+    contentId: String!
+    contentType: EComplaintContentType!
+}
+
+input ComplaintContentIn {
+    contentId: String!
+    contentType: EComplaintContentType!
+}
+
+input ComplaintDecisionIn {
+  complaintId: String!
+  decision: EComplaintDecision!
+  complaintFinalType: EComplaintType!
+}
+
+union ComplaintOrBE = Complaint | BaseError
+union ComplaintsListOrBE = ComplaintsList | BaseError
+union ComplaintTypeWrapperOrEWF = ComplaintTypeWrapper | ErrorWithFields
+union ComplaintOrEWF = Complaint | ErrorWithFields
+
+extend type Query {
+  retrieveComplaint(id: String!): ComplaintOrBE!
+  getComplaints(skip: Int! = 0, limit: Int! = 20): ComplaintsListOrBE!
+  getComplaintFinalTypeByContent(content: ComplaintContentIn!): ComplaintTypeWrapperOrEWF!
+}
+
+extend type Mutation {
+  createComplaint(complaint: ComplaintIn!): ComplaintOrEWF!
+  makeComplaintDecision(decision: ComplaintDecisionIn!): ErrorWithFields
+  deleteComplaint(id: String!): BaseError
+}

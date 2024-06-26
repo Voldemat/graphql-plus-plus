@@ -1,0 +1,23 @@
+query GetChatMessages($chatId: String!, $skip: Int, $limit: Int) {
+  getChatMessages(chatId: $chatId, skip: $skip, limit: $limit) {
+    __typename
+    ... on BaseError {
+      status
+    }
+    ... on MessageList {
+      ...MessageList
+    }
+  }
+}
+
+query RetrieveMessage ($id: String!) {
+    retrieveMessage(id: $id) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on Message {
+            ...Message
+        }
+    }
+}

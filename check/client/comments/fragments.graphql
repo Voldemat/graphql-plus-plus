@@ -1,0 +1,56 @@
+fragment Target on CommentTarget {
+    __typename
+    ... on Article {
+        id
+    }
+    ...on Comment{
+        id
+    }
+    ... on Publication {
+        id
+    }
+}
+
+fragment Reaction on Reaction {
+    type
+    count
+}
+
+fragment CommentReactions on CommentReactions {
+    myReaction
+    reactions {
+        ...Reaction
+    }
+}
+
+fragment Comment on Comment {
+    __typename
+    id
+    target {
+        ...Target
+    }
+    author {
+        ...ContentAuthor
+    }
+    createdAt
+    updatedAt
+    hasBeenRead
+    references {
+        key
+        value
+    }
+    isLiked
+    text
+    likesCount
+    reactions {
+        ...CommentReactions
+    }
+    repliesCount
+}
+
+fragment CommentList on CommentList {
+    total
+    comments {
+        ...Comment
+    }
+}

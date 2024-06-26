@@ -1,0 +1,38 @@
+query GetFavouriteCatalogItems($skip: Int, $limit: Int) {
+  getFavouriteCatalogItems(skip: $skip, limit: $limit) {
+    __typename
+    ... on BaseError {
+      status
+    }
+    ... on CatalogItemList {
+        ...CatalogItemList
+    }
+  }
+}
+
+query GetFavouriteArticles($skip: Int, $limit: Int) {
+  getFavouriteArticles(skip: $skip, limit: $limit) {
+    __typename
+    ... on BaseError {
+      status
+    }
+    ... on ArticleList {
+      ...ArticleList
+    }
+  }
+}
+
+query GetFavouritePublications($skip: Int, $limit: Int) {
+  getFavouritePublications(skip: $skip, limit: $limit) {
+    __typename
+    ... on BaseError {
+      status
+    }
+    ... on PublicationList {
+      total
+      publications {
+        ...Publication
+      }
+    }
+  }
+}

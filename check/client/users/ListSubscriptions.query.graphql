@@ -1,0 +1,11 @@
+query ListSubscriptions ($id: String!, $q: String, $skip: Int, $limit: Int) {
+    listSubscriptions (id: $id, q: $q, skip: $skip, limit: $limit) {
+        __typename
+        ... on BaseError {
+            status
+        }
+        ... on UserList {
+            ...UserList
+        }
+    }
+}

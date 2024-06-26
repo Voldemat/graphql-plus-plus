@@ -1,0 +1,14 @@
+fragment SubscriptionNewMessage on SubscriptionNewMessage {
+  message {
+    ...Message
+  }
+}
+
+fragment SubscriptionReadChat on SubscriptionReadChat {
+  chatId
+}
+
+fragment SubscriptionOnlineStatus on SubscriptionOnlineStatus {
+  isOnline
+  userId
+}

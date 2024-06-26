@@ -1,0 +1,13 @@
+query GetStatistics($params: StatisticsIn!) {
+  getStatistics(params: $params) {
+    __typename
+    ... on ErrorWithFields {
+      status
+      fields
+    }
+
+    ... on Statistics {
+      ...FullStatistics
+    }
+  }
+}

@@ -1,0 +1,18 @@
+enum LikeContentType {
+    PUBLICATION
+    PRODUCT
+    SERVICE
+    COMMENT
+    USER
+    STORY
+    ARTICLE
+}
+
+input LikeContentIn {
+    contentId: String!
+    contentType: LikeContentType!
+}
+
+extend type Mutation {
+    setIsLiked(isLiked: Boolean! = true, content: LikeContentIn!): BaseError
+}

@@ -1,0 +1,69 @@
+input PublicationIn {
+    attachments: [Upload!]!
+    title: String
+    description: String
+    tags: [String!]!
+    is18Plus: Boolean! = false
+    commentsEnabled: Boolean! = true
+    showInFeed: Boolean! = true
+}
+
+input PublicationInUpdate {
+    title: String
+    description: String
+    tags: [String!]
+    is18Plus: Boolean
+    commentsEnabled: Boolean
+    showInFeed: Boolean
+}
+
+type Publication {
+    id: String!
+    createdAt: String!
+    updatedAt: String!
+    author: User!
+    references: [RecordType!]!
+    likesCount: Int!
+    viewsCount: Int!
+    comments: PublicationsComments!
+    isBlocked: Boolean!
+    isLiked: Boolean!
+    isFavourite: Boolean!
+
+    title: String
+    description: String
+    tags: [String!]!
+    attachments: [File!]!
+    is18Plus: Boolean!
+    showInFeed: Boolean!
+}
+
+type PublicationsComments {
+    total: Int!
+    enabled: Boolean!
+    unreadCount: Int!
+}
+
+type PublicationList {
+    total: Int!,
+    publications: [Publication!]!
+}
+
+union PublicationOrBE = Publication | BaseError
+union PublicationOrEWF = Publication | ErrorWithFields
+union PublicationListOrBE = PublicationList | BaseError
+
+extend type Query {
+    retrievePublication(id: String!): PublicationOrBE!
+    getPublicationsByUserId(id: String!, skip: Int! = 0, limit: Int! = 20, onlyVideo: Boolean! = false): PublicationListOrBE!
+    getPublicationByCommentId(id: String!): PublicationOrBE!
+    getPublicationsByTag(tag: String!, skip: Int! = 0, limit: Int! = 20): PublicationListOrBE!
+    getSubscribedPublications(skip: Int! = 0, limit: Int! = 20): PublicationListOrBE!
+    getRecommendedPublications(skip: Int! = 0, limit: Int! = 20): PublicationListOrBE!
+}
+
+extend type Mutation {
+    createPublication(publication: PublicationIn!): PublicationOrEWF!
+    updatePublication(id: String!, publication: PublicationInUpdate!): PublicationOrEWF!
+    deletePublication(id: String!): BaseError
+}

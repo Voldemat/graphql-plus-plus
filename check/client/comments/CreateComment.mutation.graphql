@@ -1,0 +1,12 @@
+mutation CreateComment ($comment: CommentIn!) {
+    createComment(comment: $comment) {
+        __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on Comment {
+            ...Comment
+        }
+    }
+}

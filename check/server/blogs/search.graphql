@@ -1,0 +1,17 @@
+type BlogSearchResult {
+    followed: [Blog!]!
+    overall: [Blog!]!
+}
+
+union BlogListOrBE = BlogList | BaseError
+union BlogSearchResultOrBE = BlogSearchResult | BaseError
+
+
+extend type Query {
+  searchBlogs(query:String!): BlogSearchResultOrBE!
+  getRecentBlogs: BlogListOrBE!
+}
+
+extend type Mutation {
+  addRecentBlog(authorId: String!): BaseError
+}

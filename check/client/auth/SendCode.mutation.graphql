@@ -1,0 +1,6 @@
+mutation SendCode($target: String!, $transport: CodeTransport!){
+    sendCode(target: $target, transport: $transport){
+        status,
+        fields
+    }
+}

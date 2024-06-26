@@ -1,0 +1,6 @@
+mutation SetEmail ($id: String!, $transport: CodeTransport!, $email: String!) {
+    setEmail(id: $id, transport: $transport, email: $email) {
+        status
+        fields
+    }
+}

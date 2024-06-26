@@ -1,0 +1,79 @@
+scalar Upload
+
+enum ESortingDirection {
+  ASC
+  DESC
+}
+
+enum PeriodType {
+  LAST_WEEK
+  LAST_MONTH
+}
+
+enum PrivacyType {
+  FOR_EVERYONE
+  ONLY_FOR_FOLLOWERS
+  ONLY_FOR_FRIENDS
+}
+
+enum ErrorStatus {
+  INVALID_INPUT_DATA
+  NOT_AUTHENTICATED
+  NOT_FOUND
+  ALREADY_DONE
+  ALREADY_EXIST
+  NOT_ENOUGH_PERMISSIONS
+}
+
+input RecordTypeIn {
+  key: String!
+  value: String!
+}
+
+type RecordType {
+  key: String!
+  value: String!
+}
+
+type IntegerRecordType {
+  key: String!
+  value: Int!
+}
+
+type BaseError {
+  status: ErrorStatus!
+}
+
+type ErrorWithFields {
+  status: ErrorStatus!
+  fields: [String!]!
+}
+
+type BooleanObject {
+  boolean: Boolean!
+}
+
+type StringArray {
+    array: [String!]!
+}
+
+type NumberObject {
+  number: Int!
+}
+
+input AttachmentsInUpdate {
+    added: [Upload!]
+    removed: [String!]
+}
+
+input GeolocationIn {
+    lat: Float!
+    lng: Float!
+}
+
+type Geolocation {
+    lat: Float!
+    lng: Float!
+}
+
+union StringArrayOrBE = StringArray | BaseError

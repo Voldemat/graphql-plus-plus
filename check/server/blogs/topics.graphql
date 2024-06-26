@@ -1,0 +1,24 @@
+input TopicIn {
+  name: String!
+}
+input TopicInUpdate {
+  name: String
+}
+
+type Topic {
+  id: String!
+  name: String!
+}
+
+type TopicList {
+  total: Int!
+  topics: [Topic!]!
+}
+
+union TopicOrEWF = Topic | ErrorWithFields
+
+extend type Mutation {
+  createTopic(topic: TopicIn!): TopicOrEWF!
+  updateTopic(id: String!, topic: TopicInUpdate!): TopicOrEWF!
+  deleteTopic(id: String!): BaseError
+}

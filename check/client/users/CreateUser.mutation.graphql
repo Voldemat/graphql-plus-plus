@@ -1,0 +1,12 @@
+mutation CreateUser ($user:UserIn!) {
+  createUser(user:$user){
+       __typename
+        ... on ErrorWithFields {
+            status
+            fields
+        }
+        ... on User {
+            id
+        }
+  }
+  }
