@@ -101,8 +101,10 @@ ast::ExtendTypeNode Parser::parseExtendTypeNode() {
 };
 
 shared::ast::NameNode Parser::parseNameNode(bool raiseOnKeyword) {
+    std::cout << "start parseNameNode" << std::endl;
     consume(ComplexTokenType::IDENTIFIER);
     if (raiseOnKeyword) shared::assertIsNotKeyword(currentToken, source);
+    std::cout << "end parseNameNode" << std::endl;
     return { .location = { .startToken = currentToken,
                            .endToken = currentToken,
                            .source = source },
@@ -182,7 +184,9 @@ ast::UnionDefinitionNode Parser::parseUnionTypeDefinitionNode() {
     std::vector<shared::ast::NameNode> values = {parseNameNode()};
     std::cout << "parsed first type" << std::endl;
     while (consumeIfIsAhead(SimpleTokenType::VSLASH)) {
+        std::cout << "before parse next type" << std::endl;
         values.push_back(parseNameNode());
+        std::cout << "after parse next type" << std::endl;
     };
     std::cout << "parsed values" << std::endl;
     const GQLToken endToken = currentToken;
