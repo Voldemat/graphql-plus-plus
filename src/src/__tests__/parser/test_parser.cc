@@ -73,11 +73,8 @@ public:
 class ParserFixture : public testing::TestWithParam<ParserTestCase> {};
 TEST_P(ParserFixture, TestParser) {
     auto param = GetParam();
-    std::cout << "before creating parser" << std::endl;
     Parser parser(param.tokens, param.expectedNodes.source);
-    std::cout << "before parse: " << param.tokens.size() << std::endl;
     const auto ast = parser.parse();
-    std::cout << "after parse" << std::endl;
     FileNodesComparator comparator;
     const auto &differences = comparator.compare(ast, param.expectedNodes);
     EXPECT_EQ(differences.size(), 0);

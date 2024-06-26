@@ -1,7 +1,6 @@
 #include "./parser.hpp"
 
 #include <format>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
@@ -27,17 +26,11 @@ ast::FileNodes Parser::parse() {
     std::vector<ast::ExtendTypeNode> extensions;
     while (currentToken != tokens.back()) {
         if (index != 0) consume(ComplexTokenType::IDENTIFIER);
-        std::cout << "before parseASTNode: " << currentToken << std::endl;
         const auto &[name, node] = parseASTNode();
-        std::cout << "after pastASTNode" << std::endl;
         if (std::holds_alternative<ast::TypeDefinitionNode>(node)) {
-            std::cout << "before type definition node" << std::endl;
             definitions.push_back(std::get<ast::TypeDefinitionNode>(node));
-            std::cout << "after type definition node" << std::endl;
         } else if (std::holds_alternative<ast::ExtendTypeNode>(node)) {
-            std::cout << "before extend type node" << std::endl;
             extensions.push_back(std::get<ast::ExtendTypeNode>(node));
-            std::cout << "after extend type node" << std::endl;
         } else {
             throw shared::ParserError(currentToken, "Unexpected node type",
                                       source);
@@ -101,10 +94,8 @@ ast::ExtendTypeNode Parser::parseExtendTypeNode() {
 };
 
 shared::ast::NameNode Parser::parseNameNode(bool raiseOnKeyword) {
-    std::cout << "start parseNameNode" << std::endl;
     consume(ComplexTokenType::IDENTIFIER);
     if (raiseOnKeyword) shared::assertIsNotKeyword(currentToken, source);
-    std::cout << "end parseNameNode" << std::endl;
     return { .location = { .startToken = currentToken,
                            .endToken = currentToken,
                            .source = source },
@@ -176,21 +167,14 @@ ast::EnumValueDefinitionNode Parser::parseEnumValueDefinitionNode() {
 };
 
 ast::UnionDefinitionNode Parser::parseUnionTypeDefinitionNode() {
-    std::cout << "start parseUnionTypeDefinitionNode" << std::endl;
     const GQLToken startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    std::cout << "parsed nameNode" << std::endl;
     consume(SimpleTokenType::EQUAL);
     std::vector<shared::ast::NameNode> values = {parseNameNode()};
-    std::cout << "parsed first type" << std::endl;
     while (consumeIfIsAhead(SimpleTokenType::VSLASH)) {
-        std::cout << "before parse next type" << std::endl;
         values.push_back(parseNameNode());
-        std::cout << "after parse next type" << std::endl;
     };
-    std::cout << "parsed values" << std::endl;
     const GQLToken endToken = currentToken;
-    std::cout << "end parseUnionTypeDefinitionNode" << std::endl;
     return { .location = { .startToken = startToken,
                            .endToken = endToken,
                            .source = source },
@@ -371,16 +355,10 @@ void Parser::consumeIdentifier() {
 };
 
 bool Parser::consumeIfIsAhead(GQLTokenType expectedType) {
-    std::cout << "start consumeIfIsAhead: " << expectedType;
-    std::cout << ", currentToken: " << currentToken;
-    std::cout << ", index: " << index << std::endl;
     bool tokenIsAhead = isAhead(expectedType);
-    std::cout << "after isAhead: " << tokenIsAhead << std::endl;
     if (tokenIsAhead) {
         consume(expectedType);
-        std::cout << "after consume(expectedType)" << std::endl;
     };
-    std::cout << "end consumeIfIsAhead: " << std::endl;
     return tokenIsAhead;
 };
 

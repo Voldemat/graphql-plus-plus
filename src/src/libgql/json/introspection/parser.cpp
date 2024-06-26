@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <cstring>
 #include <format>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -110,7 +109,6 @@ std::optional<Literal> parseLiteral(const JSONValue &value,
         if (scalar->name == "Int") {
             return std::stoi(str);
         } else if (scalar->name == "Float") {
-            std::cout << str << std::endl;
             return std::stof(str);
         } else if (scalar->name == "String") {
             return str;
