@@ -1,5 +1,0 @@
-mutation UnblockUser ($id: String!) {
-    unblockUser(id: $id) {
-        status
-    }
-}

@@ -1,5 +1,0 @@
-mutation SetPrivacySettings ($settings: PrivacySettingsIn!) {
-    setPrivacySettings(settings: $settings) {
-        status
-    }
-}

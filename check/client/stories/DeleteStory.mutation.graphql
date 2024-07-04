@@ -1,5 +1,0 @@
-mutation DeleteStory($id: String!) {
-  deleteStory(id: $id) {
-      status
-  }
-}

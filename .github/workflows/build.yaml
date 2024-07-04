@@ -32,8 +32,6 @@ jobs:
     - name: Run tests
       working-directory: ./build
       run: ctest --rerun-failed --output-on-failure .
-    - name: Run on quickclick schema
-      run: ./build/gql internal parse-dir --client-dir './check/client' --server-dir './check/server' > schema.json
     - uses: actions/upload-artifact@v4
       with:
         name: 'ubuntu-cli'

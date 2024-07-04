@@ -1,5 +1,0 @@
-query DeleteRefreshToken ($refreshToken:String!) {
-  deleteRefreshToken(refreshToken:$refreshToken){
-    status
-  }
-  }

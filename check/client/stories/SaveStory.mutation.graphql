@@ -1,5 +1,0 @@
-mutation SaveStory($id: String!) {
-    saveStory(id: $id) {
-        status
-    }
-}

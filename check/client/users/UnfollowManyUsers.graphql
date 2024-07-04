@@ -1,5 +1,0 @@
-mutation UnfollowManyUsers ($ids: [String!]!){
-    unfollowManyUsers(ids: $ids) {
-        status
-    }
-}

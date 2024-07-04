@@ -1,5 +1,0 @@
-mutation DeleteFriend($id: String!){
-    deleteFriend(id: $id) {
-        status
-    }
-}

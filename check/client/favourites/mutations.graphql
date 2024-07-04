@@ -1,5 +1,0 @@
-mutation SetFavourite($isFavourite: Boolean, $content: FavouriteContentIn!) {
-    setFavourite(isFavourite: $isFavourite, content: $content) {
-        status
-    }
-}

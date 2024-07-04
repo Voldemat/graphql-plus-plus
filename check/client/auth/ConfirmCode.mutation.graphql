@@ -1,6 +1,0 @@
-mutation ConfirmCode($target: String!, $transport: CodeTransport!, $code: String!){
-    confirmCode(target: $target, transport: $transport, code: $code){
-        status,
-        fields
-    }
-}

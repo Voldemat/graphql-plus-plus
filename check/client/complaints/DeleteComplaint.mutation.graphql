@@ -1,5 +1,0 @@
-mutation DeleteComplaint($id: String!) {
-  deleteComplaint(id: $id) {
-    status
-  }
-}

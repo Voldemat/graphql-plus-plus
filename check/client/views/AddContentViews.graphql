@@ -1,6 +1,0 @@
-mutation AddContentViews($content: AddContentViewsIn!) {
-    addContentViews(content: $content) {
-        status
-        fields
-    }
-}

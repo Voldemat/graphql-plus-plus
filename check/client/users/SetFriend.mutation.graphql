@@ -1,5 +1,0 @@
-mutation SetFriend ($id: String!){
-    setFriend(id: $id) {
-        status
-    }
-}

@@ -1,3 +1,0 @@
-extend type Query {
-    getRecommendedUsers(sessionId: String!, limit: Int! = 20): UserListOrBE!
-}

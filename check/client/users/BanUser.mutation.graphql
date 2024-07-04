@@ -1,5 +1,0 @@
-mutation BanUser($id: String!) {
-  banUser(id: $id) {
-    status
-  }
-}

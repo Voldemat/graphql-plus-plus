@@ -1,5 +1,0 @@
-mutation AddRecentBlog ($authorId: String!) {
-    addRecentBlog(authorId: $authorId) {
-        status
-    }
-}
