@@ -9,8 +9,8 @@
 #include <variant>
 #include <vector>
 
-#include "libgql/parsers/client/ast.hpp"
-#include "libgql/parsers/server/ast.hpp"
+#include "../file/client/ast.hpp"
+#include "../file/server/ast.hpp"
 #include "utils.hpp"
 
 namespace parsers {
@@ -202,7 +202,7 @@ struct Fragment {
 };
 
 struct Operation {
-    client::ast::OpType type;
+    file::client::ast::OpType type;
     std::string name;
     std::map<std::string, FieldDefinition<InputFieldSpec>> parameters;
     FragmentSpec fragmentSpec;
@@ -286,8 +286,8 @@ struct Schema {
 };
 
 const Schema parseSchema(
-    std::vector<parsers::server::ast::FileNodes> astArray,
-    std::vector<parsers::client::ast::ClientDefinition> definitions);
+    std::vector<parsers::file::server::ast::FileNodes> astArray,
+    std::vector<parsers::file::client::ast::ClientDefinition> definitions);
 
 };  // namespace schema
 };  // namespace parsers

@@ -12,15 +12,16 @@
 #include <variant>
 #include <vector>
 
+#include "../file/client/ast.hpp"
+#include "../file/server/ast.hpp"
+#include "../file/shared/ast.hpp"
+#include "../file/shared/parser_error.hpp"
 #include "./type_registry.hpp"
-#include "libgql/parsers/client/ast.hpp"
-#include "libgql/parsers/server/ast.hpp"
-#include "libgql/parsers/shared/shared.hpp"
 #include "utils.hpp"
 
-using namespace parsers;
+using namespace parsers::file;
 using namespace parsers::schema;
-using namespace parsers::server;
+using namespace parsers::file::server;
 
 bool InputFieldSpec_hasDefaultValue(const InputFieldSpec &spec) {
     return std::visit<bool>(

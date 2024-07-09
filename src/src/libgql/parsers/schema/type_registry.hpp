@@ -5,9 +5,9 @@
 #include <string>
 #include <variant>
 
+#include "../file/client/ast.hpp"
+#include "../file/shared/ast.hpp"
 #include "./schema.hpp"
-#include "libgql/parsers/client/ast.hpp"
-#include "libgql/parsers/shared/shared.hpp"
 
 namespace parsers {
 namespace schema {
@@ -33,9 +33,9 @@ struct TypeRegistry {
     [[nodiscard]] std::shared_ptr<ObjectType> getMutationObject() const;
     [[nodiscard]] std::shared_ptr<ObjectType> getSubscriptionObject() const;
     [[nodiscard]] InputTypeSpec getTypeForInput(
-        const shared::ast::NameNode &node) const;
+        const file::shared::ast::NameNode &node) const;
     [[nodiscard]] ObjectTypeSpec getTypeForObject(
-        const shared::ast::NameNode &node) const;
+        const file::shared::ast::NameNode &node) const;
     [[nodiscard]] std::shared_ptr<Interface> getInterface(
         const std::string &name) const;
     [[nodiscard]] std::variant<std::shared_ptr<ObjectType>,
@@ -47,12 +47,12 @@ struct TypeRegistry {
         const std::string &name) const;
     [[nodiscard]] std::map<std::string,
                            std::shared_ptr<FieldDefinition<ObjectFieldSpec>>> &
-    getMappingForOp(client::ast::OpType type);
+    getMappingForOp(file::client::ast::OpType type);
     [[nodiscard]] const std::map<
         std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>> &
-    getMappingForOp(client::ast::OpType type) const;
+    getMappingForOp(file::client::ast::OpType type) const;
     [[nodiscard]] std::shared_ptr<FieldDefinition<ObjectFieldSpec>> getOp(
-        client::ast::OpType type, const std::string &name) const;
+        file::client::ast::OpType type, const std::string &name) const;
     void addOpIfNotExists(
         const std::shared_ptr<FieldDefinition<ObjectFieldSpec>> &field,
         std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>

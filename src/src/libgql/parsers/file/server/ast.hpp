@@ -5,11 +5,9 @@
 #include <variant>
 #include <vector>
 
-#include "libgql/parsers/shared/shared.hpp"
+#include "../shared/ast.hpp"
 
-namespace parsers {
-namespace server {
-namespace ast {
+namespace parsers::file::server::ast {
 
 struct FieldDefinitionNode {
     shared::ast::NodeLocation location;
@@ -77,7 +75,5 @@ struct FileNodes {
     std::vector<ExtendTypeNode> extensions;
 };
 
-};  // namespace ast
-};  // namespace server
-};  // namespace parsers
+};  // namespace parsers::file::server::ast
 #endif

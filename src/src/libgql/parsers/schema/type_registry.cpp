@@ -7,11 +7,13 @@
 #include <string>
 #include <variant>
 
-#include "libgql/parsers/client/ast.hpp"
-#include "libgql/parsers/schema/schema.hpp"
-#include "libgql/parsers/shared/shared.hpp"
+#include "../file/client/ast.hpp"
+#include "../file/shared/ast.hpp"
+#include "../file/shared/parser_error.hpp"
+#include "./schema.hpp"
 #include "utils.hpp"
 
+using namespace parsers::file;
 using namespace parsers::schema;
 
 TypeRegistry::TypeRegistry() {

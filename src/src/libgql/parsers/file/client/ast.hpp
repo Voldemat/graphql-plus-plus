@@ -8,11 +8,9 @@
 #include <variant>
 #include <vector>
 
-#include "libgql/parsers/shared/shared.hpp"
+#include "../shared/ast.hpp"
 
-namespace parsers {
-namespace client {
-namespace ast {
+namespace parsers::file::client::ast {
 
 struct Argument {
     shared::ast::NodeLocation location;
@@ -86,7 +84,5 @@ struct FragmentDefinition {
 
 using ClientDefinition = std::variant<OperationDefinition, FragmentDefinition>;
 
-};  // namespace ast
-};  // namespace client
-};  // namespace parsers
+};  // namespace parsers::file::client::ast
 #endif

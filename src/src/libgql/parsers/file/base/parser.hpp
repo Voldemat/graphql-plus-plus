@@ -1,21 +1,16 @@
-#ifndef GRAPHQL_SERVER_PARSER
-#define GRAPHQL_SERVER_PARSER
+#pragma once
 
 #include <memory>
 #include <optional>
 #include <string>
-#include <utility>
 #include <vector>
-
-#include "./ast.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/token_type.hpp"
-#include "libgql/parsers/shared/shared.hpp"
+#include "libgql/parsers/file/shared/ast.hpp"
 
-namespace parsers {
-namespace server {
-
-class Parser {
+namespace parsers::file {
+class BaseParser {
+protected:
     unsigned int index = 0;
     std::vector<lexer::GQLToken> tokens;
     std::shared_ptr<shared::ast::SourceFile> source;
@@ -25,28 +20,19 @@ class Parser {
     void consume(const lexer::GQLTokenType expectedType);
     void consumeIdentifier();
     bool consumeIfIsAhead(lexer::GQLTokenType expectedType);
+    bool consumeIdentifierByLexemeIfIsAhead(const std::string &lexeme);
+    void consumeIdentifierByLexeme(const std::string &lexeme);
     bool isAhead(lexer::GQLTokenType expectedType);
+    bool isAheadByLexeme(const std::string &lexeme);
     shared::ast::NameNode parseNameNode(bool raiseOnKeyword = false);
-    ast::ScalarDefinitionNode parseScalarTypeDefinitionNode();
-    ast::UnionDefinitionNode parseUnionTypeDefinitionNode();
-    std::pair<std::string, ast::ASTNode> parseASTNode();
-    ast::ExtendTypeNode parseExtendTypeNode();
-    ast::EnumDefinitionNode parseEnumTypeDefinitionNode();
-    ast::EnumValueDefinitionNode parseEnumValueDefinitionNode();
-    ast::InterfaceDefinitionNode parseInterfaceTypeDefinitionNode();
-    ast::FieldDefinitionNode parseFieldDefinitionNode();
     shared::ast::TypeNode parseTypeNode();
     shared::ast::NamedTypeNode parseNamedTypeNode();
     shared::ast::ListTypeNode parseListTypeNode();
     shared::ast::InputValueDefinitionNode parseInputValueDefinitionNode();
     shared::ast::LiteralNode parseLiteralNode();
-    ast::ObjectDefinitionNode parseObjectTypeDefinitionNode();
 
 public:
-    Parser(const std::vector<lexer::GQLToken> &tokens,
+    BaseParser(const std::vector<lexer::GQLToken> &tokens,
            const std::shared_ptr<shared::ast::SourceFile> &source);
-    ast::FileNodes parse();
 };
-};  // namespace server
-};  // namespace parsers
-#endif
+};

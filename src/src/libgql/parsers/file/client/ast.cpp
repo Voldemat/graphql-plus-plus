@@ -3,9 +3,9 @@
 #include <optional>
 #include <string>
 
-using namespace parsers::client::ast;
+using namespace parsers::file::client::ast;
 
-std::optional<OpType> parsers::client::ast::opTypeFromObjectName(
+std::optional<OpType> parsers::file::client::ast::opTypeFromObjectName(
     const std::string &value) {
     if (value == "Query") return OpType::QUERY;
     if (value == "Mutation") return OpType::MUTATION;
@@ -13,7 +13,7 @@ std::optional<OpType> parsers::client::ast::opTypeFromObjectName(
     return std::nullopt;
 };
 
-std::optional<OpType> parsers::client::ast::opTypeFromClientOp(
+std::optional<OpType> parsers::file::client::ast::opTypeFromClientOp(
     const std::string &lexeme) {
     if (lexeme == "mutation") return ast::OpType::MUTATION;
     if (lexeme == "query") return ast::OpType::QUERY;

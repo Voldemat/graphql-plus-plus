@@ -31,14 +31,15 @@
 #include "libgql/lexer/location.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/tokens_accumulators.hpp"
-#include "libgql/parsers/client/ast.hpp"
-#include "libgql/parsers/client/parser.hpp"
+#include "libgql/parsers/file/client/ast.hpp"
+#include "libgql/parsers/file/client/parser.hpp"
+#include "libgql/parsers/file/server/ast.hpp"
+#include "libgql/parsers/file/server/parser.hpp"
+#include "libgql/parsers/file/shared/ast.hpp"
+#include "libgql/parsers/file/shared/parser_error.hpp"
 #include "libgql/parsers/schema/schema.hpp"
-#include "libgql/parsers/server/ast.hpp"
-#include "libgql/parsers/server/parser.hpp"
-#include "libgql/parsers/shared/shared.hpp"
 
-using namespace parsers;
+using namespace parsers::file;
 
 rapidjson::Writer<rapidjson::StringBuffer> createWriter(
     const bool &pretty, rapidjson::StringBuffer &buffer) {

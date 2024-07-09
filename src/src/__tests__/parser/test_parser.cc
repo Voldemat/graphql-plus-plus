@@ -19,14 +19,14 @@
 #include "__tests__/parser/test_case.hpp"
 #include "gtest/gtest.h"
 #include "libgql/json/parsers/lexer/lexer.hpp"
-#include "libgql/parsers/server/ast.hpp"
-#include "libgql/parsers/server/parser.hpp"
-#include "libgql/parsers/shared/shared.hpp"
+#include "libgql/parsers/file/server/ast.hpp"
+#include "libgql/parsers/file/server/parser.hpp"
+#include "libgql/parsers/file/shared/ast.hpp"
 #include "utils.hpp"
 
-using namespace parsers;
-using namespace parsers::server;
-using namespace parsers::server::ast;
+using namespace parsers::file;
+using namespace parsers::file::server;
+using namespace parsers::file::server::ast;
 
 struct ASTNameDifference {
     const ASTNode *leftNode;
@@ -102,11 +102,16 @@ std::vector<ParserTestCase> getParserCases() {
         rapidjson::Document d;
         d.ParseStream(isw);
         assert(d.IsObject());
-        ParserTestCase testCase = { .filepath = filepath,
-                              .tokens = json::parsers::lexer::parseTokensArray(
-                                  d["tokens"].GetArray()),
-                              .expectedNodes = { .source = std::make_shared<shared::ast::SourceFile>(filepath, ""), .definitions = {},
-                                                 .extensions = {} } };
+        ParserTestCase testCase = {
+            .filepath = filepath,
+            .tokens =
+                json::parsers::lexer::parseTokensArray(d["tokens"].GetArray()),
+            .expectedNodes = { .source =
+                                   std::make_shared<shared::ast::SourceFile>(
+                                       filepath, ""),
+                               .definitions = {},
+                               .extensions = {} }
+        };
         cases.push_back(testCase);
     };
     return cases;
