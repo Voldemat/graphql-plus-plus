@@ -28,20 +28,20 @@ inline std::ostream &operator<<(std::ostream &os, const LexerTestCase &self) {
     os << ")";
     return os;
 };
-const std::filesystem::path casesPath
-    = std::filesystem::path(__FILE__).parent_path().append("cases");
+const std::filesystem::path casesPath =
+    std::filesystem::path(__FILE__).parent_path().append("cases");
 const std::regex casesRegex = std::regex(".*\\.case\\.json");
 inline std::vector<LexerTestCase> getLexerCases() noexcept {
     std::vector<LexerTestCase> cases;
     for (const auto &filepath :
-         std::filesystem::directory_iterator(casesPath)
-             | std::ranges::views::transform(
+         std::filesystem::directory_iterator(casesPath) |
+             std::ranges::views::transform(
                  [](std::filesystem::directory_entry entry) {
                      return entry.path();
-                 })
-             | std::ranges::views::filter([](std::filesystem::path path) {
-                   return std::regex_match(path.filename().string(), casesRegex);
-               })) {
+                 }) |
+             std::ranges::views::filter([](std::filesystem::path path) {
+                 return std::regex_match(path.filename().string(), casesRegex);
+             })) {
         std::ifstream file(filepath);
         rapidjson::IStreamWrapper isw(file);
         rapidjson::Document d;
@@ -55,24 +55,23 @@ inline std::vector<LexerTestCase> getLexerCases() noexcept {
                 assert(jsonToken.IsObject());
                 const auto &location = jsonToken["location"];
                 expectedTokens.push_back(
-                    { .type
-                      = gqlTokenTypeFromString(jsonToken["type"].GetString())
-                            .value(),
+                    { .type =
+                          gqlTokenTypeFromString(jsonToken["type"].GetString())
+                              .value(),
                       .lexeme = jsonToken["lexeme"].GetString(),
-                      .location = { .line = location["line"].GetUint(), .start=location["start"].GetUint(), .end=location["end"].GetUint() } });
+                      .location = { .line = location["line"].GetUint(),
+                                    .start = location["start"].GetUint(),
+                                    .end = location["end"].GetUint() } });
             };
         } else {
             const auto &errorObj = d["error"];
             const auto &location = errorObj["location"];
-            error = LexerError(
-                errorObj["message"].GetString(),
-                (Location){ 
-                            .line = location["line"].GetUint(),
-                            .start = location["start"].GetUint(),
-                            .end = location["end"].GetUint() });
+            error = LexerError(errorObj["message"].GetString(),
+                               (Location){ .line = location["line"].GetUint(),
+                                           .start = location["start"].GetUint(),
+                                           .end = location["end"].GetUint() });
         };
-        cases.push_back({ 
-                          .filename = filepath.filename(),
+        cases.push_back({ .filename = filepath.filename(),
                           .schema = schema,
                           .expectedTokens = expectedTokens,
                           .error = error });

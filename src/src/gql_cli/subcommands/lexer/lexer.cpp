@@ -5,12 +5,11 @@
 
 #include <CLI/App.hpp>
 #include <iostream>
-#include <sstream>
-#include <utility>
 
 #include "gql_cli/utils.hpp"
 #include "libgql/json/serializers/lexer/lexer.hpp"
 #include "libgql/lexer/lexer.hpp"
+#include "libgql/lexer/tokens_accumulators.hpp"
 
 void createLexerSubcommand(CLI::App *app) {
     CLI::App *lexerCmd = app->add_subcommand("lexer", "Lexer");
@@ -18,9 +17,8 @@ void createLexerSubcommand(CLI::App *app) {
         "parse", "Parse input stream into tokens in json format");
     lexerParseCmd->callback([]() {
         const auto buffer = getAllStdin();
-        std::istringstream stream(buffer);
         lexer::VectorTokensAccumulator accum;
-        lexer::Lexer lexer(std::move(stream), &accum);
+        lexer::Lexer lexer(buffer, &accum);
         auto result = lexer.parse();
         if (result.has_value()) {
             throw result.value();

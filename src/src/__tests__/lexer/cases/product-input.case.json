@@ -1,96 +1,91 @@
 {
     "$schema": "case.schema.json",
-    "schema": "input ProductIn {\nprice: Int! = 10\n}",
+    "schema": "input ProductIn {\nprice: Int! = 10\nname: String! = \"Cool product\"\n}",
     "tokens": [
         {
             "type": "IDENTIFIER",
             "lexeme": "input",
-            "location": {
-                "line": 1,
-                "start": 0,
-                "end": 4
-            }
+            "location": { "line": 1, "start": 0, "end": 4 }
         },
         {
             "type": "IDENTIFIER",
             "lexeme": "ProductIn",
-            "location": {
-                "line": 1,
-                "start": 6,
-                "end": 14
-            }
+            "location": { "line": 1, "start": 6, "end": 14 }
         },
         {
             "type": "LEFT_BRACE",
             "lexeme": "{",
-            "location": {
-                "line": 1,
-                "start": 16,
-                "end": 16
-            }
+            "location": { "line": 1, "start": 16, "end": 16 }
         },
         {
             "type": "IDENTIFIER",
             "lexeme": "price",
-            "location": {
-                "line": 2,
-                "start": 0,
-                "end": 4
-            }
+            "location": { "line": 2, "start": 0, "end": 4 }
         },
         {
             "type": "COLON",
             "lexeme": ":",
-            "location": {
-                "line": 2,
-                "start": 5,
-                "end": 5
-            }
+            "location": { "line": 2, "start": 5, "end": 5 }
         },
         {
             "type": "IDENTIFIER",
             "lexeme": "Int",
-            "location": {
-                "line": 2,
-                "start": 7,
-                "end": 9
-            }
+            "location": { "line": 2, "start": 7, "end": 9 }
         },
         {
             "type": "BANG",
             "lexeme": "!",
-            "location": {
-                "line": 2,
-                "start": 10,
-                "end": 10
-            }
+            "location": { "line": 2, "start": 10, "end": 10 }
         },
         {
             "type": "EQUAL",
             "lexeme": "=",
-            "location": {
-                "line": 2,
-                "start": 12,
-                "end": 12
-            }
+            "location": { "line": 2, "start": 12, "end": 12 }
         },
         {
             "type": "NUMBER",
             "lexeme": "10",
-            "location": {
-                "line": 2,
-                "start": 14,
-                "end": 15
-            }
+            "location": { "line": 2, "start": 14, "end": 15 }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "name",
+            "location": { "line": 3, "start": 0, "end": 3 }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": { "line": 3, "start": 4, "end": 4 }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "String",
+            "location": { "line": 3, "start": 6, "end": 11 }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": { "line": 3, "start": 12, "end": 12 }
+        },
+        {
+            "type": "EQUAL",
+            "lexeme": "=",
+            "location": { "line": 3, "start": 14, "end": 14 }
+        },
+        {
+            "type": "STRING",
+            "lexeme": "Cool product",
+            "location": { "line": 3, "start": 16, "end": 28 }
+        },
+        {
+            "type": "STRING",
+            "lexeme": "",
+            "location": { "line": 3, "start": 29, "end": 29 }
         },
         {
             "type": "RIGHT_BRACE",
             "lexeme": "}",
-            "location": {
-                "line": 3,
-                "start": 0,
-                "end": 0
-            }
+            "location": { "line": 4, "start": 0, "end": 0 }
         }
     ]
 }

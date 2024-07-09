@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/token_type.hpp"
 #include "libgql/parsers/client/ast.hpp"
 #include "libgql/parsers/shared/shared.hpp"
 
@@ -15,18 +16,18 @@ namespace client {
 
 class Parser {
     unsigned int index = 0;
-    std::vector<GQLToken> tokens;
+    std::vector<lexer::GQLToken> tokens;
     std::shared_ptr<shared::ast::SourceFile> source;
-    GQLToken currentToken;
-    const GQLToken lookahead();
+    lexer::GQLToken currentToken;
+    const lexer::GQLToken lookahead();
     void advance();
-    void consume(const GQLTokenType expectedType);
+    void consume(const lexer::GQLTokenType expectedType);
     void consumeIdentifier();
-    void consumeIdentifierByLexeme(const std::string& lexeme);
-    bool consumeIdentifierByLexemeIfIsAhead(const std::string& lexeme);
-    bool consumeIfIsAhead(GQLTokenType expectedType);
-    bool isAhead(GQLTokenType expectedType);
-    bool isAheadByLexeme(const std::string& lexeme);
+    void consumeIdentifierByLexeme(const std::string &lexeme);
+    bool consumeIdentifierByLexemeIfIsAhead(const std::string &lexeme);
+    bool consumeIfIsAhead(lexer::GQLTokenType expectedType);
+    bool isAhead(lexer::GQLTokenType expectedType);
+    bool isAheadByLexeme(const std::string &lexeme);
     shared::ast::NameNode parseNameNode(bool raiseOnKeyword = false);
     ast::OperationDefinition parseOperationDefinition();
     shared::ast::InputValueDefinitionNode parseInputValueDefinitionNode();
@@ -42,9 +43,11 @@ class Parser {
     ast::FieldSelectionNode parseFieldSelectionNode();
     ast::ConditionalSpreadSelectionNode parseConditionalSpreadSelectionNode();
     ast::ObjectFieldSpec parseObjectFieldSpec();
-    std::pair<shared::ast::NameNode, shared::ast::NameNode> parseNameAndSelectionName();
+    std::pair<shared::ast::NameNode, shared::ast::NameNode>
+    parseNameAndSelectionName();
+
 public:
-    Parser(std::vector<GQLToken> tokens,
+    Parser(std::vector<lexer::GQLToken> tokens,
            std::shared_ptr<shared::ast::SourceFile> source) noexcept;
     std::vector<ast::ClientDefinition> parse();
 };

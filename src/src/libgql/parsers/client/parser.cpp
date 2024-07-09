@@ -9,11 +9,13 @@
 #include <vector>
 
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/token_type.hpp"
 #include "libgql/parsers/client/ast.hpp"
 #include "libgql/parsers/shared/shared.hpp"
 
 using namespace parsers;
 using namespace parsers::client;
+using namespace lexer;
 
 parsers::client::Parser::Parser(
     std::vector<GQLToken> tokens,
@@ -172,8 +174,7 @@ ast::ObjectFieldSpec Parser::parseObjectFieldSpec() {
     location.endToken = currentToken;
     return (ast::ObjectCallableFieldSpec){ .selectionName = selectionName,
                                            .name = fieldName,
-                                           .arguments = args
-    };
+                                           .arguments = args };
 };
 
 ast::FieldSelectionNode Parser::parseFieldSelectionNode() {

@@ -10,16 +10,16 @@
 
 #include "./ast.hpp"
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/token_type.hpp"
 #include "libgql/parsers/shared/shared.hpp"
 
 using namespace parsers;
 using namespace parsers::server;
+using namespace lexer;
 
 Parser::Parser(const std::vector<GQLToken> &tokens,
                const std::shared_ptr<shared::ast::SourceFile> &source)
-    : tokens{ tokens },
-      source{ source },
-      currentToken{ tokens[0] } {};
+    : tokens{ tokens }, source{ source }, currentToken{ tokens[0] } {};
 
 ast::FileNodes Parser::parse() {
     std::vector<ast::TypeDefinitionNode> definitions;
@@ -170,7 +170,7 @@ ast::UnionDefinitionNode Parser::parseUnionTypeDefinitionNode() {
     const GQLToken startToken = currentToken;
     const auto &nameNode = parseNameNode();
     consume(SimpleTokenType::EQUAL);
-    std::vector<shared::ast::NameNode> values = {parseNameNode()};
+    std::vector<shared::ast::NameNode> values = { parseNameNode() };
     while (consumeIfIsAhead(SimpleTokenType::VSLASH)) {
         values.push_back(parseNameNode());
     };
@@ -363,7 +363,7 @@ bool Parser::consumeIfIsAhead(GQLTokenType expectedType) {
 };
 
 bool Parser::isAhead(GQLTokenType expectedType) {
-    const auto& t = lookahead();
+    const auto &t = lookahead();
     if (!t.has_value()) return false;
     return t->type == expectedType;
 };

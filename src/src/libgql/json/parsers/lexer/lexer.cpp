@@ -13,8 +13,11 @@
 #include "../putils.hpp"
 #include "../shared.hpp"
 #include "libgql/json/utils.hpp"
+#include "libgql/lexer/location.hpp"
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/token_type.hpp"
 
+using namespace lexer;
 using namespace json::parsers;
 using namespace json::parsers::lexer;
 using namespace json::parsers::utils;

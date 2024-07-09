@@ -6,23 +6,21 @@
 #include <rapidjson/istreamwrapper.h>
 
 #include <algorithm>
-#include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "./lexer_utils.hpp"
 #include "gtest/gtest.h"
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/tokens_accumulators.hpp"
 
 class LexerFixture : public testing::TestWithParam<LexerTestCase> {};
 
 using namespace lexer;
 TEST_P(LexerFixture, TestLexer) {
     auto testCase = GetParam();
-    std::istringstream buffer(testCase.schema);
     VectorTokensAccumulator accumulator;
-    Lexer lexer(std::move(buffer), &accumulator);
+    Lexer lexer(testCase.schema, &accumulator);
     const auto &result = lexer.parse();
     if (!result.has_value()) {
         const std::vector<GQLToken> tokens = accumulator.getTokens();

@@ -4,12 +4,11 @@
 #include <ostream>
 #include <vector>
 #include "libgql/lexer/token.hpp"
-#include "libgql/lexer/token.hpp"
 #include "libgql/parsers/server/ast.hpp"
 
 struct ParserTestCase {
     std::filesystem::path filepath;
-    std::vector<GQLToken> tokens;
+    std::vector<lexer::GQLToken> tokens;
     parsers::server::ast::FileNodes expectedNodes;
 
 

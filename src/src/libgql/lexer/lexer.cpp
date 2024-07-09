@@ -1,49 +1,39 @@
 #include "./lexer.hpp"
 
-#include <algorithm>
 #include <cctype>
-#include <format>
+#include <functional>
 #include <optional>
-#include <sstream>
 #include <string>
+#include <string_view>
 #include <variant>
 
+#include "./lexer_error.hpp"
 #include "./token.hpp"
+#include "./token_type.hpp"
+#include "./itokens_accumulator.hpp"
 
 using namespace lexer;
 
-LexerError::LexerError(const std::string message,
-                       const Location location) noexcept
-    : message{ message },
-      location{ location },
-      finalMessage{ std::format("{}:{}:{}: {}", location.line, location.start,
-                                location.end, message) } {};
-const char *LexerError::what() const noexcept { return finalMessage.c_str(); };
-Location LexerError::getLocation() const noexcept { return location; };
-Lexer::Lexer(std::istringstream s, ITokensAccumulator *tokensAccumulator)
-    : state{ tokensAccumulator } {
-    stream.swap(s);
+Lexer::Lexer(const std::string_view &s, ITokensAccumulator *tokensAccumulator)
+    : state{ tokensAccumulator }, stream{ s } {};
+
+std::optional<LexerError> Lexer::parse() {
+    for (const auto &c : stream) {
+        const auto &result = state.feed(c);
+        if (result.has_value()) return result;
+    };
+    state.maybeExtractAndSaveToken();
+    return std::nullopt;
 };
 
-std::optional<LexerError> LexerState::feed(char c) noexcept {
-    if (c == -1) {
-        const auto &maybeToken = maybeExtractToken();
-        if (maybeToken.has_value())
-            tokensAccumulator->addToken(maybeToken.value());
-        return std::nullopt;
-    } else if (c == '\n') {
-        const auto &maybeToken = maybeExtractToken();
-        if (maybeToken.has_value())
-            tokensAccumulator->addToken(maybeToken.value());
-        location.line += 1;
-        location.start = -1;
-        location.end = -1;
+std::optional<LexerError> LexerState::feed(char c) {
+    if (c == '\n') {
+        maybeExtractAndSaveToken();
+        location.newLine();
         return std::nullopt;
     };
-    std::optional<LexerError> result;
     if (type.has_value()) {
-        result = feedWithType(c, type.value());
-        if (result.has_value()) return result;
+        feedWithType(c, type.value());
         if (!type.has_value()) {
             location.start = location.end;
         } else {
@@ -51,89 +41,16 @@ std::optional<LexerError> LexerState::feed(char c) noexcept {
             return std::nullopt;
         };
     };
-    result = feedNew(c);
-    if (result.has_value()) return result;
-    return result;
-    return std::nullopt;
+    return feedNew(c);
 };
 
-std::optional<GQLTokenType> LexerState::getTypeForChar(char c) const noexcept {
-    if (std::isalpha(c) || c == '_') return ComplexTokenType::IDENTIFIER;
-    if (std::isdigit(c)) return ComplexTokenType::NUMBER;
-    if (c == '"') return ComplexTokenType::STRING;
-    switch (c) {
-        case '!':
-            return SimpleTokenType::BANG;
-        case '=':
-            return SimpleTokenType::EQUAL;
-        case '(':
-            return SimpleTokenType::LEFT_PAREN;
-        case ')':
-            return SimpleTokenType::RIGHT_PAREN;
-        case '{':
-            return SimpleTokenType::LEFT_BRACE;
-        case '}':
-            return SimpleTokenType::RIGHT_BRACE;
-        case ';':
-            return SimpleTokenType::SEMICOLON;
-        case ':':
-            return SimpleTokenType::COLON;
-        case '.':
-            return ComplexTokenType::SPREAD;
-        case '$':
-            return ComplexTokenType::IDENTIFIER;
-        case ',':
-            return SimpleTokenType::COMMA;
-        case '|':
-            return SimpleTokenType::VSLASH;
-        case '[':
-            return SimpleTokenType::LEFT_BRACKET;
-        case ']':
-            return SimpleTokenType::RIGHT_BRACKET;
-    };
-    return std::nullopt;
+void LexerState::maybeExtractAndSaveToken() {
+    tokensAccumulator->addMaybeToken(maybeExtractToken());
 };
 
-void LexerState::extractAndSaveToken() noexcept {
-    const auto &token = extractToken();
-    tokensAccumulator->addToken(token);
-};
-
-std::optional<LexerError> LexerState::feedWithType(
-    char c, ComplexTokenType tokenType) noexcept {
-    switch (tokenType) {
-        case ComplexTokenType::NUMBER: {
-            if (!std::isdigit(c)) {
-                extractAndSaveToken();
-                return std::nullopt;
-            };
-            break;
-        }
-        case ComplexTokenType::STRING: {
-            if (c == '"') {
-                extractAndSaveToken();
-                return std::nullopt;
-            };
-            break;
-        }
-        case ComplexTokenType::SPREAD: {
-            if (c != '.') {
-                extractAndSaveToken();
-                return std::nullopt;
-            };
-            break;
-        };
-        case ComplexTokenType::BOOLEAN:
-        case ComplexTokenType::IDENTIFIER: {
-            if (!(std::isalpha(c) || std::isdigit(c) || c == '_' || c == '-')) {
-                extractAndSaveToken();
-                return std::nullopt;
-            };
-            break;
-        };
-    };
-    buffer += c;
-    return std::nullopt;
+std::optional<GQLToken> LexerState::maybeExtractToken() {
+    if (!type.has_value()) return std::nullopt;
+    return extractToken();
 };
 
 GQLToken LexerState::extractToken() {
@@ -148,41 +65,42 @@ GQLToken LexerState::extractToken() {
     buffer = "";
     return token;
 };
-std::optional<GQLToken> LexerState::maybeExtractToken() noexcept {
-    if (!type.has_value()) return std::nullopt;
-    return extractToken();
-};
-std::optional<LexerError> Lexer::parse() noexcept {
-    while (true) {
-        char c = static_cast<char>(stream.get());
-        auto result = state.feed(c);
-        if (result.has_value()) return result;
-        if (c == -1) break;
+
+void LexerState::feedWithType(char c, ComplexTokenType tokenType) {
+    const auto &condition = getConditionForComplexTokenType(tokenType);
+    if (!condition(c)) {
+        extractAndSaveToken();
+        return;
     };
-    return std::nullopt;
+    buffer += c;
 };
-std::optional<LexerError> LexerState::feedNew(char c) noexcept {
+
+void LexerState::extractAndSaveToken() {
+    const auto &token = extractToken();
+    tokensAccumulator->addToken(token);
+};
+
+std::optional<LexerError> LexerState::feedNew(char c) {
     location.start += 1;
     location.end += 1;
     if (c == ' ') return std::nullopt;
-    const auto optTokenType = getTypeForChar(c);
+    const auto optTokenType = tokenTypeFromChar(c);
     if (!optTokenType.has_value()) {
-        location.end = std::max((int)location.end, 0);
         return LexerError(
             std::string("Cannot determine token type for char: \"") + c + '\"',
             location);
     };
-    const auto tokenType = optTokenType.value();
-    if (std::holds_alternative<SimpleTokenType>(tokenType)) {
+    const auto &tokenType = optTokenType.value();
+    if (!std::holds_alternative<ComplexTokenType>(tokenType)) {
         tokensAccumulator->addToken({ .type = tokenType,
-                                      .lexeme = std::string() + c,
+                                      .lexeme = std::string(1, c),
                                       .location = location });
         return std::nullopt;
     };
-    const auto complexTokenType = std::get<ComplexTokenType>(tokenType);
+    const auto &complexTokenType = std::get<ComplexTokenType>(tokenType);
     type = complexTokenType;
     if (complexTokenType != ComplexTokenType::STRING) {
-        buffer = std::string() + c;
+        buffer = std::string(1, c);
     };
     return std::nullopt;
-}
+};

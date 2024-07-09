@@ -24,6 +24,7 @@ include("${CMAKE_SOURCE_DIR}/src/vendor/rapidjson.cmake")
 include("${CMAKE_SOURCE_DIR}/src/vendor/cli11.cmake")
 include("${CMAKE_SOURCE_DIR}/src/vendor/httprequest.cmake")
 
+
 file(GLOB_RECURSE GQL_LIB_HEADERS src/src/libgql/*.hpp src/src/libgql/*.h)
 file(GLOB_RECURSE GQL_LIB_SOURCES src/src/libgql/*.cpp src/src/libgql/*.c)
 file(GLOB_RECURSE GQL_CLI_HEADERS src/src/gql_cli/*.hpp src/src/gql_cli/*.h)
@@ -44,10 +45,8 @@ add_executable(
     ${GQL_CLI_HEADERS}
     ${GQL_CLI_SOURCES}
 )
-#target_compile_options(gql_lib PRIVATE -Wall -fsanitize=address,undefined,leak)
-#target_compile_options(gql PRIVATE -Wall -fsanitize=address,undefined,leak)
-#target_link_options(gql_lib PRIVATE -fsanitize=address,undefined,leak)
-#target_link_options(gql PRIVATE -fsanitize=address,undefined,leak)
+
+
 target_link_libraries(gql
     PRIVATE CLI11::CLI11
     PRIVATE gql_lib
@@ -90,6 +89,16 @@ target_link_libraries(
     PRIVATE GTest::gmock_main
     PRIVATE gql_lib
 )
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(gql_lib PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+    target_link_options(gql_lib PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+    target_link_options(main_test PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+    target_link_options(gql PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+    #target_compile_options(gql_lib PRIVATE -Wall -fsanitize=address,undefined,leak)
+    #target_compile_options(gql PRIVATE -Wall -fsanitize=address,undefined,leak)
+    #target_link_options(gql_lib PRIVATE -fsanitize=address,undefined,leak)
+    #target_link_options(gql PRIVATE -fsanitize=address,undefined,leak)
+endif()
 add_dependencies(main_test rapidjson)
 include(GoogleTest)
 gtest_discover_tests(main_test)

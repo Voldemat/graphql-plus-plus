@@ -1,79 +1,42 @@
 #ifndef GRAPHQL_LEXER
 #define GRAPHQL_LEXER
 
-#include <exception>
 #include <optional>
-#include <sstream>
 #include <string>
-#include <vector>
+#include <string_view>
 
+#include "./itokens_accumulator.hpp"
+#include "./lexer_error.hpp"
+#include "./location.hpp"
 #include "./token.hpp"
+#include "./token_type.hpp"
 
 namespace lexer {
-class LexerError : public std::exception {
-    std::string message;
-    std::string finalMessage;
-    Location location;
-public:
-    LexerError(const std::string message, const Location location) noexcept;
-    [[nodiscard]] Location getLocation() const noexcept;
-    [[nodiscard]] const char* what() const noexcept override;
-};
-
-class ITokensAccumulator {
-public:
-    ITokensAccumulator(const ITokensAccumulator &) = default;
-    ITokensAccumulator(ITokensAccumulator &&) = delete;
-    ITokensAccumulator &operator=(const ITokensAccumulator &) = default;
-    ITokensAccumulator &operator=(ITokensAccumulator &&) = delete;
-    virtual ~ITokensAccumulator() = default;
-    ITokensAccumulator() = default;
-    virtual void addToken(const GQLToken token) noexcept = 0;
-};
-class VectorTokensAccumulator : public ITokensAccumulator {
-    std::vector<GQLToken> tokens;
-    void addToken(const GQLToken token) noexcept override {
-        tokens.push_back(token);
-    };
-public:
-    VectorTokensAccumulator() = default;
-    VectorTokensAccumulator(const VectorTokensAccumulator &) = default;
-    VectorTokensAccumulator(VectorTokensAccumulator &&) = delete;
-    VectorTokensAccumulator &operator=(const VectorTokensAccumulator &)
-        = default;
-    VectorTokensAccumulator &operator=(VectorTokensAccumulator &&) = delete;
-    [[nodiscard]] std::vector<GQLToken> getTokens() const noexcept { return tokens; };
-    ~VectorTokensAccumulator() override = default;
-};
 class LexerState {
     std::string buffer;
     std::optional<ComplexTokenType> type;
     Location location;
-    ITokensAccumulator* tokensAccumulator;
-    std::optional<LexerError> feedNew(char c) noexcept;
-    [[nodiscard]] std::optional<GQLTokenType> getTypeForChar(char c) const noexcept;
-    std::optional<LexerError> feedWithType(
-        char c, ComplexTokenType tokenType) noexcept;
+    ITokensAccumulator *tokensAccumulator;
+    std::optional<LexerError> feedNew(char c);
+    void feedWithType(char c, ComplexTokenType tokenType);
     GQLToken extractToken();
-    std::optional<GQLToken> maybeExtractToken() noexcept;
-    void extractAndSaveToken() noexcept;
+    std::optional<GQLToken> maybeExtractToken();
+    void extractAndSaveToken();
+
 public:
-    LexerState(
-        ITokensAccumulator* tokensAccumulator
-    ) noexcept : tokensAccumulator{tokensAccumulator} {
-    };
-    std::optional<LexerError> feed(char c) noexcept;
+    LexerState(ITokensAccumulator *tokensAccumulator)
+        : tokensAccumulator{ tokensAccumulator } {};
+    std::optional<LexerError> feed(char c);
+    void maybeExtractAndSaveToken();
 };
 
 class Lexer {
     LexerState state;
-    std::istringstream stream;
+    std::string_view stream;
+
 public:
-    Lexer(
-        std::istringstream stream,
-        ITokensAccumulator* tokensAccumulator
-    );
-    std::optional<LexerError> parse() noexcept;
+    Lexer(const std::string_view &s, ITokensAccumulator *tokensAccumulator);
+    std::optional<LexerError> parse();
 };
 };  // namespace lexer
 #endif

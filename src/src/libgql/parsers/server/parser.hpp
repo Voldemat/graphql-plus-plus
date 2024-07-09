@@ -9,6 +9,7 @@
 
 #include "./ast.hpp"
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/token_type.hpp"
 #include "libgql/parsers/shared/shared.hpp"
 
 namespace parsers {
@@ -16,15 +17,15 @@ namespace server {
 
 class Parser {
     unsigned int index = 0;
-    std::vector<GQLToken> tokens;
+    std::vector<lexer::GQLToken> tokens;
     std::shared_ptr<shared::ast::SourceFile> source;
-    GQLToken currentToken;
-    std::optional<GQLToken> lookahead();
+    lexer::GQLToken currentToken;
+    std::optional<lexer::GQLToken> lookahead();
     void advance();
-    void consume(const GQLTokenType expectedType);
+    void consume(const lexer::GQLTokenType expectedType);
     void consumeIdentifier();
-    bool consumeIfIsAhead(GQLTokenType expectedType);
-    bool isAhead(GQLTokenType expectedType);
+    bool consumeIfIsAhead(lexer::GQLTokenType expectedType);
+    bool isAhead(lexer::GQLTokenType expectedType);
     shared::ast::NameNode parseNameNode(bool raiseOnKeyword = false);
     ast::ScalarDefinitionNode parseScalarTypeDefinitionNode();
     ast::UnionDefinitionNode parseUnionTypeDefinitionNode();
@@ -42,8 +43,8 @@ class Parser {
     ast::ObjectDefinitionNode parseObjectTypeDefinitionNode();
 
 public:
-    Parser(const std::vector<GQLToken>& tokens,
-           const std::shared_ptr<shared::ast::SourceFile>& source);
+    Parser(const std::vector<lexer::GQLToken> &tokens,
+           const std::shared_ptr<shared::ast::SourceFile> &source);
     ast::FileNodes parse();
 };
 };  // namespace server

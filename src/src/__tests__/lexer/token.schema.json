@@ -18,6 +18,7 @@
                         "RIGHT_BRACE",
                         "BANG",
                         "IDENTIFIER",
+                        "SPREAD",
                         "STRING",
                         "NUMBER",
                         "SEMICOLON",

@@ -10,6 +10,9 @@
 #include <variant>
 
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/token_type.hpp"
+#include "libgql/lexer/location.hpp"
+
 namespace parsers {
 namespace shared {
 namespace ast {
@@ -20,8 +23,8 @@ struct SourceFile {
 };
 
 struct NodeLocation {
-    GQLToken startToken;
-    GQLToken endToken;
+    lexer::GQLToken startToken;
+    lexer::GQLToken endToken;
     std::shared_ptr<SourceFile> source;
 };
 
@@ -82,7 +85,7 @@ struct InputValueDefinitionNode {
 };  // namespace ast
 
 class ParserError : public std::exception {
-    GQLToken token;
+    lexer::GQLToken token;
     std::string error;
     std::shared_ptr<const ast::SourceFile> source;
 
@@ -92,23 +95,23 @@ public:
         return source;
     };
 
-    [[nodiscard]] Location getLocation() const noexcept {
+    [[nodiscard]] lexer::Location getLocation() const noexcept {
         return token.location;
     };
-    explicit ParserError(const GQLToken t, const std::string e,
+    explicit ParserError(const lexer::GQLToken t, const std::string e,
                          const std::shared_ptr<const ast::SourceFile> &source)
         : token{ t }, error{ e }, source{ source } {};
     [[nodiscard]] const char *what() const noexcept override {
         return error.c_str();
     };
     const static ParserError createEOF(
-        const GQLToken token,
+        const lexer::GQLToken token,
         const std::shared_ptr<const ast::SourceFile> &source) noexcept {
         return ParserError(token, "EOF", source);
     };
 
     const static ParserError wrongType(
-        const GQLToken token, const GQLTokenType expectedType,
+        const lexer::GQLToken token, const lexer::GQLTokenType expectedType,
         const std::shared_ptr<const ast::SourceFile> &source) noexcept {
         return ParserError(
             token,
@@ -119,21 +122,21 @@ public:
     };
 
     const static ParserError identifierIsKeyword(
-        const GQLToken token,
+        const lexer::GQLToken token,
         const std::shared_ptr<const ast::SourceFile> &source) noexcept {
         return ParserError(token, token.lexeme + " is reserved keyword",
                            source);
     };
 
     const static ParserError unexpectedIdentifier(
-        const GQLToken token,
+        const lexer::GQLToken token,
         const std::shared_ptr<const ast::SourceFile> &source) noexcept {
         return ParserError(
             token, "Unexpected identifier: \"" + token.lexeme + "\"", source);
     };
 
     const static ParserError wrongLexeme(
-        const GQLToken &token, const std::string &expectedLexeme,
+        const lexer::GQLToken &token, const std::string &expectedLexeme,
         const std::shared_ptr<ast::SourceFile> &source) {
         return ParserError(token,
                            std::format(R"((Expected: "{}", got "{}"))",
@@ -142,7 +145,7 @@ public:
     };
 };
 
-void assertIsNotKeyword(const GQLToken token, const std::shared_ptr<ast::SourceFile>& source);
+void assertIsNotKeyword(const lexer::GQLToken token, const std::shared_ptr<ast::SourceFile>& source);
 const bool isKeyword(const std::string lexeme) noexcept;
 };  // namespace shared
 };  // namespace parsers

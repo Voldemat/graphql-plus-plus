@@ -6,7 +6,8 @@
 #include "libgql/lexer/token.hpp"
 
 void parsers::shared::assertIsNotKeyword(
-    const GQLToken token, const std::shared_ptr<ast::SourceFile> &source) {
+    const lexer::GQLToken token,
+    const std::shared_ptr<ast::SourceFile> &source) {
     if (isKeyword(token.lexeme))
         throw ParserError::identifierIsKeyword(token, source);
 };

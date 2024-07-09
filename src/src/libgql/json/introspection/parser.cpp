@@ -315,7 +315,7 @@ ServerSchemaNode parseNodeSecondPass(const JSONValue &value,
         std::format("Unknown introspection type kind: {}", kind));
 };
 
-const ServerSchema json::parser::introspection::parseIntrospectionSchema(
+const ServerSchema parseIntrospectionSchema(
     const rapidjson::Document &document) {
     const auto &types = document["data"]["__schema"]["types"].GetArray();
     TypeRegistry registry;

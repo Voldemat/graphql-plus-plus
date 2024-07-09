@@ -27,7 +27,9 @@
 #include "libgql/json/serializers/parser/parser.hpp"
 #include "libgql/json/serializers/schema/schema.hpp"
 #include "libgql/lexer/lexer.hpp"
+#include "libgql/lexer/location.hpp"
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/tokens_accumulators.hpp"
 #include "libgql/parsers/client/ast.hpp"
 #include "libgql/parsers/client/parser.hpp"
 #include "libgql/parsers/schema/schema.hpp"
@@ -38,14 +40,13 @@
 using namespace parsers;
 
 rapidjson::Writer<rapidjson::StringBuffer> createWriter(
-    const bool& pretty, rapidjson::StringBuffer& buffer) {
-    if (!pretty)
-        return rapidjson::Writer(buffer);
+    const bool &pretty, rapidjson::StringBuffer &buffer) {
+    if (!pretty) return rapidjson::Writer(buffer);
     return rapidjson::PrettyWriter(buffer);
 };
 
 std::string formatLine(const std::string &line, const unsigned int &currentLine,
-                       const Location &location,
+                       const lexer::Location &location,
                        const shared::ParserError &exc) {
     std::string linestr = std::to_string(currentLine);
     std::string buffer = std::format("{}: {}\n", linestr, line);
@@ -66,7 +67,7 @@ std::string formatLine(const std::string &line, const unsigned int &currentLine,
 std::string formatError(const shared::ParserError &exc) {
     std::string buffer =
         std::format("{}\n", exc.getSource()->filepath.string());
-    const Location &location = exc.getLocation();
+    const lexer::Location &location = exc.getLocation();
     unsigned int firstLineToShow =
         std::clamp((int)location.line - 4, 1, std::numeric_limits<int>::max());
     unsigned int lastLineToShow = location.line + 4;
@@ -109,16 +110,15 @@ void createParserSubcommand(CLI::App *app) {
         };
         rapidjson::Document d;
         d.Parse(buffer.c_str());
-        std::vector<GQLToken> tokens;
+        std::vector<lexer::GQLToken> tokens;
         try {
             tokens = json::parsers::lexer::parseTokensArray(d.GetArray());
-        } catch (const json::parsers::shared::ParsingError& error) {
+        } catch (const json::parsers::shared::ParsingError &error) {
             std::cerr << error.what() << std::endl;
             throw CLI::RuntimeError(1);
         };
         if (tokens.size() == 0) {
-            std::cerr << "No tokens was provided in array"
-                      << std::endl;
+            std::cerr << "No tokens was provided in array" << std::endl;
             throw CLI::RuntimeError(1);
         };
         std::shared_ptr<shared::ast::SourceFile> source =
@@ -190,7 +190,7 @@ void createParserSubcommand(CLI::App *app) {
             std::shared_ptr<shared::ast::SourceFile> source =
                 std::make_shared<shared::ast::SourceFile>(filepath, buffer);
             lexer::VectorTokensAccumulator tokensAccumulator;
-            lexer::Lexer lexer((std::istringstream)buffer, &tokensAccumulator);
+            lexer::Lexer lexer(buffer, &tokensAccumulator);
             const auto &error = lexer.parse();
             if (error.has_value()) {
                 std::cerr << "LexerParserError: " << error.value().what()
@@ -225,7 +225,7 @@ void createParserSubcommand(CLI::App *app) {
             std::shared_ptr<shared::ast::SourceFile> source =
                 std::make_shared<shared::ast::SourceFile>(filepath, buffer);
             lexer::VectorTokensAccumulator tokensAccumulator;
-            lexer::Lexer lexer((std::istringstream)buffer, &tokensAccumulator);
+            lexer::Lexer lexer(buffer, &tokensAccumulator);
             const auto &error = lexer.parse();
             if (error.has_value()) {
                 std::cerr << std::format("LexerParserError({}): {}",

@@ -9,11 +9,12 @@
 
 #include "../../utils.hpp"
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/location.hpp"
 
 namespace json::parsers::lexer {
 
-std::vector<GQLToken> parseTokensArray(const JSONArray &document);
-Location parseLocation(
+std::vector<::lexer::GQLToken> parseTokensArray(const JSONArray &document);
+::lexer::Location parseLocation(
     rapidjson::GenericValue<rapidjson::UTF8<>> const &document,
     const std::string &path);
 

@@ -11,7 +11,7 @@ namespace json::serializers::lexer {
 
 void writeTokens(
     JSONWriter &writer,
-    const std::vector<GQLToken> &tokens);
+    const std::vector<::lexer::GQLToken> &tokens);
 void writeToken(JSONWriter &writer,
-                const GQLToken &token);
+                const ::lexer::GQLToken &token);
 };  // namespace json::serializers::lexer
