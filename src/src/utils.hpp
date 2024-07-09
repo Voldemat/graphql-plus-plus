@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <iterator>
@@ -7,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
