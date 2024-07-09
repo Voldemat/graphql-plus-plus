@@ -12,7 +12,7 @@ class LexerError : public std::exception {
 
 public:
     LexerError(const std::string message, const Location location);
-    [[nodiscard]] Location getLocation() const;
+    inline Location getLocation() const { return location; };
     [[nodiscard]] const char *what() const noexcept override;
 };
 };  // namespace lexer

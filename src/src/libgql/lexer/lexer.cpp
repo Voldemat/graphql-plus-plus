@@ -32,12 +32,7 @@ void LexerState::feed(char c) {
     };
     if (type.has_value()) {
         feedWithType(c, type.value());
-        if (!type.has_value()) {
-            location.start = location.end;
-        } else {
-            location.end += 1;
-            return;
-        };
+        if (type.has_value()) return;
     };
     feedNew(c);
 };
@@ -58,9 +53,9 @@ GQLToken LexerState::extractToken() {
     const GQLToken token = { .type = type.value(),
                              .lexeme = buffer,
                              .location = location };
-    location.start = location.end;
     type = std::nullopt;
     buffer = "";
+    location.unlockStart();
     return token;
 };
 
@@ -71,6 +66,8 @@ void LexerState::feedWithType(char c, ComplexTokenType tokenType) {
         return;
     };
     buffer += c;
+    location.advance();
+    return;
 };
 
 void LexerState::extractAndSaveToken() {
@@ -79,8 +76,7 @@ void LexerState::extractAndSaveToken() {
 };
 
 void LexerState::feedNew(char c) {
-    location.start += 1;
-    location.end += 1;
+    location.advance();
     if (c == ' ') return;
     const auto optTokenType = tokenTypeFromChar(c);
     if (!optTokenType.has_value()) {
@@ -88,6 +84,7 @@ void LexerState::feedNew(char c) {
             std::string("Cannot determine token type for char: \"") + c + '\"',
             location);
     };
+
     const auto &tokenType = optTokenType.value();
     if (!std::holds_alternative<ComplexTokenType>(tokenType)) {
         tokensAccumulator->addToken({ .type = tokenType,
@@ -95,9 +92,11 @@ void LexerState::feedNew(char c) {
                                       .location = location });
         return;
     };
+
     const auto &complexTokenType = std::get<ComplexTokenType>(tokenType);
     type = complexTokenType;
     if (complexTokenType != ComplexTokenType::STRING) {
         buffer = std::string(1, c);
     };
+    location.lockStart();
 };

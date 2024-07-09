@@ -31,11 +31,11 @@ void json::serializers::lexer::writeToken(JSONWriter &writer,
     {
         writer.StartObject();
         writer.String("line");
-        writer.Uint(token.location.line);
+        writer.Uint(token.location.getLine());
         writer.String("start");
-        writer.Uint(token.location.start);
+        writer.Uint(token.location.getStart());
         writer.String("end");
-        writer.Uint(token.location.end);
+        writer.Uint(token.location.getEnd());
         writer.EndObject();
     };
     writer.EndObject();

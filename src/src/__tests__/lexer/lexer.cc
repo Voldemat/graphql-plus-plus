@@ -42,9 +42,9 @@ TEST_P(LexerFixture, TestLexer) {
         ASSERT_TRUE(testCase.error.has_value()) << error.what();
         const auto expectedError = testCase.error.value();
         const auto expectedErrorLocation = expectedError.getLocation();
-        ASSERT_EQ(errorLocation.line, expectedErrorLocation.line);
-        ASSERT_EQ(errorLocation.start, expectedErrorLocation.start);
-        ASSERT_EQ(errorLocation.end, expectedErrorLocation.end);
+        ASSERT_EQ(errorLocation.getLine(), expectedErrorLocation.getLine());
+        ASSERT_EQ(errorLocation.getStart(), expectedErrorLocation.getStart());
+        ASSERT_EQ(errorLocation.getEnd(), expectedErrorLocation.getEnd());
         ASSERT_STREQ(error.what(), expectedError.what());
         return;
     };

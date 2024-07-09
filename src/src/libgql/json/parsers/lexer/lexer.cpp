@@ -67,7 +67,7 @@ std::vector<GQLToken> json::parsers::lexer::parseTokensArray(
 Location json::parsers::lexer::parseLocation(
     rapidjson::GenericValue<rapidjson::UTF8<>> const &value,
     const std::string &path) {
-    return (Location){ .line = extractUint(value, "line", path),
-                       .start = extractUint(value, "start", path),
-                       .end = extractUint(value, "end", path) };
+    return ::lexer::Location(extractUint(value, "line", path),
+                             extractUint(value, "start", path),
+                             extractUint(value, "end", path));
 };

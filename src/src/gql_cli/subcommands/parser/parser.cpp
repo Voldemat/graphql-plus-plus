@@ -51,12 +51,14 @@ std::string formatLine(const std::string &line, const unsigned int &currentLine,
                        const shared::ParserError &exc) {
     std::string linestr = std::to_string(currentLine);
     std::string buffer = std::format("{}: {}\n", linestr, line);
-    if (currentLine == location.line) {
+    if (currentLine == location.getLine()) {
         std::string underline;
-        for (unsigned int i = 0; i < location.start + 2 + linestr.size(); i++) {
+        for (unsigned int i = 0; i < location.getStart() + 2 + linestr.size();
+             i++) {
             underline += " ";
         };
-        for (unsigned int i = location.start; i < location.end + 1; i++) {
+        for (unsigned int i = location.getStart(); i < location.getEnd() + 1;
+             i++) {
             underline += "~";
         };
         underline += std::format(" Error: {}\n", exc.what());
@@ -69,9 +71,9 @@ std::string formatError(const shared::ParserError &exc) {
     std::string buffer =
         std::format("{}\n", exc.getSource()->filepath.string());
     const lexer::Location &location = exc.getLocation();
-    unsigned int firstLineToShow =
-        std::clamp((int)location.line - 4, 1, std::numeric_limits<int>::max());
-    unsigned int lastLineToShow = location.line + 4;
+    unsigned int firstLineToShow = std::clamp((int)location.getLine() - 4, 1,
+                                              std::numeric_limits<int>::max());
+    unsigned int lastLineToShow = location.getLine() + 4;
     std::string line;
     unsigned int currentLine = 1;
     std::istringstream stream = (std::istringstream)exc.getSource()->buffer;

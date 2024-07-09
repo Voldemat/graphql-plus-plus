@@ -61,17 +61,17 @@ inline std::vector<LexerTestCase> getLexerCases() noexcept {
                           gqlTokenTypeFromString(jsonToken["type"].GetString())
                               .value(),
                       .lexeme = jsonToken["lexeme"].GetString(),
-                      .location = { .line = location["line"].GetUint(),
-                                    .start = location["start"].GetUint(),
-                                    .end = location["end"].GetUint() } });
+                      .location = Location(location["line"].GetUint(),
+                                           location["start"].GetUint(),
+                                           location["end"].GetUint()) });
             };
         } else {
             const auto &errorObj = d["error"];
             const auto &location = errorObj["location"];
             error = LexerError(errorObj["message"].GetString(),
-                               (Location){ .line = location["line"].GetUint(),
-                                           .start = location["start"].GetUint(),
-                                           .end = location["end"].GetUint() });
+                               Location(location["line"].GetUint(),
+                                        location["start"].GetUint(),
+                                        location["end"].GetUint()));
         };
         cases.push_back({ .filename = filepath.filename(),
                           .schema = schema,

@@ -5,12 +5,24 @@
 #include <string>
 
 namespace lexer {
-struct Location {
+class Location {
+    bool isStartLocked = false;
     unsigned int line = 1;
     unsigned int start = -1;
     unsigned int end = -1;
 
+public:
+    explicit Location(unsigned int line, unsigned int start, unsigned int end);
+    Location(){};
+
+    void lockStart();
+    void advance();
+    void unlockStart();
     void newLine();
+
+    inline unsigned int getLine() const { return line; }; 
+    inline unsigned int getStart() const { return start; };
+    inline unsigned int getEnd() const { return end; };
 
     explicit operator std::string() const {
         return std::format("Line {} {}:{}", line, start, end);
