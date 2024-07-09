@@ -1,0 +1,83 @@
+#pragma once
+
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+#include <variant>
+#include <vector>
+
+#include "../file/client/ast.hpp"
+#include "libgql/parsers/schema/server_ast.hpp"
+
+namespace parsers::schema::ast {
+
+struct Fragment;
+struct FieldSelection;
+struct ObjectConditionalSpreadSelection;
+struct UnionConditionalSpreadSelection;
+struct SpreadSelection {
+    std::shared_ptr<Fragment> fragment;
+};
+
+struct TypenameField {};
+using UnionSelection = std::variant<TypenameField, SpreadSelection,
+                                    ObjectConditionalSpreadSelection,
+                                    UnionConditionalSpreadSelection>;
+using ObjectSelection =
+    std::variant<TypenameField, SpreadSelection, FieldSelection>;
+
+struct UnionFragmentSpec {
+    std::shared_ptr<Union> type;
+    std::vector<UnionSelection> selections;
+};
+
+template <typename T>
+struct ObjectFragmentSpec {
+    std::shared_ptr<T> type;
+    std::vector<ObjectSelection> selections;
+};
+
+struct ObjectConditionalSpreadSelection {
+    std::shared_ptr<ObjectType> type;
+    std::shared_ptr<ObjectFragmentSpec<ObjectType>> selection;
+};
+
+struct UnionConditionalSpreadSelection {
+    std::shared_ptr<Union> type;
+    std::shared_ptr<UnionFragmentSpec> selection;
+};
+
+using FragmentSpec =
+    std::variant<UnionFragmentSpec, ObjectFragmentSpec<ObjectType>,
+                 ObjectFragmentSpec<Interface>>;
+
+struct FieldSelectionArgument {
+    std::string name;
+    std::string parameterName;
+    std::shared_ptr<FieldDefinition<InputFieldSpec>> type;
+};
+
+struct FieldSelection {
+    std::string name;
+    std::string alias;
+    std::optional<std::map<std::string, FieldSelectionArgument>> arguments;
+    std::optional<std::shared_ptr<FragmentSpec>> selection;
+};
+
+struct Fragment {
+    std::string name;
+    FragmentSpec spec;
+};
+
+struct Operation {
+    file::client::ast::OpType type;
+    std::string name;
+    std::map<std::string, FieldDefinition<InputFieldSpec>> parameters;
+    FragmentSpec fragmentSpec;
+};
+
+using ClientSchemaNode =
+    std::variant<std::shared_ptr<Fragment>, std::shared_ptr<Operation>>;
+
+};  // namespace parsers::schema::ast

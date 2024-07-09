@@ -24,10 +24,12 @@
 #include "gql_cli/utils.hpp"
 #include "libgql/json/introspection/parser.hpp"
 #include "libgql/json/parsers/schema/schema.hpp"
+#include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "utils.hpp"
 
 using namespace parsers::schema;
+using namespace parsers::schema::ast;
 
 const char *INTROSPECTION_QUERY =
 #include "./query.data"

@@ -10,11 +10,13 @@
 #include "../file/client/ast.hpp"
 #include "../file/shared/ast.hpp"
 #include "../file/shared/parser_error.hpp"
-#include "./schema.hpp"
+#include "./client_ast.hpp"
+#include "./server_ast.hpp"
 #include "utils.hpp"
 
 using namespace parsers::file;
 using namespace parsers::schema;
+using namespace parsers::schema::ast;
 
 TypeRegistry::TypeRegistry() {
     scalars["String"] = std::make_shared<Scalar>("String");

@@ -9,10 +9,12 @@
 #include <vector>
 
 #include "../../utils.hpp"
+#include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 
 using namespace parsers::schema;
+using namespace parsers::schema::ast;
 
 const std::shared_ptr<Scalar> parseScalar(const JSONValue &value) {
     return std::make_shared<Scalar>(value.GetString());

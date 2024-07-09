@@ -20,12 +20,14 @@
 #include <vector>
 
 #include "../utils.hpp"
+#include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "utils.hpp"
 
-using namespace json::parser::introspection;
 using namespace parsers::schema;
+using namespace parsers::schema::ast;
+using namespace json::parser::introspection;
 
 namespace json::parser::introspection {
 ServerSchemaNode parseNodeFirstPass(const JSONValue &value) {
@@ -336,4 +338,4 @@ const ServerSchema parseIntrospectionSchema(
         }) |
         std::ranges::to<std::vector>());
 };
-};
+};  // namespace json::parser::introspection

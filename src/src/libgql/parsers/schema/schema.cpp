@@ -16,12 +16,14 @@
 #include "../file/server/ast.hpp"
 #include "../file/shared/ast.hpp"
 #include "../file/shared/parser_error.hpp"
+#include "./client_ast.hpp"
+#include "./server_ast.hpp"
 #include "./type_registry.hpp"
 #include "utils.hpp"
 
 using namespace parsers::file;
 using namespace parsers::schema;
-using namespace parsers::file::server;
+using namespace parsers::schema::ast;
 
 bool InputFieldSpec_hasDefaultValue(const InputFieldSpec &spec) {
     return std::visit<bool>(
@@ -45,7 +47,7 @@ InputTypeSpec extractInputTypeSpec(const InputFieldSpec &spec) {
         spec);
 };
 
-std::shared_ptr<Union> parseUnion(const ast::UnionDefinitionNode &node,
+std::shared_ptr<Union> parseUnion(const server::ast::UnionDefinitionNode &node,
                                   const TypeRegistry &registry) {
     const auto &obj = registry.unions.at(node.name.name);
     obj->items =
@@ -149,7 +151,8 @@ FieldDefinition<InputFieldSpec> parseInputFieldDefinition(
 };
 
 std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
-    const ast::FieldDefinitionNode &astNode, const TypeRegistry &registry) {
+    const server::ast::FieldDefinitionNode &astNode,
+    const TypeRegistry &registry) {
     const auto &[returnType, nullable] =
         parseNonCallableObjectTypeSpec(astNode.type, registry);
     ObjectFieldSpec returnTypeSpec = std::visit(
@@ -174,7 +177,8 @@ std::pair<ObjectFieldSpec, bool> parseObjectTypeSpec(
 };
 
 std::pair<InputFieldSpec, bool> parseInputTypeSpec(
-    const ast::FieldDefinitionNode &astNode, const TypeRegistry &registry) {
+    const server::ast::FieldDefinitionNode &astNode,
+    const TypeRegistry &registry) {
     const auto &[returnType, nullable] =
         parseNonCallableInputTypeSpec(astNode.type, std::nullopt, registry);
     InputFieldSpec returnTypeSpec = std::visit(
@@ -184,12 +188,13 @@ std::pair<InputFieldSpec, bool> parseInputTypeSpec(
 };
 
 std::shared_ptr<Interface> parseInterface(
-    const ast::InterfaceDefinitionNode &node, const TypeRegistry &registry) {
+    const server::ast::InterfaceDefinitionNode &node,
+    const TypeRegistry &registry) {
     const auto &obj = registry.interfaces.at(node.name.name);
     obj->fields =
         node.fields |
         std::views::transform(
-            [&registry](const ast::FieldDefinitionNode &defNode)
+            [&registry](const server::ast::FieldDefinitionNode &defNode)
                 -> std::pair<
                     std::string,
                     std::shared_ptr<FieldDefinition<ObjectFieldSpec>>> {
@@ -204,12 +209,13 @@ std::shared_ptr<Interface> parseInterface(
 };
 
 std::shared_ptr<InputType> parseInput(
-    const ast::InputObjectDefinitionNode &node, const TypeRegistry &registry) {
+    const server::ast::InputObjectDefinitionNode &node,
+    const TypeRegistry &registry) {
     const auto &obj = registry.inputs.at(node.name.name);
     obj->fields =
         node.fields |
         std::views::transform(
-            [&registry](const ast::FieldDefinitionNode &defNode)
+            [&registry](const server::ast::FieldDefinitionNode &defNode)
                 -> std::pair<std::string, FieldDefinition<InputFieldSpec>> {
                 const auto &[typeSpec, nullable] =
                     parseInputTypeSpec(defNode, registry);
@@ -222,13 +228,14 @@ std::shared_ptr<InputType> parseInput(
     return obj;
 };
 
-std::shared_ptr<ObjectType> parseObject(const ast::ObjectDefinitionNode &node,
-                                        const TypeRegistry &registry) {
+std::shared_ptr<ObjectType> parseObject(
+    const server::ast::ObjectDefinitionNode &node,
+    const TypeRegistry &registry) {
     const auto &obj = registry.objects.at(node.name.name);
     obj->fields =
         node.fields |
         std::views::transform(
-            [&registry](const ast::FieldDefinitionNode &defNode)
+            [&registry](const server::ast::FieldDefinitionNode &defNode)
                 -> std::pair<
                     std::string,
                     std::shared_ptr<FieldDefinition<ObjectFieldSpec>>> {
@@ -251,31 +258,31 @@ std::shared_ptr<ObjectType> parseObject(const ast::ObjectDefinitionNode &node,
     return obj;
 };
 
-ServerSchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
+ServerSchemaNode parseServerNode(const server::ast::TypeDefinitionNode &astNode,
                                  const TypeRegistry &registry) {
     return std::visit<ServerSchemaNode>(
         overloaded{
-            [&registry](const ast::ScalarDefinitionNode &node)
+            [&registry](const server::ast::ScalarDefinitionNode &node)
                 -> std::shared_ptr<Scalar> {
                 return registry.scalars.at(node.name.name);
             },
-            [&registry](
-                const ast::EnumDefinitionNode &node) -> std::shared_ptr<Enum> {
+            [&registry](const server::ast::EnumDefinitionNode &node)
+                -> std::shared_ptr<Enum> {
                 return registry.enums.at(node.name.name);
             },
-            [&registry](const ast::UnionDefinitionNode &node)
+            [&registry](const server::ast::UnionDefinitionNode &node)
                 -> std::shared_ptr<Union> {
                 return parseUnion(node, registry);
             },
-            [&registry](const ast::InterfaceDefinitionNode &node)
+            [&registry](const server::ast::InterfaceDefinitionNode &node)
                 -> std::shared_ptr<Interface> {
                 return parseInterface(node, registry);
             },
-            [&registry](const ast::InputObjectDefinitionNode &node)
+            [&registry](const server::ast::InputObjectDefinitionNode &node)
                 -> std::shared_ptr<InputType> {
                 return parseInput(node, registry);
             },
-            [&registry](const ast::ObjectDefinitionNode &node)
+            [&registry](const server::ast::ObjectDefinitionNode &node)
                 -> std::shared_ptr<ObjectType> {
                 return parseObject(node, registry);
             },
@@ -286,7 +293,7 @@ ServerSchemaNode parseServerNode(const ast::TypeDefinitionNode &astNode,
 std::pair<
     std::shared_ptr<ObjectType>,
     std::map<std::string, std::shared_ptr<FieldDefinition<ObjectFieldSpec>>>>
-parseExtendObjectType(const ast::ExtendTypeNode &node,
+parseExtendObjectType(const server::ast::ExtendTypeNode &node,
                       const TypeRegistry &registry) {
     if (!registry.objects.contains(node.typeNode.name.name)) {
         throw shared::ParserError(node.typeNode.name.location.startToken,
@@ -826,29 +833,29 @@ ClientSchemaNode parseClientDefinition(
 };
 
 ServerSchemaNode parseServerNodeFirstPass(
-    const ast::TypeDefinitionNode &astNode) {
+    const server::ast::TypeDefinitionNode &astNode) {
     return std::visit<ServerSchemaNode>(
         overloaded{
-            [](const ast::ScalarDefinitionNode &node) {
+            [](const server::ast::ScalarDefinitionNode &node) {
                 return std::make_shared<Scalar>(node.name.name);
             },
-            [](const ast::EnumDefinitionNode &node) {
+            [](const server::ast::EnumDefinitionNode &node) {
                 return std::make_shared<Enum>(
                     node.name.name,
                     node.values | std::views::transform([](const auto &v) {
                         return v.value.name;
                     }) | std::ranges::to<std::vector>());
             },
-            [](const ast::UnionDefinitionNode &node) {
+            [](const server::ast::UnionDefinitionNode &node) {
                 return std::make_shared<Union>(node.name.name);
             },
-            [](const ast::ObjectDefinitionNode &node) {
+            [](const server::ast::ObjectDefinitionNode &node) {
                 return std::make_shared<ObjectType>(node.name.name);
             },
-            [](const ast::InputObjectDefinitionNode &node) {
+            [](const server::ast::InputObjectDefinitionNode &node) {
                 return std::make_shared<InputType>(node.name.name);
             },
-            [](const ast::InterfaceDefinitionNode &node) {
+            [](const server::ast::InterfaceDefinitionNode &node) {
                 return std::make_shared<Interface>(node.name.name);
             } },
         astNode);
@@ -980,29 +987,63 @@ void assertOperationIsValid(const std::shared_ptr<Operation> &op) {
     };
 };
 
+std::vector<ast::ServerSchemaNode> parseServerNodes(
+    const std::vector<server::ast::FileNodes> &astArray,
+    const TypeRegistry &registry) {
+    return astArray | std::views::transform([](const auto &ast) {
+               return ast.definitions;
+           }) |
+           std::views::join | std::views::transform([&registry](auto &sNode) {
+               return parseServerNode(sNode, registry);
+           }) |
+           std::ranges::to<std::vector>();
+};
+
+auto parseServerExtendNodes(const std::vector<server::ast::FileNodes> &astArray,
+                            const TypeRegistry &registry) {
+    return astArray | std::views::transform([](const auto &ast) {
+               return ast.extensions;
+           }) |
+           std::views::join |
+           std::views::transform([&registry](const auto &node) {
+               return parseExtendObjectType(node, registry);
+           });
+};
+
+void assertClientNodesAreValid(
+    const std::vector<ast::ClientSchemaNode> &clientNodes) {
+    for (const auto &opNode :
+         clientNodes | std::views::filter([](const auto &n) {
+             return std::holds_alternative<std::shared_ptr<Operation>>(n);
+         }) | std::views::transform([](const auto &n) {
+             return std::get<std::shared_ptr<Operation>>(n);
+         })) {
+        assertOperationIsValid(opNode);
+    };
+};
+
+std::vector<ast::ClientSchemaNode> parseClientNodes(
+    const std::vector<client::ast::ClientDefinition> &definitions,
+    const TypeRegistry &registry) {
+    return definitions | std::views::transform([&registry](const auto &node) {
+               return parseClientDefinition(node, registry);
+           }) |
+           std::ranges::to<std::vector>();
+};
+
 const Schema parsers::schema::parseSchema(
-    std::vector<ast::FileNodes> astArray,
+    std::vector<server::ast::FileNodes> astArray,
     std::vector<client::ast::ClientDefinition> clientDefinitions) {
-    Schema schema;
     TypeRegistry registry;
     for (const auto &ast : astArray) {
         for (const auto &node : ast.definitions) {
             registry.addNode(parseServerNodeFirstPass(node));
         };
     };
-    schema.server = ServerSchema::fromNodes(
-        astArray |
-        std::views::transform([](const auto &ast) { return ast.definitions; }) |
-        std::views::join | std::views::transform([&registry](auto &sNode) {
-            return parseServerNode(sNode, registry);
-        }) |
-        std::ranges::to<std::vector>());
-    for (const auto &ast : astArray) {
-        for (const auto &node : ast.extensions) {
-            const auto &[typeNode, newFields] =
-                parseExtendObjectType(node, registry);
-            registry.patchObject(typeNode, newFields);
-        };
+    const auto &serverNodes = parseServerNodes(astArray, registry);
+    for (const auto &[typeNode, newFields] :
+         parseServerExtendNodes(astArray, registry)) {
+        registry.patchObject(typeNode, newFields);
     };
     for (const auto &fragmentDefinition :
          clientDefinitions | std::views::filter([](const auto &def) {
@@ -1014,20 +1055,8 @@ const Schema parsers::schema::parseSchema(
         registry.addFragment(
             parseFragmentFirstPass(fragmentDefinition, registry));
     };
-    const auto &clientNodes =
-        clientDefinitions |
-        std::views::transform([&registry](const auto &node) {
-            return parseClientDefinition(node, registry);
-        }) |
-        std::ranges::to<std::vector>();
-    for (const auto &opNode :
-         clientNodes | std::views::filter([](const auto &n) {
-             return std::holds_alternative<std::shared_ptr<Operation>>(n);
-         }) | std::views::transform([](const auto &n) {
-             return std::get<std::shared_ptr<Operation>>(n);
-         })) {
-        assertOperationIsValid(opNode);
-    };
-    schema.client = ClientSchema(clientNodes);
-    return schema;
+    const auto &clientNodes = parseClientNodes(clientDefinitions, registry);
+    assertClientNodesAreValid(clientNodes);
+    return { .server = ServerSchema::fromNodes(serverNodes),
+             .client = ClientSchema::fromNodes(clientNodes) };
 };
