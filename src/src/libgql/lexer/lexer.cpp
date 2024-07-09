@@ -7,30 +7,28 @@
 #include <string_view>
 #include <variant>
 
+#include "./itokens_accumulator.hpp"
 #include "./lexer_error.hpp"
 #include "./token.hpp"
 #include "./token_type.hpp"
-#include "./itokens_accumulator.hpp"
 
 using namespace lexer;
 
 Lexer::Lexer(const std::string_view &s, ITokensAccumulator *tokensAccumulator)
     : state{ tokensAccumulator }, stream{ s } {};
 
-std::optional<LexerError> Lexer::parse() {
+void Lexer::parse() {
     for (const auto &c : stream) {
-        const auto &result = state.feed(c);
-        if (result.has_value()) return result;
+        state.feed(c);
     };
     state.maybeExtractAndSaveToken();
-    return std::nullopt;
 };
 
-std::optional<LexerError> LexerState::feed(char c) {
+void LexerState::feed(char c) {
     if (c == '\n') {
         maybeExtractAndSaveToken();
         location.newLine();
-        return std::nullopt;
+        return;
     };
     if (type.has_value()) {
         feedWithType(c, type.value());
@@ -38,10 +36,10 @@ std::optional<LexerError> LexerState::feed(char c) {
             location.start = location.end;
         } else {
             location.end += 1;
-            return std::nullopt;
+            return;
         };
     };
-    return feedNew(c);
+    feedNew(c);
 };
 
 void LexerState::maybeExtractAndSaveToken() {
@@ -80,13 +78,13 @@ void LexerState::extractAndSaveToken() {
     tokensAccumulator->addToken(token);
 };
 
-std::optional<LexerError> LexerState::feedNew(char c) {
+void LexerState::feedNew(char c) {
     location.start += 1;
     location.end += 1;
-    if (c == ' ') return std::nullopt;
+    if (c == ' ') return;
     const auto optTokenType = tokenTypeFromChar(c);
     if (!optTokenType.has_value()) {
-        return LexerError(
+        throw LexerError(
             std::string("Cannot determine token type for char: \"") + c + '\"',
             location);
     };
@@ -95,12 +93,11 @@ std::optional<LexerError> LexerState::feedNew(char c) {
         tokensAccumulator->addToken({ .type = tokenType,
                                       .lexeme = std::string(1, c),
                                       .location = location });
-        return std::nullopt;
+        return;
     };
     const auto &complexTokenType = std::get<ComplexTokenType>(tokenType);
     type = complexTokenType;
     if (complexTokenType != ComplexTokenType::STRING) {
         buffer = std::string(1, c);
     };
-    return std::nullopt;
 };

@@ -27,6 +27,7 @@
 #include "libgql/json/serializers/parser/parser.hpp"
 #include "libgql/json/serializers/schema/schema.hpp"
 #include "libgql/lexer/lexer.hpp"
+#include "libgql/lexer/lexer_error.hpp"
 #include "libgql/lexer/location.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/tokens_accumulators.hpp"
@@ -191,10 +192,10 @@ void createParserSubcommand(CLI::App *app) {
                 std::make_shared<shared::ast::SourceFile>(filepath, buffer);
             lexer::VectorTokensAccumulator tokensAccumulator;
             lexer::Lexer lexer(buffer, &tokensAccumulator);
-            const auto &error = lexer.parse();
-            if (error.has_value()) {
-                std::cerr << "LexerParserError: " << error.value().what()
-                          << std::endl;
+            try {
+                lexer.parse();
+            } catch (const lexer::LexerError &error) {
+                std::cerr << "LexerParserError: " << error.what() << std::endl;
                 throw CLI::RuntimeError(1);
             };
             const auto &tokens = tokensAccumulator.getTokens();
@@ -226,11 +227,12 @@ void createParserSubcommand(CLI::App *app) {
                 std::make_shared<shared::ast::SourceFile>(filepath, buffer);
             lexer::VectorTokensAccumulator tokensAccumulator;
             lexer::Lexer lexer(buffer, &tokensAccumulator);
-            const auto &error = lexer.parse();
-            if (error.has_value()) {
+            try {
+                lexer.parse();
+            } catch (const lexer::LexerError &error) {
                 std::cerr << std::format("LexerParserError({}): {}",
                                          source->filepath.filename().string(),
-                                         error.value().what())
+                                         error.what())
                           << std::endl;
                 throw CLI::RuntimeError(1);
             };

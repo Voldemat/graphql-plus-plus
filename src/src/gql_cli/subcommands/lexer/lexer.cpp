@@ -4,11 +4,13 @@
 #include <rapidjson/stringbuffer.h>
 
 #include <CLI/App.hpp>
+#include <CLI/Error.hpp>
 #include <iostream>
 
 #include "gql_cli/utils.hpp"
 #include "libgql/json/serializers/lexer/lexer.hpp"
 #include "libgql/lexer/lexer.hpp"
+#include "libgql/lexer/lexer_error.hpp"
 #include "libgql/lexer/tokens_accumulators.hpp"
 
 void createLexerSubcommand(CLI::App *app) {
@@ -19,9 +21,11 @@ void createLexerSubcommand(CLI::App *app) {
         const auto buffer = getAllStdin();
         lexer::VectorTokensAccumulator accum;
         lexer::Lexer lexer(buffer, &accum);
-        auto result = lexer.parse();
-        if (result.has_value()) {
-            throw result.value();
+        try {
+            lexer.parse();
+        } catch (const lexer::LexerError &error) {
+            std::cerr << error.what() << std::endl;
+            throw CLI::RuntimeError(1);
         };
         const auto tokens = accum.getTokens();
         rapidjson::StringBuffer sb;

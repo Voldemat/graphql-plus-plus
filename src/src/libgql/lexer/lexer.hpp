@@ -6,7 +6,6 @@
 #include <string_view>
 
 #include "./itokens_accumulator.hpp"
-#include "./lexer_error.hpp"
 #include "./location.hpp"
 #include "./token.hpp"
 #include "./token_type.hpp"
@@ -17,7 +16,7 @@ class LexerState {
     std::optional<ComplexTokenType> type;
     Location location;
     ITokensAccumulator *tokensAccumulator;
-    std::optional<LexerError> feedNew(char c);
+    void feedNew(char c);
     void feedWithType(char c, ComplexTokenType tokenType);
     GQLToken extractToken();
     std::optional<GQLToken> maybeExtractToken();
@@ -26,7 +25,7 @@ class LexerState {
 public:
     LexerState(ITokensAccumulator *tokensAccumulator)
         : tokensAccumulator{ tokensAccumulator } {};
-    std::optional<LexerError> feed(char c);
+    void feed(char c);
     void maybeExtractAndSaveToken();
 };
 
@@ -36,7 +35,7 @@ class Lexer {
 
 public:
     Lexer(const std::string_view &s, ITokensAccumulator *tokensAccumulator);
-    std::optional<LexerError> parse();
+    void parse();
 };
 };  // namespace lexer
 #endif

@@ -12,15 +12,17 @@
 #include <string>
 #include <vector>
 
-#include "libgql/lexer/lexer.hpp"
+#include "libgql/lexer/lexer_error.hpp"
+#include "libgql/lexer/location.hpp"
 #include "libgql/lexer/token.hpp"
+#include "libgql/lexer/token_type.hpp"
 
 using namespace lexer;
 struct LexerTestCase {
     std::string filename;
     std::string schema;
     std::vector<GQLToken> expectedTokens;
-    std::optional<LexerError> error;
+    std::optional<lexer::LexerError> error;
 };
 inline std::ostream &operator<<(std::ostream &os, const LexerTestCase &self) {
     os << "TestCase(filename: " << self.filename << ", schema: ";

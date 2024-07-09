@@ -11,6 +11,7 @@
 
 #include "./lexer_utils.hpp"
 #include "gtest/gtest.h"
+#include "libgql/lexer/lexer_error.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/tokens_accumulators.hpp"
 
@@ -21,8 +22,8 @@ TEST_P(LexerFixture, TestLexer) {
     auto testCase = GetParam();
     VectorTokensAccumulator accumulator;
     Lexer lexer(testCase.schema, &accumulator);
-    const auto &result = lexer.parse();
-    if (!result.has_value()) {
+    try {
+        lexer.parse();
         const std::vector<GQLToken> tokens = accumulator.getTokens();
         EXPECT_EQ(tokens.size(), testCase.expectedTokens.size());
         int index = 0;
@@ -36,8 +37,7 @@ TEST_P(LexerFixture, TestLexer) {
                 << "token: " << token << "\nexpectedToken: " << expectedToken;
             index++;
         };
-    } else {
-        const auto error = result.value();
+    } catch (const lexer::LexerError &error) {
         const auto errorLocation = error.getLocation();
         ASSERT_TRUE(testCase.error.has_value()) << error.what();
         const auto expectedError = testCase.error.value();
