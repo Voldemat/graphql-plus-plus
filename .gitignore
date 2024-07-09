@@ -3,3 +3,4 @@ build
 cases-lock.ls
 CMakeUserPresets.json
 .clangd
+.DS_Store
