@@ -134,4 +134,6 @@ using ServerSchemaNode =
     std::variant<std::shared_ptr<ObjectType>, std::shared_ptr<Interface>,
                  std::shared_ptr<Scalar>, std::shared_ptr<Union>,
                  std::shared_ptr<Enum>, std::shared_ptr<InputType>>;
+bool InputFieldSpec_hasDefaultValue(const InputFieldSpec &spec);
+InputTypeSpec extractInputTypeSpec(const InputFieldSpec &spec);
 };  // namespace parsers::schema::ast

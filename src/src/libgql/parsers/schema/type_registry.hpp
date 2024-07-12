@@ -76,6 +76,8 @@ struct TypeRegistry {
         const std::shared_ptr<ast::ObjectType> &type,
         const std::map<std::string, std::shared_ptr<ast::FieldDefinition<
                                         ast::ObjectFieldSpec>>> &newFields);
+
+    ast::FragmentSpec fragmentSpecFromOpType(file::client::ast::OpType type) const;
 };
 };  // namespace schema
 };  // namespace parsers

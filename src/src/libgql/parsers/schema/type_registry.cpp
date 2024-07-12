@@ -191,3 +191,21 @@ void TypeRegistry::patchObject(
     };
     TypeRegistry::appendOpsIfSpecialObject(type->name, newFields);
 };
+
+FragmentSpec TypeRegistry::fragmentSpecFromOpType(client::ast::OpType type) const {
+    switch (type) {
+        case client::ast::OpType::QUERY: {
+            return (ObjectFragmentSpec<ObjectType>){ .type = getQueryObject() };
+        }
+        case client::ast::OpType::MUTATION: {
+            return (ObjectFragmentSpec<ObjectType>){ .type =
+                                                         getMutationObject() };
+        }
+
+        case client::ast::OpType::SUBSCRIPTION: {
+            return (ObjectFragmentSpec<ObjectType>){
+                .type = getSubscriptionObject()
+            };
+        }
+    };
+};
