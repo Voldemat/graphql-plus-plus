@@ -29,8 +29,8 @@ std::ostream &operator<<(std::ostream &os, const GQLTokenType &type);
 std::string gqlTokenTypeToString(GQLTokenType type);
 std::optional<GQLTokenType> gqlTokenTypeFromString(std::string t);
 
-const std::function<bool(const char &)> &getConditionForComplexTokenType(
-    const ComplexTokenType &tokenType);
+const std::function<bool(const char &, const std::string &)> &
+getConditionForComplexTokenType(const ComplexTokenType &tokenType);
 
 std::optional<GQLTokenType> tokenTypeFromChar(char c);
 };  // namespace lexer

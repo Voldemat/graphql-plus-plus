@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <functional>
+#include <iostream>
 #include <map>
 #include <optional>
 #include <ostream>
@@ -49,17 +50,27 @@ std::ostream &lexer::operator<<(std::ostream &os, const GQLTokenType &type) {
 };
 
 const auto &numberCondition =
-    std::function([](const char &c) { return std::isdigit(c) != 0; });
-const auto &stringCondition =
-    std::function([](const char &c) { return c != '"'; });
-const auto &spreadCondition =
-    std::function([](const char &c) { return c == '.'; });
-const auto &identifierCondition = std::function([](const char &c) {
-    return std::isalpha(c) || std::isdigit(c) || c == '_' || c == '-';
-});
+    std::function([](const char &c, const std::string &buffer) {
+        const auto& hasFChar = buffer.back() == 'f';
+        if (hasFChar) return false;
+        const auto &isDigit = std::isdigit(c) != 0;
+        const auto &hasPoint = buffer.contains('.');
+        if (hasPoint && isDigit) return true;
+        const auto& lastCharIsDigit = std::isdigit(buffer.back()) != 0;
+        const auto &isChar = c == '.' || c == 'f';
+        return isDigit || (lastCharIsDigit && isChar);
+    });
+const auto &stringCondition = std::function(
+    [](const char &c, const std::string &buffer) { return c != '"'; });
+const auto &spreadCondition = std::function(
+    [](const char &c, const std::string &buffer) { return c == '.'; });
+const auto &identifierCondition =
+    std::function([](const char &c, const std::string &buffer) {
+        return std::isalpha(c) || std::isdigit(c) || c == '_' || c == '-';
+    });
 
-const std::function<bool(const char &)> &lexer::getConditionForComplexTokenType(
-    const ComplexTokenType &tokenType) {
+const std::function<bool(const char &, const std::string &buffer)> &
+lexer::getConditionForComplexTokenType(const ComplexTokenType &tokenType) {
     switch (tokenType) {
         case ComplexTokenType::NUMBER:
             return numberCondition;

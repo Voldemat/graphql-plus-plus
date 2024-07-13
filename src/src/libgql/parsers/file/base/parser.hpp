@@ -30,6 +30,7 @@ protected:
     shared::ast::ListTypeNode parseListTypeNode();
     shared::ast::InputValueDefinitionNode parseInputValueDefinitionNode();
     shared::ast::LiteralNode parseLiteralNode();
+    std::optional<shared::ast::LiteralIntNode> parseLiteralIntNode();
 
 public:
     BaseParser(const std::vector<lexer::GQLToken> &tokens,

@@ -6,10 +6,10 @@
 
 namespace lexer {
 class Location {
-    bool isStartLocked = false;
     unsigned int line = 1;
     unsigned int start = -1;
     unsigned int end = -1;
+    bool isStartLocked = false;
 
 public:
     explicit Location(unsigned int line, unsigned int start, unsigned int end);

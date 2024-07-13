@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <variant>
 #include <vector>
@@ -31,16 +32,15 @@ shared::ast::NameNode BaseParser::parseNameNode(bool raiseOnKeyword) {
 shared::ast::InputValueDefinitionNode
 BaseParser::parseInputValueDefinitionNode() {
     const auto &nameNode = parseNameNode();
-    const GQLToken startToken = currentToken;
+    const auto &startToken = currentToken;
     consume(SimpleTokenType::COLON);
     const auto &typeNode = parseTypeNode();
     std::optional<shared::ast::LiteralNode> defaultValue;
     if (consumeIfIsAhead(SimpleTokenType::EQUAL)) {
         defaultValue = parseLiteralNode();
     };
-    const GQLToken endToken = currentToken;
     return { .location = { .startToken = startToken,
-                           .endToken = endToken,
+                           .endToken = currentToken,
                            .source = source },
              .name = nameNode,
              .type = typeNode,
@@ -52,6 +52,21 @@ void BaseParser::advance() {
     currentToken = tokens[index];
 };
 
+std::optional<shared::ast::LiteralIntNode> BaseParser::parseLiteralIntNode() {
+    try {
+        return (shared::ast::LiteralIntNode){
+            .location = { .startToken = currentToken,
+                          .endToken = currentToken,
+                          .source = source },
+            .value = std::stoi(currentToken.lexeme)
+        };
+    } catch (const std::invalid_argument &) {
+        return std::nullopt;
+    } catch (const std::out_of_range &) {
+        return std::nullopt;
+    };
+};
+
 shared::ast::LiteralNode BaseParser::parseLiteralNode() {
     advance();
     if (!std::holds_alternative<ComplexTokenType>(currentToken.type)) {
@@ -60,18 +75,10 @@ shared::ast::LiteralNode BaseParser::parseLiteralNode() {
     };
     switch (std::get<ComplexTokenType>(currentToken.type)) {
         case ComplexTokenType::NUMBER: {
-            shared::ast::NodeLocation location = { .startToken = currentToken,
-                                                   .endToken = currentToken,
-                                                   .source = source };
-            try {
-                return (shared::ast::LiteralIntNode){
-                    .location = location,
-                    .value = std::stoi(currentToken.lexeme)
-                };
-            } catch (...) {
-            };
+            const auto& node = parseLiteralIntNode();
+            if (node.has_value()) return node.value();
             return (shared::ast::LiteralFloatNode){
-                .location = location, .value = std::stof(currentToken.lexeme)
+                .location = {}, .value = std::stof(currentToken.lexeme)
             };
         };
         case ComplexTokenType::BOOLEAN: {
@@ -172,7 +179,7 @@ bool BaseParser::isAhead(GQLTokenType expectedType) {
 };
 
 bool BaseParser::isAheadByLexeme(const std::string &lexeme) {
-    const auto& t = lookahead();
+    const auto &t = lookahead();
     if (!t.has_value()) return false;
     return t.value().lexeme == lexeme;
 };

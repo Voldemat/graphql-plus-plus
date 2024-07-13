@@ -61,7 +61,7 @@ GQLToken LexerState::extractToken() {
 
 void LexerState::feedWithType(char c, ComplexTokenType tokenType) {
     const auto &condition = getConditionForComplexTokenType(tokenType);
-    if (!condition(c)) {
+    if (!condition(c, buffer)) {
         extractAndSaveToken();
         return;
     };

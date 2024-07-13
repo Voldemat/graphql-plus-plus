@@ -1,0 +1,56 @@
+{
+    "$schema": "case.schema.json",
+    "schema": "type Check {\ncheck: Float! = 1.1\n}",
+    "tokens": [
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "type",
+            "location": { "line": 1, "start": 0, "end": 3 }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Check",
+            "location": { "line": 1, "start": 5, "end": 9 }
+        },
+        {
+            "type": "LEFT_BRACE",
+            "lexeme": "{",
+            "location": { "line": 1, "start": 11, "end": 11 }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "check",
+            "location": { "line": 2, "start": 0, "end": 4 }
+        },
+        {
+            "type": "COLON",
+            "lexeme": ":",
+            "location": { "line": 2, "start": 5, "end": 5 }
+        },
+        {
+            "type": "IDENTIFIER",
+            "lexeme": "Float",
+            "location": { "line": 2, "start": 7, "end": 11 }
+        },
+        {
+            "type": "BANG",
+            "lexeme": "!",
+            "location": { "line": 2, "start": 12, "end": 12 }
+        },
+        {
+            "type": "EQUAL",
+            "lexeme": "=",
+            "location": { "line": 2, "start": 14, "end": 14 }
+        },
+        {
+            "type": "NUMBER",
+            "lexeme": "1.1",
+            "location": { "line": 2, "start": 16, "end": 18 }
+        },
+        {
+            "type": "RIGHT_BRACE",
+            "lexeme": "}",
+            "location": { "line": 3, "start": 0, "end": 0 }
+        }
+    ]
+}
