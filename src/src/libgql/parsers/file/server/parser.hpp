@@ -1,11 +1,10 @@
-#ifndef GRAPHQL_SERVER_PARSER
-#define GRAPHQL_SERVER_PARSER
+#pragma once
 
-#include <string>
-#include <utility>
+#include <vector>
 
 #include "./ast.hpp"
 #include "libgql/parsers/file/base/parser.hpp"
+#include "libgql/parsers/file/shared/ast.hpp"
 
 namespace parsers::file::server {
 
@@ -19,10 +18,11 @@ class Parser : public BaseParser {
     ast::InterfaceDefinitionNode parseInterfaceTypeDefinitionNode();
     ast::FieldDefinitionNode parseFieldDefinitionNode();
     ast::ObjectDefinitionNode parseObjectTypeDefinitionNode();
+    std::vector<shared::ast::NameNode> parseImplementsClause();
+    std::vector<shared::ast::InputValueDefinitionNode> parseArguments();
 
 public:
     using BaseParser::BaseParser;
     ast::FileNodes parse();
 };
 };  // namespace parsers::file::server
-#endif

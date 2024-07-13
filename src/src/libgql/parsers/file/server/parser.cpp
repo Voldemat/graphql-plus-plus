@@ -138,9 +138,7 @@ ast::InterfaceDefinitionNode Parser::parseInterfaceTypeDefinitionNode() {
              .fields = fields };
 };
 
-ast::ObjectDefinitionNode Parser::parseObjectTypeDefinitionNode() {
-    const auto startToken = currentToken;
-    const auto &nameNode = parseNameNode();
+std::vector<shared::ast::NameNode> Parser::parseImplementsClause() {
     std::vector<shared::ast::NameNode> interfaces;
     if (consumeIdentifierByLexemeIfIsAhead("implements")) {
         interfaces.emplace_back(parseNameNode());
@@ -148,6 +146,13 @@ ast::ObjectDefinitionNode Parser::parseObjectTypeDefinitionNode() {
             interfaces.emplace_back(parseNameNode());
         };
     };
+    return interfaces;
+};
+
+ast::ObjectDefinitionNode Parser::parseObjectTypeDefinitionNode() {
+    const auto startToken = currentToken;
+    const auto &nameNode = parseNameNode();
+    const auto &interfaces = parseImplementsClause();
     // clang-format off
     USE_BRACE_CONTEXT(
         std::vector<ast::FieldDefinitionNode> fields;
@@ -178,14 +183,7 @@ ast::ExtendTypeNode Parser::parseExtendTypeNode() {
 ast::FieldDefinitionNode Parser::parseFieldDefinitionNode() {
     const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    std::vector<shared::ast::InputValueDefinitionNode> arguments;
-    if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
-        while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            arguments.emplace_back(parseInputValueDefinitionNode());
-            consumeIfIsAhead(SimpleTokenType::COMMA);
-        };
-        consume(SimpleTokenType::RIGHT_PAREN);
-    };
+    const auto &arguments = parseArguments();
     consume(SimpleTokenType::COLON);
     const auto &typeNode = parseTypeNode();
     std::optional<shared::ast::LiteralNode> defaultValue;
@@ -198,4 +196,16 @@ ast::FieldDefinitionNode Parser::parseFieldDefinitionNode() {
              .name = nameNode,
              .type = typeNode,
              .arguments = arguments };
+};
+
+std::vector<shared::ast::InputValueDefinitionNode> Parser::parseArguments() {
+    std::vector<shared::ast::InputValueDefinitionNode> arguments;
+    if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
+        while (isAhead(ComplexTokenType::IDENTIFIER)) {
+            arguments.emplace_back(parseInputValueDefinitionNode());
+            consumeIfIsAhead(SimpleTokenType::COMMA);
+        };
+        consume(SimpleTokenType::RIGHT_PAREN);
+    };
+    return arguments;
 };
