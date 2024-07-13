@@ -50,6 +50,13 @@ include_directories(
     SYSTEM ${CLI11_INCLUDE_DIR}
 )
 
+set(GQL_PROJ_INCLUDE_DIR 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/src/
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/include/
+)
+
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     option(GQL_BUILD_TESTS "build tests" OFF)
 
