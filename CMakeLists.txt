@@ -51,7 +51,7 @@ include_directories(
 )
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    option(GQL_BUILD_TESTS "build tests" ON)
+    option(GQL_BUILD_TESTS "build tests" OFF)
 
     if(GQL_BUILD_TESTS)
         FetchContent_Declare(
