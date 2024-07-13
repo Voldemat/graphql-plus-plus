@@ -18,7 +18,6 @@ std::ostream &operator<<(std::ostream &os, const TokenConditionCase &self) {
     os << self.lexeme << ", expectedResults: [" << std::boolalpha;
     for (const auto &r : self.expectedResults) {
         os << r;
-        if (&self.expectedResults.back() == &r) continue;
         os << ", ";
     };
     os << "])";
