@@ -20,7 +20,7 @@ jobs:
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       with:
-        args: -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS='-D__cpp_concepts=202002L' -DCMAKE_EXE_LINKER_FLAGS='-static'
+        args: -DCMAKE_BUILD_TYPE=Release -DGQL_BUILD_TESTS=true -DCMAKE_CXX_FLAGS='-D__cpp_concepts=202002L' -DCMAKE_EXE_LINKER_FLAGS='-static'
         run-build: true
         c-compiler: clang-18
         cxx-compiler: clang++-18
