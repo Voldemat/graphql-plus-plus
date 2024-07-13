@@ -26,6 +26,7 @@ add_library(
     ${GQL_LIB_HEADERS}
     ${GQL_LIB_SOURCES}
 )
+add_dependencies(gql_lib rapidjson)
 add_executable(
     gql
     src/main.cpp
@@ -33,6 +34,7 @@ add_executable(
     ${GQL_CLI_HEADERS}
     ${GQL_CLI_SOURCES}
 )
+add_dependencies(gql_lib CLI11 httprequest)
 
 target_link_libraries(gql
     PRIVATE CLI11::CLI11
