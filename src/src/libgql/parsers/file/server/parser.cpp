@@ -4,7 +4,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <utility>
 #include <variant>
 #include <vector>
 
@@ -13,6 +12,8 @@
 #include "./ast.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/token_type.hpp"
+#include "libgql/parsers/file/base/parser.hpp"
+#include "utils.hpp"
 
 using namespace parsers::file;
 using namespace parsers::file::server;
@@ -23,15 +24,16 @@ ast::FileNodes Parser::parse() {
     std::vector<ast::ExtendTypeNode> extensions;
     while (currentToken != tokens.back()) {
         if (index != 0) consume(ComplexTokenType::IDENTIFIER);
-        const auto &[name, node] = parseASTNode();
-        if (std::holds_alternative<ast::TypeDefinitionNode>(node)) {
-            definitions.push_back(std::get<ast::TypeDefinitionNode>(node));
-        } else if (std::holds_alternative<ast::ExtendTypeNode>(node)) {
-            extensions.push_back(std::get<ast::ExtendTypeNode>(node));
-        } else {
-            throw shared::ParserError(currentToken, "Unexpected node type",
-                                      source);
-        };
+        const auto &node = parseASTNode();
+        std::visit<void>(
+            overloaded{
+                [&definitions](const ast::TypeDefinitionNode &tNode) -> void {
+                    definitions.emplace_back(tNode);
+                },
+                [&extensions](const ast::ExtendTypeNode &eNode) -> void {
+                    extensions.emplace_back(eNode);
+                } },
+            node);
     };
     return {
         .source = source,
@@ -40,103 +42,67 @@ ast::FileNodes Parser::parse() {
     };
 };
 
-std::pair<std::string, ast::ASTNode> Parser::parseASTNode() {
-    if (currentToken.type != (GQLTokenType)ComplexTokenType::IDENTIFIER) {
-        throw shared::ParserError::wrongType(
-            currentToken, ComplexTokenType::IDENTIFIER, source);
-    };
+ast::ASTNode Parser::parseASTNode() {
     if (currentToken.lexeme == "scalar") {
-        const auto &node = parseScalarTypeDefinitionNode();
-        return { node.name.name, node };
+        return parseScalarTypeDefinitionNode();
     } else if (currentToken.lexeme == "union") {
-        const auto &node = parseUnionTypeDefinitionNode();
-        return { node.name.name, node };
+        return parseUnionTypeDefinitionNode();
     } else if (currentToken.lexeme == "enum") {
-        const auto &node = parseEnumTypeDefinitionNode();
-        return { node.name.name, node };
+        return parseEnumTypeDefinitionNode();
     } else if (currentToken.lexeme == "interface") {
-        const auto &node = parseInterfaceTypeDefinitionNode();
-        return { node.name.name, node };
+        return parseInterfaceTypeDefinitionNode();
     } else if (currentToken.lexeme == "type") {
-        const auto &node = parseObjectTypeDefinitionNode();
-        return { node.name.name, node };
+        return parseObjectTypeDefinitionNode();
     } else if (currentToken.lexeme == "input") {
         const auto &interfaceNode = parseInterfaceTypeDefinitionNode();
-        return { interfaceNode.name.name,
-                 (ast::InputObjectDefinitionNode){
-                     .location = interfaceNode.location,
-                     .name = interfaceNode.name,
-                     .fields = interfaceNode.fields } };
+        return (
+            ast::InputObjectDefinitionNode){ .location = interfaceNode.location,
+                                             .name = interfaceNode.name,
+                                             .fields = interfaceNode.fields };
     } else if (currentToken.lexeme == "extend") {
-        const auto &node = parseExtendTypeNode();
-        return { node.typeNode.name.name, node };
+        return parseExtendTypeNode();
     };
     throw shared::ParserError(
         currentToken,
         std::format("Unknown identifier: {}", currentToken.lexeme), source);
 };
 
-ast::ExtendTypeNode Parser::parseExtendTypeNode() {
-    const GQLToken startToken = currentToken;
-    consume(ComplexTokenType::IDENTIFIER);
-    if (currentToken.lexeme != "type") {
-        throw shared::ParserError(currentToken, "Expected \"type\" identifier",
-                                  source);
-    };
-    const auto &typeNode = parseObjectTypeDefinitionNode();
-    return { .location = { .startToken = startToken,
-                           .endToken = currentToken,
-                           .source = source },
-             .typeNode = typeNode };
-};
-
-ast::ObjectDefinitionNode Parser::parseObjectTypeDefinitionNode() {
-    const GQLToken startToken = currentToken;
-    const auto &nameNode = parseNameNode();
-    std::vector<shared::ast::NameNode> interfaces;
-    if (lookahead()->lexeme == "implements") {
-        consume(ComplexTokenType::IDENTIFIER);
-        interfaces.push_back(parseNameNode());
-        while (consumeIfIsAhead(SimpleTokenType::COMMA)) {
-            interfaces.push_back(parseNameNode());
-        };
-    };
-    consume(SimpleTokenType::LEFT_BRACE);
-    std::vector<ast::FieldDefinitionNode> fields;
-    while (lookahead()->type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
-        fields.push_back(parseFieldDefinitionNode());
-        consumeIfIsAhead(SimpleTokenType::COMMA);
-    };
-    consume(SimpleTokenType::RIGHT_BRACE);
-    const GQLToken endToken = currentToken;
-    return { .location = { .startToken = startToken,
-                           .endToken = endToken,
-                           .source = source },
-             .name = nameNode,
-             .interfaces = interfaces,
-             .fields = fields };
-};
-
 ast::ScalarDefinitionNode Parser::parseScalarTypeDefinitionNode() {
-    const GQLToken startToken = currentToken;
+    const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    const GQLToken endToken = nameNode.location.endToken;
     return { .location = { .startToken = startToken,
-                           .endToken = endToken,
+                           .endToken = nameNode.location.endToken,
                            .source = source },
              .name = nameNode };
 };
 
-ast::EnumDefinitionNode Parser::parseEnumTypeDefinitionNode() {
-    const GQLToken startToken = currentToken;
+ast::UnionDefinitionNode Parser::parseUnionTypeDefinitionNode() {
+    const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    consume(SimpleTokenType::LEFT_BRACE);
-    std::vector<ast::EnumValueDefinitionNode> values;
-    while (lookahead()->type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
-        values.push_back(parseEnumValueDefinitionNode());
-        consumeIfIsAhead(SimpleTokenType::COMMA);
+    consume(SimpleTokenType::EQUAL);
+    std::vector<shared::ast::NameNode> values = { parseNameNode() };
+    while (consumeIfIsAhead(SimpleTokenType::VSLASH)) {
+        values.emplace_back(parseNameNode());
     };
-    consume(SimpleTokenType::RIGHT_BRACE);
+    return { .location = { .startToken = startToken,
+                           .endToken = values.back().location.endToken,
+                           .source = source },
+             .name = nameNode,
+             .values = values };
+};
+
+ast::EnumDefinitionNode Parser::parseEnumTypeDefinitionNode() {
+    const auto startToken = currentToken;
+    const auto &nameNode = parseNameNode();
+    // clang-format off
+    USE_BRACE_CONTEXT(
+        std::vector<ast::EnumValueDefinitionNode> values;
+        while (isAhead(ComplexTokenType::IDENTIFIER)) {
+            values.emplace_back(parseEnumValueDefinitionNode());
+            consumeIfIsAhead(SimpleTokenType::COMMA);
+        };
+    );
+    // clang-format on
     return { .location = { .startToken = startToken,
                            .endToken = currentToken,
                            .source = source },
@@ -145,56 +111,77 @@ ast::EnumDefinitionNode Parser::parseEnumTypeDefinitionNode() {
 };
 
 ast::EnumValueDefinitionNode Parser::parseEnumValueDefinitionNode() {
-    const GQLToken startToken = currentToken;
+    const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    const GQLToken endToken = nameNode.location.endToken;
     return { .location = { .startToken = startToken,
-                           .endToken = endToken,
+                           .endToken = nameNode.location.endToken,
                            .source = source },
              .value = nameNode };
 };
 
-ast::UnionDefinitionNode Parser::parseUnionTypeDefinitionNode() {
-    const GQLToken startToken = currentToken;
-    const auto &nameNode = parseNameNode();
-    consume(SimpleTokenType::EQUAL);
-    std::vector<shared::ast::NameNode> values = { parseNameNode() };
-    while (consumeIfIsAhead(SimpleTokenType::VSLASH)) {
-        values.push_back(parseNameNode());
-    };
-    const GQLToken endToken = currentToken;
-    return { .location = { .startToken = startToken,
-                           .endToken = endToken,
-                           .source = source },
-             .name = nameNode,
-             .values = values };
-};
-
 ast::InterfaceDefinitionNode Parser::parseInterfaceTypeDefinitionNode() {
-    const GQLToken startToken = currentToken;
+    const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    consume(SimpleTokenType::LEFT_BRACE);
-    std::vector<ast::FieldDefinitionNode> fields;
-    while (lookahead()->type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
-        fields.push_back(parseFieldDefinitionNode());
-        consumeIfIsAhead(SimpleTokenType::COMMA);
-    };
-    consume(SimpleTokenType::RIGHT_BRACE);
-    const GQLToken endToken = currentToken;
+    // clang-format off
+    USE_BRACE_CONTEXT(
+        std::vector<ast::FieldDefinitionNode> fields;
+        while (isAhead(ComplexTokenType::IDENTIFIER)) {
+            fields.emplace_back(parseFieldDefinitionNode());
+            consumeIfIsAhead(SimpleTokenType::COMMA);
+        };
+    );
+    // clang-format on
     return { .location = { .startToken = startToken,
-                           .endToken = endToken,
+                           .endToken = currentToken,
                            .source = source },
              .name = nameNode,
              .fields = fields };
 };
 
+ast::ObjectDefinitionNode Parser::parseObjectTypeDefinitionNode() {
+    const auto startToken = currentToken;
+    const auto &nameNode = parseNameNode();
+    std::vector<shared::ast::NameNode> interfaces;
+    if (consumeIdentifierByLexemeIfIsAhead("implements")) {
+        interfaces.emplace_back(parseNameNode());
+        while (consumeIfIsAhead(SimpleTokenType::COMMA)) {
+            interfaces.emplace_back(parseNameNode());
+        };
+    };
+    // clang-format off
+    USE_BRACE_CONTEXT(
+        std::vector<ast::FieldDefinitionNode> fields;
+        while (isAhead(ComplexTokenType::IDENTIFIER)) {
+            fields.emplace_back(parseFieldDefinitionNode());
+            consumeIfIsAhead(SimpleTokenType::COMMA);
+        };
+    )
+    // clang-format on
+    return { .location = { .startToken = startToken,
+                           .endToken = currentToken,
+                           .source = source },
+             .name = nameNode,
+             .interfaces = interfaces,
+             .fields = fields };
+};
+
+ast::ExtendTypeNode Parser::parseExtendTypeNode() {
+    const auto startToken = currentToken;
+    consumeIdentifierByLexeme("type");
+    const auto &typeNode = parseObjectTypeDefinitionNode();
+    return { .location = { .startToken = startToken,
+                           .endToken = currentToken,
+                           .source = source },
+             .typeNode = typeNode };
+};
+
 ast::FieldDefinitionNode Parser::parseFieldDefinitionNode() {
-    const GQLToken startToken = currentToken;
-    const auto &nameNode = parseNameNode(false);
+    const auto startToken = currentToken;
+    const auto &nameNode = parseNameNode();
     std::vector<shared::ast::InputValueDefinitionNode> arguments;
     if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
         while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            arguments.push_back(parseInputValueDefinitionNode());
+            arguments.emplace_back(parseInputValueDefinitionNode());
             consumeIfIsAhead(SimpleTokenType::COMMA);
         };
         consume(SimpleTokenType::RIGHT_PAREN);
@@ -205,9 +192,8 @@ ast::FieldDefinitionNode Parser::parseFieldDefinitionNode() {
     if (consumeIfIsAhead(SimpleTokenType::EQUAL)) {
         defaultValue = parseLiteralNode();
     };
-    const GQLToken endToken = currentToken;
     return { .location = { .startToken = startToken,
-                           .endToken = endToken,
+                           .endToken = currentToken,
                            .source = source },
              .name = nameNode,
              .type = typeNode,

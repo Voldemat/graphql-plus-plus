@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -10,11 +12,15 @@
 namespace parsers::file::client {
 
 class Parser : public BaseParser {
-    ast::OperationDefinition parseOperationDefinition();
-    ast::Argument parseArgument();
-    ast::FragmentSpec parseFragmentSpec();
     ast::ClientDefinition parseClientDefinition();
     ast::FragmentDefinition parseFragmentDefinition();
+    ast::OperationDefinition parseOperationDefinition();
+    std::map<std::string, shared::ast::InputValueDefinitionNode>
+    parseOperationParameters();
+    ast::Argument parseArgument();
+    std::vector<ast::Argument> parseArguments();
+    ast::FragmentSpec parseFragmentSpec();
+    std::vector<client::ast::SelectionNode> parseSelectionNodes();
     ast::SelectionNode parseSelectionNode();
     ast::FieldSelectionNode parseFieldSelectionNode();
     ast::ConditionalSpreadSelectionNode parseConditionalSpreadSelectionNode();

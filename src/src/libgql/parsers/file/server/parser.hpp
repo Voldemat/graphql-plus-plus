@@ -10,9 +10,9 @@
 namespace parsers::file::server {
 
 class Parser : public BaseParser {
+    ast::ASTNode parseASTNode();
     ast::ScalarDefinitionNode parseScalarTypeDefinitionNode();
     ast::UnionDefinitionNode parseUnionTypeDefinitionNode();
-    std::pair<std::string, ast::ASTNode> parseASTNode();
     ast::ExtendTypeNode parseExtendTypeNode();
     ast::EnumDefinitionNode parseEnumTypeDefinitionNode();
     ast::EnumValueDefinitionNode parseEnumValueDefinitionNode();

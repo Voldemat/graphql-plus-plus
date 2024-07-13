@@ -18,7 +18,12 @@ using namespace lexer;
 namespace parsers::file {
 BaseParser::BaseParser(const std::vector<GQLToken> &tokens,
                        const std::shared_ptr<shared::ast::SourceFile> &source)
-    : tokens{ tokens }, source{ source }, currentToken{ tokens[0] } {};
+    : tokens{ tokens }, source{ source }, currentToken{ tokens[0] } {
+    if (currentToken.type != (GQLTokenType)ComplexTokenType::IDENTIFIER) {
+        throw shared::ParserError::wrongType(
+            currentToken, ComplexTokenType::IDENTIFIER, source);
+    };
+};
 
 shared::ast::NameNode BaseParser::parseNameNode(bool raiseOnKeyword) {
     consume(ComplexTokenType::IDENTIFIER);
@@ -32,7 +37,7 @@ shared::ast::NameNode BaseParser::parseNameNode(bool raiseOnKeyword) {
 shared::ast::InputValueDefinitionNode
 BaseParser::parseInputValueDefinitionNode() {
     const auto &nameNode = parseNameNode();
-    const auto &startToken = currentToken;
+    const auto startToken = currentToken;
     consume(SimpleTokenType::COLON);
     const auto &typeNode = parseTypeNode();
     std::optional<shared::ast::LiteralNode> defaultValue;
@@ -67,42 +72,53 @@ std::optional<shared::ast::LiteralIntNode> BaseParser::parseLiteralIntNode() {
     };
 };
 
+std::optional<shared::ast::LiteralFloatNode>
+BaseParser::parseLiteralFloatNode() {
+    try {
+        return (shared::ast::LiteralFloatNode){
+            .location = { .startToken = currentToken,
+                          .endToken = currentToken,
+                          .source = source },
+            .value = std::stof(currentToken.lexeme)
+        };
+    } catch (const std::invalid_argument &) {
+        return std::nullopt;
+    } catch (const std::out_of_range &) {
+        return std::nullopt;
+    };
+};
+
 shared::ast::LiteralNode BaseParser::parseLiteralNode() {
     advance();
     if (!std::holds_alternative<ComplexTokenType>(currentToken.type)) {
         throw shared::ParserError(currentToken, "Expected literal node",
                                   source);
     };
+    const shared::ast::NodeLocation &nLocation = { .startToken = currentToken,
+                                                   .endToken = currentToken,
+                                                   .source = source };
     switch (std::get<ComplexTokenType>(currentToken.type)) {
         case ComplexTokenType::NUMBER: {
-            const auto& node = parseLiteralIntNode();
-            if (node.has_value()) return node.value();
-            return (shared::ast::LiteralFloatNode){
-                .location = {}, .value = std::stof(currentToken.lexeme)
-            };
+            const auto &intNode = parseLiteralIntNode();
+            if (intNode.has_value()) return intNode.value();
+            const auto &floatNode = parseLiteralFloatNode();
+            if (floatNode.has_value()) return floatNode.value();
+            throw shared::ParserError(currentToken,
+                                      "Cannot parse number literal", source);
         };
         case ComplexTokenType::BOOLEAN: {
             return (shared::ast::LiteralBooleanNode){
-                .location = { .startToken = currentToken,
-                              .endToken = currentToken,
-                              .source = source },
-                .value = currentToken.lexeme == "true"
+                .location = nLocation, .value = currentToken.lexeme == "true"
             };
         };
         case ComplexTokenType::STRING: {
-            return (shared::ast::LiteralStringNode){
-                .location = { .startToken = currentToken,
-                              .endToken = currentToken,
-                              .source = source },
-                .value = currentToken.lexeme
-            };
+            return (shared::ast::LiteralStringNode){ .location = nLocation,
+                                                     .value =
+                                                         currentToken.lexeme };
         };
         case ComplexTokenType::IDENTIFIER: {
             return (shared::ast::LiteralEnumValueNode){
-                .location = { .startToken = currentToken,
-                              .endToken = currentToken,
-                              .source = source },
-                .value = currentToken.lexeme
+                .location = nLocation, .value = currentToken.lexeme
             };
         };
         case ComplexTokenType::SPREAD: {
@@ -122,11 +138,9 @@ shared::ast::TypeNode BaseParser::parseTypeNode() {
 
 shared::ast::NamedTypeNode BaseParser::parseNamedTypeNode() {
     const auto &nameNode = parseNameNode();
-    const GQLToken startToken = currentToken;
     bool nullable = !consumeIfIsAhead(SimpleTokenType::BANG);
-    const GQLToken endToken = currentToken;
-    return { .location = { .startToken = startToken,
-                           .endToken = endToken,
+    return { .location = { .startToken = nameNode.location.startToken,
+                           .endToken = currentToken,
                            .source = source },
              .name = nameNode,
              .nullable = nullable };
@@ -134,13 +148,12 @@ shared::ast::NamedTypeNode BaseParser::parseNamedTypeNode() {
 
 shared::ast::ListTypeNode BaseParser::parseListTypeNode() {
     consume(SimpleTokenType::LEFT_BRACKET);
-    const GQLToken startToken = currentToken;
+    const auto startToken = currentToken;
     const auto &typeNode = parseNamedTypeNode();
     consume(SimpleTokenType::RIGHT_BRACKET);
     bool nullable = !consumeIfIsAhead(SimpleTokenType::BANG);
-    const GQLToken endToken = currentToken;
     return { .location = { .startToken = startToken,
-                           .endToken = endToken,
+                           .endToken = currentToken,
                            .source = source },
              .type = typeNode,
              .nullable = nullable };
@@ -165,7 +178,7 @@ void BaseParser::consumeIdentifier() {
 };
 
 bool BaseParser::consumeIfIsAhead(GQLTokenType expectedType) {
-    bool tokenIsAhead = isAhead(expectedType);
+    const auto &tokenIsAhead = isAhead(expectedType);
     if (tokenIsAhead) {
         consume(expectedType);
     };
@@ -185,13 +198,11 @@ bool BaseParser::isAheadByLexeme(const std::string &lexeme) {
 };
 
 bool BaseParser::consumeIdentifierByLexemeIfIsAhead(const std::string &lexeme) {
-    const auto &t = lookahead();
-    if (!t.has_value()) return false;
-    bool isAhead = t.value().lexeme == lexeme;
-    if (isAhead) {
+    const auto &lexemeIsAhead = isAheadByLexeme(lexeme);
+    if (lexemeIsAhead) {
         consumeIdentifierByLexeme(lexeme);
     };
-    return isAhead;
+    return lexemeIsAhead;
 };
 
 void BaseParser::consumeIdentifierByLexeme(const std::string &lexeme) {
