@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "gql_cli/utils.hpp"
+#include "../../utils.hpp"
 #include "libgql/json/parsers/lexer/lexer.hpp"
 #include "libgql/json/parsers/shared.hpp"
 #include "libgql/json/serializers/parser/parser.hpp"

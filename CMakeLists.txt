@@ -12,99 +12,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_compile_options(-fexperimental-library)
-include("${CMAKE_CURRENT_SOURCE_DIR}/src/vendor/rapidjson.cmake")
-include("${CMAKE_CURRENT_SOURCE_DIR}/src/vendor/cli11.cmake")
-include("${CMAKE_CURRENT_SOURCE_DIR}/src/vendor/httprequest.cmake")
 
-file(GLOB_RECURSE GQL_LIB_HEADERS src/src/libgql/*.hpp src/src/libgql/*.h)
-file(GLOB_RECURSE GQL_LIB_SOURCES src/src/libgql/*.cpp src/src/libgql/*.c)
-file(GLOB_RECURSE GQL_CLI_HEADERS src/src/gql_cli/*.hpp src/src/gql_cli/*.h)
-file(GLOB_RECURSE GQL_CLI_SOURCES src/src/gql_cli/*.cpp src/src/gql_cli/*.c)
-add_library(
-    gql_lib
-    ${GQL_LIB_HEADERS}
-    ${GQL_LIB_SOURCES}
-)
-add_dependencies(gql_lib rapidjson)
-add_executable(
-    gql
-    src/main.cpp
-    src/src/utils.cpp
-    ${GQL_CLI_HEADERS}
-    ${GQL_CLI_SOURCES}
-)
-add_dependencies(gql_lib CLI11 httprequest)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(IS_ROOT_PROJECT ON)
+else()
+    set(IS_ROOT_PROJECT OFF)
+endif()
 
-target_link_libraries(gql
-    PRIVATE CLI11::CLI11
-    PRIVATE gql_lib
-)
+option(GQL_BUILD_TESTS "build tests" ${IS_ROOT_PROJECT})
+if(GQL_BUILD_TESTS)
+    set(LIBGQL_BUILD_TESTS ON)
+endif()
+option(BUILD_GQLCLI "build cli" ${IS_ROOT_PROJECT})
 
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/src/
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/include/
-    SYSTEM ${RAPIDJSON_INCLUDE_DIR}
-    SYSTEM ${HTTPREQUEST_INCLUDE_DIR}
-    SYSTEM ${CLI11_INCLUDE_DIR}
-)
-
-set(GQL_PROJ_INCLUDE_DIR 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/src/
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/include/
-    PARENT_SCOPE
-)
-
-if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    option(GQL_BUILD_TESTS "build tests" OFF)
-
-    if(GQL_BUILD_TESTS)
-        FetchContent_Declare(
-          googletest
-          URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-        )
-        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-        FetchContent_MakeAvailable(googletest)
-        enable_testing()
-
-        file(GLOB_RECURSE GQL_TESTS_SOURCES src/src/*.cc)
-        file(GLOB_RECURSE GQL_TESTS_HEADERS src/src/*.cc src/src/__tests__/*.hpp)
-        file(GLOB_RECURSE LEXER_TESTS src/src/__tests__/lexer/cases/*.json)
-        file(GLOB_RECURSE PARSER_TESTS src/src/__tests__/parser/cases/*.json)
-
-        add_custom_command(
-            OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases-lock.ls
-            COMMAND ls ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases/ > ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases-lock.ls
-            DEPENDS ${LEXER_TESTS}
-        )
-        add_custom_command(
-            OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases-lock.ls
-            COMMAND ls ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases/ > ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases-lock.ls
-            DEPENDS ${PARSER_TESTS}
-        )
-        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases-lock.ls PROPERTIES
-            GENERATED TRUE
-        )
-        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases-lock.ls PROPERTIES
-            GENERATED TRUE
-        )
-        add_executable(
-            main_test
-            ${GQL_TESTS_SOURCES}
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/lexer/cases-lock.ls
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/src/__tests__/parser/cases-lock.ls
-        )
-        target_link_libraries(
-            main_test
-            PRIVATE GTest::gtest_main
-            PRIVATE GTest::gmock_main
-            PRIVATE gql_lib
-        )
-        add_dependencies(main_test rapidjson)
-        include(GoogleTest)
-        gtest_discover_tests(main_test)
-    endif()
+include("${CMAKE_CURRENT_SOURCE_DIR}/CMakeUtils.txt")
+include("${CMAKE_CURRENT_SOURCE_DIR}/vendor/rapidjson.cmake")
+add_subdirectory("src/libgql")
+if (BUILD_GQLCLI)
+    add_subdirectory("src/gql_cli")
 endif()

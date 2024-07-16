@@ -1,10 +1,5 @@
 #include "./gql_cli.hpp"
 
-#include <rapidjson/document.h>
-#include <rapidjson/istreamwrapper.h>
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/stringbuffer.h>
-
 #include <CLI/App.hpp>
 #include <CLI/Error.hpp>
 #include <CLI/Option.hpp>

@@ -1,6 +1,3 @@
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/stringbuffer.h>
-
 #include <CLI/App.hpp>
 #include <CLI/Error.hpp>
 #include <CLI/Option.hpp>
@@ -10,7 +7,7 @@
 #include <memory>
 #include <variant>
 
-#include "gql_cli/gql_cli.hpp"
+#include "app/gql_cli.hpp"
 
 using A = std::variant<int, float>;
 

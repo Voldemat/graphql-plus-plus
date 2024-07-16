@@ -21,24 +21,23 @@
 #include <vector>
 
 #include "HTTPRequest.hpp"
-#include "gql_cli/utils.hpp"
+#include "../../utils.hpp"
+#include "libgql/introspection/introspection.hpp"
 #include "libgql/json/introspection/parser.hpp"
 #include "libgql/json/parsers/schema/schema.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/schema.hpp"
+#include "libgql/parsers/schema/server_ast.hpp"
 #include "utils.hpp"
 
 using namespace parsers::schema;
 using namespace parsers::schema::ast;
 
-const char *INTROSPECTION_QUERY =
-#include "./query.data"
-
-    rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
+rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
     http::HeaderFields headers{ { "Accept", "application/json" },
                                 { "Content-Type", "application/json" } };
     http::Request request{ urlToApi };
-    const auto &response = request.send("POST", INTROSPECTION_QUERY, headers);
+    const auto &response =
+        request.send("POST", introspection::INTROSPECTION_QUERY, headers);
     if (response.status.code != http::Status::Ok) {
         std::cerr << std::format("Expected 200 status code, while received {}",
                                  response.status.code)

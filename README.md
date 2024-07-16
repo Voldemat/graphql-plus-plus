@@ -51,7 +51,7 @@ src/main.cpp
 
 int main() {
     lexer::VectorTokensAccumulator accum;
-    lexer::Lexer lexer("asdsad %", &accum);
+    lexer::Lexer lexer("asdsad", &accum);
     lexer.parse();
     return 0;
 };

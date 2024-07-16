@@ -7,7 +7,7 @@
 #include <CLI/Error.hpp>
 #include <iostream>
 
-#include "gql_cli/utils.hpp"
+#include "../../utils.hpp"
 #include "libgql/json/serializers/lexer/lexer.hpp"
 #include "libgql/lexer/lexer.hpp"
 #include "libgql/lexer/lexer_error.hpp"
