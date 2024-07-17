@@ -33,5 +33,5 @@ unsigned int json::parsers::utils::extractUint(const JSONValue &value,
                                                const std::string &path) {
     return json::parsers::utils::extractValue(
         value, key, path, [](const JSONValue &v) -> bool { return v.IsUint(); },
-        FFL([](const JSONValue &v) -> unsigned int { return v.GetUint(); }));
+        FuncFromLambda([](const JSONValue &v) -> unsigned int { return v.GetUint(); }));
 };

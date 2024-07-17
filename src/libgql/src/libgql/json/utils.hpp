@@ -14,12 +14,12 @@ using JSONObjectEntry =
                              rapidjson::MemoryPoolAllocator<>>;
 
 using JSONArray = rapidjson::GenericArray<
-    false, rapidjson::GenericValue<
+    true, rapidjson::GenericValue<
                rapidjson::UTF8<char>,
                rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>>>;
 
 using JSONWriter = rapidjson::Writer<rapidjson::StringBuffer>;
 using JSONObject = rapidjson::GenericObject<
-    false, rapidjson::GenericValue<
+    true, rapidjson::GenericValue<
                rapidjson::UTF8<char>,
                rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>>>;

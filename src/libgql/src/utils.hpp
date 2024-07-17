@@ -29,7 +29,7 @@ struct memfun_type<Ret (Class::*)(Args...) const> {
 };
 
 template <typename F>
-typename memfun_type<decltype(&F::operator())>::type FFL(
+typename memfun_type<decltype(&F::operator())>::type FuncFromLambda(
     F const &func) {  // Function from lambda !
     return func;
 };
