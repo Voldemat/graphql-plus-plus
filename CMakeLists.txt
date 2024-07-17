@@ -24,6 +24,7 @@ endif()
 option(GQL_BUILD_TESTS "build tests" ${IS_ROOT_PROJECT})
 if(GQL_BUILD_TESTS)
     set(LIBGQL_BUILD_TESTS ON)
+    enable_testing()
 endif()
 option(BUILD_GQLCLI "build cli" ${IS_ROOT_PROJECT})
 

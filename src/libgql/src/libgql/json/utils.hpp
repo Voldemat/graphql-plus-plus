@@ -13,8 +13,12 @@ using JSONObjectEntry =
     rapidjson::GenericMember<rapidjson::UTF8<>,
                              rapidjson::MemoryPoolAllocator<>>;
 
-using JSONArray = rapidjson::GenericArray<
+using JSONConstArray = rapidjson::GenericArray<
     true, rapidjson::GenericValue<
+               rapidjson::UTF8<char>,
+               rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>>>;
+using JSONArray = rapidjson::GenericArray<
+    false, rapidjson::GenericValue<
                rapidjson::UTF8<char>,
                rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>>>;
 

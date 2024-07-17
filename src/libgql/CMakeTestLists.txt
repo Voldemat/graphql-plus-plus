@@ -1,5 +1,4 @@
 include("${CMAKE_CURRENT_SOURCE_DIR}/vendor/googletest.cmake")
-enable_testing()
 
 file(GLOB_RECURSE GQL_TESTS_SOURCES src/__tests__/*.cc)
 file(GLOB_RECURSE GQL_TESTS_HEADERS src/__tests__/*.hpp)

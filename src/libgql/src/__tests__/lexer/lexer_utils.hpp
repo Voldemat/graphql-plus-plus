@@ -34,6 +34,7 @@ const std::filesystem::path casesPath =
     std::filesystem::path(__FILE__).parent_path().append("cases");
 const std::regex casesRegex = std::regex(".*\\.case\\.json");
 inline std::vector<LexerTestCase> getLexerCases() noexcept {
+    std::cout << casesPath << std::endl;
     std::vector<LexerTestCase> cases;
     for (const auto &filepath :
          std::filesystem::directory_iterator(casesPath) |

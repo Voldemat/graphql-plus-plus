@@ -19,7 +19,7 @@ using namespace parsers::schema::ast;
 
 template <typename T>
 std::map<std::string, T> parseNodesFromArray(
-    const JSONArray &array,
+    const JSONConstArray &array,
     const std::function<T(const JSONValue &)> &parserFunc,
     TypeRegistry &registry) {
     return array |
