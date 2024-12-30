@@ -40,6 +40,13 @@ jobs:
         retention-days: 90
         compression-level: 6
         overwrite: true
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      if: github.ref_type == 'tag'
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        title: "Release ${{ github.ref_name }}"
+        files: |
+          build/bin/gql
   build-completions:
     name: Build bash completions
     runs-on: ubuntu-24.04
