@@ -46,6 +46,7 @@ jobs:
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         title: "Release ${{ github.ref_name }}"
+        prerelease: false
         files: |
           build/bin/gql
   build-completions:
