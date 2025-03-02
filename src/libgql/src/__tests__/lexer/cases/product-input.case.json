@@ -78,11 +78,6 @@
             "location": { "line": 3, "start": 16, "end": 28 }
         },
         {
-            "type": "STRING",
-            "lexeme": "",
-            "location": { "line": 3, "start": 29, "end": 29 }
-        },
-        {
             "type": "RIGHT_BRACE",
             "lexeme": "}",
             "location": { "line": 4, "start": 0, "end": 0 }
