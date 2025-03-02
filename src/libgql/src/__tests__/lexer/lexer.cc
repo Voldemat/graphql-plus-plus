@@ -25,7 +25,7 @@ TEST_P(LexerFixture, TestLexer) {
     try {
         lexer.parse();
         const std::vector<GQLToken> tokens = accumulator.getTokens();
-        EXPECT_EQ(tokens.size(), testCase.expectedTokens.size());
+        ASSERT_EQ(tokens.size(), testCase.expectedTokens.size());
         int index = 0;
         for (const auto &token : tokens) {
             const auto &expectedToken = testCase.expectedTokens[index];

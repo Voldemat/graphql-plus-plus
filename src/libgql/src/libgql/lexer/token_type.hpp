@@ -19,7 +19,8 @@ enum class SimpleTokenType {
     COMMA,
     VSLASH,
     LEFT_BRACKET,
-    RIGHT_BRACKET
+    RIGHT_BRACKET,
+    AT_SIGN
 };
 enum class ComplexTokenType { IDENTIFIER, STRING, NUMBER, BOOLEAN, SPREAD };
 using GQLTokenType = std::variant<SimpleTokenType, ComplexTokenType>;

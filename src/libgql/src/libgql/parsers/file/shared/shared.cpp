@@ -16,5 +16,5 @@ void parsers::file::shared::assertIsNotKeyword(
 
 const bool parsers::file::shared::isKeyword(const std::string lexeme) {
     return (lexeme == "type" || lexeme == "query" || lexeme == "input" ||
-            lexeme == "extend");
+            lexeme == "extend" || lexeme == "directive");
 };

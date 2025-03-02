@@ -12,7 +12,6 @@
 #include "../shared/parser_error.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/token_type.hpp"
-#include "libgql/parsers/file/base/parser.hpp"
 
 using namespace parsers::file;
 using namespace parsers::file::client;
@@ -30,6 +29,8 @@ std::vector<ast::ClientDefinition> Parser::parse() {
 ast::ClientDefinition Parser::parseClientDefinition() {
     if (currentToken.lexeme == "fragment") {
         return parseFragmentDefinition();
+    } else if (currentToken.lexeme == "directive") {
+        return parseDirectiveNode();
     };
     return parseOperationDefinition();
 };
@@ -88,12 +89,10 @@ Parser::parseOperationParameters() {
 };
 
 ast::FragmentSpec Parser::parseFragmentSpec() {
-    // clang-format off
-    USE_BRACE_CONTEXT(
-        const auto startToken = currentToken;
-        const auto &selections = parseSelectionNodes();
-    );
-    // clang-format on
+    consume(SimpleTokenType::LEFT_BRACE);
+    const auto startToken = currentToken;
+    const auto &selections = parseSelectionNodes();
+    consume(SimpleTokenType::RIGHT_BRACE);
     return { .location = { .startToken = startToken,
                            .endToken = currentToken,
                            .source = source },
@@ -180,18 +179,12 @@ Parser::parseNameAndSelectionName() {
     return { fieldName, selectionName };
 };
 
-std::vector<ast::Argument> Parser::parseArguments() {
-    std::vector<ast::Argument> args;
-    while (isAhead(ComplexTokenType::IDENTIFIER)) {
-        args.push_back(parseArgument());
-        consumeIfIsAhead(SimpleTokenType::COMMA);
+ast::DirectiveLocation Parser::parseDirectiveLocation() {
+    consumeIdentifier();
+    const auto &value = ast::stringToDirectiveLocation(currentToken.lexeme);
+    if (!value.has_value()) {
+        throw shared::ParserError(currentToken, "Unknown directive location",
+                                  source);
     };
-    return args;
-};
-
-ast::Argument Parser::parseArgument() {
-    const auto &name = parseNameNode();
-    consume(SimpleTokenType::COLON);
-    const auto &paramName = parseNameNode();
-    return { .name = name, .paramName = paramName };
+    return value.value();
 };

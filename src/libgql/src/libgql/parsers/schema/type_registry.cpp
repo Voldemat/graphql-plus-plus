@@ -154,6 +154,12 @@ void TypeRegistry::addNode(const ServerSchemaNode &schemaNode) {
                            [this](const std::shared_ptr<Enum> &node) {
                                enums[node->name] = node;
                            },
+                           [this](const std::shared_ptr<ClientDirective> &node) {
+                               clientDirectives[node->name] = node;
+                           },
+                           [this](const std::shared_ptr<ServerDirective> &node) {
+                               serverDirectives[node->name] = node;
+                           },
                            [this](const std::shared_ptr<Scalar> &node) {
                                scalars[node->name] = node;
                            } },
@@ -208,4 +214,14 @@ FragmentSpec TypeRegistry::fragmentSpecFromOpType(client::ast::OpType type) cons
             };
         }
     };
+};
+
+[[nodiscard]] std::shared_ptr<ast::ServerDirective> TypeRegistry::getServerDirective(const std::string& name) const {
+    if (serverDirectives.contains(name)) return serverDirectives.at(name);
+    throw std::runtime_error("Not server directive with name: " + name);
+};
+
+[[nodiscard]] std::shared_ptr<ast::ClientDirective> TypeRegistry::getClientDirective(const std::string& name) const {
+    if (clientDirectives.contains(name)) return clientDirectives.at(name);
+    throw std::runtime_error("Not client directive with name: " + name);
 };

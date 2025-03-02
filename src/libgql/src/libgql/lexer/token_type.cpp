@@ -28,6 +28,7 @@ const std::map<std::string, GQLTokenType> &stringToTokenType{
     { "VSLASH", SimpleTokenType::VSLASH },
     { "RIGHT_BRACKET", SimpleTokenType::RIGHT_BRACKET },
     { "LEFT_BRACKET", SimpleTokenType::LEFT_BRACKET },
+    { "AT_SIGN", SimpleTokenType::AT_SIGN },
     { "SPREAD", ComplexTokenType::SPREAD },
     { "BOOLEAN", ComplexTokenType::BOOLEAN },
 };
@@ -97,6 +98,7 @@ const std::map<char, GQLTokenType> &charToTokenType = {
     { '|', SimpleTokenType::VSLASH },
     { '[', SimpleTokenType::LEFT_BRACKET },
     { ']', SimpleTokenType::RIGHT_BRACKET },
+    { '@', SimpleTokenType::AT_SIGN },
     { '"', ComplexTokenType::STRING },
     { '.', ComplexTokenType::SPREAD },
     { '$', ComplexTokenType::IDENTIFIER },

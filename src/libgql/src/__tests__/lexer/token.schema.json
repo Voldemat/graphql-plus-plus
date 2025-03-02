@@ -11,6 +11,7 @@
                 "type": {
                     "type": "string",
                     "enum": [
+                        "AT_SIGN",
                         "EQUAL",
                         "LEFT_PAREN",
                         "RIGHT_PAREN",

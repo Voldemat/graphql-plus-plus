@@ -3,12 +3,12 @@
 #include <vector>
 
 #include "./ast.hpp"
-#include "libgql/parsers/file/base/parser.hpp"
+#include "libgql/parsers/file/base/directive.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
 
 namespace parsers::file::server {
 
-class Parser : public BaseParser {
+class Parser : public BaseDirectiveParser<ast::DirectiveLocation> {
     ast::ASTNode parseASTNode();
     ast::ScalarDefinitionNode parseScalarTypeDefinitionNode();
     ast::UnionDefinitionNode parseUnionTypeDefinitionNode();
@@ -20,9 +20,10 @@ class Parser : public BaseParser {
     ast::ObjectDefinitionNode parseObjectTypeDefinitionNode();
     std::vector<shared::ast::NameNode> parseImplementsClause();
     std::vector<shared::ast::InputValueDefinitionNode> parseArguments();
+    ast::DirectiveLocation parseDirectiveLocation() override;
 
 public:
-    using BaseParser::BaseParser;
+    using BaseDirectiveParser<ast::DirectiveLocation>::BaseDirectiveParser;
     ast::FileNodes parse();
 };
 };  // namespace parsers::file::server

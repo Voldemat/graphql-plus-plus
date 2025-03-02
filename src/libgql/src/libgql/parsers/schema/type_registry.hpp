@@ -15,6 +15,12 @@ namespace schema {
 
 struct TypeRegistry {
     std::map<std::string,
+             std::shared_ptr<ast::ServerDirective>>
+        serverDirectives;
+    std::map<std::string,
+             std::shared_ptr<ast::ClientDirective>>
+        clientDirectives;
+    std::map<std::string,
              std::shared_ptr<ast::FieldDefinition<ast::ObjectFieldSpec>>>
         queries;
     std::map<std::string,
@@ -33,6 +39,8 @@ struct TypeRegistry {
 
     explicit TypeRegistry();
 
+    [[nodiscard]] std::shared_ptr<ast::ServerDirective> getServerDirective(const std::string& name) const;
+    [[nodiscard]] std::shared_ptr<ast::ClientDirective> getClientDirective(const std::string& name) const;
     [[nodiscard]] std::shared_ptr<ast::ObjectType> getQueryObject() const;
     [[nodiscard]] std::shared_ptr<ast::ObjectType> getMutationObject() const;
     [[nodiscard]] std::shared_ptr<ast::ObjectType> getSubscriptionObject()

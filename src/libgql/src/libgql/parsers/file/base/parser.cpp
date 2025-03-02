@@ -165,6 +165,9 @@ std::optional<GQLToken> BaseParser::lookahead() {
 };
 
 void BaseParser::consume(const GQLTokenType type) {
+    if (index + 1 >= tokens.size()) {
+        throw shared::ParserError::createEOF(currentToken, source);
+    };
     index += 1;
     currentToken = tokens[index];
     if (currentToken.type != type) {
@@ -174,7 +177,6 @@ void BaseParser::consume(const GQLTokenType type) {
 
 void BaseParser::consumeIdentifier() {
     consume(ComplexTokenType::IDENTIFIER);
-    shared::assertIsNotKeyword(currentToken, source);
 };
 
 bool BaseParser::consumeIfIsAhead(GQLTokenType expectedType) {
@@ -211,4 +213,53 @@ void BaseParser::consumeIdentifierByLexeme(const std::string &lexeme) {
         throw shared::ParserError::wrongLexeme(currentToken, lexeme, source);
     };
 };
+
+std::vector<shared::ast::Argument> BaseParser::parseArguments() {
+    std::vector<shared::ast::Argument> args = {parseArgument()};
+    while (consumeIfIsAhead(SimpleTokenType::COMMA)) {
+        args.push_back(parseArgument());
+    };
+    return args;
+};
+
+shared::ast::Argument BaseParser::parseArgument() {
+    const auto &name = parseNameNode();
+    consume(SimpleTokenType::COLON);
+    const auto &value = parseArgumentValue();
+    return {
+        .location = {
+            .startToken = name.location.startToken,
+            .endToken = currentToken,
+            .source = source,
+        },
+        .name = name,
+        .value = value
+    };
+};
+
+shared::ast::ArgumentValue BaseParser::parseArgumentValue() {
+    const auto &nextTokenOptional = lookahead();
+    if (!nextTokenOptional.has_value()) {
+        throw shared::ParserError::createEOF(currentToken, source);
+    }
+    const auto &nextToken = nextTokenOptional.value();
+    if (nextToken.type == (GQLTokenType)ComplexTokenType::IDENTIFIER) {
+        return parseNameNode();
+    };
+    return parseLiteralNode();
+};
+
+std::vector<shared::ast::InputValueDefinitionNode> BaseParser::parseInputValueDefinitionNodes() {
+    std::vector<shared::ast::InputValueDefinitionNode> arguments;
+    if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
+        while (isAhead(ComplexTokenType::IDENTIFIER)) {
+            arguments.emplace_back(parseInputValueDefinitionNode());
+            consumeIfIsAhead(SimpleTokenType::COMMA);
+        };
+        consume(SimpleTokenType::RIGHT_PAREN);
+    };
+    return arguments;
+};
+
+
 };  // namespace parsers::file

@@ -31,8 +31,10 @@ void LexerState::feed(char c) {
         return;
     };
     if (type.has_value()) {
+        const auto& oldType = type.value();
         feedWithType(c, type.value());
         if (type.has_value()) return;
+        if (oldType == ComplexTokenType::STRING && !type.has_value()) return;
     };
     feedNew(c);
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../file/shared/ast.hpp"
-#include "../server_ast.hpp"
+#include "../shared_ast.hpp"
 #include "../type_registry.hpp"
 
 namespace parsers::schema::nodes {

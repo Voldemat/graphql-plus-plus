@@ -4,6 +4,7 @@
 #include <rapidjson/writer.h>
 
 #include <variant>
+#include <magic_enum.hpp>
 
 #include "libgql/json/serializers/lexer/lexer.hpp"
 #include "libgql/json/utils.hpp"
@@ -13,6 +14,7 @@
 
 using namespace parsers::file;
 using namespace parsers::file::server;
+
 
 void writeNodeLocation(JSONWriter &writer,
                        const shared::ast::NodeLocation &location) {
@@ -76,6 +78,17 @@ void writeTypeNode(JSONWriter &writer, const shared::ast::TypeNode &typeNode) {
     writer.EndObject();
 };
 
+void writeDirectiveLocationNode(
+    rapidjson::Writer<rapidjson::StringBuffer> &writer,
+    const server::ast::DirectiveLocationNode &node){
+    writer.StartObject();
+    writer.String("location");
+    writeNodeLocation(writer, node.location);
+    writer.String("directiveLocation");
+    writer.String(magic_enum::enum_name(node.directiveLocation).data());
+    writer.EndObject();
+};
+
 void writeLiteralNode(JSONWriter &writer,
                       const shared::ast::LiteralNode &literalNode) {
     writer.StartObject();
@@ -133,6 +146,18 @@ void writeInputValueDefinitionNode(
     writer.EndObject();
 };
 
+void writeArgumentValue(JSONWriter& writer, const shared::ast::ArgumentValue& value) {
+    std::visit(overloaded{
+        [&writer](const shared::ast::NameNode& node){
+            writer.String(node.name.c_str());
+        },
+        [&writer](const shared::ast::LiteralNode& node){
+            writeLiteralNode(writer, node);
+        }
+    }, value);
+};
+
+
 void writeFieldDefinitionNode(JSONWriter &writer,
                               const ast::FieldDefinitionNode &node) {
     writer.StartObject();
@@ -146,6 +171,21 @@ void writeFieldDefinitionNode(JSONWriter &writer,
         writeInputValueDefinitionNode(writer, arg);
     };
     writer.EndArray();
+    writer.String("directives");
+    writer.StartObject();
+    for (const auto& directive : node.directives) {
+        writer.String(directive.name.name.c_str());
+        writer.StartObject();
+        writer.String("arguments");
+        writer.StartObject();
+        for (const auto& arg : directive.arguments) {
+            writer.String(arg.name.name.c_str());
+            writeArgumentValue(writer, arg.value);
+        };
+        writer.EndObject();
+        writer.EndObject();
+    };
+    writer.EndObject();
     writer.String("location");
     writeNodeLocation(writer, node.location);
     writer.EndObject();
@@ -225,6 +265,26 @@ void writeDefinitionNode(JSONWriter &writer,
                         writer.String("location");
                         writeNodeLocation(writer, node.location);
                     },
+                    [&writer](const ast::DirectiveDefinitionNode &node) {
+                        writer.String("_type");
+                        writer.String("DirectiveDefinitionNode");
+                        writer.String("name");
+                        writeNameNode(writer, node.name);
+                        writer.String("arguments");
+                        writer.StartArray();
+                        for (const auto &v : node.arguments) {
+                            writeInputValueDefinitionNode(writer, v);
+                        };
+                        writer.EndArray();
+                        writer.String("targets");
+                        writer.StartArray();
+                        for (const auto &v : node.targets) {
+                            writeDirectiveLocationNode(writer, v);
+                        };
+                        writer.EndArray();
+                        writer.String("location");
+                        writeNodeLocation(writer, node.location);
+                    },
                     [&writer](const ast::InterfaceDefinitionNode &node) {
                         writer.String("_type");
                         writer.String("InterfaceDefinitionNode");
@@ -243,6 +303,14 @@ void writeDefinitionNode(JSONWriter &writer,
     writer.EndObject();
 };
 
+void writeExtensionNode(JSONWriter& writer, const ast::ExtendTypeNode& node) {
+    writer.StartObject();
+    writer.String("type");
+    writeDefinitionNode(writer, node.typeNode);
+    writer.EndObject();
+
+};
+
 void json::serializers::parser::writeFileNodes(
     rapidjson::Writer<rapidjson::StringBuffer> &writer,
     const server::ast::FileNodes &nodes) {
@@ -258,7 +326,9 @@ void json::serializers::parser::writeFileNodes(
     writer.String("extensions");
     writer.StartArray();
     for (const auto &node : nodes.extensions) {
+        writeExtensionNode(writer, node);
     };
     writer.EndArray();
     writer.EndObject();
 };
+

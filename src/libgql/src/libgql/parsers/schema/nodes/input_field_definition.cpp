@@ -4,7 +4,7 @@
 #include <variant>
 
 #include "../../file/shared/ast.hpp"
-#include "../server_ast.hpp"
+#include "../shared_ast.hpp"
 #include "../type_registry.hpp"
 #include "./input_type_spec.hpp"
 

@@ -11,12 +11,6 @@
 
 namespace parsers::file {
 
-#define USE_CONTEXT(startType, endType, context) \
-    consume(startType);                          \
-    context consume(endType);
-#define USE_BRACE_CONTEXT(context)                                         \
-    USE_CONTEXT(SimpleTokenType::LEFT_BRACE, SimpleTokenType::RIGHT_BRACE, \
-                context)
 class BaseParser {
 protected:
     unsigned int index = 0;
@@ -37,9 +31,13 @@ protected:
     shared::ast::NamedTypeNode parseNamedTypeNode();
     shared::ast::ListTypeNode parseListTypeNode();
     shared::ast::InputValueDefinitionNode parseInputValueDefinitionNode();
+    std::vector<shared::ast::InputValueDefinitionNode> parseInputValueDefinitionNodes();
     shared::ast::LiteralNode parseLiteralNode();
     std::optional<shared::ast::LiteralIntNode> parseLiteralIntNode();
     std::optional<shared::ast::LiteralFloatNode> parseLiteralFloatNode();
+    std::vector<shared::ast::Argument> parseArguments();
+    shared::ast::Argument parseArgument();
+    shared::ast::ArgumentValue parseArgumentValue();
 
 public:
     BaseParser(const std::vector<lexer::GQLToken> &tokens,

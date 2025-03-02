@@ -57,10 +57,10 @@ inline std::vector<LexerTestCase> getLexerCases() noexcept {
             for (const auto &jsonToken : d["tokens"].GetArray()) {
                 assert(jsonToken.IsObject());
                 const auto &location = jsonToken["location"];
+                const auto& tokenType = gqlTokenTypeFromString(jsonToken["type"].GetString());
+                if (!tokenType.has_value()) continue;
                 expectedTokens.push_back(
-                    { .type =
-                          gqlTokenTypeFromString(jsonToken["type"].GetString())
-                              .value(),
+                    { .type = tokenType.value(),
                       .lexeme = jsonToken["lexeme"].GetString(),
                       .location = Location(location["line"].GetUint(),
                                            location["start"].GetUint(),

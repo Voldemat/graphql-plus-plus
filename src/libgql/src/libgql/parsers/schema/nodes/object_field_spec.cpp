@@ -6,12 +6,15 @@
 #include <string>
 #include <utility>
 #include <variant>
+#include <vector>
 
 #include "../../file/server/ast.hpp"
 #include "../../file/shared/ast.hpp"
 #include "../nodes/input_field_definition.hpp"
 #include "../server_ast.hpp"
+#include "../shared_ast.hpp"
 #include "../type_registry.hpp"
+#include "libgql/parsers/schema/nodes/server_directive_invocation.hpp"
 #include "utils.hpp"
 
 using namespace parsers::file;
@@ -19,23 +22,29 @@ using namespace parsers::file;
 namespace parsers::schema::nodes {
 
 std::pair<ast::NonCallableFieldSpec<ast::ObjectTypeSpec>, bool>
-parseNonCallableObjectTypeSpec(const shared::ast::TypeNode astNode,
-                               const TypeRegistry &registry) {
+parseNonCallableObjectTypeSpec(
+    const shared::ast::TypeNode astNode,
+    const std::vector<ast::ServerDirectiveInvocation> &directives,
+    const TypeRegistry &registry) {
     return std::visit<
         std::pair<ast::NonCallableFieldSpec<ast::ObjectTypeSpec>, bool>>(
         overloaded{
-            [&registry](const shared::ast::NamedTypeNode &node)
+            [&registry, &directives](const shared::ast::NamedTypeNode &node)
                 -> std::pair<ast::LiteralFieldSpec<ast::ObjectTypeSpec>, bool> {
-                return { (ast::LiteralFieldSpec<ast::ObjectTypeSpec>){
-                             .type = registry.getTypeForObject(node.name) },
-                         node.nullable };
+                ast::LiteralFieldSpec<ast::ObjectTypeSpec> spec = {
+                    .type = registry.getTypeForObject(node.name),
+                };
+                spec.invocations = directives;
+                return { spec, node.nullable };
             },
-            [&registry](const shared::ast::ListTypeNode &node)
+            [&registry, &directives](const shared::ast::ListTypeNode &node)
                 -> std::pair<ast::ArrayFieldSpec<ast::ObjectTypeSpec>, bool> {
-                return { (ast::ArrayFieldSpec<ast::ObjectTypeSpec>){
-                             .type = registry.getTypeForObject(node.type.name),
-                             .nullable = node.type.nullable },
-                         node.nullable };
+                ast::ArrayFieldSpec<ast::ObjectTypeSpec> spec = {
+                    .type = registry.getTypeForObject(node.type.name),
+                    .nullable = node.type.nullable
+                };
+                spec.invocations = directives;
+                return { spec, node.nullable };
             } },
         astNode);
 };
@@ -43,8 +52,10 @@ parseNonCallableObjectTypeSpec(const shared::ast::TypeNode astNode,
 std::pair<ast::ObjectFieldSpec, bool> parseObjectFieldSpec(
     const file::server::ast::FieldDefinitionNode &astNode,
     const TypeRegistry &registry) {
+    const auto &directives =
+        parseServerDirectiveInvocations(astNode.directives, registry);
     const auto &[returnType, nullable] =
-        parseNonCallableObjectTypeSpec(astNode.type, registry);
+        parseNonCallableObjectTypeSpec(astNode.type, directives, registry);
     ast::ObjectFieldSpec returnTypeSpec = std::visit(
         [](auto &&arg) -> ast::ObjectFieldSpec { return arg; }, returnType);
     if (astNode.arguments.empty()) return { returnTypeSpec, nullable };
@@ -76,7 +87,8 @@ ast::ObjectTypeSpec getReturnTypeFromNonCallableFieldSpec(
         fSpec);
 };
 
-ast::ObjectTypeSpec getReturnTypeFromObjectFieldSpec(const ast::ObjectFieldSpec &spec) {
+ast::ObjectTypeSpec getReturnTypeFromObjectFieldSpec(
+    const ast::ObjectFieldSpec &spec) {
     return std::visit<ast::ObjectTypeSpec>(
         overloaded{ [](const ast::LiteralFieldSpec<ast::ObjectTypeSpec> &node) {
                        return node.type;

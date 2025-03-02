@@ -9,6 +9,7 @@
 
 #include "../file/client/ast.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 
 namespace parsers::schema::ast {
 
@@ -52,16 +53,11 @@ using FragmentSpec =
     std::variant<UnionFragmentSpec, ObjectFragmentSpec<ObjectType>,
                  ObjectFragmentSpec<Interface>>;
 
-struct FieldSelectionArgument {
-    std::string name;
-    std::string parameterName;
-    std::shared_ptr<FieldDefinition<InputFieldSpec>> type;
-};
 
 struct FieldSelection {
     std::string name;
     std::string alias;
-    std::optional<std::map<std::string, FieldSelectionArgument>> arguments;
+    std::map<std::string, FieldSelectionArgument> arguments;
     std::optional<std::shared_ptr<FragmentSpec>> selection;
 };
 
@@ -77,7 +73,15 @@ struct Operation {
     FragmentSpec fragmentSpec;
 };
 
+struct ClientDirective {
+    std::string name;
+    std::map<std::string, std::shared_ptr<FieldDefinition<InputFieldSpec>>>
+        arguments;
+    std::vector<file::client::ast::DirectiveLocation> locations;
+};
+
+
 using ClientSchemaNode =
-    std::variant<std::shared_ptr<Fragment>, std::shared_ptr<Operation>>;
+    std::variant<std::shared_ptr<Fragment>, std::shared_ptr<Operation>, std::shared_ptr<ClientDirective>>;
 
 };  // namespace parsers::schema::ast

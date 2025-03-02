@@ -1,5 +1,4 @@
-#ifndef LIBGQL_PARSERS_CLIENT_AST
-#define LIBGQL_PARSERS_CLIENT_AST
+#pragma once
 
 #include <map>
 #include <memory>
@@ -12,11 +11,23 @@
 
 namespace parsers::file::client::ast {
 
-struct Argument {
-    shared::ast::NodeLocation location;
-    shared::ast::NameNode name;
-    shared::ast::NameNode paramName;
+enum class DirectiveLocation {
+    QUERY,
+    MUTATION,
+    SUBSCRIPTION,
+    FIELD,
+    FRAGMENT_DEFINITION,
+    FRAGMENT_SPREAD,
+    INLINE_FRAGMENT,
+    VARIABLE_DEFINITION,
 };
+
+std::optional<DirectiveLocation> stringToDirectiveLocation(
+    const std::string &str);
+
+using DirectiveLocationNode =
+    shared::ast::DirectiveLocationNode<DirectiveLocation>;
+using DirectiveDefinition = shared::ast::DirectiveNode<DirectiveLocation>;
 
 struct FragmentSpec;
 
@@ -30,7 +41,7 @@ struct ObjectCallableFieldSpec {
     shared::ast::NodeLocation location;
     shared::ast::NameNode selectionName;
     shared::ast::NameNode name;
-    std::vector<Argument> arguments;
+    std::vector<shared::ast::Argument> arguments;
 };
 
 using ObjectFieldSpec =
@@ -82,7 +93,7 @@ struct FragmentDefinition {
     FragmentSpec spec;
 };
 
-using ClientDefinition = std::variant<OperationDefinition, FragmentDefinition>;
+using ClientDefinition =
+    std::variant<OperationDefinition, FragmentDefinition, DirectiveDefinition>;
 
 };  // namespace parsers::file::client::ast
-#endif

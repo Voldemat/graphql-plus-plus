@@ -7,18 +7,15 @@
 
 #include "../client/ast.hpp"
 #include "../shared/ast.hpp"
-#include "libgql/parsers/file/base/parser.hpp"
+#include "libgql/parsers/file/base/directive.hpp"
 
 namespace parsers::file::client {
-
-class Parser : public BaseParser {
+class Parser : public BaseDirectiveParser<ast::DirectiveLocation> {
     ast::ClientDefinition parseClientDefinition();
     ast::FragmentDefinition parseFragmentDefinition();
     ast::OperationDefinition parseOperationDefinition();
     std::map<std::string, shared::ast::InputValueDefinitionNode>
     parseOperationParameters();
-    ast::Argument parseArgument();
-    std::vector<ast::Argument> parseArguments();
     ast::FragmentSpec parseFragmentSpec();
     std::vector<client::ast::SelectionNode> parseSelectionNodes();
     ast::SelectionNode parseSelectionNode();
@@ -27,9 +24,9 @@ class Parser : public BaseParser {
     ast::ObjectFieldSpec parseObjectFieldSpec();
     std::pair<shared::ast::NameNode, shared::ast::NameNode>
     parseNameAndSelectionName();
-
+    ast::DirectiveLocation parseDirectiveLocation() override;
 public:
-    using BaseParser::BaseParser;
+    using BaseDirectiveParser::BaseDirectiveParser;
     std::vector<ast::ClientDefinition> parse();
 };
 };  // namespace parsers::file::client

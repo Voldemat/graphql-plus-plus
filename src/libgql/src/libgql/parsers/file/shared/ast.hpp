@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <variant>
+#include <vector>
 
 #include "libgql/lexer/token.hpp"
 
@@ -68,10 +69,43 @@ struct ListTypeNode {
 
 using TypeNode = std::variant<NamedTypeNode, ListTypeNode>;
 
+using ArgumentValue = std::variant<
+    shared::ast::NameNode,
+    shared::ast::LiteralNode
+>;
+
+struct Argument {
+    shared::ast::NodeLocation location;
+    shared::ast::NameNode name;
+    ArgumentValue value;
+};
+
+struct DirectiveInvocationNode {
+    shared::ast::NodeLocation location;
+    shared::ast::NameNode name;
+    std::vector<shared::ast::Argument> arguments;
+};
+
 struct InputValueDefinitionNode {
     shared::ast::NodeLocation location;
     shared::ast::NameNode name;
     shared::ast::TypeNode type;
     std::optional<shared::ast::LiteralNode> defaultValue;
+    std::vector<DirectiveInvocationNode> directives;
 };
+
+template <class T>
+struct DirectiveLocationNode {
+    shared::ast::NodeLocation location;
+    T directiveLocation;
+};
+
+template <class T>
+struct DirectiveNode {
+    shared::ast::NodeLocation location;
+    shared::ast::NameNode name;
+    std::vector<DirectiveLocationNode<T>> targets;
+    std::vector<shared::ast::InputValueDefinitionNode> arguments;
+};
+
 };  // namespace parsers::file::shared::ast

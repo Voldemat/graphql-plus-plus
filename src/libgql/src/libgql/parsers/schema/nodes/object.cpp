@@ -6,6 +6,7 @@
 
 #include "../../file/server/ast.hpp"
 #include "../server_ast.hpp"
+#include "../shared_ast.hpp"
 #include "../type_registry.hpp"
 #include "./object_field_spec.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
@@ -21,12 +22,11 @@ std::shared_ptr<ast::ObjectType> parseObject(
     obj->fields =
         node.fields |
         std::views::transform(
-            [&registry](const server::ast::FieldDefinitionNode &defNode)
+            [&registry, &node](const server::ast::FieldDefinitionNode &defNode)
                 -> std::pair<std::string, std::shared_ptr<ast::FieldDefinition<
                                               ast::ObjectFieldSpec>>> {
                 const auto &[typeSpec, nullable] =
                     parseObjectFieldSpec(defNode, registry);
-
                 return { defNode.name.name,
                          std::make_shared<
                              ast::FieldDefinition<ast::ObjectFieldSpec>>(

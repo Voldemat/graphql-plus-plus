@@ -10,6 +10,7 @@
 #include "libgql/parsers/file/server/ast.hpp"
 #include "libgql/parsers/schema/nodes/extend_object_type.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 
 using namespace parsers::file;

@@ -12,6 +12,8 @@
 #include "./interface.hpp"
 #include "./object.hpp"
 #include "./union.hpp"
+#include "libgql/parsers/schema/nodes/server_directive.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 #include "utils.hpp"
 
 using namespace parsers::file;
@@ -39,6 +41,9 @@ ast::ServerSchemaNode parseServerNodeFirstPass(
             },
             [](const server::ast::InputObjectDefinitionNode &node) {
                 return std::make_shared<ast::InputType>(node.name.name);
+            },
+            [](const server::ast::DirectiveDefinitionNode &node) {
+                return std::make_shared<ast::ServerDirective>(node.name.name);
             },
             [](const server::ast::InterfaceDefinitionNode &node) {
                 return std::make_shared<ast::Interface>(node.name.name);
@@ -74,6 +79,10 @@ ast::ServerSchemaNode parseServerNodeSecondPass(
             [&registry](const server::ast::ObjectDefinitionNode &node)
                 -> std::shared_ptr<ast::ObjectType> {
                 return nodes::parseObject(node, registry);
+            },
+            [&registry](const server::ast::DirectiveDefinitionNode &node)
+                -> std::shared_ptr<ast::ServerDirective> {
+                return nodes::parseServerDirective(node, registry);
             },
         },
         astNode);

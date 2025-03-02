@@ -12,7 +12,6 @@
 #include "./ast.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/token_type.hpp"
-#include "libgql/parsers/file/base/parser.hpp"
 #include "utils.hpp"
 
 using namespace parsers::file;
@@ -53,6 +52,8 @@ ast::ASTNode Parser::parseASTNode() {
         return parseInterfaceTypeDefinitionNode();
     } else if (currentToken.lexeme == "type") {
         return parseObjectTypeDefinitionNode();
+    } else if (currentToken.lexeme == "directive") {
+        return parseDirectiveNode();
     } else if (currentToken.lexeme == "input") {
         const auto &interfaceNode = parseInterfaceTypeDefinitionNode();
         return (
@@ -94,15 +95,13 @@ ast::UnionDefinitionNode Parser::parseUnionTypeDefinitionNode() {
 ast::EnumDefinitionNode Parser::parseEnumTypeDefinitionNode() {
     const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    // clang-format off
-    USE_BRACE_CONTEXT(
-        std::vector<ast::EnumValueDefinitionNode> values;
-        while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            values.emplace_back(parseEnumValueDefinitionNode());
-            consumeIfIsAhead(SimpleTokenType::COMMA);
-        };
-    );
-    // clang-format on
+    consume(SimpleTokenType::LEFT_BRACE);
+    std::vector<ast::EnumValueDefinitionNode> values;
+    while (isAhead(ComplexTokenType::IDENTIFIER)) {
+        values.emplace_back(parseEnumValueDefinitionNode());
+        consumeIfIsAhead(SimpleTokenType::COMMA);
+    };
+    consume(SimpleTokenType::RIGHT_BRACE);
     return { .location = { .startToken = startToken,
                            .endToken = currentToken,
                            .source = source },
@@ -122,15 +121,13 @@ ast::EnumValueDefinitionNode Parser::parseEnumValueDefinitionNode() {
 ast::InterfaceDefinitionNode Parser::parseInterfaceTypeDefinitionNode() {
     const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    // clang-format off
-    USE_BRACE_CONTEXT(
-        std::vector<ast::FieldDefinitionNode> fields;
-        while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            fields.emplace_back(parseFieldDefinitionNode());
-            consumeIfIsAhead(SimpleTokenType::COMMA);
-        };
-    );
-    // clang-format on
+    consume(SimpleTokenType::LEFT_BRACE);
+    std::vector<ast::FieldDefinitionNode> fields;
+    while (isAhead(ComplexTokenType::IDENTIFIER)) {
+        fields.emplace_back(parseFieldDefinitionNode());
+        consumeIfIsAhead(SimpleTokenType::COMMA);
+    };
+    consume(SimpleTokenType::RIGHT_BRACE);
     return { .location = { .startToken = startToken,
                            .endToken = currentToken,
                            .source = source },
@@ -153,15 +150,14 @@ ast::ObjectDefinitionNode Parser::parseObjectTypeDefinitionNode() {
     const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
     const auto &interfaces = parseImplementsClause();
-    // clang-format off
-    USE_BRACE_CONTEXT(
-        std::vector<ast::FieldDefinitionNode> fields;
+    std::vector<ast::FieldDefinitionNode> fields;
+    if (consumeIfIsAhead(SimpleTokenType::LEFT_BRACE)) {
         while (isAhead(ComplexTokenType::IDENTIFIER)) {
             fields.emplace_back(parseFieldDefinitionNode());
             consumeIfIsAhead(SimpleTokenType::COMMA);
         };
-    )
-    // clang-format on
+        consume(SimpleTokenType::RIGHT_BRACE);
+    };
     return { .location = { .startToken = startToken,
                            .endToken = currentToken,
                            .source = source },
@@ -183,29 +179,32 @@ ast::ExtendTypeNode Parser::parseExtendTypeNode() {
 ast::FieldDefinitionNode Parser::parseFieldDefinitionNode() {
     const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    const auto &arguments = parseArguments();
+    const auto &arguments = parseInputValueDefinitionNodes();
     consume(SimpleTokenType::COLON);
     const auto &typeNode = parseTypeNode();
     std::optional<shared::ast::LiteralNode> defaultValue;
     if (consumeIfIsAhead(SimpleTokenType::EQUAL)) {
         defaultValue = parseLiteralNode();
     };
+    std::vector<shared::ast::DirectiveInvocationNode> directives;
+    while (consumeIfIsAhead(SimpleTokenType::AT_SIGN)) {
+        directives.push_back(parseDirectiveInvocationNode());
+    };
     return { .location = { .startToken = startToken,
                            .endToken = currentToken,
                            .source = source },
              .name = nameNode,
              .type = typeNode,
-             .arguments = arguments };
+             .arguments = arguments,
+             .directives = directives };
 };
 
-std::vector<shared::ast::InputValueDefinitionNode> Parser::parseArguments() {
-    std::vector<shared::ast::InputValueDefinitionNode> arguments;
-    if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
-        while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            arguments.emplace_back(parseInputValueDefinitionNode());
-            consumeIfIsAhead(SimpleTokenType::COMMA);
-        };
-        consume(SimpleTokenType::RIGHT_PAREN);
+ast::DirectiveLocation Parser::parseDirectiveLocation() {
+    consumeIdentifier();
+    const auto &value = ast::stringToDirectiveLocation(currentToken.lexeme);
+    if (!value.has_value()) {
+        throw shared::ParserError(currentToken, "Unknown directive location",
+                                  source);
     };
-    return arguments;
+    return value.value();
 };

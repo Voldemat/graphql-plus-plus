@@ -9,10 +9,12 @@
 
 #include "libgql/parsers/file/client/ast.hpp"
 #include "libgql/parsers/schema/client_ast.hpp"
+#include "libgql/parsers/schema/nodes/client_directive.hpp"
 #include "libgql/parsers/schema/nodes/client_operation.hpp"
 #include "libgql/parsers/schema/nodes/fragment/field_selection_node.hpp"
 #include "libgql/parsers/schema/nodes/fragment/fragment.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "utils.hpp"
 
@@ -26,6 +28,9 @@ ast::ClientSchemaNode parseClientDefinition(
         overloaded{ [&registry](const client::ast::FragmentDefinition &node) {
                        return nodes::parseFragmentSecondPass(node, registry);
                    },
+                    [&registry](const client::ast::DirectiveDefinition &node) {
+                        return nodes::parseClientDirective(node, registry);
+                    },
                     [&registry](const client::ast::OperationDefinition &node) {
                         return nodes::parseClientOperationDefinition(node,
                                                                      registry);
@@ -33,21 +38,22 @@ ast::ClientSchemaNode parseClientDefinition(
         definition);
 };
 
-void assertOperationArgumentIsValid(const ast::FieldSelectionArgument &arg,
+void assertOperationArgumentRefIsValid(const ast::ArgumentRefValue &ref,
+                                    const std::shared_ptr<ast::FieldDefinition<ast::InputFieldSpec>>& type,
                                     const std::shared_ptr<ast::Operation> &op) {
-    if (!op->parameters.contains(arg.parameterName)) {
+    if (!op->parameters.contains(ref.name)) {
         throw std::runtime_error(
             std::format("Operation {} doesn`t define required parameter {}",
-                        op->name, arg.parameterName));
+                        op->name, ref.name));
     };
     const ast::FieldDefinition<ast::InputFieldSpec> &paramField =
-        op->parameters.at(arg.parameterName);
-    const ast::FieldDefinition<ast::InputFieldSpec> &argField = *arg.type;
+        op->parameters.at(ref.name);
+    const ast::FieldDefinition<ast::InputFieldSpec> &argField = *type;
     if (extractInputTypeSpec(paramField.spec) !=
         extractInputTypeSpec(argField.spec)) {
         throw std::runtime_error(
             std::format("Operation {} parameter {} has wrong type", op->name,
-                        arg.parameterName));
+                        ref.name));
     };
     const auto &isArgNullable = argField.nullable;
     const auto &argHasDefaultValue =
@@ -60,18 +66,28 @@ void assertOperationArgumentIsValid(const ast::FieldSelectionArgument &arg,
         throw std::runtime_error(
             std::format("Operation {} parameter {} must not be "
                         "nullable or need to have default value",
-                        op->name, arg.parameterName));
+                        op->name, ref.name));
     };
+};
+
+
+void assertOperationArgumentIsValid(const ast::FieldSelectionArgument &arg,
+                                    const std::shared_ptr<ast::Operation> &op) {
+    std::visit(overloaded{
+        [&arg, &op](const ast::ArgumentRefValue& value) {
+            assertOperationArgumentRefIsValid(value, arg.type, op);
+        },
+        [&arg, &op](const ast::ArgumentLiteralValue& value){
+        },
+    }, arg.value);
 };
 
 void assertOperationIsValid(const std::shared_ptr<ast::Operation> &op) {
     const auto &selections =
         nodes::getFieldSelectionsFromFragmentSpec(op->fragmentSpec);
     for (const auto &field :
-         selections | std::views::filter([](const auto &field) {
-             return field.arguments.has_value();
-         })) {
-        for (const auto &arg : field.arguments.value() | std::views::values) {
+         selections) {
+        for (const auto &arg : field.arguments | std::views::values) {
             assertOperationArgumentIsValid(arg, op);
         };
     };

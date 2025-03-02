@@ -1,5 +1,4 @@
-#ifndef LIBGQL_PARSERS_SHARED
-#define LIBGQL_PARSERS_SHARED
+#pragma once
 
 #include <memory>
 #include <string>
@@ -12,6 +11,4 @@ namespace parsers::file::shared {
 void assertIsNotKeyword(const lexer::GQLToken token,
                         const std::shared_ptr<ast::SourceFile> &source);
 const bool isKeyword(const std::string lexeme);
-};  // namespace parsers::shared
-
-#endif
+};  // namespace parsers::file::shared

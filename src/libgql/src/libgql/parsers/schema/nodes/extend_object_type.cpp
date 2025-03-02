@@ -11,6 +11,7 @@
 #include "../server_ast.hpp"
 #include "../type_registry.hpp"
 #include "./object_field_spec.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 
 using namespace parsers::file;
 
@@ -29,13 +30,12 @@ parseExtendObjectType(const server::ast::ExtendTypeNode &node,
         registry.getObject(node.typeNode.name.name),
         node.typeNode.fields |
             std::views::transform(
-                [&registry](const auto &field)
+                [&registry](const server::ast::FieldDefinitionNode &field)
                     -> std::pair<std::string,
                                  std::shared_ptr<ast::FieldDefinition<
                                      ast::ObjectFieldSpec>>> {
                     const auto &[typeSpec, nullable] =
                         nodes::parseObjectFieldSpec(field, registry);
-
                     return { field.name.name,
                              std::make_shared<
                                  ast::FieldDefinition<ast::ObjectFieldSpec>>(
