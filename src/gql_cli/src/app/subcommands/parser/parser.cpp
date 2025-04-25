@@ -202,6 +202,10 @@ void createParserSubcommand(CLI::App *app) {
                 throw CLI::RuntimeError(1);
             };
             const auto &tokens = tokensAccumulator.getTokens();
+            if (tokens.size() == 0) {
+                std::cerr << "No tokens in file: " << filepath.filename() << std::endl;
+                throw CLI::RuntimeError(1);
+            }
             server::Parser parser(tokens, source);
             try {
                 const auto &ast = parser.parse();
