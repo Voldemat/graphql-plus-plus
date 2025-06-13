@@ -1,6 +1,7 @@
 #include "./lexer.hpp"
 
 #include <cctype>
+#include <format>
 #include <functional>
 #include <optional>
 #include <string>
@@ -31,7 +32,7 @@ void LexerState::feed(char c) {
         return;
     };
     if (type.has_value()) {
-        const auto& oldType = type.value();
+        const auto &oldType = type.value();
         feedWithType(c, type.value());
         if (type.has_value()) return;
         if (oldType == ComplexTokenType::STRING && !type.has_value()) return;
@@ -83,7 +84,9 @@ void LexerState::feedNew(char c) {
     const auto optTokenType = tokenTypeFromChar(c);
     if (!optTokenType.has_value()) {
         throw LexerError(
-            std::string("Cannot determine token type for char: \"") + c + '\"',
+            std::format("Cannot determine token type for char: \"{}\", "
+                        "charCodeAt: {}",
+                        c, (int)c),
             location);
     };
 

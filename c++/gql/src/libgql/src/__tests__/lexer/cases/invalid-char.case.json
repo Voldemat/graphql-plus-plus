@@ -2,7 +2,7 @@
     "$schema": "case.schema.json",
     "schema": "%",
     "error": {
-        "message": "Cannot determine token type for char: \"%\"",
+        "message": "Cannot determine token type for char: \"%\", charCodeAt: 37",
         "location": {
             "line": 1,
             "start": 0,
