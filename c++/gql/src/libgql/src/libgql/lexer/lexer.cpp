@@ -80,7 +80,7 @@ void LexerState::extractAndSaveToken() {
 
 void LexerState::feedNew(char c) {
     location.advance();
-    if (c == ' ' || c == '\r') return;
+    if (c == ' ' || c == '\r' || c == '\t') return;
     const auto optTokenType = tokenTypeFromChar(c);
     if (!optTokenType.has_value()) {
         throw LexerError(
