@@ -215,9 +215,10 @@ void BaseParser::consumeIdentifierByLexeme(const std::string &lexeme) {
 };
 
 std::vector<shared::ast::Argument> BaseParser::parseArguments() {
-    std::vector<shared::ast::Argument> args = {parseArgument()};
-    while (consumeIfIsAhead(SimpleTokenType::COMMA)) {
+    std::vector<shared::ast::Argument> args = {};
+    while (isAhead(ComplexTokenType::IDENTIFIER)) {
         args.push_back(parseArgument());
+        consumeIfIsAhead(SimpleTokenType::COMMA);
     };
     return args;
 };
