@@ -25,7 +25,7 @@ void Lexer::parse() {
 };
 
 void LexerState::feed(char c) {
-    if (c == '\n' || c || '\r') {
+    if (c == '\n') {
         maybeExtractAndSaveToken();
         location.newLine();
         return;
@@ -79,7 +79,7 @@ void LexerState::extractAndSaveToken() {
 
 void LexerState::feedNew(char c) {
     location.advance();
-    if (c == ' ') return;
+    if (c == ' ' || c == '\r') return;
     const auto optTokenType = tokenTypeFromChar(c);
     if (!optTokenType.has_value()) {
         throw LexerError(
