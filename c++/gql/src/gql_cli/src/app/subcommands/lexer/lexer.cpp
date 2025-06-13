@@ -5,6 +5,7 @@
 
 #include <CLI/App.hpp>
 #include <CLI/Error.hpp>
+#include <format>
 #include <iostream>
 
 #include "../../utils.hpp"
@@ -24,7 +25,7 @@ void createLexerSubcommand(CLI::App *app) {
         try {
             lexer.parse();
         } catch (const lexer::LexerError &error) {
-            std::cerr << error.what() << std::endl;
+            std::cerr << std::format("LexerError: {}", error.what()) << std::endl;
             throw CLI::RuntimeError(1);
         };
         const auto tokens = accum.getTokens();

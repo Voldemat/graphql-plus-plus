@@ -198,12 +198,16 @@ void createParserSubcommand(CLI::App *app) {
             try {
                 lexer.parse();
             } catch (const lexer::LexerError &error) {
-                std::cerr << "LexerParserError: " << error.what() << std::endl;
+                std::cerr << std::format("LexerParserError({}): {}",
+                                         source->filepath.filename().string(),
+                                         error.what())
+                          << std::endl;
                 throw CLI::RuntimeError(1);
             };
             const auto &tokens = tokensAccumulator.getTokens();
             if (tokens.size() == 0) {
-                std::cerr << "No tokens in file: " << filepath.filename() << std::endl;
+                std::cerr << "No tokens in file: " << filepath.filename()
+                          << std::endl;
                 throw CLI::RuntimeError(1);
             }
             server::Parser parser(tokens, source);

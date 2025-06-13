@@ -11,7 +11,8 @@ lexer::LexerError::LexerError(const std::string message,
       location{ location },
       finalMessage{ std::format("{}:{}:{}: {}", location.getLine(),
                                 location.getStart(), location.getEnd(),
-                                message) } {};
+                                message) } {
+      };
 const char *lexer::LexerError::what() const noexcept {
     return finalMessage.c_str();
 };
