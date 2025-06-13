@@ -25,7 +25,7 @@ void Lexer::parse() {
 };
 
 void LexerState::feed(char c) {
-    if (c == '\n') {
+    if (c == '\n' || c || '\r') {
         maybeExtractAndSaveToken();
         location.newLine();
         return;
