@@ -32,9 +32,15 @@ ast::SpreadSelection parseSpreadSelectionNode(
         std::holds_alternative<ast::ObjectFragmentSpec<ast::Interface>>(
             fragment->spec);
     if (!isUnion && !isInterface) {
-        throw shared::ParserError(node.fragmentName.location.startToken,
-                                  "Fragment has invalid type",
-                                  node.fragmentName.location.source);
+        const auto &objectSpec =
+            std::get<ast::ObjectFragmentSpec<ast::ObjectType>>(fragment->spec);
+        throw shared::ParserError(
+            node.fragmentName.location.startToken,
+            std::format(
+                "Fragment has object type, while union or interface was "
+                "expected. Fragment type: {}, Expected type: {}",
+                objectSpec.type->name, type->name),
+            node.fragmentName.location.source);
     };
     if (isUnion) {
         const auto &unionFragment =
@@ -88,9 +94,9 @@ bool isObjectFieldSpecIsTypenameField(
                "__typename";
 };
 
-ast::UnionSelection parseUnionSelectionNode(const client::ast::SelectionNode &sNode,
-                                       const std::shared_ptr<ast::Union> &type,
-                                       const TypeRegistry &registry) {
+ast::UnionSelection parseUnionSelectionNode(
+    const client::ast::SelectionNode &sNode,
+    const std::shared_ptr<ast::Union> &type, const TypeRegistry &registry) {
     return std::visit<ast::UnionSelection>(
         overloaded{
             [&registry, &type](const client::ast::SpreadSelectionNode &node) {
@@ -122,21 +128,23 @@ ast::UnionSelection parseUnionSelectionNode(const client::ast::SelectionNode &sN
                 if (std::holds_alternative<std::shared_ptr<ast::ObjectType>>(
                         itemTypeVariant)) {
                     const auto &itemType =
-                        std::get<std::shared_ptr<ast::ObjectType>>(itemTypeVariant);
+                        std::get<std::shared_ptr<ast::ObjectType>>(
+                            itemTypeVariant);
                     const auto &spec = nodes::parseObjectFragmentSpec(
                         node.fragment->selections, itemType, registry);
-                    return (ast::UnionSelection)(ast::ObjectConditionalSpreadSelection){
+                    return (ast::UnionSelection)(
+                        ast::ObjectConditionalSpreadSelection){
                         .type = itemType,
-                        .selection =
-                            std::make_shared<ast::ObjectFragmentSpec<ast::ObjectType>>(
-                                spec)
+                        .selection = std::make_shared<
+                            ast::ObjectFragmentSpec<ast::ObjectType>>(spec)
                     };
                 };
                 const auto &itemType =
                     std::get<std::shared_ptr<ast::Union>>(itemTypeVariant);
                 const auto &spec = nodes::parseUnionFragmentSpec(
                     node.fragment->selections, itemType, registry);
-                return (ast::UnionSelection)(ast::UnionConditionalSpreadSelection){
+                return (ast::UnionSelection)(
+                    ast::UnionConditionalSpreadSelection){
                     .type = itemType,
                     .selection = std::make_shared<ast::UnionFragmentSpec>(spec)
                 };
