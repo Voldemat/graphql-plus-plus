@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <cassert>
+#include <format>
 #include <map>
 #include <memory>
 #include <ranges>
@@ -15,6 +17,7 @@
 #include "libgql/parsers/schema/nodes/fragment/selection_argument.hpp"
 #include "libgql/parsers/schema/nodes/fragment/spec.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "utils.hpp"
 
@@ -73,19 +76,31 @@ ast::FieldSelection parseFieldSelectionNode(
                 };
                 const auto &spec =
                     std::get<ast::CallableFieldSpec>(fType->spec);
+                const auto &arguments =
+                    node.arguments |
+                    std::views::transform(
+                        [&spec](const auto &arg)
+                            -> std::pair<std::string,
+                                         ast::FieldSelectionArgument> {
+                            return { arg.name.name,
+                                     nodes::parseSelectionArgument(arg, spec) };
+                        }) |
+                    std::ranges::to<std::map>();
+                for (const auto &[argName, argSpec] : spec.arguments) {
+                    if (!argSpec->nullable &&
+                        !ast::InputFieldSpec_hasDefaultValue(argSpec->spec) &&
+                        !arguments.contains(argName)) {
+                        assert(node.location.source != nullptr);
+                        throw file::shared::ParserError(
+                            node.name.location.startToken,
+                            std::format("Required argument {} was not provided",
+                                        argName),
+                            node.name.location.source);
+                    }
+                }
                 return { .name = node.name.name,
                          .alias = node.selectionName.name,
-                         .arguments =
-                             node.arguments |
-                             std::views::transform(
-                                 [&spec](const auto &arg)
-                                     -> std::pair<std::string,
-                                                  ast::FieldSelectionArgument> {
-                                     return { arg.name.name,
-                                              nodes::parseSelectionArgument(
-                                                  arg, spec) };
-                                 }) |
-                             std::ranges::to<std::map>(),
+                         .arguments = arguments,
                          .selection = fNode.spec.transform(
                              [&registry, &fType](const auto &selectionNode) {
                                  return std::make_shared<ast::FragmentSpec>(

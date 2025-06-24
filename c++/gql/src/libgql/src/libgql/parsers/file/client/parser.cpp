@@ -164,9 +164,12 @@ ast::ObjectFieldSpec Parser::parseObjectFieldSpec() {
     const auto &args = parseArguments();
     consume(SimpleTokenType::RIGHT_PAREN);
     location.endToken = currentToken;
-    return (ast::ObjectCallableFieldSpec){ .selectionName = selectionName,
-                                           .name = fieldName,
-                                           .arguments = args };
+    return (ast::ObjectCallableFieldSpec){
+        .location = location,
+        .selectionName = selectionName,
+        .name = fieldName,
+        .arguments = args,
+    };
 };
 
 std::pair<shared::ast::NameNode, shared::ast::NameNode>

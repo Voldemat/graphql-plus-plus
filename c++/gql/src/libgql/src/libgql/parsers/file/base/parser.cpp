@@ -1,5 +1,6 @@
 #include "./parser.hpp"
 
+#include <cassert>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -19,6 +20,7 @@ namespace parsers::file {
 BaseParser::BaseParser(const std::vector<GQLToken> &tokens,
                        const std::shared_ptr<shared::ast::SourceFile> &source)
     : tokens{ tokens }, source{ source }, currentToken{ tokens[0] } {
+    assert(source != nullptr);
     if (currentToken.type != (GQLTokenType)ComplexTokenType::IDENTIFIER) {
         throw shared::ParserError::wrongType(
             currentToken, ComplexTokenType::IDENTIFIER, source);
