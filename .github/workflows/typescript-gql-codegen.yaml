@@ -9,6 +9,7 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
+    environment: typescript-gql-codegen
     steps:
       - name: checkout
         uses: actions/checkout@v2
