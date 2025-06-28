@@ -3,8 +3,8 @@ name: "c++ gql build"
 on:
   push:
     paths:
-      - c++/gql/**
-      - .github/workflows/c++-gql.yaml
+      - 'c++/gql/**'
+      - '.github/workflows/c++-gql.yaml'
 
 jobs:
   build:
