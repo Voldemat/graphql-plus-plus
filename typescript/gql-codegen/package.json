@@ -7,8 +7,8 @@
     "files": [
         "/dist"
     ],
-    "homepage": "https://github.com/Voldemat/graphql++#readme",
-    "repository": "https://github.com/Voldemat/graphql++",
+    "homepage": "https://github.com/Voldemat/graphql-plus-plus#readme",
+    "repository": "https://github.com/Voldemat/graphql-plus-plus",
     "scripts": {
         "lint": "eslint .",
         "lint:fix": "eslint --fix .",
