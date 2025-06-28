@@ -1,5 +1,5 @@
 {
-    "name": "gql-codegen",
+    "name": "@vladimirdev635/gql-codegen",
     "version": "0.0.1",
     "type": "module",
     "main": "dist/index.js",
@@ -8,7 +8,10 @@
         "/dist"
     ],
     "homepage": "https://github.com/Voldemat/graphql-plus-plus#readme",
-    "repository": "https://github.com/Voldemat/graphql-plus-plus",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Voldemat/graphql-plus-plus.git"
+    },
     "scripts": {
         "lint": "eslint .",
         "lint:fix": "eslint --fix .",
