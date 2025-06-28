@@ -3,8 +3,8 @@ name: "c++ gql build"
 on:
   push:
     paths:
-      - 'c++/gql/**'
-      - '.github/workflows/c++-gql.yaml'
+      - cpp/gql/**
+      - .github/workflows/cpp-gql.yaml
 
 jobs:
   build:
@@ -20,12 +20,12 @@ jobs:
       id: restore-cache-build
       uses: actions/cache/restore@v4
       with:
-        path: c++/gql/build
+        path: cpp/gql/build
         key: ${{ runner.os }}-build
     - name: CMake Action
       uses: threeal/cmake-action@v1.3.0
       with:
-        source-dir: c++/gql
+        source-dir: cpp/gql
         args: -DCMAKE_BUILD_TYPE=Release -DGQL_BUILD_TESTS=true -DCMAKE_CXX_FLAGS='-D__cpp_concepts=202002L' -DCMAKE_EXE_LINKER_FLAGS='-static'
         build-args: --parallel 4
         run-build: true
@@ -34,15 +34,15 @@ jobs:
     - uses: actions/cache/save@v3
       name: Save build cache
       with:
-        path: c++/gql/build
+        path: cpp/gql/build
         key: ${{ runner.os }}-build
     - name: Run tests
-      working-directory: ./c++/gql/build
+      working-directory: ./cpp/gql/build
       run: ctest --rerun-failed --output-on-failure .
     - uses: actions/upload-artifact@v4
       with:
         name: 'ubuntu-cli'
-        path: c++/gql/build/bin/gql
+        path: cpp/gql/build/bin/gql
         if-no-files-found: error
         retention-days: 90
         compression-level: 6
@@ -54,7 +54,7 @@ jobs:
         title: "Release ${{ github.ref_name }}"
         prerelease: false
         files: |
-          c++/gql/build/bin/gql
+          cpp/gql/build/bin/gql
   build-completions:
     name: Build bash completions
     runs-on: ubuntu-24.04
@@ -63,12 +63,12 @@ jobs:
     - name: "Install completely"
       run: sudo apt update && sudo apt-get install -y rubygems-integration && sudo gem install completely
     - name: "Build completions"
-      working-directory: c++/gql
+      working-directory: cpp/gql
       run: cd autocomplete && completely generate
     - uses: actions/upload-artifact@v4
       with:
         name: 'ubuntu-cli-completions'
-        path: c++/gql/autocomplete/completely.bash
+        path: cpp/gql/autocomplete/completely.bash
         if-no-files-found: error
         retention-days: 90
         compression-level: 6
