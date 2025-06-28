@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - typescript/gql-codegen/**
+      - .github/workflows/typescript-gql-codegen.yaml
 
 jobs:
   main:

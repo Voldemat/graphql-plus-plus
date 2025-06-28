@@ -1,6 +1,10 @@
 name: "c++ gql build"
 
-on: [push]
+on:
+  push:
+    paths:
+      - c++/gql/**
+      - .github/workflows/c++-gql.yaml
 
 jobs:
   build:
