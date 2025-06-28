@@ -1,4 +1,4 @@
-name: CMake Build
+name: "c++ gql build"
 
 on: [push]
 
