@@ -1,0 +1,63 @@
+import ts from 'typescript';
+
+export const helperNodes = [
+    ts.factory.createTypeAliasDeclaration(
+        [],
+        'Maybe',
+        [ts.factory.createTypeParameterDeclaration([], 'T')],
+        ts.factory.createUnionTypeNode([
+            ts.factory.createTypeReferenceNode('T'),
+            ts.factory.createLiteralTypeNode(ts.factory.createNull())
+        ])
+    ),
+    ts.factory.createTypeAliasDeclaration(
+        [],
+        'Exact',
+        [ts.factory.createTypeParameterDeclaration(
+            [],
+            'T',
+            ts.factory.createTypeLiteralNode([
+                ts.factory.createIndexSignature(
+                    undefined,
+                    [ts.factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        'key',
+                        undefined,
+                        ts.factory.createTypeReferenceNode('string')
+                    )],
+                    ts.factory.createTypeReferenceNode('unknown')
+                ),
+            ])
+        )],
+        ts.factory.createMappedTypeNode(
+            undefined,
+            ts.factory.createTypeParameterDeclaration(
+                undefined,
+                ts.factory.createIdentifier('K'),
+                ts.factory.createTypeOperatorNode(
+                    ts.SyntaxKind.KeyOfKeyword,
+                    ts.factory.createTypeReferenceNode(
+                        ts.factory.createIdentifier('T'),
+                        undefined
+                    )
+                ),
+                undefined
+            ),
+            undefined,
+            undefined,
+            ts.factory.createIndexedAccessTypeNode(
+                ts.factory.createTypeReferenceNode(
+                    ts.factory.createIdentifier('T'),
+                    undefined
+                ),
+                ts.factory.createTypeReferenceNode(
+                    ts.factory.createIdentifier('K'),
+                    undefined
+                )
+            ),
+            undefined
+        )
+    )
+]
+

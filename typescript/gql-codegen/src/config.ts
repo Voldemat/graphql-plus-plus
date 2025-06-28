@@ -1,5 +1,5 @@
-import { RootSchema } from "./schema.js";
-import { Logger } from "pino";
+import { RootSchema } from './schema.js';
+import { Logger } from 'pino';
 
 export interface ActorContext {
     readonly schema: RootSchema

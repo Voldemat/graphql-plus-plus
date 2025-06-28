@@ -2,7 +2,8 @@
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
-import { includeIgnoreFile } from "@eslint/compat";
+import { FlatConfig, includeIgnoreFile } from "@eslint/compat";
+import babelParser from "@babel/eslint-parser";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,6 +14,14 @@ const compat = new FlatCompat({
 });
 const eslintConfig = [
     includeIgnoreFile(gitignorePath),
+    {
+        languageOptions: {
+            parser: babelParser,
+            parserOptions: {
+                requireConfigFile: false
+            }
+        },
+    } as FlatConfig,
     ...compat.config({
         rules: {
             "max-lines": [
@@ -22,6 +31,10 @@ const eslintConfig = [
             "max-len": [
                 "error",
                 80
+            ],
+            "quotes": [
+                "error",
+                "single"
             ],
             "array-callback-return": "error",
             "no-duplicate-imports": "error",

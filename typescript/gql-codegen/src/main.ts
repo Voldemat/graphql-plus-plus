@@ -1,4 +1,4 @@
-import { ActorContext, Config } from "./config.js";
+import { ActorContext, Config } from './config.js';
 
 export async function run<TContext extends ActorContext>(
     config: Config<TContext>

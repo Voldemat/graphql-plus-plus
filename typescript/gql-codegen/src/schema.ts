@@ -1,63 +1,63 @@
 /* eslint-disable max-lines */
-import { z } from "zod";
+import { z } from 'zod';
 
-export const objectTypeSchema = z.discriminatedUnion("_type", [
+export const objectTypeSchema = z.discriminatedUnion('_type', [
     z.object({
-        _type: z.literal("ObjectType"),
+        _type: z.literal('ObjectType'),
         name: z.string(),
         $ref: z.string()
     }),
     z.object({
-        _type: z.literal("Scalar"),
+        _type: z.literal('Scalar'),
         name: z.string()
     }),
     z.object({
-        _type: z.literal("Union"),
+        _type: z.literal('Union'),
         name: z.string(),
         $ref: z.string()
     })
 ])
 
-export const inputTypeSchema = z.discriminatedUnion("_type", [
+export const inputTypeSchema = z.discriminatedUnion('_type', [
     z.object({
-        _type: z.literal("InputType"),
+        _type: z.literal('InputType'),
         name: z.string(),
         $ref: z.string()
     }),
     z.object({
-        _type: z.literal("Scalar"),
+        _type: z.literal('Scalar'),
         name: z.string()
     }),
     z.object({
-        _type: z.literal("Enum"),
+        _type: z.literal('Enum'),
         name: z.string(),
         $ref: z.string()
     }),
 ])
 export const objectLiteralSpecSchema = z.object({
-    _type: z.literal("literal"),
+    _type: z.literal('literal'),
     type: objectTypeSchema
 })
 export const objectArraySpecSchema = z.object({
-    _type: z.literal("array"),
+    _type: z.literal('array'),
     nullable: z.boolean(),
     type: objectTypeSchema
 })
 
 export const inputLiteralSpecSchema = z.object({
-    _type: z.literal("literal"),
+    _type: z.literal('literal'),
     type: inputTypeSchema
 })
 export const inputArraySpecSchema = z.object({
-    _type: z.literal("array"),
+    _type: z.literal('array'),
     nullable: z.boolean(),
     type: inputTypeSchema
 })
-export const inputFieldSpecSchema = z.discriminatedUnion("_type", [
+export const inputFieldSpecSchema = z.discriminatedUnion('_type', [
     inputLiteralSpecSchema,
     inputArraySpecSchema,
 ])
-export const objectNonCallableFieldSpecSchema = z.discriminatedUnion("_type", [
+export const objectNonCallableFieldSpecSchema = z.discriminatedUnion('_type', [
     objectLiteralSpecSchema,
     objectArraySpecSchema,
 ])
@@ -67,11 +67,11 @@ export const inputFieldSchema = z.object({
     spec: inputFieldSpecSchema
 })
 export const callableSpecSchema = z.object({
-    _type: z.literal("callable"),
+    _type: z.literal('callable'),
     returnType: objectNonCallableFieldSpecSchema,
     arguments: z.record(z.string(), inputFieldSchema)
 })
-export const objectFieldSpecSchema = z.discriminatedUnion("_type", [
+export const objectFieldSpecSchema = z.discriminatedUnion('_type', [
     objectLiteralSpecSchema,
     objectArraySpecSchema,
     callableSpecSchema
