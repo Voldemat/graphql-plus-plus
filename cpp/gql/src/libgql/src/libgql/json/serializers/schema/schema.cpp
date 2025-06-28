@@ -12,6 +12,7 @@
 #include <string>
 #include <variant>
 
+#include "libgql/parsers/schema/client_ast.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/shared_ast.hpp"
@@ -19,14 +20,16 @@
 #include "utils.hpp"
 
 using namespace rapidjson;
-using namespace parsers;
+using namespace parsers::schema;
+using namespace parsers::schema::ast;
 
+namespace json::serializers::schema {
 void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                   const schema::ast::ObjectTypeSpec &field) {
+                   const ObjectTypeSpec &field) {
     writer.StartObject();
     std::visit(
         overloaded{
-            [&writer](const std::shared_ptr<schema::ast::ObjectType> &node) {
+            [&writer](const std::shared_ptr<ObjectType> &node) {
                 writer.String("_type");
                 writer.String("ObjectType");
                 writer.String("name");
@@ -35,7 +38,7 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                 writer.String(
                     std::format("#/server/objects/{}", node->name).c_str());
             },
-            [&writer](const std::shared_ptr<schema::ast::Interface> &node) {
+            [&writer](const std::shared_ptr<Interface> &node) {
                 writer.String("_type");
                 writer.String("InterfaceType");
                 writer.String("name");
@@ -44,13 +47,13 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                 writer.String(
                     std::format("#/server/interfaces/{}", node->name).c_str());
             },
-            [&writer](const std::shared_ptr<schema::ast::Scalar> &node) {
+            [&writer](const std::shared_ptr<Scalar> &node) {
                 writer.String("_type");
                 writer.String("Scalar");
                 writer.String("name");
                 writer.String(node->name.c_str());
             },
-            [&writer](const std::shared_ptr<schema::ast::Enum> &node) {
+            [&writer](const std::shared_ptr<Enum> &node) {
                 writer.String("_type");
                 writer.String("Enum");
                 writer.String("name");
@@ -59,7 +62,7 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                 writer.String(
                     std::format("#/server/enums/{}", node->name).c_str());
             },
-            [&writer](const std::shared_ptr<schema::ast::Union> &node) {
+            [&writer](const std::shared_ptr<Union> &node) {
                 writer.String("_type");
                 writer.String("Union");
                 writer.String("name");
@@ -74,11 +77,11 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                   const schema::ast::InputTypeSpec &field) {
+                   const InputTypeSpec &field) {
     writer.StartObject();
     std::visit(
         overloaded{
-            [&writer](const std::shared_ptr<schema::ast::InputType> &node) {
+            [&writer](const std::shared_ptr<InputType> &node) {
                 writer.String("_type");
                 writer.String("InputType");
                 writer.String("name");
@@ -87,13 +90,13 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                 writer.String(
                     std::format("#/server/inputs/{}", node->name).c_str());
             },
-            [&writer](const std::shared_ptr<schema::ast::Scalar> &node) {
+            [&writer](const std::shared_ptr<Scalar> &node) {
                 writer.String("_type");
                 writer.String("Scalar");
                 writer.String("name");
                 writer.String(node->name.c_str());
             },
-            [&writer](const std::shared_ptr<schema::ast::Enum> &node) {
+            [&writer](const std::shared_ptr<Enum> &node) {
                 writer.String("_type");
                 writer.String("Enum");
                 writer.String("name");
@@ -109,16 +112,16 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 
 template <typename T>
 void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                    const schema::ast::NonCallableFieldSpec<T> &field) {
+                    const NonCallableFieldSpec<T> &field) {
     writer.StartObject();
     std::visit(overloaded{
-                   [&writer](const schema::ast::LiteralFieldSpec<T> &node) {
+                   [&writer](const LiteralFieldSpec<T> &node) {
                        writer.String("_type");
                        writer.String("literal");
                        writer.String("type");
                        writeTypeSpec(writer, node.type);
                    },
-                   [&writer](const schema::ast::ArrayFieldSpec<T> &node) {
+                   [&writer](const ArrayFieldSpec<T> &node) {
                        writer.String("_type");
                        writer.String("array");
                        writer.String("nullable");
@@ -133,55 +136,52 @@ void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 
 template <typename T>
 void writeFieldDefinition(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                          const schema::ast::FieldDefinition<T> &field);
+                          const FieldDefinition<T> &field);
 
 void writeArgumentLiteralValue(
     rapidjson::Writer<rapidjson::StringBuffer> &writer,
-    const schema::ast::ArgumentLiteralValue &argValue) {
-    std::visit(
-        overloaded{
-            [&writer](const std::string& value) {
-                writer.String(value.c_str());
-            },
-            [&writer](const int& value) {
-                writer.Int(value);
-            },
-            [&writer](const float& value) {
-                writer.Double(value);
-            },
-            [&writer](const bool& value) {
-                writer.Bool(value);
-            },
-            [&writer](const schema::ast::ArgumentEnumValue& value) {
-                writer.String(value.value.c_str());
-            },
-        },
-    argValue);
+    const ArgumentLiteralValue &argValue) {
+    std::visit(overloaded{
+                   [&writer](const std::string &value) {
+                       writer.String(value.c_str());
+                   },
+                   [&writer](const int &value) { writer.Int(value); },
+                   [&writer](const float &value) { writer.Double(value); },
+                   [&writer](const bool &value) { writer.Bool(value); },
+                   [&writer](const ArgumentEnumValue &value) {
+                       writer.String(value.value.c_str());
+                   },
+               },
+               argValue);
 };
 
 void writeArgumentValue(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                        const schema::ast::ArgumentValue &argValue) {
+                        const ArgumentValue &argValue) {
     writer.StartObject();
-    std::visit(
-        overloaded{ [&writer](const schema::ast::ArgumentLiteralValue &value) {
+    std::visit(overloaded{
+                   [&writer](const ArgumentLiteralValue &value) {
                        writer.String("_type");
                        writer.String("literal");
                        writer.String("value");
                        writeArgumentLiteralValue(writer, value);
                    },
-                    [&writer](const schema::ast::ArgumentRefValue &value) {} },
-        argValue);
+                   [&writer](const ArgumentRefValue &value) {
+                       writer.String("_type");
+                       writer.String("ref");
+                       writer.String("name");
+                       writer.String(value.name.c_str());
+                   },
+               },
+               argValue);
     writer.EndObject();
 };
 
 void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                    const schema::ast::ObjectFieldSpec &field) {
+                    const ObjectFieldSpec &field) {
     writer.StartObject();
     std::visit(
         overloaded{
-            [&writer](
-                const schema::ast::LiteralFieldSpec<schema::ast::ObjectTypeSpec>
-                    &node) {
+            [&writer](const LiteralFieldSpec<ObjectTypeSpec> &node) {
                 writer.String("_type");
                 writer.String("literal");
                 writer.String("type");
@@ -205,9 +205,7 @@ void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                 };
                 writer.EndObject();
             },
-            [&writer](
-                const schema::ast::ArrayFieldSpec<schema::ast::ObjectTypeSpec>
-                    &node) {
+            [&writer](const ArrayFieldSpec<ObjectTypeSpec> &node) {
                 writer.String("_type");
                 writer.String("array");
                 writer.String("nullable");
@@ -215,7 +213,7 @@ void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                 writer.String("type");
                 writeTypeSpec(writer, node.type);
             },
-            [&writer](const schema::ast::CallableFieldSpec &node) {
+            [&writer](const CallableFieldSpec &node) {
                 writer.String("_type");
                 writer.String("callable");
                 writer.String("returnType");
@@ -235,7 +233,7 @@ void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 
 template <typename T>
 void writeFieldDefinition(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                          const schema::ast::FieldDefinition<T> &field) {
+                          const FieldDefinition<T> &field) {
     writer.StartObject();
     writer.String("nullable");
     writer.Bool(field.nullable);
@@ -245,7 +243,7 @@ void writeFieldDefinition(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                     const schema::ast::ObjectType &node) {
+                     const ObjectType &node) {
     writer.StartObject();
     writer.String("name");
     writer.String(node.name.c_str());
@@ -273,7 +271,7 @@ void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                     const schema::ast::Interface &node) {
+                     const Interface &node) {
     writer.StartObject();
     writer.String("name");
     writer.String(node.name.c_str());
@@ -288,7 +286,7 @@ void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                     const schema::ast::InputType &node) {
+                     const InputType &node) {
     writer.StartObject();
     writer.String("name");
     writer.String(node.name.c_str());
@@ -308,7 +306,7 @@ void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                     const schema::ast::Enum &node) {
+                     const Enum &node) {
     writer.StartObject();
     writer.String("name");
     writer.String(node.name.c_str());
@@ -322,7 +320,7 @@ void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                     const schema::ast::Union &node) {
+                     const Union &node) {
     writer.StartObject();
     writer.String("name");
     writer.String(node.name.c_str());
@@ -337,7 +335,7 @@ void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeServerDirective(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                          const schema::ast::ServerDirective &node) {
+                          const ServerDirective &node) {
     writer.StartObject();
     writer.String("name");
     writer.String(node.name.c_str());
@@ -363,7 +361,7 @@ void writeServerDirective(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeServerSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                       const schema::ServerSchema &schema) {
+                       const ServerSchema &schema) {
     writer.StartObject();
 
     writer.String("objects");
@@ -424,11 +422,229 @@ void writeServerSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.EndObject();
 };
 
-void json::serializers::schema::writeSchemaNodes(
+void writeFieldSelectionArgument(
     rapidjson::Writer<rapidjson::StringBuffer> &writer,
-    const parsers::schema::Schema &schema) {
+    const FieldSelectionArgument &argument) {
+    writer.StartObject();
+    writer.String("name");
+    writer.String(argument.name.c_str());
+    writer.String("value");
+    writeArgumentValue(writer, argument.value);
+    writer.EndObject();
+}
+
+void writeClientFragmentSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                             const FragmentSpec &spec);
+
+void writeObjectSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                          const ObjectSelection &selection) {
+    writer.StartObject();
+    writer.String("_type");
+    std::visit(overloaded{
+                   [&writer](const TypenameField &node) {
+                       writer.String("TypenameField");
+                   },
+                   [&writer](const SpreadSelection &node) {
+                       writer.String("SpreadSelection");
+                       writer.String("fragment");
+                       writer.String(node.fragment->name.c_str());
+                   },
+                   [&writer](const FieldSelection &node) {
+                       writer.String("FieldSelection");
+                       writer.String("name");
+                       writer.String(node.name.c_str());
+                       writer.String("alias");
+                       writer.String(node.alias.c_str());
+                       writer.String("arguments");
+                       writer.StartObject();
+                       for (const auto &[name, argument] : node.arguments) {
+                           writer.String(name.c_str());
+                           writeFieldSelectionArgument(writer, argument);
+                       }
+                       writer.EndObject();
+                       writer.String("selection");
+                       if (!node.selection.has_value()) {
+                           writer.Null();
+                           return;
+                       };
+                       writeClientFragmentSpec(writer,
+                                               *node.selection.value().get());
+                   },
+               },
+               selection);
+    writer.EndObject();
+};
+
+void writeObjectFragmentSpec(
+    rapidjson::Writer<rapidjson::StringBuffer> &writer,
+    const std::shared_ptr<ObjectFragmentSpec<ObjectType>> &selection) {
+    writer.StartObject();
+    writer.String("type");
+    writer.String(selection->type->name.c_str());
+    writer.String("selections");
+    writer.StartArray();
+    for (const auto &s : selection->selections) {
+        writeObjectSelection(writer, s);
+    }
+    writer.EndArray();
+    writer.EndObject();
+};
+
+void writeUnionSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                         const UnionSelection &selection) {
+    writer.StartObject();
+    writer.String("_type");
+    std::visit(overloaded{
+                   [&writer](const TypenameField &node) {
+                       writer.String("TypenameField");
+                   },
+                   [&writer](const SpreadSelection &node) {
+                       writer.String("SpreadSelection");
+                       writer.String("fragment");
+                       writer.String(node.fragment->name.c_str());
+                   },
+                   [&writer](const UnionConditionalSpreadSelection &node) {
+                       writer.String("UnionConditionalSpreadSelection");
+                       writer.String("union");
+                       writer.String(node.type->name.c_str());
+                       writer.String("selections");
+                       writer.StartArray();
+                       for (const auto &s : node.selection->selections) {
+                           writeUnionSelection(writer, s);
+                       }
+                       writer.EndArray();
+                   },
+                   [&writer](const ObjectConditionalSpreadSelection &node) {
+                       writer.String("ObjectConditionalSpreadSelection");
+                       writer.String("object");
+                       writer.String(node.type->name.c_str());
+                       writer.String("spec");
+                       writeObjectFragmentSpec(writer, node.selection);
+                   },
+               },
+               selection);
+    writer.EndObject();
+};
+
+void writeClientFragmentSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                             const FragmentSpec &spec) {
+    writer.StartObject();
+    std::visit(overloaded{
+                   [&writer](const UnionFragmentSpec &node) {
+                       writer.String("_type");
+                       writer.String("union");
+                       writer.String("unionName");
+                       writer.String(node.type->name.c_str());
+                       writer.String("selections");
+                       writer.StartArray();
+                       for (const auto &selection : node.selections) {
+                           writeUnionSelection(writer, selection);
+                       }
+                       writer.EndArray();
+                   },
+                   [&writer](const ObjectFragmentSpec<ObjectType> &node) {
+                       writer.String("_type");
+                       writer.String("object");
+                       writer.String("name");
+                       writer.String(node.type->name.c_str());
+                       writer.String("selections");
+                       writer.StartArray();
+                       for (const auto &selection : node.selections) {
+                           writeObjectSelection(writer, selection);
+                       }
+                       writer.EndArray();
+                   },
+                   [&writer](const ObjectFragmentSpec<Interface> &node) {
+                       writer.String("_type");
+                       writer.String("interface");
+                       writer.String("name");
+                       writer.String(node.type->name.c_str());
+                       writer.String("selections");
+                       writer.StartArray();
+                       for (const auto &selection : node.selections) {
+                           writeObjectSelection(writer, selection);
+                       }
+                       writer.EndArray();
+                   },
+               },
+               spec);
+    writer.EndObject();
+}
+
+void writeClientOperation(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                          const std::shared_ptr<Operation> &operation) {
+    writer.StartObject();
+    writer.String("name");
+    writer.String(operation->name.c_str());
+    writer.String("type");
+    writer.String(magic_enum::enum_name(operation->type).data());
+    writer.String("parameters");
+    writer.StartObject();
+    for (const auto &[name, parameter] : operation->parameters) {
+        writer.String(name.c_str());
+        writeFieldDefinition(writer, parameter);
+    };
+    writer.EndObject();
+    writer.String("fragmentSpec");
+    writeClientFragmentSpec(writer, operation->fragmentSpec);
+    writer.EndObject();
+};
+
+void writeClientDirective(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                          const std::shared_ptr<ClientDirective> &directive) {
+    writer.StartObject();
+    writer.String("name");
+    writer.String(directive->name.c_str());
+    writer.String("arguments");
+    writer.StartObject();
+    for (const auto& [name, argument] : directive->arguments) {
+        writer.String(name.c_str());
+        writeFieldDefinition(writer, *argument.get());
+    };
+    writer.EndObject();
+    writer.String("locations");
+    writer.StartArray();
+    for (const auto& location : directive->locations) {
+        writer.String(magic_enum::enum_name(location).data());
+    }
+    writer.EndArray();
+    writer.EndObject();
+};
+
+void writeClientSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                       const parsers::schema::ClientSchema &schema) {
+    writer.StartObject();
+    writer.String("fragments");
+    writer.StartObject();
+    for (const auto &fragment : schema.fragments | std::views::values) {
+        writer.String(fragment->name.c_str());
+        writeClientFragmentSpec(writer, fragment->spec);
+    }
+    writer.EndObject();
+    writer.String("operations");
+    writer.StartObject();
+    for (const auto &op : schema.operations | std::views::values) {
+        writer.String(op->name.c_str());
+        writeClientOperation(writer, op);
+    };
+    writer.EndObject();
+    writer.String("directives");
+    writer.StartObject();
+    for (const auto &directive : schema.directives | std::views::values) {
+        writer.String(directive->name.c_str());
+        writeClientDirective(writer, directive);
+    };
+    writer.EndObject();
+    writer.EndObject();
+};
+
+void writeSchemaNodes(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                      const parsers::schema::Schema &schema) {
     writer.StartObject();
     writer.String("server");
     writeServerSchema(writer, schema.server);
+    writer.String("client");
+    writeClientSchema(writer, schema.client);
     writer.EndObject();
 };
+};  // namespace json::serializers::schema
