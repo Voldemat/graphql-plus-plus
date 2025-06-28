@@ -1,0 +1,3159 @@
+{
+    "server": {
+        "objects": {
+            "AutoCategory": {
+                "name": "AutoCategory",
+                "implements": {},
+                "fields": {
+                    "subcategory": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EAutoSubcategory",
+                                "$ref": "#/server/enums/EAutoSubcategory"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "BeautyAndHealthCategory": {
+                "name": "BeautyAndHealthCategory",
+                "implements": {},
+                "fields": {
+                    "subcategory": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EBeautyAndHealthSubcategory",
+                                "$ref": "#/server/enums/EBeautyAndHealthSubcategory"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ChildrenGoodsCategory": {
+                "name": "ChildrenGoodsCategory",
+                "implements": {},
+                "fields": {
+                    "subcategory": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EChildrenGoodsSubcategory",
+                                "$ref": "#/server/enums/EChildrenGoodsSubcategory"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ClothingCategory": {
+                "name": "ClothingCategory",
+                "implements": {},
+                "fields": {
+                    "subcategory": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EClothingSubcategory",
+                                "$ref": "#/server/enums/EClothingSubcategory"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ContactInfo": {
+                "name": "ContactInfo",
+                "implements": {},
+                "fields": {
+                    "phone": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "telegram": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "vk": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "website": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "whatsapp": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorAlreadyDone": {
+                "name": "ErrorAlreadyDone",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorAlreadyPending": {
+                "name": "ErrorAlreadyPending",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorCodeExpired": {
+                "name": "ErrorCodeExpired",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidCategory": {
+                "name": "ErrorInvalidCategory",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidCode": {
+                "name": "ErrorInvalidCode",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidCollections": {
+                "name": "ErrorInvalidCollections",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidDescription": {
+                "name": "ErrorInvalidDescription",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidDurationDays": {
+                "name": "ErrorInvalidDurationDays",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidKeywords": {
+                "name": "ErrorInvalidKeywords",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidLocation": {
+                "name": "ErrorInvalidLocation",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidLogin": {
+                "name": "ErrorInvalidLogin",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidMedia": {
+                "name": "ErrorInvalidMedia",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidPhone": {
+                "name": "ErrorInvalidPhone",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidPrice": {
+                "name": "ErrorInvalidPrice",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidRegion": {
+                "name": "ErrorInvalidRegion",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidTitle": {
+                "name": "ErrorInvalidTitle",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidUserName": {
+                "name": "ErrorInvalidUserName",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorLoginCollision": {
+                "name": "ErrorLoginCollision",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorNotFound": {
+                "name": "ErrorNotFound",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorOTPTokenExpired": {
+                "name": "ErrorOTPTokenExpired",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorPhoneCollision": {
+                "name": "ErrorPhoneCollision",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "FullPublication": {
+                "name": "FullPublication",
+                "implements": {},
+                "fields": {
+                    "counts": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "PublicationCounts",
+                                "$ref": "#/server/objects/PublicationCounts"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "flags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "PublicationFlags",
+                                "$ref": "#/server/objects/PublicationFlags"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "publication": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Publication",
+                                "$ref": "#/server/objects/Publication"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "FullUser": {
+                "name": "FullUser",
+                "implements": {},
+                "fields": {
+                    "counts": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "UserCounts",
+                                "$ref": "#/server/objects/UserCounts"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "flags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "UserFlags",
+                                "$ref": "#/server/objects/UserFlags"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "user": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "User",
+                                "$ref": "#/server/objects/User"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "Geolocation": {
+                "name": "Geolocation",
+                "implements": {},
+                "fields": {
+                    "lat": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Float"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "lng": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Float"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "GoodsCategory": {
+                "name": "GoodsCategory",
+                "implements": {},
+                "fields": {
+                    "subcategory": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EGoodsSubcategory",
+                                "$ref": "#/server/enums/EGoodsSubcategory"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "Marketplaces": {
+                "name": "Marketplaces",
+                "implements": {},
+                "fields": {
+                    "ozonUrl": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "websiteUrl": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "wildberriesUrl": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "yandexmarketUrl": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "Mutation": {
+                "name": "Mutation",
+                "implements": {},
+                "fields": {
+                    "blockUser": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Scalar",
+                                    "name": "Void"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "confirmCode": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "ConfirmCodeResponse",
+                                    "$ref": "#/server/unions/ConfirmCodeResponse"
+                                }
+                            },
+                            "arguments": {
+                                "code": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "phone": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "confirmLogin": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "ConfirmLoginError",
+                                    "$ref": "#/server/unions/ConfirmLoginError"
+                                }
+                            },
+                            "arguments": {
+                                "code": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "phone": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "createPublication": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CreatePublicationResponse",
+                                    "$ref": "#/server/unions/CreatePublicationResponse"
+                                }
+                            },
+                            "arguments": {
+                                "publication": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "PublicationIn",
+                                            "$ref": "#/server/inputs/PublicationIn"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "createUser": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CreateUserError",
+                                    "$ref": "#/server/unions/CreateUserError"
+                                }
+                            },
+                            "arguments": {
+                                "otpToken": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "user": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "UserIn",
+                                            "$ref": "#/server/inputs/UserIn"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "createVerifyRequest": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CreateVerifyRequestError",
+                                    "$ref": "#/server/unions/CreateVerifyRequestError"
+                                }
+                            },
+                            "arguments": {
+                                "photo": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Upload"
+                                        }
+                                    }
+                                },
+                                "stance": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Enum",
+                                            "name": "EVerificationStance",
+                                            "$ref": "#/server/enums/EVerificationStance"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "deleteMe": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Void"
+                            },
+                            "invocations": {
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "deletePublication": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorNotFound",
+                                    "$ref": "#/server/objects/ErrorNotFound"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "followUser": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Scalar",
+                                    "name": "Void"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "login": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "LoginError",
+                                    "$ref": "#/server/unions/LoginError"
+                                }
+                            },
+                            "arguments": {
+                                "mustBeAdmin": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Boolean"
+                                        }
+                                    }
+                                },
+                                "phone": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "logout": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Void"
+                            },
+                            "invocations": {
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "reportUser": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "ReportUserError",
+                                    "$ref": "#/server/unions/ReportUserError"
+                                }
+                            },
+                            "arguments": {
+                                "reason": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Enum",
+                                            "name": "ReportReason",
+                                            "$ref": "#/server/enums/ReportReason"
+                                        }
+                                    }
+                                },
+                                "userId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "sendCodePrivate": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Union",
+                                "name": "SendCodePrivateError",
+                                "$ref": "#/server/unions/SendCodePrivateError"
+                            },
+                            "invocations": {
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "sendCodePublic": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "SendCodePublicError",
+                                    "$ref": "#/server/unions/SendCodePublicError"
+                                }
+                            },
+                            "arguments": {
+                                "phone": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "setPublicationIsFavourited": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorNotFound",
+                                    "$ref": "#/server/objects/ErrorNotFound"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "isFavourited": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "setPublicationIsLiked": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorNotFound",
+                                    "$ref": "#/server/objects/ErrorNotFound"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "isLiked": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "sharePublication": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorNotFound",
+                                    "$ref": "#/server/objects/ErrorNotFound"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "unblockUser": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Scalar",
+                                    "name": "Void"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "unfollowUser": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Scalar",
+                                    "name": "Void"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "updateMe": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "UpdateUserError",
+                                    "$ref": "#/server/unions/UpdateUserError"
+                                }
+                            },
+                            "arguments": {
+                                "user": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "UserInUpdate",
+                                            "$ref": "#/server/inputs/UserInUpdate"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "updatePublication": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "UpdatePublicationError",
+                                    "$ref": "#/server/unions/UpdatePublicationError"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "publication": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "PublicationInUpdate",
+                                            "$ref": "#/server/inputs/PublicationInUpdate"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "OTPToken": {
+                "name": "OTPToken",
+                "implements": {},
+                "fields": {
+                    "token": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "Publication": {
+                "name": "Publication",
+                "implements": {},
+                "fields": {
+                    "archiveAt": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "author": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "User",
+                                "$ref": "#/server/objects/User"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "category": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Union",
+                                "name": "Category",
+                                "$ref": "#/server/unions/Category"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "description": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "id": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "keywords": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "location": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Geolocation",
+                                "$ref": "#/server/objects/Geolocation"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "marketplaces": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Marketplaces",
+                                "$ref": "#/server/objects/Marketplaces"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "mediaUrl": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "price": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Float"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "region": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "title": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "updatedAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "PublicationCounts": {
+                "name": "PublicationCounts",
+                "implements": {},
+                "fields": {
+                    "dislikes": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "favourites": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "likes": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "shares": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "PublicationFlags": {
+                "name": "PublicationFlags",
+                "implements": {},
+                "fields": {
+                    "isArchived": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "isFavourite": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "isLiked": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "PublicationList": {
+                "name": "PublicationList",
+                "implements": {},
+                "fields": {
+                    "publications": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "FullPublication",
+                                "$ref": "#/server/objects/FullPublication"
+                            }
+                        }
+                    }
+                }
+            },
+            "Query": {
+                "name": "Query",
+                "implements": {},
+                "fields": {
+                    "getBlockedUsers": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "User",
+                                    "$ref": "#/server/objects/User"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getFavouritePublications": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "FullPublication",
+                                    "$ref": "#/server/objects/FullPublication"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getMe": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "User",
+                                "$ref": "#/server/objects/User"
+                            },
+                            "invocations": {
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "getPublications": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "FullPublication",
+                                    "$ref": "#/server/objects/FullPublication"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getPublicationsByUserId": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetPublicationsByUserIdResponse",
+                                    "$ref": "#/server/unions/GetPublicationsByUserIdResponse"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "userId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getUsers": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "User",
+                                    "$ref": "#/server/objects/User"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "listFollowers": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "User",
+                                    "$ref": "#/server/objects/User"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sortBy": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "UserSortBy",
+                                            "$ref": "#/server/inputs/UserSortBy"
+                                        }
+                                    }
+                                },
+                                "userId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "listSubscriptions": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "User",
+                                    "$ref": "#/server/objects/User"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sortBy": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "UserSortBy",
+                                            "$ref": "#/server/inputs/UserSortBy"
+                                        }
+                                    }
+                                },
+                                "userId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "retrievePublication": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "RetrievePublicationResponse",
+                                    "$ref": "#/server/unions/RetrievePublicationResponse"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "retrieveUser": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "RetrieveUserResponse",
+                                    "$ref": "#/server/unions/RetrieveUserResponse"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "RealEstateCategory": {
+                "name": "RealEstateCategory",
+                "implements": {},
+                "fields": {
+                    "subcategory": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "ERealEstateSubcategory",
+                                "$ref": "#/server/enums/ERealEstateSubcategory"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ServicesCategory": {
+                "name": "ServicesCategory",
+                "implements": {},
+                "fields": {
+                    "subcategory": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EServicesSubcategory",
+                                "$ref": "#/server/enums/EServicesSubcategory"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "TelegramChannelsCategory": {
+                "name": "TelegramChannelsCategory",
+                "implements": {},
+                "fields": {
+                    "subcategory": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "ETelegramChannelsSubcategory",
+                                "$ref": "#/server/enums/ETelegramChannelsSubcategory"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "UrlObject": {
+                "name": "UrlObject",
+                "implements": {},
+                "fields": {
+                    "value": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "User": {
+                "name": "User",
+                "implements": {},
+                "fields": {
+                    "avatarURL": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "contactInfo": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "ContactInfo",
+                                "$ref": "#/server/objects/ContactInfo"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "id": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "interests": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EInterestCategory",
+                                "$ref": "#/server/enums/EInterestCategory"
+                            }
+                        }
+                    },
+                    "login": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "phone": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "purpose": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EPurpose",
+                                "$ref": "#/server/enums/EPurpose"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "shortDescription": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "updatedAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "verificationStatus": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EVerificationStatus",
+                                "$ref": "#/server/enums/EVerificationStatus"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "UserCounts": {
+                "name": "UserCounts",
+                "implements": {},
+                "fields": {
+                    "followers": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "publications": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "subscriptions": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "UserFlags": {
+                "name": "UserFlags",
+                "implements": {},
+                "fields": {
+                    "blockedMe": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "isBlocked": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "isFollowing": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            }
+        },
+        "interfaces": {},
+        "inputs": {
+            "AvatarIn": {
+                "name": "AvatarIn",
+                "fields": {
+                    "file": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Upload"
+                            }
+                        }
+                    },
+                    "update": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            }
+                        }
+                    }
+                }
+            },
+            "CategoryIn": {
+                "name": "CategoryIn",
+                "fields": {
+                    "auto": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EAutoSubcategory",
+                                "$ref": "#/server/enums/EAutoSubcategory"
+                            }
+                        }
+                    },
+                    "beautyAndHealth": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EBeautyAndHealthSubcategory",
+                                "$ref": "#/server/enums/EBeautyAndHealthSubcategory"
+                            }
+                        }
+                    },
+                    "childrenGoods": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EChildrenGoodsSubcategory",
+                                "$ref": "#/server/enums/EChildrenGoodsSubcategory"
+                            }
+                        }
+                    },
+                    "clothing": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EClothingSubcategory",
+                                "$ref": "#/server/enums/EClothingSubcategory"
+                            }
+                        }
+                    },
+                    "goods": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EGoodsSubcategory",
+                                "$ref": "#/server/enums/EGoodsSubcategory"
+                            }
+                        }
+                    },
+                    "realEstate": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "ERealEstateSubcategory",
+                                "$ref": "#/server/enums/ERealEstateSubcategory"
+                            }
+                        }
+                    },
+                    "services": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EServicesSubcategory",
+                                "$ref": "#/server/enums/EServicesSubcategory"
+                            }
+                        }
+                    },
+                    "telegramChannels": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "ETelegramChannelsSubcategory",
+                                "$ref": "#/server/enums/ETelegramChannelsSubcategory"
+                            }
+                        }
+                    }
+                }
+            },
+            "ContactInfoIn": {
+                "name": "ContactInfoIn",
+                "fields": {
+                    "phone": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "telegram": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "vk": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "website": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "whatsapp": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    }
+                }
+            },
+            "GeolocationIn": {
+                "name": "GeolocationIn",
+                "fields": {
+                    "lat": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Float"
+                            }
+                        }
+                    },
+                    "lng": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Float"
+                            }
+                        }
+                    }
+                }
+            },
+            "MarketplacesIn": {
+                "name": "MarketplacesIn",
+                "fields": {
+                    "ozonUrl": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            }
+                        }
+                    },
+                    "websiteUrl": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            }
+                        }
+                    },
+                    "wildberriesUrl": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            }
+                        }
+                    },
+                    "yandexmarketUrl": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            }
+                        }
+                    }
+                }
+            },
+            "PublicationIn": {
+                "name": "PublicationIn",
+                "fields": {
+                    "category": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "InputType",
+                                "name": "CategoryIn",
+                                "$ref": "#/server/inputs/CategoryIn"
+                            }
+                        }
+                    },
+                    "collectionIds": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            }
+                        }
+                    },
+                    "description": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "durationDays": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            }
+                        }
+                    },
+                    "keywords": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "location": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "InputType",
+                                "name": "GeolocationIn",
+                                "$ref": "#/server/inputs/GeolocationIn"
+                            }
+                        }
+                    },
+                    "marketplaces": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "InputType",
+                                "name": "MarketplacesIn",
+                                "$ref": "#/server/inputs/MarketplacesIn"
+                            }
+                        }
+                    },
+                    "media": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Upload"
+                            }
+                        }
+                    },
+                    "price": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Float"
+                            }
+                        }
+                    },
+                    "region": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "title": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    }
+                }
+            },
+            "PublicationInUpdate": {
+                "name": "PublicationInUpdate",
+                "fields": {
+                    "description": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "durationDays": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            }
+                        }
+                    },
+                    "keywords": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "marketplaces": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "InputType",
+                                "name": "MarketplacesIn",
+                                "$ref": "#/server/inputs/MarketplacesIn"
+                            }
+                        }
+                    },
+                    "price": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Float"
+                            }
+                        }
+                    },
+                    "title": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    }
+                }
+            },
+            "UserIn": {
+                "name": "UserIn",
+                "fields": {
+                    "interests": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EInterestCategory",
+                                "$ref": "#/server/enums/EInterestCategory"
+                            }
+                        }
+                    },
+                    "login": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "phone": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "purpose": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EPurpose",
+                                "$ref": "#/server/enums/EPurpose"
+                            }
+                        }
+                    }
+                }
+            },
+            "UserInUpdate": {
+                "name": "UserInUpdate",
+                "fields": {
+                    "avatar": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "InputType",
+                                "name": "AvatarIn",
+                                "$ref": "#/server/inputs/AvatarIn"
+                            }
+                        }
+                    },
+                    "contactInfo": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "InputType",
+                                "name": "ContactInfoIn",
+                                "$ref": "#/server/inputs/ContactInfoIn"
+                            }
+                        }
+                    },
+                    "login": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "shortDescription": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    }
+                }
+            },
+            "UserSortBy": {
+                "name": "UserSortBy",
+                "fields": {
+                    "direction": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "SortDirection",
+                                "$ref": "#/server/enums/SortDirection"
+                            }
+                        }
+                    },
+                    "field": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "UserSortField",
+                                "$ref": "#/server/enums/UserSortField"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "scalars": [
+            "Datetime",
+            "UUID",
+            "Upload",
+            "Url",
+            "Void"
+        ],
+        "enums": {
+            "EAutoSubcategory": {
+                "name": "EAutoSubcategory",
+                "values": [
+                    "PASSENGER_CARS",
+                    "TRUCKS",
+                    "MOTORCYCLES",
+                    "SPARE_PARTS"
+                ]
+            },
+            "EBeautyAndHealthSubcategory": {
+                "name": "EBeautyAndHealthSubcategory",
+                "values": [
+                    "COSMETICS",
+                    "CARE",
+                    "FITNESS",
+                    "MASSAGE"
+                ]
+            },
+            "EChildrenGoodsSubcategory": {
+                "name": "EChildrenGoodsSubcategory",
+                "values": [
+                    "TOYS",
+                    "CLOTHING",
+                    "STROLLERS",
+                    "BABY_FOOD"
+                ]
+            },
+            "EClothingSubcategory": {
+                "name": "EClothingSubcategory",
+                "values": [
+                    "MEN",
+                    "WOMEN",
+                    "CHILDREN"
+                ]
+            },
+            "EGoodsSubcategory": {
+                "name": "EGoodsSubcategory",
+                "values": [
+                    "ELECTRONICS",
+                    "FURNITURE",
+                    "BOOKS"
+                ]
+            },
+            "EInterestCategory": {
+                "name": "EInterestCategory",
+                "values": [
+                    "CARS",
+                    "TELEGRAM_CHANNELS",
+                    "REAL_ESTATE",
+                    "GOODS",
+                    "SERVICES",
+                    "CLOTHING",
+                    "BEAUTY_AND_HEALTH",
+                    "CHILDREN_PRODUCTS"
+                ]
+            },
+            "EPurpose": {
+                "name": "EPurpose",
+                "values": [
+                    "PERSONAL_ADS",
+                    "PROMOTE_PERSONAL_BRAND",
+                    "SELL_PRODUCTS",
+                    "SELL_SERVICES",
+                    "IMPORT_ON_DEMAND",
+                    "NOT_SURE"
+                ]
+            },
+            "ERealEstateSubcategory": {
+                "name": "ERealEstateSubcategory",
+                "values": [
+                    "APARTMENTS",
+                    "HOUSES",
+                    "COMMERCIAL",
+                    "LAND",
+                    "GARAGES"
+                ]
+            },
+            "EServicesSubcategory": {
+                "name": "EServicesSubcategory",
+                "values": [
+                    "REPAIRS",
+                    "TRAINING",
+                    "DELIVERY",
+                    "CONSULTING"
+                ]
+            },
+            "ETelegramChannelsSubcategory": {
+                "name": "ETelegramChannelsSubcategory",
+                "values": [
+                    "NEWS",
+                    "ENTERTAINMENT",
+                    "EDUCATION"
+                ]
+            },
+            "EVerificationStance": {
+                "name": "EVerificationStance",
+                "values": [
+                    "THUMBS_UP",
+                    "PEACE_SIGN",
+                    "HAND_WAVE"
+                ]
+            },
+            "EVerificationStatus": {
+                "name": "EVerificationStatus",
+                "values": [
+                    "NOT_VERIFIED",
+                    "VERIFIED",
+                    "VERIFICATION_FAILED",
+                    "VERIFICATION_RECALLED",
+                    "IN_WAITING"
+                ]
+            },
+            "ReportReason": {
+                "name": "ReportReason",
+                "values": [
+                    "BANNED_PRODUCTS",
+                    "OUTDATED_PROMO",
+                    "BANNED_SUBSTANCES",
+                    "INAPPROPRIATE_CONTENT",
+                    "FRAUD_OR_SCAM"
+                ]
+            },
+            "SortDirection": {
+                "name": "SortDirection",
+                "values": [
+                    "ASC",
+                    "DSC"
+                ]
+            },
+            "UserSortField": {
+                "name": "UserSortField",
+                "values": [
+                    "NAME",
+                    "CREATED_AT"
+                ]
+            }
+        },
+        "unions": {
+            "Category": {
+                "name": "Category",
+                "items": {
+                    "AutoCategory": "#/server/objects/AutoCategory",
+                    "BeautyAndHealthCategory": "#/server/objects/BeautyAndHealthCategory",
+                    "ChildrenGoodsCategory": "#/server/objects/ChildrenGoodsCategory",
+                    "ClothingCategory": "#/server/objects/ClothingCategory",
+                    "GoodsCategory": "#/server/objects/GoodsCategory",
+                    "RealEstateCategory": "#/server/objects/RealEstateCategory",
+                    "ServicesCategory": "#/server/objects/ServicesCategory",
+                    "TelegramChannelsCategory": "#/server/objects/TelegramChannelsCategory"
+                }
+            },
+            "ConfirmCodeResponse": {
+                "name": "ConfirmCodeResponse",
+                "items": {
+                    "ErrorCodeExpired": "#/server/objects/ErrorCodeExpired",
+                    "ErrorInvalidCode": "#/server/objects/ErrorInvalidCode",
+                    "OTPToken": "#/server/objects/OTPToken"
+                }
+            },
+            "ConfirmLoginError": {
+                "name": "ConfirmLoginError",
+                "items": {
+                    "ErrorCodeExpired": "#/server/objects/ErrorCodeExpired",
+                    "ErrorInvalidCode": "#/server/objects/ErrorInvalidCode"
+                }
+            },
+            "CreatePublicationResponse": {
+                "name": "CreatePublicationResponse",
+                "items": {
+                    "ErrorInvalidCategory": "#/server/objects/ErrorInvalidCategory",
+                    "ErrorInvalidCollections": "#/server/objects/ErrorInvalidCollections",
+                    "ErrorInvalidDescription": "#/server/objects/ErrorInvalidDescription",
+                    "ErrorInvalidDurationDays": "#/server/objects/ErrorInvalidDurationDays",
+                    "ErrorInvalidKeywords": "#/server/objects/ErrorInvalidKeywords",
+                    "ErrorInvalidLocation": "#/server/objects/ErrorInvalidLocation",
+                    "ErrorInvalidMedia": "#/server/objects/ErrorInvalidMedia",
+                    "ErrorInvalidPrice": "#/server/objects/ErrorInvalidPrice",
+                    "ErrorInvalidRegion": "#/server/objects/ErrorInvalidRegion",
+                    "ErrorInvalidTitle": "#/server/objects/ErrorInvalidTitle",
+                    "UrlObject": "#/server/objects/UrlObject"
+                }
+            },
+            "CreateUserError": {
+                "name": "CreateUserError",
+                "items": {
+                    "ErrorInvalidPhone": "#/server/objects/ErrorInvalidPhone",
+                    "ErrorLoginCollision": "#/server/objects/ErrorLoginCollision",
+                    "ErrorOTPTokenExpired": "#/server/objects/ErrorOTPTokenExpired",
+                    "ErrorPhoneCollision": "#/server/objects/ErrorPhoneCollision"
+                }
+            },
+            "CreateVerifyRequestError": {
+                "name": "CreateVerifyRequestError",
+                "items": {
+                    "ErrorAlreadyDone": "#/server/objects/ErrorAlreadyDone",
+                    "ErrorAlreadyPending": "#/server/objects/ErrorAlreadyPending"
+                }
+            },
+            "GetPublicationsByUserIdResponse": {
+                "name": "GetPublicationsByUserIdResponse",
+                "items": {
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound",
+                    "PublicationList": "#/server/objects/PublicationList"
+                }
+            },
+            "LoginError": {
+                "name": "LoginError",
+                "items": {
+                    "ErrorAlreadyDone": "#/server/objects/ErrorAlreadyDone",
+                    "ErrorInvalidPhone": "#/server/objects/ErrorInvalidPhone",
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound"
+                }
+            },
+            "ReportUserError": {
+                "name": "ReportUserError",
+                "items": {
+                    "ErrorAlreadyDone": "#/server/objects/ErrorAlreadyDone",
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound"
+                }
+            },
+            "RetrievePublicationResponse": {
+                "name": "RetrievePublicationResponse",
+                "items": {
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound",
+                    "FullPublication": "#/server/objects/FullPublication"
+                }
+            },
+            "RetrieveUserResponse": {
+                "name": "RetrieveUserResponse",
+                "items": {
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound",
+                    "FullUser": "#/server/objects/FullUser"
+                }
+            },
+            "SendCodePrivateError": {
+                "name": "SendCodePrivateError",
+                "items": {
+                    "ErrorAlreadyDone": "#/server/objects/ErrorAlreadyDone",
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound"
+                }
+            },
+            "SendCodePublicError": {
+                "name": "SendCodePublicError",
+                "items": {
+                    "ErrorAlreadyDone": "#/server/objects/ErrorAlreadyDone",
+                    "ErrorInvalidPhone": "#/server/objects/ErrorInvalidPhone",
+                    "ErrorPhoneCollision": "#/server/objects/ErrorPhoneCollision"
+                }
+            },
+            "UpdatePublicationError": {
+                "name": "UpdatePublicationError",
+                "items": {
+                    "ErrorInvalidDescription": "#/server/objects/ErrorInvalidDescription",
+                    "ErrorInvalidDurationDays": "#/server/objects/ErrorInvalidDurationDays",
+                    "ErrorInvalidKeywords": "#/server/objects/ErrorInvalidKeywords",
+                    "ErrorInvalidPrice": "#/server/objects/ErrorInvalidPrice",
+                    "ErrorInvalidTitle": "#/server/objects/ErrorInvalidTitle",
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound"
+                }
+            },
+            "UpdateUserError": {
+                "name": "UpdateUserError",
+                "items": {
+                    "ErrorInvalidLogin": "#/server/objects/ErrorInvalidLogin",
+                    "ErrorInvalidUserName": "#/server/objects/ErrorInvalidUserName",
+                    "ErrorLoginCollision": "#/server/objects/ErrorLoginCollision"
+                }
+            }
+        },
+        "directives": {
+            "admin": {
+                "name": "admin",
+                "locations": [
+                    "FIELD_DEFINITION"
+                ],
+                "arguments": {}
+            },
+            "authenticated": {
+                "name": "authenticated",
+                "locations": [
+                    "FIELD_DEFINITION"
+                ],
+                "arguments": {}
+            }
+        }
+    }
+}

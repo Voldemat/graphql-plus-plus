@@ -1,0 +1,4303 @@
+{
+    "server": {
+        "objects": {
+            "Deal": {
+                "name": "Deal",
+                "implements": {},
+                "fields": {
+                    "architect": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "area": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "projectLead": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "projectManager": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "site": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "stage": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorAlreadyDone": {
+                "name": "ErrorAlreadyDone",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorAlreadyExists": {
+                "name": "ErrorAlreadyExists",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorAlreadyPending": {
+                "name": "ErrorAlreadyPending",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorChangeForbidden": {
+                "name": "ErrorChangeForbidden",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorDateRangeIsInvalid": {
+                "name": "ErrorDateRangeIsInvalid",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorEmailCollision": {
+                "name": "ErrorEmailCollision",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorFileNotUploaded": {
+                "name": "ErrorFileNotUploaded",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorGroupNotFound": {
+                "name": "ErrorGroupNotFound",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidCredentials": {
+                "name": "ErrorInvalidCredentials",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidEmail": {
+                "name": "ErrorInvalidEmail",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidGroupName": {
+                "name": "ErrorInvalidGroupName",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidLimitOfDownloadsPerDay": {
+                "name": "ErrorInvalidLimitOfDownloadsPerDay",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidOTPCode": {
+                "name": "ErrorInvalidOTPCode",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidPassword": {
+                "name": "ErrorInvalidPassword",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidToken": {
+                "name": "ErrorInvalidToken",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorInvalidUserName": {
+                "name": "ErrorInvalidUserName",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorMultipartUploadFileIsTooLight": {
+                "name": "ErrorMultipartUploadFileIsTooLight",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorMultipartUploadFilePartSizeIsTooBig": {
+                "name": "ErrorMultipartUploadFilePartSizeIsTooBig",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorMultipartUploadFilePartSizeIsTooSmall": {
+                "name": "ErrorMultipartUploadFilePartSizeIsTooSmall",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorNotFound": {
+                "name": "ErrorNotFound",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorOTPCodeExpired": {
+                "name": "ErrorOTPCodeExpired",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorOTPTokenExpired": {
+                "name": "ErrorOTPTokenExpired",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorPutUploadFileIsTooBig": {
+                "name": "ErrorPutUploadFileIsTooBig",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorTableInvalid": {
+                "name": "ErrorTableInvalid",
+                "implements": {},
+                "fields": {
+                    "message": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorUnknownFile": {
+                "name": "ErrorUnknownFile",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorUnknownGroup": {
+                "name": "ErrorUnknownGroup",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorUnknownGroups": {
+                "name": "ErrorUnknownGroups",
+                "implements": {},
+                "fields": {
+                    "groupIds": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            }
+                        }
+                    }
+                }
+            },
+            "ErrorUnknownSessionId": {
+                "name": "ErrorUnknownSessionId",
+                "implements": {},
+                "fields": {
+                    "a": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "ErrorUnknownTags": {
+                "name": "ErrorUnknownTags",
+                "implements": {},
+                "fields": {
+                    "tagIds": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            }
+                        }
+                    }
+                }
+            },
+            "ErrorUnknownUsers": {
+                "name": "ErrorUnknownUsers",
+                "implements": {},
+                "fields": {
+                    "userIds": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            }
+                        }
+                    }
+                }
+            },
+            "EventFileDeleted": {
+                "name": "EventFileDeleted",
+                "implements": {},
+                "fields": {
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "file": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "File",
+                                "$ref": "#/server/objects/File"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "EventFileDownloaded": {
+                "name": "EventFileDownloaded",
+                "implements": {},
+                "fields": {
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "file": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "File",
+                                "$ref": "#/server/objects/File"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "EventFileTagsEdited": {
+                "name": "EventFileTagsEdited",
+                "implements": {},
+                "fields": {
+                    "addedTags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            }
+                        }
+                    },
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "file": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "File",
+                                "$ref": "#/server/objects/File"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "removedTags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            }
+                        }
+                    }
+                }
+            },
+            "EventFileUploaded": {
+                "name": "EventFileUploaded",
+                "implements": {},
+                "fields": {
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "file": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "File",
+                                "$ref": "#/server/objects/File"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "EventTagApprovalIsRequested": {
+                "name": "EventTagApprovalIsRequested",
+                "implements": {},
+                "fields": {
+                    "author": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "User",
+                                "$ref": "#/server/objects/User"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "tag": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "EventsList": {
+                "name": "EventsList",
+                "implements": {},
+                "fields": {
+                    "events": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Union",
+                                "name": "Event",
+                                "$ref": "#/server/unions/Event"
+                            }
+                        }
+                    }
+                }
+            },
+            "FavouriteTags": {
+                "name": "FavouriteTags",
+                "implements": {},
+                "fields": {
+                    "first10Tags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            }
+                        }
+                    },
+                    "group": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "hasMore": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "File": {
+                "name": "File",
+                "implements": {},
+                "fields": {
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "filename": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "id": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "mimeType": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "previewUrl": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "sizeInBytes": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int64"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "user": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "User",
+                                "$ref": "#/server/objects/User"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "Group": {
+                "name": "Group",
+                "implements": {},
+                "fields": {
+                    "first10Tags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            }
+                        }
+                    },
+                    "id": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "limitOfDownloadsPerDay": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "GroupUser": {
+                "name": "GroupUser",
+                "implements": {},
+                "fields": {
+                    "inGroup": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "user": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "User",
+                                "$ref": "#/server/objects/User"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "GroupUserList": {
+                "name": "GroupUserList",
+                "implements": {},
+                "fields": {
+                    "users": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "GroupUser",
+                                "$ref": "#/server/objects/GroupUser"
+                            }
+                        }
+                    }
+                }
+            },
+            "IntObject": {
+                "name": "IntObject",
+                "implements": {},
+                "fields": {
+                    "value": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "MultipartUploadSession": {
+                "name": "MultipartUploadSession",
+                "implements": {},
+                "fields": {
+                    "id": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "initialUploadURLs": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "UploadUrl",
+                                "$ref": "#/server/objects/UploadUrl"
+                            }
+                        }
+                    }
+                }
+            },
+            "Mutation": {
+                "name": "Mutation",
+                "implements": {},
+                "fields": {
+                    "addTagToCatalog": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CreateTagError",
+                                    "$ref": "#/server/unions/CreateTagError"
+                                }
+                            },
+                            "arguments": {
+                                "tag": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "addUserToGroup": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "ErrorGroupNotFoundOrErrorNotFound",
+                                    "$ref": "#/server/unions/ErrorGroupNotFoundOrErrorNotFound"
+                                }
+                            },
+                            "arguments": {
+                                "groupId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "userId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "changePassword": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorInvalidCredentials",
+                                    "$ref": "#/server/objects/ErrorInvalidCredentials"
+                                }
+                            },
+                            "arguments": {
+                                "newPassword": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "oldPassword": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "commitMultipartFileSession": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CommitMultipartFileSessionResponse",
+                                    "$ref": "#/server/unions/CommitMultipartFileSessionResponse"
+                                }
+                            },
+                            "arguments": {
+                                "sessionId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "commitPutFileSession": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CommitPutFileSessionResponse",
+                                    "$ref": "#/server/unions/CommitPutFileSessionResponse"
+                                }
+                            },
+                            "arguments": {
+                                "sessionId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "confirmOTPCode": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "ConfirmOTPCodeResponse",
+                                    "$ref": "#/server/unions/ConfirmOTPCodeResponse"
+                                }
+                            },
+                            "arguments": {
+                                "code": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "email": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "confirmUser": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "ConfirmUserError",
+                                    "$ref": "#/server/unions/ConfirmUserError"
+                                }
+                            },
+                            "arguments": {
+                                "password": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "token": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "createGroup": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CreateGroupError",
+                                    "$ref": "#/server/unions/CreateGroupError"
+                                }
+                            },
+                            "arguments": {
+                                "groupIn": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "GroupIn",
+                                            "$ref": "#/server/inputs/GroupIn"
+                                        }
+                                    }
+                                },
+                                "userIds": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "array",
+                                        "nullable": false,
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "createMultipartFileSession": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CreateMultipartFileSessionResponse",
+                                    "$ref": "#/server/unions/CreateMultipartFileSessionResponse"
+                                }
+                            },
+                            "arguments": {
+                                "fileIn": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "MultipartUploadFileIn",
+                                            "$ref": "#/server/inputs/MultipartUploadFileIn"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "createPutFileSession": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CreatePutFileSessionResponse",
+                                    "$ref": "#/server/unions/CreatePutFileSessionResponse"
+                                }
+                            },
+                            "arguments": {
+                                "fileIn": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "PutUploadFileIn",
+                                            "$ref": "#/server/inputs/PutUploadFileIn"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "createTag": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CreateTagError",
+                                    "$ref": "#/server/unions/CreateTagError"
+                                }
+                            },
+                            "arguments": {
+                                "tag": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "TagIn",
+                                            "$ref": "#/server/inputs/TagIn"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "createUser": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "CreateUserError",
+                                    "$ref": "#/server/unions/CreateUserError"
+                                }
+                            },
+                            "arguments": {
+                                "userIn": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "UserIn",
+                                            "$ref": "#/server/inputs/UserIn"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "deleteFile": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "DeleteFileError",
+                                    "$ref": "#/server/unions/DeleteFileError"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "deleteGroup": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorGroupNotFound",
+                                    "$ref": "#/server/objects/ErrorGroupNotFound"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "deletePendingUser": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorNotFound",
+                                    "$ref": "#/server/objects/ErrorNotFound"
+                                }
+                            },
+                            "arguments": {
+                                "email": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "deleteTag": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorNotFound",
+                                    "$ref": "#/server/objects/ErrorNotFound"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "editGroup": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "EditGroupError",
+                                    "$ref": "#/server/unions/EditGroupError"
+                                }
+                            },
+                            "arguments": {
+                                "groupIn": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "GroupIn",
+                                            "$ref": "#/server/inputs/GroupIn"
+                                        }
+                                    }
+                                },
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "login": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorInvalidCredentials",
+                                    "$ref": "#/server/objects/ErrorInvalidCredentials"
+                                }
+                            },
+                            "arguments": {
+                                "email": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "password": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "logout": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Void"
+                            },
+                            "invocations": {
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "removeUserFromGroup": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "ErrorGroupNotFoundOrErrorNotFound",
+                                    "$ref": "#/server/unions/ErrorGroupNotFoundOrErrorNotFound"
+                                }
+                            },
+                            "arguments": {
+                                "groupId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "userId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "resetPassword": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "ResetPasswordError",
+                                    "$ref": "#/server/unions/ResetPasswordError"
+                                }
+                            },
+                            "arguments": {
+                                "newPassword": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "token": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "sendOTPCode": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorInvalidCredentials",
+                                    "$ref": "#/server/objects/ErrorInvalidCredentials"
+                                }
+                            },
+                            "arguments": {
+                                "email": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "setTagIsFavourite": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "ErrorAlreadyDoneOrUnknownTags",
+                                    "$ref": "#/server/unions/ErrorAlreadyDoneOrUnknownTags"
+                                }
+                            },
+                            "arguments": {
+                                "isFavourite": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Boolean"
+                                        }
+                                    }
+                                },
+                                "tagId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "updateFile": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "UpdateFileError",
+                                    "$ref": "#/server/unions/UpdateFileError"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "name": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "tagIds": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "array",
+                                        "nullable": false,
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "uploadDealTable": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "ErrorTableInvalid",
+                                    "$ref": "#/server/objects/ErrorTableInvalid"
+                                }
+                            },
+                            "arguments": {
+                                "file": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Upload"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "OTPToken": {
+                "name": "OTPToken",
+                "implements": {},
+                "fields": {
+                    "token": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "PendingUser": {
+                "name": "PendingUser",
+                "implements": {},
+                "fields": {
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "email": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "groups": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Group",
+                                "$ref": "#/server/objects/Group"
+                            }
+                        }
+                    },
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "ttl": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Duration"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "PendingUserList": {
+                "name": "PendingUserList",
+                "implements": {},
+                "fields": {
+                    "users": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "PendingUser",
+                                "$ref": "#/server/objects/PendingUser"
+                            }
+                        }
+                    }
+                }
+            },
+            "PutUploadSession": {
+                "name": "PutUploadSession",
+                "implements": {},
+                "fields": {
+                    "id": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "uploadURL": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "UploadUrl",
+                                "$ref": "#/server/objects/UploadUrl"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "Query": {
+                "name": "Query",
+                "implements": {},
+                "fields": {
+                    "getDealInfo": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "Deal",
+                                    "$ref": "#/server/objects/Deal"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getDeals": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "Tag",
+                                    "$ref": "#/server/objects/Tag"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getEvents": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetEventsResponse",
+                                    "$ref": "#/server/unions/GetEventsResponse"
+                                }
+                            },
+                            "arguments": {
+                                "dateRange": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "DateRange",
+                                            "$ref": "#/server/inputs/DateRange"
+                                        }
+                                    }
+                                },
+                                "filters": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "EventFiltersIn",
+                                            "$ref": "#/server/inputs/EventFiltersIn"
+                                        }
+                                    }
+                                },
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getFavouriteTags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "FavouriteTags",
+                                    "$ref": "#/server/objects/FavouriteTags"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getFavouriteTagsInGroup": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetFavouriteTagsInGroupResponse",
+                                    "$ref": "#/server/unions/GetFavouriteTagsInGroupResponse"
+                                }
+                            },
+                            "arguments": {
+                                "group": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getFileURL": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetFileURLResponse",
+                                    "$ref": "#/server/unions/GetFileURLResponse"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getFiles": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetFilesResponse",
+                                    "$ref": "#/server/unions/GetFilesResponse"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sortBy": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "FileSortBy",
+                                            "$ref": "#/server/inputs/FileSortBy"
+                                        }
+                                    }
+                                },
+                                "tagIds": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "array",
+                                        "nullable": false,
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getFilesCount": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "IntObjectOrErrorUnknownTags",
+                                    "$ref": "#/server/unions/IntObjectOrErrorUnknownTags"
+                                }
+                            },
+                            "arguments": {
+                                "tagIds": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "array",
+                                        "nullable": false,
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getGroupTags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetGroupTagsResponse",
+                                    "$ref": "#/server/unions/GetGroupTagsResponse"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getGroupUsers": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetGroupUsersResponse",
+                                    "$ref": "#/server/unions/GetGroupUsersResponse"
+                                }
+                            },
+                            "arguments": {
+                                "groupId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sortBy": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "GetGroupUsersSortBy",
+                                            "$ref": "#/server/inputs/GetGroupUsersSortBy"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getGroupUsersAndUsers": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetGroupUsersAndUsersResponse",
+                                    "$ref": "#/server/unions/GetGroupUsersAndUsersResponse"
+                                }
+                            },
+                            "arguments": {
+                                "groupId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sortBy": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "GetUsersSortBy",
+                                            "$ref": "#/server/inputs/GetUsersSortBy"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getGroupUsersTotal": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetGroupUsersTotalResponse",
+                                    "$ref": "#/server/unions/GetGroupUsersTotalResponse"
+                                }
+                            },
+                            "arguments": {
+                                "groupId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getGroups": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "Group",
+                                    "$ref": "#/server/objects/Group"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sortBy": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "GetGroupsSortBy",
+                                            "$ref": "#/server/inputs/GetGroupsSortBy"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getGroupsTotal": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {
+                                "admin": {
+                                    "arguments": {}
+                                },
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "getMe": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "User",
+                                "$ref": "#/server/objects/User"
+                            },
+                            "invocations": {
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "getMyTags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "Tag",
+                                    "$ref": "#/server/objects/Tag"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getMyTagsCount": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "getNextMultipartUploadUrls": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetNextMultipartUploadUrlsResponse",
+                                    "$ref": "#/server/unions/GetNextMultipartUploadUrlsResponse"
+                                }
+                            },
+                            "arguments": {
+                                "lastPart": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sessionId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getPathToTag": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetPathToTagResponse",
+                                    "$ref": "#/server/unions/GetPathToTagResponse"
+                                }
+                            },
+                            "arguments": {
+                                "tagId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getPendingUsers": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "PendingUserList",
+                                "$ref": "#/server/objects/PendingUserList"
+                            },
+                            "invocations": {
+                                "admin": {
+                                    "arguments": {}
+                                },
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "getPopularTags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "Tag",
+                                    "$ref": "#/server/objects/Tag"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getTagChildren": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetTagsResponse",
+                                    "$ref": "#/server/unions/GetTagsResponse"
+                                }
+                            },
+                            "arguments": {
+                                "tagId": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getTags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetTagsResponse",
+                                    "$ref": "#/server/unions/GetTagsResponse"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "parentTagId": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getTagsCount": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "IntObjectOrErrorUnknownTags",
+                                    "$ref": "#/server/unions/IntObjectOrErrorUnknownTags"
+                                }
+                            },
+                            "arguments": {
+                                "parentTag": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getTimestampOfLatestDeal": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {
+                                "admin": {
+                                    "arguments": {}
+                                },
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "getUploadedFiles": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "GetFilesResponse",
+                                    "$ref": "#/server/unions/GetFilesResponse"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sortBy": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "FileSortBy",
+                                            "$ref": "#/server/inputs/FileSortBy"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getUploadedFilesCount": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Union",
+                                "name": "IntObjectOrErrorUnknownTags",
+                                "$ref": "#/server/unions/IntObjectOrErrorUnknownTags"
+                            },
+                            "invocations": {
+                                "authenticated": {
+                                    "arguments": {}
+                                }
+                            }
+                        }
+                    },
+                    "getUsers": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "UsersList",
+                                    "$ref": "#/server/objects/UsersList"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sortBy": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "GetUsersSortBy",
+                                            "$ref": "#/server/inputs/GetUsersSortBy"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getUsersTags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "UsersTag",
+                                    "$ref": "#/server/objects/UsersTag"
+                                }
+                            },
+                            "arguments": {
+                                "limit": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                },
+                                "skip": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "Int"
+                                        }
+                                    }
+                                },
+                                "sortBy": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "InputType",
+                                            "name": "UsersTagSortBy",
+                                            "$ref": "#/server/inputs/UsersTagSortBy"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getUsersTagsCount": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Scalar",
+                                    "name": "Int"
+                                }
+                            },
+                            "arguments": {
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "getUsersTotal": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Scalar",
+                                    "name": "Int"
+                                }
+                            },
+                            "arguments": {
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "isTagExists": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Scalar",
+                                    "name": "Boolean"
+                                }
+                            },
+                            "arguments": {
+                                "tag": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "retrieveFile": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "RetrieveFileResponse",
+                                    "$ref": "#/server/unions/RetrieveFileResponse"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "retrieveGroup": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "literal",
+                                "type": {
+                                    "_type": "Union",
+                                    "name": "RetrieveGroupResponse",
+                                    "$ref": "#/server/unions/RetrieveGroupResponse"
+                                }
+                            },
+                            "arguments": {
+                                "id": {
+                                    "nullable": false,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "UUID"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "searchTags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "callable",
+                            "returnType": {
+                                "_type": "array",
+                                "nullable": false,
+                                "type": {
+                                    "_type": "ObjectType",
+                                    "name": "Tag",
+                                    "$ref": "#/server/objects/Tag"
+                                }
+                            },
+                            "arguments": {
+                                "query": {
+                                    "nullable": true,
+                                    "spec": {
+                                        "_type": "literal",
+                                        "type": {
+                                            "_type": "Scalar",
+                                            "name": "String"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "SearchFile": {
+                "name": "SearchFile",
+                "implements": {},
+                "fields": {
+                    "file": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "File",
+                                "$ref": "#/server/objects/File"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "tags": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            }
+                        }
+                    }
+                }
+            },
+            "SearchFileList": {
+                "name": "SearchFileList",
+                "implements": {},
+                "fields": {
+                    "files": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "SearchFile",
+                                "$ref": "#/server/objects/SearchFile"
+                            }
+                        }
+                    }
+                }
+            },
+            "StringEntry": {
+                "name": "StringEntry",
+                "implements": {},
+                "fields": {
+                    "key": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "value": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "StringList": {
+                "name": "StringList",
+                "implements": {},
+                "fields": {
+                    "values": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    }
+                }
+            },
+            "StringObject": {
+                "name": "StringObject",
+                "implements": {},
+                "fields": {
+                    "value": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "Tag": {
+                "name": "Tag",
+                "implements": {},
+                "fields": {
+                    "hasChildren": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "id": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "isFavourite": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "tag": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "TagList": {
+                "name": "TagList",
+                "implements": {},
+                "fields": {
+                    "list": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Tag",
+                                "$ref": "#/server/objects/Tag"
+                            }
+                        }
+                    }
+                }
+            },
+            "UploadUrl": {
+                "name": "UploadUrl",
+                "implements": {},
+                "fields": {
+                    "headers": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "StringEntry",
+                                "$ref": "#/server/objects/StringEntry"
+                            }
+                        }
+                    },
+                    "url": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "UploadUrlList": {
+                "name": "UploadUrlList",
+                "implements": {},
+                "fields": {
+                    "urls": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "UploadUrl",
+                                "$ref": "#/server/objects/UploadUrl"
+                            }
+                        }
+                    }
+                }
+            },
+            "UrlObject": {
+                "name": "UrlObject",
+                "implements": {},
+                "fields": {
+                    "value": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Url"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            },
+            "User": {
+                "name": "User",
+                "implements": {},
+                "fields": {
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "email": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "id": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "tenGroups": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "Group",
+                                "$ref": "#/server/objects/Group"
+                            }
+                        }
+                    }
+                }
+            },
+            "UsersList": {
+                "name": "UsersList",
+                "implements": {},
+                "fields": {
+                    "users": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "ObjectType",
+                                "name": "User",
+                                "$ref": "#/server/objects/User"
+                            }
+                        }
+                    }
+                }
+            },
+            "UsersTag": {
+                "name": "UsersTag",
+                "implements": {},
+                "fields": {
+                    "createdAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "tag": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            },
+                            "invocations": {}
+                        }
+                    },
+                    "usersCount": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            },
+                            "invocations": {}
+                        }
+                    }
+                }
+            }
+        },
+        "interfaces": {},
+        "inputs": {
+            "DateRange": {
+                "name": "DateRange",
+                "fields": {
+                    "endAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            }
+                        }
+                    },
+                    "startAt": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Datetime"
+                            }
+                        }
+                    }
+                }
+            },
+            "EventFiltersIn": {
+                "name": "EventFiltersIn",
+                "fields": {
+                    "eventFileDeleted": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            }
+                        }
+                    },
+                    "eventFileDownloaded": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            }
+                        }
+                    },
+                    "eventFileTagsEdited": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            }
+                        }
+                    },
+                    "eventFileUploaded": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            }
+                        }
+                    },
+                    "eventTagApprovalIsRequested": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Boolean"
+                            }
+                        }
+                    }
+                }
+            },
+            "FileSortBy": {
+                "name": "FileSortBy",
+                "fields": {
+                    "direction": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "ESortDirection",
+                                "$ref": "#/server/enums/ESortDirection"
+                            }
+                        }
+                    },
+                    "field": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EFileField",
+                                "$ref": "#/server/enums/EFileField"
+                            }
+                        }
+                    }
+                }
+            },
+            "GetGroupUsersSortBy": {
+                "name": "GetGroupUsersSortBy",
+                "fields": {
+                    "direction": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "ESortDirection",
+                                "$ref": "#/server/enums/ESortDirection"
+                            }
+                        }
+                    },
+                    "field": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EGroupUsers",
+                                "$ref": "#/server/enums/EGroupUsers"
+                            }
+                        }
+                    }
+                }
+            },
+            "GetGroupsSortBy": {
+                "name": "GetGroupsSortBy",
+                "fields": {
+                    "direction": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "ESortDirection",
+                                "$ref": "#/server/enums/ESortDirection"
+                            }
+                        }
+                    },
+                    "field": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EGroupField",
+                                "$ref": "#/server/enums/EGroupField"
+                            }
+                        }
+                    }
+                }
+            },
+            "GetUsersSortBy": {
+                "name": "GetUsersSortBy",
+                "fields": {
+                    "direction": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "ESortDirection",
+                                "$ref": "#/server/enums/ESortDirection"
+                            }
+                        }
+                    },
+                    "field": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EUserField",
+                                "$ref": "#/server/enums/EUserField"
+                            }
+                        }
+                    }
+                }
+            },
+            "GroupIn": {
+                "name": "GroupIn",
+                "fields": {
+                    "limitOfDownloadsPerDay": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            }
+                        }
+                    },
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "tagIds": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            }
+                        }
+                    }
+                }
+            },
+            "MultipartUploadFileIn": {
+                "name": "MultipartUploadFileIn",
+                "fields": {
+                    "initialPartsCount": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            }
+                        }
+                    },
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "partSizeInBytes": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int"
+                            }
+                        }
+                    },
+                    "sizeInBytes": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int64"
+                            }
+                        }
+                    },
+                    "tagIds": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            }
+                        }
+                    }
+                }
+            },
+            "PutUploadFileIn": {
+                "name": "PutUploadFileIn",
+                "fields": {
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "sizeInBytes": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "Int64"
+                            }
+                        }
+                    },
+                    "tagIds": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            }
+                        }
+                    }
+                }
+            },
+            "TagIn": {
+                "name": "TagIn",
+                "fields": {
+                    "parentTag": {
+                        "nullable": true,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "tag": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    }
+                }
+            },
+            "UserIn": {
+                "name": "UserIn",
+                "fields": {
+                    "email": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    },
+                    "groupIds": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "array",
+                            "nullable": false,
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "UUID"
+                            }
+                        }
+                    },
+                    "name": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Scalar",
+                                "name": "String"
+                            }
+                        }
+                    }
+                }
+            },
+            "UsersTagSortBy": {
+                "name": "UsersTagSortBy",
+                "fields": {
+                    "direction": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "ESortDirection",
+                                "$ref": "#/server/enums/ESortDirection"
+                            }
+                        }
+                    },
+                    "field": {
+                        "nullable": false,
+                        "spec": {
+                            "_type": "literal",
+                            "type": {
+                                "_type": "Enum",
+                                "name": "EUsersTagField",
+                                "$ref": "#/server/enums/EUsersTagField"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "scalars": [
+            "Datetime",
+            "Duration",
+            "Int64",
+            "UUID",
+            "Upload",
+            "Url",
+            "Void"
+        ],
+        "enums": {
+            "EFileField": {
+                "name": "EFileField",
+                "values": [
+                    "NAME",
+                    "MIMETYPE",
+                    "SIZE_IN_BYTES",
+                    "AUTHOR_NAME",
+                    "TAGS",
+                    "CREATED_AT"
+                ]
+            },
+            "EGroupField": {
+                "name": "EGroupField",
+                "values": [
+                    "NAME",
+                    "CREATED_AT",
+                    "LIMIT_OF_DOWNLOADS_PER_DAY"
+                ]
+            },
+            "EGroupUsers": {
+                "name": "EGroupUsers",
+                "values": [
+                    "NAME",
+                    "EMAIL"
+                ]
+            },
+            "ESortDirection": {
+                "name": "ESortDirection",
+                "values": [
+                    "ASC",
+                    "DSC"
+                ]
+            },
+            "EUserField": {
+                "name": "EUserField",
+                "values": [
+                    "NAME",
+                    "EMAIL",
+                    "CREATED_AT"
+                ]
+            },
+            "EUsersTagField": {
+                "name": "EUsersTagField",
+                "values": [
+                    "TAG",
+                    "USERS_COUNT",
+                    "CREATED_AT"
+                ]
+            }
+        },
+        "unions": {
+            "CommitMultipartFileSessionResponse": {
+                "name": "CommitMultipartFileSessionResponse",
+                "items": {
+                    "ErrorFileNotUploaded": "#/server/objects/ErrorFileNotUploaded",
+                    "ErrorUnknownSessionId": "#/server/objects/ErrorUnknownSessionId",
+                    "File": "#/server/objects/File"
+                }
+            },
+            "CommitPutFileSessionResponse": {
+                "name": "CommitPutFileSessionResponse",
+                "items": {
+                    "ErrorFileNotUploaded": "#/server/objects/ErrorFileNotUploaded",
+                    "ErrorUnknownSessionId": "#/server/objects/ErrorUnknownSessionId",
+                    "File": "#/server/objects/File"
+                }
+            },
+            "ConfirmOTPCodeResponse": {
+                "name": "ConfirmOTPCodeResponse",
+                "items": {
+                    "ErrorInvalidOTPCode": "#/server/objects/ErrorInvalidOTPCode",
+                    "ErrorOTPCodeExpired": "#/server/objects/ErrorOTPCodeExpired",
+                    "OTPToken": "#/server/objects/OTPToken"
+                }
+            },
+            "ConfirmUserError": {
+                "name": "ConfirmUserError",
+                "items": {
+                    "ErrorInvalidPassword": "#/server/objects/ErrorInvalidPassword",
+                    "ErrorInvalidToken": "#/server/objects/ErrorInvalidToken"
+                }
+            },
+            "CreateGroupError": {
+                "name": "CreateGroupError",
+                "items": {
+                    "ErrorAlreadyExists": "#/server/objects/ErrorAlreadyExists",
+                    "ErrorInvalidGroupName": "#/server/objects/ErrorInvalidGroupName",
+                    "ErrorInvalidLimitOfDownloadsPerDay": "#/server/objects/ErrorInvalidLimitOfDownloadsPerDay",
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags",
+                    "ErrorUnknownUsers": "#/server/objects/ErrorUnknownUsers"
+                }
+            },
+            "CreateMultipartFileSessionResponse": {
+                "name": "CreateMultipartFileSessionResponse",
+                "items": {
+                    "ErrorMultipartUploadFileIsTooLight": "#/server/objects/ErrorMultipartUploadFileIsTooLight",
+                    "ErrorMultipartUploadFilePartSizeIsTooBig": "#/server/objects/ErrorMultipartUploadFilePartSizeIsTooBig",
+                    "ErrorMultipartUploadFilePartSizeIsTooSmall": "#/server/objects/ErrorMultipartUploadFilePartSizeIsTooSmall",
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags",
+                    "MultipartUploadSession": "#/server/objects/MultipartUploadSession"
+                }
+            },
+            "CreatePutFileSessionResponse": {
+                "name": "CreatePutFileSessionResponse",
+                "items": {
+                    "ErrorPutUploadFileIsTooBig": "#/server/objects/ErrorPutUploadFileIsTooBig",
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags",
+                    "PutUploadSession": "#/server/objects/PutUploadSession"
+                }
+            },
+            "CreateTagError": {
+                "name": "CreateTagError",
+                "items": {
+                    "ErrorAlreadyExists": "#/server/objects/ErrorAlreadyExists",
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags"
+                }
+            },
+            "CreateUserError": {
+                "name": "CreateUserError",
+                "items": {
+                    "ErrorAlreadyPending": "#/server/objects/ErrorAlreadyPending",
+                    "ErrorEmailCollision": "#/server/objects/ErrorEmailCollision",
+                    "ErrorInvalidEmail": "#/server/objects/ErrorInvalidEmail",
+                    "ErrorInvalidUserName": "#/server/objects/ErrorInvalidUserName",
+                    "ErrorUnknownGroups": "#/server/objects/ErrorUnknownGroups"
+                }
+            },
+            "DeleteFileError": {
+                "name": "DeleteFileError",
+                "items": {
+                    "ErrorChangeForbidden": "#/server/objects/ErrorChangeForbidden",
+                    "ErrorUnknownFile": "#/server/objects/ErrorUnknownFile"
+                }
+            },
+            "EditGroupError": {
+                "name": "EditGroupError",
+                "items": {
+                    "ErrorAlreadyExists": "#/server/objects/ErrorAlreadyExists",
+                    "ErrorGroupNotFound": "#/server/objects/ErrorGroupNotFound",
+                    "ErrorInvalidGroupName": "#/server/objects/ErrorInvalidGroupName",
+                    "ErrorInvalidLimitOfDownloadsPerDay": "#/server/objects/ErrorInvalidLimitOfDownloadsPerDay",
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags"
+                }
+            },
+            "ErrorAlreadyDoneOrUnknownTags": {
+                "name": "ErrorAlreadyDoneOrUnknownTags",
+                "items": {
+                    "ErrorAlreadyDone": "#/server/objects/ErrorAlreadyDone",
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags"
+                }
+            },
+            "ErrorGroupNotFoundOrErrorNotFound": {
+                "name": "ErrorGroupNotFoundOrErrorNotFound",
+                "items": {
+                    "ErrorGroupNotFound": "#/server/objects/ErrorGroupNotFound",
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound"
+                }
+            },
+            "Event": {
+                "name": "Event",
+                "items": {
+                    "EventFileDeleted": "#/server/objects/EventFileDeleted",
+                    "EventFileDownloaded": "#/server/objects/EventFileDownloaded",
+                    "EventFileTagsEdited": "#/server/objects/EventFileTagsEdited",
+                    "EventFileUploaded": "#/server/objects/EventFileUploaded",
+                    "EventTagApprovalIsRequested": "#/server/objects/EventTagApprovalIsRequested"
+                }
+            },
+            "GetEventsResponse": {
+                "name": "GetEventsResponse",
+                "items": {
+                    "ErrorDateRangeIsInvalid": "#/server/objects/ErrorDateRangeIsInvalid",
+                    "EventsList": "#/server/objects/EventsList"
+                }
+            },
+            "GetFavouriteTagsInGroupResponse": {
+                "name": "GetFavouriteTagsInGroupResponse",
+                "items": {
+                    "ErrorUnknownGroup": "#/server/objects/ErrorUnknownGroup",
+                    "TagList": "#/server/objects/TagList"
+                }
+            },
+            "GetFileURLResponse": {
+                "name": "GetFileURLResponse",
+                "items": {
+                    "ErrorUnknownFile": "#/server/objects/ErrorUnknownFile",
+                    "UrlObject": "#/server/objects/UrlObject"
+                }
+            },
+            "GetFilesResponse": {
+                "name": "GetFilesResponse",
+                "items": {
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags",
+                    "SearchFileList": "#/server/objects/SearchFileList"
+                }
+            },
+            "GetGroupTagsResponse": {
+                "name": "GetGroupTagsResponse",
+                "items": {
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound",
+                    "TagList": "#/server/objects/TagList"
+                }
+            },
+            "GetGroupUsersAndUsersResponse": {
+                "name": "GetGroupUsersAndUsersResponse",
+                "items": {
+                    "ErrorGroupNotFound": "#/server/objects/ErrorGroupNotFound",
+                    "GroupUserList": "#/server/objects/GroupUserList"
+                }
+            },
+            "GetGroupUsersResponse": {
+                "name": "GetGroupUsersResponse",
+                "items": {
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound",
+                    "UsersList": "#/server/objects/UsersList"
+                }
+            },
+            "GetGroupUsersTotalResponse": {
+                "name": "GetGroupUsersTotalResponse",
+                "items": {
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound",
+                    "IntObject": "#/server/objects/IntObject"
+                }
+            },
+            "GetNextMultipartUploadUrlsResponse": {
+                "name": "GetNextMultipartUploadUrlsResponse",
+                "items": {
+                    "ErrorUnknownSessionId": "#/server/objects/ErrorUnknownSessionId",
+                    "UploadUrlList": "#/server/objects/UploadUrlList"
+                }
+            },
+            "GetPathToTagResponse": {
+                "name": "GetPathToTagResponse",
+                "items": {
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags",
+                    "StringList": "#/server/objects/StringList"
+                }
+            },
+            "GetTagsResponse": {
+                "name": "GetTagsResponse",
+                "items": {
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags",
+                    "TagList": "#/server/objects/TagList"
+                }
+            },
+            "IntObjectOrErrorUnknownTags": {
+                "name": "IntObjectOrErrorUnknownTags",
+                "items": {
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags",
+                    "IntObject": "#/server/objects/IntObject"
+                }
+            },
+            "ResetPasswordError": {
+                "name": "ResetPasswordError",
+                "items": {
+                    "ErrorInvalidPassword": "#/server/objects/ErrorInvalidPassword",
+                    "ErrorOTPTokenExpired": "#/server/objects/ErrorOTPTokenExpired"
+                }
+            },
+            "RetrieveFileResponse": {
+                "name": "RetrieveFileResponse",
+                "items": {
+                    "ErrorUnknownFile": "#/server/objects/ErrorUnknownFile",
+                    "SearchFile": "#/server/objects/SearchFile"
+                }
+            },
+            "RetrieveGroupResponse": {
+                "name": "RetrieveGroupResponse",
+                "items": {
+                    "ErrorNotFound": "#/server/objects/ErrorNotFound",
+                    "Group": "#/server/objects/Group"
+                }
+            },
+            "UpdateFileError": {
+                "name": "UpdateFileError",
+                "items": {
+                    "ErrorChangeForbidden": "#/server/objects/ErrorChangeForbidden",
+                    "ErrorUnknownFile": "#/server/objects/ErrorUnknownFile",
+                    "ErrorUnknownTags": "#/server/objects/ErrorUnknownTags"
+                }
+            }
+        },
+        "directives": {
+            "admin": {
+                "name": "admin",
+                "locations": [
+                    "FIELD_DEFINITION"
+                ],
+                "arguments": {}
+            },
+            "authenticated": {
+                "name": "authenticated",
+                "locations": [
+                    "FIELD_DEFINITION"
+                ],
+                "arguments": {}
+            }
+        }
+    }
+}

@@ -1,0 +1,4 @@
+node_modules
+dist
+gql-codegen.mts
+check
