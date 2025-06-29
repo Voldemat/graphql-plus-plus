@@ -1,18 +1,40 @@
+/* eslint-disable max-lines */
 import { z } from 'zod/v4'
 import { argument } from './argument.js'
 
-type FragmentSpecSchemaType = z.ZodDiscriminatedUnion<[
-    typeof objectFragmentSpec,
-    typeof unionFragmentSpec
+type UnionFragmentSpec = z.ZodObject<{
+    _type: z.ZodLiteral<'union'>;
+    unionName: z.ZodString;
+    selections: z.ZodArray<typeof unionSelection>
+}>
+type ObjectFragmentSpec = z.ZodObject<{
+    _type: z.ZodLiteral<'object'>;
+    name: z.ZodString;
+    selections: z.ZodArray<typeof objectSelection>
+}>
+export type FragmentSpecSchemaZodType = z.ZodDiscriminatedUnion<[
+    ObjectFragmentSpec,
+    UnionFragmentSpec
 ]>
+export type FragmentSpecSchemaType =
+    {
+        _type: 'union',
+        unionName: string,
+        selections: z.infer<typeof unionSelection>[]
+    } |
+    {
+        _type: 'object',
+        name: string,
+        selections: z.infer<typeof objectSelection>[]
+    }
 
-const fieldSelection =
+export const fieldSelection =
     z.object({
         _type: z.literal('FieldSelection'),
         name: z.string(),
         alias: z.string(),
         arguments: z.record(z.string(), argument),
-        get selection(): z.ZodNullable<FragmentSpecSchemaType> {
+        get selection(): z.ZodNullable<FragmentSpecSchemaZodType> {
             // eslint-disable-next-line no-use-before-define
             return z.nullable(fragmentSpecSchema)
         }
@@ -22,11 +44,6 @@ export const typenameSelection = z.object({
     _type: z.literal('TypenameField')
 })
 
-type ObjectFragmentSpec = z.ZodObject<{
-    _type: z.ZodLiteral<'object'>;
-    name: z.ZodString;
-    selections: z.ZodArray<typeof objectSelection>
-}>
 export const objectConditionalSpreadSelection = z.object({
     _type: z.literal('ObjectConditionalSpreadSelection'),
     object: z.string(),
@@ -85,8 +102,8 @@ export const unionFragmentSpec =
         selections: z.array(unionSelection)
     })
 
-export const fragmentSpecSchema: FragmentSpecSchemaType =
+export const fragmentSpecSchema =
     z.discriminatedUnion('_type', [
         objectFragmentSpec,
         unionFragmentSpec
-    ])
+    ]) satisfies FragmentSpecSchemaZodType

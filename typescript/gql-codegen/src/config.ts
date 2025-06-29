@@ -1,4 +1,4 @@
-import { RootSchema } from './schema.js';
+import { RootSchema } from './schema/root.js';
 import { Logger } from 'pino';
 
 export interface ActorContext {

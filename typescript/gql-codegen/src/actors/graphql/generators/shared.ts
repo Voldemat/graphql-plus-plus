@@ -1,10 +1,29 @@
 import ts from 'typescript'
-import { generateScalarReference } from './scalars/generators.js'
-import {
-    inputFieldSpecSchema,
-    objectNonCallableFieldSpecSchema
-} from '../../../schema.js'
-import { z } from 'zod'
+
+export function createTypenamePropertySignature(name: string) {
+    return ts.factory.createPropertySignature(
+        undefined,
+        '__typename',
+        ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+        ts.factory.createLiteralTypeNode(
+            ts.factory.createStringLiteral(name)
+        )
+    )
+}
+
+export function generateScalarReference(name: string) {
+    return ts.factory.createIndexedAccessTypeNode(
+        ts.factory.createIndexedAccessTypeNode(
+            ts.factory.createTypeReferenceNode('Scalars'),
+            ts.factory.createLiteralTypeNode(
+                ts.factory.createStringLiteral(name)
+            )
+        ),
+        ts.factory.createLiteralTypeNode(
+            ts.factory.createStringLiteral('output')
+        )
+    )
+}
 
 export function generateTypeReferenceNode(
     scalars: string[],
@@ -21,27 +40,3 @@ export function createQuestionTokenIfNullable(nullable: boolean) {
         undefined
 }
 
-export function generateNonCallableFieldSpec(
-    scalars: string[],
-    spec: z.infer<typeof objectNonCallableFieldSpecSchema> |
-    z.infer<typeof inputFieldSpecSchema>,
-) {
-    switch (spec._type) {
-    case 'array':
-        return ts.factory.createArrayTypeNode(
-            generateTypeReferenceNode(scalars, spec.type.name)
-        )
-    case 'literal':
-        return generateTypeReferenceNode(scalars, spec.type.name)
-    }
-}
-
-
-export function wrapInMaybeIfNullable(spec: ts.TypeNode, nullable: boolean) {
-    return nullable ?
-        ts.factory.createTypeReferenceNode(
-            'Maybe',
-            [spec]
-        ) :
-        spec
-}

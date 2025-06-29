@@ -1,14 +1,17 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import ts from 'typescript';
 import {
-    objectFieldSpecSchema,
-    objectSchema
-} from '../../../schema.js';
-import {
-    createQuestionTokenIfNullable,
     generateNonCallableFieldSpec,
     wrapInMaybeIfNullable,
 } from './shared.js';
+import {
+    objectFieldSpecSchema,
+    objectSchema
+} from '../../../../schema/server.js';
+import {
+    createQuestionTokenIfNullable,
+    createTypenamePropertySignature
+} from '../shared.js';
 
 function generateObjectFieldSpec(
     scalars: string[],
@@ -18,17 +21,6 @@ function generateObjectFieldSpec(
         return generateNonCallableFieldSpec(scalars, spec.returnType)
     }
     return generateNonCallableFieldSpec(scalars, spec)
-}
-
-function createTypenamePropertySignature(name: string) {
-    return ts.factory.createPropertySignature(
-        undefined,
-        '__typename',
-        ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-        ts.factory.createLiteralTypeNode(
-            ts.factory.createStringLiteral(name)
-        )
-    )
 }
 
 export function generateObjectInterfaceDefinition(

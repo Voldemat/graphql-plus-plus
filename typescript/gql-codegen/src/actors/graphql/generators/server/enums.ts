@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { enumSchema } from '../../../schema.js';
+import { z } from 'zod/v4';
 import ts from 'typescript';
+import { enumSchema } from '../../../../schema/server.js';
 
 export function generateEnumDefinition(
     e: z.infer<typeof enumSchema>

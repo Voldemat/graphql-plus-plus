@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { unionSchema } from '../../../schema.js';
+import { z } from 'zod/v4';
 import ts from 'typescript';
-import { generateTypeReferenceNode } from './shared.js';
+import { unionSchema } from '../../../../schema/server.js';
+import { generateTypeReferenceNode } from '../shared.js';
 
 export function generateUnionTypeDefinition(
     scalars: string[],

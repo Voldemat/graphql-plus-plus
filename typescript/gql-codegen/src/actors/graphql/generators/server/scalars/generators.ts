@@ -5,20 +5,6 @@ import {
     ScalarsMapping
 } from './mapping.js';
 
-export function generateScalarReference(name: string) {
-    return ts.factory.createIndexedAccessTypeNode(
-        ts.factory.createIndexedAccessTypeNode(
-            ts.factory.createTypeReferenceNode('Scalars'),
-            ts.factory.createLiteralTypeNode(
-                ts.factory.createStringLiteral(name)
-            )
-        ),
-        ts.factory.createLiteralTypeNode(
-            ts.factory.createStringLiteral('output')
-        )
-    )
-}
-
 export function generateScalarsInterfaceDefinition(
     scalarsMapping: ScalarsMapping,
     scalars: string[],

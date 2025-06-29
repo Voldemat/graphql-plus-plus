@@ -1,10 +1,10 @@
-import { z } from 'zod';
-import { inputSchema } from '../../../schema.js';
+import { z } from 'zod/v4';
 import ts from 'typescript';
 import {
-    createQuestionTokenIfNullable,
     generateNonCallableFieldSpec
 } from './shared.js';
+import { inputSchema } from '../../../../schema/server.js';
+import { createQuestionTokenIfNullable } from '../shared.js';
 
 export function generateInputTypeDefinition(
     scalars: string[],
