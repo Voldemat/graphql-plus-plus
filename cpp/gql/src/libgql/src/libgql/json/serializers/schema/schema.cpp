@@ -475,16 +475,18 @@ void writeObjectSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.EndObject();
 };
 
-void writeObjectFragmentSpec(
-    rapidjson::Writer<rapidjson::StringBuffer> &writer,
-    const std::shared_ptr<ObjectFragmentSpec<ObjectType>> &selection) {
+template <typename T>
+void writeObjectFragmentSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                             const ObjectFragmentSpec<T> &selection) {
     writer.StartObject();
-    writer.String("type");
-    writer.String(selection->type->name.c_str());
+    writer.String("_type");
+    writer.String("object");
+    writer.String("name");
+    writer.String(selection.type->name.c_str());
     writer.String("selections");
     writer.StartArray();
-    for (const auto &s : selection->selections) {
-        writeObjectSelection(writer, s);
+    for (const auto &selection : selection.selections) {
+        writeObjectSelection(writer, selection);
     }
     writer.EndArray();
     writer.EndObject();
@@ -519,7 +521,7 @@ void writeUnionSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                        writer.String("object");
                        writer.String(node.type->name.c_str());
                        writer.String("spec");
-                       writeObjectFragmentSpec(writer, node.selection);
+                       writeObjectFragmentSpec(writer, *node.selection.get());
                    },
                },
                selection);
@@ -528,47 +530,30 @@ void writeUnionSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 
 void writeClientFragmentSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                              const FragmentSpec &spec) {
-    writer.StartObject();
-    std::visit(overloaded{
-                   [&writer](const UnionFragmentSpec &node) {
-                       writer.String("_type");
-                       writer.String("union");
-                       writer.String("unionName");
-                       writer.String(node.type->name.c_str());
-                       writer.String("selections");
-                       writer.StartArray();
-                       for (const auto &selection : node.selections) {
-                           writeUnionSelection(writer, selection);
-                       }
-                       writer.EndArray();
-                   },
-                   [&writer](const ObjectFragmentSpec<ObjectType> &node) {
-                       writer.String("_type");
-                       writer.String("object");
-                       writer.String("name");
-                       writer.String(node.type->name.c_str());
-                       writer.String("selections");
-                       writer.StartArray();
-                       for (const auto &selection : node.selections) {
-                           writeObjectSelection(writer, selection);
-                       }
-                       writer.EndArray();
-                   },
-                   [&writer](const ObjectFragmentSpec<Interface> &node) {
-                       writer.String("_type");
-                       writer.String("interface");
-                       writer.String("name");
-                       writer.String(node.type->name.c_str());
-                       writer.String("selections");
-                       writer.StartArray();
-                       for (const auto &selection : node.selections) {
-                           writeObjectSelection(writer, selection);
-                       }
-                       writer.EndArray();
-                   },
-               },
-               spec);
-    writer.EndObject();
+    std::visit(
+        overloaded{
+            [&writer](const UnionFragmentSpec &node) -> void {
+                writer.StartObject();
+                writer.String("_type");
+                writer.String("union");
+                writer.String("unionName");
+                writer.String(node.type->name.c_str());
+                writer.String("selections");
+                writer.StartArray();
+                for (const auto &selection : node.selections) {
+                    writeUnionSelection(writer, selection);
+                }
+                writer.EndArray();
+                writer.EndObject();
+            },
+            [&writer](const ObjectFragmentSpec<ObjectType> &node) -> void {
+                writeObjectFragmentSpec(writer, node);
+            },
+            [&writer](const ObjectFragmentSpec<Interface> &node) -> void {
+                writeObjectFragmentSpec(writer, node);
+            },
+        },
+        spec);
 }
 
 void writeClientOperation(rapidjson::Writer<rapidjson::StringBuffer> &writer,
@@ -597,14 +582,14 @@ void writeClientDirective(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.String(directive->name.c_str());
     writer.String("arguments");
     writer.StartObject();
-    for (const auto& [name, argument] : directive->arguments) {
+    for (const auto &[name, argument] : directive->arguments) {
         writer.String(name.c_str());
         writeFieldDefinition(writer, *argument.get());
     };
     writer.EndObject();
     writer.String("locations");
     writer.StartArray();
-    for (const auto& location : directive->locations) {
+    for (const auto &location : directive->locations) {
         writer.String(magic_enum::enum_name(location).data());
     }
     writer.EndArray();
