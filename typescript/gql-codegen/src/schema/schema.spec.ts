@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import testJSON from './test.json' with { type: 'json' }
-import { rootSchema } from './schema.js'
+import { rootSchema } from './root.js'
 
 describe('Schema', () => {
     it('Should parse ok', () => {
