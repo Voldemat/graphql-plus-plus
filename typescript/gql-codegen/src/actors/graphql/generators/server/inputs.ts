@@ -5,6 +5,27 @@ import {
 } from './shared.js';
 import { inputSchema } from '../../../../schema/server.js';
 import { createQuestionTokenIfNullable } from '../shared.js';
+import { inputFieldSchema } from '../../../../schema/shared.js';
+
+export function generateInputFieldsPropertySignatures(
+    scalars: string[],
+    fields: Record<string, z.infer<typeof inputFieldSchema>>
+) {
+    return Object.entries(fields).map(([name, field]) => {
+        const spec = generateNonCallableFieldSpec(scalars, field.spec)
+        return ts.factory.createPropertySignature(
+            undefined,
+            name,
+            createQuestionTokenIfNullable(field.nullable),
+            field.nullable ?
+                ts.factory.createTypeReferenceNode(
+                    'Maybe',
+                    [spec]
+                ) :
+                spec
+        )
+    })
+}
 
 export function generateInputTypeDefinition(
     scalars: string[],
@@ -17,19 +38,6 @@ export function generateInputTypeDefinition(
         input.name,
         undefined,
         undefined,
-        Object.entries(input.fields).map(([name, field]) => {
-            const spec = generateNonCallableFieldSpec(scalars, field.spec)
-            return ts.factory.createPropertySignature(
-                undefined,
-                name,
-                createQuestionTokenIfNullable(field.nullable),
-                field.nullable ?
-                    ts.factory.createTypeReferenceNode(
-                        'Maybe',
-                        [spec]
-                    ) :
-                    spec
-            )
-        })
+        generateInputFieldsPropertySignatures(scalars, input.fields)
     )
 }

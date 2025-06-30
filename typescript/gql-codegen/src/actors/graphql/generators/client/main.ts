@@ -3,6 +3,7 @@ import { ActorContext } from '../../../../config.js';
 import { GraphqlActorConfig } from '../../actor.js';
 import { generateFragmentTypes } from './fragments.js';
 import { addNewLineBetweenNodes } from '../../../ts-shared.js';
+import { generateOperationsNodes } from './operations.js';
 
 export function generateClientNodes(
     config: GraphqlActorConfig,
@@ -13,6 +14,10 @@ export function generateClientNodes(
         ...addNewLineBetweenNodes(generateFragmentTypes(
             scalars,
             context.schema
+        )),
+        ...addNewLineBetweenNodes(generateOperationsNodes(
+            scalars,
+            context.schema,
         ))
     ]
 }

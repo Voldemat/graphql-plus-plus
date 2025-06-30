@@ -1,10 +1,20 @@
 import ts from 'typescript'
 
-export function createTypenamePropertySignature(name: string) {
+export function createQuestionTokenIfNullable(nullable: boolean) {
+    return nullable ?
+        ts.factory.createToken(ts.SyntaxKind.QuestionToken) :
+        undefined
+}
+
+export function createTypenamePropertySignature(
+    name: string,
+    optional: boolean,
+    alias: string | null,
+) {
     return ts.factory.createPropertySignature(
         undefined,
-        '__typename',
-        ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+        alias || '__typename',
+        createQuestionTokenIfNullable(optional),
         ts.factory.createLiteralTypeNode(
             ts.factory.createStringLiteral(name)
         )
@@ -33,10 +43,3 @@ export function generateTypeReferenceNode(
         return generateScalarReference(name)
     return ts.factory.createTypeReferenceNode(name)
 }
-
-export function createQuestionTokenIfNullable(nullable: boolean) {
-    return nullable ?
-        ts.factory.createToken(ts.SyntaxKind.QuestionToken) :
-        undefined
-}
-

@@ -41,7 +41,8 @@ export const fieldSelection =
     })
 
 export const typenameSelection = z.object({
-    _type: z.literal('TypenameField')
+    _type: z.literal('TypenameField'),
+    alias: z.nullable(z.string())
 })
 
 export const objectConditionalSpreadSelection = z.object({
