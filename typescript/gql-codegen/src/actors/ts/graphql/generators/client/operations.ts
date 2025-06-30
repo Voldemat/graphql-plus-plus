@@ -11,6 +11,15 @@ import {
 import assert from 'assert';
 import { FragmentSpecSchemaType } from '@/schema/client/fragment.js';
 
+export function opTypeToName(
+    type: z.infer<typeof operationSchema>['type']
+): string {
+    switch (type) {
+    case 'QUERY': return 'Query'
+    case 'MUTATION': return 'Mutation'
+    case 'SUBSCRIPTION': return 'Subscription'
+    }
+}
 
 export function generateOperationInputDataNodes(
     scalars: string[],
@@ -26,7 +35,7 @@ export function generateOperationInputDataNodes(
             ts.factory.createModifiersFromModifierFlags(
                 ts.ModifierFlags.Export
             ),
-            operation.name + 'Variables',
+            operation.name + opTypeToName(operation.type) + 'Variables',
             undefined,
             ts.factory.createTypeReferenceNode(
                 'Exact',
@@ -43,14 +52,6 @@ export function generateOperationInputDataNodes(
             pSignatures
         )
     ]
-}
-
-function opTypeToName(type: z.infer<typeof operationSchema>['type']): string {
-    switch (type) {
-    case 'QUERY': return 'Query'
-    case 'MUTATION': return 'Mutation'
-    case 'SUBSCRIPTION': return 'Subscription'
-    }
 }
 
 function generateOperationReturnTypeNode(
