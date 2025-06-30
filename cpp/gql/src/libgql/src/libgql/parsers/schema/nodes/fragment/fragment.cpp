@@ -8,6 +8,7 @@
 #include "../../client_ast.hpp"
 #include "../../server_ast.hpp"
 #include "../../type_registry.hpp"
+#include "libgql/parsers/file/shared/shared.hpp"
 #include "libgql/parsers/schema/nodes/fragment/spec.hpp"
 
 using namespace parsers::file;
@@ -50,6 +51,11 @@ std::shared_ptr<ast::Fragment> parseFragmentSecondPass(
     const client::ast::FragmentDefinition &definition,
     const TypeRegistry &registry) {
     const auto &fragment = registry.getFragment(definition.name.name);
+    fragment->sourceText = shared::getSourceText(
+        definition.location.source->buffer,
+        definition.location.startToken.location,
+        definition.location.endToken.location
+    );
     fragment->spec =
         nodes::parseFragmentSpec(definition.spec, fragment->spec, registry);
     return fragment;

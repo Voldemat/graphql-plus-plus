@@ -583,6 +583,8 @@ void writeClientOperation(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.EndObject();
     writer.String("fragmentSpec");
     writeClientFragmentSpec(writer, operation->fragmentSpec);
+    writer.String("sourceText");
+    writer.String(operation->sourceText.c_str());
     writer.EndObject();
 };
 
@@ -607,6 +609,16 @@ void writeClientDirective(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.EndObject();
 };
 
+void writeFragment(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                       const parsers::schema::ast::Fragment &fragment) {
+    writer.StartObject();
+    writer.String("sourceText");
+    writer.String(fragment.sourceText.c_str());
+    writer.String("spec");
+    writeClientFragmentSpec(writer, fragment.spec);
+    writer.EndObject();
+};
+
 void writeClientSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                        const parsers::schema::ClientSchema &schema) {
     writer.StartObject();
@@ -614,7 +626,7 @@ void writeClientSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.StartObject();
     for (const auto &fragment : schema.fragments | std::views::values) {
         writer.String(fragment->name.c_str());
-        writeClientFragmentSpec(writer, fragment->spec);
+        writeFragment(writer, *fragment.get());
     }
     writer.EndObject();
     writer.String("operations");

@@ -66,6 +66,7 @@ struct FieldSelection {
 struct Fragment {
     std::string name;
     FragmentSpec spec;
+    std::string sourceText;
 };
 
 struct Operation {
@@ -73,6 +74,7 @@ struct Operation {
     std::string name;
     std::map<std::string, FieldDefinition<InputFieldSpec>> parameters;
     FragmentSpec fragmentSpec;
+    std::string sourceText;
 };
 
 struct ClientDirective {

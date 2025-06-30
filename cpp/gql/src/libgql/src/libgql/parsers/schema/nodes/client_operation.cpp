@@ -7,10 +7,12 @@
 #include <utility>
 
 #include "libgql/parsers/file/client/ast.hpp"
+#include "libgql/parsers/file/shared/shared.hpp"
 #include "libgql/parsers/schema/client_ast.hpp"
 #include "libgql/parsers/schema/nodes/fragment/spec.hpp"
 #include "libgql/parsers/schema/nodes/input_field_definition.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 
 using namespace parsers::file;
@@ -37,6 +39,9 @@ std::shared_ptr<ast::Operation> parseClientOperationDefinition(
     const auto &sNode = std::get<ast::FieldSelection>(objectNode.selections[0]);
 
     return std::make_shared<ast::Operation>(
-        definition.type, definition.name.name, parameters, node);
+        definition.type, definition.name.name, parameters, node,
+        shared::getSourceText(definition.location.source->buffer,
+                              definition.location.startToken.location,
+                              definition.location.endToken.location));
 };
 };  // namespace parsers::schema::nodes
