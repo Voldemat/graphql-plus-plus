@@ -47,6 +47,8 @@ struct ObjectCallableFieldSpec {
 using ObjectFieldSpec =
     std::variant<ObjectLiteralFieldSpec, ObjectCallableFieldSpec>;
 
+std::optional<std::string> extractSelectionName(const ObjectFieldSpec& spec);
+
 struct FieldSelectionNode {
     shared::ast::NodeLocation location;
     ObjectFieldSpec field;

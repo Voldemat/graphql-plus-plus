@@ -8,6 +8,7 @@
 #include "libgql/parsers/file/client/ast.hpp"
 #include "libgql/parsers/file/shared/parser_error.hpp"
 #include "libgql/parsers/schema/client_ast.hpp"
+#include "libgql/parsers/schema/nodes/fragment/field_selection_node.hpp"
 #include "libgql/parsers/schema/nodes/fragment/object_fragment_spec.hpp"
 #include "libgql/parsers/schema/nodes/fragment/union_fragment_spec.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
@@ -87,13 +88,6 @@ getTypeForUnionConditionalSelection(
     return unionNode;
 };
 
-bool isObjectFieldSpecIsTypenameField(
-    const client::ast::ObjectFieldSpec &spec) {
-    return std::holds_alternative<client::ast::ObjectLiteralFieldSpec>(spec) &&
-           std::get<client::ast::ObjectLiteralFieldSpec>(spec).name.name ==
-               "__typename";
-};
-
 ast::UnionSelection parseUnionSelectionNode(
     const client::ast::SelectionNode &sNode,
     const std::shared_ptr<ast::Union> &type, const TypeRegistry &registry) {
@@ -104,7 +98,10 @@ ast::UnionSelection parseUnionSelectionNode(
             },
             [&registry, &type](const client::ast::FieldSelectionNode &node) {
                 if (isObjectFieldSpecIsTypenameField(node.field))
-                    return (ast::TypenameField){};
+                    return (ast::TypenameField){
+                        .alias =
+                            file::client::ast::extractSelectionName(node.field)
+                    };
                 throw shared::ParserError(
                     node.location.startToken,
                     "No fields selections are allowed on union fragments",

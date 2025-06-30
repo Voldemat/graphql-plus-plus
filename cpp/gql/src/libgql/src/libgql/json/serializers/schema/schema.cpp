@@ -436,20 +436,31 @@ void writeFieldSelectionArgument(
 void writeClientFragmentSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                              const FragmentSpec &spec);
 
+void writeTypenameField(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                        const TypenameField &field) {
+    writer.String("TypenameField");
+    writer.String("alias");
+    if (!field.alias.has_value()) {
+        writer.Null();
+        return;
+    }
+    writer.String(field.alias.value().c_str());
+}
+
 void writeObjectSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                           const ObjectSelection &selection) {
     writer.StartObject();
     writer.String("_type");
     std::visit(overloaded{
-                   [&writer](const TypenameField &node) {
-                       writer.String("TypenameField");
+                   [&writer](const TypenameField &node) -> void {
+                       writeTypenameField(writer, node);
                    },
-                   [&writer](const SpreadSelection &node) {
+                   [&writer](const SpreadSelection &node) -> void {
                        writer.String("SpreadSelection");
                        writer.String("fragment");
                        writer.String(node.fragment->name.c_str());
                    },
-                   [&writer](const FieldSelection &node) {
+                   [&writer](const FieldSelection &node) -> void {
                        writer.String("FieldSelection");
                        writer.String("name");
                        writer.String(node.name.c_str());
@@ -498,7 +509,7 @@ void writeUnionSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.String("_type");
     std::visit(overloaded{
                    [&writer](const TypenameField &node) {
-                       writer.String("TypenameField");
+                       writeTypenameField(writer, node);
                    },
                    [&writer](const SpreadSelection &node) {
                        writer.String("SpreadSelection");

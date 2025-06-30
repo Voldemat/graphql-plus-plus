@@ -22,6 +22,8 @@
 #include "utils.hpp"
 
 namespace parsers::schema::nodes {
+bool isObjectFieldSpecIsTypenameField(
+    const file::client::ast::ObjectFieldSpec &spec);
 template <typename T>
 ast::FieldSelection parseFieldSelectionNode(
     const file::client::ast::FieldSelectionNode &fNode,

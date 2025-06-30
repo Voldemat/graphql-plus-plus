@@ -38,7 +38,11 @@ ast::ObjectSelection parseObjectSelectionNode(
                     node.location.source);
             },
             [&registry,
-             &type](const file::client::ast::FieldSelectionNode &node) {
+             &type](const file::client::ast::FieldSelectionNode &node)
+                -> ast::ObjectSelection {
+                if (isObjectFieldSpecIsTypenameField(node.field)) {
+                    return (ast::TypenameField){ .alias = file::client::ast::extractSelectionName(node.field) };
+                }
                 return parseFieldSelectionNode(node, type, registry);
             } },
         sNode);

@@ -5,6 +5,7 @@
 #include <variant>
 #include <vector>
 
+#include "libgql/parsers/file/client/ast.hpp"
 #include "libgql/parsers/schema/client_ast.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
 #include "utils.hpp"
@@ -12,6 +13,13 @@
 using namespace parsers::file;
 
 namespace parsers::schema::nodes {
+bool isObjectFieldSpecIsTypenameField(
+    const client::ast::ObjectFieldSpec &spec) {
+    return std::holds_alternative<client::ast::ObjectLiteralFieldSpec>(spec) &&
+           std::get<client::ast::ObjectLiteralFieldSpec>(spec).name.name ==
+               "__typename";
+};
+
 std::vector<ast::FieldSelection> getFieldSelectionsFromFragmentSpec(
     const ast::FragmentSpec &spec);
 std::vector<ast::FieldSelection> getFieldSelectionsFromObjectSelection(

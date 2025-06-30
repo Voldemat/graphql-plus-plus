@@ -21,7 +21,9 @@ struct SpreadSelection {
     std::shared_ptr<Fragment> fragment;
 };
 
-struct TypenameField {};
+struct TypenameField {
+    std::optional<std::string> alias;
+};
 using UnionSelection = std::variant<TypenameField, SpreadSelection,
                                     ObjectConditionalSpreadSelection,
                                     UnionConditionalSpreadSelection>;
