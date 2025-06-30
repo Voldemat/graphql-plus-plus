@@ -1,11 +1,9 @@
 import { z } from 'zod/v4';
 import ts from 'typescript';
-import {
-    generateNonCallableFieldSpec
-} from './shared.js';
-import { inputSchema } from '../../../../schema/server.js';
+import { generateNonCallableFieldSpec } from './shared.js';
+import { inputSchema } from '@/schema/server.js';
 import { createQuestionTokenIfNullable } from '../shared.js';
-import { inputFieldSchema } from '../../../../schema/shared.js';
+import { inputFieldSchema } from '@/schema/shared.js';
 
 export function generateInputFieldsPropertySignatures(
     scalars: string[],

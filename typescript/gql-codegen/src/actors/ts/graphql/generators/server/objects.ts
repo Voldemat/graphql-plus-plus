@@ -4,10 +4,7 @@ import {
     generateNonCallableFieldSpec,
     wrapInMaybeIfNullable,
 } from './shared.js';
-import {
-    objectFieldSpecSchema,
-    objectSchema
-} from '../../../../schema/server.js';
+import { objectFieldSpecSchema, objectSchema } from '@/schema/server.js';
 import {
     createQuestionTokenIfNullable,
     createTypenamePropertySignature
@@ -35,7 +32,7 @@ export function generateObjectInterfaceDefinition(
         undefined,
         undefined,
         [
-            createTypenamePropertySignature(object.name),
+            createTypenamePropertySignature(object.name, true, null),
             ...Object.entries(object.fields).map(([name, field]) => {
                 const spec = generateObjectFieldSpec(scalars, field.spec)
                 return ts.factory.createPropertySignature(

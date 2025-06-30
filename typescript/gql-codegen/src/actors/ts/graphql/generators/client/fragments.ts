@@ -4,23 +4,22 @@ import {
     createQuestionTokenIfNullable,
     createTypenamePropertySignature,
     generateScalarReference,
-    generateStringOrTemplate,
 } from '../shared.js';
+import { RootSchema } from '@/schema/root.js';
 import {
     fieldSelection,
     fragmentSchema,
     FragmentSpecSchemaType,
     objectConditionalSpreadSelection,
     objectSelection,
-    unionSelection
-} from '../../../../schema/client/fragment.js';
+    UnionSelection,
+} from '@/schema/client/fragment.js';
 import { z } from 'zod/v4';
-import { RootSchema } from '../../../../schema/root.js';
 import assert from 'assert';
 import {
     objectFieldSpecSchema,
     objectTypeSchema
-} from '../../../../schema/server.js';
+} from '@/schema/server.js';
 import { wrapInMaybeIfNullable } from '../server/shared.js';
 
 export function generateFragmentUnionSpecTypeNodes(
@@ -29,10 +28,9 @@ export function generateFragmentUnionSpecTypeNodes(
     spec: Extract<FragmentSpecSchemaType, { _type: 'union' }>,
 ): ts.TypeNode[] {
     const union = schema.server.unions[spec.unionName]
-    const typenameSelections =[
-        ...spec.selections.filter(s => s._type === 'TypenameField'),
-        
-    ]
+    const selections = spec.selections
+    const typenameSelections =
+        selections.filter(s => s._type === 'TypenameField')
     if (typenameSelections.length === 0 ||
         typenameSelections.every(tSelection => tSelection.alias !== null)) {
         typenameSelections.push({ _type: 'TypenameField', alias: null })
@@ -41,7 +39,7 @@ export function generateFragmentUnionSpecTypeNodes(
         .some(tSelection => tSelection.alias !== null)
     const selectedTypes: string[] = []
     const selectedNodes =
-    spec.selections.filter(s => s._type !== 'TypenameField').map(s => {
+    selections.filter(s => s._type !== 'TypenameField').map(s => {
         assert(s._type !== 'UnionConditionalSpreadSelection')
         const nodes: ts.PropertySignature[] = []
         if (s._type === 'ObjectConditionalSpreadSelection') {
@@ -263,7 +261,7 @@ export function generateFragmentObjectSpecPropertySignatures(
 
 function getObjectConditionalSpreadSelectionsFromUnionSelections(
     schema: RootSchema,
-    selections: z.infer<typeof unionSelection>[]
+    selections: UnionSelection[]
 ): z.infer<typeof objectConditionalSpreadSelection>[] {
     const objectSelections:
         Record<string, z.infer<typeof objectConditionalSpreadSelection>> = {}

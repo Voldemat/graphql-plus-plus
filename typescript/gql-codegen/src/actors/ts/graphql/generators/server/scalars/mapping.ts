@@ -8,10 +8,16 @@ export interface ScalarSpec {
 export type ScalarsMapping =
     Record<BuiltinScalarName, ScalarSpec> & Record<string, ScalarSpec>
 
-export function buildSymmetricScalarSpec(specType: ts.TypeNode): ScalarSpec {
+export function buildSymmetricScalarSpec(
+    specType: ts.TypeNode | string
+): ScalarSpec {
     return {
-        input: specType,
-        output: specType
+        input: typeof specType === 'string' ?
+            ts.factory.createTypeReferenceNode(specType) :
+            specType,
+        output: typeof specType === 'string' ?
+            ts.factory.createTypeReferenceNode(specType) :
+            specType
     }
 }
 

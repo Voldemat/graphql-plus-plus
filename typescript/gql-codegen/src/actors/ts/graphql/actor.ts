@@ -3,8 +3,8 @@ import {
 } from './generators/server/scalars/mapping.js'
 import { PathOrFileDescriptor, writeFileSync } from 'fs'
 import ts from 'typescript'
-import { Actor, ActorContext } from '../../config.js'
-import { renderNodes, TSActorConfig } from '../ts-shared.js'
+import { Actor, ActorContext } from '@/config.js'
+import { renderNodes, TSActorConfig } from '../shared.js'
 import { generateNodes } from './generators/main.js'
 
 export interface GraphqlActorConfig extends TSActorConfig {

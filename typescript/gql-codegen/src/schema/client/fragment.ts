@@ -20,7 +20,7 @@ export type FragmentSpecSchemaType =
     {
         _type: 'union',
         unionName: string,
-        selections: z.infer<typeof unionSelection>[]
+        selections: UnionSelection[]
     } |
     {
         _type: 'object',
@@ -59,23 +59,32 @@ export const spreadSelection = z.object({
     fragment: z.string()
 })
 
-type UnionSelection = z.ZodLazy<z.ZodDiscriminatedUnion<[
-    typeof typenameSelection,
-    typeof spreadSelection,
-    typeof objectConditionalSpreadSelection,
-    typeof unionConditionalSpreadSelection
-]>>
+export type UnionSelection =
+    z.infer<typeof typenameSelection> |
+    z.infer<typeof spreadSelection> |
+    z.infer<typeof objectConditionalSpreadSelection> |
+    z.infer<typeof unionConditionalSpreadSelection>
+
+export type UnionSelectionZodType = z.ZodLazy<
+    z.ZodDiscriminatedUnion<[
+        typeof typenameSelection,
+        typeof spreadSelection,
+        typeof objectConditionalSpreadSelection,
+        typeof unionConditionalSpreadSelection
+    ]>
+>
+
 
 export const unionConditionalSpreadSelection = z.object({
     _type: z.literal('UnionConditionalSpreadSelection'),
     union: z.string(),
-    get selections(): z.ZodArray<UnionSelection> {
+    get selections(): z.ZodArray<UnionSelectionZodType> {
         // eslint-disable-next-line no-use-before-define
         return z.array(unionSelection)
     }
 })
 
-export const unionSelection: UnionSelection =
+export const unionSelection: UnionSelectionZodType =
     z.lazy(() => z.discriminatedUnion('_type', [
         typenameSelection,
         spreadSelection,

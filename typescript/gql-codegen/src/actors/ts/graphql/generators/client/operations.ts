@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import ts from 'typescript';
-import { RootSchema } from '../../../../schema/root.js';
-import { operationSchema } from '../../../../schema/client/operation.js';
+import { RootSchema } from '@/schema/root.js';
+import { operationSchema } from '@/schema/client/operation.js';
 import { z } from 'zod/v4';
 import { generateInputFieldsPropertySignatures } from '../server/inputs.js';
 import {
@@ -9,7 +9,7 @@ import {
     generateFragmentObjectSpecPropertySignatures
 } from './fragments.js';
 import assert from 'assert';
-import { FragmentSpecSchemaType } from '../../../../schema/client/fragment.js';
+import { FragmentSpecSchemaType } from '@/schema/client/fragment.js';
 
 
 export function generateOperationInputDataNodes(

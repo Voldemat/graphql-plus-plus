@@ -1,12 +1,12 @@
 import ts from 'typescript';
 import { GraphqlActorConfig } from '../../actor.js';
 import { generateScalarsInterfaceDefinition } from './scalars/generators.js';
-import { ActorContext } from '../../../../config.js';
+import { ActorContext } from '@/config.js';
 import { generateEnumDefinition } from './enums.js';
 import { generateObjectInterfaceDefinition } from './objects.js';
 import { generateUnionTypeDefinition } from './unions.js';
 import { generateInputTypeDefinition } from './inputs.js';
-import { addNewLineBetweenNodes } from '../../../ts-shared.js';
+import { addNewLineBetweenNodes } from '../../../shared.js';
 
 export function generateServerNodes(
     config: GraphqlActorConfig,

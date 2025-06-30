@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { ActorContext } from '../../../config.js';
+import { ActorContext } from '@/config.js';
 import { GraphqlActorConfig } from '../actor.js';
 import { generateServerNodes } from './server/main.js';
 import { helperNodes } from './helperNodes.js';

@@ -1,8 +1,8 @@
 import ts from 'typescript';
-import { ActorContext } from '../../../../config.js';
+import { ActorContext } from '@/config.js';
 import { GraphqlActorConfig } from '../../actor.js';
 import { generateFragmentTypes } from './fragments.js';
-import { addNewLineBetweenNodes } from '../../../ts-shared.js';
+import { addNewLineBetweenNodes } from '../../../shared.js';
 import { generateOperationsNodes } from './operations.js';
 
 export function generateClientNodes(

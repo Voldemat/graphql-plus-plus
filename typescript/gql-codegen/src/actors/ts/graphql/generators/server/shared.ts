@@ -1,7 +1,7 @@
 import ts from 'typescript'
 import { z } from 'zod/v4'
-import { objectNonCallableFieldSpecSchema } from '../../../../schema/server.js'
-import { inputFieldSpecSchema } from '../../../../schema/shared.js'
+import { objectNonCallableFieldSpecSchema } from '@/schema/server.js'
+import { inputFieldSpecSchema } from '@/schema/shared.js'
 import { generateTypeReferenceNode } from '../shared.js'
 
 export function generateNonCallableFieldSpec(
