@@ -1,10 +1,15 @@
+/* eslint-disable max-lines */
 import ts from 'typescript';
 import { RootSchema } from '../../../../schema/root.js';
 import { operationSchema } from '../../../../schema/client/operation.js';
 import { z } from 'zod/v4';
 import { generateInputFieldsPropertySignatures } from '../server/inputs.js';
-import { generateFragmentObjectSpecPropertySignatures } from './fragments.js';
+import {
+    extractFragmentSourceTextsInSpec,
+    generateFragmentObjectSpecPropertySignatures
+} from './fragments.js';
 import assert from 'assert';
+import { FragmentSpecSchemaType } from '../../../../schema/client/fragment.js';
 
 
 export function generateOperationInputDataNodes(
@@ -70,6 +75,30 @@ function generateOperationReturnTypeNode(
     )
 }
 
+function generateOperationDocumentNode(
+    schema: RootSchema,
+    operation: z.infer<typeof operationSchema>
+) {
+    return ts.factory.createVariableStatement(
+        [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        ts.factory.createVariableDeclarationList(
+            [ts.factory.createVariableDeclaration(
+                ts.factory.createIdentifier(operation.name + 'Document'),
+                undefined,
+                undefined,
+                ts.factory.createStringLiteral([
+                    operation.sourceText,
+                    ...extractFragmentSourceTextsInSpec(
+                        schema,
+                        operation.fragmentSpec as FragmentSpecSchemaType
+                    )
+                ].join('\n'))
+            )],
+            ts.NodeFlags.Const
+        )
+    )
+}
+
 export function generateOperationNodes(
     scalars: string[],
     schema: RootSchema,
@@ -77,7 +106,8 @@ export function generateOperationNodes(
 ): ts.Node[] {
     return [
         ...generateOperationInputDataNodes(scalars, operation),
-        generateOperationReturnTypeNode(scalars, schema, operation)
+        generateOperationReturnTypeNode(scalars, schema, operation),
+        generateOperationDocumentNode(schema, operation),
     ]
 }
 

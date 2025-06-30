@@ -4,9 +4,11 @@ import {
     createQuestionTokenIfNullable,
     createTypenamePropertySignature,
     generateScalarReference,
+    generateStringOrTemplate,
 } from '../shared.js';
 import {
     fieldSelection,
+    fragmentSchema,
     FragmentSpecSchemaType,
     objectConditionalSpreadSelection,
     objectSelection,
@@ -198,7 +200,7 @@ function generateObjectSelectionPropertySignatures(
     case 'SpreadSelection': {
         const fragment = schema.client.fragments[
             selection.fragment
-        ] as FragmentSpecSchemaType
+        ].spec as FragmentSpecSchemaType
         assert(fragment._type === 'object')
         // eslint-disable-next-line no-use-before-define
         return generateFragmentObjectSpecPropertySignatures(
@@ -278,7 +280,7 @@ function getObjectConditionalSpreadSelectionsFromUnionSelections(
         }
         const fragment = schema.client.fragments[
             selection.fragment
-        ] as FragmentSpecSchemaType
+        ].spec as FragmentSpecSchemaType
         assert(fragment._type === 'union')
         for (const s of getObjectConditionalSpreadSelectionsFromUnionSelections(
             schema,
@@ -328,15 +330,71 @@ function generateObjectFragmentSpecDeclaration(
     )
 }
 
+export function extractFragmentSourceTextsInSpec(
+    schema: RootSchema,
+    fragmentSpec: FragmentSpecSchemaType
+): string[] {
+    if (fragmentSpec._type === 'union') {
+        return fragmentSpec.selections.map((s): string[] => {
+            if (s._type === 'SpreadSelection') {
+                return [schema.client.fragments[s.fragment].sourceText]
+            }
+            if (s._type === 'ObjectConditionalSpreadSelection') {
+                return extractFragmentSourceTextsInSpec(schema, s.spec)
+            }
+            return []
+        }).flat()
+    }
+    return fragmentSpec.selections.map((s): string[] => {
+        if (s._type === 'SpreadSelection') {
+            return [schema.client.fragments[s.fragment].sourceText]
+        }
+        if (s._type === 'FieldSelection' && s.selection !== null) {
+            return extractFragmentSourceTextsInSpec(
+                schema,
+                s.selection as FragmentSpecSchemaType
+            )
+        }
+        return []
+    }).flat()
+}
+
+function generateFragmentDocumentNode(
+    schema: RootSchema,
+    name: string,
+    fragment: z.infer<typeof fragmentSchema>
+) {
+    return ts.factory.createVariableStatement(
+        [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        ts.factory.createVariableDeclarationList(
+            [ts.factory.createVariableDeclaration(
+                ts.factory.createIdentifier(name + 'FragmentDocument'),
+                undefined,
+                undefined,
+                ts.factory.createStringLiteral([
+                    fragment.sourceText,
+                    ...extractFragmentSourceTextsInSpec(
+                        schema,
+                        fragment.spec as FragmentSpecSchemaType
+                    )
+                ].join('\n'))
+            )],
+            ts.NodeFlags.Const
+        )
+    )
+}
+
 function generateFragmentSpecDeclarations(
     scalars: string[],
     schema: RootSchema,
     name: string,
-    spec: FragmentSpecSchemaType
+    fragment: z.infer<typeof fragmentSchema>
 ): ts.Node[] {
     const fragmentName = name + 'Fragment'
+    const spec = fragment.spec as FragmentSpecSchemaType
     if (spec._type === 'object') {
         return [
+            generateFragmentDocumentNode(schema, name, fragment),
             generateObjectFragmentSpecDeclaration(
                 scalars,
                 schema,
@@ -351,6 +409,7 @@ function generateFragmentSpecDeclarations(
             spec.selections
         )
     return [
+        generateFragmentDocumentNode(schema, name, fragment),
         ...generateUnionFragmentChildren(
             scalars, schema, name, objectSelections
         ),
@@ -370,13 +429,18 @@ function generateFragmentSpecDeclarations(
     ]
 }
 
+
 export function generateFragmentTypes(
     scalars: string[],
     schema: RootSchema,
 ): ts.Node[] {
-    return Object.entries(
-        schema.client.fragments as Record<string, FragmentSpecSchemaType>
-    ).map(([name, spec]) => {
-        return generateFragmentSpecDeclarations(scalars, schema, name, spec)
-    }).flat()
+    return Object.entries(schema.client.fragments)
+        .map(([name, fragment]) => {
+            return generateFragmentSpecDeclarations(
+                scalars,
+                schema,
+                name,
+                fragment
+            )
+        }).flat()
 }

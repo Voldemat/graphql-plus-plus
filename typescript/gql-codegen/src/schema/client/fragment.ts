@@ -108,3 +108,8 @@ export const fragmentSpecSchema =
         objectFragmentSpec,
         unionFragmentSpec
     ]) satisfies FragmentSpecSchemaZodType
+
+export const fragmentSchema = z.object({
+    sourceText: z.string(),
+    spec: fragmentSpecSchema
+})

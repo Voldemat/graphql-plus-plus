@@ -6,6 +6,7 @@ export const operationSchema = z.object({
     name: z.string(),
     type: z.enum(['MUTATION', 'QUERY', 'SUBSCRIPTION']),
     parameters: z.record(z.string(), inputFieldSchema),
-    fragmentSpec: fragmentSpecSchema
+    fragmentSpec: fragmentSpecSchema,
+    sourceText: z.string()
 })
 

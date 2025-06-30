@@ -43,3 +43,17 @@ export function generateTypeReferenceNode(
         return generateScalarReference(name)
     return ts.factory.createTypeReferenceNode(name)
 }
+
+export function generateStringOrTemplate(value: string, values: string[]) {
+    if (values.length === 0) return ts.factory.createStringLiteral(value)
+    return ts.factory.createTemplateExpression(
+        ts.factory.createTemplateHead(value),
+        values.map((item, index) =>
+            ts.factory.createTemplateSpan(
+                ts.factory.createIdentifier(item),
+                index + 1 !== values.length ?
+                    ts.factory.createTemplateMiddle('', '') :
+                    ts.factory.createTemplateTail('', '')
+            ))
+    )
+}
