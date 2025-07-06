@@ -1,41 +1,72 @@
 import ts from 'typescript'
 
-export type BuiltinScalarName = 'String' | 'Boolean' | 'Int'
+export type BuiltinScalarName = 'String' | 'Boolean' | 'Int' | 'Float'
 export interface ScalarSpec {
-    input: ts.TypeNode
-    output: ts.TypeNode
+    inputSchema: ts.Expression
+    outputSchema: ts.Expression
 }
 export type ScalarsMapping =
     Record<BuiltinScalarName, ScalarSpec> & Record<string, ScalarSpec>
 
 export function buildSymmetricScalarSpec(
-    specType: ts.TypeNode | string
+    specType: ts.Expression
 ): ScalarSpec {
     return {
-        input: typeof specType === 'string' ?
-            ts.factory.createTypeReferenceNode(specType) :
-            specType,
-        output: typeof specType === 'string' ?
-            ts.factory.createTypeReferenceNode(specType) :
-            specType
+        inputSchema: specType,
+        outputSchema: specType
     }
 }
 
 export const builtinScalarsMapping: ScalarsMapping = {
     ID: buildSymmetricScalarSpec(
-        ts.factory.createTypeReferenceNode('string')
+        ts.factory.createCallExpression(
+            ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier('z'),
+                'string'
+            ),
+            undefined,
+            []
+        )
     ),
     String: buildSymmetricScalarSpec(
-        ts.factory.createTypeReferenceNode('string')
+        ts.factory.createCallExpression(
+            ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier('z'),
+                'string'
+            ),
+            undefined,
+            []
+        )
     ),
     Int: buildSymmetricScalarSpec(
-        ts.factory.createTypeReferenceNode('number')
+        ts.factory.createCallExpression(
+            ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier('z'),
+                'number'
+            ),
+            undefined,
+            []
+        )
     ),
     Float: buildSymmetricScalarSpec(
-        ts.factory.createTypeReferenceNode('number')
+        ts.factory.createCallExpression(
+            ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier('z'),
+                'number'
+            ),
+            undefined,
+            []
+        )
     ),
     Boolean: buildSymmetricScalarSpec(
-        ts.factory.createTypeReferenceNode('boolean')
+        ts.factory.createCallExpression(
+            ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier('z'),
+                'boolean'
+            ),
+            undefined,
+            []
+        )
     ),
 }
 

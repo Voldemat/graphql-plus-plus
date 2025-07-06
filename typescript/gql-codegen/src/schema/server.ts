@@ -1,9 +1,15 @@
+/* eslint-disable max-lines */
 import { z } from 'zod/v4';
 import { inputFieldSchema } from './shared.js';
 
 export const objectTypeSchema = z.discriminatedUnion('_type', [
     z.object({
         _type: z.literal('ObjectType'),
+        name: z.string(),
+        $ref: z.string()
+    }),
+    z.object({
+        _type: z.literal('InterfaceType'),
         name: z.string(),
         $ref: z.string()
     }),
@@ -15,7 +21,12 @@ export const objectTypeSchema = z.discriminatedUnion('_type', [
         _type: z.literal('Union'),
         name: z.string(),
         $ref: z.string()
-    })
+    }),
+    z.object({
+        _type: z.literal('Enum'),
+        name: z.string(),
+        $ref: z.string()
+    }),
 ])
 
 export const objectLiteralSpecSchema = z.object({
@@ -50,12 +61,14 @@ export const objectFieldSchema = z.object({
 export const objectSchema = z.object({
     name: z.string(),
     implements: z.record(z.string(), z.string()),
-    fields: z.record(z.string(), objectFieldSchema)
+    fields: z.record(z.string(), objectFieldSchema),
+    dependencies: z.array(z.string())
 })
 
 export const inputSchema = z.object({
     name: z.string(),
-    fields: z.record(z.string(), inputFieldSchema)
+    fields: z.record(z.string(), inputFieldSchema),
+    dependencies: z.array(z.string())
 })
 
 export const directiveLocationEnum = z.enum([
@@ -79,7 +92,8 @@ export const directiveSchema = z.object({
 
 export const unionSchema = z.object({
     name: z.string(),
-    items: z.record(z.string(), z.string())
+    items: z.record(z.string(), z.string()),
+    dependencies: z.array(z.string())
 })
 
 export const enumSchema = z.object({

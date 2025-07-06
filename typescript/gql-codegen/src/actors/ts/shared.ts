@@ -56,3 +56,15 @@ export function addNewLineBetweenNodes(nodes: ts.Node[]): ts.Node[] {
     }
     return finalNodes
 } 
+
+export function invokeMethod(
+    expr: ts.Expression,
+    methodName: string,
+    args: ts.Expression[]
+) {
+    return ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(expr, methodName),
+        undefined,
+        args
+    )
+}

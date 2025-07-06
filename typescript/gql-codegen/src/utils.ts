@@ -14,3 +14,8 @@ export function fromEntries <
 >(eList: T): { [K in T[number]as K[0]]: K[1] } {
     return Object.fromEntries(eList) as { [K in T[number]as K[0]]: K[1] };
 };
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function assertUnreachable(_: never): never {
+    throw new Error('Didn\'t expect to get here');
+}

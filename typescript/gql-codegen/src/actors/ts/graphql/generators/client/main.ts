@@ -2,7 +2,6 @@ import ts from 'typescript';
 import { ActorContext } from '@/config.js';
 import { GraphqlActorConfig } from '../../actor.js';
 import { generateFragmentTypes } from './fragments.js';
-import { addNewLineBetweenNodes } from '../../../shared.js';
 import { generateOperationsNodes } from './operations.js';
 
 export function generateClientNodes(
@@ -11,13 +10,13 @@ export function generateClientNodes(
     scalars: string[]
 ): ts.Node[] {
     return [
-        ...addNewLineBetweenNodes(generateFragmentTypes(
+        ...generateFragmentTypes(
             scalars,
             context.schema
-        )),
-        ...addNewLineBetweenNodes(generateOperationsNodes(
-            scalars,
+        ),
+        ...generateOperationsNodes(
+            config.scalarsMapping,
             context.schema,
-        ))
+        )
     ]
 }

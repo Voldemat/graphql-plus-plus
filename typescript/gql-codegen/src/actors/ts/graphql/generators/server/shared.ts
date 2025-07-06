@@ -7,7 +7,7 @@ import { generateTypeReferenceNode } from '../shared.js'
 export function generateNonCallableFieldSpec(
     scalars: string[],
     spec: z.infer<typeof objectNonCallableFieldSpecSchema> |
-    z.infer<typeof inputFieldSpecSchema>,
+        z.infer<typeof inputFieldSpecSchema>,
 ) {
     switch (spec._type) {
     case 'array':
@@ -28,3 +28,25 @@ export function wrapInMaybeIfNullable(spec: ts.TypeNode, nullable: boolean) {
         ) :
         spec
 }
+
+export function generateZodInferTypeAlias(name: string, typeName: string) {
+    return ts.factory.createTypeAliasDeclaration(
+        ts.factory.createModifiersFromModifierFlags(
+            ts.ModifierFlags.Export
+        ),
+        name,
+        undefined,
+        ts.factory.createTypeReferenceNode(
+            'z.infer',
+            [ts.factory.createTypeQueryNode(
+                ts.factory.createIdentifier(typeName),
+                undefined
+            )]
+        )
+    )
+}
+
+export function generateSchemaName(name: string) {
+    return name[0].toLowerCase() + name.slice(1) + 'Schema'
+}
+

@@ -3,13 +3,17 @@ import ts from 'typescript';
 import { RootSchema } from '@/schema/root.js';
 import { operationSchema } from '@/schema/client/operation.js';
 import { z } from 'zod/v4';
-import { generateInputFieldsPropertySignatures } from '../server/inputs.js';
 import {
     extractFragmentSourceTextsInSpec,
-    generateFragmentObjectSpecPropertySignatures
 } from './fragments.js';
-import assert from 'assert';
 import { FragmentSpecSchemaType } from '@/schema/client/fragment.js';
+import { inputFieldSchema } from '@/schema/shared.js';
+import {
+    generateSchemaName,
+    generateZodInferTypeAlias
+} from '../server/shared.js';
+import { generateInputTypeDefinitionFields } from '../server/inputs.js';
+import { ScalarsMapping } from '../server/scalars/mapping.js';
 
 export function opTypeToName(
     type: z.infer<typeof operationSchema>['type']
@@ -21,59 +25,11 @@ export function opTypeToName(
     }
 }
 
-export function generateOperationInputDataNodes(
-    scalars: string[],
-    operation: z.infer<typeof operationSchema>
-): ts.Node[] {
-    const pSignatures = generateInputFieldsPropertySignatures(
-        scalars,
-        Object.fromEntries(Object.keys(operation.parameters).map(name =>
-            [name.slice(1), operation.parameters[name]]))
-    )
-    return [
-        ts.factory.createTypeAliasDeclaration(
-            ts.factory.createModifiersFromModifierFlags(
-                ts.ModifierFlags.Export
-            ),
-            operation.name + opTypeToName(operation.type) + 'Variables',
-            undefined,
-            ts.factory.createTypeReferenceNode(
-                'Exact',
-                [ts.factory.createTypeLiteralNode(pSignatures)]
-            ),
-        ),
-        ts.factory.createInterfaceDeclaration(
-            ts.factory.createModifiersFromModifierFlags(
-                ts.ModifierFlags.Export
-            ),
-            operation.name + 'Args',
-            undefined,
-            undefined,
-            pSignatures
-        )
-    ]
-}
-
-function generateOperationReturnTypeNode(
-    scalars: string[],
-    schema: RootSchema,
-    operation: z.infer<typeof operationSchema>
-): ts.InterfaceDeclaration {
-    assert(operation.fragmentSpec._type === 'object')
-    return ts.factory.createInterfaceDeclaration(
-        ts.factory.createModifiersFromModifierFlags(
-            ts.ModifierFlags.Export
-        ),
-        operation.name + opTypeToName(operation.type),
-        undefined,
-        undefined,
-        generateFragmentObjectSpecPropertySignatures(
-            scalars,
-            schema,
-            operation.fragmentSpec,
-            { ensurePresent: true, optional: true, ignore: false }
-        )
-    )
+function parametersToFields(
+    parameters: Record<string, z.infer<typeof inputFieldSchema>>
+) {
+    return Object.fromEntries(Object.keys(parameters).map(name =>
+        [name.slice(1), parameters[name]]))
 }
 
 function generateOperationDocumentNode(
@@ -100,23 +56,60 @@ function generateOperationDocumentNode(
     )
 }
 
-export function generateOperationNodes(
-    scalars: string[],
+function generateOperationZodInputSchema(
+    scalarsMapping: ScalarsMapping,
+    operation: z.infer<typeof operationSchema>
+): ts.VariableStatement {
+    return ts.factory.createVariableStatement(
+        [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        ts.factory.createVariableDeclarationList(
+            [ts.factory.createVariableDeclaration(
+                ts.factory.createIdentifier(
+                    generateSchemaName(operation.name + 'Variables')
+                ),
+                undefined,
+                undefined,
+                ts.factory.createCallExpression(
+                    ts.factory.createPropertyAccessExpression(
+                        ts.factory.createIdentifier('z'),
+                        'object'
+                    ),
+                    undefined,
+                    [ts.factory.createObjectLiteralExpression(
+                        generateInputTypeDefinitionFields(
+                            scalarsMapping,
+                            parametersToFields(operation.parameters)
+                        ), true
+                    )]
+                )
+            )],
+            ts.NodeFlags.Const
+        )
+    )
+}
+
+function generateOperationNodes(
+    scalarsMapping: ScalarsMapping,
     schema: RootSchema,
     operation: z.infer<typeof operationSchema>
 ): ts.Node[] {
     return [
-        ...generateOperationInputDataNodes(scalars, operation),
-        generateOperationReturnTypeNode(scalars, schema, operation),
+        generateOperationZodInputSchema(scalarsMapping, operation),
+        generateZodInferTypeAlias(
+            operation.name + 'Variables',
+            generateSchemaName(operation.name + 'Variables')
+        ),
+        ts.factory.createIdentifier('\n'),
         generateOperationDocumentNode(schema, operation),
+        ts.factory.createIdentifier('\n')
     ]
 }
 
 export function generateOperationsNodes(
-    scalars: string[],
+    scalarsMapping: ScalarsMapping,
     schema: RootSchema,
 ): ts.Node[] {
     return Object.values(schema.client.operations).map(operation => {
-        return generateOperationNodes(scalars, schema, operation)
+        return generateOperationNodes(scalarsMapping, schema, operation)
     }).flat()
 }
