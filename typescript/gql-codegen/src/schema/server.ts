@@ -62,13 +62,11 @@ export const objectSchema = z.object({
     name: z.string(),
     implements: z.record(z.string(), z.string()),
     fields: z.record(z.string(), objectFieldSchema),
-    dependencies: z.array(z.string())
 })
 
 export const inputSchema = z.object({
     name: z.string(),
     fields: z.record(z.string(), inputFieldSchema),
-    dependencies: z.array(z.string())
 })
 
 export const directiveLocationEnum = z.enum([
@@ -93,7 +91,6 @@ export const directiveSchema = z.object({
 export const unionSchema = z.object({
     name: z.string(),
     items: z.record(z.string(), z.string()),
-    dependencies: z.array(z.string())
 })
 
 export const enumSchema = z.object({
