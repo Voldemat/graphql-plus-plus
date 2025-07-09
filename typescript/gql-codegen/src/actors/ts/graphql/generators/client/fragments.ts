@@ -1,332 +1,22 @@
 /* eslint-disable max-lines */
 import ts from 'typescript';
-import {
-    createQuestionTokenIfNullable,
-    createTypenamePropertySignature,
-    generateScalarReference,
-} from '../shared.js';
 import { RootSchema } from '@/schema/root.js';
 import {
-    fieldSelection,
     fragmentSchema,
     FragmentSpecSchemaType,
     objectConditionalSpreadSelection,
     objectSelection,
+    typenameSelection,
+    unionFragmentSpec,
     UnionSelection,
 } from '@/schema/client/fragment.js';
 import { z } from 'zod/v4';
+import { objectSchema } from '@/schema/server.js';
+import { generateSchemaName } from '../server/shared.js';
+import { ScalarsMapping } from '../server/scalars/mapping.js';
+import { generateZodObjectFieldSpec } from '../server/objects.js';
 import assert from 'assert';
-import {
-    objectFieldSpecSchema,
-    objectTypeSchema
-} from '@/schema/server.js';
-import { wrapInMaybeIfNullable } from '../server/shared.js';
-
-export function generateFragmentUnionSpecTypeNodes(
-    scalars: string[],
-    schema: RootSchema,
-    spec: Extract<FragmentSpecSchemaType, { _type: 'union' }>,
-): ts.TypeNode[] {
-    const union = schema.server.unions[spec.unionName]
-    const selections = spec.selections
-    const typenameSelections =
-        selections.filter(s => s._type === 'TypenameField')
-    if (typenameSelections.length === 0 ||
-        typenameSelections.every(tSelection => tSelection.alias !== null)) {
-        typenameSelections.push({ _type: 'TypenameField', alias: null })
-    }
-    const globalHasTypenameAliasedField = typenameSelections
-        .some(tSelection => tSelection.alias !== null)
-    const selectedTypes: string[] = []
-    const selectedNodes =
-    selections.filter(s => s._type !== 'TypenameField').map(s => {
-        assert(s._type !== 'UnionConditionalSpreadSelection')
-        const nodes: ts.PropertySignature[] = []
-        if (s._type === 'ObjectConditionalSpreadSelection') {
-            selectedTypes.push(s.object)
-            const hasTypenameAliasedField = s.spec.selections
-                .some(o => o._type === 'TypenameField' && o.alias !== null)
-            nodes.push(
-                ...typenameSelections.map(
-                    tSelection =>
-                        createTypenamePropertySignature(
-                            s.object,
-                            hasTypenameAliasedField,
-                            tSelection.alias
-                        )
-                ),
-                // eslint-disable-next-line no-use-before-define
-                ...generateFragmentObjectSpecPropertySignatures(
-                    scalars,
-                    schema,
-                    s.spec,
-                    { ensurePresent: true, optional: false, ignore: true }
-                )
-            )
-        }
-        return ts.factory.createTypeLiteralNode(nodes)
-    })
-    const unselectedTypes = Object.keys(union.items)
-        .filter(item => !selectedTypes.includes(item))
-    return [
-        ...selectedNodes,
-        ...unselectedTypes.map(typeName =>
-            ts.factory.createTypeLiteralNode(
-                typenameSelections.map(
-                    tSelection =>
-                        createTypenamePropertySignature(
-                            typeName,
-                            tSelection.alias === null &&
-                                globalHasTypenameAliasedField,
-                            tSelection.alias
-                        )
-                )
-            ))
-    ]
-}
-
-function generateFieldLiteralSelectionTypeNode(
-    scalars: string[],
-    schema: RootSchema,
-    typeSpec: z.infer<typeof objectTypeSchema>,
-    selection: FragmentSpecSchemaType | null
-) {
-    if (typeSpec._type === 'Scalar') {
-        assert(selection === null)
-        return generateScalarReference(typeSpec.name)
-    }
-    assert(selection !== null)
-    if (selection._type === 'object') {
-        return ts.factory.createTypeLiteralNode(
-            // eslint-disable-next-line no-use-before-define
-            generateFragmentObjectSpecPropertySignatures(
-                scalars,
-                schema,
-                selection,
-                { ensurePresent: true, optional: true, ignore: false }
-            )
-        )
-    }
-    const unionNodes = generateFragmentUnionSpecTypeNodes(
-        scalars,
-        schema,
-        selection,
-    )
-    return ts.factory.createUnionTypeNode(unionNodes)
-}
-
-function generateFieldSelectionSpecTypeNode(
-    scalars: string[],
-    schema: RootSchema,
-    fieldSpec: z.infer<typeof objectFieldSpecSchema>,
-    selection: FragmentSpecSchemaType | null
-): ts.TypeNode {
-    switch (fieldSpec._type) {
-    case 'literal': {
-        return generateFieldLiteralSelectionTypeNode(
-            scalars,
-            schema,
-            fieldSpec.type,
-            selection
-        )
-    }
-    case 'array': {
-        const elementType = generateFieldLiteralSelectionTypeNode(
-            scalars,
-            schema,
-            fieldSpec.type,
-            selection
-        )
-        return ts.factory.createArrayTypeNode(
-            fieldSpec.nullable ?
-                ts.factory.createUnionTypeNode([
-                    elementType,
-                    ts.factory.createLiteralTypeNode(ts.factory.createNull())
-                ]) :
-                elementType
-
-        )
-    }
-    case 'callable': {
-        return generateFieldSelectionSpecTypeNode(
-            scalars, schema, fieldSpec.returnType, selection
-        )
-    }
-    }
-}
-
-function generateFieldSelectionPropertySignature(
-    scalars: string[],
-    schema: RootSchema,
-    typeName: string,
-    selection: z.infer<typeof fieldSelection>
-): ts.PropertySignature {
-    const type = schema.server.objects[typeName]
-    assert(type)
-    const field = type.fields[selection.name]
-    assert(field, JSON.stringify({ fields: type.fields, name: selection.name }))
-    return ts.factory.createPropertySignature(
-        undefined,
-        selection.alias,
-        createQuestionTokenIfNullable(field.nullable),
-        wrapInMaybeIfNullable(generateFieldSelectionSpecTypeNode(
-            scalars,
-            schema,
-            field.spec,
-            selection.selection as FragmentSpecSchemaType | null
-        ), field.nullable)
-    )
-}
-
-function generateObjectSelectionPropertySignatures(
-    scalars: string[],
-    schema: RootSchema,
-    typeName: string,
-    selection: z.infer<typeof objectSelection>,
-    typenameOptional: boolean
-): ts.PropertySignature[] {
-    switch (selection._type) {
-    case 'TypenameField': {
-        return [
-            createTypenamePropertySignature(
-                typeName,
-                !typenameOptional || selection.alias === null,
-                selection.alias
-            )
-        ]
-    }
-    case 'SpreadSelection': {
-        const fragment = schema.client.fragments[
-            selection.fragment
-        ].spec as FragmentSpecSchemaType
-        assert(fragment._type === 'object')
-        // eslint-disable-next-line no-use-before-define
-        return generateFragmentObjectSpecPropertySignatures(
-            scalars,
-            schema,
-            fragment,
-            { ensurePresent: false, optional: true, ignore: false }
-        )
-    }
-    case 'FieldSelection': {
-        return [generateFieldSelectionPropertySignature(
-            scalars,
-            schema,
-            typeName,
-            selection
-        )]
-    }
-    }
-}
-
-export function generateFragmentObjectSpecPropertySignatures(
-    scalars: string[],
-    schema: RootSchema,
-    spec: Extract<FragmentSpecSchemaType, { _type: 'object' }>,
-    typenameConfig: {
-        ensurePresent: boolean,
-        optional: boolean,
-        ignore: boolean
-    }
-): ts.PropertySignature[] {
-    let hasTypename: boolean = false
-    const nodes = spec.selections.map(selection => {
-        if (selection._type === 'TypenameField' && typenameConfig.ignore)
-            return []
-        if (selection._type === 'TypenameField') hasTypename = true
-        return generateObjectSelectionPropertySignatures(
-            scalars,
-            schema,
-            spec.name,
-            selection,
-            typenameConfig.optional
-        )
-    }).flat()
-    if (
-        !typenameConfig.ignore &&
-        !hasTypename &&
-        typenameConfig.ensurePresent
-    ) {
-        return [
-            createTypenamePropertySignature(
-                spec.name,
-                typenameConfig.optional,
-                null
-            ),
-            ...nodes
-        ]
-    }
-    return nodes
-}
-
-function getObjectConditionalSpreadSelectionsFromUnionSelections(
-    schema: RootSchema,
-    selections: UnionSelection[]
-): z.infer<typeof objectConditionalSpreadSelection>[] {
-    const objectSelections:
-        Record<string, z.infer<typeof objectConditionalSpreadSelection>> = {}
-    for (const selection of selections) {
-        if (
-            selection._type === 'TypenameField' ||
-            selection._type === 'UnionConditionalSpreadSelection'
-        ) continue
-        if (selection._type === 'ObjectConditionalSpreadSelection') {
-            if (!(selection.object in objectSelections)) {
-                objectSelections[selection.object] = selection
-            }
-            continue
-        }
-        const fragment = schema.client.fragments[
-            selection.fragment
-        ].spec as FragmentSpecSchemaType
-        assert(fragment._type === 'union')
-        for (const s of getObjectConditionalSpreadSelectionsFromUnionSelections(
-            schema,
-            fragment.selections
-        )) {
-            if (!(s.object in objectSelections)) {
-                objectSelections[s.object] = s
-            }
-        }
-    }
-    return Object.values(objectSelections)
-}
-
-function generateUnionFragmentChildren(
-    scalars: string[],
-    schema: RootSchema,
-    unionName: string,
-    selections: z.infer<typeof objectConditionalSpreadSelection>[],
-): ts.Node[] {
-    return selections.map(s => {
-        // eslint-disable-next-line no-use-before-define
-        return generateObjectFragmentSpecDeclaration(
-            scalars, schema, `${unionName}_${s.object}_Fragment`, s.spec
-        )
-    }).flat()
-}
-
-function generateObjectFragmentSpecDeclaration(
-    scalars: string[],
-    schema: RootSchema,
-    fragmentName: string,
-    spec: Extract<FragmentSpecSchemaType, { _type: 'object' }>
-) {
-    return ts.factory.createInterfaceDeclaration(
-        ts.factory.createModifiersFromModifierFlags(
-            ts.ModifierFlags.Export
-        ),
-        fragmentName,
-        undefined,
-        undefined,
-        generateFragmentObjectSpecPropertySignatures(
-            scalars,
-            schema,
-            spec,
-            { ensurePresent: true, optional: true, ignore: false }
-        )
-    )
-}
+import { invokeMethod } from '../../../shared.js';
 
 export function extractFragmentSourceTextsInSpec(
     schema: RootSchema,
@@ -382,60 +72,298 @@ function generateFragmentDocumentNode(
     )
 }
 
-function generateFragmentSpecDeclarations(
-    scalars: string[],
+function generateZodObjectSelection(
+    scalarsMapping: ScalarsMapping,
     schema: RootSchema,
-    name: string,
+    objectType: z.infer<typeof objectSchema>,
+    selection: z.infer<typeof objectSelection>,
+    typenameConfig: Parameters<typeof resolveSelections>[1]
+): ts.PropertyAssignment | ts.SpreadAssignment | null {
+    switch (selection._type) {
+    case 'TypenameField': {
+        if ('ignore' in typenameConfig) return null
+        let expression = invokeMethod(
+            ts.factory.createIdentifier('z'),
+            'literal',
+            [ts.factory.createStringLiteral(objectType.name)]
+        )
+        if (selection.alias === null && typenameConfig.optional) {
+            expression = invokeMethod(
+                invokeMethod(expression, 'nullable', []),
+                'optional',
+                []
+            )
+        }
+        return ts.factory.createPropertyAssignment(
+            selection.alias || '__typename',
+            expression
+        )
+    }
+    case 'FieldSelection': {
+        const fieldSpec = objectType.fields[selection.name]
+        let expression: ts.Expression
+        if (selection.selection === null) {
+            expression = generateZodObjectFieldSpec(scalarsMapping, fieldSpec)
+        } else {
+            // eslint-disable-next-line no-use-before-define
+            expression = generateZodFragmentSpecCallExpression(
+                scalarsMapping,
+                schema,
+                selection.selection
+            )
+        }
+        return ts.factory.createPropertyAssignment(selection.alias, expression)
+    }
+    case 'SpreadSelection': {
+        return ts.factory.createSpreadAssignment(
+            ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier(
+                    generateSchemaName(selection.fragment + 'Fragment')
+                ),
+                'shape'
+            )
+        )
+    }
+    }
+}
+
+function resolveSelections(
+    specSelections: z.infer<typeof objectSelection>[],
+    typenameConfig:
+        { ensurePresent: boolean, optional: boolean } | { ignore: true }
+) {
+    const ignoreTypename = 'ignore' in typenameConfig
+    const selections = [...specSelections.filter(
+        s => s._type !== 'TypenameField' || !ignoreTypename
+    ).toSorted((s1, s2) => s1._type.localeCompare(s2._type))]
+    if (ignoreTypename) return selections
+    const hasTypename = specSelections.some(
+        s => s._type === 'TypenameField'
+    )
+    const hasSpreadSelection = specSelections.some(
+        s => s._type === 'SpreadSelection'
+    )
+    if (!hasTypename) {
+        if (hasSpreadSelection) {
+            selections.push({ _type: 'TypenameField', alias: null })
+        } else {
+            selections.unshift({ _type: 'TypenameField', alias: null })
+        }
+    }
+    return selections
+}
+
+
+function generateZodObjectFragmentSpecCallExpression(
+    scalarsMapping: ScalarsMapping,
+    schema: RootSchema,
+    object: z.infer<typeof objectSchema>,
+    specSelections: z.infer<typeof objectSelection>[],
+    insideLazy: boolean,
+    typenameConfig: Parameters<typeof resolveSelections>[1]
+) {
+    const selections = resolveSelections(specSelections, typenameConfig)
+    const expression = ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(
+            ts.factory.createIdentifier('z'),
+            'object'
+        ),
+        undefined,
+        [ts.factory.createObjectLiteralExpression(
+            selections.map(s => generateZodObjectSelection(
+                scalarsMapping,
+                schema,
+                object,
+                s,
+                typenameConfig
+            )).filter(s => s !== null),
+            true
+        )]
+    )
+    if (insideLazy) return expression
+    const hasSpreadSelection = selections.some(
+        s => s._type === 'SpreadSelection'
+    )
+    if (!hasSpreadSelection) return expression
+    return ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(
+            ts.factory.createIdentifier('z'),
+            'lazy'
+        ),
+        undefined,
+        [ts.factory.createArrowFunction(
+            undefined,
+            undefined,
+            [],
+            undefined,
+            ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+            expression
+        )]
+    )
+}
+
+function resolveUnionSelections(
+    schema: RootSchema,
+    specSelections: UnionSelection[]
+): [
+    z.infer<typeof objectConditionalSpreadSelection>[],
+    z.infer<typeof typenameSelection>[]
+] {
+    const typenameSelections: z.infer<typeof typenameSelection>[] = []
+    const objectSelections = specSelections.map(s => {
+        assert(s._type !== 'UnionConditionalSpreadSelection')
+        if (s._type === 'TypenameField') {
+            typenameSelections.push(s)
+            return []
+        }
+        if (s._type === 'ObjectConditionalSpreadSelection') return [s]
+        const fragmentSpec = schema.client.fragments[s.fragment].spec
+        assert(fragmentSpec._type === 'union')
+        const [selections, tSelections] = resolveUnionSelections(
+            schema,
+            fragmentSpec.selections
+        )
+        typenameSelections.push(...tSelections)
+        return selections
+    }).flat()
+    return [objectSelections, typenameSelections]
+}
+
+function generateZodUnionFragmentSpecCallExpression(
+    scalarsMapping: ScalarsMapping,
+    schema: RootSchema,
+    spec: z.infer<typeof unionFragmentSpec>
+) {
+    const [objectSelections, typenameSelections] = resolveUnionSelections(
+        schema,
+        spec.selections
+    )
+    for (const item of Object.keys(
+        schema.server.unions[spec.unionName].items
+    )) {
+        if (!objectSelections.some(s => s.object === item)) {
+            objectSelections.push({
+                _type: 'ObjectConditionalSpreadSelection',
+                object: item,
+                spec: {
+                    _type: 'object',
+                    name: item,
+                    selections: []
+                }
+            })
+        }
+    }
+    const expression = ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(
+            ts.factory.createIdentifier('z'),
+            'union'
+        ),
+        undefined,
+        [ts.factory.createArrayLiteralExpression(
+            objectSelections.map(s =>
+                generateZodObjectFragmentSpecCallExpression(
+                    scalarsMapping,
+                    schema,
+                    schema.server.objects[s.object],
+                    [...s.spec.selections, ...typenameSelections],
+                    true,
+                    { ensurePresent: true, optional: false }
+                )),
+            true
+        )]
+    )
+    return ts.factory.createCallExpression(
+        ts.factory.createPropertyAccessExpression(
+            ts.factory.createIdentifier('z'),
+            'lazy'
+        ),
+        undefined,
+        [ts.factory.createArrowFunction(
+            undefined,
+            undefined,
+            [],
+            undefined,
+            ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
+            expression
+        )]
+    )
+}
+
+export function generateZodFragmentSpecCallExpression(
+    scalarsMapping: ScalarsMapping,
+    schema: RootSchema,
+    spec: FragmentSpecSchemaType
+) {
+    if (spec._type === 'object') {
+        return generateZodObjectFragmentSpecCallExpression(
+            scalarsMapping,
+            schema,
+            schema.server.objects[spec.name],
+            spec.selections,
+            false,
+            { ensurePresent: true, optional: true }
+        )
+    }
+    return generateZodUnionFragmentSpecCallExpression(
+        scalarsMapping,
+        schema,
+        spec
+    )
+
+}
+
+function generateZodFragmentSchema(
+    scalarsMapping: ScalarsMapping,
+    schema: RootSchema,
+    fragmentName: string,
+    fragment: z.infer<typeof fragmentSchema>
+) {
+    return ts.factory.createVariableStatement(
+        [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        ts.factory.createVariableDeclarationList(
+            [ts.factory.createVariableDeclaration(
+                ts.factory.createIdentifier(
+                    generateSchemaName(fragmentName + 'Fragment')
+                ),
+                undefined,
+                undefined,
+                generateZodFragmentSpecCallExpression(
+                    scalarsMapping,
+                    schema,
+                    fragment.spec
+                )
+            )],
+            ts.NodeFlags.Const
+        )
+    )
+}
+
+function generateFragmentSpecDeclarations(
+    scalarsMapping: ScalarsMapping,
+    schema: RootSchema,
+    fragmentName: string,
     fragment: z.infer<typeof fragmentSchema>
 ): ts.Node[] {
-    const fragmentName = name + 'Fragment'
-    const spec = fragment.spec as FragmentSpecSchemaType
-    if (spec._type === 'object') {
-        return [
-            generateFragmentDocumentNode(schema, name, fragment),
-            generateObjectFragmentSpecDeclaration(
-                scalars,
-                schema,
-                fragmentName,
-                spec
-            )
-        ]
-    }
-    const objectSelections =
-        getObjectConditionalSpreadSelectionsFromUnionSelections(
-            schema,
-            spec.selections
-        )
     return [
-        generateFragmentDocumentNode(schema, name, fragment),
-        ...generateUnionFragmentChildren(
-            scalars, schema, name, objectSelections
-        ),
-        ts.factory.createTypeAliasDeclaration(
-            ts.factory.createModifiersFromModifierFlags(
-                ts.ModifierFlags.Export
-            ),
+        generateFragmentDocumentNode(schema, fragmentName, fragment),
+        generateZodFragmentSchema(
+            scalarsMapping,
+            schema,
             fragmentName,
-            undefined,
-            ts.factory.createUnionTypeNode(
-                objectSelections.map(s =>
-                    ts.factory.createTypeReferenceNode(
-                        `${name}_${s.object}_Fragment`
-                    ))
-            )
+            fragment
         )
     ]
 }
 
 
 export function generateFragmentTypes(
-    scalars: string[],
+    scalarsMapping: ScalarsMapping,
     schema: RootSchema,
 ): ts.Node[] {
     return Object.entries(schema.client.fragments)
         .map(([name, fragment]) => {
             return generateFragmentSpecDeclarations(
-                scalars,
+                scalarsMapping,
                 schema,
                 name,
                 fragment

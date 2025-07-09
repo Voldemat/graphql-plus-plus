@@ -42,7 +42,7 @@ function generateZodObjectTypeSpec(
     }
 }
 
-function generateObjectNonCallableFieldSpec(
+export function generateObjectNonCallableFieldSpec(
     scalarsMapping: ScalarsMapping,
     spec: z.infer<typeof objectNonCallableFieldSpecSchema>
 ) {
@@ -66,7 +66,7 @@ function generateObjectNonCallableFieldSpec(
     }
 }
 
-function generateZodObjectFieldSpec(
+export function generateZodObjectFieldSpec(
     scalarsMapping: ScalarsMapping,
     field: z.infer<typeof objectFieldSchema>
 ) {

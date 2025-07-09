@@ -8,7 +8,6 @@ export function generateNodes(
     config: GraphqlActorConfig,
     context: ActorContext
 ) {
-    const scalars = Object.keys(config.scalarsMapping)
     return [
         ts.factory.createImportDeclaration(
             [],
@@ -27,7 +26,7 @@ export function generateNodes(
         ),
         ...config.importDeclarations,
         ts.factory.createIdentifier('\n'),
-        ...generateServerNodes(config, context, config.scalarsMapping),
-        ...generateClientNodes(config, context, scalars)
+        ...generateServerNodes(config, context),
+        ...generateClientNodes(config, context)
     ]
 }

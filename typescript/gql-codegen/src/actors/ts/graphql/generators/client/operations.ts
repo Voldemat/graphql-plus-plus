@@ -5,6 +5,7 @@ import { operationSchema } from '@/schema/client/operation.js';
 import { z } from 'zod/v4';
 import {
     extractFragmentSourceTextsInSpec,
+    generateZodFragmentSpecCallExpression,
 } from './fragments.js';
 import { FragmentSpecSchemaType } from '@/schema/client/fragment.js';
 import { inputFieldSchema } from '@/schema/shared.js';
@@ -32,24 +33,53 @@ function parametersToFields(
         [name.slice(1), parameters[name]]))
 }
 
-function generateOperationDocumentNode(
+function generateOperationNode(
     schema: RootSchema,
     operation: z.infer<typeof operationSchema>
 ) {
     return ts.factory.createVariableStatement(
-        [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        ts.factory.createModifiersFromModifierFlags(
+            ts.ModifierFlags.Export
+        ),
         ts.factory.createVariableDeclarationList(
             [ts.factory.createVariableDeclaration(
-                ts.factory.createIdentifier(operation.name + 'Document'),
+                ts.factory.createIdentifier(operation.name + 'Operation'),
                 undefined,
                 undefined,
-                ts.factory.createStringLiteral([
-                    operation.sourceText,
-                    ...extractFragmentSourceTextsInSpec(
-                        schema,
-                        operation.fragmentSpec as FragmentSpecSchemaType
-                    )
-                ].join('\n'))
+                ts.factory.createSatisfiesExpression(
+                    ts.factory.createAsExpression(
+                        ts.factory.createObjectLiteralExpression([
+                            ts.factory.createPropertyAssignment(
+                                'document',
+                                ts.factory.createStringLiteral([
+                                    operation.sourceText,
+                                    ...extractFragmentSourceTextsInSpec(
+                                        schema,
+                                operation.fragmentSpec as FragmentSpecSchemaType
+                                    )
+                                ].join('\n'))
+                            ),
+                            ts.factory.createPropertyAssignment(
+                                'variablesSchema',
+                                ts.factory.createIdentifier(
+                                    generateSchemaName(
+                                        operation.name + 'Variables'
+                                    )
+                                )
+                            ),
+                            ts.factory.createPropertyAssignment(
+                                'resultSchema',
+                                ts.factory.createIdentifier(
+                                    generateSchemaName(
+                                        operation.name + 'Result'
+                                    )
+                                )
+                            )
+                        ], true),
+                        ts.factory.createTypeReferenceNode('const')
+                    ),
+                    ts.factory.createTypeReferenceNode('Operation')
+                )
             )],
             ts.NodeFlags.Const
         )
@@ -88,6 +118,31 @@ function generateOperationZodInputSchema(
     )
 }
 
+function genearteOperationZodOutputSchema(
+    scalarsMapping: ScalarsMapping,
+    schema: RootSchema,
+    operation: z.infer<typeof operationSchema>
+): ts.VariableStatement {
+    return ts.factory.createVariableStatement(
+        [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        ts.factory.createVariableDeclarationList(
+            [ts.factory.createVariableDeclaration(
+                ts.factory.createIdentifier(
+                    generateSchemaName(operation.name + 'Result')
+                ),
+                undefined,
+                undefined,
+                generateZodFragmentSpecCallExpression(
+                    scalarsMapping,
+                    schema,
+                    operation.fragmentSpec
+                )
+            )],
+            ts.NodeFlags.Const
+        )
+    )
+}
+
 function generateOperationNodes(
     scalarsMapping: ScalarsMapping,
     schema: RootSchema,
@@ -100,7 +155,12 @@ function generateOperationNodes(
             generateSchemaName(operation.name + 'Variables')
         ),
         ts.factory.createIdentifier('\n'),
-        generateOperationDocumentNode(schema, operation),
+        genearteOperationZodOutputSchema(scalarsMapping, schema, operation),
+        generateZodInferTypeAlias(
+            operation.name + 'Result',
+            generateSchemaName(operation.name + 'Result')
+        ),
+        generateOperationNode(schema, operation),
         ts.factory.createIdentifier('\n')
     ]
 }
