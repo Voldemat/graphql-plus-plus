@@ -1,0 +1,42 @@
+name: "typescript gql-client"
+
+on:
+  push:
+    paths:
+      - typescript/gql-client/**
+      - .github/workflows/typescript-gql-client.yaml
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    environment: typescript-gql-client
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: install
+        working-directory: typescript/gql-client
+        run: npm ci
+      - name: lint
+        working-directory: typescript/gql-client
+        run: npm run lint:ci
+      - name: test
+        working-directory: typescript/gql-client
+        env:
+          FORCE_COLOR: 1
+        run: npm run test
+      - name: build
+        working-directory: typescript/gql-client
+        run: npm run build
+      - name: publish
+        if: ${{ github.ref_type == 'tag' }}
+        working-directory: typescript/gql-client
+        run: |
+          npm version $GITHUB_REF_NAME --no-git-tag-version --no-commit-hooks
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
