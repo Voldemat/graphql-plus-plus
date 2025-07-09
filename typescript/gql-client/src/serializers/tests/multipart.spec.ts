@@ -1,0 +1,60 @@
+import { describe, expect, it } from 'vitest'
+import { createMultipartSerializer } from '../multipart.js'
+import { Operation } from '@/types.js'
+import { z } from 'zod/v4'
+import assert from 'assert'
+
+describe('Multipart serializer', () => {
+    const multipartSerializer = createMultipartSerializer()
+
+    it('Should crush if no files present', () => {
+        const operation = {
+            document: 'test-document',
+            variablesSchema: z.object({
+                name: z.string()
+            }),
+            resultSchema: z.void()
+        } satisfies Operation
+        const variables: z.infer<(typeof operation)['variablesSchema']> = {
+            name: 'test-name'
+        }
+        expect(
+            () => multipartSerializer.serializeRequest({}, operation, variables)
+        ).toThrowError('Dont use multipartSerializer for regular bodies')
+    })
+
+    it('Should build proper form data', async () => {
+        const operation = {
+            document: 'test-document',
+            variablesSchema: z.object({
+                name: z.string(),
+                file: z.file()
+            }),
+            resultSchema: z.void()
+        } satisfies Operation
+        const variables: z.infer<(typeof operation)['variablesSchema']> = {
+            name: 'test-name',
+            file: new File([], 'check.txt')
+        }
+        const init = await multipartSerializer.serializeRequest(
+            {},
+            operation,
+            variables
+        )
+        const headers = new Headers(init.headers)
+        expect(headers.get('Content-Type')).toBe('multipart/form-data')
+        assert(init.body != null)
+        assert(init.body instanceof FormData)
+        expect(init.body.get('operations')).toBe(JSON.stringify({
+            query: operation.document,
+            variables: {
+                name: 'test-name',
+                file: null
+            }
+        }))
+        expect(init.body.get('map')).toBe(JSON.stringify({
+            '0': ['variables.file']
+        }))
+        expect(init.body.get('0')).toStrictEqual(variables.file)
+    })
+})
