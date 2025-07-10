@@ -109,7 +109,15 @@ function generateZodObjectSelection(
             expression = generateZodFragmentSpecCallExpression(
                 scalarsMapping,
                 schema,
-                selection.selection
+                selection.selection,
+                { ensurePresent: true, optional: !fieldSpec.nullable }
+            )
+        }
+        if (fieldSpec.nullable) {
+            expression = invokeMethod(
+                invokeMethod(expression, 'nullable', []),
+                'optional',
+                []
             )
         }
         return ts.factory.createPropertyAssignment(selection.alias, expression)
@@ -292,7 +300,8 @@ function generateZodUnionFragmentSpecCallExpression(
 export function generateZodFragmentSpecCallExpression(
     scalarsMapping: ScalarsMapping,
     schema: RootSchema,
-    spec: FragmentSpecSchemaType
+    spec: FragmentSpecSchemaType,
+    typenameConfig?: Parameters<typeof resolveSelections>[1]
 ) {
     if (spec._type === 'object') {
         return generateZodObjectFragmentSpecCallExpression(
@@ -301,7 +310,7 @@ export function generateZodFragmentSpecCallExpression(
             schema.server.objects[spec.name],
             spec.selections,
             false,
-            { ensurePresent: true, optional: true }
+            typenameConfig || { ensurePresent: true, optional: true }
         )
     }
     return generateZodUnionFragmentSpecCallExpression(
