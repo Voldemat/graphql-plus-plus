@@ -34,7 +34,7 @@ jobs:
         run: npm run build
       - name: publish
         if: ${{ github.ref_type == 'tag' }}
-        working-directory: typescript/gql-client
+        working-directory: typescript/gql-client/dist
         run: |
           npm version $GITHUB_REF_NAME --no-git-tag-version --no-commit-hooks
           npm publish --access public
