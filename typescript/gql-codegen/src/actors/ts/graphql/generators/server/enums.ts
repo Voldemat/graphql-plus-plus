@@ -8,6 +8,9 @@ export function generateEnumDefinition(
     return ts.factory.createEnumDeclaration(
         ts.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Export),
         e.name,
-        e.values.map(value => ts.factory.createEnumMember(value))
+        e.values.map(value => ts.factory.createEnumMember(
+            value,
+            ts.factory.createStringLiteral(value)
+        ))
     )
 }
