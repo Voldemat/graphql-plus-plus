@@ -2,11 +2,9 @@
     "name": "@vladimirdev635/gql-client",
     "version": "0.0.1",
     "type": "module",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "files": [
-        "/dist"
-    ],
+    "main": "./index.js",
+    "types": "./index.d.ts",
+    "files": ["./"],
     "homepage": "https://github.com/Voldemat/graphql-plus-plus#readme",
     "repository": {
         "type": "git",
@@ -17,7 +15,7 @@
         "lint:fix": "eslint --fix .",
         "lint:ci": "npm run lint",
         "test": "vitest",
-        "build": "tsc"
+        "build": "tsc && cp package.json ./dist/"
     },
     "keywords": [],
     "author": "",
