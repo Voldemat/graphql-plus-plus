@@ -113,6 +113,16 @@ function generateZodObjectSelection(
                 { ensurePresent: true, optional: !fieldSpec.nullable }
             )
         }
+        if (fieldSpec.spec._type === 'array') {
+            expression = ts.factory.createCallExpression(
+                ts.factory.createPropertyAccessExpression(
+                    ts.factory.createIdentifier('z'),
+                    'array'
+                ),
+                undefined,
+                [expression]
+            )
+        }
         if (fieldSpec.nullable) {
             expression = invokeMethod(
                 invokeMethod(expression, 'nullable', []),
