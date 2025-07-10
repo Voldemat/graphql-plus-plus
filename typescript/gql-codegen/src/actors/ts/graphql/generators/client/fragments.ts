@@ -20,12 +20,16 @@ import { invokeMethod } from '../../../shared.js';
 
 export function extractFragmentSourceTextsInSpec(
     schema: RootSchema,
-    fragmentSpec: FragmentSpecSchemaType
+    fragmentSpec: FragmentSpecSchemaType,
 ): string[] {
     if (fragmentSpec._type === 'union') {
         return fragmentSpec.selections.map((s): string[] => {
             if (s._type === 'SpreadSelection') {
-                return [schema.client.fragments[s.fragment].sourceText]
+                const fragment = schema.client.fragments[s.fragment]
+                return [
+                    fragment.sourceText,
+                    ...extractFragmentSourceTextsInSpec(schema, fragment.spec)
+                ]
             }
             if (s._type === 'ObjectConditionalSpreadSelection') {
                 return extractFragmentSourceTextsInSpec(schema, s.spec)
@@ -35,12 +39,16 @@ export function extractFragmentSourceTextsInSpec(
     }
     return fragmentSpec.selections.map((s): string[] => {
         if (s._type === 'SpreadSelection') {
-            return [schema.client.fragments[s.fragment].sourceText]
+            const fragment = schema.client.fragments[s.fragment]
+            return [
+                fragment.sourceText,
+                ...extractFragmentSourceTextsInSpec(schema, fragment.spec)
+            ]
         }
         if (s._type === 'FieldSelection' && s.selection !== null) {
             return extractFragmentSourceTextsInSpec(
                 schema,
-                s.selection as FragmentSpecSchemaType
+                s.selection as FragmentSpecSchemaType,
             )
         }
         return []
