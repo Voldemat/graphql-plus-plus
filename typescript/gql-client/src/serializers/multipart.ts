@@ -88,6 +88,7 @@ export function createMultipartSerializer<TContext>(
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
+                method: 'POST',
                 body: buildFormData(operation, variables as any)
             }
         },

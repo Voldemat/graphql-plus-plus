@@ -8,6 +8,7 @@ export function createJSONSerializer<TContext>(): ClientSerializer<TContext> {
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                method: 'POST',
                 body: JSON.stringify({
                     query: operation.document,
                     variables
