@@ -31,7 +31,8 @@ function generateFunctionBlock(
             undefined,
             [
                 ts.factory.createIdentifier(operationName),
-                ts.factory.createIdentifier('variables')
+                ts.factory.createIdentifier('variables'),
+                ts.factory.createIdentifier('requestContext')
             ]
         )
     )
@@ -86,7 +87,15 @@ export function generateNodes(
                             undefined,
                             generateVariablesTypeNode(operationName)
                         ),
-
+                        ts.factory.createParameterDeclaration(
+                            undefined,
+                            undefined,
+                            'requestContext',
+                            undefined,
+                            ts.factory.createTypeReferenceNode(
+                                'TRequestContext'
+                            ),
+                        ),
                     ],
                     undefined,
                     ts.factory.createToken(
@@ -105,13 +114,18 @@ export function generateNodes(
         ts.factory.createImportDeclaration(
             [],
             ts.factory.createImportClause(
-                false,
+                true,
                 undefined,
                 ts.factory.createNamedImports([
                     ts.factory.createImportSpecifier(
-                        true,
+                        false,
                         undefined,
                         ts.factory.createIdentifier('Executor')
+                    ),
+                    ts.factory.createImportSpecifier(
+                        false,
+                        undefined,
+                        ts.factory.createIdentifier('RequestContext')
                     )
                 ])
             ),
@@ -153,13 +167,19 @@ export function generateNodes(
             ),
             undefined,
             'createSdk',
-            [],
+            [ts.factory.createTypeParameterDeclaration(
+                undefined,
+                'TRequestContext',
+                ts.factory.createTypeReferenceNode('RequestContext')
+            )],
             [ts.factory.createParameterDeclaration(
                 undefined,
                 undefined,
                 'executor',
                 undefined,
-                ts.factory.createTypeReferenceNode('Executor')
+                ts.factory.createTypeReferenceNode('Executor', [
+                    ts.factory.createTypeReferenceNode('TRequestContext')
+                ])
             )],
             undefined,
             ts.factory.createBlock([
