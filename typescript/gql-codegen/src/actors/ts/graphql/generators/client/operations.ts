@@ -50,6 +50,14 @@ function generateOperationNode(
                     ts.factory.createAsExpression(
                         ts.factory.createObjectLiteralExpression([
                             ts.factory.createPropertyAssignment(
+                                'name',
+                                ts.factory.createStringLiteral(operation.name),
+                            ),
+                            ts.factory.createPropertyAssignment(
+                                'type',
+                                ts.factory.createStringLiteral(operation.type)
+                            ),
+                            ts.factory.createPropertyAssignment(
                                 'document',
                                 ts.factory.createStringLiteral([
                                     operation.sourceText,

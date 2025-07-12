@@ -12,6 +12,23 @@ const operationTypeNode = ts.factory.createInterfaceDeclaration(
     [
         ts.factory.createPropertySignature(
             undefined,
+            'name',
+            undefined,
+            ts.factory.createTypeReferenceNode('string'),
+        ),
+        ts.factory.createPropertySignature(
+            undefined,
+            'type',
+            undefined,
+            ts.factory.createUnionTypeNode(
+                ['QUERY', 'MUTATION', 'SUBSCRIPTION'].map(v =>
+                    ts.factory.createLiteralTypeNode(
+                        ts.factory.createStringLiteral(v)
+                    ))
+            )
+        ),
+        ts.factory.createPropertySignature(
+            undefined,
             'document',
             undefined,
             ts.factory.createTypeReferenceNode('string'),
