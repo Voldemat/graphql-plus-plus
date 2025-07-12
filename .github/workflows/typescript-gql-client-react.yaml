@@ -1,0 +1,42 @@
+name: "typescript gql-client-react"
+
+on:
+  push:
+    paths:
+      - typescript/gql-client-react/**
+      - .github/workflows/typescript-gql-client-react.yaml
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    environment: typescript-gql-codegen
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: install
+        working-directory: typescript/gql-client-react
+        run: npm ci
+      - name: lint
+        working-directory: typescript/gql-client-react
+        run: npm run lint:ci
+      - name: test
+        working-directory: typescript/gql-client-react
+        env:
+          FORCE_COLOR: 1
+        run: npm run test
+      - name: build
+        working-directory: typescript/gql-client-react
+        run: npm run build
+      - name: publish
+        if: ${{ github.ref_type == 'tag' }}
+        working-directory: typescript/gql-client-react/dist
+        run: |
+          npm version $GITHUB_REF_NAME --no-git-tag-version --no-commit-hooks
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
