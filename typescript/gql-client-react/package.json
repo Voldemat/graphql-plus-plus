@@ -1,0 +1,44 @@
+{
+    "name": "@vladimirdev635/gql-client-react",
+    "version": "0.0.1",
+    "type": "module",
+    "main": "./index.js",
+    "types": "./index.d.ts",
+    "files": [
+        "./"
+    ],
+    "homepage": "https://github.com/Voldemat/graphql-plus-plus#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Voldemat/graphql-plus-plus.git"
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "lint:fix": "eslint --fix .",
+        "lint:ci": "npm run lint",
+        "test": "vitest",
+        "build": "tsc && cp package.json .npmignore ./dist/"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@eslint/compat": "^1.3.0",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^16.3.0",
+        "@testing-library/user-event": "^14.6.1",
+        "@types/node": "^24.0.1",
+        "@types/react": "^19.1.8",
+        "@typescript-eslint/eslint-plugin": "^8.34.0",
+        "@vitejs/plugin-react": "^4.6.0",
+        "eslint": "^9.28.0",
+        "jiti": "^2.4.2",
+        "jsdom": "^26.1.0",
+        "vitest": "^3.2.4"
+    },
+    "dependencies": {
+        "react": "^19.1.0",
+        "zod": "^4.0.5"
+    }
+}
