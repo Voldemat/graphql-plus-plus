@@ -40,5 +40,8 @@
     "dependencies": {
         "react": "^19.1.0",
         "zod": "^4.0.5"
+    },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-gnu": "4.9.5"
     }
 }
