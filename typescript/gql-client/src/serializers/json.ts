@@ -1,9 +1,12 @@
-import { ClientSerializer } from '@/types.js'
+import { ClientSerializer, RequestContext } from '@/types/index.js'
 import assert from 'assert'
 
-export function createJSONSerializer<TContext>(): ClientSerializer<TContext> {
+export function createJSONSerializer<
+    TClientContext,
+    TRequestContext extends RequestContext
+>(): ClientSerializer<TClientContext, TRequestContext> {
     return {
-        serializeRequest: (_, operation, variables) => {
+        serializeRequest: ({ operation, variables }) => {
             return {
                 headers: {
                     'Content-Type': 'application/json'

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ClientSerializer, Operation } from '@/types.js'
+import { ClientSerializer, Operation, RequestContext } from '@/types/index.js'
 import assert from 'assert';
 
 function getFilesKeysAndPayload (
@@ -80,10 +80,12 @@ function buildFormData<T extends Operation> (
     return formData
 }
 
-export function createMultipartSerializer<TContext>(
-): ClientSerializer<TContext> {
+export function createMultipartSerializer<
+    TClientContext,
+    TRequestContext extends RequestContext
+>(): ClientSerializer<TClientContext, TRequestContext> {
     return {
-        serializeRequest: (_, operation, variables) => {
+        serializeRequest: ({ operation, variables }) => {
             return {
                 headers: {
                     'Content-Type': 'multipart/form-data'

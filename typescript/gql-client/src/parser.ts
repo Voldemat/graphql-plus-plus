@@ -1,38 +1,45 @@
 import { z } from 'zod/v4';
-import { ClientParser, Operation } from './types.js';
+import { ClientParser, Operation, RequestContext } from './types/index.js';
+import { ClientParserParseBodyOptions } from './types/parser.js';
 
-interface CreateParserOptions<TContext> {
+interface CreateParserOptions<
+    TClientContext,
+    TRequestContext extends RequestContext
+> {
     onErrors: <T extends Operation>(
-        context: TContext,
-        operation: T,
-        response: Response,
+        options: ClientParserParseBodyOptions<
+            TClientContext, TRequestContext, T
+        >,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         errors: any[]
     ) => Promise<void> | void
 }
 
-const defaultParserOptions: CreateParserOptions<unknown> = {
-    onErrors(_, __, ___, errors) {
+const defaultParserOptions: CreateParserOptions<unknown, RequestContext> = {
+    onErrors(_, errors) {
         throw new Error(JSON.stringify(errors))
     },
 }
 
-export function createParser<TContext>(
-    options: CreateParserOptions<TContext> = defaultParserOptions
-): ClientParser<TContext> {
+export function createParser<
+    TClientContext,
+    TRequestContext extends RequestContext
+>(
+    parserOptions: CreateParserOptions<
+        TClientContext, TRequestContext
+    > = defaultParserOptions
+): ClientParser<TClientContext, TRequestContext> {
     return {
         parseBody: async <T extends Operation>(
-            context: TContext,
-            operation: T,
-            response: Response
+            options: ClientParserParseBodyOptions<
+                TClientContext, TRequestContext, T
+            >
         ) => {
-            const json = await response.json()
+            const json = await options.response.json()
             if (json.errors) {
-                await options.onErrors(
-                    context, operation, response, json.errors
-                )
+                await parserOptions.onErrors(options, json.errors)
             }
-            return operation.resultSchema.parse(
+            return options.operation.resultSchema.parse(
                 json.data
             ) as z.infer<T['resultSchema']>
         },

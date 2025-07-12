@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createMultipartSerializer } from '../multipart.js'
-import { Operation } from '@/types.js'
+import { Operation } from '@/types/index.js'
 import { z } from 'zod/v4'
 import assert from 'assert'
 
@@ -10,6 +10,8 @@ describe('Multipart serializer', () => {
     it('Should crush if no files present', () => {
         const operation = {
             document: 'test-document',
+            name: '',
+            type: 'QUERY',
             variablesSchema: z.object({
                 name: z.string()
             }),
@@ -19,13 +21,20 @@ describe('Multipart serializer', () => {
             name: 'test-name'
         }
         expect(
-            () => multipartSerializer.serializeRequest({}, operation, variables)
+            () => multipartSerializer.serializeRequest({
+                clientContext: {},
+                requestContext: {},
+                operation,
+                variables
+            })
         ).toThrowError('Dont use multipartSerializer for regular bodies')
     })
 
     it('Should build proper form data', async () => {
         const operation = {
             document: 'test-document',
+            name: '',
+            type: 'QUERY',
             variablesSchema: z.object({
                 name: z.string(),
                 file: z.file()
@@ -36,11 +45,12 @@ describe('Multipart serializer', () => {
             name: 'test-name',
             file: new File([], 'check.txt')
         }
-        const init = await multipartSerializer.serializeRequest(
-            {},
+        const init = await multipartSerializer.serializeRequest({
+            clientContext: {},
+            requestContext: {},
             operation,
             variables
-        )
+        })
         const headers = new Headers(init.headers)
         expect(headers.get('Content-Type')).toBe('multipart/form-data')
         assert(init.body != null)

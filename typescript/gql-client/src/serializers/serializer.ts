@@ -1,4 +1,5 @@
-import { ClientSerializer } from '../types.js';
+import { RequestContext } from '@/types/base.js'
+import { ClientSerializer } from '@/types/serializer.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function hasBlobValue (data: any): boolean  {
@@ -12,22 +13,21 @@ export function hasBlobValue (data: any): boolean  {
     return false
 }
 
-export function createSerializer<TContext>(
-    jsonSerializer: ClientSerializer<TContext>,
-    multipartSerializer: ClientSerializer<TContext>,
+export function createSerializer<
+    TClientContext,
+    TRequestContext extends RequestContext
+>(
+    jsonSerializer: ClientSerializer<TClientContext, TRequestContext>,
+    multipartSerializer: ClientSerializer<TClientContext, TRequestContext>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     shouldUseMultipartSerializer: (variables: any) => boolean = hasBlobValue
-): ClientSerializer<TContext> {
+): ClientSerializer<TClientContext, TRequestContext> {
     return {
-        serializeRequest: (context, operation, variables) => {
-            if (!shouldUseMultipartSerializer(variables)) {
-                return jsonSerializer.serializeRequest(
-                    context, operation, variables
-                )
+        serializeRequest: (options) => {
+            if (!shouldUseMultipartSerializer(options.variables)) {
+                return jsonSerializer.serializeRequest(options)
             }
-            return multipartSerializer.serializeRequest(
-                context, operation, variables
-            )
+            return multipartSerializer.serializeRequest(options)
         },
     }
 }
