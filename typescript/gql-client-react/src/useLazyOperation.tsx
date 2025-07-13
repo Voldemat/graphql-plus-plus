@@ -6,8 +6,8 @@ import { Dispatch, SetStateAction, useState } from 'react'
 export interface LazyOperationInitialState {
     state: 'initial'
 }
-export type LazyOperationState<T extends Operation> =
-    OperationState<T> | LazyOperationInitialState
+export type LazyOperationState<TResult> =
+    OperationState<TResult> | LazyOperationInitialState
 export const lazyInitialState = Object.freeze(
     { state: 'initial' } as const
 ) satisfies LazyOperationInitialState
@@ -20,9 +20,11 @@ async function execute<
     operation: T,
     variables: z.infer<T['variablesSchema']>,
     requestContext: TRequestContext,
-    setState: Dispatch<SetStateAction<LazyOperationState<T>>>
-): Promise<LazyOperationState<T>> {
-    let newState: OperationState<T>
+    setState: Dispatch<
+        SetStateAction<LazyOperationState<z.infer<T['resultSchema']>>>
+    >
+): Promise<LazyOperationState<z.infer<T['resultSchema']>>> {
+    let newState: OperationState<z.infer<T['resultSchema']>>
     try {
         const result = await executor(operation, variables, requestContext)
         newState = { state: 'success', ...result }
@@ -40,8 +42,8 @@ interface UseLazyOperationReturnType<
     execute: (
         variables: z.infer<T['variablesSchema']>,
         requestContext: TRequestContext
-    ) => Promise<LazyOperationState<T>>
-    state: LazyOperationState<T>
+    ) => Promise<LazyOperationState<z.infer<T['resultSchema']>>>
+    state: LazyOperationState<z.infer<T['resultSchema']>>
     reset: () => void
 }
 export function useLazyOperation<
@@ -51,7 +53,9 @@ export function useLazyOperation<
     executor: Executor<TRequestContext>,
     operation: T,
 ): UseLazyOperationReturnType<T, TRequestContext> {
-    const [state, setState] = useState<LazyOperationState<T>>(lazyInitialState)
+    const [state, setState] = useState<
+        LazyOperationState<z.infer<T['resultSchema']>>
+    >(lazyInitialState)
     return {
         execute: (variables, requestContext) => {
             setState(loadingState)

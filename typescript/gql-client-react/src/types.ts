@@ -8,8 +8,8 @@ export interface Operation {
     resultSchema: z.ZodType;
 }
 
-export interface ExecuteResult<T extends Operation> {
-    result: z.infer<T['resultSchema']>;
+export interface ExecuteResult<TResult> {
+    result: TResult;
     response: Response;
 }
 
@@ -22,4 +22,4 @@ export type Executor<TRequestContext extends RequestContext> =
         operation: T,
         variables: z.infer<T['variablesSchema']>,
         context: TRequestContext
-    ) => Promise<ExecuteResult<T>>
+    ) => Promise<ExecuteResult<z.infer<T['resultSchema']>>>

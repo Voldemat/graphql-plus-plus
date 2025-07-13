@@ -3,7 +3,7 @@ import { LazyOperationState, useLazyOperation } from '../useLazyOperation.jsx';
 import { describe, expect, it } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import assert from 'assert';
-import { testOperation } from './utils.js';
+import { testOperation, TestOperationResult } from './utils.js';
 import { Executor, Operation, RequestContext } from '@/types.js';
 
 describe('useLazyOperation', () => {
@@ -24,7 +24,7 @@ describe('useLazyOperation', () => {
                 })
             const { result } = renderHook(() =>
                 useLazyOperation(executor, testOperation))
-            let promise: Promise<LazyOperationState<typeof testOperation>>
+            let promise: Promise<LazyOperationState<TestOperationResult>>
             act(() => {
                 promise = result.current.execute({}, {})
             })
@@ -45,7 +45,7 @@ describe('useLazyOperation', () => {
                 async () => { throw error }
             const { result } = renderHook(() =>
                 useLazyOperation(executor, testOperation))
-            let promise: Promise<LazyOperationState<typeof testOperation>>
+            let promise: Promise<LazyOperationState<TestOperationResult>>
             act(() => {
                 promise = result.current.execute({}, {})
             })

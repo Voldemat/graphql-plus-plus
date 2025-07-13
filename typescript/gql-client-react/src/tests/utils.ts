@@ -8,3 +8,5 @@ export const testOperation = {
     variablesSchema: z.object({}),
     resultSchema: z.object({})
 } as const satisfies Operation
+export type TestOperationResult =
+    z.infer<(typeof testOperation)['resultSchema']>

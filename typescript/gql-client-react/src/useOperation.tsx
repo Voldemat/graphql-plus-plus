@@ -6,9 +6,7 @@ export interface OperationLoadingState {
     state: 'loading'
 }
 
-export interface OperationSuccessState<
-    T extends Operation
-> extends ExecuteResult<T> {
+export interface OperationSuccessState<TResult> extends ExecuteResult<TResult> {
     state: 'success'
 }
 
@@ -17,8 +15,10 @@ export interface OperationFailureState {
     error: Error
 }
 
-export type OperationState<T extends Operation> =
-    OperationLoadingState | OperationSuccessState<T> | OperationFailureState
+export type OperationState<TResult> =
+    OperationLoadingState |
+    OperationSuccessState<TResult> |
+    OperationFailureState
 
 export const loadingState =
     Object.freeze({ state: 'loading' } as const) satisfies OperationLoadingState
@@ -31,8 +31,10 @@ export function useOperation<
     operation: T,
     variables: z.infer<T['variablesSchema']>,
     requestContext: TRequestContext
-): OperationState<T> {
-    const [state, setState] = useState<OperationState<T>>(loadingState)
+): OperationState<z.infer<T['resultSchema']>> {
+    const [state, setState] = useState<
+        OperationState<z.infer<T['resultSchema']>>
+    >(loadingState)
     useEffect(() => {
         executor(operation, variables, requestContext)
             .then(result => setState({ state: 'success', ...result }))
