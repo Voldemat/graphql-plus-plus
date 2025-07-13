@@ -1,4 +1,3 @@
-export { createProviderAndHook } from './context.jsx'
 export {
     type OperationLoadingState,
     type OperationSuccessState,
@@ -8,8 +7,9 @@ export {
     useOperation,
 } from './useOperation.jsx'
 export {
-    LazyOperationInitialState,
-    LazyOperationState,
+    type LazyOperationInitialState,
+    type LazyOperationState,
+    type UseLazyOperationReturnType,
     lazyInitialState,
-    useLazyOperation
+    useLazyOperation,
 } from './useLazyOperation.jsx'

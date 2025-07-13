@@ -35,15 +35,16 @@ async function execute<
     return newState
 }
 
-interface UseLazyOperationReturnType<
-    T extends Operation,
+export interface UseLazyOperationReturnType<
+    TVariables,
+    TResult,
     TRequestContext extends RequestContext
 > {
     execute: (
-        variables: z.infer<T['variablesSchema']>,
+        variables: TVariables,
         requestContext: TRequestContext
-    ) => Promise<LazyOperationState<z.infer<T['resultSchema']>>>
-    state: LazyOperationState<z.infer<T['resultSchema']>>
+    ) => Promise<LazyOperationState<TResult>>
+    state: LazyOperationState<TResult>
     reset: () => void
 }
 export function useLazyOperation<
@@ -52,7 +53,11 @@ export function useLazyOperation<
 >(
     executor: Executor<TRequestContext>,
     operation: T,
-): UseLazyOperationReturnType<T, TRequestContext> {
+): UseLazyOperationReturnType<
+    z.infer<T['variablesSchema']>,
+    z.infer<T['resultSchema']>,
+    TRequestContext
+> {
     const [state, setState] = useState<
         LazyOperationState<z.infer<T['resultSchema']>>
     >(lazyInitialState)
