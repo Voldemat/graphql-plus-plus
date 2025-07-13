@@ -12,7 +12,10 @@ import {
 } from '@/schema/client/fragment.js';
 import { z } from 'zod/v4';
 import { objectSchema } from '@/schema/server.js';
-import { generateSchemaName } from '../server/shared.js';
+import {
+    generateSchemaName,
+    generateZodInferTypeAlias
+} from '../server/shared.js';
 import { ScalarsMapping } from '../server/scalars/mapping.js';
 import { generateZodObjectFieldSpec } from '../server/objects.js';
 import assert from 'assert';
@@ -374,6 +377,7 @@ function generateFragmentSpecDeclarations(
     fragmentName: string,
     fragment: z.infer<typeof fragmentSchema>
 ): ts.Node[] {
+    const fName = fragmentName + 'Fragment'
     return [
         generateFragmentDocumentNode(schema, fragmentName, fragment),
         generateZodFragmentSchema(
@@ -381,7 +385,8 @@ function generateFragmentSpecDeclarations(
             schema,
             fragmentName,
             fragment
-        )
+        ),
+        generateZodInferTypeAlias(fName, generateSchemaName(fName))
     ]
 }
 
