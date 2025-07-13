@@ -32,7 +32,8 @@
         "@types/react": "^19.1.8",
         "@typescript-eslint/eslint-plugin": "^8.34.0",
         "@vitejs/plugin-react": "^4.6.0",
-        "eslint": "^9.28.0",
+        "eslint": "^9.31.0",
+        "eslint-plugin-react": "^7.37.5",
         "jiti": "^2.4.2",
         "jsdom": "^26.1.0",
         "vitest": "^3.2.4"

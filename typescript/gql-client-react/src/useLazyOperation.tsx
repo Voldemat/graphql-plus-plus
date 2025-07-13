@@ -6,7 +6,7 @@ import {
     type OperationState,
     type OperationSuccessState
 } from './useOperation.jsx'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 
 export interface LazyOperationInitialState {
     state: 'initial'
@@ -70,17 +70,21 @@ export function useLazyOperation<
     const [state, setState] = useState<
         LazyOperationState<z.infer<T['resultSchema']>>
     >(lazyInitialState)
+    const executeCallback = useCallback((
+        variables: z.infer<T['variablesSchema']>,
+        requestContext: TRequestContext
+    ) => {
+        setState(loadingState)
+        return execute(
+            executor,
+            operation,
+            variables,
+            requestContext,
+            setState
+        )
+    }, [setState, executor, operation])
     return {
-        execute: (variables, requestContext) => {
-            setState(loadingState)
-            return execute(
-                executor,
-                operation,
-                variables,
-                requestContext,
-                setState
-            )
-        },
+        execute: executeCallback,
         state,
         reset: () => setState(lazyInitialState)
     }

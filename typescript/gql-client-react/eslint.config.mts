@@ -3,6 +3,7 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import { includeIgnoreFile } from "@eslint/compat";
+import reactPlugin from 'eslint-plugin-react'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,6 +14,18 @@ const compat = new FlatCompat({
 });
 const eslintConfig = [
     includeIgnoreFile(gitignorePath),
+    {
+        plugins: {
+            react: reactPlugin
+        },
+        languageOptions: {
+          parserOptions: {
+            ecmaFeatures: {
+              jsx: true,
+            },
+          },
+        },
+    },
     ...compat.config({
         rules: {
             "max-lines": [
