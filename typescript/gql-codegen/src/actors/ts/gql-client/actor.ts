@@ -4,7 +4,7 @@ import { Actor, ActorContext } from '@/config.js'
 import { renderNodes, TSActorConfig } from '../shared.js'
 import { generateNodes } from './generators/main.js'
 
-export type OperationReturnType = 'ExecutorResult' | 'ExecutorResult.result'
+export type OperationReturnType = 'ExecuteResult' | 'ExecuteResult.result'
 export interface SDKConfig {
     defaultOperationReturnType: OperationReturnType
     operationReturnTypeMapping: Record<string, OperationReturnType>

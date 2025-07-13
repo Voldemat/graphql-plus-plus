@@ -3,24 +3,6 @@ import { ActorContext } from '@/config.js';
 import { GQLClientActorConfig, OperationReturnType } from '../actor.js';
 import ts from 'typescript';
 
-function generateVariablesTypeNode(operationName: string) {
-    return ts.factory.createTypeReferenceNode(
-        'z.infer',
-        [
-            ts.factory.createIndexedAccessTypeNode(
-                ts.factory.createParenthesizedType(
-                    ts.factory.createTypeQueryNode(
-                        ts.factory.createIdentifier(operationName),
-                    )
-                ),
-                ts.factory.createLiteralTypeNode(
-                    ts.factory.createStringLiteral('variablesSchema')
-                )
-            )
-        ]
-    )
-}
-
 function generateFunctionBlock(
     operationName: string,
     returnType: OperationReturnType
@@ -36,7 +18,7 @@ function generateFunctionBlock(
             ]
         )
     )
-    if (returnType === 'ExecutorResult') {
+    if (returnType === 'ExecuteResult') {
         return ts.factory.createBlock([
             ts.factory.createReturnStatement(awaitExpression)
         ], true)
@@ -63,15 +45,38 @@ function generateFunctionBlock(
     ], true)
 }
 
+function createReturnTypeNode(
+    resultName: string,
+    returnType: OperationReturnType
+) {
+    const rType = ts.factory.createTypeReferenceNode(resultName)
+    if (returnType === 'ExecuteResult.result') return rType
+    return ts.factory.createTypeReferenceNode('ExecuteResult', [rType])
+}
+
+function getReturnTypeFromConfig(
+    config: GQLClientActorConfig,
+    operationName: string
+) {
+    return config.sdk.operationReturnTypeMapping[operationName] ||
+        config.sdk.defaultOperationReturnType
+}
+
 export function generateNodes(
     config: GQLClientActorConfig,
     context: ActorContext
 ): ts.Node[] {
     const graphqlImports: string[] = []
+    let shouldIncludeExecuteResultType = false
     const nodes = Object.values(context.schema.client.operations)
         .map(operation => {
             const operationName = operation.name + 'Operation'
-            graphqlImports.push(operationName)
+            const variablesName = operation.name + 'Variables'
+            const resultName = operation.name + 'Result'
+            graphqlImports.push(operationName, variablesName, resultName)
+            const returnType = getReturnTypeFromConfig(config, operation.name)
+            if (returnType === 'ExecuteResult')
+                shouldIncludeExecuteResultType = true
             return ts.factory.createPropertyAssignment(
                 operation.name,
                 ts.factory.createArrowFunction(
@@ -85,7 +90,7 @@ export function generateNodes(
                             undefined,
                             'variables',
                             undefined,
-                            generateVariablesTypeNode(operationName)
+                            ts.factory.createTypeReferenceNode(variablesName)
                         ),
                         ts.factory.createParameterDeclaration(
                             undefined,
@@ -97,54 +102,54 @@ export function generateNodes(
                             ),
                         ),
                     ],
-                    undefined,
+                    ts.factory.createTypeReferenceNode(
+                        'Promise',
+                        [
+                            createReturnTypeNode(
+                                resultName,
+                                returnType
+                            )
+                        ]
+                    ),
                     ts.factory.createToken(
                         ts.SyntaxKind.EqualsGreaterThanToken
                     ),
-                    generateFunctionBlock(
-                        operationName,
-                        config.sdk.operationReturnTypeMapping[operation.name] ||
-                        config.sdk.defaultOperationReturnType
-                    )
+                    generateFunctionBlock(operationName, returnType)
                 )
             )
         })
+    const gqlClientImports = [
+        ts.factory.createImportSpecifier(
+            false,
+            undefined,
+            ts.factory.createIdentifier('Executor')
+        ),
+        ts.factory.createImportSpecifier(
+            false,
+            undefined,
+            ts.factory.createIdentifier('RequestContext')
+        )
+    ]
+    if (shouldIncludeExecuteResultType) {
+        gqlClientImports.push(
+            ts.factory.createImportSpecifier(
+                true,
+                undefined,
+                ts.factory.createIdentifier('ExecuteResult')
+            ),
+        )
+    }
     return [
+        ts.factory.createIdentifier('// @ts-nocheck'),
         ...config.importDeclarations,
         ts.factory.createImportDeclaration(
             [],
             ts.factory.createImportClause(
                 true,
                 undefined,
-                ts.factory.createNamedImports([
-                    ts.factory.createImportSpecifier(
-                        false,
-                        undefined,
-                        ts.factory.createIdentifier('Executor')
-                    ),
-                    ts.factory.createImportSpecifier(
-                        false,
-                        undefined,
-                        ts.factory.createIdentifier('RequestContext')
-                    )
-                ])
+                ts.factory.createNamedImports(gqlClientImports)
             ),
             ts.factory.createStringLiteral('@vladimirdev635/gql-client')
-        ),
-        ts.factory.createImportDeclaration(
-            [],
-            ts.factory.createImportClause(
-                false,
-                undefined,
-                ts.factory.createNamedImports([
-                    ts.factory.createImportSpecifier(
-                        false,
-                        undefined,
-                        ts.factory.createIdentifier('z')
-                    )
-                ])
-            ),
-            ts.factory.createStringLiteral('zod/v4')
         ),
         ts.factory.createImportDeclaration(
             undefined,

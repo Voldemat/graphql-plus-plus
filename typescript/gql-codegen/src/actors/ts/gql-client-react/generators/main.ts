@@ -3,24 +3,6 @@ import { ActorContext } from '@/config.js';
 import { GQLClientReactActorConfig } from '../actor.js';
 import ts from 'typescript';
 
-function generateVariablesTypeNode(operationName: string) {
-    return ts.factory.createTypeReferenceNode(
-        'z.infer',
-        [
-            ts.factory.createIndexedAccessTypeNode(
-                ts.factory.createParenthesizedType(
-                    ts.factory.createTypeQueryNode(
-                        ts.factory.createIdentifier(operationName),
-                    )
-                ),
-                ts.factory.createLiteralTypeNode(
-                    ts.factory.createStringLiteral('variablesSchema')
-                )
-            )
-        ]
-    )
-}
-
 function generateFunctionBlock(
     operationName: string,
     lazy: boolean
@@ -49,17 +31,28 @@ function generateFunctionBlock(
 
 function generateArrowFunction(
     operationName: string,
+    variablesName: string,
+    resultName: string,
     lazy: boolean
 ) {
     const parameters: ts.ParameterDeclaration[] = []
+    let resultType: ts.TypeNode = ts.factory.createTypeReferenceNode(
+        'LazyOperationState',
+        [
+            ts.factory.createTypeReferenceNode(resultName)
+        ]
+    )
     if (!lazy) {
+        resultType = ts.factory.createTypeReferenceNode('OperationState', [
+            ts.factory.createTypeReferenceNode(resultName)
+        ])
         parameters.push(
             ts.factory.createParameterDeclaration(
                 undefined,
                 undefined,
                 'variables',
                 undefined,
-                generateVariablesTypeNode(operationName)
+                ts.factory.createTypeReferenceNode(variablesName)
             ),
             ts.factory.createParameterDeclaration(
                 undefined,
@@ -76,7 +69,7 @@ function generateArrowFunction(
         undefined,
         undefined,
         parameters,
-        undefined,
+        resultType,
         ts.factory.createToken(
             ts.SyntaxKind.EqualsGreaterThanToken
         ),
@@ -92,19 +85,32 @@ export function generateNodes(
     const nodes = Object.values(context.schema.client.operations)
         .map(operation => {
             const operationName = operation.name + 'Operation'
-            graphqlImports.push(operationName)
+            const variablesName = operation.name + 'Variables'
+            const resultName = operation.name + 'Result'
+            graphqlImports.push(operationName, variablesName, resultName)
             return [
                 ts.factory.createPropertyAssignment(
                     'use' + operationName,
-                    generateArrowFunction(operationName, false)
+                    generateArrowFunction(
+                        operationName,
+                        variablesName,
+                        resultName,
+                        false
+                    )
                 ),
                 ts.factory.createPropertyAssignment(
                     'useLazy' + operationName,
-                    generateArrowFunction(operationName, true)
+                    generateArrowFunction(
+                        operationName,
+                        variablesName,
+                        resultName,
+                        true
+                    )
                 )
             ]
         }).flat()
     return [
+        ts.factory.createIdentifier('// @ts-nocheck'),
         ...config.importDeclarations,
         ts.factory.createImportDeclaration(
             [],
@@ -121,6 +127,16 @@ export function generateNodes(
                         false,
                         undefined,
                         ts.factory.createIdentifier('useLazyOperation')
+                    ),
+                    ts.factory.createImportSpecifier(
+                        true,
+                        undefined,
+                        ts.factory.createIdentifier('OperationState')
+                    ),
+                    ts.factory.createImportSpecifier(
+                        true,
+                        undefined,
+                        ts.factory.createIdentifier('LazyOperationState')
                     )
                 ])
             ),
@@ -145,21 +161,6 @@ export function generateNodes(
                 ])
             ),
             ts.factory.createStringLiteral('@vladimirdev635/gql-client')
-        ),
-        ts.factory.createImportDeclaration(
-            [],
-            ts.factory.createImportClause(
-                false,
-                undefined,
-                ts.factory.createNamedImports([
-                    ts.factory.createImportSpecifier(
-                        false,
-                        undefined,
-                        ts.factory.createIdentifier('z')
-                    )
-                ])
-            ),
-            ts.factory.createStringLiteral('zod/v4')
         ),
         ts.factory.createImportDeclaration(
             undefined,
@@ -199,10 +200,7 @@ export function generateNodes(
             undefined,
             ts.factory.createBlock([
                 ts.factory.createReturnStatement(
-                    ts.factory.createAsExpression(
-                        ts.factory.createObjectLiteralExpression(nodes, true),
-                        ts.factory.createTypeReferenceNode('const')
-                    )
+                    ts.factory.createObjectLiteralExpression(nodes, true),
                 )
             ], true)
         )
