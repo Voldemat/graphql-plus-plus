@@ -124,12 +124,16 @@ function generateZodObjectSelection(
         if (selection.selection === null) {
             expression = generateZodObjectFieldSpec(scalarsMapping, fieldSpec)
         } else {
+            const optional = fieldSpec.spec._type !== 'callable' ||
+                    !selection.selection.selections.every(s =>
+                        s._type === 'TypenameField') ||
+                    !fieldSpec.nullable
             // eslint-disable-next-line no-use-before-define
             expression = generateZodFragmentSpecCallExpression(
                 scalarsMapping,
                 schema,
                 selection.selection,
-                { ensurePresent: true, optional: !fieldSpec.nullable }
+                { ensurePresent: true, optional }
             )
             if (fieldSpec.spec._type === 'array' ||
                     fieldSpec.spec._type === 'callable' &&
