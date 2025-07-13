@@ -37,9 +37,11 @@ function generateArrowFunction(
 ) {
     const parameters: ts.ParameterDeclaration[] = []
     let resultType: ts.TypeNode = ts.factory.createTypeReferenceNode(
-        'LazyOperationState',
+        'UseLazyOperationReturnType',
         [
-            ts.factory.createTypeReferenceNode(resultName)
+            ts.factory.createTypeReferenceNode(variablesName),
+            ts.factory.createTypeReferenceNode(resultName),
+            ts.factory.createTypeReferenceNode('TRequestContext')
         ]
     )
     if (!lazy) {
@@ -136,7 +138,9 @@ export function generateNodes(
                     ts.factory.createImportSpecifier(
                         true,
                         undefined,
-                        ts.factory.createIdentifier('LazyOperationState')
+                        ts.factory.createIdentifier(
+                            'UseLazyOperationReturnType'
+                        )
                     )
                 ])
             ),
