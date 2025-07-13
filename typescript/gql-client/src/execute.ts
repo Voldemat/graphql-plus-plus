@@ -1,8 +1,8 @@
 import { z } from 'zod/v4'
 import { ClientConfig, Operation, RequestContext } from './types/index.js'
 
-export interface ExecuteResult<T extends Operation> {
-    result: z.infer<T['resultSchema']>
+export interface ExecuteResult<TResult> {
+    result: TResult
     response: Response
 }
 
@@ -15,7 +15,7 @@ export async function execute<
     operation: T,
     variables: z.infer<T['variablesSchema']>,
     requestContext: TRequestContext
-): Promise<ExecuteResult<T>> {
+): Promise<ExecuteResult<z.infer<T['resultSchema']>>> {
     for (const middleware of config.middlewares.beforeSerialization) {
         [operation, variables] = await middleware({
             clientContext: config.context,
@@ -75,7 +75,7 @@ export type Executor<TRequestContext extends RequestContext> =
         operation: T,
         variables: z.infer<T['variablesSchema']>,
         context: TRequestContext
-    ) => Promise<ExecuteResult<T>>
+    ) => Promise<ExecuteResult<z.infer<T['resultSchema']>>>
 export function bindConfigToExecute<
     TClientContext,
     TRequestContext extends RequestContext
