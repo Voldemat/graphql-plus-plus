@@ -21,7 +21,7 @@ import { generateZodObjectFieldSpec } from '../server/objects.js';
 import assert from 'assert';
 import { invokeMethod } from '../../../shared.js';
 
-export function extractFragmentSourceTextsInSpec(
+export function extractFragmentNamesInSpec(
     schema: RootSchema,
     fragmentSpec: FragmentSpecSchemaType,
 ): string[] {
@@ -30,12 +30,12 @@ export function extractFragmentSourceTextsInSpec(
             if (s._type === 'SpreadSelection') {
                 const fragment = schema.client.fragments[s.fragment]
                 return [
-                    fragment.sourceText,
-                    ...extractFragmentSourceTextsInSpec(schema, fragment.spec)
+                    s.fragment,
+                    ...extractFragmentNamesInSpec(schema, fragment.spec)
                 ]
             }
             if (s._type === 'ObjectConditionalSpreadSelection') {
-                return extractFragmentSourceTextsInSpec(schema, s.spec)
+                return extractFragmentNamesInSpec(schema, s.spec)
             }
             return []
         }).flat()
@@ -44,18 +44,26 @@ export function extractFragmentSourceTextsInSpec(
         if (s._type === 'SpreadSelection') {
             const fragment = schema.client.fragments[s.fragment]
             return [
-                fragment.sourceText,
-                ...extractFragmentSourceTextsInSpec(schema, fragment.spec)
+                s.fragment,
+                ...extractFragmentNamesInSpec(schema, fragment.spec)
             ]
         }
         if (s._type === 'FieldSelection' && s.selection !== null) {
-            return extractFragmentSourceTextsInSpec(
+            return extractFragmentNamesInSpec(
                 schema,
                 s.selection as FragmentSpecSchemaType,
             )
         }
         return []
     }).flat()
+}
+
+export function extractFragmentSourceTextsInSpec(
+    schema: RootSchema,
+    fragmentSpec: FragmentSpecSchemaType,
+): string[] {
+    return Array.from(new Set(extractFragmentNamesInSpec(schema, fragmentSpec)))
+        .map(f => schema.client.fragments[f].sourceText)
 }
 
 function generateFragmentDocumentNode(
