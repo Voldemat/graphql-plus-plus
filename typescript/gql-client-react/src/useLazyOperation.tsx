@@ -1,6 +1,11 @@
 import { z } from 'zod/v4'
 import { Executor, Operation, RequestContext } from './types.js'
-import { loadingState, OperationState } from './useOperation.jsx'
+import {
+    loadingState,
+    type OperationFailureState,
+    type OperationState,
+    type OperationSuccessState
+} from './useOperation.jsx'
 import { Dispatch, SetStateAction, useState } from 'react'
 
 export interface LazyOperationInitialState {
@@ -12,6 +17,10 @@ export const lazyInitialState = Object.freeze(
     { state: 'initial' } as const
 ) satisfies LazyOperationInitialState
 
+type LazyOperationExecuteReturnType<TResult> = Promise<
+    OperationSuccessState<TResult> |
+    OperationFailureState
+>
 async function execute<
     TRequestContext extends RequestContext,
     T extends Operation
@@ -23,7 +32,7 @@ async function execute<
     setState: Dispatch<
         SetStateAction<LazyOperationState<z.infer<T['resultSchema']>>>
     >
-): Promise<LazyOperationState<z.infer<T['resultSchema']>>> {
+): LazyOperationExecuteReturnType<z.infer<T['resultSchema']>> {
     let newState: OperationState<z.infer<T['resultSchema']>>
     try {
         const result = await executor(operation, variables, requestContext)
@@ -43,7 +52,7 @@ export interface UseLazyOperationReturnType<
     execute: (
         variables: TVariables,
         requestContext: TRequestContext
-    ) => Promise<LazyOperationState<TResult>>
+    ) => LazyOperationExecuteReturnType<TResult>
     state: LazyOperationState<TResult>
     reset: () => void
 }
