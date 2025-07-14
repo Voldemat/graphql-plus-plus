@@ -40,6 +40,6 @@ export function useOperation<
             .then(result => setState({ state: 'success', ...result }))
             .catch(error => setState({ state: 'failure', error }))
         return () => setState(loadingState)
-    }, [])
+    }, [setState, executor, operation, variables, requestContext])
     return state
 }

@@ -13,9 +13,11 @@ describe('useOperation', () => {
                 result: { a: 1 } as z.infer<T['resultSchema']>,
                 response: new Response()
             })
-        const { result } = renderHook(() =>
-            useOperation(executor, testOperation, {}, {}))
+        const { result } = renderHook((props) => useOperation(...props), {
+            initialProps: [executor, testOperation, {}, {}] as const
+        })
         expect(result.current.state).toBe('loading')
+        act(() => {})
         await act(async () => {})
         expect(result.current.state).toBe('success')
         assert(result.current.state === 'success')
@@ -25,9 +27,11 @@ describe('useOperation', () => {
     it('Should return loading state and then failure state', async () => {
         const error = new Error('Network error')
         const executor: Executor<RequestContext> = async () => { throw error }
-        const { result } = renderHook(() =>
-            useOperation(executor, testOperation, {}, {}))
+        const { result } = renderHook((props) => useOperation(...props), {
+            initialProps: [executor, testOperation, {}, {}] as const
+        })
         expect(result.current.state).toBe('loading')
+        act(() => {})
         await act(async () => {})
         expect(result.current.state).toBe('failure')
         assert(result.current.state === 'failure')
