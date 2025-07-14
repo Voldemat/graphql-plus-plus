@@ -29,6 +29,7 @@
         "@testing-library/react": "^16.3.0",
         "@testing-library/user-event": "^14.6.1",
         "@types/node": "^24.0.1",
+        "@types/object-hash": "^3.0.6",
         "@types/react": "^19.1.8",
         "@typescript-eslint/eslint-plugin": "^8.34.0",
         "@vitejs/plugin-react": "^4.6.0",
@@ -39,6 +40,7 @@
         "vitest": "^3.2.4"
     },
     "dependencies": {
+        "object-hash": "^3.0.0",
         "react": "^19.1.0",
         "zod": "^4.0.5"
     },

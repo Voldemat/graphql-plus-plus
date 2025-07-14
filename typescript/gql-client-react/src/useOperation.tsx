@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { z } from 'zod/v4'
 import { ExecuteResult, Executor, Operation, RequestContext } from './types.js';
+import hash, { NotUndefined } from 'object-hash'
 
 export interface OperationLoadingState {
     state: 'loading'
@@ -35,11 +36,26 @@ export function useOperation<
     const [state, setState] = useState<
         OperationState<z.infer<T['resultSchema']>>
     >(loadingState)
-    useEffect(() => {
-        executor(operation, variables, requestContext)
-            .then(result => setState({ state: 'success', ...result }))
-            .catch(error => setState({ state: 'failure', error }))
-        return () => setState(loadingState)
-    }, [setState, executor, operation, variables, requestContext])
+    const memoizedVariables = useMemo(
+        () => variables, [hash(variables as NotUndefined)]
+    )
+    const memoizedRequestContext = useMemo(
+        () => requestContext, [hash(requestContext)]
+    )
+    useEffect(
+        () => {
+            executor(operation, variables, requestContext)
+                .then(result => setState({ state: 'success', ...result }))
+                .catch(error => setState({ state: 'failure', error }))
+            return () => setState(loadingState)
+        },
+        [
+            setState,
+            executor,
+            operation,
+            memoizedVariables,
+            memoizedRequestContext
+        ]
+    )
     return state
 }
