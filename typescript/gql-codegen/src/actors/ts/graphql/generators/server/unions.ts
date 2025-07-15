@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import ts from 'typescript';
 import { objectSchema, unionSchema } from '@/schema/server.js';
-import { ScalarsMapping } from './scalars/mapping.js';
+import { ScalarsMapping } from './scalars/index.js';
 import { generateSchemaName, generateZodInferTypeAlias } from './shared.js';
 import { generateZodObjectTypeExpression } from './objects.js';
 

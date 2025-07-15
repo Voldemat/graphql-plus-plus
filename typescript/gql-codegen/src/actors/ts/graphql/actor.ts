@@ -1,6 +1,4 @@
-import {
-    ScalarsMapping
-} from './generators/server/scalars/mapping.js'
+import { ScalarsMapping } from './generators/server/scalars/index.js'
 import { PathOrFileDescriptor, writeFileSync } from 'fs'
 import ts from 'typescript'
 import { Actor, ActorContext } from '@/config.js'

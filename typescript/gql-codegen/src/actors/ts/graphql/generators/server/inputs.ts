@@ -3,7 +3,7 @@ import { z } from 'zod/v4';
 import ts from 'typescript';
 import { inputSchema } from '@/schema/server.js';
 import { inputFieldSchema, inputTypeSchema } from '@/schema/shared.js';
-import { getScalarSpecFromMapping, ScalarsMapping } from './scalars/mapping.js';
+import { getScalarSpecFromMapping, ScalarsMapping } from './scalars/index.js';
 import { invokeMethod } from '../../../shared.js';
 import { generateSchemaName, generateZodInferTypeAlias } from './shared.js';
 
