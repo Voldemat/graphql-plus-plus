@@ -17,7 +17,7 @@
         "lint:fix": "eslint --fix .",
         "lint:ci": "npm run lint",
         "test": "vitest",
-        "build": "tsc && cp package.json ./dist/package.json"
+        "build": "tsc && tsc-alias && cp package.json ./dist/package.json"
     },
     "keywords": [],
     "author": "",
@@ -36,6 +36,7 @@
         "@typescript-eslint/eslint-plugin": "^8.34.0",
         "eslint": "^9.28.0",
         "jiti": "^2.4.2",
+        "tsc-alias": "^1.8.16",
         "vitest": "^3.2.4"
     }
 }
