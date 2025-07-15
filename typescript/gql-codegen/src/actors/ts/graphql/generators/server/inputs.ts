@@ -2,7 +2,11 @@
 import { z } from 'zod/v4';
 import ts from 'typescript';
 import { inputSchema } from '@/schema/server.js';
-import { inputFieldSchema, inputTypeSchema } from '@/schema/shared.js';
+import {
+    inputFieldSchema,
+    inputFieldSpecSchema,
+    inputTypeSchema
+} from '@/schema/shared.js';
 import { getScalarSpecFromMapping, ScalarsMapping } from './scalars/index.js';
 import { invokeMethod } from '../../../shared.js';
 import { generateSchemaName, generateZodInferTypeAlias } from './shared.js';
@@ -62,15 +66,28 @@ function generateZodInputFieldSpec(
     )
 }
 
+function isFieldLazy(spec: z.infer<typeof inputFieldSpecSchema>): boolean {
+    return spec.type._type === 'InputType'
+}
+
 export function generateInputTypeDefinitionFields(
     scalarsMapping: ScalarsMapping,
     fields: Record<string, z.infer<typeof inputFieldSchema>>
-): ts.PropertyAssignment[] {
+): (ts.PropertyAssignment | ts.GetAccessorDeclaration)[] {
     return Object.entries(fields).map(([name, field]) => {
-        return ts.factory.createPropertyAssignment(
-            name,
-            generateZodInputFieldSpec(scalarsMapping, field),
-        )
+        const fieldSpec = generateZodInputFieldSpec(scalarsMapping, field)
+        if (isFieldLazy(field.spec)) {
+            return ts.factory.createGetAccessorDeclaration(
+                [],
+                name,
+                [],
+                undefined,
+                ts.factory.createBlock([
+                    ts.factory.createReturnStatement(fieldSpec)
+                ], true)
+            )
+        }
+        return ts.factory.createPropertyAssignment(name, fieldSpec)
     })
 }
 
