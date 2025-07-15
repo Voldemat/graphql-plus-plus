@@ -9,9 +9,9 @@ import (
 type ScalarStringSpec struct{}
 
 func (s *ScalarStringSpec) OnObjectType(st *jen.Statement, nullable bool) {
-    if nullable {
-        st.Op("*")
-    }
+	if nullable {
+		st.Op("*")
+	}
 	st.String()
 }
 func (s *ScalarStringSpec) OnInputType(st *jen.Statement) {
@@ -21,9 +21,9 @@ func (s *ScalarStringSpec) OnInputType(st *jen.Statement) {
 type ScalarBooleanSpec struct{}
 
 func (s *ScalarBooleanSpec) OnObjectType(st *jen.Statement, nullable bool) {
-    if nullable {
-        st.Op("*")
-    }
+	if nullable {
+		st.Op("*")
+	}
 	st.Bool()
 }
 func (s *ScalarBooleanSpec) OnInputType(st *jen.Statement) {
@@ -33,9 +33,9 @@ func (s *ScalarBooleanSpec) OnInputType(st *jen.Statement) {
 type ScalarIntSpec struct{}
 
 func (s *ScalarIntSpec) OnObjectType(st *jen.Statement, nullable bool) {
-    if nullable {
-        st.Op("*")
-    }
+	if nullable {
+		st.Op("*")
+	}
 	st.Int32()
 }
 func (s *ScalarIntSpec) OnInputType(st *jen.Statement) {
@@ -45,9 +45,9 @@ func (s *ScalarIntSpec) OnInputType(st *jen.Statement) {
 type ScalarInt64Spec struct{}
 
 func (s *ScalarInt64Spec) OnObjectType(st *jen.Statement, nullable bool) {
-    if nullable {
-        st.Op("*")
-    }
+	if nullable {
+		st.Op("*")
+	}
 	st.Int64()
 }
 func (s *ScalarInt64Spec) OnInputType(st *jen.Statement) {
@@ -57,9 +57,9 @@ func (s *ScalarInt64Spec) OnInputType(st *jen.Statement) {
 type ScalarFloatSpec struct{}
 
 func (s *ScalarFloatSpec) OnObjectType(st *jen.Statement, nullable bool) {
-    if nullable {
-        st.Op("*")
-    }
+	if nullable {
+		st.Op("*")
+	}
 	st.Float32()
 }
 func (s *ScalarFloatSpec) OnInputType(st *jen.Statement) {

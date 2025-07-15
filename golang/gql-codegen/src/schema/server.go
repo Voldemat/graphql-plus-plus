@@ -219,10 +219,12 @@ const (
 	ObjectNonCallableFieldTypeArray   ObjectNonCallableFieldType = "array"
 	ObjectNonCallableFieldTypeLiteral ObjectNonCallableFieldType = "literal"
 )
+
 var allValuesOfObjectNonCallableFieldType = []ObjectNonCallableFieldType{
-    ObjectNonCallableFieldTypeArray,
-    ObjectNonCallableFieldTypeLiteral,
+	ObjectNonCallableFieldTypeArray,
+	ObjectNonCallableFieldTypeLiteral,
 }
+
 func (t *ObjectNonCallableFieldType) UnmarshalJSON(data []byte) error {
 	var value string
 	err := json.Unmarshal(data, &value)
@@ -237,11 +239,12 @@ func (t *ObjectNonCallableFieldType) UnmarshalJSON(data []byte) error {
 }
 
 type ObjectNonCallableFieldSpec struct {
-    Value any
+	Value any
 }
 type objectNonCallableFieldSpecTagType struct {
 	Type ObjectNonCallableFieldType `json:"_type"`
 }
+
 func (s *ObjectNonCallableFieldSpec) UnmarshalJSON(bytes []byte) error {
 	var typeStruct objectNonCallableFieldSpecTagType
 	err := json.Unmarshal(bytes, &typeStruct)
