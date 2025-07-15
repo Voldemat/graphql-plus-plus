@@ -5,6 +5,7 @@ import (
 	"gql-codegen/src/actors"
 	"gql-codegen/src/actors/golang"
 	"gql-codegen/src/schema"
+	"reflect"
 	"slices"
 
 	"github.com/dave/jennifer/jen"
@@ -14,13 +15,14 @@ import (
 )
 
 type ScalarSpec interface {
-	OnObjectType(s *jen.Statement)
+	OnObjectType(s *jen.Statement, nullable bool)
 	OnInputType(s *jen.Statement)
 }
 
 func applyObjectTypeSpec(
 	scalarsMapping map[string]ScalarSpec,
 	spec schema.ObjectTypeSpec,
+    nullable bool,
 	statement *jen.Statement,
 ) error {
 	switch spec.Type {
@@ -33,39 +35,80 @@ func applyObjectTypeSpec(
 					spec.Name,
 				)
 			}
-			scalarSpec.OnObjectType(statement)
+			scalarSpec.OnObjectType(statement, nullable)
+            return nil
 		}
+    case schema.ObjectTypeUnion: {
+        statement.Id(spec.Name)
+        return nil
+    }
 	default:
 		{
+            if nullable {
+                statement.Op("*")
+            }
 			statement.Id(spec.Name)
 		}
 	}
 	return nil
 }
 
-func applyObjectFieldSpec(
+func applyNonCallableObjectFieldSpec(
 	scalarsMapping map[string]ScalarSpec,
-	fieldSpec schema.ObjectFieldSpec,
+	fieldSpec schema.ObjectNonCallableFieldSpec,
+    nullable bool,
 	statement *jen.Statement,
 ) error {
 	switch spec := fieldSpec.Value.(type) {
 	case *schema.ObjectLiteralFieldSpec:
 		{
-			return applyObjectTypeSpec(scalarsMapping, spec.Type, statement)
+			return applyObjectTypeSpec(scalarsMapping, spec.Type, nullable, statement)
 		}
 	case *schema.ObjectArrayFieldSpec:
 		{
+            if nullable {
+                statement.Op("*")
+            }
 			statement.Index()
-			if spec.Nullable {
-				statement.Op("*")
-			}
-			return applyObjectTypeSpec(scalarsMapping, spec.Type, statement)
+			return applyObjectTypeSpec(scalarsMapping, spec.Type, spec.Nullable, statement)
 		}
+    }
+	return fmt.Errorf("Unknown ObjectNonCallableFieldSpec, %s", reflect.TypeOf(fieldSpec.Value))
+}
+func applyObjectFieldSpec(
+	scalarsMapping map[string]ScalarSpec,
+	fieldSpec schema.ObjectFieldSpec,
+    nullable bool,
+	statement *jen.Statement,
+) error {
+	switch spec := fieldSpec.Value.(type) {
+	case *schema.ObjectLiteralFieldSpec:
+        return applyNonCallableObjectFieldSpec(
+            scalarsMapping,
+            schema.ObjectNonCallableFieldSpec{
+                Value: fieldSpec.Value,
+            },
+            nullable,
+            statement,
+        )
+	case *schema.ObjectArrayFieldSpec:
+        return applyNonCallableObjectFieldSpec(
+            scalarsMapping,
+            schema.ObjectNonCallableFieldSpec{
+                Value: fieldSpec.Value,
+            },
+            nullable,
+            statement,
+        )
 	case *schema.ObjectCallableFieldSpec:
-		{
-		}
+        return applyNonCallableObjectFieldSpec(
+            scalarsMapping,
+            spec.ReturnType,
+            nullable,
+            statement,
+        )
 	}
-	return nil
+	return fmt.Errorf("Unknown ObjectFieldSpec")
 }
 
 func generateObjectTypeDefinition(
@@ -79,10 +122,9 @@ func generateObjectTypeDefinition(
 		statement := jen.Id(cases.Title(language.English, cases.NoLower).String(name))
 		tag := name
 		if field.Nullable {
-			statement.Op("*")
 			tag += ",omitempty"
 		}
-		err := applyObjectFieldSpec(scalarsMapping, field.Spec, statement)
+		err := applyObjectFieldSpec(scalarsMapping, field.Spec, field.Nullable, statement)
 		if err != nil {
 			return err
 		}
@@ -215,6 +257,24 @@ type GraphqlActorConfig struct {
 	ScalarsMapping map[string]ScalarSpec
 }
 
+func generateObjectInterfaceDefinition(
+    scalarsMapping map[string]ScalarSpec,
+    object schema.ObjectSchema,
+    file *jen.File,
+) error {
+    methods := []jen.Code{}
+    for name, field := range object.Fields {
+		statement := jen.Id(cases.Title(language.English, cases.NoLower).String(name)).Params()
+		err := applyObjectFieldSpec(scalarsMapping, field.Spec, field.Nullable, statement)
+		if err != nil {
+			return err
+		}
+		methods = append(methods, statement)
+    }
+    file.Type().Id(object.Name).Interface(methods...)
+    return nil
+}
+
 func generateFile(
 	conf actors.IActorConfig,
 	actorConfig GraphqlActorConfig,
@@ -232,10 +292,16 @@ func generateFile(
 		file.Line()
 	}
 	for _, object := range s.Server.Objects {
+        var err error
 		if object.Name == "Query" || object.Name == "Mutation" || object.Name == "Subscription" {
-			continue
-		}
-		err := generateObjectTypeDefinition(actorConfig.ScalarsMapping, object, objectMapping[object.Name], file)
+            err = generateObjectInterfaceDefinition(
+                actorConfig.ScalarsMapping,
+                object,
+                file,
+            )
+		} else {
+            err = generateObjectTypeDefinition(actorConfig.ScalarsMapping, object, objectMapping[object.Name], file)
+        }
 		if err != nil {
 			logger.Fatal("Failed to generate object type definition", zap.Error(err))
 		}

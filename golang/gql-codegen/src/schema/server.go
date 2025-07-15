@@ -219,10 +219,50 @@ const (
 	ObjectNonCallableFieldTypeArray   ObjectNonCallableFieldType = "array"
 	ObjectNonCallableFieldTypeLiteral ObjectNonCallableFieldType = "literal"
 )
+var allValuesOfObjectNonCallableFieldType = []ObjectNonCallableFieldType{
+    ObjectNonCallableFieldTypeArray,
+    ObjectNonCallableFieldTypeLiteral,
+}
+func (t *ObjectNonCallableFieldType) UnmarshalJSON(data []byte) error {
+	var value string
+	err := json.Unmarshal(data, &value)
+	if err != nil {
+		return err
+	}
+	if !slices.Contains(allValuesOfObjectNonCallableFieldType, ObjectNonCallableFieldType(value)) {
+		return fmt.Errorf("Invalid ObjectNonCallableFieldType: %s", value)
+	}
+	*t = ObjectNonCallableFieldType(value)
+	return nil
+}
 
 type ObjectNonCallableFieldSpec struct {
-	json.RawMessage
+    Value any
+}
+type objectNonCallableFieldSpecTagType struct {
 	Type ObjectNonCallableFieldType `json:"_type"`
+}
+func (s *ObjectNonCallableFieldSpec) UnmarshalJSON(bytes []byte) error {
+	var typeStruct objectNonCallableFieldSpecTagType
+	err := json.Unmarshal(bytes, &typeStruct)
+	if err != nil {
+		return err
+	}
+	var spec any
+	switch typeStruct.Type {
+	case ObjectNonCallableFieldTypeLiteral:
+		spec = new(ObjectLiteralFieldSpec)
+	case ObjectNonCallableFieldTypeArray:
+		spec = new(ObjectArrayFieldSpec)
+	default:
+		return fmt.Errorf("Unknown fieldSpec type: %s", typeStruct.Type)
+	}
+	err = json.Unmarshal(bytes, &spec)
+	if err != nil {
+		return err
+	}
+	s.Value = spec
+	return nil
 }
 
 type ObjectCallableFieldSpec struct {
