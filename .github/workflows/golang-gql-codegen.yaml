@@ -1,0 +1,40 @@
+name: "golang gql-codegen"
+
+on:
+  push:
+    paths:
+      - golang/gql-codegen/**
+      - .github/workflows/golang-gql-codegen.yaml
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.23.11
+      - name: install
+        working-directory: golang/gql-codegen
+        run: go mod download
+      - name: lint
+        working-directory: golang/gql-codegen
+        run: |
+          output=$(gofmt -l .)
+          if [ "$output" != "" ]; then
+            echo "Some files are not formatted"
+            echo "$output"
+            exit 1
+          else
+            exit 0
+          fi
+      - name: build
+        working-directory: golang/gql-codegen
+        run: go build ./...
+      - name: test
+        working-directory: golang/gql-codegen
+        env:
+          FORCE_COLOR: 1
+        run: go test ./...
