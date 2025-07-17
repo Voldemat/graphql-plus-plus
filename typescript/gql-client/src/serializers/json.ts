@@ -6,7 +6,7 @@ export function createJSONSerializer<
     TRequestContext extends RequestContext
 >(): ClientSerializer<TClientContext, TRequestContext> {
     return {
-        serializeRequest: ({ operation, variables }) => {
+        serializeRequest: ({ operation, requestContext, variables }) => {
             return {
                 headers: {
                     'Content-Type': 'application/json'
@@ -22,7 +22,8 @@ export function createJSONSerializer<
                         `key: "${key}"`
                     )
                     return value
-                })
+                }),
+                ...requestContext.fetchOptions
             }
         },
     }

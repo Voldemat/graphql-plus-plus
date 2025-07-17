@@ -85,13 +85,14 @@ export function createMultipartSerializer<
     TRequestContext extends RequestContext
 >(): ClientSerializer<TClientContext, TRequestContext> {
     return {
-        serializeRequest: ({ operation, variables }) => {
+        serializeRequest: ({ operation, requestContext, variables }) => {
             return {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
                 method: 'POST',
-                body: buildFormData(operation, variables as any)
+                body: buildFormData(operation, variables as any),
+                ...requestContext.fetchOptions
             }
         },
     }
