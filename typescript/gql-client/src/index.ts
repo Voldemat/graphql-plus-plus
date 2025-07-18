@@ -1,4 +1,7 @@
-export { createParser } from './parser.js'
+export {
+    createParser,
+    type CreateParserOptions,
+} from './parser.js'
 export {
     createSerializer,
     createJSONSerializer,
@@ -13,6 +16,8 @@ export {
 } from './execute.js'
 export type {
     Operation,
+    SyncOperation,
+    SubscriptionOperation,
     RequestContext,
     ClientParser,
     ClientSerializer,
@@ -22,4 +27,7 @@ export type {
     AfterSerializationMiddleware,
     BeforeParsingMiddleware,
     AfterParsingMiddleware,
+    OpResultBasedOnOp,
+    OperationVariables,
+    OperationResult
 } from './types/index.js'

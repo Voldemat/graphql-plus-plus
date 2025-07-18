@@ -1,5 +1,5 @@
-import { z } from 'zod/v4'
 import { Operation, RequestContext } from './base.js'
+import { OperationVariables, PromiseOrValue } from './utils.js'
 
 export interface ClientSerializer<
     TClientContext,
@@ -9,7 +9,7 @@ export interface ClientSerializer<
         clientContext: TClientContext,
         requestContext: TRequestContext,
         operation: T,
-        variables: z.infer<T['variablesSchema']>
-    }) => Promise<RequestInit> | RequestInit
+        variables: OperationVariables<T>
+    }) => PromiseOrValue<RequestInit>
 }
 

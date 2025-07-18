@@ -1,5 +1,11 @@
-import { z } from 'zod/v4'
-import { ClientConfig, Operation, RequestContext } from './types/index.js'
+import {
+    ClientConfig,
+    Operation,
+    OperationVariables,
+    RequestContext,
+} from './types/index.js'
+import { AfterParsingMiddlewareOptions } from './types/middlewares.js'
+import { OpResultBasedOnOp } from './types/utils.js'
 
 export interface ExecuteResult<TResult> {
     result: TResult
@@ -13,9 +19,9 @@ export async function execute<
 >(
     config: ClientConfig<TClientContext, TRequestContext>,
     operation: T,
-    variables: z.infer<T['variablesSchema']>,
+    variables: OperationVariables<T>,
     requestContext: TRequestContext
-): Promise<ExecuteResult<z.infer<T['resultSchema']>>> {
+): Promise<ExecuteResult<OpResultBasedOnOp<T>>> {
     for (const middleware of config.middlewares.beforeSerialization) {
         [operation, variables] = await middleware({
             clientContext: config.context,
@@ -65,23 +71,27 @@ export async function execute<
             init,
             response,
             result
-        })
+        } as AfterParsingMiddlewareOptions<TClientContext, TRequestContext, T>)
     }
-    return { result, response }
+    return { result, response } as ExecuteResult<OpResultBasedOnOp<T>>
 }
 
 export type Executor<TRequestContext extends RequestContext> =
-    <T extends Operation>(
-        operation: T,
-        variables: z.infer<T['variablesSchema']>,
+    <TOperation extends Operation>(
+        operation: TOperation,
+        variables: OperationVariables<TOperation>,
         context: TRequestContext
-    ) => Promise<ExecuteResult<z.infer<T['resultSchema']>>>
+    ) => Promise<ExecuteResult<OpResultBasedOnOp<TOperation>>>
+
 export function bindConfigToExecute<
     TClientContext,
     TRequestContext extends RequestContext
 >(
     config: ClientConfig<TClientContext, TRequestContext>
 ): Executor<TRequestContext> {
-    return (operation, variables, requestContext) =>
-        execute(config, operation, variables, requestContext)
+    return (
+        operation,
+        variables,
+        requestContext
+    ) => execute(config, operation, variables, requestContext)
 }

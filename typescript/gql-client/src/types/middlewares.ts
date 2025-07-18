@@ -1,5 +1,16 @@
-import { z } from 'zod/v4'
-import { Operation, RequestContext } from './base.js'
+import {
+    Operation,
+    SubscriptionOperation,
+    SyncOperation,
+    RequestContext,
+} from './base.js'
+import { SubOpAsyncIterable } from './parser.js'
+import {
+    OperationResult,
+    OperationVariables,
+    OpResultBasedOnOp,
+    PromiseOrValue
+} from './utils.js'
 
 export type BeforeSerializationMiddleware<
     TClientContext,
@@ -8,9 +19,8 @@ export type BeforeSerializationMiddleware<
     clientContext: TClientContext,
     requestContext: TRequestContext,
     operation: T,
-    variables: z.infer<T['variablesSchema']>
-}) => Promise<[T, z.infer<T['variablesSchema']>]> |
-    [T, z.infer<T['variablesSchema']>]
+    variables: OperationVariables<T>
+}) => PromiseOrValue<[T, OperationVariables<T>]>
 
 export type AfterSerializationMiddleware<
     TClientContext,
@@ -19,9 +29,9 @@ export type AfterSerializationMiddleware<
     clientContext: TClientContext,
     requestContext: TRequestContext,
     operation: T,
-    variables: z.infer<T['variablesSchema']>,
+    variables: OperationVariables<T>,
     init: RequestInit
-}) => Promise<RequestInit> | RequestInit
+}) => PromiseOrValue<RequestInit>
 
 export type BeforeParsingMiddleware<
     TClientContext,
@@ -30,29 +40,55 @@ export type BeforeParsingMiddleware<
     clientContext: TClientContext,
     requestContext: TRequestContext,
     operation: T,
-    variables: z.infer<T['variablesSchema']>,
+    variables: OperationVariables<T>,
     init: RequestInit,
     response: Response
-}) => Promise<Response> | Response
+}) => PromiseOrValue<Response>
 
-export type AfterParsingMiddleware<
+export interface AfterParsingMiddlewareOptions<
     TClientContext,
-    TRequestContext extends RequestContext
-> = <T extends Operation>(options: {
+    TRequestContext extends RequestContext,
+    T extends Operation
+> {
     clientContext: TClientContext,
     requestContext: TRequestContext,
     operation: T,
-    variables: z.infer<T['variablesSchema']>,
+    variables: OperationVariables<T>,
     init: RequestInit,
     response: Response,
-    result: z.infer<T['resultSchema']>
-}) => Promise<z.infer<T['resultSchema']>> |
-    z.infer<T['resultSchema']>
-
-export interface ClientMiddlewaresConfig<
+    result: OpResultBasedOnOp<T>
+}
+export type AfterParsingMiddleware<
     TClientContext,
     TRequestContext extends RequestContext
-> {
+> = {
+    <TSyncOp extends SyncOperation>(
+        options: AfterParsingMiddlewareOptions<
+            TClientContext,
+            TRequestContext,
+            TSyncOp
+        >
+    ): PromiseOrValue<OperationResult<TSyncOp>>
+    <TSubOp extends SubscriptionOperation>(
+        options: AfterParsingMiddlewareOptions<
+            TClientContext,
+            TRequestContext,
+            TSubOp
+        >
+    ): PromiseOrValue<SubOpAsyncIterable<OperationResult<TSubOp>>>
+    <TOp extends Operation>(
+        options: AfterParsingMiddlewareOptions<
+            TClientContext,
+            TRequestContext,
+            TOp
+        >
+    ): PromiseOrValue<OperationResult<TOp>> |
+        PromiseOrValue<SubOpAsyncIterable<OperationResult<TOp>>>
+}
+export interface ClientMiddlewaresConfig<
+            TClientContext,
+            TRequestContext extends RequestContext
+        > {
     beforeSerialization: BeforeSerializationMiddleware<
         TClientContext, TRequestContext
     >[]

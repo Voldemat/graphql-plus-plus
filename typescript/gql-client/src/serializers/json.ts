@@ -7,10 +7,14 @@ export function createJSONSerializer<
 >(): ClientSerializer<TClientContext, TRequestContext> {
     return {
         serializeRequest: ({ operation, requestContext, variables }) => {
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json'
+            }
+            if (operation.type === 'SUBSCRIPTION') {
+                headers.Accept = 'text/event-stream'
+            }
             return {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers,
                 method: 'POST',
                 body: JSON.stringify({
                     query: operation.document,
