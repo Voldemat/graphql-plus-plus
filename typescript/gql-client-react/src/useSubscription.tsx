@@ -1,45 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
 import type {
-    ExecuteResult,
     Executor,
-    OperationResult,
     OperationVariables,
     RequestContext,
-    SyncOperation
+    SubOpAsyncIterable,
+    SubscriptionOperation,
 } from './types.js';
 import hash, { type NotUndefined } from 'object-hash'
+import { loadingState, type OperationState } from './useOperation.jsx';
 
-export interface OperationLoadingState {
-    state: 'loading'
-}
-
-export interface OperationSuccessState<TResult> extends ExecuteResult<TResult> {
-    state: 'success'
-}
-
-export interface OperationFailureState {
-    state: 'failure'
-    error: Error
-}
-
-export type OperationState<TResult> =
-    OperationLoadingState |
-    OperationSuccessState<TResult> |
-    OperationFailureState
-
-export const loadingState =
-    Object.freeze({ state: 'loading' } as const) satisfies OperationLoadingState
-
-export function useOperation<
-    T extends SyncOperation,
+export function useSubscription<
+    T extends SubscriptionOperation,
     TRequestContext extends RequestContext
 >(
     executor: Executor<TRequestContext>,
     operation: T,
     variables: OperationVariables<T>,
     requestContext: TRequestContext
-): OperationState<OperationResult<T>> {
-    const [state, setState] = useState<OperationState<OperationResult<T>>>(
+): OperationState<SubOpAsyncIterable<T>> {
+    const [state, setState] = useState<OperationState<SubOpAsyncIterable<T>>>(
         loadingState
     )
     const memoizedVariables = useMemo(

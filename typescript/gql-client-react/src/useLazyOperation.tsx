@@ -1,16 +1,24 @@
-import { z } from 'zod/v4'
-import { Executor, Operation, RequestContext } from './types.js'
+import {
+    type Dispatch,
+    type SetStateAction,
+    useCallback,
+    useState
+} from 'react'
+import type {
+    Executor,
+    OperationResult,
+    OperationVariables,
+    RequestContext,
+    SyncOperation
+} from './types.js'
 import {
     loadingState,
     type OperationFailureState,
     type OperationState,
     type OperationSuccessState
 } from './useOperation.jsx'
-import { Dispatch, SetStateAction, useCallback, useState } from 'react'
 
-export interface LazyOperationInitialState {
-    state: 'initial'
-}
+export interface LazyOperationInitialState { state: 'initial' }
 export type LazyOperationState<TResult> =
     OperationState<TResult> | LazyOperationInitialState
 export const lazyInitialState = Object.freeze(
@@ -23,17 +31,17 @@ type LazyOperationExecuteReturnType<TResult> = Promise<
 >
 async function execute<
     TRequestContext extends RequestContext,
-    T extends Operation
+    T extends SyncOperation
 >(
     executor: Executor<TRequestContext>,
     operation: T,
-    variables: z.infer<T['variablesSchema']>,
+    variables: OperationVariables<T>,
     requestContext: TRequestContext,
     setState: Dispatch<
-        SetStateAction<LazyOperationState<z.infer<T['resultSchema']>>>
+        SetStateAction<LazyOperationState<OperationResult<T>>>
     >
-): LazyOperationExecuteReturnType<z.infer<T['resultSchema']>> {
-    let newState: OperationState<z.infer<T['resultSchema']>>
+): LazyOperationExecuteReturnType<OperationResult<T>> {
+    let newState: OperationState<OperationResult<T>>
     try {
         const result = await executor(operation, variables, requestContext)
         newState = { state: 'success', ...result }
@@ -57,21 +65,21 @@ export interface UseLazyOperationReturnType<
     reset: () => void
 }
 export function useLazyOperation<
-    T extends Operation,
+    T extends SyncOperation,
     TRequestContext extends RequestContext
 >(
     executor: Executor<TRequestContext>,
     operation: T,
 ): UseLazyOperationReturnType<
-    z.infer<T['variablesSchema']>,
-    z.infer<T['resultSchema']>,
+    OperationVariables<T>,
+    OperationResult<T>,
     TRequestContext
 > {
-    const [state, setState] = useState<
-        LazyOperationState<z.infer<T['resultSchema']>>
-    >(lazyInitialState)
+    const [state, setState] = useState<LazyOperationState<OperationResult<T>>>(
+        lazyInitialState
+    )
     const executeCallback = useCallback((
-        variables: z.infer<T['variablesSchema']>,
+        variables: OperationVariables<T>,
         requestContext: TRequestContext
     ) => {
         setState(loadingState)
@@ -84,8 +92,8 @@ export function useLazyOperation<
         )
     }, [setState, executor, operation])
     return {
-        execute: executeCallback,
         state,
+        execute: executeCallback,
         reset: () => setState(lazyInitialState)
     }
 }
