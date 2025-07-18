@@ -3,3 +3,4 @@ dist
 gql-codegen.mts
 check
 schema.json
+src/check.ts

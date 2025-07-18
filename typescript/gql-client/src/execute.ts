@@ -1,11 +1,15 @@
+/* eslint-disable max-lines */
 import {
     ClientConfig,
     Operation,
     OperationVariables,
     RequestContext,
+    SubOpAsyncIterable,
+    SubscriptionOperation,
+    SyncOperation,
 } from './types/index.js'
 import { AfterParsingMiddlewareOptions } from './types/middlewares.js'
-import { OpResultBasedOnOp } from './types/utils.js'
+import { OperationResult, OpResultBasedOnOp } from './types/utils.js'
 
 export interface ExecuteResult<TResult> {
     result: TResult
@@ -76,12 +80,18 @@ export async function execute<
     return { result, response } as ExecuteResult<OpResultBasedOnOp<T>>
 }
 
-export type Executor<TRequestContext extends RequestContext> =
-    <TOperation extends Operation>(
+export type Executor<TRequestContext extends RequestContext> = {
+    <TSyncOp extends SyncOperation>(
+        operation: TSyncOp,
+        variables: OperationVariables<TSyncOp>,
+        context: TRequestContext
+    ): Promise<ExecuteResult<OperationResult<TSyncOp>>>
+    <TOperation extends SubscriptionOperation>(
         operation: TOperation,
         variables: OperationVariables<TOperation>,
         context: TRequestContext
-    ) => Promise<ExecuteResult<OpResultBasedOnOp<TOperation>>>
+    ): Promise<ExecuteResult<SubOpAsyncIterable<TOperation>>>
+}
 
 export function bindConfigToExecute<
     TClientContext,
@@ -89,9 +99,9 @@ export function bindConfigToExecute<
 >(
     config: ClientConfig<TClientContext, TRequestContext>
 ): Executor<TRequestContext> {
-    return (
-        operation,
-        variables,
-        requestContext
+    return <T extends Operation>(
+        operation: T,
+        variables: OperationVariables<T>,
+        requestContext: TRequestContext
     ) => execute(config, operation, variables, requestContext)
 }
