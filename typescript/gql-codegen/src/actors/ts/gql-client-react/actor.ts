@@ -8,6 +8,11 @@ export interface GQLClientReactActorConfig extends TSActorConfig {
     outPath: PathOrFileDescriptor
     importDeclarations: ts.ImportDeclaration[]
     graphqlModulePath: string
+    sdk: {
+        queriesKey: string
+        mutationsKey: string
+        subscriptionsKey: string
+    }
 }
 async function gqlClientReactActor(
     config: GQLClientReactActorConfig,

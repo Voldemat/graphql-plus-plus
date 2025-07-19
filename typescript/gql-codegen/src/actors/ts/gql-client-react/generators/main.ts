@@ -130,30 +130,47 @@ export function generateNodes(
     context: ActorContext
 ): ts.Node[] {
     const graphqlImports: string[] = []
-    let hasSubscriptions = false
-    const nodes = Object.values(context.schema.client.operations)
-        .map(operation => {
-            if (operation.type === 'SUBSCRIPTION') hasSubscriptions = true
-            const operationName = operation.name + 'Operation'
-            const variablesName = operation.name + 'Variables'
-            const resultName = operation.name + 'Result'
-            graphqlImports.push(operationName, variablesName, resultName)
-            if (operation.type === 'SUBSCRIPTION') {
-                return [
-                    ts.factory.createPropertyAssignment(
-                        'use' + operationName,
-                        generateArrowFunction(
-                            operationName,
-                            variablesName,
-                            resultName,
-                            'SUBSCRIPTION'
-                        )
-                    ),
-                ]
-            }
-            return [
+    const queryNodes: ts.PropertyAssignment[] = []
+    const mutationNodes: ts.PropertyAssignment[] = []
+    const subscriptionNodes: ts.PropertyAssignment[] = []
+    for (const operation of Object.values(context.schema.client.operations)) {
+        const operationName = operation.name + 'Operation'
+        const variablesName = operation.name + 'Variables'
+        const resultName = operation.name + 'Result'
+        graphqlImports.push(operationName, variablesName, resultName)
+        switch (operation.type) {
+        case 'SUBSCRIPTION': {
+            subscriptionNodes.push(
                 ts.factory.createPropertyAssignment(
-                    'use' + operationName,
+                    'use' + operation.name,
+                    generateArrowFunction(
+                        operationName,
+                        variablesName,
+                        resultName,
+                        'SUBSCRIPTION'
+                    )
+                ),
+            )
+            break
+        }
+        case 'MUTATION': {
+            mutationNodes.push(
+                ts.factory.createPropertyAssignment(
+                    'use' + operation.name,
+                    generateArrowFunction(
+                        operationName,
+                        variablesName,
+                        resultName,
+                        'LAZY'
+                    )
+                )
+            )
+            break
+        }
+        case 'QUERY': {
+            queryNodes.push(
+                ts.factory.createPropertyAssignment(
+                    'use' + operation.name,
                     generateArrowFunction(
                         operationName,
                         variablesName,
@@ -162,7 +179,7 @@ export function generateNodes(
                     )
                 ),
                 ts.factory.createPropertyAssignment(
-                    'useLazy' + operationName,
+                    'useLazy' + operation.name,
                     generateArrowFunction(
                         operationName,
                         variablesName,
@@ -170,8 +187,11 @@ export function generateNodes(
                         'LAZY'
                     )
                 )
-            ]
-        }).flat()
+            )
+            break
+        }
+        }
+    }
     const gqlClientReactImports: ts.ImportSpecifier[] = [
         ts.factory.createImportSpecifier(
             false,
@@ -196,7 +216,8 @@ export function generateNodes(
             )
         )
     ]
-    if (hasSubscriptions) {
+
+    if (subscriptionNodes.length !== 0) {
         gqlClientReactImports.push(
             ts.factory.createImportSpecifier(
                 false,
@@ -214,6 +235,35 @@ export function generateNodes(
             )
         )
     }
+
+    const returnObjectNodes: ts.PropertyAssignment[] = []
+    if (queryNodes.length !== 0) {
+        returnObjectNodes.push(
+            ts.factory.createPropertyAssignment(
+                config.sdk.queriesKey,
+                ts.factory.createObjectLiteralExpression(queryNodes, true)
+            )
+        )
+    }
+    if (mutationNodes.length !== 0) {
+        returnObjectNodes.push(
+            ts.factory.createPropertyAssignment(
+                config.sdk.mutationsKey,
+                ts.factory.createObjectLiteralExpression(mutationNodes, true)
+            )
+        )
+    }
+    if (subscriptionNodes.length !== 0) {
+        returnObjectNodes.push(
+            ts.factory.createPropertyAssignment(
+                config.sdk.subscriptionsKey,
+                ts.factory.createObjectLiteralExpression(
+                    subscriptionNodes, true
+                )
+            )
+        )
+    }
+
     return [
         ts.factory.createIdentifier('// @ts-nocheck'),
         ...config.importDeclarations,
@@ -284,7 +334,9 @@ export function generateNodes(
             undefined,
             ts.factory.createBlock([
                 ts.factory.createReturnStatement(
-                    ts.factory.createObjectLiteralExpression(nodes, true),
+                    ts.factory.createObjectLiteralExpression(
+                        returnObjectNodes, true
+                    ),
                 )
             ], true)
         )

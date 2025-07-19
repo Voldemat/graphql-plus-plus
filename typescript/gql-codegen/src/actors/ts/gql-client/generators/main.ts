@@ -72,61 +72,75 @@ export function generateNodes(
 ): ts.Node[] {
     const graphqlImports: string[] = []
     let shouldIncludeExecuteResultType = false
-    let shouldIncludeSubOpAsyncIterable = false
-    const nodes = Object.values(context.schema.client.operations)
-        .map(operation => {
-            if (operation.type === 'SUBSCRIPTION') {
-                shouldIncludeSubOpAsyncIterable = true
-            }
-            const operationName = operation.name + 'Operation'
-            const variablesName = operation.name + 'Variables'
-            const resultName = operation.name + 'Result'
-            graphqlImports.push(operationName, variablesName, resultName)
-            const returnType = getReturnTypeFromConfig(config, operation.name)
-            if (returnType === 'ExecuteResult')
-                shouldIncludeExecuteResultType = true
-            return ts.factory.createPropertyAssignment(
-                operation.name,
-                ts.factory.createArrowFunction(
-                    ts.factory.createModifiersFromModifierFlags(
-                        ts.ModifierFlags.Async
+    const queryNodes: ts.PropertyAssignment[] = []
+    const mutationNodes: ts.PropertyAssignment[] = []
+    const subscriptionNodes: ts.PropertyAssignment[] = []
+    for (const operation of Object.values(context.schema.client.operations)) {
+        const operationName = operation.name + 'Operation'
+        const variablesName = operation.name + 'Variables'
+        const resultName = operation.name + 'Result'
+        graphqlImports.push(operationName, variablesName, resultName)
+        const returnType = getReturnTypeFromConfig(config, operation.name)
+        if (returnType === 'ExecuteResult')
+            shouldIncludeExecuteResultType = true
+        const propAssignment = ts.factory.createPropertyAssignment(
+            operation.name,
+            ts.factory.createArrowFunction(
+                ts.factory.createModifiersFromModifierFlags(
+                    ts.ModifierFlags.Async
+                ),
+                undefined,
+                [
+                    ts.factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        'variables',
+                        undefined,
+                        ts.factory.createTypeReferenceNode(variablesName)
                     ),
-                    undefined,
+                    ts.factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        'requestContext',
+                        undefined,
+                        ts.factory.createTypeReferenceNode(
+                            'TRequestContext'
+                        ),
+                    ),
+                ],
+                ts.factory.createTypeReferenceNode(
+                    'Promise',
                     [
-                        ts.factory.createParameterDeclaration(
-                            undefined,
-                            undefined,
-                            'variables',
-                            undefined,
-                            ts.factory.createTypeReferenceNode(variablesName)
-                        ),
-                        ts.factory.createParameterDeclaration(
-                            undefined,
-                            undefined,
-                            'requestContext',
-                            undefined,
-                            ts.factory.createTypeReferenceNode(
-                                'TRequestContext'
-                            ),
-                        ),
-                    ],
-                    ts.factory.createTypeReferenceNode(
-                        'Promise',
-                        [
-                            createReturnTypeNode(
-                                resultName,
-                                returnType,
-                                operation.type
-                            )
-                        ]
-                    ),
-                    ts.factory.createToken(
-                        ts.SyntaxKind.EqualsGreaterThanToken
-                    ),
-                    generateFunctionBlock(operationName, returnType)
-                )
+                        createReturnTypeNode(
+                            resultName,
+                            returnType,
+                            operation.type
+                        )
+                    ]
+                ),
+                ts.factory.createToken(
+                    ts.SyntaxKind.EqualsGreaterThanToken
+                ),
+                generateFunctionBlock(operationName, returnType)
             )
-        })
+        )
+
+        switch (operation.type) {
+        case 'QUERY': {
+            queryNodes.push(propAssignment)
+            break
+        }
+        case 'MUTATION': {
+            mutationNodes.push(propAssignment)
+            break
+        }
+        case 'SUBSCRIPTION': {
+            subscriptionNodes.push(propAssignment)
+            break
+        }
+        }
+    }
+
     const gqlClientImports = [
         ts.factory.createImportSpecifier(
             false,
@@ -139,15 +153,7 @@ export function generateNodes(
             ts.factory.createIdentifier('RequestContext')
         )
     ]
-    if (shouldIncludeSubOpAsyncIterable) {
-        gqlClientImports.push(
-            ts.factory.createImportSpecifier(
-                false,
-                undefined,
-                ts.factory.createIdentifier('SubOpAsyncIterable')
-            ),
-        )
-    }
+
     if (shouldIncludeExecuteResultType) {
         gqlClientImports.push(
             ts.factory.createImportSpecifier(
@@ -157,6 +163,42 @@ export function generateNodes(
             ),
         )
     }
+
+    const returnObjectNodes: ts.PropertyAssignment[] = []
+    if (queryNodes.length !== 0) {
+        returnObjectNodes.push(
+            ts.factory.createPropertyAssignment(
+                config.sdk.queriesKey,
+                ts.factory.createObjectLiteralExpression(queryNodes, true)
+            )
+        )
+    }
+    if (mutationNodes.length !== 0) {
+        returnObjectNodes.push(
+            ts.factory.createPropertyAssignment(
+                config.sdk.mutationsKey,
+                ts.factory.createObjectLiteralExpression(mutationNodes, true)
+            )
+        )
+    }
+    if (subscriptionNodes.length !== 0) {
+        gqlClientImports.push(
+            ts.factory.createImportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier('SubOpAsyncIterable')
+            ),
+        )
+        returnObjectNodes.push(
+            ts.factory.createPropertyAssignment(
+                config.sdk.subscriptionsKey,
+                ts.factory.createObjectLiteralExpression(
+                    subscriptionNodes, true
+                )
+            )
+        )
+    }
+
     return [
         ts.factory.createIdentifier('// @ts-nocheck'),
         ...config.importDeclarations,
@@ -208,7 +250,9 @@ export function generateNodes(
             ts.factory.createBlock([
                 ts.factory.createReturnStatement(
                     ts.factory.createAsExpression(
-                        ts.factory.createObjectLiteralExpression(nodes, true),
+                        ts.factory.createObjectLiteralExpression(
+                            returnObjectNodes, true
+                        ),
                         ts.factory.createTypeReferenceNode('const')
                     )
                 )

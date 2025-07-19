@@ -8,6 +8,9 @@ export type OperationReturnType = 'ExecuteResult' | 'ExecuteResult.result'
 export interface SDKConfig {
     defaultOperationReturnType: OperationReturnType
     operationReturnTypeMapping: Record<string, OperationReturnType>
+    queriesKey: string
+    mutationsKey: string
+    subscriptionsKey: string
 }
 export interface GQLClientActorConfig extends TSActorConfig {
     outPath: PathOrFileDescriptor
