@@ -1,6 +1,11 @@
 import { z } from 'zod/v4';
-import { ClientParser, Operation, RequestContext } from './types/index.js';
-import { ClientParserParseBodyOptions } from './types/parser.js';
+import {
+    ClientParser,
+    Operation,
+    RequestContext,
+    SubOpAsyncIterable,
+    ClientParserParseBodyOptions,
+} from './types/index.js';
 import assert from 'assert';
 
 export interface CreateParserOptions<
@@ -47,13 +52,13 @@ export function createParser<
                     options.response.headers.get('content-type') ===
                         'text/event-stream'
                 )
-                const stream = options.response.body
-                assert(stream !== null)
-                const reader = stream.getReader()
+                const rStream = options.response.body
+                assert(rStream !== null)
+                const reader = rStream.getReader()
                 const decoder = new TextDecoder()
                 let shouldClose = false
-                const cancel = () => shouldClose = true
-                const streamGen = async function*() {
+                const close = () => shouldClose = true
+                const stream = async function*() {
                     while (!shouldClose) {
                         const readResult = await reader.read()
                         if (readResult.done || shouldClose) break
@@ -69,7 +74,7 @@ export function createParser<
                         }
                     }
                 }()
-                return { stream: streamGen, cancel }
+                return { stream, close } as SubOpAsyncIterable<TResult>
             }
             const json = await options.response.json()
             if (json.errors) {
