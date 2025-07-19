@@ -3,6 +3,8 @@ export type {
     SyncOperation,
     SubscriptionOperation,
     RequestContext,
+    OperationVariables,
+    OperationResult
 } from './base.js'
 export type {
     BeforeSerializationMiddleware,
@@ -18,8 +20,4 @@ export type {
 } from './parser.js'
 export type { ClientSerializer } from './serializer.js'
 export type { ClientConfig } from './config.js'
-export type {
-    OperationResult,
-    OperationVariables,
-    OpResultBasedOnOp
-} from './utils.js'
+export type { OpResultBasedOnOp } from './utils.js'

@@ -1,10 +1,10 @@
-import { z } from 'zod/v4';
 import {
     ClientParser,
     Operation,
     RequestContext,
-    SubOpAsyncIterable,
     ClientParserParseBodyOptions,
+    SubOpAsyncIterable,
+    OperationResult,
 } from './types/index.js';
 import assert from 'assert';
 
@@ -12,7 +12,7 @@ export interface CreateParserOptions<
     TClientContext,
     TRequestContext extends RequestContext
 > {
-    onErrors: <T extends Operation>(
+    onErrors: <T extends Operation<unknown, unknown>>(
         options: ClientParserParseBodyOptions<
             TClientContext, TRequestContext, T
         >,
@@ -36,14 +36,15 @@ export function createParser<
     > = defaultParserOptions
 ): ClientParser<TClientContext, TRequestContext> {
     return {
-        parseBody: async <T extends Operation>(
+        parseBody: async <T extends Operation<unknown, unknown>>(
             options: ClientParserParseBodyOptions<
                 TClientContext,
                 TRequestContext,
                 T
             >
-        ) => {
-            type TResult = z.infer<T['resultSchema']>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ): Promise<any> => {
+            type TResult = OperationResult<T>
             if (options.operation.type === 'SUBSCRIPTION') {
                 if (options.response.status !== 200) {
                     throw new Error(await options.response.text())
@@ -70,7 +71,7 @@ export function createParser<
                             if (name !== 'data') continue
                             yield options.operation.resultSchema.parse(
                                 JSON.parse(value).data
-                            ) as TResult
+                            )
                         }
                     }
                 }()

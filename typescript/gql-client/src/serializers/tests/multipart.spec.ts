@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createMultipartSerializer } from '../multipart.js'
-import { Operation } from '@/types/index.js'
+import { Operation, OperationVariables } from '@/types/index.js'
 import { z } from 'zod/v4'
 import assert from 'assert'
 
@@ -16,8 +16,8 @@ describe('Multipart serializer', () => {
                 name: z.string()
             }),
             resultSchema: z.void()
-        } satisfies Operation
-        const variables: z.infer<(typeof operation)['variablesSchema']> = {
+        } satisfies Operation<{ name: string }, void>
+        const variables: OperationVariables<typeof operation> = {
             name: 'test-name'
         }
         expect(
@@ -40,8 +40,8 @@ describe('Multipart serializer', () => {
                 file: z.file()
             }),
             resultSchema: z.void()
-        } satisfies Operation
-        const variables: z.infer<(typeof operation)['variablesSchema']> = {
+        } satisfies Operation<{ name: string, file: File }, void>
+        const variables: OperationVariables<typeof operation> = {
             name: 'test-name',
             file: new File([], 'check.txt')
         }

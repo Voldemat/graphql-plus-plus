@@ -2,6 +2,7 @@
 import {
     ClientConfig,
     Operation,
+    OperationResult,
     OperationVariables,
     RequestContext,
     SubOpAsyncIterable,
@@ -9,7 +10,7 @@ import {
     SyncOperation,
 } from './types/index.js'
 import { AfterParsingMiddlewareOptions } from './types/middlewares.js'
-import { OperationResult, OpResultBasedOnOp } from './types/utils.js'
+import { OpResultBasedOnOp } from './types/utils.js'
 
 export interface ExecuteResult<TResult> {
     result: TResult
@@ -19,7 +20,7 @@ export interface ExecuteResult<TResult> {
 export async function execute<
     TClientContext,
     TRequestContext extends RequestContext,
-    T extends Operation
+    T extends Operation<unknown, unknown>
 >(
     config: ClientConfig<TClientContext, TRequestContext>,
     operation: T,
@@ -81,12 +82,12 @@ export async function execute<
 }
 
 export type Executor<TRequestContext extends RequestContext> = {
-    <TSyncOp extends SyncOperation>(
+    <TSyncOp extends SyncOperation<unknown, unknown>>(
         operation: TSyncOp,
         variables: OperationVariables<TSyncOp>,
         context: TRequestContext
     ): Promise<ExecuteResult<OperationResult<TSyncOp>>>
-    <TOperation extends SubscriptionOperation>(
+    <TOperation extends SubscriptionOperation<unknown, unknown>>(
         operation: TOperation,
         variables: OperationVariables<TOperation>,
         context: TRequestContext
@@ -99,9 +100,12 @@ export function bindConfigToExecute<
 >(
     config: ClientConfig<TClientContext, TRequestContext>
 ): Executor<TRequestContext> {
-    return <T extends Operation>(
+    return <T extends Operation<unknown, unknown>>(
         operation: T,
         variables: OperationVariables<T>,
         requestContext: TRequestContext
-    ) => execute(config, operation, variables, requestContext)
+    ) => execute(
+        config, operation, variables, requestContext
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any
 }

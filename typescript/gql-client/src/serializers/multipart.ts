@@ -42,7 +42,7 @@ function getNestedValue (obj: Record<string, any>, key: string): any {
     return obj
 }
 
-function buildFormData<T extends Operation> (
+function buildFormData<T extends Operation<unknown, unknown>> (
     operation: T,
     variables: Record<string, any> | Array<any>,
     shouldTreatAsObject?: (v: any) => boolean

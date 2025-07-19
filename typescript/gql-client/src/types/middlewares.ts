@@ -3,19 +3,16 @@ import {
     SubscriptionOperation,
     SyncOperation,
     RequestContext,
+    OperationVariables,
+    OperationResult,
 } from './base.js'
 import { SubOpAsyncIterable } from './parser.js'
-import {
-    OperationResult,
-    OperationVariables,
-    OpResultBasedOnOp,
-    PromiseOrValue
-} from './utils.js'
+import { OpResultBasedOnOp, PromiseOrValue } from './utils.js'
 
 export type BeforeSerializationMiddleware<
     TClientContext,
     TRequestContext extends RequestContext
-> = <T extends Operation>(options: {
+> = <T extends Operation<unknown, unknown>>(options: {
     clientContext: TClientContext,
     requestContext: TRequestContext,
     operation: T,
@@ -25,7 +22,7 @@ export type BeforeSerializationMiddleware<
 export type AfterSerializationMiddleware<
     TClientContext,
     TRequestContext extends RequestContext
-> = <T extends Operation>(options: {
+> = <T extends Operation<unknown, unknown>>(options: {
     clientContext: TClientContext,
     requestContext: TRequestContext,
     operation: T,
@@ -36,7 +33,7 @@ export type AfterSerializationMiddleware<
 export type BeforeParsingMiddleware<
     TClientContext,
     TRequestContext extends RequestContext
-> = <T extends Operation>(options: {
+> = <T extends Operation<unknown, unknown>>(options: {
     clientContext: TClientContext,
     requestContext: TRequestContext,
     operation: T,
@@ -48,7 +45,7 @@ export type BeforeParsingMiddleware<
 export interface AfterParsingMiddlewareOptions<
     TClientContext,
     TRequestContext extends RequestContext,
-    T extends Operation
+    T extends Operation<unknown, unknown>
 > {
     clientContext: TClientContext,
     requestContext: TRequestContext,
@@ -62,21 +59,21 @@ export type AfterParsingMiddleware<
     TClientContext,
     TRequestContext extends RequestContext
 > = {
-    <TSyncOp extends SyncOperation>(
+    <TSyncOp extends SyncOperation<unknown, unknown>>(
         options: AfterParsingMiddlewareOptions<
             TClientContext,
             TRequestContext,
             TSyncOp
         >
     ): PromiseOrValue<OperationResult<TSyncOp>>
-    <TSubOp extends SubscriptionOperation>(
+    <TSubOp extends SubscriptionOperation<unknown, unknown>>(
         options: AfterParsingMiddlewareOptions<
             TClientContext,
             TRequestContext,
             TSubOp
         >
     ): PromiseOrValue<SubOpAsyncIterable<OperationResult<TSubOp>>>
-    <TOp extends Operation>(
+    <TOp extends Operation<unknown, unknown>>(
         options: AfterParsingMiddlewareOptions<
             TClientContext,
             TRequestContext,
@@ -86,9 +83,9 @@ export type AfterParsingMiddleware<
         PromiseOrValue<SubOpAsyncIterable<OperationResult<TOp>>>
 }
 export interface ClientMiddlewaresConfig<
-            TClientContext,
-            TRequestContext extends RequestContext
-        > {
+    TClientContext,
+    TRequestContext extends RequestContext
+> {
     beforeSerialization: BeforeSerializationMiddleware<
         TClientContext, TRequestContext
     >[]

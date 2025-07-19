@@ -3,13 +3,14 @@ import type {
     SyncOperation,
     RequestContext,
     Operation,
+    OperationResult,
 } from './base.js'
-import { OperationResult, PromiseOrValue } from './utils.js'
+import { PromiseOrValue } from './utils.js'
 
 export interface ClientParserParseBodyOptions<
     TClientContext,
     TRequestContext extends RequestContext,
-    TOperation
+    TOperation extends Operation<unknown, unknown>
 > {
     clientContext: TClientContext
     requestContext: TRequestContext
@@ -26,21 +27,21 @@ export type ParseBodyFuncType<
     TClientContext,
     TRequestContext extends RequestContext
 > = {
-    <TSyncOp extends SyncOperation>(
+    <TSyncOp extends SyncOperation<unknown, unknown>>(
         options: ClientParserParseBodyOptions<
             TClientContext,
             TRequestContext,
             TSyncOp
         >
     ): PromiseOrValue<OperationResult<TSyncOp>>
-    <TSubOp extends SubscriptionOperation>(
+    <TSubOp extends SubscriptionOperation<unknown, unknown>>(
         options: ClientParserParseBodyOptions<
             TClientContext,
             TRequestContext,
             TSubOp
         >
     ): PromiseOrValue<SubOpAsyncIterable<OperationResult<TSubOp>>>
-    <TOp extends Operation>(
+    <TOp extends Operation<unknown, unknown>>(
         options: ClientParserParseBodyOptions<
             TClientContext,
             TRequestContext,
