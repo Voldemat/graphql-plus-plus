@@ -18,7 +18,7 @@ export function useSubscription<
     operation: T,
     variables: OperationVariables<T>,
     requestContext: TRequestContext
-): OperationState<SubOpAsyncIterable<OperationResult<T>>> {
+) {
     const [state, setState] = useState<
         OperationState<SubOpAsyncIterable<OperationResult<T>>>
     >(loadingState)
