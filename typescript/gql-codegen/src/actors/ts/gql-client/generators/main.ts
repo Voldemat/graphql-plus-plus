@@ -142,7 +142,7 @@ export function generateNodes(
     if (shouldIncludeSubOpAsyncIterable) {
         gqlClientImports.push(
             ts.factory.createImportSpecifier(
-                true,
+                false,
                 undefined,
                 ts.factory.createIdentifier('SubOpAsyncIterable')
             ),
@@ -151,7 +151,7 @@ export function generateNodes(
     if (shouldIncludeExecuteResultType) {
         gqlClientImports.push(
             ts.factory.createImportSpecifier(
-                true,
+                false,
                 undefined,
                 ts.factory.createIdentifier('ExecuteResult')
             ),
