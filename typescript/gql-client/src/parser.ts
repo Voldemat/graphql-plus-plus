@@ -51,13 +51,16 @@ export function createParser<
                 assert(stream !== null)
                 const reader = stream.getReader()
                 const decoder = new TextDecoder()
-                return async function*() {
-                    while (true) {
+                let shouldClose = false
+                const cancel = () => shouldClose = true
+                const streamGen = async function*() {
+                    while (!shouldClose) {
                         const readResult = await reader.read()
-                        if (readResult.done) break
+                        if (readResult.done || shouldClose) break
                         const lines = decoder.decode(readResult.value)
                             .split('\n')
-                        for (const line of lines.filter(c => c!== '')) {
+                        for (const line of lines.filter(c => c !== '')) {
+                            if (shouldClose) return
                             const [name, value] = line.split(/:(.*)/s, 2)
                             if (name !== 'data') continue
                             yield options.operation.resultSchema.parse(
@@ -66,6 +69,7 @@ export function createParser<
                         }
                     }
                 }()
+                return { stream: streamGen, cancel }
             }
             const json = await options.response.json()
             if (json.errors) {

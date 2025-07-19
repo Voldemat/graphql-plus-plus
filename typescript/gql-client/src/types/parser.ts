@@ -17,7 +17,10 @@ export interface ClientParserParseBodyOptions<
     response: Response
 }
 
-export type SubOpAsyncIterable<TResult> = AsyncIterable<TResult, void, unknown>
+export type SubOpAsyncIterable<TResult> = {
+    stream: AsyncIterable<TResult, void, unknown>
+    close: () => void
+}
 
 export type ParseBodyFuncType<
     TClientContext,
