@@ -52,18 +52,20 @@ async function execute<
     return newState
 }
 
-export interface UseLazyOperationReturnType<
+export type UseLazyOperationReturnType<
     TVariables,
     TResult,
     TRequestContext extends RequestContext
-> {
-    execute: (
+> = [
+    (
         variables: TVariables,
         requestContext: TRequestContext
-    ) => LazyOperationExecuteReturnType<TResult>
-    state: LazyOperationState<TResult>
-    reset: () => void
-}
+    ) => LazyOperationExecuteReturnType<TResult>,
+    {
+        state: LazyOperationState<TResult>
+        reset: () => void
+    }
+]
 export function useLazyOperation<
     T extends SyncOperation<unknown, unknown>,
     TRequestContext extends RequestContext
@@ -91,9 +93,8 @@ export function useLazyOperation<
             setState
         )
     }, [setState, executor, operation])
-    return {
-        state,
-        execute: executeCallback,
-        reset: () => setState(lazyInitialState)
-    }
+    return [
+        executeCallback,
+        { state, reset: () => setState(lazyInitialState) }
+    ]
 }

@@ -10,9 +10,9 @@ describe('useLazyOperation', () => {
     it('Should preserve initial state if no one calls', async () => {
         const { result } = renderHook(() =>
             useLazyOperation({} as Executor<RequestContext>, testOperation))
-        expect(result.current.state.state).toBe('initial')
+        expect(result.current[1].state.state).toBe('initial')
         await act(async () => {})
-        expect(result.current.state.state).toBe('initial')
+        expect(result.current[1].state.state).toBe('initial')
     })
 
     it('Should return loading state after invoking, then success state',
@@ -26,16 +26,16 @@ describe('useLazyOperation', () => {
                 useLazyOperation(executor, testOperation))
             let promise: Promise<LazyOperationState<TestOperationResult>>
             act(() => {
-                promise = result.current.execute({}, {})
+                promise = result.current[0]({}, {})
             })
-            expect(result.current.state.state).toBe('loading')
+            expect(result.current[1].state.state).toBe('loading')
             // @ts-expect-error 2454
             const newState = await promise
             expect(newState.state).toBe('success')
             assert(newState.state === 'success')
             expect(newState.result).toStrictEqual({ a: 1 })
             await act(async () => {})
-            expect(result.current.state).toStrictEqual(newState)
+            expect(result.current[1].state).toStrictEqual(newState)
         })
 
     it('Should return loading state after invoking, then failure state',
@@ -47,15 +47,15 @@ describe('useLazyOperation', () => {
                 useLazyOperation(executor, testOperation))
             let promise: Promise<LazyOperationState<TestOperationResult>>
             act(() => {
-                promise = result.current.execute({}, {})
+                promise = result.current[0]({}, {})
             })
-            expect(result.current.state.state).toBe('loading')
+            expect(result.current[1].state.state).toBe('loading')
             // @ts-expect-error 2454
             const newState = await promise 
             expect(newState.state).toBe('failure')
             assert(newState.state === 'failure')
             expect(newState.error).toBe(error)
             await act(async () => {})
-            expect(result.current.state).toStrictEqual(newState)
+            expect(result.current[1].state).toStrictEqual(newState)
         })
 })
