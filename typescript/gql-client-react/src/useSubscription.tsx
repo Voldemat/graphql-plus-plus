@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type {
     Executor,
+    OperationResult,
     OperationVariables,
     RequestContext,
     SubOpAsyncIterable,
@@ -17,10 +18,10 @@ export function useSubscription<
     operation: T,
     variables: OperationVariables<T>,
     requestContext: TRequestContext
-): OperationState<SubOpAsyncIterable<T>> {
-    const [state, setState] = useState<OperationState<SubOpAsyncIterable<T>>>(
-        loadingState
-    )
+): OperationState<SubOpAsyncIterable<OperationResult<T>>> {
+    const [state, setState] = useState<
+        OperationState<SubOpAsyncIterable<OperationResult<T>>>
+    >(loadingState)
     const memoizedVariables = useMemo(
         () => variables, [hash(variables as NotUndefined)]
     )
@@ -32,7 +33,14 @@ export function useSubscription<
             executor(operation, variables, requestContext)
                 .then(result => setState({ state: 'success', ...result }))
                 .catch(error => setState({ state: 'failure', error }))
-            return () => setState(loadingState)
+            return () => {
+                setState(currentState => {
+                    if (currentState.state === 'success')  {
+                        currentState.result.close()
+                    }
+                    return loadingState
+                })
+            }
         },
         [
             setState,

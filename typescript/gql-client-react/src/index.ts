@@ -13,3 +13,4 @@ export {
     lazyInitialState,
     useLazyOperation,
 } from './useLazyOperation.jsx'
+export { useSubscription } from './useSubscription.jsx'

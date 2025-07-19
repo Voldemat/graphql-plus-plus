@@ -11,11 +11,14 @@ describe('useSubscription', () => {
             const readableStream = new ReadableStream()
             const response = new Response(readableStream)
             return {
-                result: (async function*() {
-                    yield { number: 1 }
-                    yield { number: 2 }
-                    yield { number: 3 }
-                })(),
+                result: {
+                    stream: (async function*() {
+                        yield { number: 1 }
+                        yield { number: 2 }
+                        yield { number: 3 }
+                    })(),
+                    close: () => {}
+                },
                 response
             }
         }
@@ -28,7 +31,7 @@ describe('useSubscription', () => {
         expect(result.current.state).toBe('success')
         assert(result.current.state === 'success')
         let number = 1
-        for await (const value of result.current.result) {
+        for await (const value of result.current.result.stream) {
             expect(value.number).toBe(number)
             number++
         }

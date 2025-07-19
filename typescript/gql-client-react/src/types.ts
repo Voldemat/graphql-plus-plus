@@ -26,8 +26,10 @@ export interface ExecuteResult<TResult> {
 export type OperationResult<T extends Operation> = z.infer<T['resultSchema']>
 export type OperationVariables<T extends Operation> =
     z.infer<T['variablesSchema']>
-export type SubOpAsyncIterable<T extends Operation> =
-    AsyncIterable<OperationResult<T>>
+export type SubOpAsyncIterable<TResult> = {
+    stream: AsyncIterable<TResult, void, unknown>
+    close: () => void
+}
 
 export interface RequestContext {
     fetchOptions?: RequestInit
@@ -43,5 +45,5 @@ export type Executor<TRequestContext extends RequestContext> = {
         operation: TOperation,
         variables: OperationVariables<TOperation>,
         context: TRequestContext
-    ): Promise<ExecuteResult<SubOpAsyncIterable<TOperation>>>
+    ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<TOperation>>>>
 }
