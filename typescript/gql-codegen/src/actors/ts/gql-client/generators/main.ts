@@ -47,9 +47,13 @@ function generateFunctionBlock(
 
 function createReturnTypeNode(
     resultName: string,
-    returnType: OperationReturnType
+    returnType: OperationReturnType,
+    operationType: 'QUERY' | 'MUTATION' | 'SUBSCRIPTION'
 ) {
-    const rType = ts.factory.createTypeReferenceNode(resultName)
+    const rOpType = ts.factory.createTypeReferenceNode(resultName)
+    const rType = operationType === 'SUBSCRIPTION' ?
+        ts.factory.createTypeReferenceNode('SubOpAsyncIterable', [rOpType]) :
+        rOpType
     if (returnType === 'ExecuteResult.result') return rType
     return ts.factory.createTypeReferenceNode('ExecuteResult', [rType])
 }
@@ -68,8 +72,12 @@ export function generateNodes(
 ): ts.Node[] {
     const graphqlImports: string[] = []
     let shouldIncludeExecuteResultType = false
+    let shouldIncludeSubOpAsyncIterable = false
     const nodes = Object.values(context.schema.client.operations)
         .map(operation => {
+            if (operation.type === 'SUBSCRIPTION') {
+                shouldIncludeSubOpAsyncIterable = true
+            }
             const operationName = operation.name + 'Operation'
             const variablesName = operation.name + 'Variables'
             const resultName = operation.name + 'Result'
@@ -107,7 +115,8 @@ export function generateNodes(
                         [
                             createReturnTypeNode(
                                 resultName,
-                                returnType
+                                returnType,
+                                operation.type
                             )
                         ]
                     ),
@@ -130,6 +139,15 @@ export function generateNodes(
             ts.factory.createIdentifier('RequestContext')
         )
     ]
+    if (shouldIncludeSubOpAsyncIterable) {
+        gqlClientImports.push(
+            ts.factory.createImportSpecifier(
+                true,
+                undefined,
+                ts.factory.createIdentifier('SubOpAsyncIterable')
+            ),
+        )
+    }
     if (shouldIncludeExecuteResultType) {
         gqlClientImports.push(
             ts.factory.createImportSpecifier(

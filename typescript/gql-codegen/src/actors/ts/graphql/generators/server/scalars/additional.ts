@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { buildSymmetricScalarSpec, ScalarSpec } from './mapping.js';
-import { invokeMethod } from '@/actors/ts/shared.js';
+import { invokeMethod } from '../../../../shared.js';
 import { builtinScalarsMapping } from './builtin.js';
 
 export const additionalScalarsMapping = {

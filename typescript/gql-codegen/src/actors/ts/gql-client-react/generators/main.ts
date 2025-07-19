@@ -5,9 +5,10 @@ import ts from 'typescript';
 
 function generateFunctionBlock(
     operationName: string,
-    lazy: boolean
+    type: 'SYNC' | 'LAZY' | 'SUBSCRIPTION'
 ) {
-    if (!lazy) {
+    switch (type) {
+    case 'SYNC':
         return ts.factory.createCallExpression(
             ts.factory.createIdentifier('useOperation'),
             undefined,
@@ -18,33 +19,48 @@ function generateFunctionBlock(
                 ts.factory.createIdentifier('requestContext')
             ]
         )
+    case 'LAZY':
+        return ts.factory.createCallExpression(
+            ts.factory.createIdentifier('useLazyOperation'),
+            undefined,
+            [
+                ts.factory.createIdentifier('executor'),
+                ts.factory.createIdentifier(operationName)
+            ]
+        )
+    case 'SUBSCRIPTION':
+        return ts.factory.createCallExpression(
+            ts.factory.createIdentifier('useSubscription'),
+            undefined,
+            [
+                ts.factory.createIdentifier('executor'),
+                ts.factory.createIdentifier(operationName),
+                ts.factory.createIdentifier('variables'),
+                ts.factory.createIdentifier('requestContext')
+            ]
+        )
     }
-    return ts.factory.createCallExpression(
-        ts.factory.createIdentifier('useLazyOperation'),
-        undefined,
-        [
-            ts.factory.createIdentifier('executor'),
-            ts.factory.createIdentifier(operationName)
-        ]
-    )
 }
 
 function generateArrowFunction(
     operationName: string,
     variablesName: string,
     resultName: string,
-    lazy: boolean
+    type: 'SYNC' | 'LAZY' | 'SUBSCRIPTION'
 ) {
     const parameters: ts.ParameterDeclaration[] = []
-    let resultType: ts.TypeNode = ts.factory.createTypeReferenceNode(
-        'UseLazyOperationReturnType',
-        [
-            ts.factory.createTypeReferenceNode(variablesName),
-            ts.factory.createTypeReferenceNode(resultName),
-            ts.factory.createTypeReferenceNode('TRequestContext')
-        ]
-    )
-    if (!lazy) {
+    let resultType: ts.TypeNode
+    switch (type) {
+    case 'LAZY':
+        resultType = ts.factory.createTypeReferenceNode(
+            'UseLazyOperationReturnType',
+            [
+                ts.factory.createTypeReferenceNode(variablesName),
+                ts.factory.createTypeReferenceNode(resultName),
+                ts.factory.createTypeReferenceNode('TRequestContext')
+            ]
+        )
+    case 'SYNC': {
         resultType = ts.factory.createTypeReferenceNode('OperationState', [
             ts.factory.createTypeReferenceNode(resultName)
         ])
@@ -67,6 +83,33 @@ function generateArrowFunction(
             ),
         )
     }
+    case 'SUBSCRIPTION': {
+        resultType = ts.factory.createTypeReferenceNode('OperationState', [
+            ts.factory.createTypeReferenceNode(
+                'SubOpAsyncIterable',
+                [ts.factory.createTypeReferenceNode(resultName)]
+            )
+        ])
+        parameters.push(
+            ts.factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'variables',
+                undefined,
+                ts.factory.createTypeReferenceNode(variablesName)
+            ),
+            ts.factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'requestContext',
+                undefined,
+                ts.factory.createTypeReferenceNode(
+                    'TRequestContext'
+                ),
+            ),
+        )
+    }
+    }
     return ts.factory.createArrowFunction(
         undefined,
         undefined,
@@ -75,7 +118,7 @@ function generateArrowFunction(
         ts.factory.createToken(
             ts.SyntaxKind.EqualsGreaterThanToken
         ),
-        generateFunctionBlock(operationName, lazy)
+        generateFunctionBlock(operationName, type)
     )
 }
 
@@ -90,6 +133,19 @@ export function generateNodes(
             const variablesName = operation.name + 'Variables'
             const resultName = operation.name + 'Result'
             graphqlImports.push(operationName, variablesName, resultName)
+            if (operation.type === 'SUBSCRIPTION') {
+                return [
+                    ts.factory.createPropertyAssignment(
+                        'use' + operationName,
+                        generateArrowFunction(
+                            operationName,
+                            variablesName,
+                            resultName,
+                            'SUBSCRIPTION'
+                        )
+                    ),
+                ]
+            }
             return [
                 ts.factory.createPropertyAssignment(
                     'use' + operationName,
@@ -97,7 +153,7 @@ export function generateNodes(
                         operationName,
                         variablesName,
                         resultName,
-                        false
+                        'SYNC'
                     )
                 ),
                 ts.factory.createPropertyAssignment(
@@ -106,7 +162,7 @@ export function generateNodes(
                         operationName,
                         variablesName,
                         resultName,
-                        true
+                        'LAZY'
                     )
                 )
             ]
