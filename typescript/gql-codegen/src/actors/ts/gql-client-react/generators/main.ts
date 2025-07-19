@@ -130,8 +130,10 @@ export function generateNodes(
     context: ActorContext
 ): ts.Node[] {
     const graphqlImports: string[] = []
+    let hasSubscriptions = false
     const nodes = Object.values(context.schema.client.operations)
         .map(operation => {
+            if (operation.type === 'SUBSCRIPTION') hasSubscriptions = true
             const operationName = operation.name + 'Operation'
             const variablesName = operation.name + 'Variables'
             const resultName = operation.name + 'Result'
@@ -170,6 +172,48 @@ export function generateNodes(
                 )
             ]
         }).flat()
+    const gqlClientReactImports: ts.ImportSpecifier[] = [
+        ts.factory.createImportSpecifier(
+            false,
+            undefined,
+            ts.factory.createIdentifier('useOperation')
+        ),
+        ts.factory.createImportSpecifier(
+            false,
+            undefined,
+            ts.factory.createIdentifier('useLazyOperation')
+        ),
+        ts.factory.createImportSpecifier(
+            true,
+            undefined,
+            ts.factory.createIdentifier('OperationState')
+        ),
+        ts.factory.createImportSpecifier(
+            true,
+            undefined,
+            ts.factory.createIdentifier(
+                'UseLazyOperationReturnType'
+            )
+        )
+    ]
+    if (hasSubscriptions) {
+        gqlClientReactImports.push(
+            ts.factory.createImportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier(
+                    'useSubscription'
+                )
+            ),
+            ts.factory.createImportSpecifier(
+                true,
+                undefined,
+                ts.factory.createIdentifier(
+                    'SubOpAsyncIterable'
+                )
+            )
+        )
+    }
     return [
         ts.factory.createIdentifier('// @ts-nocheck'),
         ...config.importDeclarations,
@@ -178,30 +222,7 @@ export function generateNodes(
             ts.factory.createImportClause(
                 false,
                 undefined,
-                ts.factory.createNamedImports([
-                    ts.factory.createImportSpecifier(
-                        false,
-                        undefined,
-                        ts.factory.createIdentifier('useOperation')
-                    ),
-                    ts.factory.createImportSpecifier(
-                        false,
-                        undefined,
-                        ts.factory.createIdentifier('useLazyOperation')
-                    ),
-                    ts.factory.createImportSpecifier(
-                        true,
-                        undefined,
-                        ts.factory.createIdentifier('OperationState')
-                    ),
-                    ts.factory.createImportSpecifier(
-                        true,
-                        undefined,
-                        ts.factory.createIdentifier(
-                            'UseLazyOperationReturnType'
-                        )
-                    )
-                ])
+                ts.factory.createNamedImports(gqlClientReactImports)
             ),
             ts.factory.createStringLiteral('@vladimirdev635/gql-client-react')
         ),
