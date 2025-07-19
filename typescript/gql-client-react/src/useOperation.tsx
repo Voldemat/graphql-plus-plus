@@ -31,7 +31,7 @@ export const loadingState =
     Object.freeze({ state: 'loading' } as const) satisfies OperationLoadingState
 
 export function useOperation<
-    T extends SyncOperation,
+    T extends SyncOperation<unknown, unknown>,
     TRequestContext extends RequestContext
 >(
     executor: Executor<TRequestContext>,

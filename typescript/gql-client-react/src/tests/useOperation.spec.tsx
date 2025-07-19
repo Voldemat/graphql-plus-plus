@@ -9,7 +9,7 @@ import { Executor, Operation, RequestContext } from '@/types.js';
 describe('useOperation', () => {
     it('Should return loading state and then success state', async () => {
         const executor: Executor<RequestContext> =
-            async <T extends Operation>() => ({
+            async <T extends Operation<unknown, unknown>>() => ({
                 result: { a: 1 } as z.infer<T['resultSchema']>,
                 response: new Response()
             })

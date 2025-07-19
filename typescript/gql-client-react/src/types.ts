@@ -1,47 +1,51 @@
 import { z } from 'zod/v4'
 
-export interface SyncOperation {
+export type SchemaFor<T> = z.ZodType<T>;
+
+interface BaseOperation<V, R> {
     name: string
-    document: string;
+    document: string
+    variablesSchema: SchemaFor<V>
+    resultSchema: SchemaFor<R>
+}
+
+export interface SyncOperation<V, R> extends BaseOperation<V, R> {
     type: 'QUERY' | 'MUTATION'
-    variablesSchema: z.ZodType;
-    resultSchema: z.ZodType;
 }
 
-export interface SubscriptionOperation {
-    name: string
-    document: string;
+export interface SubscriptionOperation<V, R> extends BaseOperation<V, R> {
     type: 'SUBSCRIPTION'
-    variablesSchema: z.ZodType;
-    resultSchema: z.ZodType;
 }
 
-export type Operation = SyncOperation | SubscriptionOperation
-
-export interface ExecuteResult<TResult> {
-    result: TResult;
-    response: Response;
-}
-
-export type OperationResult<T extends Operation> = z.infer<T['resultSchema']>
-export type OperationVariables<T extends Operation> =
-    z.infer<T['variablesSchema']>
-export type SubOpAsyncIterable<TResult> = {
-    stream: AsyncIterable<TResult, void, unknown>
-    close: () => void
-}
+export type Operation<V, R> = SyncOperation<V, R> | SubscriptionOperation<V, R>
 
 export interface RequestContext {
     fetchOptions?: RequestInit
 }
 
+export type OperationVariables<T extends Operation<unknown, unknown>> =
+    T extends Operation<infer V, unknown> ? V : never
+
+export type OperationResult<T extends Operation<unknown, unknown>> =
+    T extends Operation<unknown, infer R> ? R : never
+
+export interface ExecuteResult<TResult> {
+    result: TResult
+    response: Response
+}
+
+export type SubOpAsyncIterable<TResult> = {
+    stream: AsyncIterable<TResult, void, unknown>
+    close: () => void
+}
+
 export type Executor<TRequestContext extends RequestContext> = {
-    <TSyncOp extends SyncOperation>(
+    <TSyncOp extends SyncOperation<unknown, unknown>>(
         operation: TSyncOp,
         variables: OperationVariables<TSyncOp>,
         context: TRequestContext
     ): Promise<ExecuteResult<OperationResult<TSyncOp>>>
-    <TOperation extends SubscriptionOperation>(
+    <TOperation extends SubscriptionOperation<unknown, unknown>>(
         operation: TOperation,
         variables: OperationVariables<TOperation>,
         context: TRequestContext

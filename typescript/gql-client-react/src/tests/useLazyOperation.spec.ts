@@ -18,7 +18,7 @@ describe('useLazyOperation', () => {
     it('Should return loading state after invoking, then success state',
         async () => {
             const executor: Executor<RequestContext> =
-                async <T extends Operation>() => ({
+                async <T extends Operation<unknown, unknown>>() => ({
                     result: { a: 1 } as z.infer<T['resultSchema']>,
                     response: new Response()
                 })

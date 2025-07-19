@@ -11,7 +11,7 @@ import hash, { type NotUndefined } from 'object-hash'
 import { loadingState, type OperationState } from './useOperation.jsx';
 
 export function useSubscription<
-    T extends SubscriptionOperation,
+    T extends SubscriptionOperation<unknown, unknown>,
     TRequestContext extends RequestContext
 >(
     executor: Executor<TRequestContext>,

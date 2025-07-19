@@ -1,4 +1,4 @@
-import { Operation, SubscriptionOperation } from '@/types.js'
+import { Operation, OperationResult, SubscriptionOperation } from '@/types.js'
 import { z } from 'zod/v4'
 
 export const testOperation = {
@@ -7,9 +7,8 @@ export const testOperation = {
     type: 'QUERY',
     variablesSchema: z.object({}),
     resultSchema: z.object({})
-} as const satisfies Operation
-export type TestOperationResult =
-    z.infer<(typeof testOperation)['resultSchema']>
+} as const satisfies Operation<Record<string, never>, Record<string, never>>
+export type TestOperationResult = OperationResult<typeof testOperation>
 
 export const testSubscription = {
     document: '',
@@ -17,10 +16,9 @@ export const testSubscription = {
     type: 'SUBSCRIPTION',
     variablesSchema: z.object({}),
     resultSchema: z.object({ number: z.number() })
-} as const satisfies SubscriptionOperation
+} as const satisfies SubscriptionOperation<
+    Record<string, never>,
+    { number: number }
+>
 export type TestSubscriptionResult =
-    z.infer<(typeof testSubscription)['resultSchema']>
-
-export async function asyncTimeout(timeoutMS: number) {
-    return await new Promise<void>(resolve => setTimeout(resolve, timeoutMS))
-}
+    OperationResult<typeof testSubscription>

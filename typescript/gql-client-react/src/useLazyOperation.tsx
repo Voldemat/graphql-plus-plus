@@ -31,7 +31,7 @@ type LazyOperationExecuteReturnType<TResult> = Promise<
 >
 async function execute<
     TRequestContext extends RequestContext,
-    T extends SyncOperation
+    T extends SyncOperation<unknown, unknown>
 >(
     executor: Executor<TRequestContext>,
     operation: T,
@@ -65,7 +65,7 @@ export interface UseLazyOperationReturnType<
     reset: () => void
 }
 export function useLazyOperation<
-    T extends SyncOperation,
+    T extends SyncOperation<unknown, unknown>,
     TRequestContext extends RequestContext
 >(
     executor: Executor<TRequestContext>,
