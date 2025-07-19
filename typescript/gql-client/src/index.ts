@@ -18,6 +18,7 @@ export type {
     Operation,
     SyncOperation,
     SubscriptionOperation,
+    SubOpAsyncIterable,
     RequestContext,
     ClientParser,
     ClientSerializer,

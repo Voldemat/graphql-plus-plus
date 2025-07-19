@@ -90,7 +90,7 @@ export type Executor<TRequestContext extends RequestContext> = {
         operation: TOperation,
         variables: OperationVariables<TOperation>,
         context: TRequestContext
-    ): Promise<ExecuteResult<SubOpAsyncIterable<TOperation>>>
+    ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<TOperation>>>>
 }
 
 export function bindConfigToExecute<
