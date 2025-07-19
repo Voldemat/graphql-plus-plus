@@ -7,7 +7,10 @@ import { generateOperationsNodes } from './operations.js';
 const operationTypeNode = ts.factory.createInterfaceDeclaration(
     ts.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Export),
     'Operation',
-    [],
+    [
+        ts.factory.createTypeParameterDeclaration(undefined, 'V'),
+        ts.factory.createTypeParameterDeclaration(undefined, 'R')
+    ],
     [],
     [
         ts.factory.createPropertySignature(
@@ -37,13 +40,17 @@ const operationTypeNode = ts.factory.createInterfaceDeclaration(
             undefined,
             'variablesSchema',
             undefined,
-            ts.factory.createTypeReferenceNode('z.ZodType'),
+            ts.factory.createTypeReferenceNode('z.ZodType', [
+                ts.factory.createTypeReferenceNode('V')
+            ]),
         ),
         ts.factory.createPropertySignature(
             undefined,
             'resultSchema',
             undefined,
-            ts.factory.createTypeReferenceNode('z.ZodType'),
+            ts.factory.createTypeReferenceNode('z.ZodType', [
+                ts.factory.createTypeReferenceNode('R')
+            ]),
         )
     ]
 )

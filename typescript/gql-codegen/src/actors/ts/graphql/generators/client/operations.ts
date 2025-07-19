@@ -86,7 +86,14 @@ function generateOperationNode(
                         ], true),
                         ts.factory.createTypeReferenceNode('const')
                     ),
-                    ts.factory.createTypeReferenceNode('Operation')
+                    ts.factory.createTypeReferenceNode('Operation', [
+                        ts.factory.createTypeReferenceNode(
+                            operation.name + 'Variables'
+                        ),
+                        ts.factory.createTypeReferenceNode(
+                            operation.name + 'Result'
+                        ),
+                    ])
                 )
             )],
             ts.NodeFlags.Const
