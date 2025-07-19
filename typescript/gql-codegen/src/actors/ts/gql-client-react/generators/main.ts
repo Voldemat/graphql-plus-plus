@@ -60,6 +60,7 @@ function generateArrowFunction(
                 ts.factory.createTypeReferenceNode('TRequestContext')
             ]
         )
+        break
     case 'SYNC': {
         resultType = ts.factory.createTypeReferenceNode('OperationState', [
             ts.factory.createTypeReferenceNode(resultName)
@@ -82,6 +83,7 @@ function generateArrowFunction(
                 ),
             ),
         )
+        break
     }
     case 'SUBSCRIPTION': {
         resultType = ts.factory.createTypeReferenceNode('OperationState', [
@@ -108,6 +110,7 @@ function generateArrowFunction(
                 ),
             ),
         )
+        break
     }
     }
     return ts.factory.createArrowFunction(
