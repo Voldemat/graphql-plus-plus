@@ -87,9 +87,6 @@ export function createMultipartSerializer<
     return {
         serializeRequest: ({ operation, requestContext, variables }) => {
             return {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                },
                 method: 'POST',
                 body: buildFormData(operation, variables as any),
                 ...requestContext.fetchOptions

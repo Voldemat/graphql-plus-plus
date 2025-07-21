@@ -52,7 +52,7 @@ describe('Multipart serializer', () => {
             variables
         })
         const headers = new Headers(init.headers)
-        expect(headers.get('Content-Type')).toBe('multipart/form-data')
+        expect(headers.get('Content-Type')).toBe(null)
         assert(init.body != null)
         assert(init.body instanceof FormData)
         expect(init.body.get('operations')).toBe(JSON.stringify({
