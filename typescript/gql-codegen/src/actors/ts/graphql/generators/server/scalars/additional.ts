@@ -66,7 +66,7 @@ export const additionalScalarsMapping = {
         ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
                 ts.factory.createIdentifier('z'),
-                'never'
+                'any'
             ),
             undefined,
             []
