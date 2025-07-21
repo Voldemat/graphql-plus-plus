@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import ts from 'typescript';
 import { buildSymmetricScalarSpec, ScalarSpec } from './mapping.js';
 import { invokeMethod } from '../../../../shared.js';
@@ -52,16 +53,45 @@ export const additionalScalarsMapping = {
             []
         )
     ),
-    Url: buildSymmetricScalarSpec(
-        ts.factory.createCallExpression(
+    Url: {
+        inputSchema: invokeMethod(
+            ts.factory.createCallExpression(
+                ts.factory.createPropertyAccessExpression(
+                    ts.factory.createIdentifier('z'),
+                    'custom'
+                ),
+                [ts.factory.createTypeReferenceNode('URL')],
+                []
+            ),
+            'transform',
+            [ts.factory.createArrowFunction(
+                undefined,
+                undefined,
+                [ts.factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    'url'
+                )],
+                undefined,
+                ts.factory.createToken(
+                    ts.SyntaxKind.EqualsGreaterThanToken
+                ),
+                invokeMethod(
+                    ts.factory.createIdentifier('url'),
+                    'toString',
+                    []
+                )
+            )]
+        ),
+        outputSchema: ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
                 ts.factory.createIdentifier('z'),
                 'custom'
             ),
             [ts.factory.createTypeReferenceNode('URL')],
             []
-        )
-    ),
+        ),
+    },
     Void: buildSymmetricScalarSpec(
         ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
