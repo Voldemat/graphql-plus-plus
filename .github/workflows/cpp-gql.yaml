@@ -98,8 +98,7 @@ jobs:
             load: true
             platforms: linux/amd64,linux/arm64
             tags: vladimirdev635/gql:$GITHUB_REF_NAME
-            build-args: 
-              - GQL_VERSION=$GITHUB_REF_NAME
+            build-args: GQL_VERSION=$GITHUB_REF_NAME
         - name: Build and push
           uses: docker/build-push-action@v6
           with:
