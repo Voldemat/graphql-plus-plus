@@ -1,6 +1,6 @@
 FROM alpine:3.22.1
 ARG GQL_VERSION
-RUN apk add --no-cache wget==1.25.0-r1 &&
-    wget --progress=dot:giga https://github.com/Voldemat/graphql-plus-plus/releases/download/$GQL_VERSION/gql &&
-    mv gql /usr/local/bin/ &&
+RUN apk add --no-cache wget==1.25.0-r1 && \
+    wget --progress=dot:giga https://github.com/Voldemat/graphql-plus-plus/releases/download/$GQL_VERSION/gql && \
+    mv gql /usr/local/bin/ && \
     chmod +x /usr/local/bin/gql && gql --help
