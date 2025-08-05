@@ -73,3 +73,42 @@ jobs:
         retention-days: 90
         compression-level: 6
         overwrite: true
+  docker:
+      runs-on: ubuntu-latest
+      environment: cpp-gql
+      if: ${{ github.ref_type == 'tag' }}
+      needs:
+        - build
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+        - name: Login to Docker Hub
+          uses: docker/login-action@v3
+          with:
+            username: ${{ vars.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+        - name: Set up QEMU
+          uses: docker/setup-qemu-action@v3
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v3
+        - name: Build and push
+          uses: docker/build-push-action@v6
+          with:
+            file: shared/dockerfiles/gql
+            load: true
+            platforms: linux/amd64,linux/arm64
+            tags: vladimirdev635/gql:$GITHUB_REF_NAME
+            build-args: 
+              - GQL_VERSION=$GITHUB_REF_NAME
+        - name: Build and push
+          uses: docker/build-push-action@v6
+          with:
+            platforms: linux/amd64,linux/arm64
+            push: true
+            tags: vladimirdev635/gql:$GITHUB_REF_NAME
+        - name: Build and push
+          uses: docker/build-push-action@v6
+          with:
+            platforms: linux/amd64,linux/arm64
+            push: true
+            tags: vladimirdev635/gql:latest
