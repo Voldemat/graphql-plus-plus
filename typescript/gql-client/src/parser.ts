@@ -58,10 +58,21 @@ export function createParser<
                 const reader = rStream.getReader()
                 const decoder = new TextDecoder()
                 let shouldClose = false
-                const close = () => shouldClose = true
+                type ReadResult = Awaited<ReturnType<typeof reader.read>>
+                let resolve: (v: ReadResult) => void
+                const signal = new Promise<ReadResult>(
+                    res => resolve = res
+                )
+                const close = () => {
+                    shouldClose = true
+                    resolve({ done: true, value: undefined })
+                }
                 const stream = async function*() {
                     while (!shouldClose) {
-                        const readResult = await reader.read()
+                        const readResult = await Promise.race([
+                            reader.read(),
+                            signal
+                        ])
                         if (readResult.done || shouldClose) break
                         const lines = decoder.decode(readResult.value)
                             .split('\n')
