@@ -5,35 +5,30 @@ import {
     useState
 } from 'react'
 import type {
-    Executor,
+    IExecutor,
     OperationResult,
     OperationVariables,
     RequestContext,
     SyncOperation
-} from './types.js'
+} from '../types.js'
+import { type OperationState } from '../useOperation.jsx'
 import {
-    loadingState,
-    type OperationFailureState,
-    type OperationState,
-    type OperationSuccessState
-} from './useOperation.jsx'
+    LazyOperationExecuteReturnType,
+    LazyOperationInitialState,
+    LazyOperationState,
+    UseLazyOperationReturnType
+} from './types.js'
+import { loadingState } from '../loading-state.js'
 
-export interface LazyOperationInitialState { state: 'initial' }
-export type LazyOperationState<TResult> =
-    OperationState<TResult> | LazyOperationInitialState
-export const lazyInitialState = Object.freeze(
+const lazyInitialState = Object.freeze(
     { state: 'initial' } as const
 ) satisfies LazyOperationInitialState
 
-type LazyOperationExecuteReturnType<TResult> = Promise<
-    OperationSuccessState<TResult> |
-    OperationFailureState
->
 async function execute<
     TRequestContext extends RequestContext,
     T extends SyncOperation<unknown, unknown>
 >(
-    executor: Executor<TRequestContext>,
+    executor: IExecutor<TRequestContext>,
     operation: T,
     variables: OperationVariables<T>,
     requestContext: TRequestContext,
@@ -43,7 +38,11 @@ async function execute<
 ): LazyOperationExecuteReturnType<OperationResult<T>> {
     let newState: OperationState<OperationResult<T>>
     try {
-        const result = await executor(operation, variables, requestContext)
+        const result = await executor.executeSync(
+            operation,
+            variables,
+            requestContext
+        )
         newState = { state: 'success', ...result }
     } catch (error: unknown) {
         newState = { state: 'failure', error: error as Error }
@@ -52,25 +51,11 @@ async function execute<
     return newState
 }
 
-export type UseLazyOperationReturnType<
-    TVariables,
-    TResult,
-    TRequestContext extends RequestContext
-> = [
-    (
-        variables: TVariables,
-        requestContext: TRequestContext
-    ) => LazyOperationExecuteReturnType<TResult>,
-    {
-        state: LazyOperationState<TResult>
-        reset: () => void
-    }
-]
 export function useLazyOperation<
     T extends SyncOperation<unknown, unknown>,
     TRequestContext extends RequestContext
 >(
-    executor: Executor<TRequestContext>,
+    executor: IExecutor<TRequestContext>,
     operation: T,
 ): UseLazyOperationReturnType<
     OperationVariables<T>,

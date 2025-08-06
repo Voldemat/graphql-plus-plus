@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import type {
     ExecuteResult,
-    Executor,
+    IExecutor,
     OperationResult,
     OperationVariables,
     RequestContext,
     SyncOperation
 } from './types.js';
 import hash, { type NotUndefined } from 'object-hash'
+import { loadingState } from './loading-state.js';
 
 export interface OperationLoadingState {
     state: 'loading'
@@ -27,14 +28,11 @@ export type OperationState<TResult> =
     OperationSuccessState<TResult> |
     OperationFailureState
 
-export const loadingState =
-    Object.freeze({ state: 'loading' } as const) satisfies OperationLoadingState
-
 export function useOperation<
     T extends SyncOperation<unknown, unknown>,
     TRequestContext extends RequestContext
 >(
-    executor: Executor<TRequestContext>,
+    executor: IExecutor<TRequestContext>,
     operation: T,
     variables: OperationVariables<T>,
     requestContext: TRequestContext
@@ -50,7 +48,7 @@ export function useOperation<
     )
     useEffect(
         () => {
-            executor(operation, variables, requestContext)
+            executor.executeSync(operation, variables, requestContext)
                 .then(result => setState({ state: 'success', ...result }))
                 .catch(error => setState({ state: 'failure', error }))
             return () => setState(loadingState)

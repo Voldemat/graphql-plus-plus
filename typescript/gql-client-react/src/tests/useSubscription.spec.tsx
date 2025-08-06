@@ -3,25 +3,27 @@ import { describe, expect, it } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import assert from 'assert';
 import { testSubscription } from './utils.js';
-import { Executor, RequestContext } from '@/types.js';
+import { IExecutor, RequestContext } from '@/types.js';
 
 describe('useSubscription', () => {
     it('Should return loading state and then success state', async () => {
-        const executor: Executor<RequestContext> = async () => {
-            const readableStream = new ReadableStream()
-            const response = new Response(readableStream)
-            return {
-                result: {
-                    stream: (async function*() {
-                        yield { number: 1 }
-                        yield { number: 2 }
-                        yield { number: 3 }
-                    })(),
-                    close: () => {}
-                },
-                response
-            }
-        }
+        const executor = {
+            executeSubscription: async () => {
+                const readableStream = new ReadableStream()
+                const response = new Response(readableStream)
+                return {
+                    result: {
+                        stream: (async function*() {
+                            yield { number: 1 }
+                            yield { number: 2 }
+                            yield { number: 3 }
+                        })(),
+                        close: () => { }
+                    },
+                    response
+                }
+            },
+        } as unknown as IExecutor<RequestContext>
         const { result } = renderHook((props) => useSubscription(...props), {
             initialProps: [executor, testSubscription, {}, {}] as const
         })
@@ -39,7 +41,9 @@ describe('useSubscription', () => {
 
     it('Should return loading state and then failure state', async () => {
         const error = new Error('Network error')
-        const executor: Executor<RequestContext> = async () => { throw error }
+        const executor = {
+            executeSubscription: async () => { throw error }
+        } as unknown as IExecutor<RequestContext>
         const { result } = renderHook((props) => useSubscription(...props), {
             initialProps: [executor, testSubscription, {}, {}] as const
         })

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type {
-    Executor,
+    IExecutor,
     OperationResult,
     OperationVariables,
     RequestContext,
@@ -8,13 +8,14 @@ import type {
     SubscriptionOperation,
 } from './types.js';
 import hash, { type NotUndefined } from 'object-hash'
-import { loadingState, type OperationState } from './useOperation.jsx';
+import { type OperationState } from './useOperation.jsx';
+import { loadingState } from './loading-state.js';
 
 export function useSubscription<
     T extends SubscriptionOperation<unknown, unknown>,
     TRequestContext extends RequestContext
 >(
-    executor: Executor<TRequestContext>,
+    executor: IExecutor<TRequestContext>,
     operation: T,
     variables: OperationVariables<T>,
     requestContext: TRequestContext
@@ -30,7 +31,12 @@ export function useSubscription<
     )
     useEffect(
         () => {
-            executor(operation, variables, requestContext)
+            executor.executeSubscription(
+                operation,
+                variables,
+                requestContext,
+                new AbortController()
+            )
                 .then(result => setState({ state: 'success', ...result }))
                 .catch(error => setState({ state: 'failure', error }))
             return () => {

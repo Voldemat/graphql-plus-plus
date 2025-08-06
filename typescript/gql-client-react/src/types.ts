@@ -34,20 +34,21 @@ export interface ExecuteResult<TResult> {
     response: Response
 }
 
-export type SubOpAsyncIterable<TResult> = {
+export interface SubOpAsyncIterable<TResult> extends Disposable {
     stream: AsyncIterable<TResult, void, unknown>
     close: () => void
 }
 
-export type Executor<TRequestContext extends RequestContext> = {
-    <TSyncOp extends SyncOperation<unknown, unknown>>(
-        operation: TSyncOp,
-        variables: OperationVariables<TSyncOp>,
-        context: TRequestContext
-    ): Promise<ExecuteResult<OperationResult<TSyncOp>>>
-    <TOperation extends SubscriptionOperation<unknown, unknown>>(
-        operation: TOperation,
-        variables: OperationVariables<TOperation>,
-        context: TRequestContext
-    ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<TOperation>>>>
+export interface IExecutor<TRequestContext extends RequestContext> {
+    executeSync<T extends SyncOperation<unknown, unknown>>(
+        operation: T,
+        variables: OperationVariables<T>,
+        requestContext: TRequestContext
+    ): Promise<ExecuteResult<OperationResult<T>>>
+    executeSubscription<T extends SubscriptionOperation<unknown, unknown>>(
+        operation: T,
+        variables: OperationVariables<T>,
+        requestContext: TRequestContext,
+        controller: AbortController
+    ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<T>>>>
 }

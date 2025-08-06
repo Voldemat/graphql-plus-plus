@@ -3,14 +3,12 @@ export {
     type OperationSuccessState,
     type OperationFailureState,
     type OperationState,
-    loadingState,
     useOperation,
 } from './useOperation.jsx'
 export {
     type LazyOperationInitialState,
     type LazyOperationState,
     type UseLazyOperationReturnType,
-    lazyInitialState,
-    useLazyOperation,
-} from './useLazyOperation.jsx'
+    type LazyOperationExecuteReturnType,
+} from './use-lazy-operation/index.js'
 export { useSubscription } from './useSubscription.jsx'
