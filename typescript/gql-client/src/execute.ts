@@ -1,7 +1,6 @@
 /* eslint-disable max-lines */
 import {
     ClientConfig,
-    Operation,
     OperationResult,
     OperationVariables,
     RequestContext,
@@ -9,103 +8,163 @@ import {
     SubscriptionOperation,
     SyncOperation,
 } from './types/index.js'
-import { AfterParsingMiddlewareOptions } from './types/middlewares.js'
-import { OpResultBasedOnOp } from './types/utils.js'
+import {
+    AfterParsingSubscriptionMiddlewareOptions,
+    AfterParsingSyncMiddlewareOptions
+} from './types/middlewares/parsing.js'
 
 export interface ExecuteResult<TResult> {
     result: TResult
     response: Response
 }
 
-export async function execute<
-    TClientContext,
-    TRequestContext extends RequestContext,
-    T extends Operation<unknown, unknown>
->(
-    config: ClientConfig<TClientContext, TRequestContext>,
-    operation: T,
-    variables: OperationVariables<T>,
-    requestContext: TRequestContext
-): Promise<ExecuteResult<OpResultBasedOnOp<T>>> {
-    for (const middleware of config.middlewares.beforeSerialization) {
-        [operation, variables] = await middleware({
-            clientContext: config.context,
+export class Executor<TClientContext, TRequestContext extends RequestContext> {
+    constructor(
+        private readonly config: ClientConfig<TClientContext, TRequestContext>
+    ) { }
+
+    async executeSync<T extends SyncOperation<unknown, unknown>>(
+        operation: T,
+        variables: OperationVariables<T>,
+        requestContext: TRequestContext
+    ): Promise<ExecuteResult<OperationResult<T>>> {
+        for (const middleware of this.config.middlewares.beforeSerialization) {
+            [operation, variables] = await middleware({
+                clientContext: this.config.context,
+                requestContext,
+                operation,
+                variables
+            })
+        }
+        let init = await this.config.serializer.serializeRequest({
+            clientContext: this.config.context,
             requestContext,
             operation,
             variables
         })
-    }
-    let init = await config.serializer.serializeRequest({
-        clientContext: config.context,
-        requestContext,
-        operation,
-        variables
-    })
-    for (const middleware of config.middlewares.afterSerialization) {
-        init = await middleware({
-            clientContext: config.context,
+        for (
+            const middleware of
+            this.config.middlewares.afterSerialization.sync
+        ) {
+            init = await middleware({
+                clientContext: this.config.context,
+                requestContext,
+                operation,
+                variables,
+                init
+            })
+        }
+        let response = await this.config.fetcher(init)
+        for (const middleware of this.config.middlewares.beforeParsing.sync) {
+            response = await middleware({
+                clientContext: this.config.context,
+                requestContext,
+                operation,
+                variables,
+                init,
+                response
+            })
+        }
+        let result = await this.config.parser.parseBodySync({
+            clientContext: this.config.context,
             requestContext,
             operation,
-            variables,
-            init
-        })
-    }
-    let response = await config.fetcher(init)
-    for (const middleware of config.middlewares.beforeParsing) {
-        response = await middleware({
-            clientContext: config.context,
-            requestContext,
-            operation,
-            variables,
-            init,
             response
         })
+        for (const middleware of this.config.middlewares.afterParsing.sync) {
+            result = await middleware({
+                clientContext: this.config.context,
+                requestContext,
+                operation,
+                variables,
+                init,
+                response,
+                result
+            } as AfterParsingSyncMiddlewareOptions<
+                TClientContext,
+                TRequestContext,
+                T
+            >)
+        }
+        return { result, response }
     }
-    let result = await config.parser.parseBody({
-        clientContext: config.context,
-        requestContext,
-        operation,
-        response
-    })
-    for (const middleware of config.middlewares.afterParsing) {
-        result = await middleware({
-            clientContext: config.context,
-            requestContext,
-            operation,
-            variables,
-            init,
-            response,
-            result
-        } as AfterParsingMiddlewareOptions<TClientContext, TRequestContext, T>)
-    }
-    return { result, response } as ExecuteResult<OpResultBasedOnOp<T>>
-}
 
-export type Executor<TRequestContext extends RequestContext> = {
-    <TSyncOp extends SyncOperation<unknown, unknown>>(
-        operation: TSyncOp,
-        variables: OperationVariables<TSyncOp>,
-        context: TRequestContext
-    ): Promise<ExecuteResult<OperationResult<TSyncOp>>>
-    <TOperation extends SubscriptionOperation<unknown, unknown>>(
-        operation: TOperation,
-        variables: OperationVariables<TOperation>,
-        context: TRequestContext
-    ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<TOperation>>>>
-}
-
-export function bindConfigToExecute<
-    TClientContext,
-    TRequestContext extends RequestContext
->(
-    config: ClientConfig<TClientContext, TRequestContext>
-): Executor<TRequestContext> {
-    return <T extends Operation<unknown, unknown>>(
+    async executeSubscription<
+        T extends SubscriptionOperation<unknown, unknown>
+    >(
         operation: T,
         variables: OperationVariables<T>,
-        requestContext: TRequestContext
-    ) => execute(
-        config, operation, variables, requestContext
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any
+        requestContext: TRequestContext,
+        controller: AbortController
+    ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<T>>>> {
+        for (const middleware of this.config.middlewares.beforeSerialization) {
+            [operation, variables] = await middleware({
+                clientContext: this.config.context,
+                requestContext,
+                operation,
+                variables
+            })
+        }
+        let init = await this.config.serializer.serializeRequest({
+            clientContext: this.config.context,
+            requestContext,
+            operation,
+            variables
+        })
+        for (
+            const middleware of
+            this.config.middlewares.afterSerialization.subscription
+        ) {
+            init = await middleware({
+                clientContext: this.config.context,
+                requestContext,
+                operation,
+                variables,
+                init,
+                controller
+            })
+        }
+        let response = await this.config.fetcher(init)
+        for (
+            const middleware of
+            this.config.middlewares.beforeParsing.subscription
+        ) {
+            response = await middleware({
+                clientContext: this.config.context,
+                requestContext,
+                operation,
+                variables,
+                init,
+                response,
+                controller
+            })
+        }
+        let result = await this.config.parser.parseBodySubscription({
+            clientContext: this.config.context,
+            requestContext,
+            operation,
+            response,
+            controller
+        })
+        for (
+            const middleware of
+            this.config.middlewares.afterParsing.subscription
+        ) {
+            result = await middleware({
+                clientContext: this.config.context,
+                requestContext,
+                operation,
+                variables,
+                init,
+                response,
+                result,
+                controller
+            } as AfterParsingSubscriptionMiddlewareOptions<
+                TClientContext,
+                TRequestContext,
+                T
+            >)
+        }
+        return { result, response }
+    }
 }

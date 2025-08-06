@@ -6,16 +6,11 @@ export type {
     OperationVariables,
     OperationResult
 } from './base.js'
-export type {
-    BeforeSerializationMiddleware,
-    AfterSerializationMiddleware,
-    BeforeParsingMiddleware,
-    AfterParsingMiddleware,
-    ClientMiddlewaresConfig
-} from './middlewares.js'
+export * as middlewares from './middlewares/index.js'
 export type {
     ClientParser,
-    ClientParserParseBodyOptions,
+    ClientParserParseBodySyncOptions,
+    ClientParserParseBodySubscriptionOptions,
     SubOpAsyncIterable
 } from './parser.js'
 export type { ClientSerializer } from './serializer.js'

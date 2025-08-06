@@ -24,6 +24,17 @@ export function createSerializer<
 ): ClientSerializer<TClientContext, TRequestContext> {
     return {
         serializeRequest: (options) => {
+            if (options.operation.type === 'SUBSCRIPTION') {
+                const controller = new AbortController()
+                options.requestContext = {
+                    ...options.requestContext,
+                    fetchOptions: {
+                        ...options.requestContext.fetchOptions,
+                        signal: controller.signal,
+                    },
+                    subscriptionController: controller
+                }
+            }
             if (!shouldUseMultipartSerializer(options.variables)) {
                 return jsonSerializer.serializeRequest(options)
             }

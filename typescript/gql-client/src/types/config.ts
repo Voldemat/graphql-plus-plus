@@ -1,5 +1,5 @@
 import { RequestContext } from './base.js'
-import { ClientMiddlewaresConfig } from './middlewares.js'
+import { ClientMiddlewaresConfig } from './middlewares/config.js'
 import { ClientParser } from './parser.js'
 import { ClientSerializer } from './serializer.js'
 

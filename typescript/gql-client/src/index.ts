@@ -1,34 +1,7 @@
+export * as parsers from './parsers/index.js';
+export * as serializers from './serializers/index.js';
 export {
-    createParser,
-    type CreateParserOptions,
-} from './parser.js'
-export {
-    createSerializer,
-    createJSONSerializer,
-    createMultipartSerializer,
-    hasBlobValue
-} from './serializers/index.js'
-export {
-    execute,
-    bindConfigToExecute,
-    type Executor,
+    Executor,
     type ExecuteResult
 } from './execute.js'
-export type {
-    Operation,
-    SyncOperation,
-    SubscriptionOperation,
-    SubOpAsyncIterable,
-    RequestContext,
-    ClientParser,
-    ClientSerializer,
-    ClientConfig,
-    ClientMiddlewaresConfig,
-    BeforeSerializationMiddleware,
-    AfterSerializationMiddleware,
-    BeforeParsingMiddleware,
-    AfterParsingMiddleware,
-    OpResultBasedOnOp,
-    OperationVariables,
-    OperationResult
-} from './types/index.js'
+export type * as types from './types/index.js'
