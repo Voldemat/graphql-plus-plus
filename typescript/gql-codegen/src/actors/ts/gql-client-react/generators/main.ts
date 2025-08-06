@@ -217,6 +217,19 @@ export function generateNodes(
         )
     ]
 
+    const gqlClientImports = [
+        ts.factory.createImportSpecifier(
+            false,
+            undefined,
+            ts.factory.createIdentifier('IExecutor')
+        ),
+        ts.factory.createImportSpecifier(
+            false,
+            undefined,
+            ts.factory.createIdentifier('RequestContext')
+        )
+    ]
+
     if (subscriptionNodes.length !== 0) {
         gqlClientReactImports.push(
             ts.factory.createImportSpecifier(
@@ -226,6 +239,8 @@ export function generateNodes(
                     'useSubscription'
                 )
             ),
+        )
+        gqlClientImports.push(
             ts.factory.createImportSpecifier(
                 true,
                 undefined,
@@ -281,20 +296,9 @@ export function generateNodes(
             ts.factory.createImportClause(
                 true,
                 undefined,
-                ts.factory.createNamedImports([
-                    ts.factory.createImportSpecifier(
-                        false,
-                        undefined,
-                        ts.factory.createIdentifier('Executor')
-                    ),
-                    ts.factory.createImportSpecifier(
-                        false,
-                        undefined,
-                        ts.factory.createIdentifier('RequestContext')
-                    )
-                ])
+                ts.factory.createNamedImports(gqlClientImports)
             ),
-            ts.factory.createStringLiteral('@vladimirdev635/gql-client')
+            ts.factory.createStringLiteral('@vladimirdev635/gql-client/types')
         ),
         ts.factory.createImportDeclaration(
             undefined,
@@ -327,7 +331,7 @@ export function generateNodes(
                 undefined,
                 'executor',
                 undefined,
-                ts.factory.createTypeReferenceNode('Executor', [
+                ts.factory.createTypeReferenceNode('IExecutor', [
                     ts.factory.createTypeReferenceNode('TRequestContext')
                 ])
             )],

@@ -2,20 +2,32 @@
 import { ActorContext } from '@/config.js';
 import { GQLClientActorConfig, OperationReturnType } from '../actor.js';
 import ts from 'typescript';
+import { operationSchema } from '@/schema/client/operation.js';
+import { z } from 'zod/v4';
 
 function generateFunctionBlock(
     operationName: string,
+    operationType: z.infer<typeof operationSchema>['type'],
     returnType: OperationReturnType
 ) {
+    const callArgs = [
+        ts.factory.createIdentifier(operationName),
+        ts.factory.createIdentifier('variables'),
+        ts.factory.createIdentifier('requestContext')
+    ]
+    if (operationType === 'SUBSCRIPTION') {
+        callArgs.push(ts.factory.createIdentifier('controller'))
+    }
     const awaitExpression = ts.factory.createAwaitExpression(
         ts.factory.createCallExpression(
-            ts.factory.createIdentifier('executor'),
+            ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier('executor'),
+                operationType === 'SUBSCRIPTION' ?
+                    'executeSubscription' :
+                    'executeSync'
+            ),
             undefined,
-            [
-                ts.factory.createIdentifier(operationName),
-                ts.factory.createIdentifier('variables'),
-                ts.factory.createIdentifier('requestContext')
-            ]
+            callArgs
         )
     )
     if (returnType === 'ExecuteResult') {
@@ -83,6 +95,35 @@ export function generateNodes(
         const returnType = getReturnTypeFromConfig(config, operation.name)
         if (returnType === 'ExecuteResult')
             shouldIncludeExecuteResultType = true
+        const funcArgs = [
+            ts.factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'variables',
+                undefined,
+                ts.factory.createTypeReferenceNode(variablesName)
+            ),
+            ts.factory.createParameterDeclaration(
+                undefined,
+                undefined,
+                'requestContext',
+                undefined,
+                ts.factory.createTypeReferenceNode(
+                    'TRequestContext'
+                ),
+            ),
+        ]
+        if (operation.type === 'SUBSCRIPTION') {
+            funcArgs.push(
+                ts.factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    'controller',
+                    undefined,
+                    ts.factory.createTypeReferenceNode('AbortController'),
+                ),
+            )
+        }
         const propAssignment = ts.factory.createPropertyAssignment(
             operation.name,
             ts.factory.createArrowFunction(
@@ -90,24 +131,7 @@ export function generateNodes(
                     ts.ModifierFlags.Async
                 ),
                 undefined,
-                [
-                    ts.factory.createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        'variables',
-                        undefined,
-                        ts.factory.createTypeReferenceNode(variablesName)
-                    ),
-                    ts.factory.createParameterDeclaration(
-                        undefined,
-                        undefined,
-                        'requestContext',
-                        undefined,
-                        ts.factory.createTypeReferenceNode(
-                            'TRequestContext'
-                        ),
-                    ),
-                ],
+                funcArgs,
                 ts.factory.createTypeReferenceNode(
                     'Promise',
                     [
@@ -121,7 +145,7 @@ export function generateNodes(
                 ts.factory.createToken(
                     ts.SyntaxKind.EqualsGreaterThanToken
                 ),
-                generateFunctionBlock(operationName, returnType)
+                generateFunctionBlock(operationName, operation.type, returnType)
             )
         )
 
@@ -145,7 +169,7 @@ export function generateNodes(
         ts.factory.createImportSpecifier(
             false,
             undefined,
-            ts.factory.createIdentifier('Executor')
+            ts.factory.createIdentifier('IExecutor')
         ),
         ts.factory.createImportSpecifier(
             false,
@@ -209,7 +233,7 @@ export function generateNodes(
                 undefined,
                 ts.factory.createNamedImports(gqlClientImports)
             ),
-            ts.factory.createStringLiteral('@vladimirdev635/gql-client')
+            ts.factory.createStringLiteral('@vladimirdev635/gql-client/types')
         ),
         ts.factory.createImportDeclaration(
             undefined,
@@ -242,7 +266,7 @@ export function generateNodes(
                 undefined,
                 'executor',
                 undefined,
-                ts.factory.createTypeReferenceNode('Executor', [
+                ts.factory.createTypeReferenceNode('IExecutor', [
                     ts.factory.createTypeReferenceNode('TRequestContext')
                 ])
             )],
