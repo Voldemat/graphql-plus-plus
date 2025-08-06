@@ -16,3 +16,4 @@ export type {
 export type { ClientSerializer } from './serializer.js'
 export type { ClientConfig } from './config.js'
 export type { OpResultBasedOnOp } from './utils.js'
+export type { IExecutor, ExecuteResult } from './iexecutor.js'

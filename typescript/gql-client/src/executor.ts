@@ -1,6 +1,8 @@
 /* eslint-disable max-lines */
 import {
     ClientConfig,
+    ExecuteResult,
+    IExecutor,
     OperationResult,
     OperationVariables,
     RequestContext,
@@ -13,12 +15,10 @@ import {
     AfterParsingSyncMiddlewareOptions
 } from './types/middlewares/parsing.js'
 
-export interface ExecuteResult<TResult> {
-    result: TResult
-    response: Response
-}
-
-export class Executor<TClientContext, TRequestContext extends RequestContext> {
+export class Executor<
+    TClientContext,
+    TRequestContext extends RequestContext
+> implements IExecutor<TRequestContext> {
     constructor(
         private readonly config: ClientConfig<TClientContext, TRequestContext>
     ) { }
@@ -124,6 +124,7 @@ export class Executor<TClientContext, TRequestContext extends RequestContext> {
                 controller
             })
         }
+        init.signal = controller.signal
         let response = await this.config.fetcher(init)
         for (
             const middleware of
