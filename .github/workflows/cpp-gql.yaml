@@ -5,83 +5,23 @@ on:
     paths:
       - cpp/gql/**
       - .github/workflows/cpp-gql.yaml
+      - shared/dockerfiles/gql
+      - shared/dockerfiles/gql.dockerignore
+      - shared/dockerfiles/gql-darwin
+      - shared/dockerfiles/gql-darwin.dockerignore
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-24.04
-    permissions: write-all
-    steps:
-    - uses: actions/checkout@v3
-    - uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: libc++-18-dev clang-18
-    - name: Cache Build
-      id: restore-cache-build
-      uses: actions/cache/restore@v4
-      with:
-        path: cpp/gql/build
-        key: ${{ runner.os }}-build
-    - name: CMake Action
-      uses: threeal/cmake-action@v1.3.0
-      with:
-        source-dir: cpp/gql
-        args: -DCMAKE_BUILD_TYPE=Release -DGQL_BUILD_TESTS=true -DCMAKE_CXX_FLAGS='-D__cpp_concepts=202002L' -DCMAKE_EXE_LINKER_FLAGS='-static'
-        build-args: --parallel 4
-        run-build: true
-        c-compiler: clang-18
-        cxx-compiler: clang++-18
-    - uses: actions/cache/save@v3
-      name: Save build cache
-      with:
-        path: cpp/gql/build
-        key: ${{ runner.os }}-build
-    - name: Run tests
-      working-directory: ./cpp/gql/build
-      run: ctest --rerun-failed --output-on-failure .
-    - uses: actions/upload-artifact@v4
-      with:
-        name: 'ubuntu-cli'
-        path: cpp/gql/build/bin/gql
-        if-no-files-found: error
-        retention-days: 90
-        compression-level: 6
-        overwrite: true
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      if: github.ref_type == 'tag'
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        title: "Release ${{ github.ref_name }}"
-        prerelease: false
-        files: |
-          cpp/gql/build/bin/gql
-  build-completions:
-    name: Build bash completions
-    runs-on: ubuntu-24.04
-    steps:
-    - uses: actions/checkout@v3
-    - name: "Install completely"
-      run: sudo apt update && sudo apt-get install -y rubygems-integration && sudo gem install completely
-    - name: "Build completions"
-      working-directory: cpp/gql
-      run: cd autocomplete && completely generate
-    - uses: actions/upload-artifact@v4
-      with:
-        name: 'ubuntu-cli-completions'
-        path: cpp/gql/autocomplete/completely.bash
-        if-no-files-found: error
-        retention-days: 90
-        compression-level: 6
-        overwrite: true
   docker:
       runs-on: ubuntu-latest
       environment: cpp-gql
-      if: ${{ github.ref_type == 'tag' }}
       needs:
         - build
       steps:
         - name: Checkout
           uses: actions/checkout@v4
+        - uses: awalsh128/cache-apt-pkgs-action@latest
+          with:
+            packages: zip
         - name: Login to Docker Hub
           uses: docker/login-action@v3
           with:
@@ -96,7 +36,59 @@ jobs:
           with:
             file: shared/dockerfiles/gql
             push: true
+            target: scratch
             platforms: linux/amd64,linux/arm64
             tags: vladimirdev635/gql:${{ github.ref_name }}
-            build-args: |
-              GQL_VERSION=${{ github.ref_name }}
+        - name: Build and push
+          uses: docker/build-push-action@v6
+          with:
+            file: shared/dockerfiles/gql
+            push: true
+            target: alpine
+            platforms: linux/amd64,linux/arm64
+            tags: vladimirdev635/gql:alpine-${{ github.ref_name }}
+        - name: Build and push
+          uses: docker/build-push-action@v6
+          with:
+            file: shared/dockerfiles/gql-darwin
+            push: true
+            platforms: linux/amd64,linux/arm64
+            tags: vladimirdev635/gql-darwin:${{ github.ref_name }}
+        - name: 'Copy all binaries'
+          run: |
+            container_id=$(docker create vladimirdev635/gql-darwin:${{ github.ref_name }} --platform=linux/amd64)
+            docker cp $container_id:/gql ./gql-darwin-x86_64
+            tar -cvzf ./gql-darwin-x86_64.tar.gz ./gql-darwin-x86_64
+            zip ./gql-darwin-x86_64.zip ./gql-darwin-x86_64
+            docker rm $container_id
+            container_id=$(docker create vladimirdev635/gql-darwin:${{ github.ref_name }} --platform=linux/arm64)
+            docker cp $container_id:/gql ./gql-darwin-arm64
+            tar -cvzf ./gql-darwin-arm64.tar.gz ./gql-darwin-arm64
+            zip ./gql-darwin-arm64.zip ./gql-darwin-arm64
+            docker rm $container_id
+            container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=linux/amd64)
+            docker cp $container_id:/gql ./gql-linux-x86_64
+            tar -cvzf ./gql-linux-x86_64.tar.gz ./gql-linux-x86_64
+            zip ./gql-linux-x86_64.zip ./gql-linux-x86_64
+            docker rm $container_id
+            container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=linux/arm64)
+            docker cp $container_id:/gql ./gql-linux-arm64
+            tar -cvzf ./gql-linux-arm64.tar.gz ./gql-linux-arm64
+            zip ./gql-linux-arm64.zip ./gql-linux-arm64
+            docker rm $container_id
+            ls
+        - uses: "marvinpinto/action-automatic-releases@latest"
+          if: github.ref_type == 'tag'
+          with:
+            repo_token: "${{ secrets.GITHUB_TOKEN }}"
+            title: "Release ${{ github.ref_name }}"
+            prerelease: false
+            files: |
+              gql-linux-x86_64.tar.gz
+              gql-linux-x86_64.zip
+              gql-linux-arm64.tar.gz
+              gql-linux-arm64.zip
+              gql-darwin-x86_64.tar.gz
+              gql-darwin-x86_64.zip
+              gql-darwin-arm64.tar.gz
+              gql-darwin-arm64.zip

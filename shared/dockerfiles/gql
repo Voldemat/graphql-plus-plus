@@ -1,6 +1,24 @@
-FROM alpine:3.22.1
-ARG GQL_VERSION
-RUN apk add --no-cache wget==1.25.0-r1 && \
-    wget --progress=dot:giga https://github.com/Voldemat/graphql-plus-plus/releases/download/$GQL_VERSION/gql && \
-    mv gql /usr/local/bin/ && \
-    chmod +x /usr/local/bin/gql && gql --help
+FROM alpine:3.22.1 as builder
+RUN apk --no-cache add \
+    clang lld musl-dev cmake make git && \
+    rm -rf /var/cache/apk/*
+WORKDIR /usr/local/app/
+COPY cpp/gql/ ./
+ENV CC=clang
+ENV CXX=clang++
+RUN cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_EXE_LINKER_FLAGS="-static" \
+    -DGQL_BUILD_TESTS=ON \
+    -S . \
+    -B build && \
+    cmake --build build --parallel 4 && \
+    ctest --rerun-failed --output-on-failure build
+
+FROM alpine:3.22.1 as alpine
+COPY --from=builder /usr/local/app/build/bin/gql /gql
+CMD ["/gql"]
+
+FROM scratch as scratch
+COPY --from=builder /usr/local/app/build/bin/gql /gql
+CMD ["/gql"]
