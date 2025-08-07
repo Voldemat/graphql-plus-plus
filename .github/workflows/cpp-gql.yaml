@@ -93,29 +93,25 @@ jobs:
             docker manifest push vladimirdev635/gql:${{ github.ref_name }}
         - name: 'Copy all binaries'
           run: |
-            docker pull vladimirdev635/gql:${{ github.ref_name }} --platform=darwin/amd64
-            docker pull vladimirdev635/gql:${{ github.ref_name }} --platform=darwin/arm64
-            docker pull vladimirdev635/gql:${{ github.ref_name }} --platform=linux/arm64
-            docker pull vladimirdev635/gql:${{ github.ref_name }} --platform=linux/amd64
-            container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=darwin/amd64)
+            container_id=$(docker create vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }})
             docker cp $container_id:/gql ./gql-darwin-x86_64
             tar -cvzf ./gql-darwin-x86_64.tar.gz ./gql-darwin-x86_64
             zip ./gql-darwin-x86_64.zip ./gql-darwin-x86_64
             docker rm $container_id
 
-            container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=darwin/arm64)
+            container_id=$(docker create vladimirdev635/gql-darwin-arm64:${{ github.ref_name }})
             docker cp $container_id:/gql ./gql-darwin-arm64
             tar -cvzf ./gql-darwin-arm64.tar.gz ./gql-darwin-arm64
             zip ./gql-darwin-arm64.zip ./gql-darwin-arm64
             docker rm $container_id
 
-            container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=linux/amd64)
+            container_id=$(docker create vladimirdev635/gql-linux-x86_64:${{ github.ref_name }})
             docker cp $container_id:/gql ./gql-linux-x86_64
             tar -cvzf ./gql-linux-x86_64.tar.gz ./gql-linux-x86_64
             zip ./gql-linux-x86_64.zip ./gql-linux-x86_64
             docker rm $container_id
 
-            container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=linux/arm64)
+            container_id=$(docker create vladimirdev635/gql-linux-arm64:${{ github.ref_name }})
             docker cp $container_id:/gql ./gql-linux-arm64
             tar -cvzf ./gql-linux-arm64.tar.gz ./gql-linux-arm64
             zip ./gql-linux-arm64.zip ./gql-linux-arm64
