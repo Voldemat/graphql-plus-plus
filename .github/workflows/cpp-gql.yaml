@@ -38,10 +38,10 @@ jobs:
             push: true
             target: scratch
             tags: vladimirdev635/gql-linux-x86_64:${{ github.ref_name }}
-            cache-from: type=gha
             cache-to: type=gha,mode=max
             provenance: false
             sbom: false
+            cache-from: type=gha
         - name: Build gql linux/arm64
           uses: docker/build-push-action@v6
           with:
@@ -51,8 +51,10 @@ jobs:
             push: true
             target: scratch
             tags: vladimirdev635/gql-linux-arm64:${{ github.ref_name }}
-            cache-from: type=gha
             cache-to: type=gha,mode=max
+            cache-from: |
+              type=gha
+              type=registry,ref=vladimirdev635/alpine-arm64@sha256:52fcab06392b4757bfe4e3bd91f19e9cdb9946ea671d408c90a824865f5c6ccf
         - name: Build gql darwin/x86_64
           uses: docker/build-push-action@v6
           with:
