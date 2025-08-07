@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 vladimirdev635/alpine-arm64 as alpine-sysroot
+FROM --platform=linux/arm64 vladimirdev635/alpine-arm64:52fcab06392b4757bfe4e3bd91f19e9cdb9946ea671d408c90a824865f5c6ccf as alpine-sysroot
 FROM alpine:3.22.1 as builder
 RUN apk --no-cache add \
     clang lld musl-dev cmake make git && \
