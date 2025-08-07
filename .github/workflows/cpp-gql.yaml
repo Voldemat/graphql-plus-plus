@@ -36,9 +36,9 @@ jobs:
           with:
             file: shared/dockerfiles/gql
             push: false
-            load: true
             target: scratch
             tags: gql-linux-x86_64:${{ github.ref_name }}
+            outputs: type=docker,dest=${{ runner.temp }}/gql-linux-x86_64.tar
             cache-from: type=gha
             cache-to: type=gha,mode=max
         - name: Build gql linux/arm64
@@ -46,22 +46,25 @@ jobs:
           with:
             file: shared/dockerfiles/gql-arm64
             push: false
-            load: true
             target: scratch
             tags: gql-linux-arm64:${{ github.ref_name }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
+            outputs: type=docker,dest=${{ runner.temp }}/gql-linux-arm64.tar
         - name: Build gql darwin/x86_64
           uses: docker/build-push-action@v6
           with:
             file: shared/dockerfiles/gql
             push: false
-            load: true
             tags: gql-darwin-x86_64:${{ github.ref_name }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
+            outputs: type=docker,dest=${{ runner.temp }}/gql-darwin-x86_64.tar
         - name: Push gql
           run: |
+            docker load -i ${{ runner.temp }}/gql-linux-x86_64.tar
+            docker load -i ${{ runner.temp }}/gql-linux-arm64.tar
+            docker load -i ${{ runner.temp }}/gql-darwin-x86_64.tar
             docker manifest create vladimirdev635/gql:${{ github.ref_name }} \
                 gql-linux-x86_64:${{ github.ref_name }} \
                 gql-linux-arm64:${{ github.ref_name }} \
