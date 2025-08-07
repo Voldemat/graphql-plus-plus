@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM crazymax/osxcross:15.5-alpine AS osxcross
+FROM crazymax/osxcross:15.5-alpine AS osxcross
 
 FROM alpine:3.22.1 as builder
 RUN apk --no-cache add \

@@ -1,0 +1,31 @@
+FROM --platform=linux/arm64 vladimirdev635/alpine-arm64 as alpine-sysroot
+FROM alpine:3.22.1 as builder
+RUN apk --no-cache add \
+    clang lld musl-dev cmake make git && \
+    rm -rf /var/cache/apk/*
+WORKDIR /usr/local/app/
+COPY cpp/gql/ ./
+ENV CC=clang
+ENV CXX=clang++
+COPY --from=alpine-sysroot /lib/ /arm64-sysroot/lib/
+COPY --from=alpine-sysroot /usr/lib/ /arm64-sysroot/usr/lib/
+COPY --from=alpine-sysroot /usr/include/ /arm64-sysroot/usr/include/
+COPY --from=alpine-sysroot /usr/local/lib/ /arm64-sysroot/usr/local/lib/
+RUN cmake \
+    -DCMAKE_C_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot" \
+    -DCMAKE_CXX_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot" \
+    -DCMAKE_LINKER_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot -fuse-ld=lld" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_EXE_LINKER_FLAGS="-static" \
+    -DGQL_BUILD_TESTS=OFF \
+    -S . \
+    -B build && \
+    cmake --build build --parallel 4
+
+FROM --platform=linux/arm64 alpine:3.22.1 as alpine
+COPY --from=builder /usr/local/app/build/bin/gql /gql
+CMD ["/gql"]
+
+FROM --platform=linux/arm64 scratch as scratch
+COPY --from=builder /usr/local/app/build/bin/gql /gql
+CMD ["/gql"]

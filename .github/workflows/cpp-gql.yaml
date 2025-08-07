@@ -29,29 +29,42 @@ jobs:
           uses: docker/setup-qemu-action@v3
         - name: Set up Docker Buildx
           uses: docker/setup-buildx-action@v3
-        - name: Build and push
+        - name: Build gql x86_64
           uses: docker/build-push-action@v6
           with:
             file: shared/dockerfiles/gql
-            push: true
+            push: false
             target: scratch
-            tags: vladimirdev635/gql:${{ github.ref_name }}
-        - name: Build and push
+            tags: gql-linux-x86_64:${{ github.ref_name }}
+        - name: Build gql linux/arm64
+          uses: docker/build-push-action@v6
+          with:
+            file: shared/dockerfiles/gql-arm64
+            push: false
+            target: scratch
+            tags: gql-linux-arm64:${{ github.ref_name }}
+        - name: Build gql darwin/x86_64
           uses: docker/build-push-action@v6
           with:
             file: shared/dockerfiles/gql
-            push: true
-            target: alpine
-            tags: vladimirdev635/gql:alpine-${{ github.ref_name }}
-        - name: Build and push
-          uses: docker/build-push-action@v6
-          with:
-            file: shared/dockerfiles/gql-darwin
-            push: true
-            tags: vladimirdev635/gql-darwin:${{ github.ref_name }}
+            push: false
+            tags: gql-darwin-x86_64:${{ github.ref_name }}
+        - name: Push gql
+          run: |
+            docker manifest create vladimirdev635/gql:${{ github.ref_name }} \
+                gql-linux-x86_64:${{ github.ref_name }} \
+                gql-linux-arm64:${{ github.ref_name }} \
+                gql-darwin-x86_64:${{ github.ref_name }} \
+            docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
+                gql-linux-x86_64:${{ github.ref_name }} --os linux --arch=amd64
+            docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
+                gql-linux-arm64:${{ github.ref_name }} --os linux --arch=arm64
+            docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
+                gql-darwin-x86_64:${{ github.ref_name }} --os darwin --arch=amd64
+            docker push vladimirdev635/gql:${{ github.ref_name }}
         - name: 'Copy all binaries'
           run: |
-            container_id=$(docker create vladimirdev635/gql-darwin:${{ github.ref_name }} --platform=linux/amd64)
+            container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=darwin/amd64)
             docker cp $container_id:/gql ./gql-darwin-x86_64
             tar -cvzf ./gql-darwin-x86_64.tar.gz ./gql-darwin-x86_64
             zip ./gql-darwin-x86_64.zip ./gql-darwin-x86_64
@@ -61,6 +74,11 @@ jobs:
             tar -cvzf ./gql-linux-x86_64.tar.gz ./gql-linux-x86_64
             zip ./gql-linux-x86_64.zip ./gql-linux-x86_64
             docker rm $container_id
+            container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=linux/arm64)
+            docker cp $container_id:/gql ./gql-linux-arm64
+            tar -cvzf ./gql-linux-arm64.tar.gz ./gql-linux-arm64
+            zip ./gql-linux-arm64.zip ./gql-linux-arm64
+            docker rm $container_id
             ls
         - uses: "marvinpinto/action-automatic-releases@latest"
           if: github.ref_type == 'tag'
@@ -69,7 +87,12 @@ jobs:
             title: "Release ${{ github.ref_name }}"
             prerelease: false
             files: |
+              gql-linux-x86_64
               gql-linux-x86_64.tar.gz
               gql-linux-x86_64.zip
+              gql-linux-arm64
+              gql-linux-arm64.tar.gz
+              gql-linux-arm64.zip
+              gql-darwin-x86_64
               gql-darwin-x86_64.tar.gz
               gql-darwin-x86_64.zip
