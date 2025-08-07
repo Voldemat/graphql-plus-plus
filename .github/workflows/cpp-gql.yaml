@@ -35,47 +35,40 @@ jobs:
           uses: docker/build-push-action@v6
           with:
             file: shared/dockerfiles/gql
-            push: false
+            push: true
             target: scratch
-            tags: gql-linux-x86_64:${{ github.ref_name }}
-            outputs: type=docker,dest=${{ runner.temp }}/gql-linux-x86_64.tar
+            tags: vladimirdev635/gql-linux-x86_64:${{ github.ref_name }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
         - name: Build gql linux/arm64
           uses: docker/build-push-action@v6
           with:
             file: shared/dockerfiles/gql-arm64
-            push: false
+            push: true
             target: scratch
-            tags: gql-linux-arm64:${{ github.ref_name }}
+            tags: vladimirdev635/gql-linux-arm64:${{ github.ref_name }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
-            outputs: type=docker,dest=${{ runner.temp }}/gql-linux-arm64.tar
         - name: Build gql darwin/x86_64
           uses: docker/build-push-action@v6
           with:
             file: shared/dockerfiles/gql
-            push: false
-            tags: gql-darwin-x86_64:${{ github.ref_name }}
+            push: true
+            tags: vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
-            outputs: type=docker,dest=${{ runner.temp }}/gql-darwin-x86_64.tar
         - name: Push gql
           run: |
-            docker load -i ${{ runner.temp }}/gql-linux-x86_64.tar
-            docker load -i ${{ runner.temp }}/gql-linux-arm64.tar
-            docker load -i ${{ runner.temp }}/gql-darwin-x86_64.tar
-            docker login -u ${{ vars.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
             docker manifest create vladimirdev635/gql:${{ github.ref_name }} \
-                gql-linux-x86_64:${{ github.ref_name }} \
-                gql-linux-arm64:${{ github.ref_name }} \
-                gql-darwin-x86_64:${{ github.ref_name }}
+                vladimirdev635/gql-linux-x86_64:${{ github.ref_name }} \
+                vladimirdev635/gql-linux-arm64:${{ github.ref_name }} \
+                vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }}
             docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
-                gql-linux-x86_64:${{ github.ref_name }} --os linux --arch=amd64
+                vladimirdev635/gql-linux-x86_64:${{ github.ref_name }} --os linux --arch=amd64
             docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
-                gql-linux-arm64:${{ github.ref_name }} --os linux --arch=arm64
+                vladimirdev635/gql-linux-arm64:${{ github.ref_name }} --os linux --arch=arm64
             docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
-                gql-darwin-x86_64:${{ github.ref_name }} --os darwin --arch=amd64
+                vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }} --os darwin --arch=amd64
             docker manifest push vladimirdev635/gql:${{ github.ref_name }}
         - name: 'Copy all binaries'
           run: |
