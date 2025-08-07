@@ -7,11 +7,11 @@ WORKDIR /usr/local/app/
 COPY cpp/gql/ ./
 ENV CC=clang
 ENV CXX=clang++
-COPY --from=alpine-sysroot /lib/ /arm64-sysroot/lib/
-COPY --from=alpine-sysroot /usr/lib/ /arm64-sysroot/usr/lib/
-COPY --from=alpine-sysroot /usr/include/ /arm64-sysroot/usr/include/
-COPY --from=alpine-sysroot /usr/local/lib/ /arm64-sysroot/usr/local/lib/
-RUN cmake \
+RUN --mount=type=bind,from=alpine-sysroot,source=/lib/,target=/arm64-sysroot/lib/ \
+    --mount=type=bind,from=alpine-sysroot,source=/usr/lib/,target=/arm64-sysroot/usr/lib/ \
+    --mount=type=bind,from=alpine-sysroot,source=/usr/include/,target=/arm64-sysroot/usr/include/ \
+    --mount=type=bind,from=alpine-sysroot,source=/usr/local/lib/,target=/arm64-sysroot/usr/local/lib/ \
+    cmake \
     -DCMAKE_C_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot -fuse-ld=lld" \
     -DCMAKE_CXX_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot -fuse-ld=lld" \
     -DCMAKE_LINKER_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot -fuse-ld=lld" \
