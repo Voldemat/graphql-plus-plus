@@ -6,12 +6,12 @@ RUN apk --no-cache add \
     rm -rf /var/cache/apk/*
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
-RUN uname -m | sed 's/^aarch64$/arm64/' > /tmp/arch.txt
 WORKDIR /usr/local/app/
 COPY cpp/gql/ ./
+ARG TARGETARCH
 RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
-    CC=$(cat /tmp/arch.txt)-apple-darwin24.5-clang \
-    CXX=$(cat /tmp/arch.txt)-apple-darwin24.5-clang++ \
+    CC=$TARGETARCH-apple-darwin24.5-clang \
+    CXX=$TARGETARCH-apple-darwin24.5-clang++ \
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_CXX_FLAGS="-mmacos-version-min=15.0" \
