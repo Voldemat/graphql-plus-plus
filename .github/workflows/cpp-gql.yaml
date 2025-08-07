@@ -36,6 +36,7 @@ jobs:
           with:
             file: shared/dockerfiles/gql
             push: false
+            load: true
             target: scratch
             tags: gql-linux-x86_64:${{ github.ref_name }}
             cache-from: type=gha
@@ -45,6 +46,7 @@ jobs:
           with:
             file: shared/dockerfiles/gql-arm64
             push: false
+            load: true
             target: scratch
             tags: gql-linux-arm64:${{ github.ref_name }}
             cache-from: type=gha
@@ -54,6 +56,7 @@ jobs:
           with:
             file: shared/dockerfiles/gql
             push: false
+            load: true
             tags: gql-darwin-x86_64:${{ github.ref_name }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
