@@ -62,7 +62,7 @@ jobs:
             docker manifest create vladimirdev635/gql:${{ github.ref_name }} \
                 gql-linux-x86_64:${{ github.ref_name }} \
                 gql-linux-arm64:${{ github.ref_name }} \
-                gql-darwin-x86_64:${{ github.ref_name }} \
+                gql-darwin-x86_64:${{ github.ref_name }}
             docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
                 gql-linux-x86_64:${{ github.ref_name }} --os linux --arch=amd64
             docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
