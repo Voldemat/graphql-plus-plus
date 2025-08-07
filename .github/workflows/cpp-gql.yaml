@@ -38,7 +38,8 @@ jobs:
             push: false
             target: scratch
             tags: gql-linux-x86_64:${{ github.ref_name }}
-            cache-to: type=inline
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
         - name: Build gql linux/arm64
           uses: docker/build-push-action@v6
           with:
@@ -46,14 +47,16 @@ jobs:
             push: false
             target: scratch
             tags: gql-linux-arm64:${{ github.ref_name }}
-            cache-to: type=inline
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
         - name: Build gql darwin/x86_64
           uses: docker/build-push-action@v6
           with:
             file: shared/dockerfiles/gql
             push: false
             tags: gql-darwin-x86_64:${{ github.ref_name }}
-            cache-to: type=inline
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
         - name: Push gql
           run: |
             docker manifest create vladimirdev635/gql:${{ github.ref_name }} \
