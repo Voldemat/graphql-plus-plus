@@ -35,7 +35,6 @@ jobs:
             file: shared/dockerfiles/gql
             push: true
             target: scratch
-            platforms: linux/amd64,linux/arm64
             tags: vladimirdev635/gql:${{ github.ref_name }}
         - name: Build and push
           uses: docker/build-push-action@v6
@@ -43,14 +42,12 @@ jobs:
             file: shared/dockerfiles/gql
             push: true
             target: alpine
-            platforms: linux/amd64,linux/arm64
             tags: vladimirdev635/gql:alpine-${{ github.ref_name }}
         - name: Build and push
           uses: docker/build-push-action@v6
           with:
             file: shared/dockerfiles/gql-darwin
             push: true
-            platforms: linux/amd64,linux/arm64
             tags: vladimirdev635/gql-darwin:${{ github.ref_name }}
         - name: 'Copy all binaries'
           run: |
@@ -59,20 +56,10 @@ jobs:
             tar -cvzf ./gql-darwin-x86_64.tar.gz ./gql-darwin-x86_64
             zip ./gql-darwin-x86_64.zip ./gql-darwin-x86_64
             docker rm $container_id
-            container_id=$(docker create vladimirdev635/gql-darwin:${{ github.ref_name }} --platform=linux/arm64)
-            docker cp $container_id:/gql ./gql-darwin-arm64
-            tar -cvzf ./gql-darwin-arm64.tar.gz ./gql-darwin-arm64
-            zip ./gql-darwin-arm64.zip ./gql-darwin-arm64
-            docker rm $container_id
             container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=linux/amd64)
             docker cp $container_id:/gql ./gql-linux-x86_64
             tar -cvzf ./gql-linux-x86_64.tar.gz ./gql-linux-x86_64
             zip ./gql-linux-x86_64.zip ./gql-linux-x86_64
-            docker rm $container_id
-            container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=linux/arm64)
-            docker cp $container_id:/gql ./gql-linux-arm64
-            tar -cvzf ./gql-linux-arm64.tar.gz ./gql-linux-arm64
-            zip ./gql-linux-arm64.zip ./gql-linux-arm64
             docker rm $container_id
             ls
         - uses: "marvinpinto/action-automatic-releases@latest"
@@ -84,9 +71,5 @@ jobs:
             files: |
               gql-linux-x86_64.tar.gz
               gql-linux-x86_64.zip
-              gql-linux-arm64.tar.gz
-              gql-linux-arm64.zip
               gql-darwin-x86_64.tar.gz
               gql-darwin-x86_64.zip
-              gql-darwin-arm64.tar.gz
-              gql-darwin-arm64.zip
