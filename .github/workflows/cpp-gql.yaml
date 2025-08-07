@@ -40,9 +40,13 @@ jobs:
             tags: vladimirdev635/gql-linux-x86_64:${{ github.ref_name }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
+            provenance: false
+            sbom: false
         - name: Build gql linux/arm64
           uses: docker/build-push-action@v6
           with:
+            provenance: false
+            sbom: false
             file: shared/dockerfiles/gql-arm64
             push: true
             target: scratch
@@ -54,6 +58,8 @@ jobs:
           with:
             file: shared/dockerfiles/gql
             push: true
+            provenance: false
+            sbom: false
             tags: vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
