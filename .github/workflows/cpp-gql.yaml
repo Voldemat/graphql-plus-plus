@@ -93,6 +93,10 @@ jobs:
             docker manifest push vladimirdev635/gql:${{ github.ref_name }}
         - name: 'Copy all binaries'
           run: |
+            docker pull vladimirdev635/gql:${{ github.ref_name }} --platform=darwin/amd64
+            docker pull vladimirdev635/gql:${{ github.ref_name }} --platform=darwin/arm64
+            docker pull vladimirdev635/gql:${{ github.ref_name }} --platform=linux/arm64
+            docker pull vladimirdev635/gql:${{ github.ref_name }} --platform=linux/amd64
             container_id=$(docker create vladimirdev635/gql:${{ github.ref_name }} --platform=darwin/amd64)
             docker cp $container_id:/gql ./gql-darwin-x86_64
             tar -cvzf ./gql-darwin-x86_64.tar.gz ./gql-darwin-x86_64

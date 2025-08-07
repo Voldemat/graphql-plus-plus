@@ -14,7 +14,6 @@ RUN --mount=type=bind,from=alpine-sysroot,source=/lib/,target=/arm64-sysroot/lib
     cmake \
     -DCMAKE_C_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot -fuse-ld=lld" \
     -DCMAKE_CXX_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot -fuse-ld=lld" \
-    -DCMAKE_LINKER_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot -fuse-ld=lld" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_EXE_LINKER_FLAGS="-static" \
     -DCMAKE_LINKER="ldd" \
