@@ -95,7 +95,7 @@ struct FragmentDefinition {
     FragmentSpec spec;
 };
 
-using ClientDefinition =
+using ASTNode =
     std::variant<OperationDefinition, FragmentDefinition, DirectiveDefinition>;
 
 };  // namespace parsers::file::client::ast

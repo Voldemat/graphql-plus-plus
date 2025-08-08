@@ -5,6 +5,7 @@
 
 #include <variant>
 #include <magic_enum.hpp>
+#include <vector>
 
 #include "libgql/json/serializers/lexer/lexer.hpp"
 #include "libgql/json/utils.hpp"
@@ -311,24 +312,20 @@ void writeExtensionNode(JSONWriter& writer, const ast::ExtendTypeNode& node) {
 
 };
 
-void json::serializers::parser::writeFileNodes(
+void json::serializers::parser::writeServerNodes(
     rapidjson::Writer<rapidjson::StringBuffer> &writer,
-    const server::ast::FileNodes &nodes) {
-    writer.StartObject();
-    writer.String("sourceFile");
-    writer.String(nodes.source->filepath.string().c_str());
-    writer.String("definitions");
+    const std::vector<server::ast::ASTNode> &nodes) {
     writer.StartArray();
-    for (const auto &node : nodes.definitions) {
-        writeDefinitionNode(writer, node);
+    for (const auto& astNode : nodes) {
+        std::visit(overloaded{
+            [&writer](const server::ast::TypeDefinitionNode& node) {
+                writeDefinitionNode(writer, node);
+            },
+            [&writer](const server::ast::ExtendTypeNode& node) {
+                writeExtensionNode(writer, node);
+            },
+        }, astNode);
     };
     writer.EndArray();
-    writer.String("extensions");
-    writer.StartArray();
-    for (const auto &node : nodes.extensions) {
-        writeExtensionNode(writer, node);
-    };
-    writer.EndArray();
-    writer.EndObject();
 };
 

@@ -89,13 +89,16 @@ ast::ServerSchemaNode parseServerNodeSecondPass(
 };
 
 std::vector<ast::ServerSchemaNode> parseServerNodesSecondPass(
-    const std::vector<server::ast::FileNodes> &astArray,
+    const std::vector<server::ast::ASTNode> &astArray,
     const TypeRegistry &registry) {
-    return astArray | std::views::transform([](const auto &ast) {
-               return ast.definitions;
+    return astArray | std::views::filter([](const auto &node) {
+               return std::holds_alternative<server::ast::TypeDefinitionNode>(
+                   node);
            }) |
-           std::views::join | std::views::transform([&registry](auto &sNode) {
-               return nodes::parseServerNodeSecondPass(sNode, registry);
+           std::views::transform([&registry](const auto &astNode) {
+               const auto &node =
+                   std::get<server::ast::TypeDefinitionNode>(astNode);
+               return nodes::parseServerNodeSecondPass(node, registry);
            }) |
            std::ranges::to<std::vector>();
 };

@@ -11,6 +11,7 @@
 #include "libgql/parsers/file/client/ast.hpp"
 #include "libgql/parsers/file/server/ast.hpp"
 #include "libgql/parsers/schema/shared_ast.hpp"
+#include "libgql/parsers/schema/type_registry.hpp"
 #include "utils.hpp"
 
 namespace parsers::schema {
@@ -103,7 +104,13 @@ struct Schema {
 };
 
 const Schema parseSchema(
-    std::vector<parsers::file::server::ast::FileNodes> astArray,
-    std::vector<parsers::file::client::ast::ClientDefinition> definitions);
+    const std::vector<parsers::file::server::ast::ASTNode>& serverNodes,
+    const std::vector<parsers::file::client::ast::ASTNode>& clientNodes);
+const ServerSchema parseServerSchema(
+    parsers::schema::TypeRegistry &registry,
+    const std::vector<file::server::ast::ASTNode> &astNodes);
+const ClientSchema parseClientSchema(
+    parsers::schema::TypeRegistry &registry,
+    const std::vector<file::client::ast::ASTNode> &astNodes);
 
 };  // namespace parsers::schema

@@ -17,16 +17,16 @@ using namespace parsers::file;
 using namespace parsers::file::client;
 using namespace lexer;
 
-std::vector<ast::ClientDefinition> Parser::parse() {
-    std::vector<ast::ClientDefinition> operations;
+std::vector<ast::ASTNode> Parser::parse() {
+    std::vector<ast::ASTNode> operations;
     while (currentToken != tokens.back()) {
         if (index != 0) consume(ComplexTokenType::IDENTIFIER);
-        operations.emplace_back(parseClientDefinition());
+        operations.emplace_back(parseASTNode());
     };
     return operations;
 };
 
-ast::ClientDefinition Parser::parseClientDefinition() {
+ast::ASTNode Parser::parseASTNode() {
     if (currentToken.lexeme == "fragment") {
         return parseFragmentDefinition();
     } else if (currentToken.lexeme == "directive") {

@@ -63,8 +63,8 @@ using FileNodesDifference = CustomVariant<ASTNameDifference>;
 class FileNodesComparator {
 public:
     std::vector<FileNodesDifference> compare(
-        const ast::FileNodes &leftNodes,
-        const ast::FileNodes &rightNodes) const {
+        const std::vector<ast::ASTNode> &leftNodes,
+        const std::vector<ast::ASTNode> &rightNodes) const {
         std::vector<FileNodesDifference> differences;
         return differences;
     };
@@ -73,7 +73,10 @@ public:
 class ParserFixture : public testing::TestWithParam<ParserTestCase> {};
 TEST_P(ParserFixture, TestParser) {
     auto param = GetParam();
-    Parser parser(param.tokens, param.expectedNodes.source);
+    auto source = std::make_shared<shared::ast::SourceFile>(
+        std::filesystem::path("/test.graphql"), ""
+    );
+    Parser parser(param.tokens, source);
     const auto ast = parser.parse();
     FileNodesComparator comparator;
     const auto &differences = comparator.compare(ast, param.expectedNodes);
@@ -106,11 +109,7 @@ std::vector<ParserTestCase> getParserCases() {
             .filepath = filepath,
             .tokens =
                 json::parsers::lexer::parseTokensArray(d["tokens"].GetArray()),
-            .expectedNodes = { .source =
-                                   std::make_shared<shared::ast::SourceFile>(
-                                       filepath, ""),
-                               .definitions = {},
-                               .extensions = {} }
+            .expectedNodes = {},
         };
         cases.push_back(testCase);
     };

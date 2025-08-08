@@ -20,13 +20,14 @@ std::vector<std::pair<
     std::shared_ptr<ast::ObjectType>,
     std::map<std::string,
              std::shared_ptr<ast::FieldDefinition<ast::ObjectFieldSpec>>>>>
-parseServerExtendNodes(const std::vector<server::ast::FileNodes> &astArray,
+parseServerExtendNodes(const std::vector<server::ast::ASTNode> &astArray,
                        const TypeRegistry &registry) {
-    return astArray | std::views::transform([](const auto &ast) {
-               return ast.extensions;
+    return astArray | std::views::filter([](const auto &node) {
+               return std::holds_alternative<server::ast::ExtendTypeNode>(node);
            }) |
-           std::views::join |
-           std::views::transform([&registry](const auto &node) {
+           std::views::transform([&registry](const auto &astNode) {
+               const auto &node =
+                   std::get<server::ast::ExtendTypeNode>(astNode);
                return nodes::parseExtendObjectType(node, registry);
            }) |
            std::ranges::to<std::vector>();

@@ -2,9 +2,13 @@
 
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+
+#include <vector>
+
 #include "libgql/parsers/file/server/ast.hpp"
 
 namespace json::serializers::parser {
-void writeFileNodes(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                      const ::parsers::file::server::ast::FileNodes &nodes);
+void writeServerNodes(
+    rapidjson::Writer<rapidjson::StringBuffer> &writer,
+    const std::vector<::parsers::file::server::ast::ASTNode> &nodes);
 };

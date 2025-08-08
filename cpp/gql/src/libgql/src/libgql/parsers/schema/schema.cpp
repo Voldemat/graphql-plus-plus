@@ -13,12 +13,9 @@
 #include "libgql/parsers/schema/nodes/extend_nodes.hpp"
 
 using namespace parsers::file;
-using namespace parsers::schema;
-using namespace parsers::schema::ast;
-
 
 auto filterFragmentDefinitions(
-    const std::vector<client::ast::ClientDefinition> &definitions) {
+    const std::vector<client::ast::ASTNode> &definitions) {
     return definitions | std::views::filter([](const auto &def) {
                return std::holds_alternative<client::ast::FragmentDefinition>(
                    def);
@@ -28,27 +25,42 @@ auto filterFragmentDefinitions(
            });
 };
 
-const Schema parsers::schema::parseSchema(
-    std::vector<server::ast::FileNodes> astArray,
-    std::vector<client::ast::ClientDefinition> clientDefinitions) {
-    TypeRegistry registry;
-    for (const auto &ast : astArray) {
-        for (const auto &node : ast.definitions) {
-            registry.addNode(nodes::parseServerNodeFirstPass(node));
-        };
+namespace parsers::schema {
+const ServerSchema parseServerSchema(
+    TypeRegistry &registry, const std::vector<server::ast::ASTNode> &astNodes) {
+    for (const auto &node :
+         astNodes | std::views::filter([](const auto &node) {
+             return std::holds_alternative<server::ast::TypeDefinitionNode>(
+                 node);
+         }) | std::views::transform([](const auto &node) {
+             return std::get<server::ast::TypeDefinitionNode>(node);
+         })) {
+        registry.addNode(nodes::parseServerNodeFirstPass(node));
     };
     const auto &serverNodes =
-        nodes::parseServerNodesSecondPass(astArray, registry);
+        nodes::parseServerNodesSecondPass(astNodes, registry);
     for (const auto &[typeNode, newFields] :
-         nodes::parseServerExtendNodes(astArray, registry)) {
+         nodes::parseServerExtendNodes(astNodes, registry)) {
         registry.patchObject(typeNode, newFields);
     };
-    for (const auto &fragmentDefinition :
-         filterFragmentDefinitions(clientDefinitions)) {
+    return ServerSchema::fromNodes(serverNodes);
+}
+
+const ClientSchema parseClientSchema(
+    parsers::schema::TypeRegistry &registry,
+    const std::vector<file::client::ast::ASTNode> &astNodes) {
+    for (const auto &fragmentDefinition : filterFragmentDefinitions(astNodes)) {
         registry.addFragment(
             nodes::parseFragmentFirstPass(fragmentDefinition, registry));
     };
-    const auto &clientNodes = nodes::parseClientNodes(clientDefinitions, registry);
-    return { .server = ServerSchema::fromNodes(serverNodes),
-             .client = ClientSchema::fromNodes(clientNodes) };
+    const auto& clientNodes = nodes::parseClientNodes(astNodes, registry);
+    return ClientSchema::fromNodes(clientNodes);
 };
+
+const Schema parseSchema(const std::vector<server::ast::ASTNode>& serverNodes,
+                         const std::vector<client::ast::ASTNode>& clientNodes) {
+    TypeRegistry registry;
+    return { .server = parseServerSchema(registry, serverNodes),
+             .client = parseClientSchema(registry, clientNodes) };
+};
+};  // namespace parsers::schema

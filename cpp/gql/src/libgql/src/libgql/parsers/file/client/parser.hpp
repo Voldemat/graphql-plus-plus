@@ -11,7 +11,7 @@
 
 namespace parsers::file::client {
 class Parser : public BaseDirectiveParser<ast::DirectiveLocation> {
-    ast::ClientDefinition parseClientDefinition();
+    ast::ASTNode parseASTNode();
     ast::FragmentDefinition parseFragmentDefinition();
     ast::OperationDefinition parseOperationDefinition();
     std::map<std::string, shared::ast::InputValueDefinitionNode>
@@ -27,6 +27,6 @@ class Parser : public BaseDirectiveParser<ast::DirectiveLocation> {
     ast::DirectiveLocation parseDirectiveLocation() override;
 public:
     using BaseDirectiveParser::BaseDirectiveParser;
-    std::vector<ast::ClientDefinition> parse();
+    std::vector<ast::ASTNode> parse();
 };
 };  // namespace parsers::file::client

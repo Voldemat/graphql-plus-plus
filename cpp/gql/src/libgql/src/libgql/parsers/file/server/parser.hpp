@@ -24,6 +24,6 @@ class Parser : public BaseDirectiveParser<ast::DirectiveLocation> {
 
 public:
     using BaseDirectiveParser<ast::DirectiveLocation>::BaseDirectiveParser;
-    ast::FileNodes parse();
+    std::vector<ast::ASTNode> parse();
 };
 };  // namespace parsers::file::server

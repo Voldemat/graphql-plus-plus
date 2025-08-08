@@ -6,6 +6,10 @@
 #include "libgql/parsers/schema/schema.hpp"
 
 namespace json::serializers::schema {
-void writeSchemaNodes(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+void writeSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                       const ::parsers::schema::Schema &schema);
+void writeServerSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                      const ::parsers::schema::ServerSchema &schema);
+void writeClientSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                      const ::parsers::schema::ClientSchema &schema);
 };

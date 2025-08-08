@@ -15,6 +15,6 @@ ast::ServerSchemaNode parseServerNodeSecondPass(
     const TypeRegistry &registry);
 
 std::vector<ast::ServerSchemaNode> parseServerNodesSecondPass(
-    const std::vector<file::server::ast::FileNodes> &astArray,
+    const std::vector<file::server::ast::ASTNode> &astArray,
     const TypeRegistry &registry);
 };  // namespace parsers::schema::nodes

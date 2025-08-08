@@ -10,7 +10,7 @@
 struct ParserTestCase {
     std::filesystem::path filepath;
     std::vector<lexer::GQLToken> tokens;
-    parsers::file::server::ast::FileNodes expectedNodes;
+    std::vector<parsers::file::server::ast::ASTNode> expectedNodes;
 
     friend std::ostream &operator<<(std::ostream &os,
                                     const ParserTestCase &self) {

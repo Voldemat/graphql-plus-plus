@@ -22,7 +22,7 @@ using namespace parsers::file;
 
 namespace parsers::schema::nodes {
 ast::ClientSchemaNode parseClientDefinition(
-    const client::ast::ClientDefinition &definition,
+    const client::ast::ASTNode &definition,
     const TypeRegistry &registry) {
     return std::visit<ast::ClientSchemaNode>(
         overloaded{ [&registry](const client::ast::FragmentDefinition &node) {
@@ -106,7 +106,7 @@ void assertClientNodesAreValid(
 };
 
 std::vector<ast::ClientSchemaNode> parseClientNodes(
-    const std::vector<client::ast::ClientDefinition> &definitions,
+    const std::vector<client::ast::ASTNode> &definitions,
     const TypeRegistry &registry) {
     const auto &nodes = definitions |
                         std::views::transform([&registry](const auto &node) {

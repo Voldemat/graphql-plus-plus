@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <optional>
 #include <string>
 #include <variant>
@@ -97,11 +96,4 @@ struct ExtendTypeNode {
 };
 
 using ASTNode = std::variant<TypeDefinitionNode, ExtendTypeNode>;
-
-struct FileNodes {
-    std::shared_ptr<shared::ast::SourceFile> source;
-    std::vector<TypeDefinitionNode> definitions;
-    std::vector<ExtendTypeNode> extensions;
-};
-
 };  // namespace parsers::file::server::ast

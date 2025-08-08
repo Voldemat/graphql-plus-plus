@@ -18,27 +18,14 @@ using namespace parsers::file;
 using namespace parsers::file::server;
 using namespace lexer;
 
-ast::FileNodes Parser::parse() {
-    std::vector<ast::TypeDefinitionNode> definitions;
-    std::vector<ast::ExtendTypeNode> extensions;
+std::vector<ast::ASTNode> Parser::parse() {
+    std::vector<ast::ASTNode> nodes;
     while (currentToken != tokens.back()) {
         if (index != 0) consume(ComplexTokenType::IDENTIFIER);
         const auto &node = parseASTNode();
-        std::visit<void>(
-            overloaded{
-                [&definitions](const ast::TypeDefinitionNode &tNode) -> void {
-                    definitions.emplace_back(tNode);
-                },
-                [&extensions](const ast::ExtendTypeNode &eNode) -> void {
-                    extensions.emplace_back(eNode);
-                } },
-            node);
+        nodes.emplace_back(node);
     };
-    return {
-        .source = source,
-        .definitions = definitions,
-        .extensions = extensions,
-    };
+    return nodes;
 };
 
 ast::ASTNode Parser::parseASTNode() {
