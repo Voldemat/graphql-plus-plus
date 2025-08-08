@@ -39,12 +39,10 @@
         "jsdom": "^26.1.0",
         "vitest": "^3.2.4"
     },
-    "dependencies": {
-        "object-hash": "^3.0.0",
-        "zod": "^4.0.5"
-    },
     "peerDependencies": {
-        "react": "*"
+        "react": "*",
+        "object-hash": ">=3.0.0",
+        "zod": ">=4.0.5"
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "4.9.5"
