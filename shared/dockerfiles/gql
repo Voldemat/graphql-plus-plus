@@ -16,8 +16,8 @@ RUN cmake \
     ctest --rerun-failed --output-on-failure build
 
 FROM alpine:3.22.1 as gql-alpine
-COPY --from=builder /usr/local/app/build/bin/gql /gql
-CMD ["/gql"]
+COPY --from=builder /usr/local/app/build/bin/gql /bin/gql
+CMD ["/bin/gql"]
 
 FROM scratch as gql-scratch
 COPY --from=builder /usr/local/app/build/bin/gql /gql
