@@ -15,10 +15,10 @@ RUN cmake \
     cmake --build build --parallel 4 && \
     ctest --rerun-failed --output-on-failure build
 
-FROM alpine:3.22.1 as alpine
+FROM alpine:3.22.1 as gql-alpine
 COPY --from=builder /usr/local/app/build/bin/gql /gql
 CMD ["/gql"]
 
-FROM scratch as scratch
+FROM scratch as gql-scratch
 COPY --from=builder /usr/local/app/build/bin/gql /gql
 CMD ["/gql"]

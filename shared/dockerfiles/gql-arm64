@@ -22,10 +22,10 @@ RUN --mount=type=bind,from=alpine-sysroot,source=/lib/,target=/arm64-sysroot/lib
     -B build && \
     cmake --build build --parallel 4
 
-FROM --platform=linux/arm64 alpine:3.22.1 as alpine
+FROM --platform=linux/arm64 alpine:3.22.1 as gql-alpine
 COPY --from=builder /usr/local/app/build/bin/gql /gql
 CMD ["/gql"]
 
-FROM --platform=linux/arm64 scratch as scratch
+FROM --platform=linux/arm64 scratch as gql-scratch
 COPY --from=builder /usr/local/app/build/bin/gql /gql
 CMD ["/gql"]
