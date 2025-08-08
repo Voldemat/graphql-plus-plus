@@ -68,3 +68,8 @@ std::vector<T> parseNodesFromDirectory(
     };
     return nodes;
 };
+
+bool doesFileHaveChanges(
+    const std::string& filepath,
+    const std::string& newBuffer
+);

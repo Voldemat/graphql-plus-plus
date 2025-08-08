@@ -179,3 +179,16 @@ std::vector<parsers::file::client::ast::ASTNode> parseClientNodesFromGraphql(
         throw CLI::RuntimeError(1);
     };
 };
+
+bool doesFileHaveChanges(
+    const std::string& filepath,
+    const std::string& newBuffer
+) {
+    const auto& oldBuffer = readFile(filepath);
+    if (oldBuffer == newBuffer) {
+        std::cout << "Schema is up to date" << std::endl;
+        return false;
+    };
+    std::cout << "Schema is not up to date" << std::endl;
+    return true;
+};

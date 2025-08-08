@@ -8,6 +8,8 @@
 #include <CLI/App.hpp>
 #include <CLI/Error.hpp>
 #include <exception>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -50,13 +52,25 @@ void createParserSubcommand(CLI::App *app) {
         "parse-dir", "Parse directory with server and client definitions");
     std::shared_ptr<std::string> serverDir = std::make_shared<std::string>();
     std::shared_ptr<std::string> clientDir = std::make_shared<std::string>();
+    std::shared_ptr<std::string> outputFile = std::make_shared<std::string>();
+    std::shared_ptr<bool> validate = std::make_shared<bool>();
     parseDirectoryCmd
         ->add_option("--server-dir", *serverDir, "Server directory")
         ->required();
     parseDirectoryCmd
         ->add_option("--client-dir", *clientDir, "Server directory")
         ->required();
-    parseDirectoryCmd->callback([serverDir, clientDir]() {
+    parseDirectoryCmd
+        ->add_option("--output-file", *outputFile, "Output file")
+        ->required();
+    parseDirectoryCmd
+        ->add_option("--validate", *validate, "Validate")
+        ->required();
+    parseDirectoryCmd->callback([serverDir, clientDir, validate, outputFile]() {
+        ensureDirectoryExists(std::filesystem::path(*outputFile).parent_path());
+        if (*validate) {
+            ensureFileExists(*outputFile);
+        };
         ensureDirectoryExists(*serverDir);
         ensureDirectoryExists(*clientDir);
         std::vector<server::ast::ASTNode> serverNodes =
@@ -72,7 +86,17 @@ void createParserSubcommand(CLI::App *app) {
                 serializeToJSONString([&schema](auto &writer) {
                     json::serializers::schema::writeSchema(writer, schema);
                 });
-            std::cout << jsonString << std::endl;
+            if (*validate) {
+                const auto& hasChanges = doesFileHaveChanges(*outputFile, jsonString);
+                if (!hasChanges) return;
+                throw CLI::RuntimeError(1);
+            };
+            if (*outputFile == "-") {
+                std::cout << jsonString << std::endl;
+                return;
+            };
+            std::ofstream file(*outputFile, std::ios::trunc);
+            file << jsonString;
         } catch (const shared::ParserError &error) {
             std::cerr << formatError(error) << std::endl;
             throw CLI::RuntimeError(1);
