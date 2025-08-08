@@ -118,6 +118,7 @@ jobs:
                 vladimirdev635/gql-alpine-linux-arm64:${{ github.ref_name }}
             docker manifest push vladimirdev635/gql-alpine:${{ github.ref_name }}
         - name: 'Copy all binaries'
+          if: github.ref_type == 'tag'
           run: |
             container_id=$(docker create vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }})
             docker cp $container_id:/gql ./gql-darwin-x86_64
