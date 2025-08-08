@@ -29,7 +29,7 @@
         "jiti": "^2.4.2",
         "vitest": "^3.2.4"
     },
-    "dependencies": {
-        "zod": "^3.25.76"
+    "peerDependencies": {
+        "zod": ">=3.25.76"
     }
 }
