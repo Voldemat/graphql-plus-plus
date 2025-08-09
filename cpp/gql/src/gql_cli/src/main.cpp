@@ -5,14 +5,11 @@
 
 #include <cstdlib>
 #include <memory>
-#include <variant>
 
 #include "app/gql_cli.hpp"
 
-using A = std::variant<int, float>;
-
 int main(int argc, char **argv) {
-    std::unique_ptr<CLI::App> app = createCLIApp();
+    std::unique_ptr<CLI::App> app = cli::createCLIApp();
     argv = app->ensure_utf8(argv);
     CLI11_PARSE(*app, argc, argv);
     return EXIT_SUCCESS;

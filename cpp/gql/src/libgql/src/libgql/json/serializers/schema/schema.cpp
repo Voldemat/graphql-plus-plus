@@ -646,14 +646,4 @@ void writeClientSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.EndObject();
 };
 
-void writeSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                      const parsers::schema::Schema &schema) {
-    writer.StartObject();
-    writer.String("server");
-    writeServerSchema(writer, schema.server);
-    writer.String("client");
-    writeClientSchema(writer, schema.client);
-    writer.EndObject();
-};
-
 };  // namespace json::serializers::schema

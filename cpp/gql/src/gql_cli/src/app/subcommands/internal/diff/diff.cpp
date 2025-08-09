@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "HTTPRequest.hpp"
-#include "../../utils.hpp"
+#include "../../../utils.hpp"
 #include "libgql/introspection/introspection.hpp"
 #include "libgql/json/introspection/parser.hpp"
 #include "libgql/json/parsers/schema/schema.hpp"
@@ -32,6 +32,7 @@
 using namespace parsers::schema;
 using namespace parsers::schema::ast;
 
+namespace cli::commands::internal::diff {
 rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
     http::HeaderFields headers{ { "Accept", "application/json" },
                                 { "Content-Type", "application/json" } };
@@ -53,7 +54,7 @@ rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
 rapidjson::Document getDocumentFromSchemaJson(const std::string &pathToSchema) {
     std::string buffer;
     if (pathToSchema == "-") {
-        buffer = getAllStdin();
+        buffer = utils::getAllStdin();
     } else {
         if (!std::filesystem::exists(pathToSchema)) {
             std::cerr << std::format("Path \"{}\" does not exists",
@@ -500,7 +501,7 @@ void findDifferenceBetweenSchemas(
     std::cout << "Schema is compatible" << std::endl;
 };
 
-void createDifSubcommand(CLI::App *app) {
+void createSubcommand(CLI::App *app) {
     CLI::App *diffCmd = app->add_subcommand("diff", "Diff between two schemas");
     CLI::App *diffParseCmd = diffCmd->add_subcommand(
         "parse", "Parse input stream into tokens in json format");
@@ -522,4 +523,5 @@ void createDifSubcommand(CLI::App *app) {
                 introspectionDocument);
         findDifferenceBetweenSchemas(schema.server, secondSchema);
     });
+};
 };

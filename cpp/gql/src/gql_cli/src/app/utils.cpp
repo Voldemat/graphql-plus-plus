@@ -2,6 +2,7 @@
 
 #include <CLI/Error.hpp>
 #include <exception>
+#include <expected>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -13,7 +14,9 @@
 #include <string>
 #include <vector>
 
+#include "app/config/config.hpp"
 #include "app/formatting/error.hpp"
+#include "glob/glob.h"
 #include "libgql/json/parsers/lexer/lexer.hpp"
 #include "libgql/json/parsers/shared.hpp"
 #include "libgql/lexer/lexer.hpp"
@@ -26,10 +29,13 @@
 #include "libgql/parsers/file/server/parser.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
 #include "libgql/parsers/file/shared/parser_error.hpp"
+#include "libgql/parsers/schema/schema.hpp"
+#include "libgql/parsers/schema/type_registry.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
+namespace cli::utils {
 std::string getAllStdin() noexcept {
     std::string lineInput;
     std::string buffer;
@@ -93,18 +99,16 @@ std::vector<lexer::GQLToken> parseTokensFromJSON(const std::string &buffer) {
     return tokens;
 };
 
-std::vector<lexer::GQLToken> parseTokensFromGraphql(
+std::expected<std::vector<lexer::GQLToken>, std::string> parseTokensFromGraphql(
     const std::shared_ptr<parsers::file::shared::ast::SourceFile> &sourceFile) {
     lexer::VectorTokensAccumulator tokensAccumulator;
     lexer::Lexer lexer(sourceFile->buffer, &tokensAccumulator);
     try {
         lexer.parse();
     } catch (const lexer::LexerError &error) {
-        std::cerr << std::format("LexerParserError({}): {}",
-                                 sourceFile->filepath.filename().string(),
-                                 error.what())
-                  << std::endl;
-        throw CLI::RuntimeError(1);
+        return std::unexpected(std::format(
+            "LexerParserError({}): {}",
+            sourceFile->filepath.filename().string(), error.what()));
     };
     return tokensAccumulator.getTokens();
 };
@@ -113,7 +117,6 @@ std::vector<parsers::file::server::ast::ASTNode> parseServerNodesFromJSON(
     const std::shared_ptr<parsers::file::shared::ast::SourceFile> &sourceFile,
     const std::vector<lexer::GQLToken> &tokens) {
     auto parser = parsers::file::server::Parser(tokens, sourceFile);
-    std::vector<parsers::file::server::ast::ASTNode> astNodes;
     try {
         return parser.parse();
     } catch (const std::exception &exc) {
@@ -122,15 +125,15 @@ std::vector<parsers::file::server::ast::ASTNode> parseServerNodesFromJSON(
     };
 };
 
-std::vector<parsers::file::server::ast::ASTNode> parseServerNodesFromGraphql(
+std::expected<std::vector<parsers::file::server::ast::ASTNode>, std::string>
+parseServerNodesFromGraphql(
     const std::shared_ptr<parsers::file::shared::ast::SourceFile> &sourceFile,
     const std::vector<lexer::GQLToken> &tokens) {
     parsers::file::server::Parser parser(tokens, sourceFile);
     try {
         return parser.parse();
     } catch (const parsers::file::shared::ParserError &exc) {
-        std::cerr << formatError(exc) << std::endl;
-        throw CLI::RuntimeError(1);
+        return std::unexpected(formatError(exc));
     };
 };
 
@@ -168,27 +171,112 @@ std::vector<std::filesystem::path> graphqlPathsInDirectory(
            std::ranges::to<std::vector>();
 };
 
-std::vector<parsers::file::client::ast::ASTNode> parseClientNodesFromGraphql(
+std::expected<std::vector<parsers::file::client::ast::ASTNode>, std::string>
+parseClientNodesFromGraphql(
     const std::shared_ptr<parsers::file::shared::ast::SourceFile> &sourceFile,
     const std::vector<lexer::GQLToken> &tokens) {
     parsers::file::client::Parser parser(tokens, sourceFile);
     try {
         return parser.parse();
     } catch (const parsers::file::shared::ParserError &exc) {
-        std::cerr << formatError(exc) << std::endl;
-        throw CLI::RuntimeError(1);
+        return std::unexpected(formatError(exc));
     };
 };
 
-bool doesFileHaveChanges(
-    const std::string& filepath,
-    const std::string& newBuffer
-) {
-    const auto& oldBuffer = readFile(filepath);
-    if (oldBuffer == newBuffer) {
-        std::cout << "Schema is up to date" << std::endl;
-        return false;
-    };
-    std::cout << "Schema is not up to date" << std::endl;
-    return true;
+bool doesFileHaveChanges(const std::string &filepath,
+                         const std::string &newBuffer,
+                         const std::string &schemaName) {
+    const auto &hasChanges = readFile(filepath) != newBuffer;
+    if (!hasChanges) {
+        std::cout << schemaName << " schema is up to date" << std::endl;
+    } else {
+        std::cout << schemaName << " schema is not up to date" << std::endl;
+    }
+    return hasChanges;
 };
+
+std::vector<std::filesystem::path> resolvePaths(
+    const std::filesystem::path &configDirPath,
+    const std::vector<std::string> &configPaths) {
+    return configPaths |
+           std::views::transform([&configDirPath](const auto &configGlobPath) {
+               const auto &canonizedPath = configDirPath / configGlobPath;
+               return glob::rglob(canonizedPath);
+           }) |
+           std::views::join | std::ranges::to<std::vector>();
+};
+
+std::expected<parsers::schema::ServerSchema,
+              std::vector<std::string> >
+loadServerSchemaFromInputs(parsers::schema::TypeRegistry &registry,
+                               const config::InputsConfig &config,
+                               const std::filesystem::path &configDirPath) {
+    std::vector<parsers::file::server::ast::ASTNode> nodes;
+    std::vector<std::string> errors;
+    for (const auto &jsonpath :
+         resolvePaths(configDirPath, config.jsonSchema)) {
+    };
+    for (const auto &graphqlPath :
+         resolvePaths(configDirPath, config.graphql)) {
+        const auto &buffer = readFile(graphqlPath);
+        const auto &source =
+            std::make_shared<parsers::file::shared::ast::SourceFile>(
+                graphqlPath, buffer);
+        const auto &tokens = utils::parseTokensFromGraphql(source);
+        if (!tokens.has_value()) {
+            errors.emplace_back(tokens.error());
+            continue;
+        };
+        const auto &fileNodes =
+            utils::parseServerNodesFromGraphql(source, tokens.value());
+        if (!fileNodes.has_value()) {
+            errors.emplace_back(fileNodes.error());
+            continue;
+        };
+        nodes.insert(nodes.end(), fileNodes->begin(), fileNodes->end());
+    };
+    if (errors.size() != 0) return std::unexpected(errors);
+    try {
+        return parsers::schema::parseServerSchema(registry, nodes);
+    } catch (const parsers::file::shared::ParserError &error) {
+        return std::unexpected((std::vector<std::string>){ formatError(error) });
+    };
+};
+
+std::expected<parsers::schema::ClientSchema,
+              std::vector<std::string> >
+loadClientSchemaFromInputs(parsers::schema::TypeRegistry &registry,
+                               const config::InputsConfig &config,
+                               const std::filesystem::path &configDirPath) {
+    std::vector<parsers::file::client::ast::ASTNode> nodes;
+    std::vector<std::string> errors;
+    for (const auto &jsonpath :
+         resolvePaths(configDirPath, config.jsonSchema)) {
+    };
+    for (const auto &graphqlPath :
+         resolvePaths(configDirPath, config.graphql)) {
+        const auto &buffer = readFile(graphqlPath);
+        const auto &source =
+            std::make_shared<parsers::file::shared::ast::SourceFile>(
+                graphqlPath, buffer);
+        const auto &tokens = utils::parseTokensFromGraphql(source);
+        if (!tokens.has_value()) {
+            errors.emplace_back(tokens.error());
+            continue;
+        };
+        const auto &fileNodes =
+            utils::parseClientNodesFromGraphql(source, tokens.value());
+        if (!fileNodes.has_value()) {
+            errors.emplace_back(fileNodes.error());
+            continue;
+        };
+        nodes.insert(nodes.end(), fileNodes->begin(), fileNodes->end());
+    };
+    if (errors.size() != 0) return std::unexpected(errors);
+    try {
+        return parsers::schema::parseClientSchema(registry, nodes);
+    } catch (const parsers::file::shared::ParserError &error) {
+        return std::unexpected((std::vector<std::string>){ formatError(error) });
+    };
+};
+};  // namespace cli::utils

@@ -1,9 +1,8 @@
-#ifndef GQL_CLI
-#define GQL_CLI
+#pragma once
 
 #include <CLI/App.hpp>
 #include <memory>
 
+namespace cli {
 std::unique_ptr<CLI::App> createCLIApp() noexcept;
-
-#endif
+};

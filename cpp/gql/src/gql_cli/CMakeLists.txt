@@ -1,5 +1,6 @@
 include("${CMAKE_CURRENT_SOURCE_DIR}/vendor/json.cmake")
-include("${CMAKE_CURRENT_SOURCE_DIR}/vendor/subprocess.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/vendor/glob.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/vendor/yaml-cpp.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/vendor/cli11.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/vendor/httprequest.cmake")
 
@@ -12,9 +13,10 @@ add_executable(
 add_dependencies(gql HTTPRequest RapidJSON)
 target_link_libraries(gql
     PRIVATE CLI11::CLI11
+    PRIVATE yaml-cpp::yaml-cpp
     PRIVATE libgql
     PRIVATE nlohmann_json::nlohmann_json
-    PRIVATE subprocess
+    PRIVATE Glob
 )
 target_include_directories(
     gql
