@@ -1,10 +1,7 @@
-import { z } from 'zod/v4'
-import { serverSchema } from './server.js'
-import { clientSchema } from './client/root.js'
+import { ClientSchema } from './client/root.js';
+import { ServerSchema } from './server.js';
 
-export const rootSchema = z.object({
-    server: serverSchema,
-    client: clientSchema
-}).strict()
-
-export type RootSchema = z.infer<typeof rootSchema>
+export interface RootSchema {
+    server: ServerSchema
+    client: ClientSchema
+}

@@ -106,3 +106,4 @@ export const serverSchema = z.object({
     scalars: z.array(z.string()),
     inputs: z.record(z.string(), inputSchema)
 })
+export type ServerSchema = z.infer<typeof serverSchema>;

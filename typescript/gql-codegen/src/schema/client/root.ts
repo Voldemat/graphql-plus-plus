@@ -8,3 +8,4 @@ export const clientSchema = z.object({
     operations: z.record(z.string(), operationSchema),
     directives: z.record(z.string(), directiveSchema)
 })
+export type ClientSchema = z.infer<typeof clientSchema>;

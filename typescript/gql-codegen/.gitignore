@@ -3,3 +3,5 @@ dist
 gql-codegen.mts
 check
 schema.json
+client-schema.json
+server-schema.json
