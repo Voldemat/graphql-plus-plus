@@ -17,7 +17,7 @@
 
 #include "../../../utils.hpp"
 #include "app/formatting/error.hpp"
-#include "libgql/json/serializers/parser/parser.hpp"
+#include "libgql/json/serializers/file/server/parser.hpp"
 #include "libgql/json/serializers/schema/schema.hpp"
 #include "libgql/parsers/file/client/ast.hpp"
 #include "libgql/parsers/file/server/ast.hpp"
@@ -44,7 +44,7 @@ void createSubcommand(CLI::App *app) {
         const auto &astNodes = utils::parseServerNodesFromJSON(source, tokens);
         const auto &jsonString =
             utils::serializeToJSONString([&astNodes](auto &writer) {
-                gql::json::serializers::parser::writeServerNodes(writer,
+                gql::json::serializers::file::server::writeNodes(writer,
                                                                  astNodes);
             });
         std::cout << jsonString << std::endl;
