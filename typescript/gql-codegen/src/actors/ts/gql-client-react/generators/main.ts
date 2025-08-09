@@ -242,7 +242,7 @@ export function generateNodes(
         )
         gqlClientImports.push(
             ts.factory.createImportSpecifier(
-                true,
+                false,
                 undefined,
                 ts.factory.createIdentifier(
                     'SubOpAsyncIterable'
