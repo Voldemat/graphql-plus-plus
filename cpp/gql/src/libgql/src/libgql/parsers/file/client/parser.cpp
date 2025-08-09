@@ -13,10 +13,9 @@
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/token_type.hpp"
 
-using namespace parsers::file;
-using namespace parsers::file::client;
-using namespace lexer;
+using namespace gql::lexer;
 
+namespace gql::parsers::file::client {
 std::vector<ast::ASTNode> Parser::parse() {
     std::vector<ast::ASTNode> operations;
     while (currentToken != tokens.back()) {
@@ -191,3 +190,4 @@ ast::DirectiveLocation Parser::parseDirectiveLocation() {
     };
     return value.value();
 };
+};  // namespace gql::parsers::file::client

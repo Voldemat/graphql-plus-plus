@@ -12,11 +12,13 @@
 #include "../../utils.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 
-using namespace parsers::schema;
-using namespace parsers::schema::ast;
+using namespace gql::parsers::schema;
+using namespace gql::parsers::schema::ast;
 
+namespace gql::json::parsers::schema {
 template <typename T>
 std::map<std::string, T> parseNodesFromArray(
     const JSONConstArray &array,
@@ -52,8 +54,8 @@ void addNodesToRegistry(const JSONObject &object, TypeRegistry &registry) {
     };
 };
 
-namespace json::parsers::schema {
-::parsers::schema::Schema parseSchema(const rapidjson::Document &document) {
+::gql::parsers::schema::Schema parseSchema(
+    const rapidjson::Document &document) {
     const auto &serverSchema = document["server"];
     TypeRegistry registry;
     Schema schema;
@@ -246,4 +248,4 @@ std::shared_ptr<FieldDefinition<ObjectFieldSpec>> parseObjectFieldDefinition(
         parseObjectFieldSpec(entry.value["spec"], registry),
         entry.value["nullable"].GetBool());
 };
-};  // namespace json::parsers::schema
+};  // namespace gql::json::parsers::schema

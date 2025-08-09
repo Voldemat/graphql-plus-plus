@@ -5,10 +5,11 @@
 
 #include <vector>
 
+#include "libgql/json/utils.hpp"
 #include "libgql/parsers/file/server/ast.hpp"
 
-namespace json::serializers::parser {
+namespace gql::json::serializers::parser {
 void writeServerNodes(
-    rapidjson::Writer<rapidjson::StringBuffer> &writer,
-    const std::vector<::parsers::file::server::ast::ASTNode> &nodes);
+    JSONWriter &writer,
+    const std::vector<::gql::parsers::file::server::ast::ASTNode> &nodes);
 };

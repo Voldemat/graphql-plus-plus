@@ -8,12 +8,13 @@
 
 #include "../../file/server/ast.hpp"
 #include "../server_ast.hpp"
+#include "../shared_ast.hpp"
 #include "../type_registry.hpp"
 #include "./input_type_spec.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 std::shared_ptr<ast::InputType> parseInput(
     const server::ast::InputObjectDefinitionNode &node,
@@ -36,4 +37,4 @@ std::shared_ptr<ast::InputType> parseInput(
     return obj;
 };
 
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

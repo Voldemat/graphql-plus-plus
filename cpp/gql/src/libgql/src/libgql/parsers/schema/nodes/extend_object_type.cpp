@@ -13,9 +13,9 @@
 #include "./object_field_spec.hpp"
 #include "libgql/parsers/schema/shared_ast.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 std::pair<std::shared_ptr<ast::ObjectType>,
           std::map<std::string,
                    std::shared_ptr<ast::FieldDefinition<ast::ObjectFieldSpec>>>>
@@ -44,4 +44,4 @@ parseExtendObjectType(const server::ast::ExtendTypeNode &node,
             std::ranges::to<std::map>()
     };
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

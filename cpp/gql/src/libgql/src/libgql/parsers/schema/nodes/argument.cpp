@@ -15,19 +15,19 @@
 #include "libgql/parsers/file/shared/parser_error.hpp"
 #include "utils.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::ArgumentLiteralValue parseArgumentValue(
     const file::shared::ast::ArgumentValue &value,
     const std::shared_ptr<ast::FieldDefinition<ast::InputFieldSpec>> &type) {
     return std::visit<ast::ArgumentLiteralValue>(
-        overloaded{
+        utils::overloaded{
             [&type](const file::shared::ast::NameNode &node) -> ast::ArgumentLiteralValue {
                 throw file::shared::ParserError(node.location.startToken, "",
                                                 node.location.source);
             },
             [&type](const file::shared::ast::LiteralNode &node) {
                 return std::visit<ast::ArgumentLiteralValue>(
-                    overloaded{
+                    utils::overloaded{
                         [](const file::shared::ast::LiteralBooleanNode &n) {
                             return n.value;
                         },

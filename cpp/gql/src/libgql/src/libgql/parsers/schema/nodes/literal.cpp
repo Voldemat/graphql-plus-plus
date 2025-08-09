@@ -7,16 +7,16 @@
 
 #include "../../file/shared/ast.hpp"
 #include "../../file/shared/parser_error.hpp"
-#include "../server_ast.hpp"
+#include "../shared_ast.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::Literal parseLiteralNode(const shared::ast::LiteralNode &literal,
                               const ast::InputTypeSpec &spec) {
     return std::visit<ast::Literal>(
-        overloaded{
+        utils::overloaded{
             [&spec](const shared::ast::LiteralEnumValueNode &node) {
                 if (!std::holds_alternative<std::shared_ptr<ast::Enum>>(spec)) {
                     throw shared::ParserError(
@@ -38,4 +38,4 @@ ast::Literal parseLiteralNode(const shared::ast::LiteralNode &literal,
             [](const auto &node) -> ast::Literal { return node.value; } },
         literal);
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

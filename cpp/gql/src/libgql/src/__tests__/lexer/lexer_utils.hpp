@@ -17,12 +17,12 @@
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/token_type.hpp"
 
-using namespace lexer;
+using namespace gql::lexer;
 struct LexerTestCase {
     std::string filename;
     std::string schema;
     std::vector<GQLToken> expectedTokens;
-    std::optional<lexer::LexerError> error;
+    std::optional<LexerError> error;
 };
 inline std::ostream &operator<<(std::ostream &os, const LexerTestCase &self) {
     os << "TestCase(filename: " << self.filename << ", schema: ";

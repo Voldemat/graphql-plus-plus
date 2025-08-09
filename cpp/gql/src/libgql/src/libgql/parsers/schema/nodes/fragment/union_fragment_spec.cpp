@@ -1,3 +1,5 @@
+#include "./union_fragment_spec.hpp"
+
 #include <memory>
 #include <ranges>
 #include <vector>
@@ -8,9 +10,9 @@
 #include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::UnionFragmentSpec parseUnionFragmentSpec(
     const std::vector<client::ast::SelectionNode> &selections,
     const std::shared_ptr<ast::Union> &type, const TypeRegistry &registry) {
@@ -23,4 +25,4 @@ ast::UnionFragmentSpec parseUnionFragmentSpec(
                  }) |
                  std::ranges::to<std::vector>() };
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

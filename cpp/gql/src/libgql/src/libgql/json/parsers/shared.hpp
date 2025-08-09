@@ -2,7 +2,8 @@
 
 #include <exception>
 #include <string>
-namespace json::parsers::shared {
+
+namespace gql::json::parsers::shared {
 enum class ParsingErrorType {
     NO_MEMBER,
     INVALID_MEMBER,

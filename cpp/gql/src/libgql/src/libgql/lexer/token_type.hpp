@@ -6,7 +6,7 @@
 #include <string>
 #include <variant>
 
-namespace lexer {
+namespace gql::lexer {
 enum class SimpleTokenType {
     EQUAL,
     LEFT_PAREN,

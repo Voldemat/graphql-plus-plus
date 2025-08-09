@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <cassert>
@@ -14,14 +13,14 @@
 #include "../../../file/client/ast.hpp"
 #include "../../../file/shared/parser_error.hpp"
 #include "../../client_ast.hpp"
-#include "libgql/parsers/schema/nodes/fragment/selection_argument.hpp"
-#include "libgql/parsers/schema/nodes/fragment/spec.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
-#include "libgql/parsers/schema/shared_ast.hpp"
-#include "libgql/parsers/schema/type_registry.hpp"
+#include "../../server_ast.hpp"
+#include "../../shared_ast.hpp"
+#include "../../type_registry.hpp"
+#include "./selection_argument.hpp"
+#include "./spec.hpp"
 #include "utils.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 bool isObjectFieldSpecIsTypenameField(
     const file::client::ast::ObjectFieldSpec &spec);
 template <typename T>
@@ -29,7 +28,7 @@ ast::FieldSelection parseFieldSelectionNode(
     const file::client::ast::FieldSelectionNode &fNode,
     const std::shared_ptr<T> &type, const TypeRegistry &registry) {
     return std::visit<ast::FieldSelection>(
-        overloaded{
+        utils::overloaded{
             [&type, &fNode,
              &registry](const file::client::ast::ObjectLiteralFieldSpec &node)
                 -> ast::FieldSelection {

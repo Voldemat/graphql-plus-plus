@@ -6,7 +6,7 @@
 #include "../server_ast.hpp"
 #include "../type_registry.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 ast::ServerSchemaNode parseServerNodeFirstPass(
     const file::server::ast::TypeDefinitionNode &astNode);
@@ -17,4 +17,4 @@ ast::ServerSchemaNode parseServerNodeSecondPass(
 std::vector<ast::ServerSchemaNode> parseServerNodesSecondPass(
     const std::vector<file::server::ast::ASTNode> &astArray,
     const TypeRegistry &registry);
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

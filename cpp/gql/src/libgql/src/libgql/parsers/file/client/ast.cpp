@@ -3,21 +3,23 @@
 #include <optional>
 #include <string>
 #include <variant>
+
 #include "utils.hpp"
 
-namespace parsers::file::client::ast {
+namespace gql::parsers::file::client::ast {
 
-std::optional<std::string> extractSelectionName(const ObjectFieldSpec& spec) {
-    return std::visit(overloaded{
-        [](const ObjectLiteralFieldSpec& s) -> std::optional<std::string> {
-            if (s.name.name == s.selectionName.name) return std::nullopt;
-            return s.selectionName.name;
-        },
-        [](const ObjectCallableFieldSpec& s) -> std::optional<std::string> {
-            if (s.name.name == s.selectionName.name) return std::nullopt;
-            return s.selectionName.name;
-        }
-    }, spec);
+std::optional<std::string> extractSelectionName(const ObjectFieldSpec &spec) {
+    return std::visit(
+        utils::overloaded{
+            [](const ObjectLiteralFieldSpec &s) -> std::optional<std::string> {
+                if (s.name.name == s.selectionName.name) return std::nullopt;
+                return s.selectionName.name;
+            },
+            [](const ObjectCallableFieldSpec &s) -> std::optional<std::string> {
+                if (s.name.name == s.selectionName.name) return std::nullopt;
+                return s.selectionName.name;
+            } },
+        spec);
 }
 
 std::optional<OpType> opTypeFromObjectName(const std::string &value) {
@@ -54,4 +56,4 @@ std::optional<DirectiveLocation> stringToDirectiveLocation(
         return DirectiveLocation::VARIABLE_DEFINITION;
     return std::nullopt;
 };
-};  // namespace parsers::file::client::ast
+};  // namespace gql::parsers::file::client::ast

@@ -13,8 +13,7 @@
 #include "./token.hpp"
 #include "./token_type.hpp"
 
-using namespace lexer;
-
+namespace gql::lexer {
 Lexer::Lexer(const std::string_view &s, ITokensAccumulator *tokensAccumulator)
     : state{ tokensAccumulator }, stream{ s } {};
 
@@ -105,3 +104,4 @@ void LexerState::feedNew(char c) {
     };
     location.lockStart();
 };
+};  // namespace gql::lexer

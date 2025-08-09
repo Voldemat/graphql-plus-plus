@@ -1,6 +1,6 @@
 #include "./introspection.hpp"
 
-namespace introspection {
+namespace gql::introspection {
 const char* INTROSPECTION_QUERY =
 #include "./query.data"
 };

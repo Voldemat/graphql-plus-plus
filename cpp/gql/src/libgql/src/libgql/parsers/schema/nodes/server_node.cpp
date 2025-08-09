@@ -16,13 +16,13 @@
 #include "libgql/parsers/schema/shared_ast.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::ServerSchemaNode parseServerNodeFirstPass(
     const server::ast::TypeDefinitionNode &astNode) {
     return std::visit<ast::ServerSchemaNode>(
-        overloaded{
+        utils::overloaded{
             [](const server::ast::ScalarDefinitionNode &node) {
                 return std::make_shared<ast::Scalar>(node.name.name);
             },
@@ -55,7 +55,7 @@ ast::ServerSchemaNode parseServerNodeSecondPass(
     const file::server::ast::TypeDefinitionNode &astNode,
     const TypeRegistry &registry) {
     return std::visit<ast::ServerSchemaNode>(
-        overloaded{
+        utils::overloaded{
             [&registry](const server::ast::ScalarDefinitionNode &node)
                 -> std::shared_ptr<ast::Scalar> {
                 return registry.scalars.at(node.name.name);

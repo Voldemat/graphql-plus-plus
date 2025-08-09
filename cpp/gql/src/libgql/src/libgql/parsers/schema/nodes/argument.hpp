@@ -9,7 +9,7 @@
 #include "../type_registry.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 std::map<std::string, ast::FieldSelectionArgument> parseArguments(
     const std::vector<file::shared::ast::Argument> &arguments,

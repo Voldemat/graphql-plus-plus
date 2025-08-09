@@ -6,7 +6,7 @@
 #include "libgql/parsers/file/base/directive.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
 
-namespace parsers::file::server {
+namespace gql::parsers::file::server {
 
 class Parser : public BaseDirectiveParser<ast::DirectiveLocation> {
     ast::ASTNode parseASTNode();
@@ -26,4 +26,4 @@ public:
     using BaseDirectiveParser<ast::DirectiveLocation>::BaseDirectiveParser;
     std::vector<ast::ASTNode> parse();
 };
-};  // namespace parsers::file::server
+};  // namespace gql::parsers::file::server

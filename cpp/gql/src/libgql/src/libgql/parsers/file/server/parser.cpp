@@ -4,7 +4,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "../shared/ast.hpp"
@@ -12,12 +11,9 @@
 #include "./ast.hpp"
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/token_type.hpp"
-#include "utils.hpp"
 
-using namespace parsers::file;
-using namespace parsers::file::server;
-using namespace lexer;
-
+using namespace gql::lexer;
+namespace gql::parsers::file::server {
 std::vector<ast::ASTNode> Parser::parse() {
     std::vector<ast::ASTNode> nodes;
     while (currentToken != tokens.back()) {
@@ -195,3 +191,4 @@ ast::DirectiveLocation Parser::parseDirectiveLocation() {
     };
     return value.value();
 };
+};  // namespace gql::parsers::file::server

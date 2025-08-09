@@ -4,7 +4,7 @@
 #include <ostream>
 #include <string>
 
-namespace lexer {
+namespace gql::lexer {
 class Location {
     unsigned int line = 1;
     unsigned int start = -1;

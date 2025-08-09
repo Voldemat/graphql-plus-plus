@@ -3,7 +3,7 @@
 #include <optional>
 #include <string>
 
-namespace parsers::file::server::ast {
+namespace gql::parsers::file::server::ast {
 std::optional<DirectiveLocation> stringToDirectiveLocation(
     const std::string &str) {
     if (str == "SCHEMA")
@@ -30,4 +30,4 @@ std::optional<DirectiveLocation> stringToDirectiveLocation(
         return DirectiveLocation::INPUT_FIELD_DEFINITION;
     return std::nullopt;
 };
-};  // namespace parsers::file::server::ast
+};  // namespace gql::parsers::file::server::ast

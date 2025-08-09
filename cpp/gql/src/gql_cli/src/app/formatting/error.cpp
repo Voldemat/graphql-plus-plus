@@ -1,15 +1,18 @@
 #include "./error.hpp"
+
 #include <algorithm>
 #include <format>
 #include <limits>
 #include <sstream>
 #include <string>
+
 #include "libgql/lexer/location.hpp"
 #include "libgql/parsers/file/shared/parser_error.hpp"
 
+namespace cli::formatting {
 std::string formatLine(const std::string &line, const unsigned int &currentLine,
-                       const lexer::Location &location,
-                       const parsers::file::shared::ParserError &exc) {
+                       const gql::lexer::Location &location,
+                       const gql::parsers::file::shared::ParserError &exc) {
     std::string linestr = std::to_string(currentLine);
     std::string buffer = std::format("{}: {}\n", linestr, line);
     if (currentLine == location.getLine()) {
@@ -28,10 +31,10 @@ std::string formatLine(const std::string &line, const unsigned int &currentLine,
     return buffer;
 };
 
-std::string formatError(const parsers::file::shared::ParserError &exc) {
+std::string formatError(const gql::parsers::file::shared::ParserError &exc) {
     std::string buffer =
         std::format("{}\n", exc.getSource()->filepath.string());
-    const lexer::Location &location = exc.getLocation();
+    const gql::lexer::Location &location = exc.getLocation();
     unsigned int firstLineToShow = std::clamp((int)location.getLine() - 4, 1,
                                               std::numeric_limits<int>::max());
     unsigned int lastLineToShow = location.getLine() + 4;
@@ -46,4 +49,4 @@ std::string formatError(const parsers::file::shared::ParserError &exc) {
     };
     return buffer;
 };
-
+};  // namespace cli::formatting

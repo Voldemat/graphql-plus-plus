@@ -6,6 +6,7 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+namespace gql::json {
 using JSONValue = rapidjson::GenericValue<
     rapidjson::UTF8<char>,
     rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>>;
@@ -27,3 +28,4 @@ using JSONObject = rapidjson::GenericObject<
     true, rapidjson::GenericValue<
                rapidjson::UTF8<char>,
                rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>>>;
+}

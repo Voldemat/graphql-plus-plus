@@ -18,7 +18,8 @@ namespace cli {
 void run_config_action(
     const std::string &configPath,
     const std::function<void(const std::string &, const std::filesystem::path &,
-                             const std::string &, const std::string&)> &jsonStringCallback) {
+                             const std::string &, const std::string &)>
+        &jsonStringCallback) {
     const auto &buffer = utils::readFile(configPath);
     const auto &yaml = YAML::LoadFile(configPath);
     const auto &configDirPath = std::filesystem::path(configPath).parent_path();
@@ -28,7 +29,7 @@ void run_config_action(
         throw CLI::RuntimeError(1);
     };
     const auto &config = parseResult.value();
-    parsers::schema::TypeRegistry registry;
+    gql::parsers::schema::TypeRegistry registry;
     const auto &serverResult = utils::loadServerSchemaFromInputs(
         registry, config.server.inputs, configDirPath);
     if (!serverResult.has_value()) {
@@ -39,7 +40,7 @@ void run_config_action(
     };
     const auto &serverSchema = serverResult.value();
 
-    std::optional<parsers::schema::ClientSchema> clientSchema;
+    std::optional<gql::parsers::schema::ClientSchema> clientSchema;
 
     if (config.client.has_value()) {
         const auto &result = utils::loadClientSchemaFromInputs(
@@ -56,8 +57,8 @@ void run_config_action(
     if (config.server.outputs.has_value()) {
         const auto &jsonString =
             utils::serializeToJSONString([&serverSchema](auto &writer) {
-                json::serializers::schema::writeServerSchema(writer,
-                                                             serverSchema);
+                gql::json::serializers::schema::writeServerSchema(writer,
+                                                                  serverSchema);
             });
         jsonStringCallback(jsonString, configDirPath,
                            config.server.outputs->filepath, "Server");
@@ -66,7 +67,7 @@ void run_config_action(
     if (config.client.has_value() && config.client->outputs.has_value()) {
         const auto &jsonString =
             utils::serializeToJSONString([&clientSchema](auto &writer) {
-                json::serializers::schema::writeClientSchema(
+                gql::json::serializers::schema::writeClientSchema(
                     writer, clientSchema.value());
             });
         jsonStringCallback(jsonString, configDirPath,

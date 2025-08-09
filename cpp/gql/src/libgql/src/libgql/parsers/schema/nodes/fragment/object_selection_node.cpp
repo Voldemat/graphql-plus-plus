@@ -10,9 +10,9 @@
 #include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 ast::SpreadSelection parseSpreadSelectionNode(
     const client::ast::SpreadSelectionNode &node,
@@ -83,4 +83,4 @@ ast::SpreadSelection parseSpreadSelectionNode(
     };
     return (ast::SpreadSelection){ .fragment = fragment };
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

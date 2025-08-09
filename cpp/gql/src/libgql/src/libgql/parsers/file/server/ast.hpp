@@ -7,7 +7,7 @@
 
 #include "../shared/ast.hpp"
 
-namespace parsers::file::server::ast {
+namespace gql::parsers::file::server::ast {
 
 enum class DirectiveLocation {
     SCHEMA,

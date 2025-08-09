@@ -20,15 +20,15 @@
 #include "utils.hpp"
 
 using namespace rapidjson;
-using namespace parsers::schema;
-using namespace parsers::schema::ast;
+using namespace gql::parsers::schema;
+using namespace gql::parsers::schema::ast;
 
-namespace json::serializers::schema {
+namespace gql::json::serializers::schema {
 void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                    const ObjectTypeSpec &field) {
     writer.StartObject();
     std::visit(
-        overloaded{
+        utils::overloaded{
             [&writer](const std::shared_ptr<ObjectType> &node) {
                 writer.String("_type");
                 writer.String("ObjectType");
@@ -80,7 +80,7 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                    const InputTypeSpec &field) {
     writer.StartObject();
     std::visit(
-        overloaded{
+        utils::overloaded{
             [&writer](const std::shared_ptr<InputType> &node) {
                 writer.String("_type");
                 writer.String("InputType");
@@ -114,7 +114,7 @@ template <typename T>
 void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                     const NonCallableFieldSpec<T> &field) {
     writer.StartObject();
-    std::visit(overloaded{
+    std::visit(utils::overloaded{
                    [&writer](const LiteralFieldSpec<T> &node) {
                        writer.String("_type");
                        writer.String("literal");
@@ -141,7 +141,7 @@ void writeFieldDefinition(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 void writeArgumentLiteralValue(
     rapidjson::Writer<rapidjson::StringBuffer> &writer,
     const ArgumentLiteralValue &argValue) {
-    std::visit(overloaded{
+    std::visit(utils::overloaded{
                    [&writer](const std::string &value) {
                        writer.String(value.c_str());
                    },
@@ -158,7 +158,7 @@ void writeArgumentLiteralValue(
 void writeArgumentValue(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                         const ArgumentValue &argValue) {
     writer.StartObject();
-    std::visit(overloaded{
+    std::visit(utils::overloaded{
                    [&writer](const ArgumentLiteralValue &value) {
                        writer.String("_type");
                        writer.String("literal");
@@ -180,7 +180,7 @@ void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                     const ObjectFieldSpec &field) {
     writer.StartObject();
     std::visit(
-        overloaded{
+        utils::overloaded{
             [&writer](const LiteralFieldSpec<ObjectTypeSpec> &node) {
                 writer.String("_type");
                 writer.String("literal");
@@ -451,7 +451,7 @@ void writeObjectSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                           const ObjectSelection &selection) {
     writer.StartObject();
     writer.String("_type");
-    std::visit(overloaded{
+    std::visit(utils::overloaded{
                    [&writer](const TypenameField &node) -> void {
                        writeTypenameField(writer, node);
                    },
@@ -507,7 +507,7 @@ void writeUnionSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                          const UnionSelection &selection) {
     writer.StartObject();
     writer.String("_type");
-    std::visit(overloaded{
+    std::visit(utils::overloaded{
                    [&writer](const TypenameField &node) {
                        writeTypenameField(writer, node);
                    },
@@ -542,7 +542,7 @@ void writeUnionSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 void writeClientFragmentSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                              const FragmentSpec &spec) {
     std::visit(
-        overloaded{
+        utils::overloaded{
             [&writer](const UnionFragmentSpec &node) -> void {
                 writer.StartObject();
                 writer.String("_type");
@@ -610,7 +610,7 @@ void writeClientDirective(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeFragment(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                       const parsers::schema::ast::Fragment &fragment) {
+                   const parsers::schema::ast::Fragment &fragment) {
     writer.StartObject();
     writer.String("sourceText");
     writer.String(fragment.sourceText.c_str());
@@ -646,4 +646,4 @@ void writeClientSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.EndObject();
 };
 
-};  // namespace json::serializers::schema
+};  // namespace gql::json::serializers::schema

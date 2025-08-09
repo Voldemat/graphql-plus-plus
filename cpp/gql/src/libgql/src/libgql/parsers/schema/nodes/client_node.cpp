@@ -18,14 +18,14 @@
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::ClientSchemaNode parseClientDefinition(
     const client::ast::ASTNode &definition,
     const TypeRegistry &registry) {
     return std::visit<ast::ClientSchemaNode>(
-        overloaded{ [&registry](const client::ast::FragmentDefinition &node) {
+        utils::overloaded{ [&registry](const client::ast::FragmentDefinition &node) {
                        return nodes::parseFragmentSecondPass(node, registry);
                    },
                     [&registry](const client::ast::DirectiveDefinition &node) {
@@ -73,7 +73,7 @@ void assertOperationArgumentRefIsValid(const ast::ArgumentRefValue &ref,
 
 void assertOperationArgumentIsValid(const ast::FieldSelectionArgument &arg,
                                     const std::shared_ptr<ast::Operation> &op) {
-    std::visit(overloaded{
+    std::visit(utils::overloaded{
         [&arg, &op](const ast::ArgumentRefValue& value) {
             assertOperationArgumentRefIsValid(value, arg.type, op);
         },

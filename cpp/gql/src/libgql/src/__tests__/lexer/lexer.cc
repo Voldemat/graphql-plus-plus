@@ -17,7 +17,6 @@
 
 class LexerFixture : public testing::TestWithParam<LexerTestCase> {};
 
-using namespace lexer;
 TEST_P(LexerFixture, TestLexer) {
     auto testCase = GetParam();
     VectorTokensAccumulator accumulator;
@@ -37,7 +36,7 @@ TEST_P(LexerFixture, TestLexer) {
                 << "token: " << token << "\nexpectedToken: " << expectedToken;
             index++;
         };
-    } catch (const lexer::LexerError &error) {
+    } catch (const LexerError &error) {
         const auto errorLocation = error.getLocation();
         ASSERT_TRUE(testCase.error.has_value()) << error.what();
         const auto expectedError = testCase.error.value();

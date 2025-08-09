@@ -10,7 +10,7 @@
 #include "libgql/lexer/token.hpp"
 #include "libgql/lexer/token_type.hpp"
 
-namespace parsers::file::shared {
+namespace gql::parsers::file::shared {
 class ParserError : public std::exception {
     lexer::GQLToken token;
     std::string error;
@@ -69,4 +69,4 @@ public:
                            source);
     };
 };
-};  // namespace parsers::shared
+};  // namespace gql::parsers::file::shared

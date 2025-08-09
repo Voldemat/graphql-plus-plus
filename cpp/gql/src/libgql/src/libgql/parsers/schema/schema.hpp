@@ -14,7 +14,7 @@
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "utils.hpp"
 
-namespace parsers::schema {
+namespace gql::parsers::schema {
 struct ServerSchema {
     std::map<std::string, std::shared_ptr<ast::ObjectType>> objects;
     std::map<std::string, std::shared_ptr<ast::InputType>> inputs;
@@ -37,7 +37,7 @@ struct ServerSchema {
 
     void addNode(const ast::ServerSchemaNode &sNode) {
         std::visit(
-            overloaded{
+            utils::overloaded{
                 [this](const std::shared_ptr<ast::ObjectType> &node) {
                     objects[node->name] = node;
                 },
@@ -80,7 +80,7 @@ struct ClientSchema {
 
     void addNode(const ast::ClientSchemaNode &sNode) {
         std::visit(
-            overloaded{
+            utils::overloaded{
                 [this](const std::shared_ptr<ast::Fragment> &node) {
                     fragments[node->name] = node;
                 },
@@ -104,8 +104,8 @@ struct Schema {
 };
 
 const Schema parseSchema(
-    const std::vector<parsers::file::server::ast::ASTNode>& serverNodes,
-    const std::vector<parsers::file::client::ast::ASTNode>& clientNodes);
+    const std::vector<parsers::file::server::ast::ASTNode> &serverNodes,
+    const std::vector<parsers::file::client::ast::ASTNode> &clientNodes);
 const ServerSchema parseServerSchema(
     parsers::schema::TypeRegistry &registry,
     const std::vector<file::server::ast::ASTNode> &astNodes);
@@ -113,4 +113,4 @@ const ClientSchema parseClientSchema(
     parsers::schema::TypeRegistry &registry,
     const std::vector<file::client::ast::ASTNode> &astNodes);
 
-};  // namespace parsers::schema
+};  // namespace gql::parsers::schema

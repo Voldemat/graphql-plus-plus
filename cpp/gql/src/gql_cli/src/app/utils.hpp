@@ -32,41 +32,41 @@ std::string readFile(const std::filesystem::path &path);
 
 std::string readFromFileOrStdin(const std::string &path);
 
-std::vector<lexer::GQLToken> parseTokensFromJSON(const std::string &buffer);
-std::expected<std::vector<lexer::GQLToken>, std::string> parseTokensFromGraphql(
-    const std::shared_ptr<parsers::file::shared::ast::SourceFile> &sourceFile);
+std::vector<gql::lexer::GQLToken> parseTokensFromJSON(const std::string &buffer);
+std::expected<std::vector<gql::lexer::GQLToken>, std::string> parseTokensFromGraphql(
+    const std::shared_ptr<gql::parsers::file::shared::ast::SourceFile> &sourceFile);
 
-std::vector<parsers::file::server::ast::ASTNode> parseServerNodesFromJSON(
-    const std::shared_ptr<parsers::file::shared::ast::SourceFile> &sourceFile,
-    const std::vector<lexer::GQLToken> &tokens);
-std::expected<std::vector<parsers::file::server::ast::ASTNode>, std::string> parseServerNodesFromGraphql(
-    const std::shared_ptr<parsers::file::shared::ast::SourceFile> &sourceFile,
-    const std::vector<lexer::GQLToken> &tokens);
+std::vector<gql::parsers::file::server::ast::ASTNode> parseServerNodesFromJSON(
+    const std::shared_ptr<gql::parsers::file::shared::ast::SourceFile> &sourceFile,
+    const std::vector<gql::lexer::GQLToken> &tokens);
+std::expected<std::vector<gql::parsers::file::server::ast::ASTNode>, std::string> parseServerNodesFromGraphql(
+    const std::shared_ptr<gql::parsers::file::shared::ast::SourceFile> &sourceFile,
+    const std::vector<gql::lexer::GQLToken> &tokens);
 
 void ensureDirectoryExists(const std::string &path);
 
 void ensureTokensPresent(const std::filesystem::path &filepath,
-                         const std::vector<lexer::GQLToken> &tokens);
+                         const std::vector<gql::lexer::GQLToken> &tokens);
 
 std::vector<std::filesystem::path> graphqlPathsInDirectory(
     const std::filesystem::path &filepath);
 
-std::expected<std::vector<parsers::file::client::ast::ASTNode>, std::string> parseClientNodesFromGraphql(
-    const std::shared_ptr<parsers::file::shared::ast::SourceFile> &sourceFile,
-    const std::vector<lexer::GQLToken> &tokens);
+std::expected<std::vector<gql::parsers::file::client::ast::ASTNode>, std::string> parseClientNodesFromGraphql(
+    const std::shared_ptr<gql::parsers::file::shared::ast::SourceFile> &sourceFile,
+    const std::vector<gql::lexer::GQLToken> &tokens);
 
 template <typename T>
 std::vector<T> parseNodesFromDirectory(
     const std::string &path,
     const std::function<std::expected<std::vector<T>, std::string>(
-        const std::shared_ptr<parsers::file::shared::ast::SourceFile>
+        const std::shared_ptr<gql::parsers::file::shared::ast::SourceFile>
             &sourceFile,
-        const std::vector<lexer::GQLToken> &tokens)> &parseCallback) {
+        const std::vector<gql::lexer::GQLToken> &tokens)> &parseCallback) {
     std::vector<T> nodes;
     for (const auto &filepath : graphqlPathsInDirectory(path)) {
         const auto &buffer = readFile(filepath);
-        std::shared_ptr<parsers::file::shared::ast::SourceFile> source =
-            std::make_shared<parsers::file::shared::ast::SourceFile>(filepath, buffer);
+        std::shared_ptr<gql::parsers::file::shared::ast::SourceFile> source =
+            std::make_shared<gql::parsers::file::shared::ast::SourceFile>(filepath, buffer);
         const auto &tokens = parseTokensFromGraphql(source);
         if (!tokens.has_value()) {
             std::cerr << tokens.error() << std::endl;
@@ -89,14 +89,14 @@ bool doesFileHaveChanges(
     const std::string& schemaName
 );
 
-std::expected<parsers::schema::ServerSchema,
+std::expected<gql::parsers::schema::ServerSchema,
               std::vector<std::string> >
-loadServerSchemaFromInputs(parsers::schema::TypeRegistry &registry,
+loadServerSchemaFromInputs(gql::parsers::schema::TypeRegistry &registry,
                                const config::InputsConfig &config,
                                const std::filesystem::path &configDirPath);
-std::expected<parsers::schema::ClientSchema,
+std::expected<gql::parsers::schema::ClientSchema,
               std::vector<std::string> >
-loadClientSchemaFromInputs(parsers::schema::TypeRegistry &registry,
+loadClientSchemaFromInputs(gql::parsers::schema::TypeRegistry &registry,
                                const config::InputsConfig &config,
                                const std::filesystem::path &configDirPath);
 };

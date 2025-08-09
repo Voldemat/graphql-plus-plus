@@ -11,7 +11,7 @@
 #include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/shared_ast.hpp"
 
-namespace parsers::schema::ast {
+namespace gql::parsers::schema::ast {
 
 struct Fragment;
 struct FieldSelection;

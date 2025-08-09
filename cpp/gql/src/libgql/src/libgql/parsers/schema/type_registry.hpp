@@ -9,16 +9,13 @@
 #include "../file/shared/ast.hpp"
 #include "./client_ast.hpp"
 #include "./server_ast.hpp"
+#include "./shared_ast.hpp"
 
-namespace parsers {
-namespace schema {
-
+namespace gql::parsers::schema {
 struct TypeRegistry {
-    std::map<std::string,
-             std::shared_ptr<ast::ServerDirective>>
+    std::map<std::string, std::shared_ptr<ast::ServerDirective>>
         serverDirectives;
-    std::map<std::string,
-             std::shared_ptr<ast::ClientDirective>>
+    std::map<std::string, std::shared_ptr<ast::ClientDirective>>
         clientDirectives;
     std::map<std::string,
              std::shared_ptr<ast::FieldDefinition<ast::ObjectFieldSpec>>>
@@ -39,8 +36,10 @@ struct TypeRegistry {
 
     explicit TypeRegistry();
 
-    [[nodiscard]] std::shared_ptr<ast::ServerDirective> getServerDirective(const std::string& name) const;
-    [[nodiscard]] std::shared_ptr<ast::ClientDirective> getClientDirective(const std::string& name) const;
+    [[nodiscard]] std::shared_ptr<ast::ServerDirective> getServerDirective(
+        const std::string &name) const;
+    [[nodiscard]] std::shared_ptr<ast::ClientDirective> getClientDirective(
+        const std::string &name) const;
     [[nodiscard]] std::shared_ptr<ast::ObjectType> getQueryObject() const;
     [[nodiscard]] std::shared_ptr<ast::ObjectType> getMutationObject() const;
     [[nodiscard]] std::shared_ptr<ast::ObjectType> getSubscriptionObject()
@@ -85,7 +84,7 @@ struct TypeRegistry {
         const std::map<std::string, std::shared_ptr<ast::FieldDefinition<
                                         ast::ObjectFieldSpec>>> &newFields);
 
-    ast::FragmentSpec fragmentSpecFromOpType(file::client::ast::OpType type) const;
+    ast::FragmentSpec fragmentSpecFromOpType(
+        file::client::ast::OpType type) const;
 };
-};  // namespace schema
-};  // namespace parsers
+};  // namespace gql::parsers::schema

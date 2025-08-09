@@ -1,4 +1,4 @@
 #pragma once
-namespace introspection {
+namespace gql::introspection {
 extern const char *INTROSPECTION_QUERY;
 };

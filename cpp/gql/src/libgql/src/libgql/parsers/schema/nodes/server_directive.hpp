@@ -6,7 +6,7 @@
 #include "../shared_ast.hpp"
 #include "../type_registry.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 std::shared_ptr<ast::ServerDirective> parseServerDirective(
     const file::server::ast::DirectiveDefinitionNode &astNode,
     const TypeRegistry &registry);

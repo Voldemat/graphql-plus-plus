@@ -9,7 +9,7 @@
 
 #include "libgql/lexer/token.hpp"
 
-namespace parsers::file::shared::ast {
+namespace gql::parsers::file::shared::ast {
 struct SourceFile {
     std::filesystem::path filepath;
     std::string buffer;
@@ -69,10 +69,8 @@ struct ListTypeNode {
 
 using TypeNode = std::variant<NamedTypeNode, ListTypeNode>;
 
-using ArgumentValue = std::variant<
-    shared::ast::NameNode,
-    shared::ast::LiteralNode
->;
+using ArgumentValue =
+    std::variant<shared::ast::NameNode, shared::ast::LiteralNode>;
 
 struct Argument {
     shared::ast::NodeLocation location;
@@ -108,4 +106,4 @@ struct DirectiveNode {
     std::vector<shared::ast::InputValueDefinitionNode> arguments;
 };
 
-};  // namespace parsers::file::shared::ast
+};  // namespace gql::parsers::file::shared::ast

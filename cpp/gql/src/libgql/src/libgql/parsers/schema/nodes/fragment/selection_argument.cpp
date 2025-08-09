@@ -5,13 +5,13 @@
 #include <string>
 #include <variant>
 
-#include "libgql/parsers/file/shared/ast.hpp"
-#include "libgql/parsers/file/shared/parser_error.hpp"
-#include "libgql/parsers/schema/client_ast.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
+#include "../../../file/shared/ast.hpp"
+#include "../../../file/shared/parser_error.hpp"
+#include "../../server_ast.hpp"
+#include "../../shared_ast.hpp"
 #include "utils.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 bool isValidScalarType(const ast::InputTypeSpec &typeSpec,
                        const std::string &scalarTypeName) {
@@ -35,7 +35,7 @@ ast::ArgumentLiteralValue parseArgumentLiteralValue(
     const file::shared::ast::LiteralNode &literalNode,
     const ast::InputTypeSpec &typeSpec) {
     return std::visit<ast::ArgumentLiteralValue>(
-        overloaded{
+        utils::overloaded{
             [&typeSpec](const file::shared::ast::LiteralIntNode &node)
                 -> ast::ArgumentLiteralValue {
                 const auto &isValid = isValidScalarType(typeSpec, "Int");
@@ -76,15 +76,13 @@ ast::ArgumentLiteralValue parseArgumentLiteralValue(
                         node.location.source);
                 return node.value;
             },
-            [
-             &typeSpec](const file::shared::ast::LiteralEnumValueNode &node)
+            [&typeSpec](const file::shared::ast::LiteralEnumValueNode &node)
                 -> ast::ArgumentLiteralValue {
                 const auto &isValid = isValidEnumValue(node.value, typeSpec);
                 if (!isValid)
-                    throw file::shared::ParserError(
-                        node.location.startToken,
-                        "Invalid enum value",
-                        node.location.source);
+                    throw file::shared::ParserError(node.location.startToken,
+                                                    "Invalid enum value",
+                                                    node.location.source);
                 return (ast::ArgumentEnumValue){ .value = node.value };
             } },
         literalNode);
@@ -102,7 +100,7 @@ ast::FieldSelectionArgument parseSelectionArgument(
     const auto &typeSpec = ast::extractInputTypeSpec(type->spec);
     return { .name = node.name.name,
              .value = std::visit<ast::ArgumentValue>(
-                 overloaded{
+                 utils::overloaded{
                      [](const file::shared::ast::NameNode &node) {
                          return (ast::ArgumentRefValue){ .name = node.name };
                      },
@@ -112,4 +110,4 @@ ast::FieldSelectionArgument parseSelectionArgument(
                  node.value),
              .type = type };
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

@@ -6,7 +6,7 @@
 #include "libgql/parsers/schema/client_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 std::shared_ptr<ast::Operation> parseClientOperationDefinition(
     const file::client::ast::OperationDefinition &definition,
     const TypeRegistry &registry);

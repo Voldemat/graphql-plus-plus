@@ -12,7 +12,7 @@
 #include "libgql/parsers/file/server/ast.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 std::shared_ptr<ast::ServerDirective> parseServerDirective(
     const file::server::ast::DirectiveDefinitionNode &astNode,
     const TypeRegistry &registry) {
@@ -40,4 +40,4 @@ std::shared_ptr<ast::ServerDirective> parseServerDirective(
     });
 };
 
-}  // namespace parsers::schema::nodes
+}  // namespace gql::parsers::schema::nodes

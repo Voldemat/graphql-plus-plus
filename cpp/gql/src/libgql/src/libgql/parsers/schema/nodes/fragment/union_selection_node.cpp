@@ -1,3 +1,4 @@
+#include "./union_selection_node.hpp"
 
 #include <format>
 #include <memory>
@@ -5,19 +6,19 @@
 #include <ranges>
 #include <variant>
 
-#include "libgql/parsers/file/client/ast.hpp"
-#include "libgql/parsers/file/shared/parser_error.hpp"
-#include "libgql/parsers/schema/client_ast.hpp"
-#include "libgql/parsers/schema/nodes/fragment/field_selection_node.hpp"
-#include "libgql/parsers/schema/nodes/fragment/object_fragment_spec.hpp"
-#include "libgql/parsers/schema/nodes/fragment/union_fragment_spec.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
-#include "libgql/parsers/schema/type_registry.hpp"
+#include "../../../file/client/ast.hpp"
+#include "../../../file/shared/parser_error.hpp"
+#include "../../client_ast.hpp"
+#include "../../server_ast.hpp"
+#include "../../type_registry.hpp"
+#include "./field_selection_node.hpp"
+#include "./object_fragment_spec.hpp"
+#include "./union_fragment_spec.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::SpreadSelection parseSpreadSelectionNode(
     const client::ast::SpreadSelectionNode &node,
     const std::shared_ptr<ast::Union> &type, const TypeRegistry &registry) {
@@ -92,7 +93,7 @@ ast::UnionSelection parseUnionSelectionNode(
     const client::ast::SelectionNode &sNode,
     const std::shared_ptr<ast::Union> &type, const TypeRegistry &registry) {
     return std::visit<ast::UnionSelection>(
-        overloaded{
+        utils::overloaded{
             [&registry, &type](const client::ast::SpreadSelectionNode &node) {
                 return nodes::parseSpreadSelectionNode(node, type, registry);
             },
@@ -148,4 +149,4 @@ ast::UnionSelection parseUnionSelectionNode(
             } },
         sNode);
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

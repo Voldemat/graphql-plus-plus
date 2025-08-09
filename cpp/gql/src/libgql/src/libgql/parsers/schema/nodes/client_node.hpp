@@ -6,7 +6,7 @@
 #include "libgql/parsers/file/client/ast.hpp"
 #include "libgql/parsers/schema/client_ast.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::ClientSchemaNode parseClientDefinition(
     const file::client::ast::ASTNode &definition,
     const TypeRegistry &registry);

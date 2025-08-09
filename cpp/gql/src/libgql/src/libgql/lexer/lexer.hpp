@@ -1,5 +1,4 @@
-#ifndef GRAPHQL_LEXER
-#define GRAPHQL_LEXER
+#pragma once
 
 #include <optional>
 #include <string>
@@ -10,7 +9,7 @@
 #include "./token.hpp"
 #include "./token_type.hpp"
 
-namespace lexer {
+namespace gql::lexer {
 class LexerState {
     std::string buffer;
     std::optional<ComplexTokenType> type;
@@ -37,5 +36,4 @@ public:
     Lexer(const std::string_view &s, ITokensAccumulator *tokensAccumulator);
     void parse();
 };
-};  // namespace lexer
-#endif
+};  // namespace gql::lexer

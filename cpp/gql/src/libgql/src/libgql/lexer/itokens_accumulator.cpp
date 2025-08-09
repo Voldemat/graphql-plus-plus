@@ -4,7 +4,9 @@
 
 #include "libgql/lexer/token.hpp"
 
-void lexer::ITokensAccumulator::addMaybeToken(
+namespace gql::lexer {
+void ITokensAccumulator::addMaybeToken(
     const std::optional<GQLToken> &maybeToken) {
     if (maybeToken.has_value()) addToken(maybeToken.value());
 };
+};  // namespace gql::lexer

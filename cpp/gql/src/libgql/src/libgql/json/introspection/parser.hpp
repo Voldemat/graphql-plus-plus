@@ -4,12 +4,7 @@
 
 #include "libgql/parsers/schema/schema.hpp"
 
-namespace json {
-namespace parser {
-namespace introspection {
-
+namespace gql::json::introspection {
 const parsers::schema::ServerSchema parseIntrospectionSchema(
     const rapidjson::Document &document);
-};
-};  // namespace parser
-};  // namespace json
+};  // namespace gql::json::introspection

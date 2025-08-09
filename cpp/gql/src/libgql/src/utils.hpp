@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+namespace gql::utils {
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
@@ -46,3 +47,4 @@ constexpr std::map<B, A> flip_map(const std::map<A, B> &src) {
                    flip_pair<A, B>);
     return dst;
 }
+};  // namespace gql

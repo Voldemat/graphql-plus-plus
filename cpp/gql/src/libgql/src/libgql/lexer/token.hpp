@@ -7,7 +7,7 @@
 #include "./location.hpp"
 #include "./token_type.hpp"
 
-namespace lexer {
+namespace gql::lexer {
 struct GQLToken {
     GQLTokenType type;
     std::string lexeme;

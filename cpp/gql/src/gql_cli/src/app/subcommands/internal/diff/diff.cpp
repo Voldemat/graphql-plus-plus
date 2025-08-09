@@ -20,17 +20,18 @@
 #include <variant>
 #include <vector>
 
-#include "HTTPRequest.hpp"
 #include "../../../utils.hpp"
+#include "HTTPRequest.hpp"
 #include "libgql/introspection/introspection.hpp"
 #include "libgql/json/introspection/parser.hpp"
 #include "libgql/json/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 #include "utils.hpp"
 
-using namespace parsers::schema;
-using namespace parsers::schema::ast;
+using namespace gql::parsers::schema;
+using namespace gql::parsers::schema::ast;
 
 namespace cli::commands::internal::diff {
 rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
@@ -38,7 +39,7 @@ rapidjson::Document getIntrospectionDocument(const std::string &urlToApi) {
                                 { "Content-Type", "application/json" } };
     http::Request request{ urlToApi };
     const auto &response =
-        request.send("POST", introspection::INTROSPECTION_QUERY, headers);
+        request.send("POST", gql::introspection::INTROSPECTION_QUERY, headers);
     if (response.status.code != http::Status::Ok) {
         std::cerr << std::format("Expected 200 status code, while received {}",
                                  response.status.code)
@@ -83,7 +84,7 @@ bool compareTwoTypeSpecs(const ObjectTypeSpec &spec,
                          const ObjectTypeSpec &spec2, const std::string &path) {
     if (spec.index() != spec2.index()) return false;
     return std::visit(
-        overloaded{
+        gql::utils::overloaded{
             [&spec2](const std::shared_ptr<ObjectType> &node) {
                 const auto &node2 =
                     std::get<std::shared_ptr<ObjectType>>(spec2);
@@ -113,7 +114,7 @@ bool compareTwoTypeSpecs(const InputTypeSpec &spec,
                          const InputTypeSpec &spec2) {
     if (spec.index() != spec2.index()) return false;
     return std::visit(
-        overloaded{
+        gql::utils::overloaded{
             [&spec2](const std::shared_ptr<Scalar> &node) {
                 const auto &node2 = std::get<std::shared_ptr<Scalar>>(spec2);
                 return node->name == node2->name;
@@ -141,7 +142,7 @@ bool compareTwoFieldTypeSpecs(const NonCallableFieldSpec<ObjectTypeSpec> &spec,
         return false;
     };
     return std::visit(
-        overloaded{
+        gql::utils::overloaded{
             [&spec2, &path](const LiteralFieldSpec<ObjectTypeSpec> &node) {
                 const auto &node2 =
                     std::get<LiteralFieldSpec<ObjectTypeSpec>>(spec2);
@@ -189,7 +190,7 @@ bool compareArguments(
 
 std::string getFieldSpecName(const ObjectFieldSpec &spec) {
     return std::visit(
-        overloaded{
+        gql::utils::overloaded{
             [](const LiteralFieldSpec<ObjectTypeSpec> &) { return "Literal"; },
             [](const ArrayFieldSpec<ObjectTypeSpec> &) { return "Array"; },
             [](const CallableFieldSpec &) { return "Callable"; },
@@ -209,7 +210,7 @@ bool compareTwoFieldTypeSpecs(const ObjectFieldSpec &spec,
         return false;
     };
     return std::visit(
-        overloaded{
+        gql::utils::overloaded{
             [&spec2, &path](const LiteralFieldSpec<ObjectTypeSpec> &node) {
                 const auto &node2 =
                     std::get<LiteralFieldSpec<ObjectTypeSpec>>(spec2);
@@ -236,7 +237,7 @@ bool compareTwoFieldTypeSpecs(const InputFieldSpec &spec,
                               const std::string &path) {
     if (spec.index() != spec2.index()) return false;
     return std::visit(
-        overloaded{
+        gql::utils::overloaded{
             [&spec2](const LiteralFieldSpec<InputTypeSpec> &node) {
                 const auto &node2 =
                     std::get<LiteralFieldSpec<InputTypeSpec>>(spec2);
@@ -483,8 +484,8 @@ bool compareEnums(const std::map<std::string, std::shared_ptr<Enum>> &enums,
 };
 
 void findDifferenceBetweenSchemas(
-    const parsers::schema::ServerSchema &schema,
-    const parsers::schema::ServerSchema &schema2) {
+    const gql::parsers::schema::ServerSchema &schema,
+    const gql::parsers::schema::ServerSchema &schema2) {
     bool isObjectsValid = compareObjects(schema.objects, schema2.objects);
     bool isUnionsValid = compareUnions(schema.unions, schema2.unions);
     bool isInputsValid = compareInputs(schema.inputs, schema2.inputs);
@@ -516,12 +517,13 @@ void createSubcommand(CLI::App *app) {
         ->required();
     diffParseCmd->callback([pathToSchema, urlToApi]() {
         const auto &schemaDocument = getDocumentFromSchemaJson(*pathToSchema);
-        const auto &schema = json::parsers::schema::parseSchema(schemaDocument);
+        const auto &schema =
+            gql::json::parsers::schema::parseSchema(schemaDocument);
         const auto &introspectionDocument = getIntrospectionDocument(*urlToApi);
         const auto &secondSchema =
-            json::parser::introspection::parseIntrospectionSchema(
+            gql::json::introspection::parseIntrospectionSchema(
                 introspectionDocument);
         findDifferenceBetweenSchemas(schema.server, secondSchema);
     });
 };
-};
+};  // namespace cli::commands::internal::diff

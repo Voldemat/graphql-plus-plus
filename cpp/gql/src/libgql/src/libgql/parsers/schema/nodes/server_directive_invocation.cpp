@@ -3,13 +3,13 @@
 #include <ranges>
 #include <vector>
 
+#include "../../file/shared/ast.hpp"
+#include "../../file/shared/parser_error.hpp"
 #include "../shared_ast.hpp"
 #include "../type_registry.hpp"
-#include "libgql/parsers/file/shared/ast.hpp"
-#include "libgql/parsers/file/shared/parser_error.hpp"
-#include "libgql/parsers/schema/nodes/argument.hpp"
+#include "./argument.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 std::vector<ast::ServerDirectiveInvocation> parseServerDirectiveInvocations(
     const std::vector<file::shared::ast::DirectiveInvocationNode> &invocations,
     const TypeRegistry &registry) {
@@ -26,12 +26,13 @@ std::vector<ast::ServerDirectiveInvocation> parseServerDirectiveInvocations(
                    };
                    const auto &directive =
                        registry.getServerDirective(node.name.name);
-                    const auto& arguments = parseArguments(node.arguments, directive, registry);
+                   const auto &arguments =
+                       parseArguments(node.arguments, directive, registry);
                    return {
-                        .directive = directive,
-                        .arguments = arguments,
+                       .directive = directive,
+                       .arguments = arguments,
                    };
                }) |
            std::ranges::to<std::vector>();
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

@@ -3,17 +3,18 @@
 #include <memory>
 #include <variant>
 
-#include "libgql/parsers/file/client/ast.hpp"
-#include "libgql/parsers/file/shared/parser_error.hpp"
-#include "libgql/parsers/schema/client_ast.hpp"
-#include "libgql/parsers/schema/nodes/fragment/object_fragment_spec.hpp"
-#include "libgql/parsers/schema/nodes/fragment/union_fragment_spec.hpp"
-#include "libgql/parsers/schema/nodes/object_field_spec.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
-#include "libgql/parsers/schema/type_registry.hpp"
+#include "../../../file/client/ast.hpp"
+#include "../../../file/shared/parser_error.hpp"
+#include "../../client_ast.hpp"
+#include "../../server_ast.hpp"
+#include "../../shared_ast.hpp"
+#include "../../type_registry.hpp"
+#include "../object_field_spec.hpp"
+#include "./object_fragment_spec.hpp"
+#include "./union_fragment_spec.hpp"
 #include "utils.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::FragmentSpec fragmentSpecFromFieldDefinition(
     const ast::FieldDefinition<ast::ObjectFieldSpec> &field,
     const file::client::ast::FragmentSpec &sNode) {
@@ -39,7 +40,7 @@ ast::FragmentSpec parseFragmentSpec(
     const file::client::ast::FragmentSpec &defSpec,
     const ast::FragmentSpec &spec, const TypeRegistry &registry) {
     return std::visit<ast::FragmentSpec>(
-        overloaded{ [&registry, &defSpec](
+        utils::overloaded{ [&registry, &defSpec](
                         const ast::ObjectFragmentSpec<ast::Interface> &node)
                         -> ast::FragmentSpec {
                        return nodes::parseObjectFragmentSpec(
@@ -58,4 +59,4 @@ ast::FragmentSpec parseFragmentSpec(
                     } },
         spec);
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

@@ -7,7 +7,7 @@
 #include "../shared_ast.hpp"
 #include "../type_registry.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 std::pair<ast::ObjectFieldSpec, bool> parseObjectFieldSpec(
     const file::server::ast::FieldDefinitionNode &astNode,
     const TypeRegistry &registry);
@@ -17,4 +17,4 @@ ast::ObjectTypeSpec getReturnTypeFromNonCallableFieldSpec(
 
 ast::ObjectTypeSpec getReturnTypeFromObjectFieldSpec(
     const ast::ObjectFieldSpec &spec);
-}  // namespace parsers::schema::nodes
+}  // namespace gql::parsers::schema::nodes

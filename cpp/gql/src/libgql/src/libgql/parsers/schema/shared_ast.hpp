@@ -10,7 +10,7 @@
 
 #include "libgql/parsers/file/server/ast.hpp"
 
-namespace parsers::schema::ast {
+namespace gql::parsers::schema::ast {
 
 struct Scalar {
     std::string name;

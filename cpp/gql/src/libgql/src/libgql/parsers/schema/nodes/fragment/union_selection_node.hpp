@@ -6,10 +6,10 @@
 
 #include "../../../file/client/ast.hpp"
 #include "../../client_ast.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
-#include "libgql/parsers/schema/type_registry.hpp"
+#include "../../server_ast.hpp"
+#include "../../type_registry.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::SpreadSelection parseSpreadSelectionNode(
     const file::client::ast::SpreadSelectionNode &node,
     const std::shared_ptr<ast::Union> &type, const TypeRegistry &registry);
@@ -20,7 +20,7 @@ getTypeForUnionConditionalSelection(
     const file::client::ast::ConditionalSpreadSelectionNode &node,
     const std::shared_ptr<ast::Union> &type, const TypeRegistry &registry);
 
-ast::UnionSelection parseUnionSelectionNode(const file::client::ast::SelectionNode &sNode,
-                                       const std::shared_ptr<ast::Union> &type,
-                                       const TypeRegistry &registry);
-};  // namespace parsers::schema::nodes
+ast::UnionSelection parseUnionSelectionNode(
+    const file::client::ast::SelectionNode &sNode,
+    const std::shared_ptr<ast::Union> &type, const TypeRegistry &registry);
+};  // namespace gql::parsers::schema::nodes

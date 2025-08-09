@@ -10,9 +10,9 @@
 #include "libgql/parsers/schema/server_ast.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 bool isObjectFieldSpecIsTypenameField(
     const client::ast::ObjectFieldSpec &spec) {
     return std::holds_alternative<client::ast::ObjectLiteralFieldSpec>(spec) &&
@@ -25,7 +25,7 @@ std::vector<ast::FieldSelection> getFieldSelectionsFromFragmentSpec(
 std::vector<ast::FieldSelection> getFieldSelectionsFromObjectSelection(
     const ast::ObjectSelection &selection) {
     return std::visit<std::vector<ast::FieldSelection>>(
-        overloaded{
+        utils::overloaded{
             [](const ast::TypenameField &) -> std::vector<ast::FieldSelection> {
                 return {};
             },
@@ -54,7 +54,7 @@ std::vector<ast::FieldSelection> getFieldSelectionsFromObjectSelection(
 std::vector<ast::FieldSelection> getFieldSelectionsFromUnionSelection(
     const ast::UnionSelection &selection) {
     return std::visit<std::vector<ast::FieldSelection>>(
-        overloaded{
+        utils::overloaded{
             [](const ast::TypenameField &) -> std::vector<ast::FieldSelection> {
                 return {};
             },
@@ -84,7 +84,7 @@ std::vector<ast::FieldSelection> getFieldSelectionsFromUnionSelection(
 std::vector<ast::FieldSelection> getFieldSelectionsFromFragmentSpec(
     const ast::FragmentSpec &spec) {
     return std::visit<std::vector<ast::FieldSelection>>(
-        overloaded{
+        utils::overloaded{
             [](const ast::UnionFragmentSpec &node)
                 -> std::vector<ast::FieldSelection> {
                 return node.selections |

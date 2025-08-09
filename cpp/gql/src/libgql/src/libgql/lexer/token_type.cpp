@@ -10,8 +10,7 @@
 
 #include "utils.hpp"
 
-using namespace lexer;
-
+namespace gql::lexer {
 const std::map<std::string, GQLTokenType> &stringToTokenType{
     { "EQUAL", SimpleTokenType::EQUAL },
     { "LEFT_PAREN", SimpleTokenType::LEFT_PAREN },
@@ -34,30 +33,30 @@ const std::map<std::string, GQLTokenType> &stringToTokenType{
 };
 
 const std::map<GQLTokenType, std::string> &tokenTypeToString =
-    flip_map(stringToTokenType);
+    utils::flip_map(stringToTokenType);
 
-std::optional<GQLTokenType> lexer::gqlTokenTypeFromString(const std::string t) {
+std::optional<GQLTokenType> gqlTokenTypeFromString(const std::string t) {
     if (stringToTokenType.contains(t)) return stringToTokenType.at(t);
     return std::nullopt;
 };
 
-std::string lexer::gqlTokenTypeToString(GQLTokenType type) {
+std::string gqlTokenTypeToString(GQLTokenType type) {
     return tokenTypeToString.at(type);
 };
 
-std::ostream &lexer::operator<<(std::ostream &os, const GQLTokenType &type) {
+std::ostream &operator<<(std::ostream &os, const GQLTokenType &type) {
     os << gqlTokenTypeToString(type);
     return os;
 };
 
 const auto &numberCondition =
     std::function([](const char &c, const std::string &buffer) {
-        const auto& hasFChar = buffer.back() == 'f';
+        const auto &hasFChar = buffer.back() == 'f';
         if (hasFChar) return false;
         const auto &isDigit = std::isdigit(c) != 0;
         const auto &hasPoint = buffer.contains('.');
         if (hasPoint && isDigit) return true;
-        const auto& lastCharIsDigit = std::isdigit(buffer.back()) != 0;
+        const auto &lastCharIsDigit = std::isdigit(buffer.back()) != 0;
         const auto &isChar = c == '.' || c == 'f';
         return isDigit || (lastCharIsDigit && isChar);
     });
@@ -71,7 +70,7 @@ const auto &identifierCondition =
     });
 
 const std::function<bool(const char &, const std::string &buffer)> &
-lexer::getConditionForComplexTokenType(const ComplexTokenType &tokenType) {
+getConditionForComplexTokenType(const ComplexTokenType &tokenType) {
     switch (tokenType) {
         case ComplexTokenType::NUMBER:
             return numberCondition;
@@ -104,9 +103,10 @@ const std::map<char, GQLTokenType> &charToTokenType = {
     { '$', ComplexTokenType::IDENTIFIER },
 };
 
-std::optional<GQLTokenType> lexer::tokenTypeFromChar(char c) {
+std::optional<GQLTokenType> tokenTypeFromChar(char c) {
     if (std::isalpha(c) || c == '_') return ComplexTokenType::IDENTIFIER;
     if (std::isdigit(c)) return ComplexTokenType::NUMBER;
     if (charToTokenType.contains(c)) return charToTokenType.at(c);
     return std::nullopt;
 };
+};  // namespace gql::lexer

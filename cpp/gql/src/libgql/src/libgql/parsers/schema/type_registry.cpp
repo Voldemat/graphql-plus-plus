@@ -12,12 +12,13 @@
 #include "../file/shared/parser_error.hpp"
 #include "./client_ast.hpp"
 #include "./server_ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
-using namespace parsers::schema;
-using namespace parsers::schema::ast;
+using namespace gql::parsers::schema::ast;
+using namespace gql::parsers::file;
 
+namespace gql::parsers::schema {
 TypeRegistry::TypeRegistry() {
     scalars["String"] = std::make_shared<Scalar>("String");
     scalars["Int"] = std::make_shared<Scalar>("Int");
@@ -137,32 +138,32 @@ void TypeRegistry::addOpIfNotExists(
 };
 
 void TypeRegistry::addNode(const ServerSchemaNode &schemaNode) {
-    std::visit(overloaded{ [this](const std::shared_ptr<ObjectType> &node) {
-                              appendOpsIfSpecialObject(node->name,
-                                                       node->fields);
-                              objects[node->name] = node;
-                          },
-                           [this](const std::shared_ptr<Interface> &node) {
-                               interfaces[node->name] = node;
-                           },
-                           [this](const std::shared_ptr<Union> &node) {
-                               unions[node->name] = node;
-                           },
-                           [this](const std::shared_ptr<InputType> &node) {
-                               inputs[node->name] = node;
-                           },
-                           [this](const std::shared_ptr<Enum> &node) {
-                               enums[node->name] = node;
-                           },
-                           [this](const std::shared_ptr<ClientDirective> &node) {
-                               clientDirectives[node->name] = node;
-                           },
-                           [this](const std::shared_ptr<ServerDirective> &node) {
-                               serverDirectives[node->name] = node;
-                           },
-                           [this](const std::shared_ptr<Scalar> &node) {
-                               scalars[node->name] = node;
-                           } },
+    std::visit(utils::overloaded{
+                   [this](const std::shared_ptr<ObjectType> &node) {
+                       appendOpsIfSpecialObject(node->name, node->fields);
+                       objects[node->name] = node;
+                   },
+                   [this](const std::shared_ptr<Interface> &node) {
+                       interfaces[node->name] = node;
+                   },
+                   [this](const std::shared_ptr<Union> &node) {
+                       unions[node->name] = node;
+                   },
+                   [this](const std::shared_ptr<InputType> &node) {
+                       inputs[node->name] = node;
+                   },
+                   [this](const std::shared_ptr<Enum> &node) {
+                       enums[node->name] = node;
+                   },
+                   [this](const std::shared_ptr<ClientDirective> &node) {
+                       clientDirectives[node->name] = node;
+                   },
+                   [this](const std::shared_ptr<ServerDirective> &node) {
+                       serverDirectives[node->name] = node;
+                   },
+                   [this](const std::shared_ptr<Scalar> &node) {
+                       scalars[node->name] = node;
+                   } },
                schemaNode);
 };
 
@@ -198,7 +199,8 @@ void TypeRegistry::patchObject(
     TypeRegistry::appendOpsIfSpecialObject(type->name, newFields);
 };
 
-FragmentSpec TypeRegistry::fragmentSpecFromOpType(client::ast::OpType type) const {
+FragmentSpec TypeRegistry::fragmentSpecFromOpType(
+    client::ast::OpType type) const {
     switch (type) {
         case client::ast::OpType::QUERY: {
             return (ObjectFragmentSpec<ObjectType>){ .type = getQueryObject() };
@@ -216,12 +218,15 @@ FragmentSpec TypeRegistry::fragmentSpecFromOpType(client::ast::OpType type) cons
     };
 };
 
-[[nodiscard]] std::shared_ptr<ast::ServerDirective> TypeRegistry::getServerDirective(const std::string& name) const {
+[[nodiscard]] std::shared_ptr<ast::ServerDirective>
+TypeRegistry::getServerDirective(const std::string &name) const {
     if (serverDirectives.contains(name)) return serverDirectives.at(name);
     throw std::runtime_error("Not server directive with name: " + name);
 };
 
-[[nodiscard]] std::shared_ptr<ast::ClientDirective> TypeRegistry::getClientDirective(const std::string& name) const {
+[[nodiscard]] std::shared_ptr<ast::ClientDirective>
+TypeRegistry::getClientDirective(const std::string &name) const {
     if (clientDirectives.contains(name)) return clientDirectives.at(name);
     throw std::runtime_error("Not client directive with name: " + name);
 };
+};  // namespace gql::parsers::schema

@@ -7,7 +7,7 @@
 #include "../../client_ast.hpp"
 #include "../../type_registry.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 ast::FragmentSpec fragmentSpecFromName(
     const file::shared::ast::NameNode &typeName, const TypeRegistry &registry);

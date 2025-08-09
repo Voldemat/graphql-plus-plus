@@ -5,7 +5,7 @@
 #include "./itokens_accumulator.hpp"
 #include "./token.hpp"
 
-namespace lexer {
+namespace gql::lexer {
 
 class VectorTokensAccumulator : public ITokensAccumulator {
     std::vector<GQLToken> tokens;

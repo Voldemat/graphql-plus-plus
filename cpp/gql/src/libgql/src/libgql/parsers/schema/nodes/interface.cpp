@@ -9,11 +9,12 @@
 #include "../../file/server/ast.hpp"
 #include "../nodes/object_field_spec.hpp"
 #include "../server_ast.hpp"
+#include "../shared_ast.hpp"
 #include "../type_registry.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 std::shared_ptr<ast::Interface> parseInterface(
     const server::ast::InterfaceDefinitionNode &node,
     const TypeRegistry &registry) {
@@ -34,4 +35,4 @@ std::shared_ptr<ast::Interface> parseInterface(
         std::ranges::to<std::map>();
     return obj;
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

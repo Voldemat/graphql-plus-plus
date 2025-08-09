@@ -14,6 +14,8 @@
 #include "libgql/lexer/lexer_error.hpp"
 #include "libgql/lexer/tokens_accumulators.hpp"
 
+using namespace gql::lexer;
+
 namespace cli::commands::internal::lexer {
 void createSubcommand(CLI::App *app) {
     CLI::App *lexerCmd = app->add_subcommand("lexer", "Lexer");
@@ -21,19 +23,20 @@ void createSubcommand(CLI::App *app) {
         "parse", "Parse input stream into tokens in json format");
     lexerParseCmd->callback([]() {
         const auto buffer = utils::getAllStdin();
-        ::lexer::VectorTokensAccumulator accum;
-        ::lexer::Lexer lexer(buffer, &accum);
+        VectorTokensAccumulator accum;
+        Lexer lexer(buffer, &accum);
         try {
             lexer.parse();
-        } catch (const ::lexer::LexerError &error) {
-            std::cerr << std::format("LexerError: {}", error.what()) << std::endl;
+        } catch (const LexerError &error) {
+            std::cerr << std::format("LexerError: {}", error.what())
+                      << std::endl;
             throw CLI::RuntimeError(1);
         };
         const auto tokens = accum.getTokens();
         rapidjson::StringBuffer sb;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-        json::serializers::lexer::writeTokens(writer, tokens);
+        gql::json::serializers::lexer::writeTokens(writer, tokens);
         std::cout << sb.GetString() << std::endl;
     });
 };
-};
+};  // namespace cli::commands::internal::lexer

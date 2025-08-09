@@ -5,7 +5,7 @@
 #include "./parser.hpp"
 #include "libgql/lexer/token_type.hpp"
 
-namespace parsers::file {
+namespace gql::parsers::file {
 template <class T>
 class BaseDirectiveParser : public BaseParser {
 public:

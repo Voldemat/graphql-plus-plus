@@ -4,12 +4,12 @@
 #include <ranges>
 #include <vector>
 
-#include "libgql/parsers/file/client/ast.hpp"
-#include "libgql/parsers/schema/client_ast.hpp"
-#include "libgql/parsers/schema/nodes/fragment/object_selection_node.hpp"
-#include "libgql/parsers/schema/type_registry.hpp"
+#include "../../../file/client/ast.hpp"
+#include "../../client_ast.hpp"
+#include "../../type_registry.hpp"
+#include "./object_selection_node.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 template <typename T>
 ast::ObjectFragmentSpec<T> parseObjectFragmentSpec(
     const std::vector<file::client::ast::SelectionNode> &selections,

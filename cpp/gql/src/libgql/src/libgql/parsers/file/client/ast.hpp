@@ -9,7 +9,7 @@
 
 #include "../shared/ast.hpp"
 
-namespace parsers::file::client::ast {
+namespace gql::parsers::file::client::ast {
 
 enum class DirectiveLocation {
     QUERY,
@@ -47,7 +47,7 @@ struct ObjectCallableFieldSpec {
 using ObjectFieldSpec =
     std::variant<ObjectLiteralFieldSpec, ObjectCallableFieldSpec>;
 
-std::optional<std::string> extractSelectionName(const ObjectFieldSpec& spec);
+std::optional<std::string> extractSelectionName(const ObjectFieldSpec &spec);
 
 struct FieldSelectionNode {
     shared::ast::NodeLocation location;
@@ -98,4 +98,4 @@ struct FragmentDefinition {
 using ASTNode =
     std::variant<OperationDefinition, FragmentDefinition, DirectiveDefinition>;
 
-};  // namespace parsers::file::client::ast
+};  // namespace gql::parsers::file::client::ast

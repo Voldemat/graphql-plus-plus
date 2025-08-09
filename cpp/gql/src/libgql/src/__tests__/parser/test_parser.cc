@@ -24,9 +24,9 @@
 #include "libgql/parsers/file/shared/ast.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
-using namespace parsers::file::server;
-using namespace parsers::file::server::ast;
+using namespace gql::parsers::file;
+using namespace gql::parsers::file::server;
+using namespace gql::parsers::file::server::ast;
 
 struct ASTNameDifference {
     const ASTNode *leftNode;
@@ -45,10 +45,10 @@ template <class... _Types>
 class CustomVariant : public std::variant<_Types...> {
 public:
     explicit operator std::string() const {
-        return std::visit<std::string>(overloaded{ [](const auto &arg) {
-                                           return static_cast<std::string>(arg);
-                                       } },
-                                       *this);
+        return std::visit<std::string>(
+            gql::utils::overloaded{
+                [](const auto &arg) { return static_cast<std::string>(arg); } },
+            *this);
     };
 
     friend std::ostream &operator<<(std::ostream &os,
@@ -74,8 +74,7 @@ class ParserFixture : public testing::TestWithParam<ParserTestCase> {};
 TEST_P(ParserFixture, TestParser) {
     auto param = GetParam();
     auto source = std::make_shared<shared::ast::SourceFile>(
-        std::filesystem::path("/test.graphql"), ""
-    );
+        std::filesystem::path("/test.graphql"), "");
     Parser parser(param.tokens, source);
     const auto ast = parser.parse();
     FileNodesComparator comparator;
@@ -107,8 +106,8 @@ std::vector<ParserTestCase> getParserCases() {
         assert(d.IsObject());
         ParserTestCase testCase = {
             .filepath = filepath,
-            .tokens =
-                json::parsers::lexer::parseTokensArray(d["tokens"].GetArray()),
+            .tokens = gql::json::parsers::lexer::parseTokensArray(
+                d["tokens"].GetArray()),
             .expectedNodes = {},
         };
         cases.push_back(testCase);

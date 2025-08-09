@@ -5,12 +5,12 @@
 #include "../../../file/client/ast.hpp"
 #include "../../../file/shared/parser_error.hpp"
 #include "../../client_ast.hpp"
-#include "libgql/parsers/schema/nodes/fragment/field_selection_node.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
-#include "libgql/parsers/schema/type_registry.hpp"
+#include "../../server_ast.hpp"
+#include "../../type_registry.hpp"
+#include "./field_selection_node.hpp"
 #include "utils.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::SpreadSelection parseSpreadSelectionNode(
     const file::client::ast::SpreadSelectionNode &node,
     const std::shared_ptr<ast::Interface> &type, const TypeRegistry &registry);
@@ -24,7 +24,7 @@ ast::ObjectSelection parseObjectSelectionNode(
     const file::client::ast::SelectionNode &sNode,
     const std::shared_ptr<T> &type, const TypeRegistry &registry) {
     return std::visit<ast::ObjectSelection>(
-        overloaded{
+        utils::overloaded{
             [&registry,
              &type](const file::client::ast::SpreadSelectionNode &node) {
                 return nodes::parseSpreadSelectionNode(node, type, registry);
@@ -41,10 +41,13 @@ ast::ObjectSelection parseObjectSelectionNode(
              &type](const file::client::ast::FieldSelectionNode &node)
                 -> ast::ObjectSelection {
                 if (isObjectFieldSpecIsTypenameField(node.field)) {
-                    return (ast::TypenameField){ .alias = file::client::ast::extractSelectionName(node.field) };
+                    return (ast::TypenameField){
+                        .alias =
+                            file::client::ast::extractSelectionName(node.field)
+                    };
                 }
                 return parseFieldSelectionNode(node, type, registry);
             } },
         sNode);
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

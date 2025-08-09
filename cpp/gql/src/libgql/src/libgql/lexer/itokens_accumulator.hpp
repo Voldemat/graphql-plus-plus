@@ -4,7 +4,7 @@
 
 #include "./token.hpp"
 
-namespace lexer {
+namespace gql::lexer {
 class ITokensAccumulator {
 public:
     virtual void addToken(const GQLToken &token) = 0;

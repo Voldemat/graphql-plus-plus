@@ -13,9 +13,9 @@
 #include "libgql/parsers/schema/shared_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 std::vector<std::pair<
     std::shared_ptr<ast::ObjectType>,
     std::map<std::string,

@@ -3,8 +3,8 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include <variant>
 #include <magic_enum.hpp>
+#include <variant>
 #include <vector>
 
 #include "libgql/json/serializers/lexer/lexer.hpp"
@@ -13,10 +13,10 @@
 #include "libgql/parsers/file/shared/ast.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
-using namespace parsers::file::server;
+using namespace gql::parsers::file;
+using namespace gql::parsers::file::server;
 
-
+namespace gql::json::serializers::parser {
 void writeNodeLocation(JSONWriter &writer,
                        const shared::ast::NodeLocation &location) {
     writer.StartObject();
@@ -60,7 +60,8 @@ void writeNamedTypeNodeContent(JSONWriter &writer,
 
 void writeTypeNode(JSONWriter &writer, const shared::ast::TypeNode &typeNode) {
     writer.StartObject();
-    std::visit(overloaded{ [&writer](const shared::ast::NamedTypeNode &node) {
+    std::visit(
+        utils::overloaded{ [&writer](const shared::ast::NamedTypeNode &node) {
                               writeNamedTypeNodeContent(writer, node);
                           },
                            [&writer](const shared::ast::ListTypeNode &node) {
@@ -75,13 +76,13 @@ void writeTypeNode(JSONWriter &writer, const shared::ast::TypeNode &typeNode) {
                                writer.String("location");
                                writeNodeLocation(writer, node.location);
                            } },
-               typeNode);
+        typeNode);
     writer.EndObject();
 };
 
 void writeDirectiveLocationNode(
     rapidjson::Writer<rapidjson::StringBuffer> &writer,
-    const server::ast::DirectiveLocationNode &node){
+    const server::ast::DirectiveLocationNode &node) {
     writer.StartObject();
     writer.String("location");
     writeNodeLocation(writer, node.location);
@@ -93,7 +94,7 @@ void writeDirectiveLocationNode(
 void writeLiteralNode(JSONWriter &writer,
                       const shared::ast::LiteralNode &literalNode) {
     writer.StartObject();
-    std::visit(overloaded{
+    std::visit(utils::overloaded{
                    [&writer](const shared::ast::LiteralIntNode &node) {
                        writer.String("value");
                        writer.Int(node.value);
@@ -147,17 +148,17 @@ void writeInputValueDefinitionNode(
     writer.EndObject();
 };
 
-void writeArgumentValue(JSONWriter& writer, const shared::ast::ArgumentValue& value) {
-    std::visit(overloaded{
-        [&writer](const shared::ast::NameNode& node){
-            writer.String(node.name.c_str());
-        },
-        [&writer](const shared::ast::LiteralNode& node){
-            writeLiteralNode(writer, node);
-        }
-    }, value);
+void writeArgumentValue(JSONWriter &writer,
+                        const shared::ast::ArgumentValue &value) {
+    std::visit(
+        utils::overloaded{ [&writer](const shared::ast::NameNode &node) {
+                              writer.String(node.name.c_str());
+                          },
+                           [&writer](const shared::ast::LiteralNode &node) {
+                               writeLiteralNode(writer, node);
+                           } },
+        value);
 };
-
 
 void writeFieldDefinitionNode(JSONWriter &writer,
                               const ast::FieldDefinitionNode &node) {
@@ -174,12 +175,12 @@ void writeFieldDefinitionNode(JSONWriter &writer,
     writer.EndArray();
     writer.String("directives");
     writer.StartObject();
-    for (const auto& directive : node.directives) {
+    for (const auto &directive : node.directives) {
         writer.String(directive.name.name.c_str());
         writer.StartObject();
         writer.String("arguments");
         writer.StartObject();
-        for (const auto& arg : directive.arguments) {
+        for (const auto &arg : directive.arguments) {
             writer.String(arg.name.name.c_str());
             writeArgumentValue(writer, arg.value);
         };
@@ -195,8 +196,8 @@ void writeFieldDefinitionNode(JSONWriter &writer,
 void writeDefinitionNode(JSONWriter &writer,
                          const server::ast::TypeDefinitionNode &node) {
     writer.StartObject();
-    std::visit(
-        overloaded{ [&writer](const ast::ScalarDefinitionNode &node) {
+    std::visit(utils::overloaded{
+                   [&writer](const ast::ScalarDefinitionNode &node) {
                        writer.String("_type");
                        writer.String("ScalarDefinitionNode");
                        writer.String("name");
@@ -204,128 +205,127 @@ void writeDefinitionNode(JSONWriter &writer,
                        writer.String("location");
                        writeNodeLocation(writer, node.location);
                    },
-                    [&writer](const ast::EnumDefinitionNode &node) {
-                        writer.String("_type");
-                        writer.String("EnumDefinitionNode");
-                        writer.String("name");
-                        writeNameNode(writer, node.name);
-                        writer.String("values");
-                        writer.StartArray();
-                        for (const auto &v : node.values) {
-                            writeEnumValueDefinitionNode(writer, v);
-                        };
-                        writer.EndArray();
-                        writer.String("location");
-                        writeNodeLocation(writer, node.location);
-                    },
-                    [&writer](const ast::UnionDefinitionNode &node) {
-                        writer.String("_type");
-                        writer.String("UnionDefinitionNode");
-                        writer.String("name");
-                        writeNameNode(writer, node.name);
-                        writer.String("values");
-                        writer.StartArray();
-                        for (const auto &v : node.values) {
-                            writeNameNode(writer, v);
-                        };
-                        writer.EndArray();
-                        writer.String("location");
-                        writeNodeLocation(writer, node.location);
-                    },
-                    [&writer](const ast::ObjectDefinitionNode &node) {
-                        writer.String("_type");
-                        writer.String("ObjectDefinitionNode");
-                        writer.String("name");
-                        writeNameNode(writer, node.name);
-                        writer.String("fields");
-                        writer.StartArray();
-                        for (const auto &v : node.fields) {
-                            writeFieldDefinitionNode(writer, v);
-                        };
-                        writer.EndArray();
-                        writer.String("interfaces");
-                        writer.StartArray();
-                        for (const auto &v : node.interfaces) {
-                            writeNameNode(writer, v);
-                        };
-                        writer.EndArray();
-                        writer.String("location");
-                        writeNodeLocation(writer, node.location);
-                    },
-                    [&writer](const ast::InputObjectDefinitionNode &node) {
-                        writer.String("_type");
-                        writer.String("InputObjectDefinitionNode");
-                        writer.String("name");
-                        writeNameNode(writer, node.name);
-                        writer.String("fields");
-                        writer.StartArray();
-                        for (const auto &v : node.fields) {
-                            writeFieldDefinitionNode(writer, v);
-                        };
-                        writer.EndArray();
-                        writer.String("location");
-                        writeNodeLocation(writer, node.location);
-                    },
-                    [&writer](const ast::DirectiveDefinitionNode &node) {
-                        writer.String("_type");
-                        writer.String("DirectiveDefinitionNode");
-                        writer.String("name");
-                        writeNameNode(writer, node.name);
-                        writer.String("arguments");
-                        writer.StartArray();
-                        for (const auto &v : node.arguments) {
-                            writeInputValueDefinitionNode(writer, v);
-                        };
-                        writer.EndArray();
-                        writer.String("targets");
-                        writer.StartArray();
-                        for (const auto &v : node.targets) {
-                            writeDirectiveLocationNode(writer, v);
-                        };
-                        writer.EndArray();
-                        writer.String("location");
-                        writeNodeLocation(writer, node.location);
-                    },
-                    [&writer](const ast::InterfaceDefinitionNode &node) {
-                        writer.String("_type");
-                        writer.String("InterfaceDefinitionNode");
-                        writer.String("name");
-                        writeNameNode(writer, node.name);
-                        writer.String("fields");
-                        writer.StartArray();
-                        for (const auto &v : node.fields) {
-                            writeFieldDefinitionNode(writer, v);
-                        };
-                        writer.EndArray();
-                        writer.String("location");
-                        writeNodeLocation(writer, node.location);
-                    } },
-        node);
+                   [&writer](const ast::EnumDefinitionNode &node) {
+                       writer.String("_type");
+                       writer.String("EnumDefinitionNode");
+                       writer.String("name");
+                       writeNameNode(writer, node.name);
+                       writer.String("values");
+                       writer.StartArray();
+                       for (const auto &v : node.values) {
+                           writeEnumValueDefinitionNode(writer, v);
+                       };
+                       writer.EndArray();
+                       writer.String("location");
+                       writeNodeLocation(writer, node.location);
+                   },
+                   [&writer](const ast::UnionDefinitionNode &node) {
+                       writer.String("_type");
+                       writer.String("UnionDefinitionNode");
+                       writer.String("name");
+                       writeNameNode(writer, node.name);
+                       writer.String("values");
+                       writer.StartArray();
+                       for (const auto &v : node.values) {
+                           writeNameNode(writer, v);
+                       };
+                       writer.EndArray();
+                       writer.String("location");
+                       writeNodeLocation(writer, node.location);
+                   },
+                   [&writer](const ast::ObjectDefinitionNode &node) {
+                       writer.String("_type");
+                       writer.String("ObjectDefinitionNode");
+                       writer.String("name");
+                       writeNameNode(writer, node.name);
+                       writer.String("fields");
+                       writer.StartArray();
+                       for (const auto &v : node.fields) {
+                           writeFieldDefinitionNode(writer, v);
+                       };
+                       writer.EndArray();
+                       writer.String("interfaces");
+                       writer.StartArray();
+                       for (const auto &v : node.interfaces) {
+                           writeNameNode(writer, v);
+                       };
+                       writer.EndArray();
+                       writer.String("location");
+                       writeNodeLocation(writer, node.location);
+                   },
+                   [&writer](const ast::InputObjectDefinitionNode &node) {
+                       writer.String("_type");
+                       writer.String("InputObjectDefinitionNode");
+                       writer.String("name");
+                       writeNameNode(writer, node.name);
+                       writer.String("fields");
+                       writer.StartArray();
+                       for (const auto &v : node.fields) {
+                           writeFieldDefinitionNode(writer, v);
+                       };
+                       writer.EndArray();
+                       writer.String("location");
+                       writeNodeLocation(writer, node.location);
+                   },
+                   [&writer](const ast::DirectiveDefinitionNode &node) {
+                       writer.String("_type");
+                       writer.String("DirectiveDefinitionNode");
+                       writer.String("name");
+                       writeNameNode(writer, node.name);
+                       writer.String("arguments");
+                       writer.StartArray();
+                       for (const auto &v : node.arguments) {
+                           writeInputValueDefinitionNode(writer, v);
+                       };
+                       writer.EndArray();
+                       writer.String("targets");
+                       writer.StartArray();
+                       for (const auto &v : node.targets) {
+                           writeDirectiveLocationNode(writer, v);
+                       };
+                       writer.EndArray();
+                       writer.String("location");
+                       writeNodeLocation(writer, node.location);
+                   },
+                   [&writer](const ast::InterfaceDefinitionNode &node) {
+                       writer.String("_type");
+                       writer.String("InterfaceDefinitionNode");
+                       writer.String("name");
+                       writeNameNode(writer, node.name);
+                       writer.String("fields");
+                       writer.StartArray();
+                       for (const auto &v : node.fields) {
+                           writeFieldDefinitionNode(writer, v);
+                       };
+                       writer.EndArray();
+                       writer.String("location");
+                       writeNodeLocation(writer, node.location);
+                   } },
+               node);
     writer.EndObject();
 };
 
-void writeExtensionNode(JSONWriter& writer, const ast::ExtendTypeNode& node) {
+void writeExtensionNode(JSONWriter &writer, const ast::ExtendTypeNode &node) {
     writer.StartObject();
     writer.String("type");
     writeDefinitionNode(writer, node.typeNode);
     writer.EndObject();
-
 };
 
-void json::serializers::parser::writeServerNodes(
-    rapidjson::Writer<rapidjson::StringBuffer> &writer,
-    const std::vector<server::ast::ASTNode> &nodes) {
+void writeServerNodes(rapidjson::Writer<rapidjson::StringBuffer> &writer,
+                      const std::vector<server::ast::ASTNode> &nodes) {
     writer.StartArray();
-    for (const auto& astNode : nodes) {
-        std::visit(overloaded{
-            [&writer](const server::ast::TypeDefinitionNode& node) {
-                writeDefinitionNode(writer, node);
-            },
-            [&writer](const server::ast::ExtendTypeNode& node) {
-                writeExtensionNode(writer, node);
-            },
-        }, astNode);
+    for (const auto &astNode : nodes) {
+        std::visit(utils::overloaded{
+                       [&writer](const server::ast::TypeDefinitionNode &node) {
+                           writeDefinitionNode(writer, node);
+                       },
+                       [&writer](const server::ast::ExtendTypeNode &node) {
+                           writeExtensionNode(writer, node);
+                       },
+                   },
+                   astNode);
     };
     writer.EndArray();
 };
-
+};  // namespace gql::json::serializers::parser

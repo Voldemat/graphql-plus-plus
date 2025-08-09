@@ -25,7 +25,7 @@
 #include "libgql/parsers/file/shared/parser_error.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
 namespace cli::commands::internal::parser {
 void createSubcommand(CLI::App *app) {
@@ -44,7 +44,8 @@ void createSubcommand(CLI::App *app) {
         const auto &astNodes = utils::parseServerNodesFromJSON(source, tokens);
         const auto &jsonString =
             utils::serializeToJSONString([&astNodes](auto &writer) {
-                json::serializers::parser::writeServerNodes(writer, astNodes);
+                gql::json::serializers::parser::writeServerNodes(writer,
+                                                                 astNodes);
             });
         std::cout << jsonString << std::endl;
     });
@@ -53,33 +54,39 @@ void createSubcommand(CLI::App *app) {
         "parse-dir", "Parse directory with server and client definitions");
     std::shared_ptr<std::string> serverDir = std::make_shared<std::string>();
     std::shared_ptr<std::string> clientDir = std::make_shared<std::string>();
-    std::shared_ptr<std::string> outputServerFile = std::make_shared<std::string>();
-    std::shared_ptr<std::string> outputClientFile = std::make_shared<std::string>();
+    std::shared_ptr<std::string> outputServerFile =
+        std::make_shared<std::string>();
+    std::shared_ptr<std::string> outputClientFile =
+        std::make_shared<std::string>();
     std::shared_ptr<bool> validate = std::make_shared<bool>();
     parseDirectoryCmd
         ->add_option("--server-dir", *serverDir, "Server directory")
         ->required();
+    parseDirectoryCmd->add_option("--client-dir", *clientDir,
+                                  "Server directory");
     parseDirectoryCmd
-        ->add_option("--client-dir", *clientDir, "Server directory");
-    parseDirectoryCmd
-        ->add_option("--output-server-file", *outputServerFile, "Output server file")
+        ->add_option("--output-server-file", *outputServerFile,
+                     "Output server file")
         ->required();
     parseDirectoryCmd
-        ->add_option("--output-client-file", *outputClientFile, "Output client file")
+        ->add_option("--output-client-file", *outputClientFile,
+                     "Output client file")
         ->required();
-    parseDirectoryCmd
-        ->add_option("--validate", *validate, "Validate")
+    parseDirectoryCmd->add_option("--validate", *validate, "Validate")
         ->required();
-    parseDirectoryCmd->callback([serverDir, clientDir, validate, outputServerFile, outputClientFile]() {
-            utils::ensureDirectoryExists(std::filesystem::path(*outputServerFile).parent_path());
-            utils::ensureDirectoryExists(std::filesystem::path(*outputClientFile).parent_path());
+    parseDirectoryCmd->callback([serverDir, clientDir, validate,
+                                 outputServerFile, outputClientFile]() {
+        utils::ensureDirectoryExists(
+            std::filesystem::path(*outputServerFile).parent_path());
+        utils::ensureDirectoryExists(
+            std::filesystem::path(*outputClientFile).parent_path());
         if (*validate) {
-        utils::ensureFileExists(*outputServerFile);
-        utils::ensureFileExists(*outputClientFile);
+            utils::ensureFileExists(*outputServerFile);
+            utils::ensureFileExists(*outputClientFile);
         };
         utils::ensureDirectoryExists(*serverDir);
         if (*clientDir != "") {
-        utils::ensureDirectoryExists(*clientDir);
+            utils::ensureDirectoryExists(*clientDir);
         }
         std::vector<server::ast::ASTNode> serverNodes =
             utils::parseNodesFromDirectory<server::ast::ASTNode>(
@@ -91,23 +98,23 @@ void createSubcommand(CLI::App *app) {
         }
         try {
             const auto &schema =
-                parsers::schema::parseSchema(serverNodes, clientNodes);
+                gql::parsers::schema::parseSchema(serverNodes, clientNodes);
             const auto &jsonServerString =
                 utils::serializeToJSONString([&schema](auto &writer) {
-                    json::serializers::schema::writeServerSchema(writer, schema.server);
+                    gql::json::serializers::schema::writeServerSchema(
+                        writer, schema.server);
                 });
             const auto &jsonClientString =
                 utils::serializeToJSONString([&schema](auto &writer) {
-                    json::serializers::schema::writeClientSchema(writer, schema.client);
+                    gql::json::serializers::schema::writeClientSchema(
+                        writer, schema.client);
                 });
             if (*validate) {
-                const auto& hasServerChanges = utils::doesFileHaveChanges(
-                    *outputServerFile, jsonServerString, "Server"
-                );
+                const auto &hasServerChanges = utils::doesFileHaveChanges(
+                    *outputServerFile, jsonServerString, "Server");
                 if (!hasServerChanges) return;
-                const auto& hasClientChanges = utils::doesFileHaveChanges(
-                    *outputClientFile, jsonClientString, "Client"
-                );
+                const auto &hasClientChanges = utils::doesFileHaveChanges(
+                    *outputClientFile, jsonClientString, "Client");
                 if (!hasClientChanges) return;
                 throw CLI::RuntimeError(1);
             };
@@ -116,7 +123,7 @@ void createSubcommand(CLI::App *app) {
             std::ofstream clientFile(*outputClientFile, std::ios::trunc);
             clientFile << jsonClientString;
         } catch (const shared::ParserError &error) {
-            std::cerr << formatError(error) << std::endl;
+            std::cerr << cli::formatting::formatError(error) << std::endl;
             throw CLI::RuntimeError(1);
         } catch (const std::exception &exc) {
             std::cerr << exc.what() << std::endl;
@@ -124,4 +131,4 @@ void createSubcommand(CLI::App *app) {
         };
     });
 };
-};
+};  // namespace cli::commands::internal::parser

@@ -5,10 +5,7 @@
 
 #include "../utils.hpp"
 
-namespace json {
-namespace parsers {
-namespace utils {
-
+namespace gql::json::parsers::utils {
 void assert_has_member(const JSONValue &value, const char *key,
                        const std::string &path);
 
@@ -26,6 +23,4 @@ T extractValue(const JSONValue &value, const char *key, const std::string &path,
 
 unsigned int extractUint(const JSONValue &value, const char *key,
                          const std::string &path);
-};  // namespace utils
-};  // namespace parsers
-};  // namespace json
+};  // namespace gql::json::parsers::utils

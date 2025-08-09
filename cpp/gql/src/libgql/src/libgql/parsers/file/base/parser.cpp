@@ -14,9 +14,8 @@
 #include "libgql/parsers/file/shared/parser_error.hpp"
 #include "libgql/parsers/file/shared/shared.hpp"
 
-using namespace lexer;
-
-namespace parsers::file {
+using namespace gql::lexer;
+namespace gql::parsers::file {
 BaseParser::BaseParser(const std::vector<GQLToken> &tokens,
                        const std::shared_ptr<shared::ast::SourceFile> &source)
     : tokens{ tokens }, source{ source }, currentToken{ tokens[0] } {
@@ -177,9 +176,7 @@ void BaseParser::consume(const GQLTokenType type) {
     };
 };
 
-void BaseParser::consumeIdentifier() {
-    consume(ComplexTokenType::IDENTIFIER);
-};
+void BaseParser::consumeIdentifier() { consume(ComplexTokenType::IDENTIFIER); };
 
 bool BaseParser::consumeIfIsAhead(GQLTokenType expectedType) {
     const auto &tokenIsAhead = isAhead(expectedType);
@@ -252,7 +249,8 @@ shared::ast::ArgumentValue BaseParser::parseArgumentValue() {
     return parseLiteralNode();
 };
 
-std::vector<shared::ast::InputValueDefinitionNode> BaseParser::parseInputValueDefinitionNodes() {
+std::vector<shared::ast::InputValueDefinitionNode>
+BaseParser::parseInputValueDefinitionNodes() {
     std::vector<shared::ast::InputValueDefinitionNode> arguments;
     if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
         while (isAhead(ComplexTokenType::IDENTIFIER)) {
@@ -264,5 +262,4 @@ std::vector<shared::ast::InputValueDefinitionNode> BaseParser::parseInputValueDe
     return arguments;
 };
 
-
-};  // namespace parsers::file
+};  // namespace gql::parsers::file

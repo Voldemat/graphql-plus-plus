@@ -11,9 +11,9 @@
 #include "./object_field_spec.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 std::shared_ptr<ast::ObjectType> parseObject(
     const file::server::ast::ObjectDefinitionNode &node,

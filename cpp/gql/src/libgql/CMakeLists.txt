@@ -15,6 +15,7 @@ target_include_directories(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/
     PRIVATE SYSTEM ${RAPIDJSON_INCLUDE_DIR}
 )
+target_compile_options(libgql PRIVATE -Wno-c99-designator)
 target_link_libraries(
     libgql PRIVATE magic_enum::magic_enum
 )

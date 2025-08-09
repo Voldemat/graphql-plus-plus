@@ -9,7 +9,7 @@
 #include "libgql/lexer/location.hpp"
 #include "libgql/lexer/token.hpp"
 
-namespace parsers::file::shared {
+namespace gql::parsers::file::shared {
 void assertIsNotKeyword(const lexer::GQLToken token,
                         const std::shared_ptr<ast::SourceFile> &source) {
     if (isKeyword(token.lexeme))
@@ -35,7 +35,7 @@ std::string getSourceText(const std::string &sourceBuffer,
         }
         if (endTokenLocation.getLine() == currentLine) {
             buffer += std::string(line.begin() + endTokenLocation.getStart(),
-                                  line.begin() + endTokenLocation.getEnd()+1);
+                                  line.begin() + endTokenLocation.getEnd() + 1);
         }
         if (currentLine > startTokenLocation.getLine() &&
             currentLine < endTokenLocation.getLine()) {
@@ -45,4 +45,4 @@ std::string getSourceText(const std::string &sourceBuffer,
     };
     return buffer;
 }
-}  // namespace parsers::file::shared
+}  // namespace gql::parsers::file::shared

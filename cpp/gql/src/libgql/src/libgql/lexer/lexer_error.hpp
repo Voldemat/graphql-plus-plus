@@ -4,7 +4,7 @@
 
 #include "./location.hpp"
 
-namespace lexer {
+namespace gql::lexer {
 class LexerError : public std::exception {
     std::string message;
     std::string finalMessage;

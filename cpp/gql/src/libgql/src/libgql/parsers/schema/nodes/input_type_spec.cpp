@@ -5,15 +5,16 @@
 #include <variant>
 
 #include "./literal.hpp"
-#include "libgql/parsers/file/server/ast.hpp"
-#include "libgql/parsers/file/shared/ast.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
-#include "libgql/parsers/schema/type_registry.hpp"
+#include "../../file/server/ast.hpp"
+#include "../../file/shared/ast.hpp"
+#include "../server_ast.hpp"
+#include "../shared_ast.hpp"
+#include "../type_registry.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 std::pair<ast::NonCallableFieldSpec<ast::InputTypeSpec>, bool>
 parseNonCallableInputTypeSpec(
@@ -22,7 +23,7 @@ parseNonCallableInputTypeSpec(
     const TypeRegistry &registry) {
     return std::visit<
         std::pair<ast::NonCallableFieldSpec<ast::InputTypeSpec>, bool>>(
-        overloaded{
+        utils::overloaded{
             [&registry,
              &defaultValueNode](const shared::ast::NamedTypeNode &node)
                 -> std::pair<ast::LiteralFieldSpec<ast::InputTypeSpec>, bool> {
@@ -56,4 +57,4 @@ std::pair<ast::InputFieldSpec, bool> parseInputTypeSpec(
 
     return { returnTypeSpec, nullable };
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

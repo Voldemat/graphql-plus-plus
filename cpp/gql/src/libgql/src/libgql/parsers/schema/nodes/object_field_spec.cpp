@@ -17,9 +17,9 @@
 #include "libgql/parsers/schema/nodes/server_directive_invocation.hpp"
 #include "utils.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 std::pair<ast::NonCallableFieldSpec<ast::ObjectTypeSpec>, bool>
 parseNonCallableObjectTypeSpec(
@@ -28,7 +28,7 @@ parseNonCallableObjectTypeSpec(
     const TypeRegistry &registry) {
     return std::visit<
         std::pair<ast::NonCallableFieldSpec<ast::ObjectTypeSpec>, bool>>(
-        overloaded{
+        utils::overloaded{
             [&registry, &directives](const shared::ast::NamedTypeNode &node)
                 -> std::pair<ast::LiteralFieldSpec<ast::ObjectTypeSpec>, bool> {
                 ast::LiteralFieldSpec<ast::ObjectTypeSpec> spec = {
@@ -82,7 +82,7 @@ std::pair<ast::ObjectFieldSpec, bool> parseObjectFieldSpec(
 ast::ObjectTypeSpec getReturnTypeFromNonCallableFieldSpec(
     const ast::NonCallableFieldSpec<ast::ObjectTypeSpec> &fSpec) {
     return std::visit<ast::ObjectTypeSpec>(
-        overloaded{
+        utils::overloaded{
             [](const auto &node) -> ast::ObjectTypeSpec { return node.type; } },
         fSpec);
 };
@@ -90,16 +90,16 @@ ast::ObjectTypeSpec getReturnTypeFromNonCallableFieldSpec(
 ast::ObjectTypeSpec getReturnTypeFromObjectFieldSpec(
     const ast::ObjectFieldSpec &spec) {
     return std::visit<ast::ObjectTypeSpec>(
-        overloaded{ [](const ast::LiteralFieldSpec<ast::ObjectTypeSpec> &node) {
-                       return node.type;
-                   },
-                    [](const ast::CallableFieldSpec &node) {
-                        return getReturnTypeFromNonCallableFieldSpec(
-                            node.returnType);
-                    },
-                    [](const ast::ArrayFieldSpec<ast::ObjectTypeSpec> &node) {
-                        return node.type;
-                    } },
+        utils::overloaded{
+            [](const ast::LiteralFieldSpec<ast::ObjectTypeSpec> &node) {
+                return node.type;
+            },
+            [](const ast::CallableFieldSpec &node) {
+                return getReturnTypeFromNonCallableFieldSpec(node.returnType);
+            },
+            [](const ast::ArrayFieldSpec<ast::ObjectTypeSpec> &node) {
+                return node.type;
+            } },
         spec);
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

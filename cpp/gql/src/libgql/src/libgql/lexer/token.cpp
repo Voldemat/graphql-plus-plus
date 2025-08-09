@@ -5,7 +5,7 @@
 #include <ostream>
 #include <string>
 
-namespace lexer {
+namespace gql::lexer {
 std::ostream &operator<<(std::ostream &os, const GQLToken &self) {
     os << "GQLToken(type: " << self.type;
     os << ", lexeme: \"" << self.lexeme << "\", location: " << self.location
@@ -13,9 +13,8 @@ std::ostream &operator<<(std::ostream &os, const GQLToken &self) {
     return os;
 };
 
-bool operator==(const GQLToken &self,
-                const GQLToken &token) noexcept {
+bool operator==(const GQLToken &self, const GQLToken &token) noexcept {
     return self.type == token.type && self.lexeme == token.lexeme &&
            self.location == token.location;
 };
-};  // namespace lexer
+};  // namespace gql::lexer

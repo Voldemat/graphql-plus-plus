@@ -20,16 +20,16 @@
 #include <vector>
 
 #include "../utils.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/schema.hpp"
+#include "libgql/parsers/schema/server_ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "utils.hpp"
 
-using namespace parsers::schema;
-using namespace parsers::schema::ast;
-using namespace json::parser::introspection;
+using namespace gql::parsers::schema;
+using namespace gql::parsers::schema::ast;
 
-namespace json::parser::introspection {
+namespace gql::json::introspection {
 ServerSchemaNode parseNodeFirstPass(const JSONValue &value) {
     const std::string &kind = value["kind"].GetString();
     const std::string &name = value["name"].GetString();
@@ -61,7 +61,7 @@ std::optional<ArrayLiteral> parseArrayLiteral(const JSONValue &value,
     if (value.IsNull()) return std::nullopt;
     const std::string &str = value.GetString();
     const std::vector<std::string> &items =
-        split(str.substr(1, str.size() - 2), ",");
+        utils::split(str.substr(1, str.size() - 2), ",");
     if (std::holds_alternative<std::shared_ptr<Scalar>>(spec)) {
         const auto &scalar = std::get<std::shared_ptr<Scalar>>(spec);
         if (scalar->name == "Int") {
@@ -338,4 +338,4 @@ const ServerSchema parseIntrospectionSchema(
         }) |
         std::ranges::to<std::vector>());
 };
-};  // namespace json::parser::introspection
+};  // namespace gql::json::introspection

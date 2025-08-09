@@ -9,7 +9,7 @@
 #include "libgql/lexer/token_type.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
 
-namespace parsers::file {
+namespace gql::parsers::file {
 
 class BaseParser {
 protected:
@@ -31,7 +31,8 @@ protected:
     shared::ast::NamedTypeNode parseNamedTypeNode();
     shared::ast::ListTypeNode parseListTypeNode();
     shared::ast::InputValueDefinitionNode parseInputValueDefinitionNode();
-    std::vector<shared::ast::InputValueDefinitionNode> parseInputValueDefinitionNodes();
+    std::vector<shared::ast::InputValueDefinitionNode>
+    parseInputValueDefinitionNodes();
     shared::ast::LiteralNode parseLiteralNode();
     std::optional<shared::ast::LiteralIntNode> parseLiteralIntNode();
     std::optional<shared::ast::LiteralFloatNode> parseLiteralFloatNode();
@@ -43,4 +44,4 @@ public:
     BaseParser(const std::vector<lexer::GQLToken> &tokens,
                const std::shared_ptr<shared::ast::SourceFile> &source);
 };
-};  // namespace parsers::file
+};  // namespace gql::parsers::file

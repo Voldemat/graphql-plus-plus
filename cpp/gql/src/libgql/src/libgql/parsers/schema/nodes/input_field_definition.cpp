@@ -8,9 +8,9 @@
 #include "../type_registry.hpp"
 #include "./input_type_spec.hpp"
 
-using namespace parsers::file;
+using namespace gql::parsers::file;
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 ast::FieldDefinition<ast::InputFieldSpec> parseInputFieldDefinition(
     const shared::ast::InputValueDefinitionNode &node,
     const TypeRegistry &registry) {

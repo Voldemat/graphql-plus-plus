@@ -2,10 +2,11 @@
 
 #include "../../../file/client/ast.hpp"
 #include "../../client_ast.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
-#include "libgql/parsers/schema/type_registry.hpp"
+#include "../../server_ast.hpp"
+#include "../../type_registry.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 
 ast::FragmentSpec fragmentSpecFromFieldDefinition(
     const ast::FieldDefinition<ast::ObjectFieldSpec> &field,
@@ -14,4 +15,4 @@ ast::FragmentSpec fragmentSpecFromFieldDefinition(
 ast::FragmentSpec parseFragmentSpec(
     const file::client::ast::FragmentSpec &defSpec,
     const ast::FragmentSpec &spec, const TypeRegistry &registry);
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes

@@ -3,10 +3,12 @@
 #include "./token.hpp"
 #include "./tokens_accumulators.hpp"
 
-void lexer::VectorTokensAccumulator::addToken(const lexer::GQLToken &token) {
+namespace gql::lexer {
+void VectorTokensAccumulator::addToken(const GQLToken &token) {
     tokens.emplace_back(token);
 };
 
-std::vector<lexer::GQLToken> lexer::VectorTokensAccumulator::getTokens() const {
+std::vector<GQLToken> VectorTokensAccumulator::getTokens() const {
     return tokens;
 };
+};  // namespace gql::lexer

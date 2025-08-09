@@ -11,7 +11,7 @@
 #include "../server_ast.hpp"
 #include "../type_registry.hpp"
 
-namespace parsers::schema::nodes {
+namespace gql::parsers::schema::nodes {
 std::shared_ptr<ast::Union> parseUnion(
     const file::server::ast::UnionDefinitionNode &node,
     const TypeRegistry &registry) {
@@ -26,4 +26,4 @@ std::shared_ptr<ast::Union> parseUnion(
         std::ranges::to<std::map>();
     return obj;
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes
