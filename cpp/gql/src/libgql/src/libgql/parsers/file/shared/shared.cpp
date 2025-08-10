@@ -1,5 +1,6 @@
 #include "./shared.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -43,6 +44,12 @@ std::string getSourceText(const std::string &sourceBuffer,
         };
         currentLine += 1;
     };
+
+    std::string::iterator new_end = std::unique(
+        buffer.begin(), buffer.end(), [](const char &lhs, const char &rhs) {
+            return (lhs == ' ') && (lhs == rhs);
+        });
+    buffer.erase(new_end, buffer.end());
     return buffer;
 }
 }  // namespace gql::parsers::file::shared

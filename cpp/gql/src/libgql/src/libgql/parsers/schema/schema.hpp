@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <map>
 #include <memory>
 #include <string>
@@ -62,6 +63,18 @@ struct ServerSchema {
             },
             sNode);
     };
+
+    void appendSchema(const ServerSchema &newSchema) {
+        objects.insert(newSchema.objects.begin(), newSchema.objects.end());
+        scalars.insert(newSchema.scalars.begin(), newSchema.scalars.end());
+        inputs.insert(newSchema.inputs.begin(), newSchema.inputs.end());
+        enums.insert(newSchema.enums.begin(), newSchema.enums.end());
+        unions.insert(newSchema.unions.begin(), newSchema.unions.end());
+        interfaces.insert(newSchema.interfaces.begin(),
+                          newSchema.interfaces.end());
+        directives.insert(newSchema.directives.begin(),
+                          newSchema.directives.end());
+    };
 };
 
 struct ClientSchema {
@@ -91,6 +104,15 @@ struct ClientSchema {
                     operations[node->name] = node;
                 } },
             sNode);
+    };
+
+    void appendSchema(const ClientSchema &newSchema) {
+        fragments.insert(newSchema.fragments.begin(),
+                         newSchema.fragments.end());
+        operations.insert(newSchema.operations.begin(),
+                          newSchema.operations.end());
+        directives.insert(newSchema.directives.begin(),
+                          newSchema.directives.end());
     };
 
     inline bool operator==(const ClientSchema &) const = default;

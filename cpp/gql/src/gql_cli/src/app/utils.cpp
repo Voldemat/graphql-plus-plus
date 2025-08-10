@@ -18,6 +18,8 @@
 #include "app/formatting/error.hpp"
 #include "glob/glob.h"
 #include "libgql/json/parsers/lexer/lexer.hpp"
+#include "libgql/json/parsers/schema/client/client.hpp"
+#include "libgql/json/parsers/schema/server/server.hpp"
 #include "libgql/json/parsers/shared.hpp"
 #include "libgql/lexer/lexer.hpp"
 #include "libgql/lexer/lexer_error.hpp"
@@ -220,8 +222,15 @@ loadServerSchemaFromInputs(gql::parsers::schema::TypeRegistry &registry,
                            const std::filesystem::path &configDirPath) {
     std::vector<gql::parsers::file::server::ast::ASTNode> nodes;
     std::vector<std::string> errors;
+    gql::parsers::schema::ServerSchema schema;
     for (const auto &jsonpath :
          resolvePaths(configDirPath, config.jsonSchema)) {
+        const auto &buffer = readFile(jsonpath);
+        rapidjson::Document document;
+        document.Parse(buffer.c_str());
+        const auto &newSchema =
+            gql::json::parsers::schema::server::parseSchema(registry, document);
+        schema.appendSchema(newSchema);
     };
     for (const auto &graphqlPath :
          resolvePaths(configDirPath, config.graphql)) {
@@ -244,7 +253,10 @@ loadServerSchemaFromInputs(gql::parsers::schema::TypeRegistry &registry,
     };
     if (errors.size() != 0) return std::unexpected(errors);
     try {
-        return gql::parsers::schema::parseServerSchema(registry, nodes);
+        const auto &newSchema =
+            gql::parsers::schema::parseServerSchema(registry, nodes);
+        schema.appendSchema(newSchema);
+        return schema;
     } catch (const gql::parsers::file::shared::ParserError &error) {
         return std::unexpected(
             (std::vector<std::string>){ formatting::formatError(error) });
@@ -257,8 +269,15 @@ loadClientSchemaFromInputs(gql::parsers::schema::TypeRegistry &registry,
                            const std::filesystem::path &configDirPath) {
     std::vector<gql::parsers::file::client::ast::ASTNode> nodes;
     std::vector<std::string> errors;
+    gql::parsers::schema::ClientSchema schema;
     for (const auto &jsonpath :
          resolvePaths(configDirPath, config.jsonSchema)) {
+        const auto &buffer = readFile(jsonpath);
+        rapidjson::Document document;
+        document.Parse(buffer.c_str());
+        const auto &newSchema =
+            gql::json::parsers::schema::client::parseSchema(registry, document);
+        schema.appendSchema(newSchema);
     };
     for (const auto &graphqlPath :
          resolvePaths(configDirPath, config.graphql)) {
@@ -281,7 +300,10 @@ loadClientSchemaFromInputs(gql::parsers::schema::TypeRegistry &registry,
     };
     if (errors.size() != 0) return std::unexpected(errors);
     try {
-        return gql::parsers::schema::parseClientSchema(registry, nodes);
+        const auto &newSchema =
+            gql::parsers::schema::parseClientSchema(registry, nodes);
+        schema.appendSchema(newSchema);
+        return schema;
     } catch (const gql::parsers::file::shared::ParserError &error) {
         return std::unexpected(
             (std::vector<std::string>){ formatting::formatError(error) });

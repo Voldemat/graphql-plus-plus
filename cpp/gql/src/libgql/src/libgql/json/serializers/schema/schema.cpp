@@ -12,6 +12,7 @@
 #include <string>
 #include <variant>
 
+#include "libgql/json/utils.hpp"
 #include "libgql/parsers/schema/client_ast.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
@@ -491,7 +492,7 @@ void writeObjectFragmentSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                              const ObjectFragmentSpec<T> &selection) {
     writer.StartObject();
     writer.String("_type");
-    writer.String("object");
+    writer.String("ObjectFragmentSpec");
     writer.String("name");
     writer.String(selection.type->name.c_str());
     writer.String("selections");
@@ -539,23 +540,27 @@ void writeUnionSelection(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.EndObject();
 };
 
+void writeUnionFragmentSpec(JSONWriter &writer, const UnionFragmentSpec &node) {
+    writer.StartObject();
+    writer.String("_type");
+    writer.String("UnionFragmentSpec");
+    writer.String("name");
+    writer.String(node.type->name.c_str());
+    writer.String("selections");
+    writer.StartArray();
+    for (const auto &selection : node.selections) {
+        writeUnionSelection(writer, selection);
+    }
+    writer.EndArray();
+    writer.EndObject();
+};
+
 void writeClientFragmentSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                              const FragmentSpec &spec) {
     std::visit(
         utils::overloaded{
             [&writer](const UnionFragmentSpec &node) -> void {
-                writer.StartObject();
-                writer.String("_type");
-                writer.String("union");
-                writer.String("unionName");
-                writer.String(node.type->name.c_str());
-                writer.String("selections");
-                writer.StartArray();
-                for (const auto &selection : node.selections) {
-                    writeUnionSelection(writer, selection);
-                }
-                writer.EndArray();
-                writer.EndObject();
+                writeUnionFragmentSpec(writer, node);
             },
             [&writer](const ObjectFragmentSpec<ObjectType> &node) -> void {
                 writeObjectFragmentSpec(writer, node);
