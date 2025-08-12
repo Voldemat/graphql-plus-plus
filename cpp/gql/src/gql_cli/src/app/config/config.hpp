@@ -16,6 +16,7 @@ struct InputsConfig {
 
 struct OutputsConfig {
     std::string filepath;
+    bool onlyUsedInOperations;
 };
 
 struct ServerConfig {

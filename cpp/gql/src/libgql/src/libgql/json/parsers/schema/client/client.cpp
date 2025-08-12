@@ -131,6 +131,7 @@ ast::FieldSelectionArgument parseFieldSelectionArgument(
     return {
         .name = object["name"].GetString(),
         .value = parseArgumentValue(object["value"].GetObject(), spec),
+        .type = spec,
     };
 };
 

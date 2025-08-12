@@ -8,7 +8,9 @@
 
 #include <format>
 #include <memory>
+#include <optional>
 #include <ranges>
+#include <set>
 #include <string>
 #include <variant>
 
@@ -17,6 +19,7 @@
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/shared_ast.hpp"
+#include "libgql/parsers/schema/uses/uses.hpp"
 #include "magic_enum.hpp"
 #include "utils.hpp"
 
@@ -244,7 +247,8 @@ void writeFieldDefinition(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                     const ObjectType &node) {
+                     const ObjectType &node,
+                     const std::optional<std::set<std::string>> &fieldSet) {
     writer.StartObject();
     writer.String("name");
     writer.String(node.name.c_str());
@@ -264,6 +268,7 @@ void writeServerType(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.String("fields");
     writer.StartObject();
     for (const auto &field : node.fields | std::views::values) {
+        if (fieldSet.has_value() && !fieldSet->contains(field->name)) continue;
         writer.String(field->name.c_str());
         writeFieldDefinition(writer, *field.get());
     };
@@ -362,20 +367,42 @@ void writeServerDirective(rapidjson::Writer<rapidjson::StringBuffer> &writer,
 };
 
 void writeServerSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
-                       const ServerSchema &schema) {
+                       const ServerSchema &schema,
+                       const std::optional<ClientSchema> &clientSchema) {
+    const auto &serverUsesMap = clientSchema.transform(
+        [](const auto &schema) { return uses::buildServerUsesMap(schema); });
     writer.StartObject();
 
     writer.String("objects");
     writer.StartObject();
     for (const auto &obj : schema.objects | std::views::values) {
+        std::optional<std::set<std::string>> fieldsMap;
+        if (serverUsesMap.has_value()) {
+            if (obj->name == "Query") {
+                if (serverUsesMap->queries.size() == 0) continue;
+                fieldsMap = serverUsesMap->queries;
+            } else if (obj->name == "Mutation") {
+                if (serverUsesMap->mutations.size() == 0) continue;
+                fieldsMap = serverUsesMap->mutations;
+            } else if (obj->name == "Subscription") {
+                if (serverUsesMap->subscriptions.size() == 0) continue;
+                fieldsMap = serverUsesMap->subscriptions;
+            } else if (!serverUsesMap->objects.contains(obj->name)) {
+                continue;
+            };
+        };
         writer.String(obj->name.c_str());
-        writeServerType(writer, *obj.get());
+        writeServerType(writer, *obj.get(), fieldsMap);
     };
     writer.EndObject();
 
     writer.String("interfaces");
     writer.StartObject();
     for (const auto &interface : schema.interfaces | std::views::values) {
+        if (serverUsesMap.has_value() &&
+            !serverUsesMap->interfaces.contains(interface->name)) {
+            continue;
+        };
         writer.String(interface->name.c_str());
         writeServerType(writer, *interface.get());
     };
@@ -384,6 +411,10 @@ void writeServerSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.String("inputs");
     writer.StartObject();
     for (const auto &input : schema.inputs | std::views::values) {
+        if (serverUsesMap.has_value() &&
+            !serverUsesMap->inputs.contains(input->name)) {
+            continue;
+        };
         writer.String(input->name.c_str());
         writeServerType(writer, *input.get());
     };
@@ -392,6 +423,10 @@ void writeServerSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.String("scalars");
     writer.StartArray();
     for (const auto &name : schema.scalars | std::views::keys) {
+        if (serverUsesMap.has_value() &&
+            !serverUsesMap->scalars.contains(name)) {
+            continue;
+        };
         writer.String(name.c_str());
     };
     writer.EndArray();
@@ -399,6 +434,10 @@ void writeServerSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.String("enums");
     writer.StartObject();
     for (const auto &node : schema.enums | std::views::values) {
+        if (serverUsesMap.has_value() &&
+            !serverUsesMap->enums.contains(node->name)) {
+            continue;
+        };
         writer.String(node->name.c_str());
         writeServerType(writer, *node.get());
     };
@@ -407,6 +446,10 @@ void writeServerSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.String("unions");
     writer.StartObject();
     for (const auto &node : schema.unions | std::views::values) {
+        if (serverUsesMap.has_value() &&
+            !serverUsesMap->unions.contains(node->name)) {
+            continue;
+        };
         writer.String(node->name.c_str());
         writeServerType(writer, *node.get());
     };
@@ -415,6 +458,10 @@ void writeServerSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.String("directives");
     writer.StartObject();
     for (const auto &node : schema.directives | std::views::values) {
+        if (serverUsesMap.has_value() &&
+            !serverUsesMap->directives.contains(node->name)) {
+            continue;
+        };
         writer.String(node->name.c_str());
         writeServerDirective(writer, *node.get());
     };

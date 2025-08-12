@@ -3,6 +3,7 @@
 #include <cassert>
 #include <map>
 #include <memory>
+#include <ranges>
 #include <string>
 #include <variant>
 #include <vector>

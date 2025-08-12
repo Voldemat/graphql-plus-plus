@@ -103,7 +103,7 @@ parseNonCallableFieldSpec(
     return (::gql::parsers::schema::ast::ArrayFieldSpec<
             ::gql::parsers::schema::ast::ObjectTypeSpec>){
         .type = parseObjectTypeSpec(value["type"], registry),
-        .nullable = value["nullable"].GetBool()
+        .nullable = value["nullable"].GetBool(),
     };
 };
 

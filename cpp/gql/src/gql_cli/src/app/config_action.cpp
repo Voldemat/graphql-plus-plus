@@ -55,10 +55,17 @@ void run_config_action(
     };
 
     if (config.server.outputs.has_value()) {
+        const auto &onlyUsedInOperations =
+            config.server.outputs->onlyUsedInOperations;
         const auto &jsonString =
-            utils::serializeToJSONString([&serverSchema](auto &writer) {
-                gql::json::serializers::schema::writeServerSchema(writer,
-                                                                  serverSchema);
+            utils::serializeToJSONString([&serverSchema, &clientSchema,
+                                          &onlyUsedInOperations](auto &writer) {
+                gql::json::serializers::schema::writeServerSchema(
+                    writer, serverSchema,
+                    onlyUsedInOperations && clientSchema.has_value()
+                        ? (std::optional<gql::parsers::schema::ClientSchema>)
+                              clientSchema.value()
+                        : std::nullopt);
             });
         jsonStringCallback(jsonString, configDirPath,
                            config.server.outputs->filepath, "Server");

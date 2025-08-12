@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -102,7 +103,7 @@ void createSubcommand(CLI::App *app) {
             const auto &jsonServerString =
                 utils::serializeToJSONString([&schema](auto &writer) {
                     gql::json::serializers::schema::writeServerSchema(
-                        writer, schema.server);
+                        writer, schema.server, std::nullopt);
                 });
             const auto &jsonClientString =
                 utils::serializeToJSONString([&schema](auto &writer) {

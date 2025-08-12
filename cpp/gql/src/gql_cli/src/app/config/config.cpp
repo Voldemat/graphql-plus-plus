@@ -62,13 +62,26 @@ std::expected<std::optional<OutputsConfig>, std::string> parseOutputsConfig(
     const auto &filepath = node["filepath"];
     if (!filepath.IsDefined()) {
         return std::unexpected(std::format(
-            "\"{}.outputs\" value have \"filepath\" key", rootPath));
+            "\"{}.outputs\" value should have \"filepath\" key", rootPath));
     };
     if (!filepath.IsScalar()) {
         return std::unexpected(std::format(
             "\"{}.outputs.filepath\" value should be a string", rootPath));
     };
-    return (OutputsConfig){ .filepath = filepath.as<std::string>() };
+    const auto &onlyUsedInOperations = node["onlyUsedInOperations"];
+    if (!onlyUsedInOperations.IsDefined()) {
+        return std::unexpected(std::format(
+            "\"{}.outputs\" value should have \"onlyUsedInOperations\" key",
+            rootPath));
+    };
+    if (!onlyUsedInOperations.IsScalar()) {
+        return std::unexpected(std::format(
+            "\"{}.outputs.onlyUsedInOperations\" value should be a boolean",
+            rootPath));
+    };
+    return (OutputsConfig){ .filepath = filepath.as<std::string>(),
+                            .onlyUsedInOperations =
+                                onlyUsedInOperations.as<bool>() };
 };
 
 std::expected<ServerConfig, std::string> parseServerConfig(
