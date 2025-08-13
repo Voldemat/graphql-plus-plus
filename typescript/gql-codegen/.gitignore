@@ -5,3 +5,5 @@ check
 schema.json
 client-schema.json
 server-schema.json
+gql.yaml
+graphql.graphql
