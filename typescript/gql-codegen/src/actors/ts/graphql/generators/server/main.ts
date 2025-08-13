@@ -17,16 +17,21 @@ export function generateServerNodes(
                 .map(generateEnumDefinition)
         ),
         ts.factory.createIdentifier('\n'),
-        ...Object.values(context.schema.server.objects)
-            .map(object =>
-                generateObjectTypeNodes(config.scalarsMapping, object)).flat(),
-        ...Object.values(context.schema.server.unions)
-            .map(union =>
-                generateUnionTypeDefinitions(
-                    config.scalarsMapping,
-                    context.schema.server.objects,
-                    union
-                )).flat(),
+        ...!config.onlyRequiredForOperations ?
+            Object.values(context.schema.server.objects)
+                .map(object =>
+                    generateObjectTypeNodes(
+                        config.scalarsMapping,
+                        object
+                    )).flat() : [],
+        ...!config.onlyRequiredForOperations ?
+            Object.values(context.schema.server.unions)
+                .map(union =>
+                    generateUnionTypeDefinitions(
+                        config.scalarsMapping,
+                        context.schema.server.objects,
+                        union
+                    )).flat() : [],
         ...Object.values(context.schema.server.inputs)
             .map(input => generateInputTypeDefinitions(
                 config.scalarsMapping, input

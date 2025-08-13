@@ -25,7 +25,7 @@ export function extractFragmentNamesInSpec(
     schema: RootSchema,
     fragmentSpec: FragmentSpecSchemaType,
 ): string[] {
-    if (fragmentSpec._type === 'union') {
+    if (fragmentSpec._type === 'UnionFragmentSpec') {
         return fragmentSpec.selections.map((s): string[] => {
             if (s._type === 'SpreadSelection') {
                 const fragment = schema.client.fragments[s.fragment]
@@ -84,7 +84,7 @@ function generateFragmentDocumentNode(
                         schema,
                         fragment.spec as FragmentSpecSchemaType
                     )
-                ].join('\n'))
+                ].join(' '))
             )],
             ts.NodeFlags.Const
         )
@@ -250,9 +250,9 @@ function resolveUnionSelections(
     schema: RootSchema,
     specSelections: UnionSelection[]
 ): [
-    z.infer<typeof objectConditionalSpreadSelection>[],
-    z.infer<typeof typenameSelection>[]
-] {
+        z.infer<typeof objectConditionalSpreadSelection>[],
+        z.infer<typeof typenameSelection>[]
+    ] {
     const typenameSelections: z.infer<typeof typenameSelection>[] = []
     const objectSelections = specSelections.map(s => {
         assert(s._type !== 'UnionConditionalSpreadSelection')
@@ -262,7 +262,7 @@ function resolveUnionSelections(
         }
         if (s._type === 'ObjectConditionalSpreadSelection') return [s]
         const fragmentSpec = schema.client.fragments[s.fragment].spec
-        assert(fragmentSpec._type === 'union')
+        assert(fragmentSpec._type === 'UnionFragmentSpec')
         const [selections, tSelections] = resolveUnionSelections(
             schema,
             fragmentSpec.selections
@@ -283,14 +283,14 @@ function generateZodUnionFragmentSpecCallExpression(
         spec.selections
     )
     for (const item of Object.keys(
-        schema.server.unions[spec.unionName].items
+        schema.server.unions[spec.name].items
     )) {
         if (!objectSelections.some(s => s.object === item)) {
             objectSelections.push({
                 _type: 'ObjectConditionalSpreadSelection',
                 object: item,
                 spec: {
-                    _type: 'object',
+                    _type: 'ObjectFragmentSpec',
                     name: item,
                     selections: []
                 }
@@ -339,7 +339,7 @@ export function generateZodFragmentSpecCallExpression(
     spec: FragmentSpecSchemaType,
     typenameConfig?: Parameters<typeof resolveSelections>[1]
 ) {
-    if (spec._type === 'object') {
+    if (spec._type === 'ObjectFragmentSpec') {
         return generateZodObjectFragmentSpecCallExpression(
             scalarsMapping,
             schema,

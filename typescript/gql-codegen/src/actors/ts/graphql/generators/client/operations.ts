@@ -65,7 +65,7 @@ function generateOperationNode(
                                         schema,
                                 operation.fragmentSpec as FragmentSpecSchemaType
                                     )
-                                ].join('\n'))
+                                ].join(' '))
                             ),
                             ts.factory.createPropertyAssignment(
                                 'variablesSchema',

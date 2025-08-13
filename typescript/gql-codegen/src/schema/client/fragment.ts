@@ -3,12 +3,12 @@ import { z } from 'zod/v4'
 import { argument } from './argument.js'
 
 type UnionFragmentSpec = z.ZodObject<{
-    _type: z.ZodLiteral<'union'>;
-    unionName: z.ZodString;
+    _type: z.ZodLiteral<'UnionFragmentSpec'>;
+    name: z.ZodString;
     selections: z.ZodArray<typeof unionSelection>
 }>
 type ObjectFragmentSpec = z.ZodObject<{
-    _type: z.ZodLiteral<'object'>;
+    _type: z.ZodLiteral<'ObjectFragmentSpec'>;
     name: z.ZodString;
     selections: z.ZodArray<typeof objectSelection>
 }>
@@ -18,12 +18,12 @@ export type FragmentSpecSchemaZodType = z.ZodDiscriminatedUnion<[
 ]>
 export type FragmentSpecSchemaType =
     {
-        _type: 'union',
-        unionName: string,
+        _type: 'UnionFragmentSpec',
+        name: string,
         selections: UnionSelection[]
     } |
     {
-        _type: 'object',
+        _type: 'ObjectFragmentSpec',
         name: string,
         selections: z.infer<typeof objectSelection>[]
     }
@@ -100,15 +100,15 @@ export const objectSelection = z.lazy(() => z.discriminatedUnion('_type', [
 
 export const objectFragmentSpec: ObjectFragmentSpec =
     z.object({
-        _type: z.literal('object'),
+        _type: z.literal('ObjectFragmentSpec'),
         name: z.string(),
         selections: z.array(objectSelection)
     })
 
 export const unionFragmentSpec =
     z.object({
-        _type: z.literal('union'),
-        unionName: z.string(),
+        _type: z.literal('UnionFragmentSpec'),
+        name: z.string(),
         selections: z.array(unionSelection)
     })
 

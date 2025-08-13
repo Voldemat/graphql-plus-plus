@@ -9,6 +9,7 @@ export interface GraphqlActorConfig extends TSActorConfig {
     outPath: PathOrFileDescriptor
     scalarsMapping: ScalarsMapping
     importDeclarations: ts.ImportDeclaration[]
+    onlyRequiredForOperations: boolean
 }
 
 async function graphqlActor(config: GraphqlActorConfig, context: ActorContext) {
