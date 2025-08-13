@@ -40,7 +40,7 @@ struct ASTVisitorHooks {
         visitClientDirectiveLocation;
     ASTVisitorHook<ast::FieldDefinition<ast::InputFieldSpec>>
         visitFieldDefinition_InputFieldSpec;
-    ASTVisitorHook<ast::FieldDefinition<ast::ObjectFieldSpec>>
+    ASTVisitorHook<std::shared_ptr<ast::FieldDefinition<ast::ObjectFieldSpec>>>
         visitFieldDefinition_ObjectFieldSpec;
     ASTVisitorHook<ast::NonCallableFieldSpec<ast::InputTypeSpec>>
         visitNonCallableFieldSpec_InputTypeSpec;

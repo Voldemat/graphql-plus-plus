@@ -46,8 +46,21 @@ void visitFieldSelection(const ASTVisitorHooks &hooks,
     };
 };
 
+void visitObjectFieldSpec(const ASTVisitorHooks &hooks,
+                          const ast::ObjectFieldSpec &spec);
+void visitFieldDefinition_ObjectFieldSpec(
+    const ASTVisitorHooks &hooks,
+    const std::shared_ptr<ast::FieldDefinition<ast::ObjectFieldSpec>> &field) {
+    if (hooks.visitFieldDefinition_ObjectFieldSpec.has_value()) {
+        hooks.visitFieldDefinition_ObjectFieldSpec.value()(field);
+    };
+    visitObjectFieldSpec(hooks, field->spec);
+};
+
+template <typename T>
 void visitObjectSelection(const ASTVisitorHooks &hooks,
-                          const ast::ObjectSelection &objectSelection) {
+                          const ast::ObjectSelection &objectSelection,
+                          const std::shared_ptr<T> &object) {
     if (hooks.visitObjectSelection.has_value()) {
         hooks.visitObjectSelection.value()(objectSelection);
     };
@@ -66,8 +79,10 @@ void visitObjectSelection(const ASTVisitorHooks &hooks,
                        };
                        visitFragmentSpec(hooks, field.fragment->spec);
                    },
-                   [&hooks](const ast::FieldSelection &field) -> void {
+                   [&hooks, &object](const ast::FieldSelection &field) -> void {
                        visitFieldSelection(hooks, field);
+                       const auto &f = object->fields[field.name];
+                       visitFieldDefinition_ObjectFieldSpec(hooks, f);
                    },
                },
                objectSelection);
@@ -119,7 +134,7 @@ void visitObjectFragmentSpec_ObjectType(
         hooks.visitObjectType.value()(spec.type);
     };
     for (const auto &selection : spec.selections) {
-        visitObjectSelection(hooks, selection);
+        visitObjectSelection(hooks, selection, spec.type);
     };
 };
 
@@ -130,7 +145,7 @@ void visitObjectFragmentSpec_Interface(
         hooks.visitObjectFragmentSpec_Interface.value()(spec);
     };
     for (const auto &selection : spec.selections) {
-        visitObjectSelection(hooks, selection);
+        visitObjectSelection(hooks, selection, spec.type);
     };
 };
 
@@ -300,11 +315,11 @@ void visitUnion(const ASTVisitorHooks &hooks,
     if (hooks.visitUnion.has_value()) {
         hooks.visitUnion.value()(unionType);
     };
-    for (const auto& object : unionType->items | std::views::values) {
+    for (const auto &object : unionType->items | std::views::values) {
         if (hooks.visitObjectType.has_value()) {
             hooks.visitObjectType.value()(object);
         };
-        for (const auto& field : object->fields | std::views::values) {
+        for (const auto &field : object->fields | std::views::values) {
             visitObjectFieldSpec(hooks, field->spec);
         };
     };
