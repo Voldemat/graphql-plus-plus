@@ -23,7 +23,44 @@ export class Executor<
         private readonly config: ClientConfig<TClientContext, TRequestContext>
     ) { }
 
+    async withRetry<T>(
+        shouldRetry: (iteration: number, error: unknown) => boolean,
+        execute: () => Promise<T>
+    ): Promise<T> {
+        let iteration = 0
+        let error: unknown
+        do {
+            try {
+                return await execute()
+            } catch (e: unknown) {
+                error = e
+                iteration++
+            }
+        } while (shouldRetry(iteration, error))
+        throw error
+    }
+
     async executeSync<T extends SyncOperation<unknown, unknown>>(
+        operation: T,
+        variables: OperationVariables<T>,
+        requestContext: TRequestContext
+    ): Promise<ExecuteResult<OperationResult<T>>> {
+        const retryOptions = {
+            context: this.config.context,
+            operation,
+            variables,
+            requestContext,
+        }
+        return await this.withRetry(
+            (iteration, error) => this.config.retryConfig.shouldSyncRetry(
+                error, iteration, retryOptions
+            ),
+            () => this._executeSync<T>(
+                operation, variables, requestContext
+            )
+        )
+    }
+    async _executeSync<T extends SyncOperation<unknown, unknown>>(
         operation: T,
         variables: OperationVariables<T>,
         requestContext: TRequestContext
@@ -90,6 +127,31 @@ export class Executor<
     }
 
     async executeSubscription<
+        T extends SubscriptionOperation<unknown, unknown>
+    >(
+        operation: T,
+        variables: OperationVariables<T>,
+        requestContext: TRequestContext,
+        controller: AbortController
+    ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<T>>>> {
+        const retryOptions = {
+            context: this.config.context,
+            operation,
+            variables,
+            requestContext,
+        }
+        return await this.withRetry(
+            (iteration, error) =>
+                this.config.retryConfig.shouldSubscriptionRetry(
+                    error, iteration, retryOptions
+                ),
+            () => this._executeSubscription<T>(
+                operation, variables, requestContext, controller
+            )
+        )
+    }
+
+    async _executeSubscription<
         T extends SubscriptionOperation<unknown, unknown>
     >(
         operation: T,
