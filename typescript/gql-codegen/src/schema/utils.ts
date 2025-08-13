@@ -190,10 +190,9 @@ function generateObjectFragmentSpecText(
                             )
                     return [
                         `${name}(` +
-                            Object.entries(
+                            Object.keys(
                                 field.spec.arguments
-                            ).map(([aName, arg]) =>
-                                `${aName}:${buildInputField(arg)}`).join(',') +
+                            ).map(aName => `${aName}:$${aName}`).join(',') +
                             ')',
                         fieldText
                     ].join('')
@@ -305,7 +304,7 @@ function buildParameters(field: z.infer<typeof objectFieldSpecSchema>) {
     const parameters: Record<string, z.infer<typeof inputFieldSchema>> = {}
     if (field._type === 'callable') {
         for (const [name, arg] of Object.entries(field.arguments)) {
-            parameters[name] = arg
+            parameters['$' + name] = arg
         }
     }
     return parameters
@@ -316,8 +315,17 @@ function buildOperationSourceText(
     object: z.infer<typeof objectSchema>,
     name: string,
     fieldName: string,
+    spec: z.infer<typeof objectFieldSpecSchema>
 ): string {
-    return opType.toLowerCase() + ' ' + name +
+    let argumentsText = ''
+    if (spec._type === 'callable') {
+        argumentsText += '('
+        argumentsText += Object.entries(spec.arguments).map(([aName, arg]) => {
+            return `$${aName}:${buildInputField(arg)}`
+        }).join(',')
+        argumentsText += ')'
+    }
+    return opType.toLowerCase() + ' ' + name + argumentsText +
         generateObjectFragmentSpecText(object, fieldName)
 }
 
@@ -353,7 +361,7 @@ function buildOperation(
         name,
         parameters: buildParameters(field.spec),
         sourceText: buildOperationSourceText(
-            type, object, name, fieldName
+            type, object, name, fieldName, field.spec
         ),
         fragmentSpec: buildFragmentSpecFromField(type, fieldName, field)
     }
