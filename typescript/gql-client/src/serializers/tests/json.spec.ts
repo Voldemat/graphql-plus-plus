@@ -15,7 +15,8 @@ describe('Json serializer', () => {
                 name: z.string(),
                 file: z.file(),
             }),
-            resultSchema: z.void()
+            resultSchema: z.void(),
+            hash: ''
         } satisfies Operation<{ name: string, file: File }, void>
         const variables: OperationVariables<typeof operation> = {
             name: 'test-name',
@@ -39,7 +40,8 @@ describe('Json serializer', () => {
             variablesSchema: z.object({
                 name: z.string(),
             }),
-            resultSchema: z.void()
+            resultSchema: z.void(),
+            hash: ''
         } satisfies Operation<{ name: string }, void>
         const variables: OperationVariables<typeof operation> = {
             name: 'test-name',

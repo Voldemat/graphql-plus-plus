@@ -7,6 +7,7 @@ interface BaseOperation<V, R> {
     document: string
     variablesSchema: SchemaFor<V>
     resultSchema: SchemaFor<R>
+    hash: string
 }
 
 export interface SyncOperation<V, R> extends BaseOperation<V, R> {

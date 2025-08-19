@@ -2,7 +2,7 @@ import { RequestContext } from '@/types/base.js'
 import { ClientSerializer } from '@/types/serializer.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function hasBlobValue (data: any): boolean  {
+export function hasBlobValue(data: any): boolean {
     if (typeof data !== 'object') return false
     for (const value of Object.values(data)) {
         if (typeof value !== 'object' || value === null) continue

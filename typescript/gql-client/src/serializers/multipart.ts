@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any,max-lines */
 import { ClientSerializer, Operation, RequestContext } from '@/types/index.js'
 import assert from 'assert';
 
-function getFilesKeysAndPayload (
+function getFilesKeysAndPayload(
     variables: Record<string, any> | Array<any>,
     initialPath: string = '',
     shouldTreatAsObject?: (v: any) => boolean,
@@ -23,16 +23,16 @@ function getFilesKeysAndPayload (
                 value, initialPath + key + '.', shouldTreatAsObject
             )
             filesKeys.push(...valueFilesKeys);
-            newObject[key] = valueObj 
+            newObject[key] = valueObj
             continue
         }
-        newObject[key] = value 
+        newObject[key] = value
     }
 
     return [filesKeys, newObject]
 }
 
-function getNestedValue (obj: Record<string, any>, key: string): any {
+function getNestedValue(obj: Record<string, any>, key: string): any {
     const subkeys = key.split('.')
     while (subkeys.length > 0) {
         const currentKey = subkeys.shift()
@@ -42,7 +42,7 @@ function getNestedValue (obj: Record<string, any>, key: string): any {
     return obj
 }
 
-function buildFormData<T extends Operation<unknown, unknown>> (
+function buildFormData<T extends Operation<unknown, unknown>>(
     operation: T,
     variables: Record<string, any> | Array<any>,
     shouldTreatAsObject?: (v: any) => boolean
@@ -72,7 +72,7 @@ function buildFormData<T extends Operation<unknown, unknown>> (
     )
     formData.append('map', JSON.stringify(finalMap))
     for (const [index, key] of properties) {
-        const value: Blob | File = getNestedValue(variables, key) 
+        const value: Blob | File = getNestedValue(variables, key)
         let filename: string | undefined = undefined
         if (value instanceof File) filename = value.name
         formData.append(index, value, filename)
@@ -86,8 +86,15 @@ export function createMultipartSerializer<
 >(): ClientSerializer<TClientContext, TRequestContext> {
     return {
         serializeRequest: ({ operation, requestContext, variables }) => {
+            const headers: Record<string, string> = {
+                'GQL-Operation-Hash': operation.hash
+            }
+            if (operation.type === 'SUBSCRIPTION') {
+                headers.Accept = 'text/event-stream'
+            }
             return {
                 method: 'POST',
+                headers,
                 body: buildFormData(operation, variables as any),
                 ...requestContext.fetchOptions
             }
