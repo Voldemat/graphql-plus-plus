@@ -637,6 +637,8 @@ void writeClientOperation(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writeClientFragmentSpec(writer, operation->fragmentSpec);
     writer.String("sourceText");
     writer.String(operation->sourceText.c_str());
+    writer.String("hash");
+    writer.String(std::to_string(operation->hash).c_str());
     writer.EndObject();
 };
 

@@ -1,16 +1,19 @@
 #include "./schema.hpp"
 
+#include <memory>
 #include <ranges>
 #include <variant>
 #include <vector>
 
 #include "../file/client/ast.hpp"
 #include "../file/server/ast.hpp"
+#include "./client_ast.hpp"
 #include "./nodes/client_node.hpp"
 #include "./nodes/extend_nodes.hpp"
 #include "./nodes/fragment/fragment.hpp"
 #include "./nodes/server_node.hpp"
 #include "./type_registry.hpp"
+#include "libgql/parsers/schema/operation_hash.hpp"
 
 using namespace gql::parsers::file;
 
@@ -54,6 +57,15 @@ const ClientSchema parseClientSchema(
             nodes::parseFragmentFirstPass(fragmentDefinition, registry));
     };
     const auto &clientNodes = nodes::parseClientNodes(astNodes, registry);
+    for (const auto &operation :
+         clientNodes | std::views::filter([](const auto &node) {
+             return std::holds_alternative<std::shared_ptr<ast::Operation>>(
+                 node);
+         }) | std::views::transform([](const auto &node) {
+             return std::get<std::shared_ptr<ast::Operation>>(node);
+         })) {
+        operation->hash = getClientOperationHash(registry, operation);
+    };
     return ClientSchema::fromNodes(clientNodes);
 };
 

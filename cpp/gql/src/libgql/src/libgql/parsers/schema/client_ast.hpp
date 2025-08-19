@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <optional>
@@ -75,6 +76,7 @@ struct Operation {
     std::map<std::string, FieldDefinition<InputFieldSpec>> parameters;
     FragmentSpec fragmentSpec;
     std::string sourceText;
+    std::size_t hash;
 };
 
 struct ClientDirective {

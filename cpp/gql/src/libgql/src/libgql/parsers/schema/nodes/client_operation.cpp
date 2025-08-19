@@ -1,5 +1,6 @@
 #include "./client_operation.hpp"
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <ranges>
@@ -11,13 +12,13 @@
 #include "libgql/parsers/schema/client_ast.hpp"
 #include "libgql/parsers/schema/nodes/fragment/spec.hpp"
 #include "libgql/parsers/schema/nodes/input_field_definition.hpp"
-#include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/shared_ast.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 
 using namespace gql::parsers::file;
 
 namespace gql::parsers::schema::nodes {
+
 std::shared_ptr<ast::Operation> parseClientOperationDefinition(
     const client::ast::OperationDefinition &definition,
     const TypeRegistry &registry) {
@@ -34,14 +35,12 @@ std::shared_ptr<ast::Operation> parseClientOperationDefinition(
         std::ranges::to<std::map>();
     const auto &node =
         parseFragmentSpec(definition.fragment, fragment, registry);
-    const auto &objectNode =
-        std::get<ast::ObjectFragmentSpec<ast::ObjectType>>(node);
-    const auto &sNode = std::get<ast::FieldSelection>(objectNode.selections[0]);
 
     return std::make_shared<ast::Operation>(
         definition.type, definition.name.name, parameters, node,
         shared::getSourceText(definition.location.source->buffer,
                               definition.location.startToken.location,
-                              definition.location.endToken.location));
+                              definition.location.endToken.location),
+        0);
 };
-};  // namespace parsers::schema::nodes
+};  // namespace gql::parsers::schema::nodes
