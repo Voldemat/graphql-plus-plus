@@ -7,13 +7,17 @@ import { clientSchema } from './client/root.js'
 describe('Server schema', () => {
     it('Should parse ok', () => {
         const result = serverSchema.safeParse(testServerJSON)
-        expect(result.success, result.error?.message || '').toBe(true)
+        expect(
+            result.success, result.error?.message.slice(0, 100) || ''
+        ).toBe(true)
     })
 })
 
 describe('Client schema', () => {
     it('Should parse ok', () => {
         const result = clientSchema.safeParse(testClientJSON)
-        expect(result.success, result.error?.message || '').toBe(true)
+        expect(
+            result.success, result.error?.message.slice(0, 100) || ''
+        ).toBe(true)
     })
 })

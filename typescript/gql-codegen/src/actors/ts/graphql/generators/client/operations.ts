@@ -63,7 +63,8 @@ function generateOperationNode(
                                     operation.sourceText,
                                     ...extractFragmentSourceTextsInSpec(
                                         schema,
-                                operation.fragmentSpec as FragmentSpecSchemaType
+                                        operation.fragmentSpec as
+                                        FragmentSpecSchemaType
                                     )
                                 ].join(' '))
                             ),
@@ -81,6 +82,12 @@ function generateOperationNode(
                                     generateSchemaName(
                                         operation.name + 'Result'
                                     )
+                                )
+                            ),
+                            ts.factory.createPropertyAssignment(
+                                'hash',
+                                ts.factory.createStringLiteral(
+                                    operation.hash
                                 )
                             )
                         ], true),

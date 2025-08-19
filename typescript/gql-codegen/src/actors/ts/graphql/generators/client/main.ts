@@ -51,7 +51,13 @@ const operationTypeNode = ts.factory.createInterfaceDeclaration(
             ts.factory.createTypeReferenceNode('z.ZodType', [
                 ts.factory.createTypeReferenceNode('R')
             ]),
-        )
+        ),
+        ts.factory.createPropertySignature(
+            undefined,
+            'hash',
+            undefined,
+            ts.factory.createTypeReferenceNode('string'),
+        ),
     ]
 )
 export function generateClientNodes(
