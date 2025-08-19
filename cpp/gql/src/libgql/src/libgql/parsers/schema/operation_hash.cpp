@@ -204,7 +204,11 @@ const auto getObjectFragmentSpecHashInput =
         spec.selections |
         std::views::transform([&fragmentNames](const auto &selection) {
             const auto &[h, fNames] = getObjectSelectionHashInput(selection);
+#ifdef __cpp_lib_containers_ranges
             fragmentNames.insert_range(fNames);
+#else
+            fragmentNames.insert(fNames.begin(), fNames.end());
+#endif
             return h;
         }) |
         std::ranges::to<std::vector>();
@@ -249,7 +253,11 @@ HashInputAndFragmentNames getFragmentSpecHashInput(
                         [&fragmentNames](const auto &selection) {
                             const auto &[h, fNames] =
                                 getUnionSelectionHashInput(selection);
+#ifdef __cpp_lib_containers_ranges
                             fragmentNames.insert_range(fNames);
+#else
+                            fragmentNames.insert(fNames.begin(), fNames.end());
+#endif
                             return h;
                         }) |
                     std::ranges::to<std::vector>();
@@ -283,7 +291,11 @@ std::size_t getClientOperationHash(
         const auto &[h, fNames] =
             getFragmentSpecHashInput(registry.getFragment(name)->spec);
         hashInput += h;
+#ifdef __cpp_lib_containers_ranges
         fragmentNames.insert_range(fNames);
+#else
+        fragmentNames.insert(fNames.begin(), fNames.end());
+#endif
         fragmentNames.erase(name);
     };
     return std::hash<std::string>()(hashInput);
