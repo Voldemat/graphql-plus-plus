@@ -76,7 +76,7 @@ std::optional<::gql::parsers::schema::ast::Literal> parseLiteral(
     };
 };
 
-template <typename T, typename JSONT=T>
+template <typename T, typename JSONT = T>
 std::vector<T> parseJSONArray(const JSONConstArray &array,
                               const std::vector<rapidjson::Type> &jsonTypes) {
     std::vector<T> elements(array.Size());
@@ -104,14 +104,16 @@ std::optional<::gql::parsers::schema::ast::ArrayLiteral> parseArrayLiteral(
     const auto &type = jsonArray[0].GetType();
     switch (type) {
         case rapidjson::kStringType:
-            return parseJSONArray<std::string, const char*>(jsonArray, { type });
+            return parseJSONArray<std::string, const char *>(jsonArray,
+                                                             { type });
         case rapidjson::kNumberType:
             if (jsonArray[0].IsFloat())
                 return parseJSONArray<float>(jsonArray, { type });
             return parseJSONArray<int>(jsonArray, { type });
         case rapidjson::kFalseType:
         case rapidjson::kTrueType:
-            return parseJSONArray<bool>(jsonArray, { type });
+            return parseJSONArray<bool>(
+                jsonArray, { rapidjson::kFalseType, rapidjson::kTrueType });
         default: {
             throw std::runtime_error(
                 std::format("Unsupported array literal type: {}",
