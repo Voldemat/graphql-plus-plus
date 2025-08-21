@@ -64,7 +64,10 @@ const ClientSchema parseClientSchema(
          }) | std::views::transform([](const auto &node) {
              return std::get<std::shared_ptr<ast::Operation>>(node);
          })) {
-        operation->hash = getClientOperationHash(registry, operation);
+        operation->parametersHash =
+            getOperationParametersHash(registry, operation->parameters);
+        operation->fragmentSpecHash =
+            getOperationFragmentSpecHash(registry, operation->fragmentSpec);
     };
     return ClientSchema::fromNodes(clientNodes);
 };

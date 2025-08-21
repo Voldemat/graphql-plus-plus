@@ -18,7 +18,6 @@
 #include "./server_ast.hpp"
 #include "./shared_ast.hpp"
 #include "./type_registry.hpp"
-#include "magic_enum.hpp"
 #include "utils.hpp"
 
 namespace gql::parsers::schema {
@@ -271,20 +270,24 @@ HashInputAndFragmentNames getFragmentSpecHashInput(
         fragmentSpec);
 };
 
-std::size_t getClientOperationHash(
+std::size_t getOperationParametersHash(
     const TypeRegistry &registry,
-    const std::shared_ptr<const ast::Operation> &operation) {
-    std::string hashInput =
-        std::string(magic_enum::enum_name(operation->type)) + operation->name;
-    auto paramsKeysVector = operation->parameters | std::views::keys |
-                            std::ranges::to<std::vector>();
+    const std::map<std::string, ast::FieldDefinition<ast::InputFieldSpec>>
+        &parameters) {
+    std::string hashInput;
+    auto paramsKeysVector =
+        parameters | std::views::keys | std::ranges::to<std::vector>();
     std::ranges::sort(paramsKeysVector, std::ranges::greater{});
     for (const auto &paramKey : paramsKeysVector) {
-        hashInput += getInputFieldDefinitionHashInput(
-            operation->parameters.at(paramKey));
+        hashInput += getInputFieldDefinitionHashInput(parameters.at(paramKey));
     };
-    auto [hInput, fragmentNames] =
-        getFragmentSpecHashInput(operation->fragmentSpec);
+    return std::hash<std::string>()(hashInput);
+};
+
+std::size_t getOperationFragmentSpecHash(
+    const TypeRegistry &registry, const ast::FragmentSpec &fragmentSpec) {
+    std::string hashInput;
+    auto [hInput, fragmentNames] = getFragmentSpecHashInput(fragmentSpec);
     hashInput += hInput;
     while (fragmentNames.size() != 0) {
         const auto &name = *fragmentNames.begin();

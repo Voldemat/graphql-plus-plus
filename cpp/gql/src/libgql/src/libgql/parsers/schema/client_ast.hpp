@@ -76,7 +76,8 @@ struct Operation {
     std::map<std::string, FieldDefinition<InputFieldSpec>> parameters;
     FragmentSpec fragmentSpec;
     std::string sourceText;
-    std::size_t hash;
+    unsigned long parametersHash;
+    unsigned long fragmentSpecHash;
 };
 
 struct ClientDirective {

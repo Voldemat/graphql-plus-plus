@@ -1,5 +1,6 @@
 #include "./client.hpp"
 
+#include <cstdlib>
 #include <format>
 #include <map>
 #include <memory>
@@ -256,7 +257,10 @@ std::shared_ptr<ast::Operation> parseOperation(TypeRegistry &registry,
         .fragmentSpec =
             parseFragmentSpec(registry, object["fragmentSpec"].GetObject()),
         .sourceText = object["sourceText"].GetString(),
-    });
+        .parametersHash =
+            std::strtoul(object["parametersHash"].GetString(), nullptr, 10),
+        .fragmentSpecHash = std::strtoul(object["fragmentSpecHash"].GetString(),
+                                         nullptr, 10) });
 };
 
 void addFragmentsToTypeRegistry(TypeRegistry &registry,

@@ -13,6 +13,7 @@
 #include <set>
 #include <string>
 #include <variant>
+#include <vector>
 
 #include "libgql/json/utils.hpp"
 #include "libgql/parsers/schema/client_ast.hpp"
@@ -114,6 +115,62 @@ void writeTypeSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.EndObject();
 };
 
+void writeDefaultValue(JSONWriter &writer,
+                       const std::optional<const ast::Literal> &literal) {
+    writer.String("defaultValue");
+    if (!literal.has_value()) {
+        writer.Null();
+        return;
+    };
+    std::visit(utils::overloaded{
+                   [&writer](const int &value) { writer.Int(value); },
+                   [&writer](const float &value) {
+                       const auto &rawValue = std::to_string(value);
+                       writer.RawNumber(rawValue.data(), rawValue.size());
+                   },
+                   [&writer](const bool &value) { writer.Bool(value); },
+                   [&writer](const std::string &value) {
+                       writer.String(value.c_str());
+                   },
+               },
+               literal.value());
+};
+
+void writeDefaultValue(JSONWriter &writer,
+                       const std::optional<const ast::ArrayLiteral> &literal) {
+    writer.String("defaultValue");
+    if (!literal.has_value()) {
+        writer.Null();
+        return;
+    };
+    writer.StartArray();
+    std::visit(utils::overloaded{
+                   [&writer](const std::vector<int> &array) {
+                       for (const auto &value : array) {
+                           writer.Int(value);
+                       };
+                   },
+                   [&writer](const std::vector<float> &array) {
+                       for (const auto &value : array) {
+                           const auto &rawValue = std::to_string(value);
+                           writer.RawNumber(rawValue.data(), rawValue.size());
+                       };
+                   },
+                   [&writer](const std::vector<bool> &array) {
+                       for (const auto &value : array) {
+                           writer.Bool(value);
+                       };
+                   },
+                   [&writer](const std::vector<std::string> &array) {
+                       for (const auto &value : array) {
+                           writer.String(value.c_str());
+                       };
+                   },
+               },
+               literal.value());
+    writer.EndArray();
+};
+
 template <typename T>
 void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                     const NonCallableFieldSpec<T> &field) {
@@ -124,6 +181,9 @@ void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                        writer.String("literal");
                        writer.String("type");
                        writeTypeSpec(writer, node.type);
+                       if constexpr (std::is_same_v<T, InputTypeSpec>) {
+                           writeDefaultValue(writer, node.defaultValue);
+                       };
                    },
                    [&writer](const ArrayFieldSpec<T> &node) {
                        writer.String("_type");
@@ -132,6 +192,9 @@ void writeFieldSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                        writer.Bool(node.nullable);
                        writer.String("type");
                        writeTypeSpec(writer, node.type);
+                       if constexpr (std::is_same_v<T, InputTypeSpec>) {
+                           writeDefaultValue(writer, node.defaultValue);
+                       };
                    },
                },
                field);
@@ -637,8 +700,10 @@ void writeClientOperation(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writeClientFragmentSpec(writer, operation->fragmentSpec);
     writer.String("sourceText");
     writer.String(operation->sourceText.c_str());
-    writer.String("hash");
-    writer.String(std::to_string(operation->hash).c_str());
+    writer.String("parametersHash");
+    writer.String(std::to_string(operation->parametersHash).c_str());
+    writer.String("fragmentSpecHash");
+    writer.String(std::to_string(operation->fragmentSpecHash).c_str());
     writer.EndObject();
 };
 
