@@ -18,6 +18,7 @@
 #include "./server_ast.hpp"
 #include "./shared_ast.hpp"
 #include "./type_registry.hpp"
+#include "libgql/parsers/schema/visitor.hpp"
 #include "utils.hpp"
 
 namespace gql::parsers::schema {
@@ -284,12 +285,13 @@ std::size_t getOperationParametersHash(
     return std::hash<std::string>()(hashInput);
 };
 
-std::size_t getOperationFragmentSpecHash(
-    const TypeRegistry &registry, const ast::FragmentSpec &fragmentSpec) {
+std::size_t getFragmentSpecHash(const TypeRegistry &registry,
+                                const ast::FragmentSpec &fragmentSpec,
+                                const bool &recursive) {
     std::string hashInput;
     auto [hInput, fragmentNames] = getFragmentSpecHashInput(fragmentSpec);
     hashInput += hInput;
-    while (fragmentNames.size() != 0) {
+    while (recursive && fragmentNames.size() != 0) {
         const auto &name = *fragmentNames.begin();
         const auto &[h, fNames] =
             getFragmentSpecHashInput(registry.getFragment(name)->spec);
@@ -302,5 +304,18 @@ std::size_t getOperationFragmentSpecHash(
         fragmentNames.erase(name);
     };
     return std::hash<std::string>()(hashInput);
+};
+
+std::vector<std::shared_ptr<ast::Fragment>> getUsedFragmentsFromFragmentSpec(
+    const TypeRegistry &registry, const ast::FragmentSpec &fragmentSpec) {
+    std::vector<std::shared_ptr<ast::Fragment>> usedFragments;
+    visitor::ASTVisitorHooks hooks = {
+        .visitSpreadSelection =
+            [&usedFragments](const ast::SpreadSelection &selection) {
+                usedFragments.emplace_back(selection.fragment);
+            },
+    };
+    visitor::visitFragmentSpec(hooks, fragmentSpec);
+    return usedFragments;
 };
 };  // namespace gql::parsers::schema

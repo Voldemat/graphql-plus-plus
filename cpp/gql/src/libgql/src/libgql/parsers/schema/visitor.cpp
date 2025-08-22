@@ -11,8 +11,6 @@
 #include "utils.hpp"
 
 namespace gql::parsers::schema::visitor {
-void visitFragmentSpec(const ASTVisitorHooks &hooks,
-                       const ast::FragmentSpec &fragmentSpec);
 void visitFieldSelection(const ASTVisitorHooks &hooks,
                          const ast::FieldSelection &selection) {
     if (hooks.visitFieldSelection.has_value()) {

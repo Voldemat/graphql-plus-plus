@@ -68,6 +68,7 @@ struct Fragment {
     std::string name;
     FragmentSpec spec;
     std::string sourceText;
+    unsigned long hash;
 };
 
 struct Operation {
@@ -75,6 +76,7 @@ struct Operation {
     std::string name;
     std::map<std::string, FieldDefinition<InputFieldSpec>> parameters;
     FragmentSpec fragmentSpec;
+    std::vector<std::shared_ptr<ast::Fragment>> usedFragments;
     std::string sourceText;
     unsigned long parametersHash;
     unsigned long fragmentSpecHash;

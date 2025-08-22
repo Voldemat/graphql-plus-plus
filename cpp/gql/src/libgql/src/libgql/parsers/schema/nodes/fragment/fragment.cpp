@@ -10,6 +10,7 @@
 #include "../../server_ast.hpp"
 #include "../../type_registry.hpp"
 #include "./spec.hpp"
+#include "libgql/parsers/schema/operation_hash.hpp"
 
 using namespace gql::parsers::file;
 
@@ -57,6 +58,7 @@ std::shared_ptr<ast::Fragment> parseFragmentSecondPass(
                               definition.location.endToken.location);
     fragment->spec =
         nodes::parseFragmentSpec(definition.spec, fragment->spec, registry);
+    fragment->hash = getFragmentSpecHash(registry, fragment->spec, false);
     return fragment;
 };
 };  // namespace gql::parsers::schema::nodes

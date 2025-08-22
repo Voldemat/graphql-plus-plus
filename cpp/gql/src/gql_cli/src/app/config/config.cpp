@@ -118,6 +118,45 @@ std::expected<std::optional<ClientConfig>, std::string> parseClientConfig(
                            .outputs = outputsResult.value() };
 };
 
+std::expected<OperationsMapInputsConfig, std::string>
+parseOperationInputsConfig(const std::string &rootPath,
+                           const YAML::Node &node) {
+    if (!node.IsDefined())
+        return std::unexpected(
+            std::format("\"{}\" should have \"inputs\" key", rootPath));
+    if (!node.IsMap())
+        return std::unexpected(
+            std::format("\"{}.inputs\" value should be a map", rootPath));
+    OperationsMapInputsConfig m;
+    for (const auto &source : node) {
+        const auto &key = source.first.as<std::string>();
+        const auto &value = source.second;
+        const auto &pathsArray =
+            parsePathsArray(rootPath, "inputs." + key, value);
+        if (!pathsArray.has_value()) {
+            return std::unexpected(pathsArray.error());
+        };
+        m[key] = pathsArray.value();
+    };
+    return m;
+};
+
+std::expected<std::optional<OperationsMapConfig>, std::string>
+parseOperationsMapConfig(const YAML::Node &node) {
+    if (!node.IsDefined()) {
+        return std::nullopt;
+    };
+    if (!node.IsMap()) {
+        return std::unexpected("\"operationsMap\" value should be a map");
+    };
+    const auto &inputsResult =
+        parseOperationInputsConfig("operationsMap", node["inputs"]);
+    if (!inputsResult.has_value()) return std::unexpected(inputsResult.error());
+    const auto &outputPath = node["outputPath"].as<std::string>();
+    return (OperationsMapConfig){ .inputs = inputsResult.value(),
+                                  .outputPath = outputPath };
+};
+
 };  // namespace yaml
 
 std::expected<Config, std::string> Config::fromYaml(const YAML::Node &yaml) {
@@ -128,6 +167,11 @@ std::expected<Config, std::string> Config::fromYaml(const YAML::Node &yaml) {
     if (!sResult.has_value()) return std::unexpected(sResult.error());
     const auto &cResult = yaml::parseClientConfig(yaml["client"]);
     if (!cResult.has_value()) return std::unexpected(cResult.error());
-    return (Config){ .server = sResult.value(), .client = cResult.value() };
+    const auto &opResult =
+        yaml::parseOperationsMapConfig(yaml["operationsMap"]);
+    if (!opResult.has_value()) return std::unexpected(opResult.error());
+    return (Config){ .server = sResult.value(),
+                     .client = cResult.value(),
+                     .operationsMap = opResult.value() };
 };
 };  // namespace cli::config

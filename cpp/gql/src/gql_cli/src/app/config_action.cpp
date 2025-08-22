@@ -10,6 +10,7 @@
 #include "app/config/config.hpp"
 #include "app/utils.hpp"
 #include "libgql/json/serializers/schema/schema.hpp"
+#include "libgql/parsers/schema/operations_map.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "yaml-cpp/yaml.h"
@@ -39,6 +40,7 @@ void run_config_action(
         throw CLI::RuntimeError(1);
     };
     const auto &serverSchema = serverResult.value();
+    auto serverOnlyRegistry = registry;
 
     std::optional<gql::parsers::schema::ClientSchema> clientSchema;
 
@@ -52,6 +54,21 @@ void run_config_action(
             throw CLI::RuntimeError(1);
         };
         clientSchema = result.value();
+    };
+
+    std::optional<gql::parsers::schema::operations_map::OperationsMapContainer>
+        operationsMapContainer;
+
+    if (config.operationsMap.has_value()) {
+        const auto &result = utils::loadOperationsMapContainerFromInputs(
+            serverOnlyRegistry, config.operationsMap->inputs, configDirPath);
+        if (!result.has_value()) {
+            for (const auto &error : result.error()) {
+                std::cerr << error << std::endl;
+            };
+            throw CLI::RuntimeError(1);
+        };
+        operationsMapContainer = result.value();
     };
 
     if (config.server.outputs.has_value()) {
@@ -79,6 +96,16 @@ void run_config_action(
             });
         jsonStringCallback(jsonString, configDirPath,
                            config.client->outputs->filepath, "Client");
+    };
+
+    if (config.operationsMap.has_value()) {
+        const auto &jsonString = utils::serializeToJSONString(
+            [&operationsMapContainer](auto &writer) {
+                gql::json::serializers::schema::writeOperationsMapContainer(
+                    writer, operationsMapContainer.value());
+            });
+        jsonStringCallback(jsonString, configDirPath,
+                           config.operationsMap->outputPath, "Operations map");
     };
 };
 };  // namespace cli

@@ -67,7 +67,9 @@ const ClientSchema parseClientSchema(
         operation->parametersHash =
             getOperationParametersHash(registry, operation->parameters);
         operation->fragmentSpecHash =
-            getOperationFragmentSpecHash(registry, operation->fragmentSpec);
+            getFragmentSpecHash(registry, operation->fragmentSpec, true);
+        operation->usedFragments =
+            getUsedFragmentsFromFragmentSpec(registry, operation->fragmentSpec);
     };
     return ClientSchema::fromNodes(clientNodes);
 };

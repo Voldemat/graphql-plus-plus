@@ -67,4 +67,6 @@ struct ASTVisitorHooks {
 
 void visitClientSchema(const ASTVisitorHooks &hooks, const ClientSchema &schema);
 void visitServerSchema(const ASTVisitorHooks &hooks, const ServerSchema &schema);
+void visitFragmentSpec(const ASTVisitorHooks &hooks,
+                       const ast::FragmentSpec &fragmentSpec);
 };  // namespace gql::parsers::schema::visitor

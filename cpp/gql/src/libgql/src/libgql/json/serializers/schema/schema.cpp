@@ -7,6 +7,7 @@
 #include <rapidjson/writer.h>
 
 #include <format>
+#include <map>
 #include <memory>
 #include <optional>
 #include <ranges>
@@ -17,6 +18,7 @@
 
 #include "libgql/json/utils.hpp"
 #include "libgql/parsers/schema/client_ast.hpp"
+#include "libgql/parsers/schema/operations_map.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/server_ast.hpp"
 #include "libgql/parsers/schema/shared_ast.hpp"
@@ -682,6 +684,18 @@ void writeClientFragmentSpec(rapidjson::Writer<rapidjson::StringBuffer> &writer,
         spec);
 }
 
+void writeOperationParameters(
+    JSONWriter &writer,
+    const std::map<std::string, ast::FieldDefinition<ast::InputFieldSpec>>
+        &parameters) {
+    writer.StartObject();
+    for (const auto &[name, parameter] : parameters) {
+        writer.String(name.c_str());
+        writeFieldDefinition(writer, parameter);
+    };
+    writer.EndObject();
+};
+
 void writeClientOperation(rapidjson::Writer<rapidjson::StringBuffer> &writer,
                           const std::shared_ptr<Operation> &operation) {
     writer.StartObject();
@@ -690,12 +704,7 @@ void writeClientOperation(rapidjson::Writer<rapidjson::StringBuffer> &writer,
     writer.String("type");
     writer.String(magic_enum::enum_name(operation->type).data());
     writer.String("parameters");
-    writer.StartObject();
-    for (const auto &[name, parameter] : operation->parameters) {
-        writer.String(name.c_str());
-        writeFieldDefinition(writer, parameter);
-    };
-    writer.EndObject();
+    writeOperationParameters(writer, operation->parameters);
     writer.String("fragmentSpec");
     writeClientFragmentSpec(writer, operation->fragmentSpec);
     writer.String("sourceText");
@@ -762,6 +771,84 @@ void writeClientSchema(rapidjson::Writer<rapidjson::StringBuffer> &writer,
         writeClientDirective(writer, directive);
     };
     writer.EndObject();
+    writer.EndObject();
+};
+
+void writeOperationImplementationMap(
+    JSONWriter &writer,
+    const operations_map::OperationImplementationMap &implementationMap) {
+    writer.StartObject();
+    for (const auto &[hash, fragmentSpec] : implementationMap) {
+        writer.String(std::to_string(hash).c_str());
+        writeClientFragmentSpec(writer, fragmentSpec);
+    };
+    writer.EndObject();
+};
+
+void writeOperationSignature(
+    JSONWriter &writer, const operations_map::OperationSignature &signature) {
+    writer.StartObject();
+    writer.String("parameters");
+    writeOperationParameters(writer, signature.parameters);
+    writer.String("implementationMap");
+    writeOperationImplementationMap(writer, signature.implementationMap);
+    writer.EndObject();
+};
+
+void writeOperationSignaturesMap(
+    JSONWriter &writer,
+    const operations_map::OperationSignatureMap &signaturesMap) {
+    writer.StartObject();
+    for (const auto &[parametersHash, signature] : signaturesMap) {
+        writer.String(std::to_string(parametersHash).c_str());
+        writeOperationSignature(writer, signature);
+    };
+    writer.EndObject();
+};
+
+void writeOperationsMap(JSONWriter &writer,
+                        const operations_map::OperationsMap &opMap) {
+    writer.StartObject();
+    for (const auto &[name, signaturesMap] : opMap) {
+        writer.String(name.c_str());
+        writeOperationSignaturesMap(writer, signaturesMap);
+    };
+    writer.EndObject();
+};
+
+void writeFragmentMap(JSONWriter &writer,
+                      const operations_map::FragmentMap &fragmentMap) {
+    writer.StartObject();
+    for (const auto &[hash, fragment] : fragmentMap) {
+        writer.String(std::to_string(hash).c_str());
+        writeClientFragmentSpec(writer, fragment->spec);
+    };
+    writer.EndObject();
+};
+
+void writeFragmentsMap(
+    JSONWriter &writer,
+    const std::map<std::string, operations_map::FragmentMap> &fragmentsMap) {
+    writer.StartObject();
+    for (const auto &[name, fragmentMap] : fragmentsMap) {
+        writer.String(name.c_str());
+        writeFragmentMap(writer, fragmentMap);
+    };
+    writer.EndObject();
+};
+
+void writeOperationsMapContainer(
+    JSONWriter &writer,
+    const operations_map::OperationsMapContainer &container) {
+    writer.StartObject();
+    writer.String("queries");
+    writeOperationsMap(writer, container.queries);
+    writer.String("mutations");
+    writeOperationsMap(writer, container.mutations);
+    writer.String("subscriptions");
+    writeOperationsMap(writer, container.subscriptions);
+    writer.String("fragments");
+    writeFragmentsMap(writer, container.fragments);
     writer.EndObject();
 };
 

@@ -13,6 +13,7 @@
 #include "libgql/parsers/file/client/ast.hpp"
 #include "libgql/parsers/file/server/ast.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
+#include "libgql/parsers/schema/operations_map.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "rapidjson/stringbuffer.h"
@@ -98,5 +99,11 @@ std::expected<gql::parsers::schema::ClientSchema,
               std::vector<std::string> >
 loadClientSchemaFromInputs(gql::parsers::schema::TypeRegistry &registry,
                                const config::InputsConfig &config,
+                               const std::filesystem::path &configDirPath);
+
+std::expected<gql::parsers::schema::operations_map::OperationsMapContainer,
+              std::vector<std::string> >
+loadOperationsMapContainerFromInputs(gql::parsers::schema::TypeRegistry &registry,
+                               const config::OperationsMapInputsConfig &config,
                                const std::filesystem::path &configDirPath);
 };

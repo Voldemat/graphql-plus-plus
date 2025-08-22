@@ -31,6 +31,7 @@
 #include "libgql/parsers/file/server/parser.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
 #include "libgql/parsers/file/shared/parser_error.hpp"
+#include "libgql/parsers/schema/operations_map.hpp"
 #include "libgql/parsers/schema/schema.hpp"
 #include "libgql/parsers/schema/type_registry.hpp"
 #include "rapidjson/document.h"
@@ -185,6 +186,7 @@ parseClientNodesFromGraphql(
     const std::shared_ptr<gql::parsers::file::shared::ast::SourceFile>
         &sourceFile,
     const std::vector<gql::lexer::GQLToken> &tokens) {
+    if (tokens.size() == 0) return {};
     gql::parsers::file::client::Parser parser(tokens, sourceFile);
     try {
         return parser.parse();
@@ -209,10 +211,12 @@ std::vector<std::filesystem::path> resolvePaths(
     const std::filesystem::path &configDirPath,
     const std::vector<std::string> &configPaths) {
     return configPaths |
-           std::views::transform([&configDirPath](const auto &configGlobPath) {
-               const auto &canonizedPath = configDirPath / configGlobPath;
-               return glob::rglob(canonizedPath);
-           }) |
+           std::views::transform(
+               [&configDirPath](const std::filesystem::path &configGlobPath) {
+                   const auto &canonizedPath = std::filesystem::absolute(
+                       configDirPath / configGlobPath);
+                   return glob::rglob(canonizedPath);
+               }) |
            std::views::join | std::ranges::to<std::vector>();
 };
 
@@ -308,5 +312,29 @@ loadClientSchemaFromInputs(gql::parsers::schema::TypeRegistry &registry,
         return std::unexpected(
             (std::vector<std::string>){ formatting::formatError(error) });
     };
+};
+
+std::expected<gql::parsers::schema::operations_map::OperationsMapContainer,
+              std::vector<std::string> >
+loadOperationsMapContainerFromInputs(
+    gql::parsers::schema::TypeRegistry &registry,
+    const config::OperationsMapInputsConfig &config,
+    const std::filesystem::path &configDirPath) {
+    std::vector<gql::parsers::schema::ClientSchema> schemas(config.size());
+    std::vector<std::string> errors;
+    for (const auto &[source, pathsArray] : config) {
+        auto localRegistry = registry;
+        const auto &result = loadClientSchemaFromInputs(
+            localRegistry, (config::InputsConfig){ .graphql = pathsArray },
+            configDirPath);
+        if (!result.has_value()) {
+            errors.append_range(result.error());
+            continue;
+        }
+        schemas.emplace_back(result.value());
+    };
+    if (errors.size() != 0) return std::unexpected(errors);
+    return gql::parsers::schema::operations_map::OperationsMapContainer::from(
+        schemas);
 };
 };  // namespace cli::utils

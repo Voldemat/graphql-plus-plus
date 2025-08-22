@@ -6,6 +6,7 @@
 #include <ranges>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "libgql/parsers/file/client/ast.hpp"
 #include "libgql/parsers/file/shared/shared.hpp"
@@ -38,9 +39,10 @@ std::shared_ptr<ast::Operation> parseClientOperationDefinition(
 
     return std::make_shared<ast::Operation>(
         definition.type, definition.name.name, parameters, node,
+        (std::vector<std::shared_ptr<ast::Fragment>>){},
         shared::getSourceText(definition.location.source->buffer,
                               definition.location.startToken.location,
                               definition.location.endToken.location),
-        0);
+        0, 0);
 };
 };  // namespace gql::parsers::schema::nodes
