@@ -266,7 +266,8 @@ std::shared_ptr<ast::Operation> parseOperation(TypeRegistry &registry,
 void addFragmentsToTypeRegistry(TypeRegistry &registry,
                                 const JSONObject &object) {
     for (const auto &[key, value] : object) {
-        registry.addFragment(std::make_shared<ast::Fragment>(key.GetString()));
+        registry.fragments[key.GetString()] =
+            std::make_shared<ast::Fragment>(key.GetString());
     };
 };
 

@@ -167,10 +167,6 @@ void TypeRegistry::addNode(const ServerSchemaNode &schemaNode) {
                schemaNode);
 };
 
-void TypeRegistry::addFragment(const std::shared_ptr<Fragment> &fragment) {
-    fragments[fragment->name] = fragment;
-};
-
 void TypeRegistry::appendOpsIfSpecialObject(
     const std::string &objName,
     const std::map<std::string,

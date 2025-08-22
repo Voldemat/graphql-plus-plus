@@ -35,19 +35,6 @@ ast::FragmentSpec fragmentSpecFromName(const shared::ast::NameNode &typeName,
         typeName.location.source);
 };
 
-std::shared_ptr<ast::Fragment> parseFragmentFirstPass(
-    const client::ast::FragmentDefinition &definition,
-    const TypeRegistry &registry) {
-    const auto &name = definition.name.name;
-    if (registry.fragments.contains(name)) {
-        throw shared::ParserError(definition.name.location.startToken,
-                                  "Fragment with this name already exists",
-                                  definition.name.location.source);
-    };
-    return std::make_shared<ast::Fragment>(
-        name, fragmentSpecFromName(definition.typeName, registry));
-};
-
 std::shared_ptr<ast::Fragment> parseFragmentSecondPass(
     const client::ast::FragmentDefinition &definition,
     const TypeRegistry &registry) {

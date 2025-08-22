@@ -13,6 +13,7 @@
 #include "./nodes/fragment/fragment.hpp"
 #include "./nodes/server_node.hpp"
 #include "./type_registry.hpp"
+#include "libgql/parsers/file/shared/parser_error.hpp"
 #include "libgql/parsers/schema/operation_hash.hpp"
 
 using namespace gql::parsers::file;
@@ -52,9 +53,46 @@ const ServerSchema parseServerSchema(
 const ClientSchema parseClientSchema(
     parsers::schema::TypeRegistry &registry,
     const std::vector<file::client::ast::ASTNode> &astNodes) {
-    for (const auto &fragmentDefinition : filterFragmentDefinitions(astNodes)) {
-        registry.addFragment(
-            nodes::parseFragmentFirstPass(fragmentDefinition, registry));
+    for (const auto &astNode : astNodes) {
+        std::visit(
+            utils::overloaded{
+                [&registry](
+                    const file::client::ast::OperationDefinition &operation) {
+                    if (registry.operations.contains(operation.name.name)) {
+                        throw shared::ParserError(
+                            operation.name.location.startToken,
+                            "Operation with this name already exists",
+                            operation.name.location.source);
+                    };
+                    registry.operations[operation.name.name] =
+                        std::make_shared<ast::Operation>(operation.type,
+                                                         operation.name.name);
+                },
+                [&registry](
+                    const file::client::ast::FragmentDefinition &fragment) {
+                    if (registry.fragments.contains(fragment.name.name)) {
+                        throw shared::ParserError(
+                            fragment.name.location.startToken,
+                            "Fragment with this name already exists",
+                            fragment.name.location.source);
+                    };
+                    registry.fragments[fragment.name.name] =
+                        std::make_shared<ast::Fragment>(
+                            fragment.name.name,
+                            nodes::fragmentSpecFromName(fragment.typeName,
+                                                        registry));
+                },
+                [&registry](
+                    const file::client::ast::DirectiveDefinition &directive) {
+                    if (registry.clientDirectives.contains(directive.name.name)) {
+                        throw shared::ParserError(
+                            directive.name.location.startToken,
+                            "Client directive with this name already exists",
+                            directive.name.location.source);
+                    };
+                },
+            },
+            astNode);
     };
     const auto &clientNodes = nodes::parseClientNodes(astNodes, registry);
     for (const auto &operation :

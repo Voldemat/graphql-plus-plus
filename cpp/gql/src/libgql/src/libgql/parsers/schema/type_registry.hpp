@@ -33,6 +33,7 @@ struct TypeRegistry {
     std::map<std::string, std::shared_ptr<ast::Enum>> enums;
     std::map<std::string, std::shared_ptr<ast::Union>> unions;
     std::map<std::string, std::shared_ptr<ast::Fragment>> fragments;
+    std::map<std::string, std::shared_ptr<ast::Operation>> operations;
 
     explicit TypeRegistry();
 
@@ -74,7 +75,6 @@ struct TypeRegistry {
                  std::shared_ptr<ast::FieldDefinition<ast::ObjectFieldSpec>>>
             &mapping);
     void addNode(const ast::ServerSchemaNode &schemaNode);
-    void addFragment(const std::shared_ptr<ast::Fragment> &fragment);
     void appendOpsIfSpecialObject(
         const std::string &objName,
         const std::map<std::string, std::shared_ptr<ast::FieldDefinition<

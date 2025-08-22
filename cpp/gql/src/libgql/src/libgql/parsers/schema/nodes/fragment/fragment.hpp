@@ -12,10 +12,6 @@ namespace gql::parsers::schema::nodes {
 ast::FragmentSpec fragmentSpecFromName(
     const file::shared::ast::NameNode &typeName, const TypeRegistry &registry);
 
-std::shared_ptr<ast::Fragment> parseFragmentFirstPass(
-    const file::client::ast::FragmentDefinition &definition,
-    const TypeRegistry &registry);
-
 std::shared_ptr<ast::Fragment> parseFragmentSecondPass(
     const file::client::ast::FragmentDefinition &definition,
     const TypeRegistry &registry);
