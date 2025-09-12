@@ -1,12 +1,13 @@
 import { z } from 'zod/v4'
 
-export type SchemaFor<T> = z.ZodType<T>;
+export type SchemaForInput<T> = z.ZodType<unknown, T>;
+export type SchemaForOutput<T> = z.ZodType<T>;
 
 interface BaseOperation<V, R> {
     name: string
     document: string
-    variablesSchema: SchemaFor<V>
-    resultSchema: SchemaFor<R>
+    variablesSchema: SchemaForInput<V>
+    resultSchema: SchemaForOutput<R>
     hash: string
 }
 

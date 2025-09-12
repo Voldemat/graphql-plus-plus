@@ -19,7 +19,7 @@ export function createJSONSerializer<
                 method: 'POST',
                 body: JSON.stringify({
                     query: operation.document,
-                    variables
+                    variables: operation.variablesSchema.parse(variables)
                 }, (key, value) => {
                     assert(
                         !(value instanceof File),

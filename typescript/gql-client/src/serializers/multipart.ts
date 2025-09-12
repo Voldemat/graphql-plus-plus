@@ -95,7 +95,10 @@ export function createMultipartSerializer<
             return {
                 method: 'POST',
                 headers,
-                body: buildFormData(operation, variables as any),
+                body: buildFormData(
+                    operation,
+                    operation.variablesSchema.parse(variables) as any
+                ),
                 ...requestContext.fetchOptions
             }
         },
