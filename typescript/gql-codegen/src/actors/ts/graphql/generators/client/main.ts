@@ -41,6 +41,7 @@ const operationTypeNode = ts.factory.createInterfaceDeclaration(
             'variablesSchema',
             undefined,
             ts.factory.createTypeReferenceNode('z.ZodType', [
+                ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
                 ts.factory.createTypeReferenceNode('V')
             ]),
         ),
