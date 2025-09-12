@@ -173,12 +173,14 @@ function generateOperationNodes(
     return [
         generateOperationZodInputSchema(scalarsMapping, operation),
         generateZodInferTypeAlias(
+            'input',
             operation.name + 'Variables',
             generateSchemaName(operation.name + 'Variables')
         ),
         ts.factory.createIdentifier('\n'),
         genearteOperationZodOutputSchema(scalarsMapping, schema, operation),
         generateZodInferTypeAlias(
+            'output',
             operation.name + 'Result',
             generateSchemaName(operation.name + 'Result')
         ),

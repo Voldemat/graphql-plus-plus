@@ -398,7 +398,7 @@ function generateFragmentSpecDeclarations(
             fragmentName,
             fragment
         ),
-        generateZodInferTypeAlias(fName, generateSchemaName(fName))
+        generateZodInferTypeAlias('output', fName, generateSchemaName(fName))
     ]
 }
 
