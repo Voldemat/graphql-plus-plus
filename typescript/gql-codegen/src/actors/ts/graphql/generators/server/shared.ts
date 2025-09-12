@@ -29,7 +29,11 @@ export function wrapInMaybeIfNullable(spec: ts.TypeNode, nullable: boolean) {
         spec
 }
 
-export function generateZodInferTypeAlias(name: string, typeName: string) {
+export function generateZodInferTypeAlias(
+    inferType: 'input' | 'output',
+    name: string,
+    typeName: string
+) {
     return ts.factory.createTypeAliasDeclaration(
         ts.factory.createModifiersFromModifierFlags(
             ts.ModifierFlags.Export
@@ -37,7 +41,7 @@ export function generateZodInferTypeAlias(name: string, typeName: string) {
         name,
         undefined,
         ts.factory.createTypeReferenceNode(
-            'z.infer',
+            'z.' + inferType,
             [ts.factory.createTypeQueryNode(
                 ts.factory.createIdentifier(typeName),
                 undefined

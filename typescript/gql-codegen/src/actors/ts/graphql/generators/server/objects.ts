@@ -199,7 +199,11 @@ export function generateObjectTypeNodes(
 ): ts.Node[] {
     return [
         generateZodObjectTypeNode(scalarsMapping, object),
-        generateZodInferTypeAlias(object.name, generateSchemaName(object.name)),
+        generateZodInferTypeAlias(
+            'output',
+            object.name,
+            generateSchemaName(object.name)
+        ),
         ts.factory.createIdentifier('\n')
     ]
 }

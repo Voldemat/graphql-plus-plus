@@ -133,7 +133,11 @@ export function generateInputTypeDefinitions(
             input.name,
             input.fields
         ),
-        generateZodInferTypeAlias(input.name, generateSchemaName(input.name)),
+        generateZodInferTypeAlias(
+            'input',
+            input.name,
+            generateSchemaName(input.name)
+        ),
         ts.factory.createIdentifier('\n')
     ]
 }

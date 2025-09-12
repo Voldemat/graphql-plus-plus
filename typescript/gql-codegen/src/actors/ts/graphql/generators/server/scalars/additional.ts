@@ -8,12 +8,9 @@ export const additionalScalarsMapping = {
     Int64: builtinScalarsMapping.Int,
     UUID: builtinScalarsMapping.String,
     Datetime: {
-        inputSchema: ts.factory.createCallExpression(
-            ts.factory.createPropertyAccessExpression(
-                ts.factory.createIdentifier('z'),
-                'date',
-            ),
-            undefined,
+        inputSchema: invokeMethod(
+            ts.factory.createIdentifier('z'),
+            'date',
             []
         ),
         outputSchema: invokeMethod(
@@ -102,4 +99,67 @@ export const additionalScalarsMapping = {
             []
         )
     ),
+    Date: {
+        inputSchema: invokeMethod(
+            invokeMethod(
+                ts.factory.createIdentifier('z'),
+                'date',
+                []
+            ),
+            'transform',
+            [
+                ts.factory.createArrowFunction(
+                    undefined,
+                    undefined,
+                    [ts.factory.createParameterDeclaration(
+                        undefined,
+                        undefined,
+                        'v'
+                    )],
+                    undefined,
+                    ts.factory.createToken(
+                        ts.SyntaxKind.EqualsGreaterThanToken
+                    ),
+                    ts.factory.createElementAccessExpression(
+                        invokeMethod(
+                            invokeMethod(
+                                ts.factory.createIdentifier('v'),
+                                'toISOString',
+                                []
+                            ),
+                            'split',
+                            [ts.factory.createStringLiteral('T')]
+                        ),
+                        ts.factory.createNumericLiteral(0)
+                    )
+                )
+            ]
+        ),
+        outputSchema: invokeMethod(
+            invokeMethod(
+                ts.factory.createIdentifier('z'),
+                'string',
+                []
+            ),
+            'transform',
+            [ts.factory.createArrowFunction(
+                undefined,
+                undefined,
+                [ts.factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    'v'
+                )],
+                undefined,
+                ts.factory.createToken(
+                    ts.SyntaxKind.EqualsGreaterThanToken
+                ),
+                ts.factory.createNewExpression(
+                    ts.factory.createIdentifier('Date'),
+                    [],
+                    [ts.factory.createIdentifier('v')]
+                )
+            )]
+        )
+    },
 } as const satisfies Record<string, ScalarSpec> 

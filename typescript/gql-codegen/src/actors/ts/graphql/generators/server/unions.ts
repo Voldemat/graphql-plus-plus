@@ -48,7 +48,11 @@ export function generateUnionTypeDefinitions(
 ): ts.Node[] {
     return [
         generateZodUnionTypeNode(scalarsMapping, objects, union),
-        generateZodInferTypeAlias(union.name, generateSchemaName(union.name)),
+        generateZodInferTypeAlias(
+            'output',
+            union.name,
+            generateSchemaName(union.name)
+        ),
         ts.factory.createIdentifier('\n')
     ]
 }
