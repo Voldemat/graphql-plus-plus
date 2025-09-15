@@ -328,7 +328,7 @@ loadOperationsMapContainerFromInputs(
             localRegistry, (config::InputsConfig){ .graphql = pathsArray },
             configDirPath);
         if (!result.has_value()) {
-            errors.append_range(result.error());
+            errors.insert(errors.end(), result.error().begin(), result.error().end());
             continue;
         }
         schemas.emplace_back(result.value());
