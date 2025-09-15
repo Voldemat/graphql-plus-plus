@@ -87,7 +87,6 @@ export function createMultipartSerializer<
     return {
         serializeRequest: ({ operation, requestContext, variables }) => {
             const headers: Record<string, string> = {
-                'GQL-Operation-Hash': operation.hash
             }
             if (operation.type === 'SUBSCRIPTION') {
                 headers.Accept = 'text/event-stream'

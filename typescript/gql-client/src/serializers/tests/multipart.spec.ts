@@ -16,7 +16,6 @@ describe('Multipart serializer', () => {
                 name: z.string()
             }),
             resultSchema: z.void(),
-            hash: ''
         } satisfies Operation<{ name: string }, void>
         const variables: OperationVariables<typeof operation> = {
             name: 'test-name'
@@ -41,7 +40,6 @@ describe('Multipart serializer', () => {
                 file: z.file()
             }),
             resultSchema: z.void(),
-            hash: ''
         } satisfies Operation<{ name: string, file: File }, void>
         const variables: OperationVariables<typeof operation> = {
             name: 'test-name',
