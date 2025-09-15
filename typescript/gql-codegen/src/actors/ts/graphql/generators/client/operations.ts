@@ -84,12 +84,6 @@ function generateOperationNode(
                                     )
                                 )
                             ),
-                            ts.factory.createPropertyAssignment(
-                                'hash',
-                                ts.factory.createStringLiteral(
-                                    operation.hash
-                                )
-                            )
                         ], true),
                         ts.factory.createTypeReferenceNode('const')
                     ),

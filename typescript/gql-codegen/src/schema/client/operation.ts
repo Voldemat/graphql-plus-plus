@@ -8,6 +8,5 @@ export const operationSchema = z.object({
     parameters: z.record(z.string(), inputFieldSchema),
     fragmentSpec: fragmentSpecSchema,
     sourceText: z.string(),
-    hash: z.string()
 })
 

@@ -364,7 +364,6 @@ function buildOperation(
             type, object, name, fieldName, field.spec
         ),
         fragmentSpec: buildFragmentSpecFromField(type, fieldName, field),
-        hash: ''
     }
 }
 
