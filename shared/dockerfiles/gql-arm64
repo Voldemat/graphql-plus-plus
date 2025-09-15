@@ -1,12 +1,12 @@
 FROM --platform=linux/arm64 vladimirdev635/alpine-arm64@sha256:52fcab06392b4757bfe4e3bd91f19e9cdb9946ea671d408c90a824865f5c6ccf as alpine-sysroot
 FROM alpine:3.22.1 as builder
-RUN apk --no-cache add \
-    clang lld musl-dev cmake make git && \
+RUN apk --no-cache add --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
+    clang21 lld21 musl-dev cmake make git && \
     rm -rf /var/cache/apk/*
 WORKDIR /usr/local/app/
 COPY cpp/gql/ ./
-ENV CC=clang
-ENV CXX=clang++
+ENV CC=clang-21
+ENV CXX=clang++-21
 RUN --mount=type=bind,from=alpine-sysroot,source=/lib/,target=/arm64-sysroot/lib/ \
     --mount=type=bind,from=alpine-sysroot,source=/usr/lib/,target=/arm64-sysroot/usr/lib/ \
     --mount=type=bind,from=alpine-sysroot,source=/usr/include/,target=/arm64-sysroot/usr/include/ \
@@ -17,6 +17,7 @@ RUN --mount=type=bind,from=alpine-sysroot,source=/lib/,target=/arm64-sysroot/lib
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_EXE_LINKER_FLAGS="-static" \
     -DCMAKE_LINKER="ldd" \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DGQL_BUILD_TESTS=OFF \
     -S . \
     -B build && \
