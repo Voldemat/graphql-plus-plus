@@ -17,6 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Build binaries in "${{ matrix.BUILD_TARGET }}" mode
+        working-directory: rust/gqlcodegen
         run: cargo build --profile ${{ matrix.BUILD_TARGET }}
       - name: Run tests in "${{ matrix.BUILD_TARGET }}" mode
+        working-directory: rust/gqlcodegen
         run: cargo test --profile ${{ matrix.BUILD_TARGET }}
