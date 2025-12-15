@@ -4,8 +4,8 @@ use crate::schema::shared::InputField;
 
 #[derive(Debug, PartialEq, serde::Deserialize)]
 pub struct Input {
-    name: String,
-    fields: HashMap<String, InputField>,
+    pub name: String,
+    pub fields: HashMap<String, InputField>,
 }
 
 #[cfg(test)]

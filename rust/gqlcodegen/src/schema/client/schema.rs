@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use super::{directive::Directive, fragment::Fragment, operation::Operation};
 
 #[derive(Debug, serde::Deserialize)]
-pub struct ClientSchema {
+pub struct Schema {
     fragments: HashMap<String, Fragment>,
     operations: HashMap<String, Operation>,
     directives: HashMap<String, Directive>,
@@ -15,7 +15,7 @@ mod tests {
 
     #[test]
     fn test_schema() {
-        let _: ClientSchema = serde_json_path_to_error::from_str(
+        let _: Schema = serde_json_path_to_error::from_str(
             r##"
 {
   "fragments": {

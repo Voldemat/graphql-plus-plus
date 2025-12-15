@@ -1,5 +1,5 @@
-mod argument;
-mod directive;
-mod fragment;
-mod operation;
-mod schema;
+pub mod argument;
+pub mod directive;
+pub mod fragment;
+pub mod operation;
+pub mod schema;
