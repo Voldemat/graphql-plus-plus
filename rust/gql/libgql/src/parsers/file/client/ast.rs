@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::parsers::file::shared;
 
-enum DirectiveLocation {
+pub enum DirectiveLocation {
     Query,
     Mutation,
     Subscription,
@@ -13,79 +13,112 @@ enum DirectiveLocation {
     VariableDefinition,
 }
 
-type DirectiveLocationNode =
+impl TryFrom<&str> for DirectiveLocation {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "QUERY" => Ok(DirectiveLocation::Query),
+            "MUTATION" => Ok(DirectiveLocation::Mutation),
+            "SUBSCRIPTION" => Ok(DirectiveLocation::Subscription),
+            "FIELD" => Ok(DirectiveLocation::Field),
+            "FRAGMENT_DEFINITION" => Ok(DirectiveLocation::FragmentDefinition),
+            "FRAGMENT_SPREAD" => Ok(DirectiveLocation::FragmentSpread),
+            "INLINE_FRAGMENT" => Ok(DirectiveLocation::InlineFragment),
+            "VARIABLE_DEFINITION" => Ok(DirectiveLocation::VariableDefinition),
+            _ => Err(()),
+        }
+    }
+}
+
+pub type DirectiveLocationNode =
     shared::ast::DirectiveLocationNode<DirectiveLocation>;
-type DirectiveDefinition = shared::ast::DirectiveNode<DirectiveLocation>;
+pub type DirectiveDefinition = shared::ast::DirectiveNode<DirectiveLocation>;
 
-struct ObjectLiteralFieldSpec {
-    location: shared::ast::NodeLocation,
-    selection_name: shared::ast::NameNode,
-    name: shared::ast::NameNode,
+pub struct ObjectLiteralFieldSpec {
+    pub location: shared::ast::NodeLocation,
+    pub selection_name: shared::ast::NameNode,
+    pub name: shared::ast::NameNode,
 }
 
-struct ObjectCallableFieldSpec {
-    location: shared::ast::NodeLocation,
-    selection_name: shared::ast::NameNode,
-    name: shared::ast::NameNode,
-    arguments: Vec<shared::ast::Argument>,
+pub struct ObjectCallableFieldSpec {
+    pub location: shared::ast::NodeLocation,
+    pub selection_name: shared::ast::NameNode,
+    pub name: shared::ast::NameNode,
+    pub arguments: Vec<shared::ast::Argument>,
 }
 
-enum ObjectFieldSpec {
+#[derive(derive_more::From)]
+pub enum ObjectFieldSpec {
     Literal(ObjectLiteralFieldSpec),
     Callable(ObjectCallableFieldSpec),
 }
 
-struct FieldSelectionNode {
-    location: shared::ast::NodeLocation,
-    field: ObjectFieldSpec,
-    spec: Option<Rc<FragmentSpec>>,
+pub struct FieldSelectionNode {
+    pub location: shared::ast::NodeLocation,
+    pub field: ObjectFieldSpec,
+    pub spec: Option<Rc<FragmentSpec>>,
 }
 
-struct SpreadSelectionNode {
-    location: shared::ast::NodeLocation,
-    fragment_name: shared::ast::NameNode,
+pub struct SpreadSelectionNode {
+    pub location: shared::ast::NodeLocation,
+    pub fragment_name: shared::ast::NameNode,
 }
 
-struct ConditionalSpreadSelectionNode {
-    location: shared::ast::NodeLocation,
-    type_name: shared::ast::NameNode,
-    fragment: Rc<FragmentSpec>,
+pub struct ConditionalSpreadSelectionNode {
+    pub location: shared::ast::NodeLocation,
+    pub type_name: shared::ast::NameNode,
+    pub fragment: Rc<FragmentSpec>,
 }
 
-enum SelectionNode {
+#[derive(derive_more::From)]
+pub enum SelectionNode {
     FieldSelectionNode(FieldSelectionNode),
     ConditionalSpreadSelectionNode(ConditionalSpreadSelectionNode),
     SpreadSelectionNode(SpreadSelectionNode),
 }
 
-struct FragmentSpec {
-    location: shared::ast::NodeLocation,
-    selections: Vec<SelectionNode>,
+pub struct FragmentSpec {
+    pub location: shared::ast::NodeLocation,
+    pub selections: Vec<SelectionNode>,
 }
 
-enum OpType {
+pub enum OpType {
     Mutation,
     Query,
     Subscription,
 }
 
-struct OperationDefinition {
-    location: shared::ast::NodeLocation,
-    r#type: OpType,
-    name: shared::ast::NameNode,
-    parameters:
+impl TryFrom<&str> for OpType {
+    type Error = ();
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "mutation" => Ok(Self::Mutation),
+            "query" => Ok(Self::Query),
+            "subscription" => Ok(Self::Subscription),
+            _ => Err(()),
+        }
+    }
+}
+
+pub struct OperationDefinition {
+    pub location: shared::ast::NodeLocation,
+    pub r#type: OpType,
+    pub name: shared::ast::NameNode,
+    pub parameters:
         indexmap::IndexMap<String, shared::ast::InputValueDefinitionNode>,
-    fragment: FragmentSpec,
+    pub fragment: FragmentSpec,
 }
 
-struct FragmentDefinition {
-    location: shared::ast::NodeLocation,
-    name: shared::ast::NameNode,
-    type_name: shared::ast::NameNode,
-    spec: FragmentSpec,
+pub struct FragmentDefinition {
+    pub location: shared::ast::NodeLocation,
+    pub name: shared::ast::NameNode,
+    pub type_name: shared::ast::NameNode,
+    pub spec: FragmentSpec,
 }
 
-enum ASTNode {
+#[derive(derive_more::From)]
+pub enum ASTNode {
     Operation(OperationDefinition),
     Fragment(FragmentDefinition),
     Directive(DirectiveDefinition),

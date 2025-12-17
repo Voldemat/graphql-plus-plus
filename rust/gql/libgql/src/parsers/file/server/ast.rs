@@ -1,6 +1,6 @@
 use crate::parsers::file::shared;
 
-enum DirectiveLocation {
+pub enum DirectiveLocation {
     Schema,
     Scalar,
     Object,
@@ -14,81 +14,148 @@ enum DirectiveLocation {
     InputFieldDefinition,
 }
 
-type DirectiveLocationNode =
+impl TryFrom<&str> for DirectiveLocation {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "SCHEMA" => Ok(DirectiveLocation::Schema),
+            "SCALAR" => Ok(DirectiveLocation::Scalar),
+            "OBJECT" => Ok(DirectiveLocation::Object),
+            "FIELD_DEFINITION" => Ok(DirectiveLocation::FieldDefinition),
+            "ARGUMENT_DEFINITION" => Ok(DirectiveLocation::ArgumentDefinition),
+            "INTERFACE" => Ok(DirectiveLocation::Interface),
+            "UNION" => Ok(DirectiveLocation::Union),
+            "ENUM" => Ok(DirectiveLocation::Enum),
+            "ENUM_VALUE" => Ok(DirectiveLocation::EnumValue),
+            "INPUT_OBJECT" => Ok(DirectiveLocation::InputObject),
+            "INPUT_FIELD_DEFINITION" => {
+                Ok(DirectiveLocation::InputFieldDefinition)
+            }
+            _ => Err(())
+        }
+    }
+}
+
+pub type DirectiveLocationNode =
     shared::ast::DirectiveLocationNode<DirectiveLocation>;
-type DirectiveDefinitionNode = shared::ast::DirectiveNode<DirectiveLocation>;
+pub type DirectiveDefinitionNode =
+    shared::ast::DirectiveNode<DirectiveLocation>;
 
-struct FieldDefinitionNode {
-    location: shared::ast::NodeLocation,
-    name: shared::ast::NameNode,
-    r#type: shared::ast::TypeNode,
-    arguments: Vec<shared::ast::InputValueDefinitionNode>,
-    directives: Vec<shared::ast::DirectiveInvocationNode>
+pub struct FieldDefinitionNode {
+    pub location: shared::ast::NodeLocation,
+    pub name: shared::ast::NameNode,
+    pub r#type: shared::ast::TypeNode,
+    pub arguments: Vec<shared::ast::InputValueDefinitionNode>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-struct InterfaceDefinitionNode {
-    location: shared::ast::NodeLocation,
-    name: shared::ast::NameNode,
-    fields: Vec<FieldDefinitionNode>,
-    directives: Vec<shared::ast::DirectiveInvocationNode>
+pub struct InterfaceDefinitionNode {
+    pub location: shared::ast::NodeLocation,
+    pub name: shared::ast::NameNode,
+    pub fields: Vec<FieldDefinitionNode>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-struct ObjectDefinitionNode {
-    location: shared::ast::NodeLocation,
-    name: shared::ast::NameNode,
-    interfaces: Vec<shared::ast::NameNode>,
-    fields: Vec<FieldDefinitionNode>,
-    directives: Vec<shared::ast::DirectiveInvocationNode>
+pub struct ObjectDefinitionNode {
+    pub location: shared::ast::NodeLocation,
+    pub name: shared::ast::NameNode,
+    pub interfaces: Vec<shared::ast::NameNode>,
+    pub fields: Vec<FieldDefinitionNode>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-struct InputObjectDefinitionNode {
-    location: shared::ast::NodeLocation,
-    name: shared::ast::NameNode,
-    fields: Vec<FieldDefinitionNode>,
-    directives: Vec<shared::ast::DirectiveInvocationNode>
+pub struct InputObjectDefinitionNode {
+    pub location: shared::ast::NodeLocation,
+    pub name: shared::ast::NameNode,
+    pub fields: Vec<FieldDefinitionNode>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-struct EnumValueDefinitionNode {
-    location: shared::ast::NodeLocation,
-    value: shared::ast::NameNode,
-    directives: Vec<shared::ast::DirectiveInvocationNode>
+pub struct EnumValueDefinitionNode {
+    pub location: shared::ast::NodeLocation,
+    pub value: shared::ast::NameNode,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-struct EnumDefinitionNode {
-    location: shared::ast::NodeLocation,
-    name: shared::ast::NameNode,
-    values: Vec<EnumValueDefinitionNode>,
-    directives: Vec<shared::ast::DirectiveInvocationNode>,
+pub struct EnumDefinitionNode {
+    pub location: shared::ast::NodeLocation,
+    pub name: shared::ast::NameNode,
+    pub values: Vec<EnumValueDefinitionNode>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-struct UnionDefinitionNode {
-    location: shared::ast::NodeLocation,
-    name: shared::ast::NameNode,
-    values: Vec<shared::ast::NameNode>,
-    directives: Vec<shared::ast::DirectiveInvocationNode>,
+pub struct UnionDefinitionNode {
+    pub location: shared::ast::NodeLocation,
+    pub name: shared::ast::NameNode,
+    pub values: Vec<shared::ast::NameNode>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-struct ScalarDefinitionNode {
-    location: shared::ast::NodeLocation,
-    name: shared::ast::NameNode,
+pub struct ScalarDefinitionNode {
+    pub location: shared::ast::NodeLocation,
+    pub name: shared::ast::NameNode,
 }
 
-enum TypeDefinitionNode {
+#[derive(derive_more::From)]
+pub enum TypeDefinitionNode {
     Scalar(ScalarDefinitionNode),
     Union(UnionDefinitionNode),
     Enum(EnumDefinitionNode),
     Input(InputObjectDefinitionNode),
     Object(ObjectDefinitionNode),
     Interface(InterfaceDefinitionNode),
-    Directive(DirectiveDefinitionNode)
+    Directive(DirectiveDefinitionNode),
 }
 
-struct ExtendTypeNode {
-    location: shared::ast::NodeLocation,
-    type_node: ObjectDefinitionNode
+pub struct ExtendTypeNode {
+    pub location: shared::ast::NodeLocation,
+    pub type_node: ObjectDefinitionNode,
 }
 
-enum ASTNode {
+#[derive(derive_more::From)]
+pub enum ASTNode {
     TypeDefinitionNode(TypeDefinitionNode),
-    ExtendTypeNode(ExtendTypeNode)
+    ExtendTypeNode(ExtendTypeNode),
+}
+
+impl From<ScalarDefinitionNode> for ASTNode {
+    fn from(value: ScalarDefinitionNode) -> Self {
+        return Self::TypeDefinitionNode(value.into());
+    }
+}
+
+impl From<UnionDefinitionNode> for ASTNode {
+    fn from(value: UnionDefinitionNode) -> Self {
+        return Self::TypeDefinitionNode(value.into());
+    }
+}
+
+impl From<EnumDefinitionNode> for ASTNode {
+    fn from(value: EnumDefinitionNode) -> Self {
+        return Self::TypeDefinitionNode(value.into());
+    }
+}
+
+impl From<InputObjectDefinitionNode> for ASTNode {
+    fn from(value: InputObjectDefinitionNode) -> Self {
+        return Self::TypeDefinitionNode(value.into());
+    }
+}
+
+impl From<ObjectDefinitionNode> for ASTNode {
+    fn from(value: ObjectDefinitionNode) -> Self {
+        return Self::TypeDefinitionNode(value.into());
+    }
+}
+
+impl From<InterfaceDefinitionNode> for ASTNode {
+    fn from(value: InterfaceDefinitionNode) -> Self {
+        return Self::TypeDefinitionNode(value.into());
+    }
+}
+
+impl From<DirectiveDefinitionNode> for ASTNode {
+    fn from(value: DirectiveDefinitionNode) -> Self {
+        return Self::TypeDefinitionNode(value.into());
+    }
 }

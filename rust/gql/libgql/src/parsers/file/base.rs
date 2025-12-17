@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use crate::lexer;
 use crate::lexer::token_type::ComplexTokenType;
 use crate::lexer::token_type::SimpleTokenType;
@@ -11,7 +13,17 @@ pub enum Error {
     IdentifierIsKeyword { token: lexer::tokens::Token },
     ExpectedComplexType { token: lexer::tokens::Token },
     CannotParseNumberLiteral { token: lexer::tokens::Token },
-    UnexpectedSpreadInLitearl { token: lexer::tokens::Token },
+    UnexpectedSpreadInLiteral { token: lexer::tokens::Token },
+    UnknownDirectiveLocation { token: lexer::tokens::Token },
+}
+
+impl Error {
+    pub fn is_eof(self: &Self) -> bool {
+        match self {
+            Self::Consume(error) => error.is_eof(),
+            _ => false
+        }
+    }
 }
 
 impl From<tokens_source::ConsumeError> for Error {
@@ -20,12 +32,20 @@ impl From<tokens_source::ConsumeError> for Error {
     }
 }
 
-pub struct BaseParser<T: tokens_source::TokensSource> {
-    tokens_source: T,
+pub struct BaseParser<
+    T: tokens_source::TokensSource,
+    TDirectiveLocation: for<'a> TryFrom<&'a str>,
+> {
+    pub tokens_source: T,
+    _v: PhantomData<TDirectiveLocation>,
 }
 
-impl<T: tokens_source::TokensSource> BaseParser<T> {
-    fn parse_name_node(
+impl<
+    T: tokens_source::TokensSource,
+    TDirectiveLocation: for<'a> TryFrom<&'a str>,
+> BaseParser<T, TDirectiveLocation>
+{
+    pub fn parse_name_node(
         self: &mut Self,
         err_on_keyword: bool,
     ) -> Result<shared::ast::NameNode, Error> {
@@ -46,7 +66,7 @@ impl<T: tokens_source::TokensSource> BaseParser<T> {
         });
     }
 
-    fn parse_type_node(
+    pub fn parse_type_node(
         self: &mut Self,
     ) -> Result<shared::ast::TypeNode, Error> {
         if T::is_ahead(&self.tokens_source, SimpleTokenType::LeftBracket.into())
@@ -103,20 +123,14 @@ impl<T: tokens_source::TokensSource> BaseParser<T> {
         });
     }
 
-    fn parse_input_value_definition_node(
+    pub fn parse_input_value_definition_node(
         self: &mut Self,
     ) -> Result<shared::ast::InputValueDefinitionNode, Error> {
         let name_node = self.parse_name_node(false)?;
         let start_token = T::get_current_token(&self.tokens_source).clone();
         T::consume(&mut self.tokens_source, SimpleTokenType::Colon.into())?;
         let type_node = self.parse_type_node()?;
-        let mut default_value: Option<shared::ast::LiteralNode> = None;
-        if T::consume_if_is_ahead(
-            &mut self.tokens_source,
-            SimpleTokenType::Equal.into(),
-        ) {
-            default_value = Some(self.parse_literal_node()?);
-        }
+        let default_value = self.parse_default_value()?;
         return Ok(shared::ast::InputValueDefinitionNode {
             location: shared::ast::NodeLocation {
                 start_token: start_token,
@@ -130,7 +144,7 @@ impl<T: tokens_source::TokensSource> BaseParser<T> {
         });
     }
 
-    fn parse_input_value_definition_nodes(
+    pub fn parse_input_value_definition_nodes(
         self: &mut Self,
     ) -> Result<Vec<shared::ast::InputValueDefinitionNode>, Error> {
         let mut arguments = Vec::<shared::ast::InputValueDefinitionNode>::new();
@@ -206,7 +220,7 @@ impl<T: tokens_source::TokensSource> BaseParser<T> {
                 .into());
             }
             ComplexTokenType::Spread => {
-                return Err(Error::UnexpectedSpreadInLitearl {
+                return Err(Error::UnexpectedSpreadInLiteral {
                     token: current_token.clone(),
                 });
             }
@@ -243,7 +257,7 @@ impl<T: tokens_source::TokensSource> BaseParser<T> {
         });
     }
 
-    fn parse_arguments(
+    pub fn parse_arguments(
         self: &mut Self,
     ) -> Result<Vec<shared::ast::Argument>, Error> {
         let mut arguments = Vec::<shared::ast::Argument>::new();
@@ -288,5 +302,99 @@ impl<T: tokens_source::TokensSource> BaseParser<T> {
             return self.parse_name_node(false).map(|v| v.into());
         }
         return self.parse_literal_node().map(|v| v.into());
+    }
+
+    pub fn parse_default_value(
+        self: &mut Self,
+    ) -> Result<Option<shared::ast::LiteralNode>, Error> {
+        if T::consume_if_is_ahead(
+            &mut self.tokens_source,
+            SimpleTokenType::Equal.into(),
+        ) {
+            return Ok(Some(self.parse_literal_node()?));
+        }
+        return Ok(None);
+    }
+
+    fn parse_directive_location_node(
+        self: &mut Self,
+    ) -> Result<shared::ast::DirectiveLocationNode<TDirectiveLocation>, Error>
+    {
+        let directive_location = self.parse_directive_location()?;
+        let current_token = T::get_current_token(&self.tokens_source);
+        return Ok(shared::ast::DirectiveLocationNode::<TDirectiveLocation> {
+            location: shared::ast::NodeLocation {
+                start_token: current_token.clone(),
+                end_token: current_token.clone(),
+                source: T::get_source_file(&self.tokens_source),
+            },
+            directive_location,
+        });
+    }
+
+    fn parse_directive_locations(
+        self: &mut Self,
+    ) -> Result<
+        Vec<shared::ast::DirectiveLocationNode<TDirectiveLocation>>,
+        Error,
+    > {
+        let mut locations = vec![self.parse_directive_location_node()?];
+        while T::consume_if_is_ahead(
+            &mut self.tokens_source,
+            SimpleTokenType::Comma.into(),
+        ) {
+            locations.push(self.parse_directive_location_node()?);
+        }
+        return Ok(locations);
+    }
+
+    pub fn parse_directive_node(
+        self: &mut Self,
+    ) -> Result<shared::ast::DirectiveNode<TDirectiveLocation>, Error> {
+        T::consume(&mut self.tokens_source, SimpleTokenType::AtSign.into())?;
+        let name_node = self.parse_name_node(false)?;
+        let arguments = self.parse_input_value_definition_nodes()?;
+        T::consume_identifier_by_lexeme(&mut self.tokens_source, "on")?;
+        let locations = self.parse_directive_locations()?;
+        return Ok(shared::ast::DirectiveNode::<TDirectiveLocation> {
+            location: shared::ast::NodeLocation {
+                start_token: name_node.location.start_token.clone(),
+                end_token: locations.last().unwrap().location.end_token.clone(),
+                source: name_node.location.source.clone(),
+            },
+            name: name_node,
+            targets: locations,
+            arguments,
+        });
+    }
+
+    pub fn parse_directive_invocation_node(
+        self: &mut Self,
+    ) -> Result<shared::ast::DirectiveInvocationNode, Error> {
+        let start_token = T::get_current_token(&self.tokens_source).clone();
+        let name = self.parse_name_node(false)?;
+        let arguments = self.parse_arguments()?;
+        return Ok(shared::ast::DirectiveInvocationNode {
+            location: shared::ast::NodeLocation {
+                start_token,
+                end_token: T::get_current_token(&self.tokens_source).clone(),
+                source: T::get_source_file(&self.tokens_source).clone(),
+            },
+            name,
+            arguments,
+        });
+    }
+
+    pub fn parse_directive_location(
+        self: &mut Self,
+    ) -> Result<TDirectiveLocation, Error> {
+        let token = T::consume_identifier(&mut self.tokens_source)?;
+        let Ok(value) = TDirectiveLocation::try_from(token.lexeme.as_str())
+        else {
+            return Err(Error::UnknownDirectiveLocation {
+                token: token.clone(),
+            });
+        };
+        return Ok(value);
     }
 }

@@ -11,6 +11,19 @@ pub enum ConsumeError {
         expected_token_type: lexer::token_type::TokenType,
         received_token: lexer::tokens::Token,
     },
+    UnexpectedLexeme {
+        expected_lexeme: String,
+        received_token: lexer::tokens::Token,
+    },
+}
+
+impl ConsumeError {
+    pub fn is_eof(self: &Self) -> bool {
+        match self {
+            Self::EOF { token: _ } => true,
+            _ => false,
+        }
+    }
 }
 
 pub trait TokensSource {
@@ -27,7 +40,10 @@ pub trait TokensSource {
         _: &mut Self,
         token_type: lexer::token_type::TokenType,
     ) -> bool;
-    fn consume_identifier_by_lexeme(_: &mut Self, lexeme: &str);
+    fn consume_identifier_by_lexeme<'a>(
+        _: &'a mut Self,
+        lexeme: &str,
+    ) -> Result<&'a lexer::tokens::Token, ConsumeError>;
     fn consume_identifier_by_lexeme_if_is_ahead(
         _: &mut Self,
         lexeme: &str,
