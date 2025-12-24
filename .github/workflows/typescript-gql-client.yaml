@@ -9,14 +9,13 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
-    environment: typescript-gql-codegen
     steps:
       - name: checkout
         uses: actions/checkout@v2
       - name: node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 25
           registry-url: https://registry.npmjs.org
       - name: install
         working-directory: typescript/gql-client
@@ -38,5 +37,3 @@ jobs:
         run: |
           npm version $GITHUB_REF_NAME --no-git-tag-version --no-commit-hooks
           npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

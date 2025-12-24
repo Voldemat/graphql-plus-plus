@@ -9,7 +9,6 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
-    environment: typescript-gql-codegen
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -31,7 +30,7 @@ jobs:
         run: npm run test
       - name: build
         working-directory: typescript/gql-codegen
-        run: npm --version && npm run build
+        run: npm run build
       - name: publish
         if: ${{ github.ref_type == 'tag' }}
         working-directory: typescript/gql-codegen/dist
