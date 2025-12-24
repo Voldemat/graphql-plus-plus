@@ -80,13 +80,34 @@ export const additionalScalarsMapping = {
                 )
             )]
         ),
-        outputSchema: ts.factory.createCallExpression(
-            ts.factory.createPropertyAccessExpression(
-                ts.factory.createIdentifier('z'),
-                'custom'
+        outputSchema: invokeMethod(
+            ts.factory.createCallExpression(
+                ts.factory.createPropertyAccessExpression(
+                    ts.factory.createIdentifier('z'),
+                    'string'
+                ),
+                [],
+                []
             ),
-            [ts.factory.createTypeReferenceNode('URL')],
-            []
+            'transform',
+            [ts.factory.createArrowFunction(
+                undefined,
+                undefined,
+                [ts.factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    'v'
+                )],
+                undefined,
+                ts.factory.createToken(
+                    ts.SyntaxKind.EqualsGreaterThanToken
+                ),
+                ts.factory.createNewExpression(
+                    ts.factory.createIdentifier('Url'),
+                    undefined,
+                    [ts.factory.createIdentifier('v')]
+                )
+            )]
         ),
     },
     Void: buildSymmetricScalarSpec(
