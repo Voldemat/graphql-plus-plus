@@ -8,7 +8,7 @@ describe('Server schema', () => {
     it('Should parse ok', () => {
         const result = serverSchema.safeParse(testServerJSON)
         expect(
-            result.success, result.error?.message.slice(0, 100) || ''
+            result.success, result.error?.message || ''
         ).toBe(true)
     })
 })
@@ -17,7 +17,7 @@ describe('Client schema', () => {
     it('Should parse ok', () => {
         const result = clientSchema.safeParse(testClientJSON)
         expect(
-            result.success, result.error?.message.slice(0, 100) || ''
+            result.success, result.error?.message || ''
         ).toBe(true)
     })
 })

@@ -33,14 +33,14 @@ export const arrayLiteralSchema = z.union([
 export const inputLiteralSpecSchema = z.object({
     _type: z.literal('literal'),
     type: inputTypeSchema,
-    defaultValue: literalSchema
+    defaultValue: literalSchema.optional().nullable()
 })
 
 export const inputArraySpecSchema = z.object({
     _type: z.literal('array'),
     nullable: z.boolean(),
     type: inputTypeSchema,
-    defaultValue: arrayLiteralSchema
+    defaultValue: arrayLiteralSchema.optional().nullable()
 })
 
 export const inputFieldSpecSchema = z.discriminatedUnion('_type', [
