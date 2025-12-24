@@ -103,7 +103,7 @@ export const additionalScalarsMapping = {
                     ts.SyntaxKind.EqualsGreaterThanToken
                 ),
                 ts.factory.createNewExpression(
-                    ts.factory.createIdentifier('Url'),
+                    ts.factory.createIdentifier('URL'),
                     undefined,
                     [ts.factory.createIdentifier('v')]
                 )
