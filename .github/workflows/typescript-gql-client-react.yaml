@@ -19,7 +19,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: install
         working-directory: typescript/gql-client-react
-        run: npm ci
+        run: npm i
       - name: lint
         working-directory: typescript/gql-client-react
         run: npm run lint:ci
