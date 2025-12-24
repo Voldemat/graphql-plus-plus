@@ -1,3 +1,5 @@
+permissions:
+  id-token: write
 name: "typescript gql-codegen"
 
 on:
