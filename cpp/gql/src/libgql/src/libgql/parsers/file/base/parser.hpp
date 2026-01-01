@@ -30,9 +30,9 @@ protected:
     shared::ast::TypeNode parseTypeNode();
     shared::ast::NamedTypeNode parseNamedTypeNode();
     shared::ast::ListTypeNode parseListTypeNode();
-    shared::ast::InputValueDefinitionNode parseInputValueDefinitionNode();
-    std::vector<shared::ast::InputValueDefinitionNode>
-    parseInputValueDefinitionNodes();
+    shared::ast::InputFieldDefinitionNode parseInputFieldDefinitionNode();
+    std::vector<shared::ast::InputFieldDefinitionNode>
+    parseInputFieldDefinitionNodes();
     shared::ast::LiteralNode parseLiteralNode();
     std::optional<shared::ast::LiteralIntNode> parseLiteralIntNode();
     std::optional<shared::ast::LiteralFloatNode> parseLiteralFloatNode();

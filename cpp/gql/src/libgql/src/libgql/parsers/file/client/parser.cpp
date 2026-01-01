@@ -67,12 +67,12 @@ ast::OperationDefinition Parser::parseOperationDefinition() {
              .fragment = fragment };
 };
 
-std::map<std::string, shared::ast::InputValueDefinitionNode>
+std::map<std::string, shared::ast::InputFieldDefinitionNode>
 Parser::parseOperationParameters() {
-    std::map<std::string, shared::ast::InputValueDefinitionNode> parameters;
+    std::map<std::string, shared::ast::InputFieldDefinitionNode> parameters;
     if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
         while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            const auto &node = parseInputValueDefinitionNode();
+            const auto &node = parseInputFieldDefinitionNode();
             if (parameters.contains(node.name.name)) {
                 throw shared::ParserError(
                     node.name.location.startToken,

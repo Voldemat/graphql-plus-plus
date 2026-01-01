@@ -38,11 +38,7 @@ ast::ASTNode Parser::parseASTNode() {
     } else if (currentToken.lexeme == "directive") {
         return parseDirectiveNode();
     } else if (currentToken.lexeme == "input") {
-        const auto &interfaceNode = parseInterfaceTypeDefinitionNode();
-        return (
-            ast::InputObjectDefinitionNode){ .location = interfaceNode.location,
-                                             .name = interfaceNode.name,
-                                             .fields = interfaceNode.fields };
+        return parseInputObjectDefinitionNode();
     } else if (currentToken.lexeme == "extend") {
         return parseExtendTypeNode();
     };
@@ -118,6 +114,23 @@ ast::InterfaceDefinitionNode Parser::parseInterfaceTypeDefinitionNode() {
              .fields = fields };
 };
 
+ast::InputObjectDefinitionNode Parser::parseInputObjectDefinitionNode() {
+    const auto startToken = currentToken;
+    const auto &nameNode = parseNameNode();
+    consume(SimpleTokenType::LEFT_BRACE);
+    std::vector<shared::ast::InputFieldDefinitionNode> fields;
+    while (isAhead(ComplexTokenType::IDENTIFIER)) {
+        fields.emplace_back(parseInputFieldDefinitionNode());
+        consumeIfIsAhead(SimpleTokenType::COMMA);
+    };
+    consume(SimpleTokenType::RIGHT_BRACE);
+    return { .location = { .startToken = startToken,
+                           .endToken = currentToken,
+                           .source = source },
+             .name = nameNode,
+             .fields = fields };
+};
+
 std::vector<shared::ast::NameNode> Parser::parseImplementsClause() {
     std::vector<shared::ast::NameNode> interfaces;
     if (consumeIdentifierByLexemeIfIsAhead("implements")) {
@@ -162,7 +175,7 @@ ast::ExtendTypeNode Parser::parseExtendTypeNode() {
 ast::FieldDefinitionNode Parser::parseFieldDefinitionNode() {
     const auto startToken = currentToken;
     const auto &nameNode = parseNameNode();
-    const auto &arguments = parseInputValueDefinitionNodes();
+    const auto &arguments = parseInputFieldDefinitionNodes();
     consume(SimpleTokenType::COLON);
     const auto &typeNode = parseTypeNode();
     std::optional<shared::ast::LiteralNode> defaultValue;
@@ -179,7 +192,8 @@ ast::FieldDefinitionNode Parser::parseFieldDefinitionNode() {
              .name = nameNode,
              .type = typeNode,
              .arguments = arguments,
-             .directives = directives };
+             .directives = directives
+        };
 };
 
 ast::DirectiveLocation Parser::parseDirectiveLocation() {

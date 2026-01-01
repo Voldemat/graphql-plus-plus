@@ -35,8 +35,8 @@ shared::ast::NameNode BaseParser::parseNameNode(bool raiseOnKeyword) {
              .name = currentToken.lexeme };
 };
 
-shared::ast::InputValueDefinitionNode
-BaseParser::parseInputValueDefinitionNode() {
+shared::ast::InputFieldDefinitionNode
+BaseParser::parseInputFieldDefinitionNode() {
     const auto &nameNode = parseNameNode();
     const auto startToken = currentToken;
     consume(SimpleTokenType::COLON);
@@ -249,12 +249,12 @@ shared::ast::ArgumentValue BaseParser::parseArgumentValue() {
     return parseLiteralNode();
 };
 
-std::vector<shared::ast::InputValueDefinitionNode>
-BaseParser::parseInputValueDefinitionNodes() {
-    std::vector<shared::ast::InputValueDefinitionNode> arguments;
+std::vector<shared::ast::InputFieldDefinitionNode>
+BaseParser::parseInputFieldDefinitionNodes() {
+    std::vector<shared::ast::InputFieldDefinitionNode> arguments;
     if (consumeIfIsAhead(SimpleTokenType::LEFT_PAREN)) {
         while (isAhead(ComplexTokenType::IDENTIFIER)) {
-            arguments.emplace_back(parseInputValueDefinitionNode());
+            arguments.emplace_back(parseInputFieldDefinitionNode());
             consumeIfIsAhead(SimpleTokenType::COMMA);
         };
         consume(SimpleTokenType::RIGHT_PAREN);

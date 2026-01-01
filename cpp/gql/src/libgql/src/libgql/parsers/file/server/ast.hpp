@@ -34,7 +34,7 @@ struct FieldDefinitionNode {
     shared::ast::NodeLocation location;
     shared::ast::NameNode name;
     shared::ast::TypeNode type;
-    std::vector<shared::ast::InputValueDefinitionNode> arguments;
+    std::vector<shared::ast::InputFieldDefinitionNode> arguments;
     std::vector<shared::ast::DirectiveInvocationNode> directives;
 };
 
@@ -56,7 +56,7 @@ struct ObjectDefinitionNode {
 struct InputObjectDefinitionNode {
     shared::ast::NodeLocation location;
     shared::ast::NameNode name;
-    std::vector<FieldDefinitionNode> fields;
+    std::vector<shared::ast::InputFieldDefinitionNode> fields;
     std::vector<shared::ast::DirectiveInvocationNode> directives;
 };
 

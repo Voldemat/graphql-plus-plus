@@ -103,8 +103,8 @@ void writeTypeNode(JSONWriter &writer, const ast::TypeNode &typeNode) {
     writer.EndObject();
 };
 
-void writeInputValueDefinitionNode(JSONWriter &writer,
-                                   const ast::InputValueDefinitionNode &node) {
+void writeInputFieldDefinitionNode(JSONWriter &writer,
+                                   const ast::InputFieldDefinitionNode &node) {
     writer.StartObject();
     writer.String("name");
     writeNameNode(writer, node.name);
@@ -131,12 +131,12 @@ void writeArgumentValue(JSONWriter &writer, const ast::ArgumentValue &value) {
                value);
 };
 
-void writeInputValueDefinitionNodes(
+void writeInputFieldDefinitionNodes(
     JSONWriter &writer,
-    const std::vector<ast::InputValueDefinitionNode> &nodes) {
+    const std::vector<ast::InputFieldDefinitionNode> &nodes) {
     writer.StartArray();
     for (const auto &arg : nodes) {
-        shared::writeInputValueDefinitionNode(writer, arg);
+        shared::writeInputFieldDefinitionNode(writer, arg);
     };
     writer.EndArray();
 };

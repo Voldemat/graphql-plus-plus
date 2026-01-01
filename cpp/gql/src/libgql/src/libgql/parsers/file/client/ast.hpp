@@ -84,7 +84,7 @@ struct OperationDefinition {
     shared::ast::NodeLocation location;
     OpType type;
     shared::ast::NameNode name;
-    std::map<std::string, shared::ast::InputValueDefinitionNode> parameters;
+    std::map<std::string, shared::ast::InputFieldDefinitionNode> parameters;
     FragmentSpec fragment;
 };
 

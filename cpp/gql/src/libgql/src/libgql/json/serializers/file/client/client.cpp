@@ -18,12 +18,12 @@ namespace shared_ast = gql::parsers::file::shared::ast;
 namespace gql::json::serializers::file::client {
 void writeParameters(
     JSONWriter &writer,
-    const std::map<std::string, shared_ast::InputValueDefinitionNode>
+    const std::map<std::string, shared_ast::InputFieldDefinitionNode>
         &parameters) {
     writer.StartObject();
     for (const auto &[name, param] : parameters) {
         writer.String(name.c_str());
-        shared::writeInputValueDefinitionNode(writer, param);
+        shared::writeInputFieldDefinitionNode(writer, param);
     };
     writer.EndObject();
 };
@@ -208,7 +208,7 @@ void writeDirectiveDefinition(JSONWriter &writer,
     writer.String("name");
     shared::writeNameNode(writer, node.name);
     writer.String("arguments");
-    shared::writeInputValueDefinitionNodes(writer, node.arguments);
+    shared::writeInputFieldDefinitionNodes(writer, node.arguments);
     writer.String("targets");
     writeDirectiveLocations(writer, node.targets);
     writer.String("location");

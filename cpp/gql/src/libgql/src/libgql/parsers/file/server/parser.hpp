@@ -19,8 +19,9 @@ class Parser : public BaseDirectiveParser<ast::DirectiveLocation> {
     ast::FieldDefinitionNode parseFieldDefinitionNode();
     ast::ObjectDefinitionNode parseObjectTypeDefinitionNode();
     std::vector<shared::ast::NameNode> parseImplementsClause();
-    std::vector<shared::ast::InputValueDefinitionNode> parseArguments();
+    std::vector<shared::ast::InputFieldDefinitionNode> parseArguments();
     ast::DirectiveLocation parseDirectiveLocation() override;
+    ast::InputObjectDefinitionNode parseInputObjectDefinitionNode();
 
 public:
     using BaseDirectiveParser<ast::DirectiveLocation>::BaseDirectiveParser;

@@ -22,7 +22,7 @@ std::shared_ptr<ast::ServerDirective> parseServerDirective(
             astNode.arguments |
             std::views::transform(
                 [&registry](
-                    const file::shared::ast::InputValueDefinitionNode &node) {
+                    const file::shared::ast::InputFieldDefinitionNode &node) {
                     return std::make_pair(
                         node.name.name,
                         std::make_shared<

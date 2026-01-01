@@ -14,7 +14,7 @@ class Parser : public BaseDirectiveParser<ast::DirectiveLocation> {
     ast::ASTNode parseASTNode();
     ast::FragmentDefinition parseFragmentDefinition();
     ast::OperationDefinition parseOperationDefinition();
-    std::map<std::string, shared::ast::InputValueDefinitionNode>
+    std::map<std::string, shared::ast::InputFieldDefinitionNode>
     parseOperationParameters();
     ast::FragmentSpec parseFragmentSpec();
     std::vector<client::ast::SelectionNode> parseSelectionNodes();

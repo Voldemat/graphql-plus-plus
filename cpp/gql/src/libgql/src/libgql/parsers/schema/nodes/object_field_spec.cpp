@@ -65,7 +65,7 @@ std::pair<ast::ObjectFieldSpec, bool> parseObjectFieldSpec(
             astNode.arguments |
             std::views::transform(
                 [&registry](
-                    const file::shared::ast::InputValueDefinitionNode &node)
+                    const file::shared::ast::InputFieldDefinitionNode &node)
                     -> std::pair<std::string,
                                  std::shared_ptr<ast::FieldDefinition<
                                      ast::InputFieldSpec>>> {

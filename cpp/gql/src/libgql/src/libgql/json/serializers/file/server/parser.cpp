@@ -47,7 +47,7 @@ void writeFieldDefinitionNode(JSONWriter &writer,
     writer.String("type");
     shared::writeTypeNode(writer, node.type);
     writer.String("arguments");
-    shared::writeInputValueDefinitionNodes(writer, node.arguments);
+    shared::writeInputFieldDefinitionNodes(writer, node.arguments);
     writer.String("directives");
     writer.StartObject();
     for (const auto &directive : node.directives) {
@@ -131,7 +131,7 @@ void writeDefinitionNode(JSONWriter &writer,
                        writer.String("fields");
                        writer.StartArray();
                        for (const auto &v : node.fields) {
-                           writeFieldDefinitionNode(writer, v);
+                           shared::writeInputFieldDefinitionNode(writer, v);
                        };
                        writer.EndArray();
                        writer.String("location");
@@ -143,7 +143,7 @@ void writeDefinitionNode(JSONWriter &writer,
                        writer.String("name");
                        shared::writeNameNode(writer, node.name);
                        writer.String("arguments");
-                       shared::writeInputValueDefinitionNodes(writer,
+                       shared::writeInputFieldDefinitionNodes(writer,
                                                               node.arguments);
                        writer.String("targets");
                        writer.StartArray();

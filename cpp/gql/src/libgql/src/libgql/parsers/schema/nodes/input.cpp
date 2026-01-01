@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "../../file/server/ast.hpp"
+#include "../../file/shared/ast.hpp"
 #include "../server_ast.hpp"
 #include "../shared_ast.hpp"
 #include "../type_registry.hpp"
@@ -23,7 +24,7 @@ std::shared_ptr<ast::InputType> parseInput(
     obj->fields =
         node.fields |
         std::views::transform(
-            [&registry](const server::ast::FieldDefinitionNode &defNode)
+            [&registry](const shared::ast::InputFieldDefinitionNode &defNode)
                 -> std::pair<std::string,
                              ast::FieldDefinition<ast::InputFieldSpec>> {
                 const auto &[typeSpec, nullable] =

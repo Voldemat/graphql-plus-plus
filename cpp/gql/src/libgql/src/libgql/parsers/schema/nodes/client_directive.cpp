@@ -7,11 +7,11 @@
 #include <vector>
 
 #include "../client_ast.hpp"
-#include "../server_ast.hpp"
 #include "../type_registry.hpp"
 #include "./input_field_definition.hpp"
 #include "libgql/parsers/file/client/ast.hpp"
 #include "libgql/parsers/file/shared/ast.hpp"
+#include "libgql/parsers/schema/shared_ast.hpp"
 
 namespace gql::parsers::schema::nodes {
 std::shared_ptr<ast::ClientDirective> parseClientDirective(
@@ -23,7 +23,7 @@ std::shared_ptr<ast::ClientDirective> parseClientDirective(
             astNode.arguments |
             std::views::transform(
                 [&registry](
-                    const file::shared::ast::InputValueDefinitionNode &node) {
+                    const file::shared::ast::InputFieldDefinitionNode &node) {
                     return std::make_pair(
                         node.name.name,
                         std::make_shared<
@@ -41,4 +41,4 @@ std::shared_ptr<ast::ClientDirective> parseClientDirective(
     });
 };
 
-}  // namespace parsers::schema::nodes
+}  // namespace gql::parsers::schema::nodes

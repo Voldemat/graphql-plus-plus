@@ -14,7 +14,7 @@ protected:
     shared::ast::DirectiveNode<T> parseDirectiveNode() {
         consume(lexer::SimpleTokenType::AT_SIGN);
         const auto& nameNode = parseNameNode();
-        const auto& arguments = parseInputValueDefinitionNodes();
+        const auto& arguments = parseInputFieldDefinitionNodes();
         consumeIdentifierByLexeme("on");
         const auto& locations = parseDirectiveLocations();
         return (shared::ast::DirectiveNode<T>){

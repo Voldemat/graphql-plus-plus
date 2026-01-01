@@ -5,9 +5,7 @@
 #include <variant>
 
 #include "./literal.hpp"
-#include "../../file/server/ast.hpp"
 #include "../../file/shared/ast.hpp"
-#include "../server_ast.hpp"
 #include "../shared_ast.hpp"
 #include "../type_registry.hpp"
 #include "utils.hpp"
@@ -48,7 +46,7 @@ parseNonCallableInputTypeSpec(
 };
 
 std::pair<ast::InputFieldSpec, bool> parseInputTypeSpec(
-    const server::ast::FieldDefinitionNode &astNode,
+    const shared::ast::InputFieldDefinitionNode &astNode,
     const TypeRegistry &registry) {
     const auto &[returnType, nullable] =
         parseNonCallableInputTypeSpec(astNode.type, std::nullopt, registry);

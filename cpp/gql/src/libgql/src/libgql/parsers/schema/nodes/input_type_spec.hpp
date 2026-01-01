@@ -3,9 +3,7 @@
 #include <optional>
 #include <utility>
 
-#include "../../file/server/ast.hpp"
 #include "../../file/shared/ast.hpp"
-#include "../server_ast.hpp"
 #include "../shared_ast.hpp"
 #include "../type_registry.hpp"
 
@@ -17,6 +15,6 @@ parseNonCallableInputTypeSpec(
     const TypeRegistry &registry);
 
 std::pair<ast::InputFieldSpec, bool> parseInputTypeSpec(
-    const file::server::ast::FieldDefinitionNode &astNode,
+    const file::shared::ast::InputFieldDefinitionNode &astNode,
     const TypeRegistry &registry);
 };  // namespace gql::parsers::schema::nodes

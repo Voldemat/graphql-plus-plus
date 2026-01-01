@@ -12,7 +12,7 @@ using namespace gql::parsers::file;
 
 namespace gql::parsers::schema::nodes {
 ast::FieldDefinition<ast::InputFieldSpec> parseInputFieldDefinition(
-    const shared::ast::InputValueDefinitionNode &node,
+    const shared::ast::InputFieldDefinitionNode &node,
     const TypeRegistry &registry) {
     const auto &[returnType, nullable] =
         parseNonCallableInputTypeSpec(node.type, node.defaultValue, registry);

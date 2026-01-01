@@ -84,7 +84,7 @@ struct DirectiveInvocationNode {
     std::vector<shared::ast::Argument> arguments;
 };
 
-struct InputValueDefinitionNode {
+struct InputFieldDefinitionNode {
     shared::ast::NodeLocation location;
     shared::ast::NameNode name;
     shared::ast::TypeNode type;
@@ -103,7 +103,7 @@ struct DirectiveNode {
     shared::ast::NodeLocation location;
     shared::ast::NameNode name;
     std::vector<DirectiveLocationNode<T>> targets;
-    std::vector<shared::ast::InputValueDefinitionNode> arguments;
+    std::vector<shared::ast::InputFieldDefinitionNode> arguments;
 };
 
 };  // namespace gql::parsers::file::shared::ast

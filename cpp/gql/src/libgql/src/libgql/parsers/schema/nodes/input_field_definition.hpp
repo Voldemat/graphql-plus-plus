@@ -6,6 +6,6 @@
 
 namespace gql::parsers::schema::nodes {
 ast::FieldDefinition<ast::InputFieldSpec> parseInputFieldDefinition(
-    const file::shared::ast::InputValueDefinitionNode &node,
+    const file::shared::ast::InputFieldDefinitionNode &node,
     const TypeRegistry &registry);
 };
