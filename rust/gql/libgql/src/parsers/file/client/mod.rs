@@ -20,8 +20,8 @@ pub enum Error {
         token: lexer::tokens::Token,
     },
     DuplicateParameter {
-        existing_parameter: shared::ast::InputValueDefinitionNode,
-        duplicate_parameter: shared::ast::InputValueDefinitionNode,
+        existing_parameter: shared::ast::InputFieldDefinitionNode,
+        duplicate_parameter: shared::ast::InputFieldDefinitionNode,
     },
 }
 
@@ -123,12 +123,12 @@ impl<T: tokens_source::TokensSource> Parser<T> {
     fn parse_operation_parameters(
         self: &mut Self,
     ) -> Result<
-        indexmap::IndexMap<String, shared::ast::InputValueDefinitionNode>,
+        indexmap::IndexMap<String, shared::ast::InputFieldDefinitionNode>,
         Error,
     > {
         let mut parameters = indexmap::IndexMap::<
             String,
-            shared::ast::InputValueDefinitionNode,
+            shared::ast::InputFieldDefinitionNode,
         >::new();
         if T::consume_if_is_ahead(
             &mut self.base.tokens_source,
@@ -138,7 +138,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
                 &self.base.tokens_source,
                 ComplexTokenType::Identifier.into(),
             ) {
-                let node = self.base.parse_input_value_definition_node()?;
+                let node = self.base.parse_input_field_definition_node()?;
                 if let Some(existing_parameter) =
                     parameters.swap_remove(&node.name.name)
                 {

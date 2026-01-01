@@ -1,5 +1,6 @@
 use crate::parsers::file::shared;
 
+#[derive(Clone, Copy)]
 pub enum DirectiveLocation {
     Schema,
     Scalar,
@@ -45,7 +46,7 @@ pub struct FieldDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
     pub r#type: shared::ast::TypeNode,
-    pub arguments: Vec<shared::ast::InputValueDefinitionNode>,
+    pub arguments: Vec<shared::ast::InputFieldDefinitionNode>,
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
@@ -67,7 +68,7 @@ pub struct ObjectDefinitionNode {
 pub struct InputObjectDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
-    pub fields: Vec<FieldDefinitionNode>,
+    pub fields: Vec<shared::ast::InputFieldDefinitionNode>,
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 

@@ -100,7 +100,7 @@ pub struct DirectiveInvocationNode {
 }
 
 #[derive(Clone)]
-pub struct InputValueDefinitionNode {
+pub struct InputFieldDefinitionNode {
     pub location: NodeLocation,
     pub name: NameNode,
     pub r#type: TypeNode,
@@ -117,5 +117,5 @@ pub struct DirectiveNode<T> {
     pub location: NodeLocation,
     pub name: NameNode,
     pub targets: Vec<DirectiveLocationNode<T>>,
-    pub arguments: Vec<InputValueDefinitionNode>,
+    pub arguments: Vec<InputFieldDefinitionNode>,
 }

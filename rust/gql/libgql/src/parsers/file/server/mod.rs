@@ -60,16 +60,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
             }
             "type" => Ok(self.parse_object_type_definition_node()?.into()),
             "directive" => Ok(self.base.parse_directive_node()?.into()),
-            "input" => {
-                let interface = self.parse_interface_type_definition_node()?;
-                return Ok(ast::InputObjectDefinitionNode {
-                    location: interface.location,
-                    name: interface.name,
-                    fields: interface.fields,
-                    directives: interface.directives,
-                }
-                .into());
-            }
+            "input" => Ok(self.parse_input_type_definition_node()?.into()),
             "extend" => Ok(self.parse_extend_type_node()?.into()),
             _ => {
                 return Err(Error::UnknownStartOfAstNode {
@@ -227,13 +218,47 @@ impl<T: tokens_source::TokensSource> Parser<T> {
         });
     }
 
+    fn parse_input_type_definition_node(
+        self: &mut Self,
+    ) -> Result<ast::InputObjectDefinitionNode, base::Error> {
+        let start_token =
+            T::get_current_token(&self.base.tokens_source).clone();
+        let name = self.base.parse_name_node(false)?;
+        T::consume(
+            &mut self.base.tokens_source,
+            SimpleTokenType::LeftBrace.into(),
+        )?;
+        let mut fields = Vec::<shared::ast::InputFieldDefinitionNode>::new();
+        while T::is_ahead(
+            &self.base.tokens_source,
+            ComplexTokenType::Identifier.into(),
+        ) {
+            fields.push(self.base.parse_input_field_definition_node()?)
+        }
+        T::consume(
+            &mut self.base.tokens_source,
+            SimpleTokenType::RightBrace.into(),
+        )?;
+        return Ok(ast::InputObjectDefinitionNode {
+            location: shared::ast::NodeLocation {
+                start_token,
+                end_token: T::get_current_token(&self.base.tokens_source)
+                    .clone(),
+                source: name.location.source.clone(),
+            },
+            name,
+            fields,
+            directives: Vec::new(),
+        });
+    }
+
     fn parse_field_definition_node(
         self: &mut Self,
     ) -> Result<ast::FieldDefinitionNode, base::Error> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
-        let arguments = self.base.parse_input_value_definition_nodes()?;
+        let arguments = self.base.parse_input_field_definition_nodes()?;
         T::consume(
             &mut self.base.tokens_source,
             SimpleTokenType::Colon.into(),

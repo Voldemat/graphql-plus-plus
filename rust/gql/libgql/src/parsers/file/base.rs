@@ -123,15 +123,15 @@ impl<
         });
     }
 
-    pub fn parse_input_value_definition_node(
+    pub fn parse_input_field_definition_node(
         self: &mut Self,
-    ) -> Result<shared::ast::InputValueDefinitionNode, Error> {
+    ) -> Result<shared::ast::InputFieldDefinitionNode, Error> {
         let name_node = self.parse_name_node(false)?;
         let start_token = T::get_current_token(&self.tokens_source).clone();
         T::consume(&mut self.tokens_source, SimpleTokenType::Colon.into())?;
         let type_node = self.parse_type_node()?;
         let default_value = self.parse_default_value()?;
-        return Ok(shared::ast::InputValueDefinitionNode {
+        return Ok(shared::ast::InputFieldDefinitionNode {
             location: shared::ast::NodeLocation {
                 start_token: start_token,
                 end_token: T::get_current_token(&self.tokens_source).clone(),
@@ -144,10 +144,10 @@ impl<
         });
     }
 
-    pub fn parse_input_value_definition_nodes(
+    pub fn parse_input_field_definition_nodes(
         self: &mut Self,
-    ) -> Result<Vec<shared::ast::InputValueDefinitionNode>, Error> {
-        let mut arguments = Vec::<shared::ast::InputValueDefinitionNode>::new();
+    ) -> Result<Vec<shared::ast::InputFieldDefinitionNode>, Error> {
+        let mut arguments = Vec::<shared::ast::InputFieldDefinitionNode>::new();
         if T::consume_if_is_ahead(
             &mut self.tokens_source,
             SimpleTokenType::LeftParen.into(),
@@ -156,7 +156,7 @@ impl<
                 &self.tokens_source,
                 ComplexTokenType::Identifier.into(),
             ) {
-                arguments.push(self.parse_input_value_definition_node()?);
+                arguments.push(self.parse_input_field_definition_node()?);
                 T::consume_if_is_ahead(
                     &mut self.tokens_source,
                     SimpleTokenType::Comma.into(),
@@ -353,7 +353,7 @@ impl<
     ) -> Result<shared::ast::DirectiveNode<TDirectiveLocation>, Error> {
         T::consume(&mut self.tokens_source, SimpleTokenType::AtSign.into())?;
         let name_node = self.parse_name_node(false)?;
-        let arguments = self.parse_input_value_definition_nodes()?;
+        let arguments = self.parse_input_field_definition_nodes()?;
         T::consume_identifier_by_lexeme(&mut self.tokens_source, "on")?;
         let locations = self.parse_directive_locations()?;
         return Ok(shared::ast::DirectiveNode::<TDirectiveLocation> {

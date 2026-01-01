@@ -82,10 +82,22 @@ pub struct FragmentSpec {
     pub selections: Vec<SelectionNode>,
 }
 
+#[derive(Clone, Copy)]
 pub enum OpType {
     Mutation,
     Query,
     Subscription,
+}
+
+impl OpType {
+    pub fn from_object_name(name: &str) -> Option<Self> {
+        match name {
+            "Query" => Some(Self::Query),
+            "Mutation" => Some(Self::Mutation),
+            "Subscription" => Some(Self::Subscription),
+            _ => None
+        }
+    }
 }
 
 impl TryFrom<&str> for OpType {
@@ -106,7 +118,7 @@ pub struct OperationDefinition {
     pub r#type: OpType,
     pub name: shared::ast::NameNode,
     pub parameters:
-        indexmap::IndexMap<String, shared::ast::InputValueDefinitionNode>,
+        indexmap::IndexMap<String, shared::ast::InputFieldDefinitionNode>,
     pub fragment: FragmentSpec,
 }
 
