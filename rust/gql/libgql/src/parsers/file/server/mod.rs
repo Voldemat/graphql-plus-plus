@@ -11,10 +11,16 @@ use crate::{
 
 pub mod ast;
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum Error {
     Base(base::Error),
     UnknownStartOfAstNode { token: lexer::tokens::Token },
+}
+
+impl From<tokens_source::ConsumeError> for Error {
+    fn from(value: tokens_source::ConsumeError) -> Self {
+        return Self::Base(value.into());
+    }
 }
 
 impl Error {
@@ -24,6 +30,13 @@ impl Error {
             _ => false,
         }
     }
+
+    pub fn get_location(self: &Self) -> lexer::tokens::Location {
+        match self {
+        Self::Base(b) => b.get_location(),
+        Self::UnknownStartOfAstNode { token } => token.location.clone()
+        }
+    }
 }
 
 pub struct Parser<T: tokens_source::TokensSource> {
@@ -31,6 +44,12 @@ pub struct Parser<T: tokens_source::TokensSource> {
 }
 
 impl<T: tokens_source::TokensSource> Parser<T> {
+    pub fn new(tokens_source: T) -> Self {
+        return Self {
+            base: BaseParser::new(tokens_source),
+        };
+    }
+
     pub fn parse_ast_nodes(
         self: &mut Self,
     ) -> Result<Vec<ast::ASTNode>, Error> {
@@ -44,6 +63,12 @@ impl<T: tokens_source::TokensSource> Parser<T> {
                     }
                     return Err(error);
                 }
+            }
+            if let Some(e) = self.base.tokens_source.advance().err() {
+                if e.is_eof() {
+                    break 'l;
+                }
+                return Err(e.into());
             }
         }
         return Ok(nodes);

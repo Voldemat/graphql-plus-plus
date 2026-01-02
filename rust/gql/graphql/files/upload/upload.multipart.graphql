@@ -1,0 +1,60 @@
+input MultipartUploadFileIn {
+    name: String!
+    tagIds: [UUID!]!
+    sizeInBytes: Int64!
+    partSizeInBytes: Int64!
+    initialPartsCount: Int!
+}
+
+type MultipartUploadSession {
+    id: UUID!
+    initialUploadURLs: [UploadUrl!]!
+}
+type ErrorMultipartUploadFilePartSizeIsTooSmall {
+    a: Boolean
+}
+type ErrorMultipartUploadFilePartSizeIsTooBig {
+    a: Boolean
+}
+type ErrorMultipartUploadFileIsTooLight {
+    a: Boolean
+}
+type ErrorMultipartUploadFileIsTooBig {
+    a: Boolean
+}
+
+union CreateMultipartFileSessionResponse =
+    MultipartUploadSession |
+    ErrorUnknownTags |
+    ErrorMultipartUploadFileIsTooLight |
+    ErrorMultipartUploadFileIsTooBig |
+    ErrorMultipartUploadFilePartSizeIsTooBig |
+    ErrorMultipartUploadFilePartSizeIsTooSmall
+
+union CommitMultipartFileSessionResponse =
+    ErrorUnknownSessionId |
+    ErrorFileNotUploaded |
+    File
+
+extend type Mutation {
+    createMultipartFileSession(
+        fileIn: MultipartUploadFileIn!
+    ): CreateMultipartFileSessionResponse! @authenticated
+    commitMultipartFileSession(
+        sessionId: UUID!
+    ): CommitMultipartFileSessionResponse @authenticated
+}
+
+type UploadUrlList {
+    urls: [UploadUrl!]!
+}
+
+union GetNextMultipartUploadUrlsResponse =
+    UploadUrlList |
+    ErrorUnknownSessionId
+
+extend type Query {
+    getNextMultipartUploadUrls(
+        sessionId: UUID!, lastPart: Int!, limit: Int!
+    ): GetNextMultipartUploadUrlsResponse! @authenticated
+}

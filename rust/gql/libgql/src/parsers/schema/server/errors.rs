@@ -9,6 +9,7 @@ pub type ArgType = shared::ast::FieldDefinition<
     shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
 >;
 
+#[derive(Debug)]
 pub enum Error {
     TypeRegistryError(type_registry::Error),
     UnexpectedArgumentValue {

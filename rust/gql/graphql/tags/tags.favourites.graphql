@@ -1,0 +1,12 @@
+extend type Query {
+    getFavouriteTags(skip: Int!, limit: Int!): [Tag!]! @authenticated
+}
+
+union ErrorAlreadyDoneOrUnknownTags = ErrorAlreadyDone | ErrorUnknownTags
+
+extend type Mutation {
+    setTagIsFavourite(
+        tagId: UUID!,
+        isFavourite: Boolean!
+    ): ErrorAlreadyDoneOrUnknownTags @authenticated
+}

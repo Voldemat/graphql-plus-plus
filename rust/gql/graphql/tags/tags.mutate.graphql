@@ -1,0 +1,27 @@
+input TagIn {
+    tag: String!
+    parentTagId: UUID
+}
+
+type ErrorUnknownParentId {
+    a: Boolean
+}
+
+type ErrorAlreadyApprovedByAdmin {
+    a: Boolean
+}
+
+type ErrorUnknownGroupIds {
+    groupIds: [UUID!]!
+}
+
+union CreateTagError = ErrorAlreadyExists | ErrorUnknownParentId
+union EditTagError = ErrorNotFound | ErrorUnknownParentId | ErrorAlreadyExists | ErrorAlreadyApprovedByAdmin
+union ApproveTagError = ErrorAlreadyExists | ErrorNotFound | ErrorUnknownGroupIds
+
+extend type Mutation {
+    createTag(tag: TagIn!): CreateTagError @authenticated
+    approveTag(tagId: UUID!, groupIds: [UUID!]!): ApproveTagError @admin @authenticated
+    deleteTag(id: UUID!): ErrorNotFound @admin @authenticated
+    editTag(id: UUID!, tag: TagIn!): EditTagError @authenticated
+}

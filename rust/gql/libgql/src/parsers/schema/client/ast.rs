@@ -5,15 +5,17 @@ use crate::parsers::{
     schema::{server, shared},
 };
 
+#[derive(Debug)]
 pub struct SpreadSelection {
     pub fragment: Rc<Fragment>,
 }
 
+#[derive(Debug)]
 pub struct TypenameField {
     pub alias: Option<String>,
 }
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum UnionSelection {
     TypenameField(TypenameField),
     SpreadSelection(SpreadSelection),
@@ -21,40 +23,45 @@ pub enum UnionSelection {
     UnionConditionalSpreadSelection(UnionConditionalSpreadSelection),
 }
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum ObjectSelection {
     TypenameField(TypenameField),
     SpreadSelection(SpreadSelection),
     FieldSelection(FieldSelection),
 }
 
+#[derive(Debug)]
 pub struct UnionFragmentSpec {
     pub r#type: Rc<RefCell<server::ast::Union>>,
     pub selections: Vec<UnionSelection>,
 }
 
+#[derive(Debug)]
 pub struct ObjectFragmentSpec<T> {
     pub r#type: Rc<RefCell<T>>,
     pub selections: Vec<ObjectSelection>,
 }
 
+#[derive(Debug)]
 pub struct ObjectConditionalSpreadSelection {
     pub r#type: Rc<RefCell<server::ast::ObjectType>>,
     pub selection: Rc<ObjectFragmentSpec<server::ast::ObjectType>>,
 }
 
+#[derive(Debug)]
 pub struct UnionConditionalSpreadSelection {
     pub r#type: Rc<RefCell<server::ast::Union>>,
     pub selection: Rc<UnionFragmentSpec>,
 }
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum FragmentSpec {
     Union(UnionFragmentSpec),
     Object(ObjectFragmentSpec<server::ast::ObjectType>),
     Interface(ObjectFragmentSpec<server::ast::Interface>),
 }
 
+#[derive(Debug)]
 pub struct FieldSelection {
     pub name: String,
     pub alias: String,
@@ -63,6 +70,7 @@ pub struct FieldSelection {
     pub selection: Option<Rc<FragmentSpec>>,
 }
 
+#[derive(Debug)]
 pub struct Fragment {
     pub name: String,
     pub spec: FragmentSpec,
@@ -70,6 +78,7 @@ pub struct Fragment {
     pub hash: u64,
 }
 
+#[derive(Debug)]
 pub struct Operation {
     pub r#type: file::client::ast::OpType,
     pub name: String,
@@ -84,6 +93,7 @@ pub struct Operation {
     pub fragment_spec_hash: u64,
 }
 
+#[derive(Debug)]
 pub struct ClientDirective {
     pub name: String,
     pub arguments: indexmap::IndexMap<

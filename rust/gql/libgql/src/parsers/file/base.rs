@@ -8,6 +8,7 @@ use crate::lexer::token_type::TokenType;
 use super::shared;
 use super::tokens_source;
 
+#[derive(Debug)]
 pub enum Error {
     Consume(tokens_source::ConsumeError),
     IdentifierIsKeyword { token: lexer::tokens::Token },
@@ -21,7 +22,18 @@ impl Error {
     pub fn is_eof(self: &Self) -> bool {
         match self {
             Self::Consume(error) => error.is_eof(),
-            _ => false
+            _ => false,
+        }
+    }
+
+    pub fn get_location(self: &Self) -> lexer::tokens::Location {
+        match self {
+            Self::Consume(e) => e.get_location(),
+            Self::IdentifierIsKeyword { token } => token.location.clone(),
+            Self::ExpectedComplexType { token } => token.location.clone(),
+            Self::CannotParseNumberLiteral { token } => token.location.clone(),
+            Self::UnexpectedSpreadInLiteral { token } => token.location.clone(),
+            Self::UnknownDirectiveLocation { token } => token.location.clone(),
         }
     }
 }
@@ -45,6 +57,13 @@ impl<
     TDirectiveLocation: for<'a> TryFrom<&'a str>,
 > BaseParser<T, TDirectiveLocation>
 {
+    pub fn new(tokens_source: T) -> Self {
+        return Self {
+            tokens_source,
+            _v: PhantomData::default(),
+        };
+    }
+
     pub fn parse_name_node(
         self: &mut Self,
         err_on_keyword: bool,
@@ -261,15 +280,24 @@ impl<
         self: &mut Self,
     ) -> Result<Vec<shared::ast::Argument>, Error> {
         let mut arguments = Vec::<shared::ast::Argument>::new();
-        while T::is_ahead(
-            &self.tokens_source,
-            ComplexTokenType::Identifier.into(),
+        if T::consume_if_is_ahead(
+            &mut self.tokens_source,
+            SimpleTokenType::LeftParen.into(),
         ) {
-            arguments.push(self.parse_argument()?);
-            T::consume_if_is_ahead(
+            while T::is_ahead(
+                &self.tokens_source,
+                ComplexTokenType::Identifier.into(),
+            ) {
+                arguments.push(self.parse_argument()?);
+                T::consume_if_is_ahead(
+                    &mut self.tokens_source,
+                    SimpleTokenType::Comma.into(),
+                );
+            }
+            T::consume(
                 &mut self.tokens_source,
-                SimpleTokenType::Comma.into(),
-            );
+                SimpleTokenType::RightParen.into(),
+            )?;
         }
         return Ok(arguments);
     }

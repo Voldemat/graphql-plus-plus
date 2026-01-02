@@ -1,0 +1,48 @@
+input UserIn {
+    name: String!
+    email: String!
+    groupIds: [UUID!]!
+}
+type ErrorInvalidUserName {
+    a: Boolean
+}
+type ErrorInvalidEmail {
+    a: Boolean
+}
+type ErrorEmailCollision {
+    a: Boolean
+}
+type ErrorAlreadyPending {
+    a: Boolean
+}
+type ErrorUnknownGroups {
+    groupIds: [UUID!]!
+}
+union CreateUserError = ErrorInvalidUserName | ErrorInvalidEmail | ErrorEmailCollision | ErrorAlreadyPending | ErrorUnknownGroups
+extend type Mutation {
+    createUser(userIn: UserIn!): CreateUserError @admin @authenticated 
+}
+
+
+type ErrorInvalidPassword {
+    a: Boolean
+}
+type ErrorInvalidToken {
+    a: Boolean
+}
+union ConfirmUserError = ErrorInvalidToken | ErrorInvalidPassword
+extend type Mutation {
+    confirmUser(token: String!, password: String!): ConfirmUserError
+    deletePendingUser(email: String!): ErrorNotFound @admin @authenticated
+}
+
+type PendingUser {
+    name: String!
+    email: String!
+    ttl: Duration!
+    groups: [Group!]!
+    createdAt: Datetime!
+}
+extend type Query {
+    getPendingUsers: [PendingUser!]! @admin @authenticated
+}

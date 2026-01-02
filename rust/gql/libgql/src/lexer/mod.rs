@@ -2,6 +2,7 @@ mod conditions;
 mod tests;
 pub mod token_type;
 pub mod tokens;
+pub mod utils;
 use conditions::get_condition_for_token_type;
 use token_type::{ComplexTokenType, TokenType};
 use tokens::{Location, Token};
@@ -13,7 +14,7 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    fn new() -> Self {
+    pub fn new() -> Self {
         return Self {
             buffer: "".into(),
             token_type: None,

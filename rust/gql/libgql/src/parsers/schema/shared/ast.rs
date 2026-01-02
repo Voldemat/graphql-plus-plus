@@ -2,23 +2,20 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::parsers::file;
 
-pub struct Scalar {
-    pub name: String,
-}
-
+#[derive(Debug)]
 pub struct Enum {
     pub name: String,
     pub values: Vec<String>,
 }
 
-#[derive(Clone, derive_more::From)]
+#[derive(Debug, Clone, derive_more::From)]
 pub enum InputTypeSpec {
     InputType(Rc<RefCell<InputType>>),
-    Scalar(Rc<RefCell<Scalar>>),
+    Scalar(String),
     Enum(Rc<RefCell<Enum>>),
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum Literal {
     Int(i32),
     Float(f32),
@@ -26,7 +23,7 @@ pub enum Literal {
     Boolean(bool),
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum ArrayLiteral {
     Int(Vec<i32>),
     Float(Vec<f32>),
@@ -34,14 +31,14 @@ pub enum ArrayLiteral {
     Boolean(Vec<bool>),
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct LiteralFieldSpec<T> {
     pub r#type: T,
     pub default_value: Option<Literal>,
     pub directive_invocations: Vec<ServerDirectiveInvocation>,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ArrayFieldSpec<T> {
     pub r#type: T,
     pub nullable: bool,
@@ -49,7 +46,7 @@ pub struct ArrayFieldSpec<T> {
     pub directive_invocations: Vec<ServerDirectiveInvocation>,
 }
 
-#[derive(Clone, derive_more::From)]
+#[derive(Debug, Clone, derive_more::From)]
 pub enum NonCallableFieldSpec<T> {
     Literal(LiteralFieldSpec<T>),
     Array(ArrayFieldSpec<T>),
@@ -57,19 +54,20 @@ pub enum NonCallableFieldSpec<T> {
 
 pub type InputFieldSpec = NonCallableFieldSpec<InputTypeSpec>;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct FieldDefinition<T> {
     pub name: String,
     pub spec: T,
     pub nullable: bool,
 }
 
+#[derive(Debug)]
 pub struct InputType {
     pub name: String,
     pub fields: indexmap::IndexMap<String, FieldDefinition<InputFieldSpec>>,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum ArgumentLiteralValue {
     String(String),
     Int(i32),
@@ -96,19 +94,20 @@ impl From<bool> for ArgumentLiteralValue {
     }
 }
 
-#[derive(Clone, derive_more::From)]
+#[derive(Debug, Clone, derive_more::From)]
 pub enum ArgumentValue {
     Ref(String),
     Literal(ArgumentLiteralValue),
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct FieldSelectionArgument {
     pub name: String,
     pub value: ArgumentValue,
     pub r#type: FieldDefinition<InputFieldSpec>,
 }
 
+#[derive(Debug)]
 pub struct ServerDirective {
     pub name: String,
     pub arguments:
@@ -116,7 +115,7 @@ pub struct ServerDirective {
     pub locations: Vec<file::server::ast::DirectiveLocation>,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ServerDirectiveInvocation {
     pub directive: Rc<RefCell<ServerDirective>>,
     pub arguments: indexmap::IndexMap<String, FieldSelectionArgument>,

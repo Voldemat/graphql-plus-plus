@@ -1,0 +1,10 @@
+type UploadUrl {
+    url: Url!
+    headers: [StringEntry!]!
+}
+type ErrorUnknownSessionId {
+    a: Boolean
+}
+type ErrorFileNotUploaded {
+    a: Boolean
+}

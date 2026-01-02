@@ -10,6 +10,7 @@ pub type FieldMapping = indexmap::IndexMap<
     Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
 >;
 
+#[derive(Debug)]
 pub struct TypeRegistry {
     pub server_directives:
         HashMap<String, Rc<RefCell<shared::ast::ServerDirective>>>,
@@ -21,19 +22,38 @@ pub struct TypeRegistry {
     pub objects: HashMap<String, Rc<RefCell<server::ast::ObjectType>>>,
     pub inputs: HashMap<String, Rc<RefCell<shared::ast::InputType>>>,
     pub interfaces: HashMap<String, Rc<RefCell<server::ast::Interface>>>,
-    pub scalars: HashMap<String, Rc<RefCell<shared::ast::Scalar>>>,
+    pub scalars: Vec<String>,
     pub enums: HashMap<String, Rc<RefCell<shared::ast::Enum>>>,
     pub unions: HashMap<String, Rc<RefCell<server::ast::Union>>>,
     pub fragments: HashMap<String, Rc<RefCell<client::ast::Fragment>>>,
     pub operations: HashMap<String, Rc<RefCell<client::ast::Operation>>>,
 }
 
+#[derive(Debug)]
 pub enum Error {
     UnknownType(file::shared::ast::NameNode),
     UnknownArgument(file::shared::ast::NameNode),
 }
 
 impl TypeRegistry {
+    pub fn new() -> Self {
+        Self {
+            server_directives: Default::default(),
+            client_directives: Default::default(),
+            queries: Default::default(),
+            mutations: Default::default(),
+            subscriptions: Default::default(),
+            objects: Default::default(),
+            inputs: Default::default(),
+            interfaces: Default::default(),
+            scalars: vec!["Int".into(), "Float".into(), "String".into(), "Boolean".into()],
+            enums: Default::default(),
+            unions: Default::default(),
+            fragments: Default::default(),
+            operations: Default::default(),
+        }
+    }
+
     fn get_query_object(
         self: &Self,
     ) -> Option<&Rc<RefCell<server::ast::ObjectType>>> {
@@ -60,8 +80,8 @@ impl TypeRegistry {
         if let Some(input) = self.inputs.get(name) {
             return Ok(input.clone().into());
         }
-        if let Some(scalar) = self.scalars.get(name) {
-            return Ok(scalar.clone().into());
+        if self.scalars.contains(name) {
+            return Ok(name.clone().into());
         }
         if let Some(gqlenum) = self.enums.get(name) {
             return Ok(gqlenum.clone().into());
@@ -83,8 +103,8 @@ impl TypeRegistry {
         if let Some(union) = self.unions.get(name) {
             return Ok(union.clone().into());
         }
-        if let Some(scalar) = self.scalars.get(name) {
-            return Ok(scalar.clone().into());
+        if self.scalars.contains(name) {
+            return Ok(name.clone().into());
         }
         if let Some(gqlenum) = self.enums.get(name) {
             return Ok(gqlenum.clone().into());
@@ -116,7 +136,10 @@ impl TypeRegistry {
         return Ok(());
     }
 
-    fn add_node(self: &mut Self, schema_node: server::ast::ServerSchemaNode) {
+    pub fn add_node(
+        self: &mut Self,
+        schema_node: server::ast::ServerSchemaNode,
+    ) {
         match schema_node {
             server::ast::ServerSchemaNode::ObjectType(object_rc) => {
                 self.append_ops_if_special_object(
@@ -147,8 +170,7 @@ impl TypeRegistry {
                 self.server_directives.insert(name, directive);
             }
             server::ast::ServerSchemaNode::Scalar(scalar) => {
-                let name = scalar.borrow().name.clone();
-                self.scalars.insert(name, scalar);
+                self.scalars.push(scalar);
             }
         }
     }
@@ -168,15 +190,12 @@ impl TypeRegistry {
         }
     }
 
-    fn patch_object<'a>(
+    pub fn patch_object(
         self: &mut Self,
         object_type: Rc<RefCell<server::ast::ObjectType>>,
-        new_fields: &'a FieldMapping,
-    ) -> Result<(), &'a str> {
+        new_fields: &FieldMapping,
+    ) {
         for (name, new_field) in new_fields {
-            if object_type.borrow().fields.contains_key(name) {
-                return Err(name);
-            }
             object_type
                 .borrow_mut()
                 .fields
@@ -186,7 +205,6 @@ impl TypeRegistry {
             &object_type.borrow().name,
             new_fields,
         );
-        return Ok(());
     }
 
     fn fragment_spec_from_op_type(

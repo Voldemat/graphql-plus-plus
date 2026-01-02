@@ -1,6 +1,6 @@
 use crate::parsers::file::shared;
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum DirectiveLocation {
     Schema,
     Scalar,
@@ -42,6 +42,7 @@ pub type DirectiveLocationNode =
 pub type DirectiveDefinitionNode =
     shared::ast::DirectiveNode<DirectiveLocation>;
 
+#[derive(Debug)]
 pub struct FieldDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -50,6 +51,7 @@ pub struct FieldDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
+#[derive(Debug)]
 pub struct InterfaceDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -57,6 +59,7 @@ pub struct InterfaceDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
+#[derive(Debug)]
 pub struct ObjectDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -65,6 +68,7 @@ pub struct ObjectDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
+#[derive(Debug)]
 pub struct InputObjectDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -72,12 +76,14 @@ pub struct InputObjectDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
+#[derive(Debug)]
 pub struct EnumValueDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub value: shared::ast::NameNode,
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
+#[derive(Debug)]
 pub struct EnumDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -85,6 +91,7 @@ pub struct EnumDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
+#[derive(Debug)]
 pub struct UnionDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -92,12 +99,13 @@ pub struct UnionDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
+#[derive(Debug)]
 pub struct ScalarDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
 }
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum TypeDefinitionNode {
     Scalar(ScalarDefinitionNode),
     Union(UnionDefinitionNode),

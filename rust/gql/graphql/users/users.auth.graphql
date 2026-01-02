@@ -1,0 +1,31 @@
+type ErrorInvalidCredentials {
+    a: Boolean
+}
+
+type ErrorInvalidOTPCode {
+    a: Boolean
+}
+
+type ErrorOTPCodeExpired {
+    a: Boolean
+}
+
+type ErrorOTPTokenExpired {
+    a: Boolean
+}
+
+type OTPToken {
+    token: String!
+}
+
+union ConfirmOTPCodeResponse =
+    OTPToken | ErrorInvalidOTPCode | ErrorOTPCodeExpired
+union ResetPasswordError =
+    ErrorInvalidPassword | ErrorOTPTokenExpired
+extend type Mutation {
+    login(email: String!, password: String!): ErrorInvalidCredentials
+    logout: Void! @authenticated
+    sendOTPCode(email: String!): ErrorInvalidCredentials
+    confirmOTPCode(email: String!, code: String!): ConfirmOTPCodeResponse!
+    resetPassword(token: String!, newPassword: String!): ResetPasswordError
+}

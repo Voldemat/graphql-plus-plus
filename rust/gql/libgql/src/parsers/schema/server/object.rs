@@ -1,13 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
+use indexmap::IndexMap;
+
 use crate::parsers::{
     file,
     schema::{
-        server::{
-            ast,
-            directive,
-            errors, input,
-        },
+        server::{ast, directive, errors, input},
         shared,
         type_registry::TypeRegistry,
     },
@@ -19,10 +17,32 @@ pub fn parse_definition(
 ) -> Result<Rc<RefCell<ast::ObjectType>>, errors::Error> {
     let obj_rc = registry.objects.get(&node.name.name).unwrap();
     let mut obj = obj_rc.borrow_mut();
-    for field_definition_node in node.fields.iter() {
+    obj.fields = parse_fields(&node.fields, registry)?;
+    for name in node.interfaces.iter() {
+        let Some(interface) = registry.interfaces.get(&name.name) else {
+            return Err(errors::Error::UnknownInterface(name.clone()));
+        };
+        obj.implements.insert(name.name.clone(), interface.clone());
+    }
+    obj.directives = directive::parse_invocations(&node.directives, registry)?;
+    return Ok(obj_rc.clone());
+}
+
+pub fn parse_fields(
+    fields: &[file::server::ast::FieldDefinitionNode],
+    registry: &TypeRegistry,
+) -> Result<
+    IndexMap<String, Rc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>>,
+    errors::Error,
+> {
+    let mut m = IndexMap::<
+        String,
+        Rc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
+    >::new();
+    for field_definition_node in fields.iter() {
         let (spec, nullable) =
             parse_object_field_spec(&field_definition_node, registry)?;
-        obj.fields.insert(
+        m.insert(
             field_definition_node.name.name.clone(),
             Rc::new(shared::ast::FieldDefinition {
                 name: field_definition_node.name.name.clone(),
@@ -31,14 +51,7 @@ pub fn parse_definition(
             }),
         );
     }
-    for name in node.interfaces.iter() {
-        let Some(interface) = registry.interfaces.get(&name.name) else {
-            return Err(errors::Error::UnknownInterface(name.clone()))
-        };
-        obj.implements.insert(name.name.clone(), interface.clone());
-    }
-    obj.directives = directive::parse_invocations(&node.directives, registry)?;
-    return Ok(obj_rc.clone());
+    return Ok(m);
 }
 
 pub fn parse_object_field_spec(

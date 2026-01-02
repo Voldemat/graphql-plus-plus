@@ -2,20 +2,22 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::parsers::schema::shared;
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum ObjectTypeSpec {
     ObjectType(Rc<RefCell<ObjectType>>),
     Interface(Rc<RefCell<Interface>>),
-    Scalar(Rc<RefCell<shared::ast::Scalar>>),
+    Scalar(String),
     Enum(Rc<RefCell<shared::ast::Enum>>),
     Union(Rc<RefCell<Union>>),
 }
 
+#[derive(Debug)]
 pub struct Union {
     pub name: String,
     pub items: indexmap::IndexMap<String, Rc<RefCell<ObjectType>>>,
 }
 
+#[derive(Debug)]
 pub struct CallableFieldSpec {
     pub return_type: shared::ast::NonCallableFieldSpec<ObjectTypeSpec>,
     pub arguments: indexmap::IndexMap<
@@ -24,7 +26,7 @@ pub struct CallableFieldSpec {
     >,
 }
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum ObjectFieldSpec {
     Literal(shared::ast::LiteralFieldSpec<ObjectTypeSpec>),
     Array(shared::ast::ArrayFieldSpec<ObjectTypeSpec>),
@@ -42,6 +44,7 @@ impl From<shared::ast::NonCallableFieldSpec<ObjectTypeSpec>>
     }
 }
 
+#[derive(Debug)]
 pub struct Interface {
     pub name: String,
     pub fields: indexmap::IndexMap<
@@ -51,7 +54,7 @@ pub struct Interface {
     pub directives: Vec<shared::ast::ServerDirectiveInvocation>,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ObjectType {
     pub name: String,
     pub fields: indexmap::IndexMap<
@@ -70,7 +73,7 @@ pub struct ExtendObjectType {
 pub enum ServerSchemaNode {
     ObjectType(Rc<RefCell<ObjectType>>),
     Interface(Rc<RefCell<Interface>>),
-    Scalar(Rc<RefCell<shared::ast::Scalar>>),
+    Scalar(String),
     Union(Rc<RefCell<Union>>),
     Enum(Rc<RefCell<shared::ast::Enum>>),
     InputType(Rc<RefCell<shared::ast::InputType>>),

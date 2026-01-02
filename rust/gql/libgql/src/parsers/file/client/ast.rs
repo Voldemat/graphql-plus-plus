@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use crate::parsers::file::shared;
 
+#[derive(Debug)]
 pub enum DirectiveLocation {
     Query,
     Mutation,
@@ -82,7 +83,7 @@ pub struct FragmentSpec {
     pub selections: Vec<SelectionNode>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum OpType {
     Mutation,
     Query,
