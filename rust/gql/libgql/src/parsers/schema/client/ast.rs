@@ -87,7 +87,7 @@ pub struct Operation {
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >,
     pub fragment_spec: FragmentSpec,
-    pub used_fragments: Vec<Rc<Fragment>>,
+    pub used_fragments: Vec<Rc<RefCell<Fragment>>>,
     pub source_text: String,
     pub parameters_hash: u64,
     pub fragment_spec_hash: u64,
@@ -98,14 +98,14 @@ pub struct ClientDirective {
     pub name: String,
     pub arguments: indexmap::IndexMap<
         String,
-        Rc<shared::ast::FieldDefinition<shared::ast::InputFieldSpec>>,
+        shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >,
     pub locations: Vec<file::client::ast::DirectiveLocation>,
 }
 
 #[derive(derive_more::From)]
 pub enum ClientSchemaNode {
-    Fragment(Rc<Fragment>),
-    Operation(Rc<Operation>),
+    Fragment(Rc<RefCell<Fragment>>),
+    Operation(Rc<RefCell<Operation>>),
     ClientDirective(Rc<ClientDirective>),
 }

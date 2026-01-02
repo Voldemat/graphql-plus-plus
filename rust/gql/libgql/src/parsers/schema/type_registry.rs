@@ -14,8 +14,7 @@ pub type FieldMapping = indexmap::IndexMap<
 pub struct TypeRegistry {
     pub server_directives:
         HashMap<String, Rc<RefCell<shared::ast::ServerDirective>>>,
-    pub client_directives:
-        HashMap<String, Rc<RefCell<client::ast::ClientDirective>>>,
+    pub client_directives: HashMap<String, Rc<client::ast::ClientDirective>>,
     pub queries: FieldMapping,
     pub mutations: FieldMapping,
     pub subscriptions: FieldMapping,
@@ -46,7 +45,12 @@ impl TypeRegistry {
             objects: Default::default(),
             inputs: Default::default(),
             interfaces: Default::default(),
-            scalars: vec!["Int".into(), "Float".into(), "String".into(), "Boolean".into()],
+            scalars: vec![
+                "Int".into(),
+                "Float".into(),
+                "String".into(),
+                "Boolean".into(),
+            ],
             enums: Default::default(),
             unions: Default::default(),
             fragments: Default::default(),
@@ -54,19 +58,19 @@ impl TypeRegistry {
         }
     }
 
-    fn get_query_object(
+    pub fn get_query_object(
         self: &Self,
     ) -> Option<&Rc<RefCell<server::ast::ObjectType>>> {
         return self.objects.get("Query");
     }
 
-    fn get_mutation_object(
+    pub fn get_mutation_object(
         self: &Self,
     ) -> Option<&Rc<RefCell<server::ast::ObjectType>>> {
         return self.objects.get("Mutation");
     }
 
-    fn get_subscription_object(
+    pub fn get_subscription_object(
         self: &Self,
     ) -> Option<&Rc<RefCell<server::ast::ObjectType>>> {
         return self.objects.get("Subscription");
@@ -136,7 +140,7 @@ impl TypeRegistry {
         return Ok(());
     }
 
-    pub fn add_node(
+    pub fn add_server_node(
         self: &mut Self,
         schema_node: server::ast::ServerSchemaNode,
     ) {
@@ -171,6 +175,26 @@ impl TypeRegistry {
             }
             server::ast::ServerSchemaNode::Scalar(scalar) => {
                 self.scalars.push(scalar);
+            }
+        }
+    }
+
+    pub fn add_client_node(
+        self: &mut Self,
+        client_node: &client::ast::ClientSchemaNode,
+    ) {
+        match client_node {
+            client::ast::ClientSchemaNode::Fragment(fragment) => {
+                let name = fragment.borrow().name.clone();
+                self.fragments.insert(name, fragment.clone());
+            }
+            client::ast::ClientSchemaNode::Operation(operation) => {
+                let name = operation.borrow().name.clone();
+                self.operations.insert(name, operation.clone());
+            }
+            client::ast::ClientSchemaNode::ClientDirective(directive) => {
+                self.client_directives
+                    .insert(directive.name.clone(), directive.clone());
             }
         }
     }

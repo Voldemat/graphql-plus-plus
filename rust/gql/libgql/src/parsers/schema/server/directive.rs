@@ -2,11 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::parsers::{
     file,
-    schema::{
-        server::{arguments::parse_arguments, errors, input},
-        shared,
-        type_registry::TypeRegistry,
-    },
+    schema::{server::errors, shared, type_registry::TypeRegistry},
 };
 
 pub fn parse_definition(
@@ -17,7 +13,7 @@ pub fn parse_definition(
     for arg in &node.arguments {
         directive.borrow_mut().arguments.insert(
             arg.name.name.clone(),
-            input::parse_field_definition(&arg, registry)?,
+            shared::input::parse_field_definition(&arg, registry)?,
         );
     }
     directive.borrow_mut().locations = node
@@ -36,7 +32,8 @@ pub fn parse_invocation(
     else {
         return Err(errors::Error::UnknownServerDirective(node.name.clone()));
     };
-    let arguments = parse_arguments(&node.arguments, directive)?;
+    let arguments =
+        shared::arguments::parse_arguments(&node.arguments, directive)?;
     return Ok(shared::ast::ServerDirectiveInvocation {
         directive: directive.clone(),
         arguments,

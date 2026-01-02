@@ -70,7 +70,7 @@ pub fn parse_object_field_spec(
     return Ok((
         ast::CallableFieldSpec {
             return_type,
-            arguments: input::parse_field_definitions(
+            arguments: shared::input::parse_field_definitions(
                 &node.arguments,
                 registry,
             )?,

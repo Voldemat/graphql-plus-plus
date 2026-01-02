@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::parsers::file::shared;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum DirectiveLocation {
     Query,
     Mutation,
@@ -35,12 +35,14 @@ pub type DirectiveLocationNode =
     shared::ast::DirectiveLocationNode<DirectiveLocation>;
 pub type DirectiveDefinition = shared::ast::DirectiveNode<DirectiveLocation>;
 
+#[derive(Debug)]
 pub struct ObjectLiteralFieldSpec {
     pub location: shared::ast::NodeLocation,
     pub selection_name: shared::ast::NameNode,
     pub name: shared::ast::NameNode,
 }
 
+#[derive(Debug)]
 pub struct ObjectCallableFieldSpec {
     pub location: shared::ast::NodeLocation,
     pub selection_name: shared::ast::NameNode,
@@ -48,36 +50,40 @@ pub struct ObjectCallableFieldSpec {
     pub arguments: Vec<shared::ast::Argument>,
 }
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum ObjectFieldSpec {
     Literal(ObjectLiteralFieldSpec),
     Callable(ObjectCallableFieldSpec),
 }
 
+#[derive(Debug)]
 pub struct FieldSelectionNode {
     pub location: shared::ast::NodeLocation,
     pub field: ObjectFieldSpec,
     pub spec: Option<Rc<FragmentSpec>>,
 }
 
+#[derive(Debug)]
 pub struct SpreadSelectionNode {
     pub location: shared::ast::NodeLocation,
     pub fragment_name: shared::ast::NameNode,
 }
 
+#[derive(Debug, Clone)]
 pub struct ConditionalSpreadSelectionNode {
     pub location: shared::ast::NodeLocation,
     pub type_name: shared::ast::NameNode,
     pub fragment: Rc<FragmentSpec>,
 }
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum SelectionNode {
     FieldSelectionNode(FieldSelectionNode),
     ConditionalSpreadSelectionNode(ConditionalSpreadSelectionNode),
     SpreadSelectionNode(SpreadSelectionNode),
 }
 
+#[derive(Debug)]
 pub struct FragmentSpec {
     pub location: shared::ast::NodeLocation,
     pub selections: Vec<SelectionNode>,
@@ -96,7 +102,7 @@ impl OpType {
             "Query" => Some(Self::Query),
             "Mutation" => Some(Self::Mutation),
             "Subscription" => Some(Self::Subscription),
-            _ => None
+            _ => None,
         }
     }
 }
@@ -118,8 +124,7 @@ pub struct OperationDefinition {
     pub location: shared::ast::NodeLocation,
     pub r#type: OpType,
     pub name: shared::ast::NameNode,
-    pub parameters:
-        indexmap::IndexMap<String, shared::ast::InputFieldDefinitionNode>,
+    pub parameters: Vec<shared::ast::InputFieldDefinitionNode>,
     pub fragment: FragmentSpec,
 }
 

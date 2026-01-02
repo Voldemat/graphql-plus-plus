@@ -1,4 +1,3 @@
-pub mod arguments;
 pub mod ast;
 pub mod directive;
 pub mod errors;
@@ -23,7 +22,7 @@ pub fn parse_server_schema(
         })
     };
     type_definition_nodes().for_each(|node| {
-        registry.add_node(nodes::parse_server_node_first_pass(node));
+        registry.add_server_node(nodes::parse_server_node_first_pass(node));
     });
     let server_nodes = type_definition_nodes()
         .map(|node| nodes::parse_server_node_second_pass(node, &mut registry))

@@ -123,13 +123,10 @@ impl<T: tokens_source::TokensSource> Parser<T> {
     fn parse_operation_parameters(
         self: &mut Self,
     ) -> Result<
-        indexmap::IndexMap<String, shared::ast::InputFieldDefinitionNode>,
+        Vec<shared::ast::InputFieldDefinitionNode>,
         Error,
     > {
-        let mut parameters = indexmap::IndexMap::<
-            String,
-            shared::ast::InputFieldDefinitionNode,
-        >::new();
+        let mut parameters = Vec::<shared::ast::InputFieldDefinitionNode>::new();
         if T::consume_if_is_ahead(
             &mut self.base.tokens_source,
             SimpleTokenType::LeftParen.into(),
@@ -139,15 +136,13 @@ impl<T: tokens_source::TokensSource> Parser<T> {
                 ComplexTokenType::Identifier.into(),
             ) {
                 let node = self.base.parse_input_field_definition_node()?;
-                if let Some(existing_parameter) =
-                    parameters.swap_remove(&node.name.name)
-                {
+                if let Some(existing_parameter) = parameters.iter().find(|p| p.name.name == node.name.name) {
                     return Err(Error::DuplicateParameter {
-                        existing_parameter,
+                        existing_parameter: existing_parameter.clone(),
                         duplicate_parameter: node,
                     });
                 };
-                parameters.insert(node.name.name.clone(), node);
+                parameters.push(node);
                 T::consume_if_is_ahead(
                     &mut self.base.tokens_source,
                     SimpleTokenType::Comma.into(),
