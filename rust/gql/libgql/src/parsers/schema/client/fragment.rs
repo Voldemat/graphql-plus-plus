@@ -493,7 +493,7 @@ fn parse_interface_selections(
         .collect();
 }
 
-fn parse_selections(
+pub fn parse_selections(
     registry: &TypeRegistry,
     spec: &mut ast::FragmentSpec,
     selections: &[file::client::ast::SelectionNode],

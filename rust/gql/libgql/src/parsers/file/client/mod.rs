@@ -13,7 +13,7 @@ use crate::{
 
 pub mod ast;
 
-#[derive(derive_more::From)]
+#[derive(Debug, derive_more::From)]
 pub enum Error {
     Base(base::Error),
     UnexpectedOpType {
@@ -32,6 +32,17 @@ impl Error {
             _ => false,
         }
     }
+
+    pub fn get_location(self: &Self) -> lexer::tokens::Location {
+        match self {
+            Self::Base(b) => b.get_location(),
+            Self::UnexpectedOpType { token } => token.location.clone(),
+            Self::DuplicateParameter {
+                duplicate_parameter,
+                ..
+            } => duplicate_parameter.location.start_token.location.clone(),
+        }
+    }
 }
 
 impl From<tokens_source::ConsumeError> for Error {
@@ -45,6 +56,12 @@ pub struct Parser<T: tokens_source::TokensSource> {
 }
 
 impl<T: tokens_source::TokensSource> Parser<T> {
+    pub fn new(tokens_source: T) -> Self {
+        Self {
+            base: BaseParser::new(tokens_source),
+        }
+    }
+
     pub fn parse_ast_nodes(
         self: &mut Self,
     ) -> Result<Vec<ast::ASTNode>, Error> {
@@ -58,6 +75,12 @@ impl<T: tokens_source::TokensSource> Parser<T> {
                     }
                     return Err(error);
                 }
+            }
+            if let Some(e) = self.base.tokens_source.advance().err() {
+                if e.is_eof() {
+                    break 'l;
+                }
+                return Err(e.into());
             }
         }
         return Ok(nodes);
@@ -122,11 +145,9 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_operation_parameters(
         self: &mut Self,
-    ) -> Result<
-        Vec<shared::ast::InputFieldDefinitionNode>,
-        Error,
-    > {
-        let mut parameters = Vec::<shared::ast::InputFieldDefinitionNode>::new();
+    ) -> Result<Vec<shared::ast::InputFieldDefinitionNode>, Error> {
+        let mut parameters =
+            Vec::<shared::ast::InputFieldDefinitionNode>::new();
         if T::consume_if_is_ahead(
             &mut self.base.tokens_source,
             SimpleTokenType::LeftParen.into(),
@@ -136,7 +157,9 @@ impl<T: tokens_source::TokensSource> Parser<T> {
                 ComplexTokenType::Identifier.into(),
             ) {
                 let node = self.base.parse_input_field_definition_node()?;
-                if let Some(existing_parameter) = parameters.iter().find(|p| p.name.name == node.name.name) {
+                if let Some(existing_parameter) =
+                    parameters.iter().find(|p| p.name.name == node.name.name)
+                {
                     return Err(Error::DuplicateParameter {
                         existing_parameter: existing_parameter.clone(),
                         duplicate_parameter: node,
@@ -278,8 +301,8 @@ impl<T: tokens_source::TokensSource> Parser<T> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let (name, selection_name) = self.parse_name_and_selection_name()?;
-        if !T::consume_if_is_ahead(
-            &mut self.base.tokens_source,
+        if !T::is_ahead(
+            &self.base.tokens_source,
             SimpleTokenType::LeftParen.into(),
         ) {
             return Ok(ast::ObjectLiteralFieldSpec {
@@ -295,15 +318,11 @@ impl<T: tokens_source::TokensSource> Parser<T> {
             .into());
         }
         let arguments = self.base.parse_arguments()?;
-        let end_token = T::consume(
-            &mut self.base.tokens_source,
-            SimpleTokenType::RightParen.into(),
-        )?
-        .clone();
         return Ok(ast::ObjectCallableFieldSpec {
             location: shared::ast::NodeLocation {
                 start_token,
-                end_token,
+                end_token: T::get_current_token(&self.base.tokens_source)
+                    .clone(),
                 source: T::get_source_file(&self.base.tokens_source),
             },
             selection_name,

@@ -4,9 +4,14 @@ use libgql::{
     lexer::{tokens::Location, utils::parse_buffer_into_tokens},
     parsers::{
         file::{
-            self, shared::ast::SourceFile, tokens_sources::VecTokensSource,
+            self,
+            shared::ast::{NodeLocation, SourceFile},
+            tokens_sources::VecTokensSource,
         },
-        schema::{server::parse_server_schema, type_registry::TypeRegistry},
+        schema::{
+            client::parse_client_schema, server::parse_server_schema,
+            type_registry::TypeRegistry,
+        },
     },
 };
 
@@ -14,7 +19,7 @@ pub fn format_line(
     line: &str,
     current_line: u32,
     location: &Location,
-    exc: &file::server::Error,
+    exc: &str,
 ) -> String {
     let linestr = current_line.to_string();
     let mut buffer = format!("{}: {}\n", linestr, line);
@@ -34,7 +39,7 @@ pub fn format_line(
         }
 
         // error message
-        underline.push_str(format!(" Error: {:?}\n", exc).as_str());
+        underline.push_str(format!(" Error: {}\n", exc).as_str());
 
         buffer.push_str(&underline);
     }
@@ -43,11 +48,10 @@ pub fn format_line(
 }
 
 pub fn format_error(
-    exc: &file::server::Error,
+    exc: &str,
+    location: Location,
     source: Rc<SourceFile>,
 ) -> String {
-    let location = exc.get_location();
-
     let mut buffer = format!("{}\n", source.filepath.display());
 
     let line_num = location.get_line() as i32;
@@ -71,15 +75,14 @@ pub fn format_error(
 }
 
 fn main() {
-    let mut tmp = glob::glob("./graphql/**/*.graphql").into_iter();
-    let mut nodes = Vec::<file::server::ast::ASTNode>::new();
-    while let Some(filepaths) = tmp.next() {
+    let mut server_nodes = Vec::<file::server::ast::ASTNode>::new();
+    let mut client_nodes = Vec::<file::client::ast::ASTNode>::new();
+    let mut server_files = glob::glob("./graphql/**/*.graphql").into_iter();
+    while let Some(filepaths) = server_files.next() {
         for filepath in filepaths.map(|f| f.unwrap()) {
             let buffer = fs::read_to_string(&filepath).unwrap();
+            println!("{} read file", filepath.to_string_lossy());
             let tokens = parse_buffer_into_tokens(buffer.as_str()).unwrap();
-            println!("{}", filepath.to_str().unwrap());
-            println!("{}", buffer);
-            println!("{:?}", tokens);
             let source_file = Rc::new(SourceFile { filepath, buffer });
             let tokens_source =
                 VecTokensSource::new(tokens, source_file.clone());
@@ -89,14 +92,54 @@ fn main() {
                 {
                     Ok(n) => n,
                     Err(e) => {
-                        println!("{}", format_error(&e, source_file));
+                        println!(
+                            "{}",
+                            format_error(
+                                format!("{:?}", e).as_str(),
+                                e.get_location(),
+                                source_file
+                            )
+                        );
                         panic!("something");
-                    },
+                    }
                 };
-            nodes.append(&mut local_nodes);
+            server_nodes.append(&mut local_nodes);
+        }
+    }
+    let mut client_files = glob::glob("./client/**/*.graphql").into_iter();
+    while let Some(filepaths) = client_files.next() {
+        for filepath in filepaths.map(|f| f.unwrap()) {
+            let buffer = fs::read_to_string(&filepath).unwrap();
+            println!("{} read file", filepath.to_string_lossy());
+            let tokens = parse_buffer_into_tokens(buffer.as_str()).unwrap();
+            let source_file = Rc::new(SourceFile { filepath, buffer });
+            let tokens_source =
+                VecTokensSource::new(tokens, source_file.clone());
+            let mut local_nodes =
+                match libgql::parsers::file::client::Parser::new(tokens_source)
+                    .parse_ast_nodes()
+                {
+                    Ok(n) => n,
+                    Err(e) => {
+                        println!(
+                            "{}",
+                            format_error(
+                                format!("{:?}", e).as_str(),
+                                e.get_location(),
+                                source_file
+                            )
+                        );
+                        panic!("something");
+                    }
+                };
+            client_nodes.append(&mut local_nodes);
         }
     }
     let mut registry = TypeRegistry::new();
-    let schema = parse_server_schema(&mut registry, &nodes).unwrap();
-    println!("{:?}", schema);
+    let server_schema =
+        parse_server_schema(&mut registry, &server_nodes).unwrap();
+    println!("{:?}", server_schema);
+    let client_schema =
+        parse_client_schema(&mut registry, &client_nodes).unwrap();
+    println!("{:?}", client_schema);
 }
