@@ -7,7 +7,7 @@ use crate::parsers::{
 
 #[derive(Debug)]
 pub struct SpreadSelection {
-    pub fragment: Rc<Fragment>,
+    pub fragment: Rc<RefCell<Fragment>>,
 }
 
 #[derive(Debug)]

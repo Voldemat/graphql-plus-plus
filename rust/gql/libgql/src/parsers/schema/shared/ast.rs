@@ -52,6 +52,15 @@ pub enum NonCallableFieldSpec<T> {
     Array(ArrayFieldSpec<T>),
 }
 
+impl<T> NonCallableFieldSpec<T> {
+    pub fn get_type_spec(self: &Self) -> &T {
+        match self {
+            Self::Literal(literal) => &literal.r#type,
+            Self::Array(array) => &array.r#type,
+        }
+    }
+}
+
 pub type InputFieldSpec = NonCallableFieldSpec<InputTypeSpec>;
 
 #[derive(Debug, Clone)]
@@ -110,8 +119,7 @@ pub struct FieldSelectionArgument {
 #[derive(Debug)]
 pub struct ServerDirective {
     pub name: String,
-    pub arguments:
-        indexmap::IndexMap<String, FieldDefinition<InputFieldSpec>>,
+    pub arguments: indexmap::IndexMap<String, FieldDefinition<InputFieldSpec>>,
     pub locations: Vec<file::server::ast::DirectiveLocation>,
 }
 

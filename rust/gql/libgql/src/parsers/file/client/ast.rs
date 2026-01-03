@@ -35,14 +35,14 @@ pub type DirectiveLocationNode =
     shared::ast::DirectiveLocationNode<DirectiveLocation>;
 pub type DirectiveDefinition = shared::ast::DirectiveNode<DirectiveLocation>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ObjectLiteralFieldSpec {
     pub location: shared::ast::NodeLocation,
     pub selection_name: shared::ast::NameNode,
     pub name: shared::ast::NameNode,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ObjectCallableFieldSpec {
     pub location: shared::ast::NodeLocation,
     pub selection_name: shared::ast::NameNode,
@@ -50,20 +50,53 @@ pub struct ObjectCallableFieldSpec {
     pub arguments: Vec<shared::ast::Argument>,
 }
 
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, Clone, derive_more::From)]
 pub enum ObjectFieldSpec {
     Literal(ObjectLiteralFieldSpec),
     Callable(ObjectCallableFieldSpec),
 }
 
-#[derive(Debug)]
+impl ObjectFieldSpec {
+    pub fn get_name(self: &Self) -> &shared::ast::NameNode {
+        match self {
+        Self::Literal(literal) => &literal.name,
+        Self::Callable(callable) => &callable.name,
+        }
+    }
+
+    pub fn get_selection_name(self: &Self) -> &shared::ast::NameNode {
+        match self {
+        Self::Literal(literal) => &literal.selection_name,
+        Self::Callable(callable) => &callable.selection_name,
+        }
+    }
+
+    pub fn get_alias(self: &Self) -> Option<String> {
+        match self {
+        Self::Literal(literal) => {
+            if literal.name.name == literal.selection_name.name {
+                return None;
+            }
+            return Some(literal.selection_name.name.clone());
+        }
+        Self::Callable(callable) => {
+            if callable.name.name == callable.selection_name.name {
+                return None;
+            }
+            return Some(callable.selection_name.name.clone());
+        }
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct FieldSelectionNode {
     pub location: shared::ast::NodeLocation,
     pub field: ObjectFieldSpec,
     pub spec: Option<Rc<FragmentSpec>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SpreadSelectionNode {
     pub location: shared::ast::NodeLocation,
     pub fragment_name: shared::ast::NameNode,

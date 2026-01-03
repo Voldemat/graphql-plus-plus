@@ -33,6 +33,16 @@ pub enum ObjectFieldSpec {
     Callable(CallableFieldSpec),
 }
 
+impl ObjectFieldSpec {
+    pub fn get_return_type(self: &Self) -> &ObjectTypeSpec {
+        match self {
+            Self::Literal(literal) => &literal.r#type,
+            Self::Array(array) => &array.r#type,
+            Self::Callable(callable) => callable.return_type.get_type_spec(),
+        }
+    }
+}
+
 impl From<shared::ast::NonCallableFieldSpec<ObjectTypeSpec>>
     for ObjectFieldSpec
 {
