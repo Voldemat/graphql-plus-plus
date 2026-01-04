@@ -1,13 +1,13 @@
 use crate::parsers::{file, schema::type_registry::TypeRegistry};
 
 pub mod ast;
+pub mod directive;
 pub mod errors;
+pub mod fragment;
 pub mod hash;
 pub mod nodes;
-pub mod schema;
-pub mod fragment;
 pub mod operation;
-pub mod directive;
+pub mod schema;
 
 pub fn parse_client_schema(
     registry: &mut TypeRegistry,
@@ -28,10 +28,7 @@ pub fn parse_client_schema(
         _ => None,
     }) {
         operation.borrow_mut().parameters_hash =
-            hash::get_operation_parameters_hash(
-                registry,
-                &operation.borrow().parameters,
-            );
+            hash::get_operation_parameters_hash(&operation.borrow().parameters);
         operation.borrow_mut().fragment_spec_hash =
             hash::get_fragment_spec_hash(
                 registry,

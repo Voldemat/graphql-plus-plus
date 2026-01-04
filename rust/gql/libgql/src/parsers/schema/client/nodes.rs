@@ -94,7 +94,6 @@ pub fn parse_first_pass(
                 ),
                 r#type: operation.r#type,
                 parameters_hash: hash::get_operation_parameters_hash(
-                    registry,
                     &parameters,
                 ),
                 parameters,
