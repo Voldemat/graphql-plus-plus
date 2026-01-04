@@ -1,4 +1,6 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize,
+)]
 pub enum SimpleTokenType {
     Equal,
     LeftParen,
@@ -15,7 +17,9 @@ pub enum SimpleTokenType {
     AtSign,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize,
+)]
 pub enum ComplexTokenType {
     Identifier,
     String,
@@ -24,7 +28,16 @@ pub enum ComplexTokenType {
     Spread,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, derive_more::From)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    derive_more::From,
+    serde::Serialize,
+    serde::Deserialize,
+)]
 pub enum TokenType {
     Simple(SimpleTokenType),
     Complex(ComplexTokenType),

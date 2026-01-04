@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::parsers::file::shared;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, serde::Serialize)]
 pub enum DirectiveLocation {
     Query,
     Mutation,
@@ -35,14 +35,14 @@ pub type DirectiveLocationNode =
     shared::ast::DirectiveLocationNode<DirectiveLocation>;
 pub type DirectiveDefinition = shared::ast::DirectiveNode<DirectiveLocation>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct ObjectLiteralFieldSpec {
     pub location: shared::ast::NodeLocation,
     pub selection_name: shared::ast::NameNode,
     pub name: shared::ast::NameNode,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct ObjectCallableFieldSpec {
     pub location: shared::ast::NodeLocation,
     pub selection_name: shared::ast::NameNode,
@@ -50,7 +50,7 @@ pub struct ObjectCallableFieldSpec {
     pub arguments: Vec<shared::ast::Argument>,
 }
 
-#[derive(Debug, Clone, derive_more::From)]
+#[derive(Debug, Clone, derive_more::From, serde::Serialize)]
 pub enum ObjectFieldSpec {
     Literal(ObjectLiteralFieldSpec),
     Callable(ObjectCallableFieldSpec),
@@ -59,70 +59,86 @@ pub enum ObjectFieldSpec {
 impl ObjectFieldSpec {
     pub fn get_name(self: &Self) -> &shared::ast::NameNode {
         match self {
-        Self::Literal(literal) => &literal.name,
-        Self::Callable(callable) => &callable.name,
+            Self::Literal(literal) => &literal.name,
+            Self::Callable(callable) => &callable.name,
         }
     }
 
     pub fn get_selection_name(self: &Self) -> &shared::ast::NameNode {
         match self {
-        Self::Literal(literal) => &literal.selection_name,
-        Self::Callable(callable) => &callable.selection_name,
+            Self::Literal(literal) => &literal.selection_name,
+            Self::Callable(callable) => &callable.selection_name,
         }
     }
 
     pub fn get_alias(self: &Self) -> Option<String> {
         match self {
-        Self::Literal(literal) => {
-            if literal.name.name == literal.selection_name.name {
-                return None;
+            Self::Literal(literal) => {
+                if literal.name.name == literal.selection_name.name {
+                    return None;
+                }
+                return Some(literal.selection_name.name.clone());
             }
-            return Some(literal.selection_name.name.clone());
-        }
-        Self::Callable(callable) => {
-            if callable.name.name == callable.selection_name.name {
-                return None;
+            Self::Callable(callable) => {
+                if callable.name.name == callable.selection_name.name {
+                    return None;
+                }
+                return Some(callable.selection_name.name.clone());
             }
-            return Some(callable.selection_name.name.clone());
-        }
         }
     }
 }
 
-#[derive(Debug, Clone)]
+fn serialize_option_rc_fragment_spec<S: serde::Serializer>(
+    v: &Option<Rc<FragmentSpec>>,
+    s: S,
+) -> Result<S::Ok, S::Error> {
+    serde::Serialize::serialize(&v.as_ref().map(|a| a.as_ref()), s)
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct FieldSelectionNode {
     pub location: shared::ast::NodeLocation,
     pub field: ObjectFieldSpec,
+    #[serde(serialize_with = "serialize_option_rc_fragment_spec")]
     pub spec: Option<Rc<FragmentSpec>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct SpreadSelectionNode {
     pub location: shared::ast::NodeLocation,
     pub fragment_name: shared::ast::NameNode,
 }
 
-#[derive(Debug, Clone)]
+fn serialize_fragment_rc<S: serde::Serializer>(
+    v: &Rc<FragmentSpec>,
+    s: S,
+) -> Result<S::Ok, S::Error> {
+    serde::Serialize::serialize(v.as_ref(), s)
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct ConditionalSpreadSelectionNode {
     pub location: shared::ast::NodeLocation,
     pub type_name: shared::ast::NameNode,
+    #[serde(serialize_with = "serialize_fragment_rc")]
     pub fragment: Rc<FragmentSpec>,
 }
 
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, derive_more::From, serde::Serialize)]
 pub enum SelectionNode {
     FieldSelectionNode(FieldSelectionNode),
     ConditionalSpreadSelectionNode(ConditionalSpreadSelectionNode),
     SpreadSelectionNode(SpreadSelectionNode),
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct FragmentSpec {
     pub location: shared::ast::NodeLocation,
     pub selections: Vec<SelectionNode>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, serde::Serialize)]
 pub enum OpType {
     Mutation,
     Query,
@@ -153,6 +169,7 @@ impl TryFrom<&str> for OpType {
     }
 }
 
+#[derive(serde::Serialize)]
 pub struct OperationDefinition {
     pub location: shared::ast::NodeLocation,
     pub r#type: OpType,
@@ -161,6 +178,7 @@ pub struct OperationDefinition {
     pub fragment: FragmentSpec,
 }
 
+#[derive(serde::Serialize)]
 pub struct FragmentDefinition {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -168,7 +186,7 @@ pub struct FragmentDefinition {
     pub spec: FragmentSpec,
 }
 
-#[derive(derive_more::From)]
+#[derive(derive_more::From, serde::Serialize)]
 pub enum ASTNode {
     Operation(OperationDefinition),
     Fragment(FragmentDefinition),

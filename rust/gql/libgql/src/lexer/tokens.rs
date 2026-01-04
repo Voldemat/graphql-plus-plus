@@ -2,7 +2,7 @@ use std::num::Wrapping;
 
 use crate::lexer::TokenType;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Location {
     line: u32,
     start: Wrapping<u32>,
@@ -79,7 +79,7 @@ impl PartialEq for Location {
 
 impl Eq for Location {}
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Token {
     pub token_type: TokenType,
     pub lexeme: String,

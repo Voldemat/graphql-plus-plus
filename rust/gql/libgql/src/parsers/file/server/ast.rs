@@ -1,6 +1,6 @@
 use crate::parsers::file::shared;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, serde::Serialize)]
 pub enum DirectiveLocation {
     Schema,
     Scalar,
@@ -42,7 +42,7 @@ pub type DirectiveLocationNode =
 pub type DirectiveDefinitionNode =
     shared::ast::DirectiveNode<DirectiveLocation>;
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct FieldDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -51,7 +51,7 @@ pub struct FieldDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct InterfaceDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -59,7 +59,7 @@ pub struct InterfaceDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct ObjectDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -68,7 +68,7 @@ pub struct ObjectDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct InputObjectDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -76,14 +76,14 @@ pub struct InputObjectDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct EnumValueDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub value: shared::ast::NameNode,
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct EnumDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -91,7 +91,7 @@ pub struct EnumDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct UnionDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
@@ -99,13 +99,13 @@ pub struct UnionDefinitionNode {
     pub directives: Vec<shared::ast::DirectiveInvocationNode>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct ScalarDefinitionNode {
     pub location: shared::ast::NodeLocation,
     pub name: shared::ast::NameNode,
 }
 
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, derive_more::From, serde::Serialize)]
 pub enum TypeDefinitionNode {
     Scalar(ScalarDefinitionNode),
     Union(UnionDefinitionNode),
@@ -116,12 +116,13 @@ pub enum TypeDefinitionNode {
     Directive(DirectiveDefinitionNode),
 }
 
+#[derive(serde::Serialize)]
 pub struct ExtendTypeNode {
     pub location: shared::ast::NodeLocation,
     pub type_node: ObjectDefinitionNode,
 }
 
-#[derive(derive_more::From)]
+#[derive(derive_more::From, serde::Serialize)]
 pub enum ASTNode {
     TypeDefinitionNode(TypeDefinitionNode),
     ExtendTypeNode(ExtendTypeNode),

@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 derive_more = { version = "2.1.0", features = ["from"] }
 indexmap = "2.12.1"
+serde = { version = "1.0.228", features = ["serde_derive"] }

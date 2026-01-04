@@ -46,7 +46,7 @@ impl From<tokens_source::ConsumeError> for Error {
 
 pub struct BaseParser<
     T: tokens_source::TokensSource,
-    TDirectiveLocation: for<'a> TryFrom<&'a str>,
+    TDirectiveLocation: for<'a> TryFrom<&'a str> + serde::Serialize,
 > {
     pub tokens_source: T,
     _v: PhantomData<TDirectiveLocation>,
@@ -54,7 +54,7 @@ pub struct BaseParser<
 
 impl<
     T: tokens_source::TokensSource,
-    TDirectiveLocation: for<'a> TryFrom<&'a str>,
+    TDirectiveLocation: for<'a> TryFrom<&'a str> + serde::Serialize,
 > BaseParser<T, TDirectiveLocation>
 {
     pub fn new(tokens_source: T) -> Self {
@@ -192,7 +192,7 @@ impl<
     fn parse_literal_node(
         self: &mut Self,
     ) -> Result<shared::ast::LiteralNode, Error> {
-        T::advance(&mut self.tokens_source);
+        T::advance(&mut self.tokens_source)?;
         let current_token = T::get_current_token(&self.tokens_source).clone();
         let TokenType::Complex(token_type) = current_token.token_type else {
             return Err(Error::ExpectedComplexType {
