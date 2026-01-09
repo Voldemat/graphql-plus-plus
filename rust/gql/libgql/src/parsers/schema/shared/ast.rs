@@ -35,7 +35,7 @@ pub enum ArrayLiteral {
 pub struct LiteralFieldSpec<T> {
     pub r#type: T,
     pub default_value: Option<Literal>,
-    pub directive_invocations: Vec<ServerDirectiveInvocation>,
+    pub directive_invocations: indexmap::IndexMap<String, ServerDirectiveInvocation>,
 }
 
 #[derive(Debug, Clone)]

@@ -14,7 +14,7 @@ use crate::parsers::{file, schema::type_registry::TypeRegistry};
 pub fn parse_server_schema(
     mut registry: &mut TypeRegistry,
     ast_nodes: &[file::server::ast::ASTNode],
-) -> Result<schema::ServerSchema, errors::Error> {
+) -> Result<schema::Schema, errors::Error> {
     let type_definition_nodes = || {
         ast_nodes.iter().filter_map(|node| match node {
             file::server::ast::ASTNode::TypeDefinitionNode(n) => Some(n),
@@ -39,5 +39,5 @@ pub fn parse_server_schema(
         .for_each(|(type_node, new_fields)| {
             registry.patch_object(type_node.clone(), new_fields)
         });
-    return Ok(schema::ServerSchema::from_nodes(&server_nodes));
+    return Ok(schema::Schema::from_nodes(&server_nodes));
 }

@@ -1,3 +1,5 @@
+use crate::cli::config;
+
 pub fn read_buffer_from_filepath(filepath: &std::path::Path) -> String {
     if filepath == Into::<std::path::PathBuf>::into("-") {
         let mut temp = String::new();
@@ -17,4 +19,83 @@ pub fn print_result<T: serde::Serialize>(pretty: bool, value: T) {
     };
     func(std::io::stdout(), &value).unwrap();
     print!("\n");
+}
+
+pub fn resolve_paths(
+    config_dir_path: &std::path::Path,
+    patterns: &[std::path::PathBuf],
+) -> Vec<std::path::PathBuf> {
+    patterns
+        .iter()
+        .map(|pattern| {
+            glob::glob(
+                std::path::Path::join(config_dir_path, pattern)
+                    .to_str()
+                    .expect("Pattern is not valid utf-8 string"),
+            )
+            .unwrap()
+            .map(|result| result.unwrap())
+        })
+        .flatten()
+        .collect()
+}
+
+pub fn load_server_schema_from_inputs(
+    registry: &mut libgql::parsers::schema::type_registry::TypeRegistry,
+    config_dir_path: &std::path::Path,
+    conf: &config::InputsConfig,
+) -> Result<
+    libgql::parsers::schema::server::schema::Schema,
+    Vec<libgql::parsers::file::server::Error>,
+> {
+    let mut nodes = Vec::<libgql::parsers::file::server::ast::ASTNode>::new();
+    let mut errors = Vec::<libgql::parsers::file::server::Error>::new();
+    let mut schema = libgql::parsers::schema::server::schema::Schema::default();
+    for jsonpath in resolve_paths(config_dir_path, &conf.json_schema) {
+        let buffer = std::fs::read_to_string(jsonpath).unwrap();
+        let new_schema =
+            libgql::json::parsers::schema::parse_server_schema(
+            registry,
+                serde_json_path_to_error::from_str::<
+                    serde_json_path_to_error::Value,
+                >(&buffer)
+                .unwrap(),
+            )
+            .unwrap();
+        schema.append_schema(new_schema);
+    }
+    for graphql_path in resolve_paths(&config_dir_path, &conf.graphql) {
+        let buffer = std::fs::read_to_string(&graphql_path).unwrap();
+        let source_file =
+            std::rc::Rc::new(libgql::parsers::file::shared::ast::SourceFile {
+                filepath: graphql_path.clone(),
+                buffer,
+            });
+        let tokens =
+            libgql::lexer::utils::parse_buffer_into_tokens(&source_file.buffer)
+                .unwrap();
+        let file_nodes = match libgql::parsers::file::server::Parser::new(
+            libgql::parsers::file::tokens_sources::VecTokensSource::new(
+                tokens,
+                source_file,
+            ),
+        )
+        .parse_ast_nodes()
+        {
+            Ok(n) => n,
+            Err(e) => {
+                errors.push(e);
+                continue;
+            }
+        };
+        nodes.extend(file_nodes);
+    }
+    if errors.len() > 0 {
+        return Err(errors);
+    }
+    let new_schema =
+        libgql::parsers::schema::server::parse_server_schema(registry, &nodes)
+            .unwrap();
+    schema.append_schema(new_schema);
+    return Ok(schema);
 }

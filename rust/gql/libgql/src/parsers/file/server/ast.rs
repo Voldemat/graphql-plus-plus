@@ -1,6 +1,6 @@
 use crate::parsers::file::shared;
 
-#[derive(Debug, Clone, Copy, serde::Serialize)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 pub enum DirectiveLocation {
     Schema,
     Scalar,

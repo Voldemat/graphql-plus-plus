@@ -5,7 +5,7 @@ use indexmap::IndexMap;
 use crate::parsers::{
     file,
     schema::{
-        server::{ast, directive, errors, input},
+        server::{ast, directive, errors},
         shared,
         type_registry::TypeRegistry,
     },
@@ -106,7 +106,10 @@ fn parse_noncallable_object_field_spec(
                 shared::ast::LiteralFieldSpec::<ast::ObjectTypeSpec> {
                     r#type: registry.get_type_for_object(&n.name)?,
                     default_value: None,
-                    directive_invocations: directives.to_vec(),
+                    directive_invocations: directives
+                        .iter()
+                        .map(|d| (d.directive.borrow().name.clone(), d.clone()))
+                        .collect(),
                 }
                 .into(),
                 n.nullable,

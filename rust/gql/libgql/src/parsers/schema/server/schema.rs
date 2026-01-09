@@ -5,7 +5,7 @@ use indexmap::IndexMap;
 use crate::parsers::schema::{server::ast, shared};
 
 #[derive(Debug, Default)]
-pub struct ServerSchema {
+pub struct Schema {
     pub objects: IndexMap<String, Rc<RefCell<ast::ObjectType>>>,
     pub inputs: IndexMap<String, Rc<RefCell<shared::ast::InputType>>>,
     pub interfaces: IndexMap<String, Rc<RefCell<ast::Interface>>>,
@@ -15,9 +15,9 @@ pub struct ServerSchema {
     pub directives: IndexMap<String, Rc<RefCell<shared::ast::ServerDirective>>>,
 }
 
-impl ServerSchema {
+impl Schema {
     pub fn from_nodes(nodes: &[ast::ServerSchemaNode]) -> Self {
-        let mut schema = ServerSchema::default();
+        let mut schema = Schema::default();
         for node in nodes {
             schema.add_node(node);
         }
@@ -53,7 +53,7 @@ impl ServerSchema {
         }
     }
 
-    fn append_schema(self: &mut Self, mut new_schema: Self) {
+    pub fn append_schema(self: &mut Self, mut new_schema: Self) {
         self.objects.append(&mut new_schema.objects);
         self.scalars.append(&mut new_schema.scalars);
         self.inputs.append(&mut new_schema.inputs);

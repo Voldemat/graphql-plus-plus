@@ -45,12 +45,7 @@ impl TypeRegistry {
             objects: Default::default(),
             inputs: Default::default(),
             interfaces: Default::default(),
-            scalars: vec![
-                "Int".into(),
-                "Float".into(),
-                "String".into(),
-                "Boolean".into(),
-            ],
+            scalars: shared::scalars::get_builtin_scalars(),
             enums: Default::default(),
             unions: Default::default(),
             fragments: Default::default(),

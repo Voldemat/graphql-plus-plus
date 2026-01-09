@@ -6,7 +6,7 @@ use crate::parsers::schema::shared;
 pub enum ObjectTypeSpec {
     ObjectType(Rc<RefCell<ObjectType>>),
     Interface(Rc<RefCell<Interface>>),
-    Scalar(String),
+    Scalar { name: String },
     Enum(Rc<RefCell<shared::ast::Enum>>),
     Union(Rc<RefCell<Union>>),
 }
