@@ -9,7 +9,7 @@ pub struct InputsConfig {
 
 #[derive(serde::Deserialize)]
 pub struct OutputsConfig {
-    pub filepath: String,
+    pub filepath: std::path::PathBuf,
     #[serde(alias="onlyUsedInOperations")]
     pub only_used_in_operations: bool
 }

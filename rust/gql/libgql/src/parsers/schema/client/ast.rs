@@ -93,6 +93,8 @@ pub struct Operation {
     pub fragment_spec_hash: u64,
 }
 
+pub type DirectiveLocation = file::client::ast::DirectiveLocation;
+
 #[derive(Debug)]
 pub struct ClientDirective {
     pub name: String,
@@ -100,7 +102,7 @@ pub struct ClientDirective {
         String,
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >,
-    pub locations: Vec<file::client::ast::DirectiveLocation>,
+    pub locations: Vec<DirectiveLocation>,
 }
 
 #[derive(derive_more::From)]

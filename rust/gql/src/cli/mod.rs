@@ -43,12 +43,30 @@ fn generate(args: &MainArgs) {
     let config = parse_config(args);
     let mut registry =
         libgql::parsers::schema::type_registry::TypeRegistry::new();
-    utils::load_server_schema_from_inputs(
+    let server_schema = utils::load_server_schema_from_inputs(
         &mut registry,
         args.config.parent().unwrap(),
         &config.server.inputs,
     )
     .unwrap();
+    let client_schema = config.client.map(|client_config| {
+        utils::load_client_schema_from_inputs(
+            &mut registry,
+            args.config.parent().unwrap(),
+            &client_config.inputs,
+        )
+        .unwrap()
+    });
+    if let Some(outputs) = config.server.outputs {
+        let json_string = libgql::json::serializers::schema::server::serialize(
+            &server_schema,
+            if outputs.only_used_in_operations {
+                client_schema.as_ref()
+            } else {
+                None
+            },
+        ).unwrap();
+    }
 }
 
 fn validate(args: &MainArgs) {
