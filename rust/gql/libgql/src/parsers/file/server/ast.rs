@@ -15,6 +15,12 @@ pub enum DirectiveLocation {
     InputFieldDefinition,
 }
 
+impl std::fmt::Display for DirectiveLocation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.into_str())
+    }
+}
+
 impl TryFrom<&str> for DirectiveLocation {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -33,6 +39,24 @@ impl TryFrom<&str> for DirectiveLocation {
                 Ok(DirectiveLocation::InputFieldDefinition)
             }
             _ => Err(())
+        }
+    }
+}
+
+impl DirectiveLocation {
+    pub fn into_str(self: &Self) -> &'static str {
+        match self {
+			Self::Schema => "SCHEMA",
+			Self::Scalar => "SCALAR",
+			Self::Object => "OBJECT",
+			Self::FieldDefinition => "FIELD_DEFINITION",
+			Self::ArgumentDefinition => "ARGUMENT_DEFINITION",
+			Self::Interface => "INTERFACE",
+			Self::Union => "UNION",
+			Self::Enum => "ENUM",
+			Self::EnumValue => "ENUM_VALUE",
+			Self::InputObject => "INPUT_OBJECT",
+			Self::InputFieldDefinition => "INPUT_FIELD_DEFINITION",
         }
     }
 }

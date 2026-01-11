@@ -38,7 +38,7 @@ fn parse_argument_value_from_literal_node(
                     arg_type: arg_type.clone(),
                 });
             };
-            if !enum_type.borrow().values.contains(&e.value) {
+            if !enum_type.values.contains(&e.value) {
                 return Err(errors::Error::InvalidEnumValue {
                     value: e.clone(),
                     enum_type: enum_type.clone(),

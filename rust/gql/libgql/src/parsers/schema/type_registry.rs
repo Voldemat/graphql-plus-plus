@@ -22,7 +22,7 @@ pub struct TypeRegistry {
     pub inputs: HashMap<String, Rc<RefCell<shared::ast::InputType>>>,
     pub interfaces: HashMap<String, Rc<RefCell<server::ast::Interface>>>,
     pub scalars: Vec<String>,
-    pub enums: HashMap<String, Rc<RefCell<shared::ast::Enum>>>,
+    pub enums: HashMap<String, Rc<shared::ast::Enum>>,
     pub unions: HashMap<String, Rc<RefCell<server::ast::Union>>>,
     pub fragments: HashMap<String, Rc<RefCell<client::ast::Fragment>>>,
     pub operations: HashMap<String, Rc<RefCell<client::ast::Operation>>>,
@@ -161,7 +161,7 @@ impl TypeRegistry {
                 self.inputs.insert(name, input);
             }
             server::ast::ServerSchemaNode::Enum(gqlenum) => {
-                let name = gqlenum.borrow().name.clone();
+                let name = gqlenum.name.clone();
                 self.enums.insert(name, gqlenum);
             }
             server::ast::ServerSchemaNode::ServerDirective(directive) => {
@@ -224,37 +224,5 @@ impl TypeRegistry {
             &object_type.borrow().name,
             new_fields,
         );
-    }
-
-    fn fragment_spec_from_op_type(
-        self: &Self,
-        optype: file::client::ast::OpType,
-    ) -> client::ast::FragmentSpec {
-        match optype {
-            file::client::ast::OpType::Query => {
-                client::ast::FragmentSpec::Object(
-                    client::ast::ObjectFragmentSpec {
-                        r#type: self.get_query_object().unwrap().clone(),
-                        selections: Vec::new(),
-                    },
-                )
-            }
-            file::client::ast::OpType::Mutation => {
-                client::ast::FragmentSpec::Object(
-                    client::ast::ObjectFragmentSpec {
-                        r#type: self.get_mutation_object().unwrap().clone(),
-                        selections: Vec::new(),
-                    },
-                )
-            }
-            file::client::ast::OpType::Subscription => {
-                client::ast::FragmentSpec::Object(
-                    client::ast::ObjectFragmentSpec {
-                        r#type: self.get_subscription_object().unwrap().clone(),
-                        selections: Vec::new(),
-                    },
-                )
-            }
-        }
     }
 }

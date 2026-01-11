@@ -344,6 +344,6 @@ impl<T: tokens_source::TokensSource> Parser<T> {
         } else {
             selection_name.clone()
         };
-        return Ok((selection_name, field_name));
+        return Ok((field_name, selection_name));
     }
 }

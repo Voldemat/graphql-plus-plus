@@ -2,13 +2,37 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::parsers::schema::shared;
 
-#[derive(Debug, derive_more::From)]
+#[derive(derive_more::From)]
 pub enum ObjectTypeSpec {
     ObjectType(Rc<RefCell<ObjectType>>),
     Interface(Rc<RefCell<Interface>>),
     Scalar { name: String },
-    Enum(Rc<RefCell<shared::ast::Enum>>),
+    Enum(Rc<shared::ast::Enum>),
     Union(Rc<RefCell<Union>>),
+}
+
+impl std::fmt::Debug for ObjectTypeSpec {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ObjectType(arg0) => f
+                .debug_tuple("ObjectType")
+                .field(&arg0.borrow().name)
+                .finish(),
+            Self::Interface(arg0) => f
+                .debug_tuple("Interface")
+                .field(&arg0.borrow().name)
+                .finish(),
+            Self::Scalar { name } => {
+                f.debug_struct("Scalar").field("name", name).finish()
+            }
+            Self::Enum(arg0) => {
+                f.debug_tuple("Enum").field(&arg0.name).finish()
+            }
+            Self::Union(arg0) => {
+                f.debug_tuple("Union").field(&arg0.borrow().name).finish()
+            }
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -85,7 +109,7 @@ pub enum ServerSchemaNode {
     Interface(Rc<RefCell<Interface>>),
     Scalar(String),
     Union(Rc<RefCell<Union>>),
-    Enum(Rc<RefCell<shared::ast::Enum>>),
+    Enum(Rc<shared::ast::Enum>),
     InputType(Rc<RefCell<shared::ast::InputType>>),
     ServerDirective(Rc<RefCell<shared::ast::ServerDirective>>),
 }

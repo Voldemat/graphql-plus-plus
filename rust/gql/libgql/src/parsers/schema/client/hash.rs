@@ -12,7 +12,7 @@ pub fn hash_input_type_spec<T: std::hash::Hasher>(
 ) {
     let name = match spec {
         shared::ast::InputTypeSpec::Scalar(s) => s,
-        shared::ast::InputTypeSpec::Enum(e) => &e.borrow().name,
+        shared::ast::InputTypeSpec::Enum(e) => &e.name,
         shared::ast::InputTypeSpec::InputType(i) => &i.borrow().name,
     };
     std::hash::Hash::hash(name, hasher);

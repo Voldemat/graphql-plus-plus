@@ -84,7 +84,7 @@ pub struct ASTVisitorHooks<'a> {
     pub visit_input_type:
         ASTVisitorHook<'a, Rc<RefCell<shared::ast::InputType>>>,
     pub visit_scalar: ASTVisitorHook<'a, String>,
-    pub visit_enum: ASTVisitorHook<'a, Rc<RefCell<shared::ast::Enum>>>,
+    pub visit_enum: ASTVisitorHook<'a, Rc<shared::ast::Enum>>,
     pub visit_union: ASTVisitorHook<'a, Rc<RefCell<server::ast::Union>>>,
 }
 

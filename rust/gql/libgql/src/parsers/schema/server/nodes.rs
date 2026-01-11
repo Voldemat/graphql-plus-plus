@@ -16,10 +16,10 @@ pub fn parse_server_node_first_pass(
 ) -> ast::ServerSchemaNode {
     match ast_node {
         file::server::ast::TypeDefinitionNode::Enum(e) => {
-            Rc::new(RefCell::new(shared::ast::Enum {
+            Rc::new(shared::ast::Enum {
                 name: e.name.name.clone(),
                 values: e.values.iter().map(|v| v.value.name.clone()).collect(),
-            }))
+            })
             .into()
         }
         file::server::ast::TypeDefinitionNode::Scalar(s) => {

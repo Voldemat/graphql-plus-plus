@@ -41,36 +41,42 @@ fn parse_config(args: &MainArgs) -> config::Config {
 
 fn generate(args: &MainArgs) {
     let config = parse_config(args);
-    let mut registry =
-        libgql::parsers::schema::type_registry::TypeRegistry::new();
-    let server_schema = utils::load_server_schema_from_inputs(
-        &mut registry,
-        args.config.parent().unwrap(),
-        &config.server.inputs,
+    utils::run_config_action(
+        &args.config,
+        &config,
+        Box::new(|json_string, filepath, _| {
+            if filepath == "-" {
+                println!("{}", json_string);
+            } else {
+                let final_filepath =
+                    std::path::Path::join(args.config.as_path(), filepath);
+                std::fs::write(final_filepath, json_string).unwrap();
+            }
+        }),
     )
     .unwrap();
-    let client_schema = config.client.map(|client_config| {
-        utils::load_client_schema_from_inputs(
-            &mut registry,
-            args.config.parent().unwrap(),
-            &client_config.inputs,
-        )
-        .unwrap()
-    });
-    if let Some(outputs) = config.server.outputs {
-        let json_string = libgql::json::serializers::schema::server::serialize(
-            &server_schema,
-            if outputs.only_used_in_operations {
-                client_schema.as_ref()
-            } else {
-                None
-            },
-        ).unwrap();
-    }
 }
 
 fn validate(args: &MainArgs) {
     let config = parse_config(args);
+    utils::run_config_action(
+        &args.config,
+        &config,
+        Box::new(|json_string, filepath, schema_name| {
+            if filepath == "-" {
+                return;
+            }
+            let final_filepath =
+                std::path::Path::join(args.config.as_path(), filepath);
+            utils::does_file_have_changes(
+                &final_filepath,
+                json_string,
+                schema_name,
+            )
+            .unwrap();
+        }),
+    )
+    .unwrap();
 }
 
 impl Commands {

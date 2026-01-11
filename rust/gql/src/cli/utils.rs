@@ -148,10 +148,10 @@ pub fn load_client_schema_from_inputs(
     return Ok(schema);
 }
 
-fn run_config_action(
+pub fn run_config_action<'a>(
     config_path: &std::path::Path,
-    config: &config::Config,
-    json_callback: fn (&str, &std::path::Path, &str)
+    config: &'a config::Config,
+    json_callback: Box<dyn Fn(&str, &std::path::Path, &str) + 'a>,
 ) -> Result<(), String> {
     let mut registry =
         libgql::parsers::schema::type_registry::TypeRegistry::new();
@@ -170,15 +170,38 @@ fn run_config_action(
         .unwrap()
     });
     if let Some(outputs) = config.server.outputs.as_ref() {
-        let json_string = libgql::json::serializers::schema::server::serialize(
-            &server_schema,
-            if outputs.only_used_in_operations {
-                client_schema.as_ref()
-            } else {
-                None
-            },
-        )?;
+        let json_string =
+            libgql::json::serializers::schema::serialize_server_schema(
+                &server_schema,
+                if outputs.only_used_in_operations {
+                    client_schema.as_ref()
+                } else {
+                    None
+                },
+            )?;
         json_callback(&json_string, &outputs.filepath, "Server");
     };
-    return Ok(())
+
+    if let Some(client_config) = &config.client
+        && let Some(outputs) = &client_config.outputs
+        && let Some(c_schema) = &client_schema
+    {
+        let json_string =
+            libgql::json::serializers::schema::serialize_client_schema(
+                c_schema,
+            )?;
+        json_callback(&json_string, &outputs.filepath, "Client");
+    };
+    return Ok(());
+}
+
+pub fn does_file_have_changes(
+    filepath: &std::path::Path,
+    json_string: &str,
+    schema_name: &str,
+) -> Result<(), String> {
+    if std::fs::read_to_string(filepath).unwrap() != json_string {
+        return Err(format!("{} schema is not up to date", schema_name));
+    }
+    return Ok(());
 }

@@ -14,6 +14,27 @@ pub enum DirectiveLocation {
     VariableDefinition,
 }
 
+impl std::fmt::Display for DirectiveLocation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.into_str())
+    }
+}
+
+impl DirectiveLocation {
+    fn into_str(self: &Self) -> &str {
+        match self {
+            Self::Query => "QUERY",
+            Self::Mutation => "MUTATION",
+            Self::Subscription => "SUBSCRIPTION",
+            Self::Field => "FIELD",
+            Self::FragmentDefinition => "FRAGMENT_DEFINITION",
+            Self::FragmentSpread => "FRAGMENT_SPREAD",
+            Self::InlineFragment => "INLINE_FRAGMENT",
+            Self::VariableDefinition => "VARIABLE_DEFINITION",
+        }
+    }
+}
+
 impl TryFrom<&str> for DirectiveLocation {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
@@ -145,7 +166,20 @@ pub enum OpType {
     Subscription,
 }
 
+impl std::fmt::Display for OpType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.into_str())
+    }
+}
+
 impl OpType {
+    pub fn into_str(self: &Self) -> &str {
+        match self {
+            Self::Query => "QUERY",
+            Self::Mutation => "MUTATION",
+            Self::Subscription => "SUBSCRIPTION",
+        }
+    }
     pub fn from_object_name(name: &str) -> Option<Self> {
         match name {
             "Query" => Some(Self::Query),

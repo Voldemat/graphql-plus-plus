@@ -10,7 +10,7 @@ pub struct Schema {
     pub inputs: IndexMap<String, Rc<RefCell<shared::ast::InputType>>>,
     pub interfaces: IndexMap<String, Rc<RefCell<ast::Interface>>>,
     pub scalars: Vec<String>,
-    pub enums: IndexMap<String, Rc<RefCell<shared::ast::Enum>>>,
+    pub enums: IndexMap<String, Rc<shared::ast::Enum>>,
     pub unions: IndexMap<String, Rc<RefCell<ast::Union>>>,
     pub directives: IndexMap<String, Rc<RefCell<shared::ast::ServerDirective>>>,
 }
@@ -27,7 +27,7 @@ impl Schema {
     fn add_node(self: &mut Self, s_node: &ast::ServerSchemaNode) {
         match s_node {
             ast::ServerSchemaNode::Enum(node) => {
-                self.enums.insert(node.borrow().name.clone(), node.clone());
+                self.enums.insert(node.name.clone(), node.clone());
             }
             ast::ServerSchemaNode::ObjectType(node) => {
                 self.objects

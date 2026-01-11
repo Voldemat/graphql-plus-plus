@@ -415,10 +415,10 @@ fn parse_enum(value: &serde_json::Value) -> Result<shared::ast::Enum, String> {
 fn parse_enums(
     registry: &mut TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Rc<RefCell<shared::ast::Enum>>>, String> {
-    let mut enums = IndexMap::<String, Rc<RefCell<shared::ast::Enum>>>::new();
+) -> Result<IndexMap<String, Rc<shared::ast::Enum>>, String> {
+    let mut enums = IndexMap::<String, Rc<shared::ast::Enum>>::new();
     for (key, value) in map.as_object().unwrap() {
-        let e = Rc::new(RefCell::new(parse_enum(value)?));
+        let e = Rc::new(parse_enum(value)?);
         registry.enums.insert(key.clone(), e.clone());
         enums.insert(key.clone(), e);
     }
@@ -553,15 +553,19 @@ pub fn parse_server_schema(
             })),
         );
     }
-    return Ok(server::schema::Schema {
-        scalars: [
-            shared::scalars::get_builtin_scalars(),
-            value["scalars"]
+    let new_scalars: Vec<String> = value["scalars"]
                 .as_array()
                 .unwrap()
                 .iter()
                 .map(|v| v.as_str().unwrap().to_string())
-                .collect(),
+                .collect();
+    for scalar in &new_scalars {
+        registry.scalars.push(scalar.clone());
+    }
+    return Ok(server::schema::Schema {
+        scalars: [
+            shared::scalars::get_builtin_scalars(),
+            new_scalars,
         ]
         .concat(),
         enums: parse_enums(registry, &value["enums"])?,

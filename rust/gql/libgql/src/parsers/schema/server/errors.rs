@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use crate::parsers::{
     file,
@@ -18,7 +18,7 @@ pub enum Error {
     },
     InvalidEnumValue {
         value: file::shared::ast::LiteralEnumValueNode,
-        enum_type: Rc<RefCell<shared::ast::Enum>>,
+        enum_type: Rc<shared::ast::Enum>,
     },
     UnknownServerDirective(file::shared::ast::NameNode),
     UnknownInterface(file::shared::ast::NameNode),

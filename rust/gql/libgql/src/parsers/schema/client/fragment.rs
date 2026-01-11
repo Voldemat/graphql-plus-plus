@@ -274,7 +274,7 @@ fn parse_argument_literal_value(
                 shared::ast::InputTypeSpec::Scalar(s) => s == "Int",
                 _ => false,
             };
-            if is_valid {
+            if !is_valid {
                 Err(errors::Error::InvalidLiteralForInput {
                     type_spec: type_spec.clone(),
                     node: node.clone(),
@@ -288,7 +288,7 @@ fn parse_argument_literal_value(
                 shared::ast::InputTypeSpec::Scalar(s) => s == "Float",
                 _ => false,
             };
-            if is_valid {
+            if !is_valid {
                 Err(errors::Error::InvalidLiteralForInput {
                     type_spec: type_spec.clone(),
                     node: node.clone(),
@@ -302,7 +302,7 @@ fn parse_argument_literal_value(
                 shared::ast::InputTypeSpec::Scalar(s) => s == "Boolean",
                 _ => false,
             };
-            if is_valid {
+            if !is_valid {
                 Err(errors::Error::InvalidLiteralForInput {
                     type_spec: type_spec.clone(),
                     node: node.clone(),
@@ -316,7 +316,7 @@ fn parse_argument_literal_value(
                 shared::ast::InputTypeSpec::Scalar(s) => s == "String",
                 _ => false,
             };
-            if is_valid {
+            if !is_valid {
                 Err(errors::Error::InvalidLiteralForInput {
                     type_spec: type_spec.clone(),
                     node: node.clone(),
@@ -330,7 +330,7 @@ fn parse_argument_literal_value(
                 shared::ast::InputTypeSpec::Scalar(s) => s == "String",
                 _ => false,
             };
-            if is_valid {
+            if !is_valid {
                 Err(errors::Error::InvalidLiteralForInput {
                     type_spec: type_spec.clone(),
                     node: node.clone(),

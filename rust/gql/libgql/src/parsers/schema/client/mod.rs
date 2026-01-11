@@ -27,19 +27,20 @@ pub fn parse_client_schema(
         ast::ClientSchemaNode::Operation(operation) => Some(operation),
         _ => None,
     }) {
-        operation.borrow_mut().parameters_hash =
+        let parameters_hash =
             hash::get_operation_parameters_hash(&operation.borrow().parameters);
-        operation.borrow_mut().fragment_spec_hash =
-            hash::get_fragment_spec_hash(
-                registry,
-                &operation.borrow().fragment_spec,
-                true,
-            );
-        operation.borrow_mut().used_fragments =
-            hash::get_used_fragments_from_fragment_spec(
-                registry,
-                &operation.borrow().fragment_spec,
-            );
+        operation.borrow_mut().parameters_hash = parameters_hash;
+        let fragment_spec_hash = hash::get_fragment_spec_hash(
+            registry,
+            &operation.borrow().fragment_spec,
+            true,
+        );
+        operation.borrow_mut().fragment_spec_hash = fragment_spec_hash;
+        let used_fragments = hash::get_used_fragments_from_fragment_spec(
+            registry,
+            &operation.borrow().fragment_spec,
+        );
+        operation.borrow_mut().used_fragments = used_fragments;
     }
     return Ok(schema::ClientSchema::from_nodes(&client_nodes));
 }

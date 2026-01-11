@@ -1,16 +1,14 @@
-use std::{
-    cell::RefCell,
-    collections::{HashMap, HashSet},
-    rc::Rc,
-};
+use std::{cell::RefCell, collections::HashSet, rc::Rc};
+
+use indexmap::IndexMap;
 
 use crate::parsers::schema::{client::ast, visitor};
 
 #[derive(Debug, Default)]
 pub struct ClientSchema {
-    pub fragments: HashMap<String, Rc<RefCell<ast::Fragment>>>,
-    pub operations: HashMap<String, Rc<RefCell<ast::Operation>>>,
-    pub directives: HashMap<String, Rc<ast::ClientDirective>>,
+    pub fragments: IndexMap<String, Rc<RefCell<ast::Fragment>>>,
+    pub operations: IndexMap<String, Rc<RefCell<ast::Operation>>>,
+    pub directives: IndexMap<String, Rc<ast::ClientDirective>>,
 }
 
 #[derive(Default)]
@@ -91,7 +89,7 @@ impl ClientSchema {
                 m.scalars.insert(scalar.clone());
             })),
             visit_enum: Some(Box::new(|e| {
-                m.enums.insert(e.borrow().name.clone());
+                m.enums.insert(e.name.clone());
             })),
             visit_union: Some(Box::new(|union| {
                 m.unions.insert(union.borrow().name.clone());

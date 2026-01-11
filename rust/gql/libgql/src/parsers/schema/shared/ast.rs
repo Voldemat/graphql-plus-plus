@@ -8,11 +8,26 @@ pub struct Enum {
     pub values: Vec<String>,
 }
 
-#[derive(Debug, Clone, derive_more::From)]
+#[derive(Clone, derive_more::From)]
 pub enum InputTypeSpec {
     InputType(Rc<RefCell<InputType>>),
     Scalar(String),
-    Enum(Rc<RefCell<Enum>>),
+    Enum(Rc<Enum>),
+}
+
+impl std::fmt::Debug for InputTypeSpec {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::InputType(arg0) => f
+                .debug_tuple("InputType")
+                .field(&arg0.borrow().name)
+                .finish(),
+            Self::Scalar(arg0) => f.debug_tuple("Scalar").field(arg0).finish(),
+            Self::Enum(arg0) => {
+                f.debug_tuple("Enum").field(&arg0.name).finish()
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -35,7 +50,8 @@ pub enum ArrayLiteral {
 pub struct LiteralFieldSpec<T> {
     pub r#type: T,
     pub default_value: Option<Literal>,
-    pub directive_invocations: indexmap::IndexMap<String, ServerDirectiveInvocation>,
+    pub directive_invocations:
+        indexmap::IndexMap<String, ServerDirectiveInvocation>,
 }
 
 #[derive(Debug, Clone)]
