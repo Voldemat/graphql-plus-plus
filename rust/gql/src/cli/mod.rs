@@ -49,7 +49,7 @@ fn generate(args: &MainArgs) {
                 println!("{}", json_string);
             } else {
                 let final_filepath =
-                    std::path::Path::join(args.config.as_path(), filepath);
+                    std::path::Path::join(args.config.parent().unwrap(), filepath);
                 std::fs::write(final_filepath, json_string).unwrap();
             }
         }),
@@ -67,7 +67,7 @@ fn validate(args: &MainArgs) {
                 return;
             }
             let final_filepath =
-                std::path::Path::join(args.config.as_path(), filepath);
+                std::path::Path::join(args.config.parent().unwrap(), filepath);
             utils::does_file_have_changes(
                 &final_filepath,
                 json_string,

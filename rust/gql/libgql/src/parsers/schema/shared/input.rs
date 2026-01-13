@@ -41,7 +41,7 @@ fn parse_noncallable_input_field_spec(
             return Ok((
                 ast::LiteralFieldSpec::<ast::InputTypeSpec> {
                     r#type: registry.get_type_for_input(&n.name)?,
-                    default_value,
+                    default_value: Some(default_value),
                     directive_invocations: IndexMap::new(),
                 }
                 .into(),

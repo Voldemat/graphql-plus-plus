@@ -81,13 +81,17 @@ pub fn hash_input_field_spec<T: std::hash::Hasher>(
         shared::ast::NonCallableFieldSpec::Literal(literal) => {
             hasher.write_u8(b'l');
             hash_input_type_spec(hasher, &literal.r#type);
-            hash_literal_default_value(hasher, &literal.default_value);
+            if let Some(default_value) = &literal.default_value {
+                hash_literal_default_value(hasher, &default_value);
+            }
         }
         shared::ast::NonCallableFieldSpec::Array(array) => {
             hasher.write_u8(b'a');
             std::hash::Hash::hash(&array.nullable, hasher);
             hash_input_type_spec(hasher, &array.r#type);
-            hash_array_default_value(hasher, &array.default_value);
+            if let Some(default_value) = &array.default_value {
+                hash_array_default_value(hasher, default_value);
+            }
         }
     }
 }

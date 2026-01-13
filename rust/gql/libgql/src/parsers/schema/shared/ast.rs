@@ -49,7 +49,7 @@ pub enum ArrayLiteral {
 #[derive(Debug, Clone)]
 pub struct LiteralFieldSpec<T> {
     pub r#type: T,
-    pub default_value: Option<Literal>,
+    pub default_value: Option<Option<Literal>>,
     pub directive_invocations:
         indexmap::IndexMap<String, ServerDirectiveInvocation>,
 }
@@ -58,7 +58,7 @@ pub struct LiteralFieldSpec<T> {
 pub struct ArrayFieldSpec<T> {
     pub r#type: T,
     pub nullable: bool,
-    pub default_value: Option<ArrayLiteral>,
+    pub default_value: Option<Option<ArrayLiteral>>,
     pub directive_invocations: Vec<ServerDirectiveInvocation>,
 }
 

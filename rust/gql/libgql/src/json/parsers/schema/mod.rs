@@ -143,7 +143,7 @@ fn parse_object_literal_field_spec(
 ) -> Result<shared::ast::LiteralFieldSpec<server::ast::ObjectTypeSpec>, String>
 {
     return Ok(shared::ast::LiteralFieldSpec {
-        default_value: parse_optional_literal(&value["default_value"])?,
+        default_value: None,
         directive_invocations: IndexMap::new(),
         r#type: parse_object_type_spec(registry, &value["type"])?,
     });
@@ -154,7 +154,7 @@ fn parse_object_array_field_spec(
     value: &serde_json::Value,
 ) -> Result<shared::ast::ArrayFieldSpec<server::ast::ObjectTypeSpec>, String> {
     return Ok(shared::ast::ArrayFieldSpec {
-        default_value: parse_optional_array_literal(&value["default_value"])?,
+        default_value: None,
         directive_invocations: Vec::new(),
         r#type: parse_object_type_spec(registry, &value["type"])?,
         nullable: value["nullable"].as_bool().unwrap(),
@@ -222,7 +222,7 @@ fn parse_input_literal_field_spec(
     value: &serde_json::Value,
 ) -> Result<shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>, String> {
     return Ok(shared::ast::LiteralFieldSpec {
-        default_value: parse_optional_literal(&value["default_value"])?,
+        default_value: Some(parse_optional_literal(&value["default_value"])?),
         directive_invocations: IndexMap::new(),
         r#type: parse_input_type_spec(registry, &value["type"])?,
     });
@@ -233,7 +233,7 @@ fn parse_input_array_field_spec(
     value: &serde_json::Value,
 ) -> Result<shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>, String> {
     return Ok(shared::ast::ArrayFieldSpec {
-        default_value: parse_optional_array_literal(&value["default_value"])?,
+        default_value: Some(parse_optional_array_literal(&value["default_value"])?),
         directive_invocations: Vec::new(),
         r#type: parse_input_type_spec(registry, &value["type"])?,
         nullable: value["nullable"].as_bool().unwrap(),

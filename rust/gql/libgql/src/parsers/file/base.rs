@@ -99,7 +99,7 @@ impl<
         self: &mut Self,
     ) -> Result<shared::ast::NamedTypeNode, Error> {
         let name_node = self.parse_name_node(false)?;
-        let nullable = T::consume_if_is_ahead(
+        let nullable = !T::consume_if_is_ahead(
             &mut self.tokens_source,
             SimpleTokenType::Bang.into(),
         );
@@ -127,7 +127,7 @@ impl<
             &mut self.tokens_source,
             SimpleTokenType::RightBracket.into(),
         )?;
-        let nullable = T::consume_if_is_ahead(
+        let nullable = !T::consume_if_is_ahead(
             &mut self.tokens_source,
             SimpleTokenType::Bang.into(),
         );

@@ -217,6 +217,7 @@ fn is_object_field_spec_is_typename_field(
 }
 
 fn fragment_spec_from_field_definition(
+    registry: &TypeRegistry,
     field: &Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
     spec: &Rc<file::client::ast::FragmentSpec>,
 ) -> Result<Rc<ast::FragmentSpec>, errors::Error> {
@@ -225,21 +226,33 @@ fn fragment_spec_from_field_definition(
         server::ast::ObjectTypeSpec::ObjectType(object) => Ok(Rc::new(
             ast::ObjectFragmentSpec {
                 r#type: object.clone(),
-                selections: Vec::new(),
+                selections: parse_object_selections(
+                    registry,
+                    &object,
+                    &spec.selections,
+                )?,
             }
             .into(),
         )),
         server::ast::ObjectTypeSpec::Interface(interface) => Ok(Rc::new(
             ast::ObjectFragmentSpec {
                 r#type: interface.clone(),
-                selections: Vec::new(),
+                selections: parse_interface_selections(
+                    registry,
+                    &interface,
+                    &spec.selections,
+                )?,
             }
             .into(),
         )),
         server::ast::ObjectTypeSpec::Union(union) => Ok(Rc::new(
             ast::UnionFragmentSpec {
                 r#type: union.clone(),
-                selections: Vec::new(),
+                selections: parse_union_selections(
+                    registry,
+                    &union,
+                    &spec.selections,
+                )?,
             }
             .into(),
         )),
@@ -370,6 +383,7 @@ fn parse_selection_argument(
 }
 
 fn parse_object_field_selection_node<T: Clone + Into<errors::FieldType>>(
+    registry: &TypeRegistry,
     r#type: &T,
     fields: &IndexMap<
         String,
@@ -391,7 +405,7 @@ fn parse_object_field_selection_node<T: Clone + Into<errors::FieldType>>(
         selection: node
             .spec
             .as_ref()
-            .map(|spec| fragment_spec_from_field_definition(field_type, spec))
+            .map(|spec| fragment_spec_from_field_definition(registry, field_type, spec))
             .transpose()?,
         arguments: match &node.field {
             file::client::ast::ObjectFieldSpec::Literal(_) => {
@@ -431,6 +445,7 @@ fn parse_object_selection_node(
                 .into());
             }
             Ok(parse_object_field_selection_node(
+                registry,
                 r#type,
                 &r#type.borrow().fields,
                 f,
@@ -457,6 +472,7 @@ fn parse_interface_selection_node(
         }
         file::client::ast::SelectionNode::FieldSelectionNode(f) => {
             Ok(parse_object_field_selection_node(
+                registry,
                 r#type,
                 &r#type.borrow().fields,
                 f,

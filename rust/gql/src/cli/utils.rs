@@ -200,7 +200,7 @@ pub fn does_file_have_changes(
     json_string: &str,
     schema_name: &str,
 ) -> Result<(), String> {
-    if std::fs::read_to_string(filepath).unwrap() != json_string {
+    if std::fs::read_to_string(filepath).map_err(|e| format!("Failed to read file: {:?} {}", filepath, e.to_string())).unwrap() != json_string {
         return Err(format!("{} schema is not up to date", schema_name));
     }
     return Ok(());
