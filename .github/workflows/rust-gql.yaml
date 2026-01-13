@@ -3,8 +3,8 @@ name: "c++ gql build"
 on:
   push:
     paths:
-      - cpp/gql/**
-      - .github/workflows/cpp-gql.yaml
+      - rust/gql/**
+      - .github/workflows/rust-gql.yaml
       - shared/dockerfiles/gql
       - shared/dockerfiles/gql.dockerignore
       - shared/dockerfiles/gql-darwin

@@ -1,4 +1,4 @@
 *
-!cpp/gql/
-cpp/gql/build
-cpp/gql/.cache
+!rust/gql/
+rust/gql/target
+rust/gql/libgql/target
