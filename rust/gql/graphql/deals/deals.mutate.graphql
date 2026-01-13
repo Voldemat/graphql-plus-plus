@@ -1,6 +1,0 @@
-extend type Mutation {
-    updateFilesAutotags(
-        fileIds: [UUID!]!,
-        autotagIds: [UUID!]!
-    ): ErrorCantAddAutotags @authenticated
-}
