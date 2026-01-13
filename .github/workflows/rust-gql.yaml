@@ -1,4 +1,4 @@
-name: "c++ gql build"
+name: "rust gql build"
 
 on:
   push:
