@@ -1,8 +1,0 @@
-BasedOnStyle: Google
-IndentWidth: 4
-DerivePointerAlignment: false
-PointerAlignment: Right
-ColumnLimit: 80
-AccessModifierOffset: -4
-IncludeBlocks: Regroup
-Cpp11BracedListStyle: false
