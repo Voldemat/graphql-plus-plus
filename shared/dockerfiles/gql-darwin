@@ -1,25 +1,20 @@
 FROM crazymax/osxcross:15.5-alpine AS osxcross
 
-FROM alpine:3.22.1 as builder
-RUN apk --no-cache add \
-    clang lld musl-dev cmake make git && \
+FROM rust:alpine3.23 as builder
+ARG TARGETARCH
+RUN rustup target add $TARGETARCH-apple-darwin && \
+    apk add --no-cache clang && \
     rm -rf /var/cache/apk/*
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
 WORKDIR /usr/local/app/
-COPY cpp/gql/ ./
-ARG TARGETARCH
+COPY rust/gql/ ./
 RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
-    CC=$TARGETARCH-apple-darwin24.5-clang \
-    CXX=$TARGETARCH-apple-darwin24.5-clang++ \
-    cmake \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_CXX_FLAGS="-mmacos-version-min=15.0" \
-        -DGQL_BUILD_TESTS=OFF \
-        -S . \
-        -B build && \
-    cmake --build build --parallel 4
+    mkdir .cargo && \
+    printf "[target.$TARGETARCH-apple-darwin]\nlinker=\"$TARGETARCH-apple-darwin24.5-clang\"\nrustflags=[\"-C\",\"link-arg=-mmacosx-version-min=15.0\"]" > .cargo/config.toml && \
+    cargo build --release --target=$TARGETARCH-apple-darwin && \
+    mv ./target/$TARGETARCH-apple-darwin/release/gql ./gql
 
 FROM scratch as scratch
-COPY --from=builder /usr/local/app/build/bin/gql /gql
+COPY --from=builder /usr/local/app/gql /gql
 CMD ["/gql"]

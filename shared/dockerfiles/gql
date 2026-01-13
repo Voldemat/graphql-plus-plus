@@ -1,25 +1,12 @@
-FROM alpine:3.22.1 as builder
-RUN apk --no-cache add --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
-    clang21 lld21 musl-dev cmake make git && \
-    rm -rf /var/cache/apk/*
+FROM rust:alpine3.23 as builder
 WORKDIR /usr/local/app/
-COPY cpp/gql/ ./
-ENV CC=clang-21
-ENV CXX=clang++-21
-RUN cmake \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_EXE_LINKER_FLAGS="-static" \
-    -DGQL_BUILD_TESTS=ON \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-    -S . \
-    -B build && \
-    cmake --build build --parallel 4 && \
-    ctest --rerun-failed --output-on-failure build
+COPY rust/gql/ ./
+RUN cargo build --release
 
-FROM alpine:3.22.1 as gql-alpine
-COPY --from=builder /usr/local/app/build/bin/gql /bin/gql
+FROM alpine:3.23 as gql-alpine
+COPY --from=builder /usr/local/app/target/release/gql /bin/gql
 CMD ["/bin/gql"]
 
 FROM scratch as gql-scratch
-COPY --from=builder /usr/local/app/build/bin/gql /gql
+COPY --from=builder /usr/local/app/target/release/gql /gql
 CMD ["/gql"]

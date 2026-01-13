@@ -1,9 +1,0 @@
-Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,-modernize-use-trailing-return-type'
-WarningsAsErrors: true
-HeaderFilterRegex: '.*'
-AnalyzeTemporaryDtors: false
-HeaderFileExtensions:         ['', 'h','hh','hpp','hxx']
-ImplementationFileExtensions: ['c','cc','cpp','cxx']
-CheckOptions:
-- key: cppcoreguidelines-macro-usage.AllowedRegexp
-  value: ^ASSERT_HAS_MEMBER|ASSERT_MEMBER_IS_VALID$

@@ -1,0 +1,13 @@
+[package]
+name = "gql"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.54", features = ["derive"] }
+glob = "0.3.3"
+libgql = { path = "./libgql" }
+serde = { version = "1.0.228", features = ["rc"] }
+serde_json = "1.0.148"
+serde_json_path_to_error = "0.1.5"
+serde_yaml = "0.9.34"

@@ -1,32 +1,13 @@
-FROM --platform=linux/arm64 vladimirdev635/alpine-arm64@sha256:52fcab06392b4757bfe4e3bd91f19e9cdb9946ea671d408c90a824865f5c6ccf as alpine-sysroot
-FROM alpine:3.22.1 as builder
-RUN apk --no-cache add --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
-    clang21 lld21 musl-dev cmake make git && \
-    rm -rf /var/cache/apk/*
+FROM --platform=linux/arm64 rust:alpine3.23 as builder
+RUN rustup target add aarch64-unknown-linux-musl
 WORKDIR /usr/local/app/
-COPY cpp/gql/ ./
-ENV CC=clang-21
-ENV CXX=clang++-21
-RUN --mount=type=bind,from=alpine-sysroot,source=/lib/,target=/arm64-sysroot/lib/ \
-    --mount=type=bind,from=alpine-sysroot,source=/usr/lib/,target=/arm64-sysroot/usr/lib/ \
-    --mount=type=bind,from=alpine-sysroot,source=/usr/include/,target=/arm64-sysroot/usr/include/ \
-    --mount=type=bind,from=alpine-sysroot,source=/usr/local/lib/,target=/arm64-sysroot/usr/local/lib/ \
-    cmake \
-    -DCMAKE_C_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot -fuse-ld=lld" \
-    -DCMAKE_CXX_FLAGS="--target=aarch64-alpine-linux-musl --sysroot=/arm64-sysroot -fuse-ld=lld" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_EXE_LINKER_FLAGS="-static" \
-    -DCMAKE_LINKER="ldd" \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-    -DGQL_BUILD_TESTS=OFF \
-    -S . \
-    -B build && \
-    cmake --build build --parallel 4
+COPY rust/gql/ ./
+RUN cargo build --release --target=aarch64-unknown-linux-musl
 
-FROM --platform=linux/arm64 alpine:3.22.1 as gql-alpine
-COPY --from=builder /usr/local/app/build/bin/gql /bin/gql
+FROM --platform=linux/arm64 alpine:3.23 as gql-alpine
+COPY --from=builder /usr/local/app/target/aarch64-unknown-linux-musl/release/gql /bin/gql
 CMD ["/bin/gql"]
 
 FROM --platform=linux/arm64 scratch as gql-scratch
-COPY --from=builder /usr/local/app/build/bin/gql /gql
+COPY --from=builder /usr/local/app/target/aarch64-unknown-linux-musl/release/gql /gql
 CMD ["/gql"]

@@ -1,0 +1,164 @@
+name: "rust gql build"
+
+on:
+  push:
+    paths:
+      - rust/gql/**
+      - .github/workflows/rust-gql.yaml
+      - shared/dockerfiles/gql
+      - shared/dockerfiles/gql.dockerignore
+      - shared/dockerfiles/gql-darwin
+      - shared/dockerfiles/gql-darwin.dockerignore
+      - shared/dockerfiles/gql-arm64
+      - shared/dockerfiles/gql-arm64.dockerignore
+
+jobs:
+  docker:
+      runs-on: ubuntu-latest
+      environment: cpp-gql
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+        - uses: awalsh128/cache-apt-pkgs-action@latest
+          with:
+            packages: zip
+        - name: Login to Docker Hub
+          uses: docker/login-action@v3
+          with:
+            username: ${{ vars.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v3
+        - name: Build gql linux x86_64
+          uses: docker/build-push-action@v6
+          with:
+            file: shared/dockerfiles/gql
+            push: true
+            target: gql-scratch
+            tags: vladimirdev635/gql-linux-x86_64:${{ github.ref_name }}
+            cache-from: type=registry,ref=vladimirdev635/gql-linux-x86_64:buildcache
+            cache-to: type=registry,ref=vladimirdev635/gql-linux-x86_64:buildcache,mode=max
+            provenance: false
+            sbom: false
+        - name: Build gql linux alpine x86_64
+          uses: docker/build-push-action@v6
+          with:
+            file: shared/dockerfiles/gql
+            push: true
+            target: gql-alpine
+            tags: vladimirdev635/gql-alpine-linux-x86_64:${{ github.ref_name }}
+            cache-from: type=registry,ref=vladimirdev635/gql-alpine-linux-x86_64:buildcache
+            cache-to: type=registry,ref=vladimirdev635/gql-alpine-linux-x86_64:buildcache,mode=max
+            provenance: false
+            sbom: false
+        - name: Build gql linux arm64
+          uses: docker/build-push-action@v6
+          with:
+            provenance: false
+            sbom: false
+            file: shared/dockerfiles/gql-arm64
+            push: true
+            target: gql-scratch
+            tags: vladimirdev635/gql-linux-arm64:${{ github.ref_name }}
+            cache-from: type=registry,ref=vladimirdev635/gql-linux-arm64:buildcache
+            cache-to: type=registry,ref=vladimirdev635/gql-linux-arm64:buildcache,mode=max
+        - name: Build gql linux alpine arm64
+          uses: docker/build-push-action@v6
+          with:
+            provenance: false
+            sbom: false
+            file: shared/dockerfiles/gql-arm64
+            push: true
+            target: gql-alpine
+            tags: vladimirdev635/gql-alpine-linux-arm64:${{ github.ref_name }}
+            cache-from: type=registry,ref=vladimirdev635/gql-alpine-linux-arm64:buildcache
+            cache-to: type=registry,ref=vladimirdev635/gql-alpine-linux-arm64:buildcache,mode=max
+        - name: Build gql darwin/x86_64
+          uses: docker/build-push-action@v6
+          with:
+            file: shared/dockerfiles/gql-darwin
+            push: true
+            provenance: false
+            sbom: false
+            tags: vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }}
+            cache-from: type=registry,ref=vladimirdev635/gql-darwin-x86_64:buildcache
+            cache-to: type=registry,ref=vladimirdev635/gql-darwin-x86_64:buildcache,mode=max
+            build-args: |
+              TARGETARCH=x86_64
+        - name: Build gql darwin/arm64
+          uses: docker/build-push-action@v6
+          with:
+            file: shared/dockerfiles/gql-darwin
+            push: true
+            provenance: false
+            sbom: false
+            tags: vladimirdev635/gql-darwin-arm64:${{ github.ref_name }}
+            cache-from: type=registry,ref=vladimirdev635/gql-darwin-arm64:buildcache
+            cache-to: type=registry,ref=vladimirdev635/gql-darwin-arm64:buildcache,mode=max
+            build-args: |
+              TARGETARCH=aarch64
+        - name: Push gql
+          run: |
+            docker manifest create vladimirdev635/gql:${{ github.ref_name }} \
+                vladimirdev635/gql-linux-x86_64:${{ github.ref_name }} \
+                vladimirdev635/gql-linux-arm64:${{ github.ref_name }} \
+                vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }} \
+                vladimirdev635/gql-darwin-arm64:${{ github.ref_name }}
+            docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
+                vladimirdev635/gql-linux-x86_64:${{ github.ref_name }} --os linux --arch=amd64
+            docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
+                vladimirdev635/gql-linux-arm64:${{ github.ref_name }} --os linux --arch=arm64
+            docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
+                vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }} --os darwin --arch=amd64
+            docker manifest annotate vladimirdev635/gql:${{ github.ref_name }} \
+                vladimirdev635/gql-darwin-arm64:${{ github.ref_name }} --os darwin --arch=arm64
+            docker manifest push vladimirdev635/gql:${{ github.ref_name }}
+            docker manifest create vladimirdev635/gql-alpine:${{ github.ref_name }} \
+                vladimirdev635/gql-alpine-linux-x86_64:${{ github.ref_name }} \
+                vladimirdev635/gql-alpine-linux-arm64:${{ github.ref_name }}
+            docker manifest push vladimirdev635/gql-alpine:${{ github.ref_name }}
+        - name: 'Copy all binaries'
+          if: github.ref_type == 'tag'
+          run: |
+            container_id=$(docker create --pull always vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }})
+            docker cp $container_id:/gql ./gql-darwin-x86_64
+            tar -cvzf ./gql-darwin-x86_64.tar.gz ./gql-darwin-x86_64
+            zip ./gql-darwin-x86_64.zip ./gql-darwin-x86_64
+            docker rm $container_id
+
+            container_id=$(docker create --pull always vladimirdev635/gql-darwin-arm64:${{ github.ref_name }})
+            docker cp $container_id:/gql ./gql-darwin-arm64
+            tar -cvzf ./gql-darwin-arm64.tar.gz ./gql-darwin-arm64
+            zip ./gql-darwin-arm64.zip ./gql-darwin-arm64
+            docker rm $container_id
+
+            container_id=$(docker create --pull always vladimirdev635/gql-linux-x86_64:${{ github.ref_name }})
+            docker cp $container_id:/gql ./gql-linux-x86_64
+            tar -cvzf ./gql-linux-x86_64.tar.gz ./gql-linux-x86_64
+            zip ./gql-linux-x86_64.zip ./gql-linux-x86_64
+            docker rm $container_id
+
+            container_id=$(docker create --pull always vladimirdev635/gql-linux-arm64:${{ github.ref_name }})
+            docker cp $container_id:/gql ./gql-linux-arm64
+            tar -cvzf ./gql-linux-arm64.tar.gz ./gql-linux-arm64
+            zip ./gql-linux-arm64.zip ./gql-linux-arm64
+            docker rm $container_id
+        - uses: "marvinpinto/action-automatic-releases@latest"
+          if: github.ref_type == 'tag'
+          with:
+            repo_token: "${{ secrets.GITHUB_TOKEN }}"
+            title: "Release ${{ github.ref_name }}"
+            prerelease: false
+            files: |
+              gql-linux-x86_64
+              gql-linux-x86_64.tar.gz
+              gql-linux-x86_64.zip
+              gql-linux-arm64
+              gql-linux-arm64.tar.gz
+              gql-linux-arm64.zip
+              gql-darwin-x86_64
+              gql-darwin-x86_64.tar.gz
+              gql-darwin-x86_64.zip
+              gql-darwin-arm64
+              gql-darwin-arm64.tar.gz
+              gql-darwin-arm64.zip
