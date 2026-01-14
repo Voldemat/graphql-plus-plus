@@ -174,6 +174,10 @@ impl<T: tokens_source::TokensSource> Parser<T> {
             ComplexTokenType::Identifier.into(),
         ) {
             values.push(self.parse_enum_value_definition_node()?);
+            T::consume_if_is_ahead(
+                &mut self.base.tokens_source,
+                SimpleTokenType::Comma.into()
+            );
         }
         T::consume(
             &mut self.base.tokens_source,
@@ -258,7 +262,11 @@ impl<T: tokens_source::TokensSource> Parser<T> {
             &self.base.tokens_source,
             ComplexTokenType::Identifier.into(),
         ) {
-            fields.push(self.base.parse_input_field_definition_node()?)
+            fields.push(self.base.parse_input_field_definition_node()?);
+            T::consume_if_is_ahead(
+                &mut self.base.tokens_source,
+                SimpleTokenType::Comma.into()
+            );
         }
         T::consume(
             &mut self.base.tokens_source,

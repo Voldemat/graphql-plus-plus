@@ -8,12 +8,34 @@ use crate::parsers::{
     },
 };
 
+fn parse_literal(node: &file::shared::ast::LiteralNode) -> ast::Literal {
+    match node {
+        file::shared::ast::LiteralNode::Int(i) => ast::Literal::Int(i.value),
+        file::shared::ast::LiteralNode::Float(i) => {
+            ast::Literal::Float(i.value)
+        }
+        file::shared::ast::LiteralNode::Boolean(i) => {
+            ast::Literal::Boolean(i.value)
+        }
+        file::shared::ast::LiteralNode::String(i) => {
+            ast::Literal::String(i.value.clone())
+        }
+        file::shared::ast::LiteralNode::EnumValue(i) => {
+            ast::Literal::String(i.value.clone())
+        }
+    }
+}
+
 fn parse_input_field_spec(
     node: &file::shared::ast::InputFieldDefinitionNode,
     registry: &TypeRegistry,
 ) -> Result<(ast::InputFieldSpec, bool), type_registry::Error> {
-    return parse_noncallable_input_field_spec(&node.r#type, None, registry)
-        .map(|(return_type, nullable)| (return_type.into(), nullable));
+    return parse_noncallable_input_field_spec(
+        &node.r#type,
+        node.default_value.as_ref().map(parse_literal),
+        registry,
+    )
+    .map(|(return_type, nullable)| (return_type.into(), nullable));
 }
 
 fn parse_noncallable_input_field_spec(
