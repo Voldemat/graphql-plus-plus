@@ -153,24 +153,25 @@ fn write_literal_object_field_spec<'a, J: struson::writer::JsonWriter>(
             writer.write_object_member(
                 "invocations",
                 |invocations_writer| {
-                        let mut new_directive_invocations = spec.directive_invocations.clone();
-                        new_directive_invocations.sort_keys();
-                        for (name, invocation) in &new_directive_invocations {
-                            invocations_writer.write_object_member(
-                                &name,
-                                |invocation_writer| {
-                                    invocation_writer.write_object_member(
-                                        "arguments",
-                                        |arguments_writer| {
-                                            write_field_selection_arguments(
-                                                arguments_writer,
-                                                &invocation.arguments,
-                                            )
-                                        },
-                                    )
-                                },
-                            )?;
-                        }
+                    let mut new_directive_invocations =
+                        spec.directive_invocations.clone();
+                    new_directive_invocations.sort_keys();
+                    for (name, invocation) in &new_directive_invocations {
+                        invocations_writer.write_object_member(
+                            &name,
+                            |invocation_writer| {
+                                invocation_writer.write_object_member(
+                                    "arguments",
+                                    |arguments_writer| {
+                                        write_field_selection_arguments(
+                                            arguments_writer,
+                                            &invocation.arguments,
+                                        )
+                                    },
+                                )
+                            },
+                        )?;
+                    }
                     Ok(())
                 },
             )?;
@@ -385,10 +386,14 @@ fn write_interface<'a, J: struson::writer::JsonWriter>(
 fn write_interfaces<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
     interfaces: &IndexMap<String, Rc<RefCell<server::ast::Interface>>>,
+    uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_interfaces = interfaces.clone();
     new_interfaces.sort_keys();
-    for interface in new_interfaces.values() {
+    for interface in new_interfaces.values().filter(|interface| {
+        uses_hashset
+            .map_or(false, |hashset| hashset.contains(&interface.borrow().name))
+    }) {
         writer.write_object_member(
             &interface.borrow().name,
             |interface_writer| {
@@ -502,10 +507,14 @@ fn write_input<'a, J: struson::writer::JsonWriter>(
 fn write_inputs<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
     inputs: &IndexMap<String, Rc<RefCell<shared::ast::InputType>>>,
+    uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_inputs = inputs.clone();
     new_inputs.sort_keys();
-    for input in new_inputs.values() {
+    for input in new_inputs.values().filter(|input| {
+        uses_hashset
+            .map_or(false, |hashset| hashset.contains(&input.borrow().name))
+    }) {
         writer.write_object_member(&input.borrow().name, |input_writer| {
             write_input(input_writer, &input.borrow())?;
             return Ok(());
@@ -535,10 +544,14 @@ fn write_union<'a, J: struson::writer::JsonWriter>(
 fn write_unions<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
     unions: &IndexMap<String, Rc<RefCell<server::ast::Union>>>,
+    uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_unions = unions.clone();
     new_unions.sort_keys();
-    for union in new_unions.values() {
+    for union in new_unions.values().filter(|union| {
+        uses_hashset
+            .map_or(false, |hashset| hashset.contains(&union.borrow().name))
+    }) {
         writer.write_object_member(&union.borrow().name, |union_writer| {
             write_union(union_writer, &union.borrow())
         })?
@@ -562,10 +575,13 @@ fn write_enum<'a, J: struson::writer::JsonWriter>(
 fn write_enums<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
     enums: &IndexMap<String, Rc<shared::ast::Enum>>,
+    used_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_enums = enums.clone();
     new_enums.sort_keys();
-    for enum_type in new_enums.values() {
+    for enum_type in new_enums.values().filter(|enum_type| {
+        used_hashset.map_or(false, |hashset| hashset.contains(&enum_type.name))
+    }) {
         writer.write_object_member(&enum_type.name, |enum_writer| {
             write_enum(enum_writer, &enum_type)
         })?
@@ -600,10 +616,13 @@ fn write_server_directive<'a, J: struson::writer::JsonWriter>(
 fn write_server_directives<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
     directives: &IndexMap<String, Rc<RefCell<shared::ast::ServerDirective>>>,
+    uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_directives = directives.clone();
     new_directives.sort_keys();
-    for (name, directive) in &new_directives {
+    for (name, directive) in new_directives.iter().filter(|(name, _)| {
+        uses_hashset.map_or(false, |hashset| hashset.contains(*name))
+    }) {
         writer.write_object_member(name, |directive_writer| {
             write_server_directive(directive_writer, &directive.borrow())
         })?
@@ -627,11 +646,19 @@ pub fn serialize_server_schema(
             schema_writer.write_object_member(
                 "interfaces",
                 |interfaces_writer| {
-                    write_interfaces(interfaces_writer, &schema.interfaces)
+                    write_interfaces(
+                        interfaces_writer,
+                        &schema.interfaces,
+                        &server_uses_map.as_ref().map(|m| &m.interfaces),
+                    )
                 },
             )?;
             schema_writer.write_object_member("inputs", |inputs_writer| {
-                write_inputs(inputs_writer, &schema.inputs)
+                write_inputs(
+                    inputs_writer,
+                    &schema.inputs,
+                    &server_uses_map.as_ref().map(|m| &m.inputs),
+                )
             })?;
             schema_writer.write_array_member("scalars", |scalars_writer| {
                 let mut new_scalars = schema.scalars.clone();
@@ -647,10 +674,18 @@ pub fn serialize_server_schema(
                 Ok(())
             })?;
             schema_writer.write_object_member("enums", |enums_writer| {
-                write_enums(enums_writer, &schema.enums)
+                write_enums(
+                    enums_writer,
+                    &schema.enums,
+                    &server_uses_map.as_ref().map(|m| &m.enums),
+                )
             })?;
             schema_writer.write_object_member("unions", |union_writer| {
-                write_unions(union_writer, &schema.unions)
+                write_unions(
+                    union_writer,
+                    &schema.unions,
+                    &server_uses_map.as_ref().map(|m| &m.unions),
+                )
             })?;
             schema_writer.write_object_member(
                 "directives",
@@ -658,6 +693,7 @@ pub fn serialize_server_schema(
                     write_server_directives(
                         directives_writer,
                         &schema.directives,
+                        &server_uses_map.as_ref().map(|m| &m.directives),
                     )
                 },
             )?;
