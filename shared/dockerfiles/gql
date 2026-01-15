@@ -1,44 +1,68 @@
 FROM crazymax/osxcross:15.5-alpine AS osxcross
-FROM rust:alpine3.23 as builder
+FROM rust:alpine3.23 AS builder
+WORKDIR /usr/local/app/
 RUN rustup target add \
     x86_64-apple-darwin aarch64-apple-darwin \
     aarch64-unknown-linux-musl x86_64-unknown-linux-musl && \
-    apk add --no-cache clang && \
-    rm -rf /var/cache/apk/*
-ENV PATH="/osxcross/bin:$PATH"
-ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
-WORKDIR /usr/local/app/
+    apk --no-cache add clang lld musl-dev && rm -rf /var/cache/apk/* && \
+    arch="$(apk --print-arch)" && \
+    if [ "$arch" = "x86_64" ]; then \
+        ln -sf /usr/bin/cc /usr/local/bin/linker-x86_64 && \
+        wget https://musl.cc/aarch64-linux-musl-cross.tgz && \
+        tar -C /usr/local -xzf aarch64-linux-musl-cross.tgz && \
+        rm aarch64-linux-musl-cross.tgz && \
+        ln -sf /usr/local/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc /usr/local/bin/linker-aarch64; \
+    elif [ "$arch" = "aarch64" ]; then \
+        wget https://musl.cc/x86_64-linux-musl-cross.tgz && \
+        tar -C /usr/local -xzf x86_64-linux-musl-cross.tgz && \
+        rm x86_64-linux-musl-cross.tgz && \
+        ln -sf /usr/local/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc /usr/local/bin/linker-x86_64 && \
+        ln -sf /usr/bin/cc /usr/local/bin/linker-aarch64; \
+    fi && \
+    mkdir .cargo && \
+    cat > /usr/local/app/.cargo/config.toml << 'EOF'
+[target.x86_64-apple-darwin]
+linker = "x86_64-apple-darwin24.5-clang"
+rustflags = ["-C", "link-arg=-mmacosx-version-min=15.0", "-C", "link-arg=-L/osxcross/lib"]
+
+[target.aarch64-apple-darwin]
+linker = "aarch64-apple-darwin24.5-clang"
+rustflags = ["-C", "link-arg=-mmacosx-version-min=15.0", "-C", "link-arg=-L/osxcross/lib"]
+
+[target.x86_64-unknown-linux-musl]
+linker = "/usr/local/bin/linker-x86_64"
+
+[target.aarch64-unknown-linux-musl]
+linker = "/usr/local/bin/linker-aarch64"
+EOF
 COPY rust/gql/ ./
 RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
-    mkdir .cargo && \
-    printf "[target.x86_64-apple-darwin]\nlinker=\"x86_64-apple-darwin24.5-clang\"\nrustflags=[\"-C\",\"link-arg=-mmacosx-version-min=15.0\"]\n" > .cargo/config.toml && \
-    printf "[target.aarch64-apple-darwin]\nlinker=\"aarch64-apple-darwin24.5-clang\"\nrustflags=[\"-C\",\"link-arg=-mmacosx-version-min=15.0\"]" >> .cargo/config.toml && \
-    cargo build --release \
-        --target=x86_64-apple-darwin \
-        --target=x86_64-unknown-linux-musl \
+    LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH" PATH="/osxcross/bin/:$PATH" cargo build --release \
         --target=aarch64-apple-darwin \
-        --target=aarch64-unknown-linux-musl
+        --target=x86_64-apple-darwin \
+        --target=aarch64-unknown-linux-musl \
+        --target=x86_64-unknown-linux-musl
 
-FROM scratch as x86_64-darwin-scratch
+FROM scratch AS x86_64-darwin-scratch
 COPY --from=builder /usr/local/app/x86_64-apple-darwin/release/gql /gql
 CMD ["/gql"]
 
-FROM scratch as aarch64-darwin-scratch
+FROM scratch AS aarch64-darwin-scratch
 COPY --from=builder /usr/local/app/aarch64-apple-darwin/release/gql /gql
 CMD ["/gql"]
 
-FROM scratch as x86_64-linux-scratch
+FROM scratch AS x86_64-linux-scratch
 COPY --from=builder /usr/local/app/x86_64-unknown-linux-musl/release/gql /gql
 CMD ["/gql"]
 
-FROM scratch as aarch64-linux-scratch
+FROM scratch AS aarch64-linux-scratch
 COPY --from=builder /usr/local/app/aarch64-unknown-linux-musl/release/gql /gql
 CMD ["/gql"]
 
-FROM alpine:3.23 as x86_64-alpine
+FROM alpine:3.23 AS x86_64-alpine
 COPY --from=builder /usr/local/app/x86_64-unknown-linux-musl/release/gql /gql
 CMD ["/gql"]
 
-FROM alpine:3.23 as aarch64-alpine
+FROM alpine:3.23 AS aarch64-alpine
 COPY --from=builder /usr/local/app/aarch64-unknown-linux-musl/release/gql /gql
 CMD ["/gql"]
