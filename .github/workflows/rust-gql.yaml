@@ -40,6 +40,8 @@ jobs:
             cache-to: type=registry,ref=vladimirdev635/gql-builder:buildcache,mode=max
             provenance: false
             sbom: false
+            build-args: |
+              PROXY=${{ secrets.PROXY }}
         - name: Build gql linux x86_64
           uses: docker/build-push-action@v6
           with:
