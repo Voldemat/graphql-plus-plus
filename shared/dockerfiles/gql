@@ -5,16 +5,16 @@ ARG PROXY
 RUN rustup target add \
     x86_64-apple-darwin aarch64-apple-darwin \
     aarch64-unknown-linux-musl x86_64-unknown-linux-musl && \
-    apk --no-cache add clang lld musl-dev && rm -rf /var/cache/apk/* && \
+    apk --no-cache add curl clang lld musl-dev && rm -rf /var/cache/apk/* && \
     arch="$(apk --print-arch)" && \
     if [ "$arch" = "x86_64" ]; then \
         ln -sf /usr/bin/cc /usr/local/bin/linker-x86_64 && \
-        wget -e use_proxy=yes -e socks_proxy=$PROXY https://musl.cc/aarch64-linux-musl-cross.tgz && \
+        curl -x "$PROXY" -o aarch64-linux-musl-cross.tgz https://musl.cc/aarch64-linux-musl-cross.tgz && \
         tar -C /usr/local -xzf aarch64-linux-musl-cross.tgz && \
         rm aarch64-linux-musl-cross.tgz && \
         ln -sf /usr/local/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc /usr/local/bin/linker-aarch64; \
     elif [ "$arch" = "aarch64" ]; then \
-        wget -e use_proxy=yes -e socks_proxy=$PROXY https://musl.cc/x86_64-linux-musl-cross.tgz && \
+        curl -x "$PROXY" -o x86_64-linux-musl-cross.tgz https://musl.cc/x86_64-linux-musl-cross.tgz && \
         tar -C /usr/local -xzf x86_64-linux-musl-cross.tgz && \
         rm x86_64-linux-musl-cross.tgz && \
         ln -sf /usr/local/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc /usr/local/bin/linker-x86_64 && \
