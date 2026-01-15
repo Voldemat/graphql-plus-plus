@@ -67,10 +67,10 @@ FROM scratch AS aarch64-linux-scratch
 COPY --from=targets /targets/aarch64-linux /gql
 CMD ["/gql"]
 
-FROM alpine:3.23 AS x86_64-alpine
-COPY --from=targets /targets/x86_64-linux /gql
+FROM --platform=linux/amd64 alpine:3.23 AS x86_64-alpine
+COPY --from=targets /targets/x86_64-linux /bin/gql
 CMD ["/gql"]
 
-FROM alpine:3.23 AS aarch64-alpine
-COPY --from=targets /targets/aarch64-linux /gql
+FROM --platform=linux/arm64 alpine:3.23 AS aarch64-alpine
+COPY --from=targets /targets/aarch64-linux /bin/gql
 CMD ["/gql"]
