@@ -392,7 +392,7 @@ fn write_interfaces<'a, J: struson::writer::JsonWriter>(
     new_interfaces.sort_keys();
     for interface in new_interfaces.values().filter(|interface| {
         uses_hashset
-            .map_or(false, |hashset| hashset.contains(&interface.borrow().name))
+            .map_or(true, |hashset| hashset.contains(&interface.borrow().name))
     }) {
         writer.write_object_member(
             &interface.borrow().name,
@@ -513,7 +513,7 @@ fn write_inputs<'a, J: struson::writer::JsonWriter>(
     new_inputs.sort_keys();
     for input in new_inputs.values().filter(|input| {
         uses_hashset
-            .map_or(false, |hashset| hashset.contains(&input.borrow().name))
+            .map_or(true, |hashset| hashset.contains(&input.borrow().name))
     }) {
         writer.write_object_member(&input.borrow().name, |input_writer| {
             write_input(input_writer, &input.borrow())?;
@@ -550,7 +550,7 @@ fn write_unions<'a, J: struson::writer::JsonWriter>(
     new_unions.sort_keys();
     for union in new_unions.values().filter(|union| {
         uses_hashset
-            .map_or(false, |hashset| hashset.contains(&union.borrow().name))
+            .map_or(true, |hashset| hashset.contains(&union.borrow().name))
     }) {
         writer.write_object_member(&union.borrow().name, |union_writer| {
             write_union(union_writer, &union.borrow())
@@ -575,12 +575,12 @@ fn write_enum<'a, J: struson::writer::JsonWriter>(
 fn write_enums<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
     enums: &IndexMap<String, Rc<shared::ast::Enum>>,
-    used_hashset: &Option<&HashSet<String>>,
+    uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_enums = enums.clone();
     new_enums.sort_keys();
     for enum_type in new_enums.values().filter(|enum_type| {
-        used_hashset.map_or(false, |hashset| hashset.contains(&enum_type.name))
+        uses_hashset.map_or(true, |hashset| hashset.contains(&enum_type.name))
     }) {
         writer.write_object_member(&enum_type.name, |enum_writer| {
             write_enum(enum_writer, &enum_type)
@@ -621,7 +621,7 @@ fn write_server_directives<'a, J: struson::writer::JsonWriter>(
     let mut new_directives = directives.clone();
     new_directives.sort_keys();
     for (name, directive) in new_directives.iter().filter(|(name, _)| {
-        uses_hashset.map_or(false, |hashset| hashset.contains(*name))
+        uses_hashset.map_or(true, |hashset| hashset.contains(*name))
     }) {
         writer.write_object_member(name, |directive_writer| {
             write_server_directive(directive_writer, &directive.borrow())
