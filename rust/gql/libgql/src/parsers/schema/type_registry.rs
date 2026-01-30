@@ -10,7 +10,7 @@ pub type FieldMapping = indexmap::IndexMap<
     Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
 >;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TypeRegistry {
     pub server_directives:
         HashMap<String, Rc<RefCell<shared::ast::ServerDirective>>>,

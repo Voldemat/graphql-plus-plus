@@ -1,5 +1,6 @@
 pub mod lexer;
 pub mod parsers;
+pub mod executor;
 
 #[derive(clap::Subcommand)]
 pub enum Commands {
@@ -7,6 +8,8 @@ pub enum Commands {
     Lexer(lexer::Commands),
     #[command(subcommand)]
     Parsers(parsers::Commands),
+    #[command(subcommand)]
+    Executor(executor::Commands),
 }
 
 impl Commands {
@@ -14,6 +17,7 @@ impl Commands {
         match self {
             Commands::Lexer(lexer) => lexer.execute(),
             Commands::Parsers(parsers) => parsers.execute(),
+            Commands::Executor(e) => e.execute(),
         }
     }
 }

@@ -78,9 +78,11 @@ pub struct Fragment {
     pub hash: u64,
 }
 
+pub type OpType = file::client::ast::OpType;
+
 #[derive(Debug)]
 pub struct Operation {
-    pub r#type: file::client::ast::OpType,
+    pub r#type: OpType,
     pub name: String,
     pub parameters: indexmap::IndexMap<
         String,
