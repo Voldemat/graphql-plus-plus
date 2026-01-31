@@ -32,16 +32,16 @@ impl std::fmt::Debug for InputTypeSpec {
 
 #[derive(Debug, Clone)]
 pub enum Literal {
-    Int(i32),
-    Float(f32),
+    Int(i64),
+    Float(f64),
     String(String),
     Boolean(bool),
 }
 
 #[derive(Debug, Clone)]
 pub enum ArrayLiteral {
-    Int(Vec<i32>),
-    Float(Vec<f32>),
+    Int(Vec<i64>),
+    Float(Vec<f64>),
     String(Vec<String>),
     Boolean(Vec<bool>),
 }
@@ -69,6 +69,19 @@ pub enum NonCallableFieldSpec<T> {
 }
 
 impl<T> NonCallableFieldSpec<T> {
+    pub fn has_default_value(self: &Self) -> bool {
+        match self {
+            Self::Literal(literal) => {
+                literal.default_value.is_some()
+                    && literal.default_value.as_ref().unwrap().is_some()
+            }
+            Self::Array(array) => {
+                array.default_value.is_some()
+                    && array.default_value.as_ref().unwrap().is_some()
+            }
+        }
+    }
+
     pub fn get_type_spec(self: &Self) -> &T {
         match self {
             Self::Literal(literal) => &literal.r#type,
@@ -95,20 +108,20 @@ pub struct InputType {
 #[derive(Debug, Clone)]
 pub enum ArgumentLiteralValue {
     String(String),
-    Int(i32),
-    Float(f32),
+    Int(i64),
+    Float(f64),
     Boolean(bool),
     EnumValue(String),
 }
 
-impl From<i32> for ArgumentLiteralValue {
-    fn from(value: i32) -> Self {
+impl From<i64> for ArgumentLiteralValue {
+    fn from(value: i64) -> Self {
         return Self::Int(value);
     }
 }
 
-impl From<f32> for ArgumentLiteralValue {
-    fn from(value: f32) -> Self {
+impl From<f64> for ArgumentLiteralValue {
+    fn from(value: f64) -> Self {
         return Self::Float(value);
     }
 }

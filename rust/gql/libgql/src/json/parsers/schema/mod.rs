@@ -12,13 +12,10 @@ fn parse_literal(
     value: &serde_json::Value,
 ) -> Result<shared::ast::Literal, String> {
     if let Some(v) = value.as_i64() {
-        return Ok(shared::ast::Literal::Int(
-            v.try_into()
-                .map_err(|_| "Int value is larger than i32::Max".to_string())?,
-        ));
+        return Ok(shared::ast::Literal::Int(v));
     };
     if let Some(v) = value.as_f64() {
-        return Ok(shared::ast::Literal::Float(v as f32));
+        return Ok(shared::ast::Literal::Float(v));
     };
     if let Some(v) = value.as_bool() {
         return Ok(shared::ast::Literal::Boolean(v));
@@ -48,18 +45,12 @@ fn parse_array_literal(
     let first_v = arr.get(0).unwrap();
     if first_v.is_i64() {
         return Ok(shared::ast::ArrayLiteral::Int(
-            arr.iter()
-                .map(|a| -> Result<i32, String> {
-                    a.as_i64().unwrap().try_into().map_err(|_| {
-                        "Int value is larger than i32::Max".to_string()
-                    })
-                })
-                .collect::<Result<Vec<i32>, String>>()?,
+            arr.iter().map(|a| a.as_i64().unwrap()).collect(),
         ));
     };
     if first_v.is_f64() {
         return Ok(shared::ast::ArrayLiteral::Float(
-            arr.iter().map(|a| a.as_f64().unwrap() as f32).collect(),
+            arr.iter().map(|a| a.as_f64().unwrap()).collect(),
         ));
     };
     if first_v.is_boolean() {
@@ -233,7 +224,9 @@ fn parse_input_array_field_spec(
     value: &serde_json::Value,
 ) -> Result<shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>, String> {
     return Ok(shared::ast::ArrayFieldSpec {
-        default_value: Some(parse_optional_array_literal(&value["default_value"])?),
+        default_value: Some(parse_optional_array_literal(
+            &value["default_value"],
+        )?),
         directive_invocations: Vec::new(),
         r#type: parse_input_type_spec(registry, &value["type"])?,
         nullable: value["nullable"].as_bool().unwrap(),
@@ -554,20 +547,16 @@ pub fn parse_server_schema(
         );
     }
     let new_scalars: Vec<String> = value["scalars"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .map(|v| v.as_str().unwrap().to_string())
-                .collect();
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
     for scalar in &new_scalars {
         registry.scalars.push(scalar.clone());
     }
     return Ok(server::schema::Schema {
-        scalars: [
-            shared::scalars::get_builtin_scalars(),
-            new_scalars,
-        ]
-        .concat(),
+        scalars: [shared::scalars::get_builtin_scalars(), new_scalars].concat(),
         enums: parse_enums(registry, &value["enums"])?,
         inputs: parse_inputs(registry, &value["inputs"])?,
         interfaces: parse_interfaces(registry, &value["interfaces"])?,

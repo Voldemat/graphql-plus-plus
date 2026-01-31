@@ -30,13 +30,13 @@ pub struct NameNode {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct LiteralIntNode {
     pub location: NodeLocation,
-    pub value: i32,
+    pub value: i64,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct LiteralFloatNode {
     pub location: NodeLocation,
-    pub value: f32,
+    pub value: f64,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]

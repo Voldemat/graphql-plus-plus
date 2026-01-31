@@ -250,7 +250,7 @@ impl<
         self: &mut Self,
     ) -> Option<shared::ast::LiteralIntNode> {
         let current_token = T::get_current_token(&self.tokens_source);
-        let value = current_token.lexeme.parse::<i32>().ok()?;
+        let value = current_token.lexeme.parse::<i64>().ok()?;
         return Some(shared::ast::LiteralIntNode {
             location: shared::ast::NodeLocation {
                 start_token: current_token.clone(),
@@ -265,7 +265,7 @@ impl<
         self: &Self,
     ) -> Option<shared::ast::LiteralFloatNode> {
         let current_token = T::get_current_token(&self.tokens_source);
-        let value = current_token.lexeme.parse::<f32>().ok()?;
+        let value = current_token.lexeme.parse::<f64>().ok()?;
         return Some(shared::ast::LiteralFloatNode {
             location: shared::ast::NodeLocation {
                 start_token: current_token.clone(),

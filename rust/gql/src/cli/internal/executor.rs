@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use libgql::parsers::schema::type_registry::TypeRegistry;
 
 use crate::cli::utils;
@@ -141,7 +139,7 @@ impl libgql::executor::Scalar for ExampleScalar {
         return Ok(Self::String(s.to_string()));
     }
 
-    fn get_enum_value(self: &Self) -> Option<&str> {
+    fn get_str(self: &Self) -> Option<&str> {
         match self {
             Self::String(s) => Some(s),
             _ => None,
@@ -169,49 +167,92 @@ impl libgql::executor::Scalar for ExampleScalar {
     }
 }
 
-#[derive(Default)]
-struct ParseRegistry {
-    scalars: HashMap<
-        String,
-        Box<dyn Fn(&ExampleScalar) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    enum_types: HashMap<
-        String,
-        Box<dyn Fn(&str) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    inputs: HashMap<
-        String,
-        Box<
-            dyn Fn(
-                &libgql::executor::Variables<ExampleScalar>,
-            ) -> Result<Box<dyn std::any::Any>, String>,
-        >,
-    >,
+enum Direction {
+    Asc,
+    Dsc,
 }
 
-impl libgql::executor::Registry<ExampleScalar> for ParseRegistry {
-    fn parse_scalar(
-        self: &Self,
-        scalar_name: &str,
-        value: &ExampleScalar,
-    ) -> Result<Box<dyn std::any::Any>, String> {
-        self.scalars.get(scalar_name).unwrap()(value)
+impl libgql::executor::GQLEnum for Direction {
+    fn from_str(s: &str) -> Result<Self, String> {
+        match s {
+            "ASC" => Ok(Self::Asc),
+            "DSC" => Ok(Self::Dsc),
+            _ => Err(format!("Invalid value {} for enum Direction", s)),
+        }
     }
+}
 
-    fn parse_enum(
-        self: &Self,
-        enum_type: &libgql::parsers::schema::shared::ast::Enum,
-        value: &str,
-    ) -> Result<Box<dyn std::any::Any>, String> {
-        self.enum_types.get(&enum_type.name).unwrap()(value)
+enum EUsersTagField {
+    Name,
+}
+
+impl libgql::executor::GQLEnum for EUsersTagField {
+    fn from_str(s: &str) -> Result<Self, String> {
+        match s {
+            "NAME" => Ok(Self::Name),
+            _ => Err(format!("Invalid value {} for enum EUsersTagField", s)),
+        }
     }
+}
 
-    fn parse_input(
-        self: &Self,
-        input_type: &libgql::parsers::schema::shared::ast::InputType,
-        value: &libgql::executor::Variables<ExampleScalar>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
-        self.inputs.get(&input_type.name).unwrap()(value)
+struct UsersTagSortBy {
+    direction: Direction,
+    field: EUsersTagField,
+}
+
+impl libgql::executor::GQLInput<ExampleScalar> for UsersTagSortBy {
+    fn from_variables(
+        vars: &libgql::executor::Variables<ExampleScalar>,
+    ) -> Result<Self, String> {
+        let direction = <Direction as libgql::executor::GQLEnum>::from_str(
+            vars.get("direction")
+                .ok_or("Missing required field \"direction\"")?
+                .get_str()
+                .ok_or("Invalid scalar for enum EUsersTagField")?,
+        )?;
+        let field = <EUsersTagField as libgql::executor::GQLEnum>::from_str(
+            vars.get("field")
+                .ok_or("Missing required field \"field\"")?
+                .get_str()
+                .ok_or("Invalid scalar for enum EUsersTagField")?,
+        )?;
+        return Ok(UsersTagSortBy { direction, field });
+    }
+}
+
+impl libgql::executor::GQLScalar<ExampleScalar> for i32 {
+    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::Int(i) => Ok(*i),
+            _ => Err(format!("Invalid scalar for i32 {:?}", s)),
+        }
+    }
+}
+
+impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
+    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::Float(f) => Ok(*f),
+            _ => Err(format!("Invalid scalar for f32 {:?}", s)),
+        }
+    }
+}
+
+impl libgql::executor::GQLScalar<ExampleScalar> for String {
+    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::String(s) => Ok(s.clone()),
+            _ => Err(format!("Invalid scalar for String {:?}", s)),
+        }
+    }
+}
+
+impl libgql::executor::GQLScalar<ExampleScalar> for bool {
+    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::Boolean(b) => Ok(*b),
+            _ => Err(format!("Invalid scalar for bool {:?}", s)),
+        }
     }
 }
 
@@ -223,18 +264,55 @@ fn execute(args: &ParseArgs) {
         serde_json::from_str::<serde_json::Value>(&buffer).unwrap(),
     )
     .unwrap();
-    let mut parse_registry = ParseRegistry::default();
+    let mut parse_registry =
+        libgql::executor::HashMapRegistry::<ExampleScalar>::default();
     parse_registry.scalars.insert(
         "String".into(),
-        Box::new(|scalar| match scalar {
-            ExampleScalar::String(s) => Ok(Box::new(s.clone())),
-            _ => Err(format!(
-                "Unexpected scalar value for String scalar: {:?}",
-                { scalar }
-            )),
-        }),
+        Box::new(
+            <String as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_to_any,
+        ),
     );
-    libgql::executor::execute::<ExampleScalar, ParseRegistry>(
+    parse_registry.scalars_array.insert(
+        "String".into(),
+        Box::new(
+            <String as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_array_to_any,
+        ),
+    );
+    parse_registry.scalars.insert(
+        "Boolean".into(),
+        Box::new(
+            <bool as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_to_any,
+        ),
+    );
+    parse_registry.scalars_array.insert(
+        "Boolean".into(),
+        Box::new(
+            <bool as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_array_to_any,
+        ),
+    );
+    parse_registry.scalars.insert(
+        "Int".into(),
+        Box::new(<i32 as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_to_any),
+    );
+    parse_registry.scalars_array.insert(
+        "Int".into(),
+        Box::new(<i32 as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_array_to_any),
+    );
+    parse_registry.scalars.insert(
+        "Float".into(),
+        Box::new(<f32 as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_to_any),
+    );
+    parse_registry.scalars_array.insert(
+        "Float".into(),
+        Box::new(<f32 as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_array_to_any),
+    );
+    parse_registry
+        .inputs
+        .insert("UsersTagSortBy".into(), Box::new(<UsersTagSortBy as libgql::executor::GQLInput<ExampleScalar>>::from_variables_to_any));
+    libgql::executor::execute::<
+        ExampleScalar,
+        libgql::executor::HashMapRegistry<ExampleScalar>,
+    >(
         &registry,
         &parse_registry,
         &utils::read_buffer_from_filepath(&args.query_path),
