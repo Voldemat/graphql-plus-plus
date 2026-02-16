@@ -115,6 +115,29 @@ impl<S: Scalar> Default for HashMapRegistry<S> {
     }
 }
 
+impl<S: Scalar + 'static> HashMapRegistry<S> {
+    pub fn add_scalar<T: GQLScalar<S>>(self: &mut Self, name: &str) {
+        self.scalars
+            .insert(name.into(), Box::new(T::from_scalar_to_any));
+        self.scalars_array
+            .insert(name.into(), Box::new(T::from_scalar_array_to_any));
+    }
+
+    pub fn add_enum<T: GQLEnum>(self: &mut Self, name: &str) {
+        self.enum_types
+            .insert(name.into(), Box::new(T::from_str_to_any));
+        self.enum_types_array
+            .insert(name.into(), Box::new(T::from_str_array_to_any));
+    }
+
+    pub fn add_input<T: GQLInput<S>>(self: &mut Self, name: &str) {
+        self.inputs
+            .insert(name.into(), Box::new(T::from_variables_to_any));
+        self.inputs_array
+            .insert(name.into(), Box::new(T::from_variables_to_any_array));
+    }
+}
+
 impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_scalar(
         self: &Self,

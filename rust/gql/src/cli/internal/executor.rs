@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use libgql::parsers::schema::type_registry::TypeRegistry;
 
 use crate::cli::utils;
@@ -256,6 +258,8 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
     }
 }
 
+type Context = ();
+
 fn execute(args: &ParseArgs) {
     let buffer = utils::read_buffer_from_filepath(&args.server_schema);
     let mut registry = TypeRegistry::new();
@@ -266,54 +270,19 @@ fn execute(args: &ParseArgs) {
     .unwrap();
     let mut parse_registry =
         libgql::executor::HashMapRegistry::<ExampleScalar>::default();
-    parse_registry.scalars.insert(
-        "String".into(),
-        Box::new(
-            <String as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_to_any,
-        ),
-    );
-    parse_registry.scalars_array.insert(
-        "String".into(),
-        Box::new(
-            <String as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_array_to_any,
-        ),
-    );
-    parse_registry.scalars.insert(
-        "Boolean".into(),
-        Box::new(
-            <bool as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_to_any,
-        ),
-    );
-    parse_registry.scalars_array.insert(
-        "Boolean".into(),
-        Box::new(
-            <bool as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_array_to_any,
-        ),
-    );
-    parse_registry.scalars.insert(
-        "Int".into(),
-        Box::new(<i32 as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_to_any),
-    );
-    parse_registry.scalars_array.insert(
-        "Int".into(),
-        Box::new(<i32 as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_array_to_any),
-    );
-    parse_registry.scalars.insert(
-        "Float".into(),
-        Box::new(<f32 as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_to_any),
-    );
-    parse_registry.scalars_array.insert(
-        "Float".into(),
-        Box::new(<f32 as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar_array_to_any),
-    );
-    parse_registry
-        .inputs
-        .insert("UsersTagSortBy".into(), Box::new(<UsersTagSortBy as libgql::executor::GQLInput<ExampleScalar>>::from_variables_to_any));
+    parse_registry.add_scalar::<String>("String");
+    parse_registry.add_scalar::<bool>("Boolean");
+    parse_registry.add_scalar::<i32>("Int");
+    parse_registry.add_scalar::<f32>("Float");
+    parse_registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
     libgql::executor::execute::<
+        Context,
         ExampleScalar,
         libgql::executor::HashMapRegistry<ExampleScalar>,
     >(
+        &mut (),
         &registry,
+        &HashMap::new(),
         &parse_registry,
         &utils::read_buffer_from_filepath(&args.query_path),
         &args.variables.as_ref().map_or(

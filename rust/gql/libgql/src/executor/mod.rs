@@ -28,65 +28,209 @@ pub enum Error {
     NoOperationsAreDefined,
 }
 
-type ResolverRoot = Option<Box<dyn std::any::Any>>;
+type ResolverRoot<S> = Variable<S>;
 
-type Resolver<C> = dyn Fn(&ResolverRoot, &C, &ResolvedVariables);
-type ResolversMap<C> = HashMap<(String, String), Resolver<C>>;
+type Resolver<C, S> = Box<
+    dyn Fn(
+        &ResolverRoot<S>,
+        &mut C,
+        &ResolvedVariables,
+    ) -> Result<Variable<S>, String>,
+>;
+type ResolversMap<C, S> = HashMap<(String, String), Resolver<C, S>>;
 
-fn execute_sync_operation(
+fn execute_fragment<C, S: Scalar>(
+    context: &mut C,
     registry: &TypeRegistry,
+    resolvers: &ResolversMap<C, S>,
+    parent: &ResolverRoot<S>,
+    spec: &client::ast::FragmentSpec,
+    variables: &ResolvedVariables,
+) -> Result<Variables<S>, String> {
+    match spec {
+        client::ast::FragmentSpec::Object(obj) => execute_object_selection_set(
+            context,
+            registry,
+            resolvers,
+            &obj.r#type.borrow(),
+            parent,
+            &obj.selections,
+            variables,
+        ),
+
+        client::ast::FragmentSpec::Union(union) => {
+            // runtime type check required
+            // choose matching conditional spread
+            Ok(Variables::<S>::new())
+        }
+
+        client::ast::FragmentSpec::Interface(interface) => {
+            // resolve runtime object type
+            Ok(Variables::<S>::new())
+        }
+    }
+}
+
+fn execute_field<C, S: Scalar>(
+    context: &mut C,
+    registry: &TypeRegistry,
+    resolvers: &ResolversMap<C, S>,
+    object_type: &server::ast::ObjectType,
+    parent: &ResolverRoot<S>,
+    field: &client::ast::FieldSelection,
+    variables: &ResolvedVariables,
+) -> Result<Variable<S>, String> {
+    let resolver_key = (object_type.name.clone(), field.name.clone());
+
+    let resolver = resolvers
+        .get(&resolver_key)
+        .ok_or_else(|| format!("No resolver for {}", field.name))?;
+
+    let value = resolver(parent, context, variables)?;
+
+    if let Some(fragment) = &field.selection {
+        execute_fragment(
+            context, registry, resolvers, &value, fragment, variables,
+        )?;
+    }
+
+    Ok(value)
+}
+
+fn execute_object_selection_set<C, S: Scalar>(
+    context: &mut C,
+    registry: &TypeRegistry,
+    resolvers: &ResolversMap<C, S>,
+    object_type: &server::ast::ObjectType,
+    parent: &ResolverRoot<S>,
+    selections: &[client::ast::ObjectSelection],
+    variables: &ResolvedVariables,
+) -> Result<Variables<S>, String> {
+    let mut result = Variables::<S>::new();
+    for selection in selections {
+        match selection {
+            client::ast::ObjectSelection::TypenameField(_) => {
+                let typename = object_type.name.clone();
+                result.insert(
+                    "__typename".into(),
+                    Variable::NonNullable(NonNullableVariable::Literal(
+                        LiteralVariable::Scalar(S::from_string(&typename)?),
+                    )),
+                );
+            }
+
+            client::ast::ObjectSelection::FieldSelection(field) => {
+                execute_field(
+                    context,
+                    registry,
+                    resolvers,
+                    object_type,
+                    parent,
+                    field,
+                    variables,
+                )?;
+            }
+
+            client::ast::ObjectSelection::SpreadSelection(spread) => {
+                let fragment = spread.fragment.borrow();
+                execute_fragment(
+                    context,
+                    registry,
+                    resolvers,
+                    parent,
+                    &fragment.spec,
+                    variables,
+                )?;
+            }
+        };
+    };
+    Ok(result)
+}
+
+fn execute_sync_operation<C, S: Scalar>(
+    context: &mut C,
+    registry: &TypeRegistry,
+    resolvers: &ResolversMap<C, S>,
     object: &server::ast::ObjectType,
     operation: &client::ast::Operation,
     variables: &ResolvedVariables,
-) -> Result<(), String> {
-    println!("{:?}", variables.get("limit").unwrap().downcast_ref::<i32>());
-    Ok(())
+) -> Result<Variables<S>, String> {
+    let client::ast::FragmentSpec::Object(fragment_spec) =
+        &operation.fragment_spec
+    else {
+        return Err("Root operation must select an object".into());
+    };
+
+    let root_value: ResolverRoot<S> = Variable::Null;
+    execute_object_selection_set(
+        context,
+        registry,
+        resolvers,
+        object,
+        &root_value,
+        &fragment_spec.selections,
+        variables,
+    )
 }
 
-fn execute_subscription_operation(
+fn execute_subscription_operation<C, S: Scalar>(
+    context: &mut C,
     registry: &TypeRegistry,
+    resolvers: &ResolversMap<C, S>,
     object: &server::ast::ObjectType,
     operation: &client::ast::Operation,
     variables: &ResolvedVariables,
-) -> Result<(), String> {
-    Ok(())
+) -> Result<Variables<S>, String> {
+    Ok(Variables::<S>::new())
 }
 
-fn execute_operation<S: Scalar, R: Registry<S>>(
+fn execute_operation<C, S: Scalar, R: Registry<S>>(
+    context: &mut C,
     registry: &TypeRegistry,
+    resolvers: &ResolversMap<C, S>,
     parse_registry: &R,
     operation: &client::ast::Operation,
     variables: &Variables<S>,
-) -> Result<(), String> {
+) -> Result<Variables<S>, String> {
     let resolved_variables = resolve_operation_parameters(
         parse_registry,
         &operation.parameters,
         variables,
     )?;
     match operation.r#type {
-        client::ast::OpType::Query => execute_sync_operation(
+        client::ast::OpType::Query => execute_sync_operation::<C, S>(
+            context,
             registry,
+            resolvers,
             &registry.get_query_object().unwrap().borrow(),
             operation,
             &resolved_variables,
         ),
-        client::ast::OpType::Mutation => execute_sync_operation(
+        client::ast::OpType::Mutation => execute_sync_operation::<C, S>(
+            context,
             registry,
+            resolvers,
             &registry.get_mutation_object().unwrap().borrow(),
             operation,
             &resolved_variables,
         ),
-        client::ast::OpType::Subscription => execute_subscription_operation(
-            registry,
-            &registry.get_subscription_object().unwrap().borrow(),
-            operation,
-            &resolved_variables,
-        ),
+        client::ast::OpType::Subscription => {
+            execute_subscription_operation::<C, S>(
+                context,
+                registry,
+                resolvers,
+                &registry.get_subscription_object().unwrap().borrow(),
+                operation,
+                &resolved_variables,
+            )
+        }
     }
 }
 
-pub fn execute<S: Scalar, R: Registry<S>>(
+pub fn execute<C, S: Scalar, R: Registry<S>>(
+    context: &mut C,
     registry: &TypeRegistry,
+    resolvers: &ResolversMap<C, S>,
     parse_registry: &R,
     client_query: &str,
     variables: &Variables<S>,
@@ -121,8 +265,10 @@ pub fn execute<S: Scalar, R: Registry<S>>(
         .operations
         .get(operation_name)
         .ok_or(Error::OperationIsNotDefined(operation_name.clone()))?;
-    execute_operation(
+    execute_operation::<C, S, R>(
+        context,
         &mut local_registry,
+        resolvers,
         parse_registry,
         &operation.borrow(),
         variables,
