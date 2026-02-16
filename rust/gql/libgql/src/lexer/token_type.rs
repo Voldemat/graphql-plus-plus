@@ -15,6 +15,7 @@ pub enum SimpleTokenType {
     LeftBracket,
     RightBracket,
     AtSign,
+    Ampersand
 }
 
 #[derive(
@@ -67,6 +68,7 @@ impl TryFrom<char> for TokenType {
             '[' => Ok(SimpleTokenType::LeftBracket.into()),
             ']' => Ok(SimpleTokenType::RightBracket.into()),
             '@' => Ok(SimpleTokenType::AtSign.into()),
+            '&' => Ok(SimpleTokenType::Ampersand.into()),
             '"' => Ok(ComplexTokenType::String.into()),
             '.' => Ok(ComplexTokenType::Spread.into()),
             '$' => Ok(ComplexTokenType::Identifier.into()),

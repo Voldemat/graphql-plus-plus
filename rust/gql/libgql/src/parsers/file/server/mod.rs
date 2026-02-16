@@ -367,7 +367,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
             interfaces.push(self.base.parse_name_node(false)?);
             while T::consume_if_is_ahead(
                 &mut self.base.tokens_source,
-                SimpleTokenType::Comma.into(),
+                SimpleTokenType::Ampersand.into(),
             ) {
                 interfaces.push(self.base.parse_name_node(false)?);
             }
