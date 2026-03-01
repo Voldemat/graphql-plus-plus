@@ -43,12 +43,14 @@ export function extractFragmentNamesInSpec(
     return fragmentSpec.selections.map((s): string[] => {
         if (s._type === 'SpreadSelection') {
             const fragment = schema.client.fragments[s.fragment]
+            assert(fragment.spec !== undefined)
             return [
                 s.fragment,
                 ...extractFragmentNamesInSpec(schema, fragment.spec)
             ]
         }
-        if (s._type === 'FieldSelection' && s.selection !== null) {
+        if (s._type === 'FieldSelection' && s.selection != null) {
+            assert(s.selection !== undefined)
             return extractFragmentNamesInSpec(
                 schema,
                 s.selection as FragmentSpecSchemaType,
@@ -121,7 +123,7 @@ function generateZodObjectSelection(
     case 'FieldSelection': {
         const fieldSpec = objectType.fields[selection.name]
         let expression: ts.Expression
-        if (selection.selection === null) {
+        if (selection.selection == null) {
             expression = generateZodObjectFieldSpec(scalarsMapping, fieldSpec)
         } else {
             const optional = fieldSpec.spec._type !== 'callable' ||

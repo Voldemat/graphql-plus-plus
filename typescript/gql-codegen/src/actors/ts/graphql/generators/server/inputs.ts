@@ -37,25 +37,30 @@ function generateZodInputTypeSpec(
 
 function generateZodInputFieldSpec(
     scalarsMapping: ScalarsMapping,
-    field: z.infer<typeof inputFieldSchema>
-) {
-    let expression: ts.Expression
-    switch (field.spec._type) {
+    spec: z.infer<typeof inputFieldSpecSchema>
+): ts.Expression {
+    switch (spec._type) {
     case 'array': {
-        expression = ts.factory.createCallExpression(
+        return ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
                 ts.factory.createIdentifier('z'),
                 'array'
             ),
             undefined,
-            [generateZodInputTypeSpec(scalarsMapping, field.spec.type)]
+            [generateZodInputFieldSpec(scalarsMapping, spec.type)]
         )
-        break;
     }
     case 'literal': {
-        expression = generateZodInputTypeSpec(scalarsMapping, field.spec.type)
+        return generateZodInputTypeSpec(scalarsMapping, spec.type)
     }
     }
+}
+
+function generateZodInputField(
+    scalarsMapping: ScalarsMapping,
+    field: z.infer<typeof inputFieldSchema>
+) {
+    const expression = generateZodInputFieldSpec(scalarsMapping, field.spec)
     if (!field.nullable) {
         return expression
     }
@@ -75,7 +80,7 @@ export function generateInputTypeDefinitionFields(
     fields: Record<string, z.infer<typeof inputFieldSchema>>
 ): (ts.PropertyAssignment | ts.GetAccessorDeclaration)[] {
     return Object.entries(fields).map(([name, field]) => {
-        const fieldSpec = generateZodInputFieldSpec(scalarsMapping, field)
+        const fieldSpec = generateZodInputField(scalarsMapping, field)
         if (isFieldLazy(field.spec)) {
             return ts.factory.createGetAccessorDeclaration(
                 [],

@@ -10,7 +10,6 @@ import {
 } from '@/schema/server.js';
 import { z } from 'zod/v4';
 import { generateSchemaName, generateZodInferTypeAlias } from './shared.js';
-import { invokeMethod } from '../../../shared.js';
 import { assertUnreachable } from '../../../../../utils.js';
 
 function generateZodObjectTypeSpec(
@@ -45,7 +44,7 @@ function generateZodObjectTypeSpec(
 export function generateObjectNonCallableFieldSpec(
     scalarsMapping: ScalarsMapping,
     spec: z.infer<typeof objectNonCallableFieldSpecSchema>
-) {
+): ts.Expression {
     switch (spec._type) {
     case 'array': {
         return ts.factory.createCallExpression(
@@ -54,7 +53,7 @@ export function generateObjectNonCallableFieldSpec(
                 'array'
             ),
             undefined,
-            [generateZodObjectTypeSpec(scalarsMapping, spec.type)]
+            [generateObjectNonCallableFieldSpec(scalarsMapping, spec.type)]
         )
     }
     case 'literal': {
@@ -89,14 +88,7 @@ export function generateZodObjectFieldSpec(
         assertUnreachable(field.spec)
     }
     }
-    if (!field.nullable) {
-        return expression
-    }
-    return invokeMethod(
-        invokeMethod(expression, 'nullable', []),
-        'optional',
-        []
-    )
+    return expression
 }
 
 const lazyTypes: z.infer<typeof objectTypeSchema>['_type'][] = [
@@ -106,9 +98,9 @@ const lazyTypes: z.infer<typeof objectTypeSchema>['_type'][] = [
 ]
 function isFieldLazy(spec: z.infer<typeof objectFieldSpecSchema>): boolean {
     switch (spec._type) {
-    case 'literal':
-    case 'array': return lazyTypes.includes(spec.type._type)
-    case 'callable': return lazyTypes.includes(spec.returnType.type._type)
+    case 'literal': return lazyTypes.includes(spec.type._type)
+    case 'array': return isFieldLazy(spec.type)
+    case 'callable': return isFieldLazy(spec.returnType)
     }
 }
 
