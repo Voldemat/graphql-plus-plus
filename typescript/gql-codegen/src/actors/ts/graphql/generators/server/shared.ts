@@ -8,11 +8,11 @@ export function generateNonCallableFieldSpec(
     scalars: string[],
     spec: z.infer<typeof objectNonCallableFieldSpecSchema> |
         z.infer<typeof inputFieldSpecSchema>,
-) {
+): ts.TypeNode {
     switch (spec._type) {
     case 'array':
         return ts.factory.createArrayTypeNode(
-            generateTypeReferenceNode(scalars, spec.type.name)
+            generateNonCallableFieldSpec(scalars, spec.type)
         )
     case 'literal':
         return generateTypeReferenceNode(scalars, spec.type.name)
