@@ -72,7 +72,10 @@ function generateZodInputField(
 }
 
 function isFieldLazy(spec: z.infer<typeof inputFieldSpecSchema>): boolean {
-    return spec.type._type === 'InputType'
+    switch (spec._type) {
+    case 'literal': return spec.type._type === 'InputType'
+    case 'array': return isFieldLazy(spec.type)
+    }
 }
 
 export function generateInputTypeDefinitionFields(
