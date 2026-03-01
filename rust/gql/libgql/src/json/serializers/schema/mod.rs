@@ -223,7 +223,7 @@ fn write_array_object_field_spec<'a, J: struson::writer::JsonWriter>(
     writer.write_string_member("_type", "array")?;
     writer.write_bool_member("nullable", spec.nullable)?;
     writer.write_object_member("type", |type_writer| {
-        write_object_type_spec(type_writer, &spec.r#type)
+        write_non_callable_object_field_spec(type_writer, &spec.r#type)
     })?;
     if let Some(default_value) = &spec.default_value {
         write_array_literal(writer, &default_value)?;
@@ -241,6 +241,20 @@ fn write_non_callable_object_field_spec<'a, J: struson::writer::JsonWriter>(
         }
         shared::ast::NonCallableFieldSpec::Array(array) => {
             write_array_object_field_spec(writer, array)
+        }
+    }
+}
+
+fn write_non_callable_input_field_spec<'a, J: struson::writer::JsonWriter>(
+    writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
+    spec: &shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match spec {
+        shared::ast::NonCallableFieldSpec::Literal(literal) => {
+            write_literal_input_field_spec(writer, literal)
+        }
+        shared::ast::NonCallableFieldSpec::Array(array) => {
+            write_array_input_field_spec(writer, array)
         }
     }
 }
@@ -454,7 +468,7 @@ fn write_array_input_field_spec<'a, J: struson::writer::JsonWriter>(
     writer.write_string_member("_type", "array")?;
     writer.write_bool_member("nullable", spec.nullable)?;
     writer.write_object_member("type", |type_writer| {
-        write_input_type_spec(type_writer, &spec.r#type)
+        write_non_callable_input_field_spec(type_writer, &spec.r#type)
     })?;
     write_array_literal(writer, spec.default_value.as_ref().unwrap_or(&None))?;
     Ok(())

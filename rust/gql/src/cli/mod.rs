@@ -48,8 +48,10 @@ fn generate(args: &MainArgs) {
             if filepath == "-" {
                 println!("{}", json_string);
             } else {
-                let final_filepath =
-                    std::path::Path::join(args.config.parent().unwrap(), filepath);
+                let final_filepath = std::path::Path::join(
+                    args.config.parent().unwrap(),
+                    filepath,
+                );
                 std::fs::write(final_filepath, json_string).unwrap();
             }
         }),

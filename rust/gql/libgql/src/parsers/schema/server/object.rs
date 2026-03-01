@@ -92,10 +92,17 @@ fn parse_noncallable_object_field_spec(
         file::shared::ast::TypeNode::List(l) => {
             return Ok((
                 shared::ast::ArrayFieldSpec::<ast::ObjectTypeSpec> {
-                    r#type: registry.get_type_for_object(&l.r#type.name)?,
+                    r#type: Box::new(
+                        parse_noncallable_object_field_spec(
+                            &l.r#type,
+                            &[],
+                            registry,
+                        )?
+                        .0,
+                    ),
                     default_value: None,
                     directive_invocations: directives.to_vec(),
-                    nullable: l.r#type.nullable,
+                    nullable: l.r#type.get_nullable(),
                 }
                 .into(),
                 l.nullable,

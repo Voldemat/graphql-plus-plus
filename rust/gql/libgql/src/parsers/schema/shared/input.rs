@@ -50,10 +50,14 @@ fn parse_noncallable_input_field_spec(
         file::shared::ast::TypeNode::List(l) => {
             return Ok((
                 ast::ArrayFieldSpec::<ast::InputTypeSpec> {
-                    r#type: registry.get_type_for_input(&l.r#type.name)?,
+                    r#type: Box::new(parse_noncallable_input_field_spec(
+                        &l.r#type,
+                        None,
+                        registry
+                    )?.0),
                     default_value: None,
                     directive_invocations: Vec::new(),
-                    nullable: l.r#type.nullable,
+                    nullable: l.r#type.get_nullable(),
                 }
                 .into(),
                 l.nullable,

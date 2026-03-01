@@ -140,13 +140,13 @@ pub enum TypeDefinitionNode {
     Directive(DirectiveDefinitionNode),
 }
 
-#[derive(serde::Serialize)]
+#[derive(Debug, serde::Serialize)]
 pub struct ExtendTypeNode {
     pub location: shared::ast::NodeLocation,
     pub type_node: ObjectDefinitionNode,
 }
 
-#[derive(derive_more::From, serde::Serialize)]
+#[derive(Debug, derive_more::From, serde::Serialize)]
 pub enum ASTNode {
     TypeDefinitionNode(TypeDefinitionNode),
     ExtendTypeNode(ExtendTypeNode),

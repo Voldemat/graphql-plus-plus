@@ -33,14 +33,14 @@ impl Error {
         }
     }
 
-    pub fn get_location(self: &Self) -> lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
         match self {
             Self::Base(b) => b.get_location(),
-            Self::UnexpectedOpType { token } => token.location.clone(),
+            Self::UnexpectedOpType { token } => &token.location,
             Self::DuplicateParameter {
                 duplicate_parameter,
                 ..
-            } => duplicate_parameter.location.start_token.location.clone(),
+            } => &duplicate_parameter.location.start_token.location,
         }
     }
 }

@@ -147,12 +147,15 @@ fn parse_object_array_field_spec(
     return Ok(shared::ast::ArrayFieldSpec {
         default_value: None,
         directive_invocations: Vec::new(),
-        r#type: parse_object_type_spec(registry, &value["type"])?,
+        r#type: Box::new(parse_non_callable_object_field_spec(
+            registry,
+            &value["type"],
+        )?),
         nullable: value["nullable"].as_bool().unwrap(),
     });
 }
 
-fn parse_non_nullable_object_field_spec(
+fn parse_non_callable_object_field_spec(
     registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<
@@ -228,7 +231,7 @@ fn parse_input_array_field_spec(
             &value["default_value"],
         )?),
         directive_invocations: Vec::new(),
-        r#type: parse_input_type_spec(registry, &value["type"])?,
+        r#type: Box::new(parse_input_field_spec(registry, &value["type"])?),
         nullable: value["nullable"].as_bool().unwrap(),
     });
 }
@@ -287,7 +290,7 @@ fn parse_object_callable_field_spec(
     value: &serde_json::Value,
 ) -> Result<server::ast::CallableFieldSpec, String> {
     return Ok(server::ast::CallableFieldSpec {
-        return_type: parse_non_nullable_object_field_spec(
+        return_type: parse_non_callable_object_field_spec(
             registry,
             &value["returnType"],
         )?,

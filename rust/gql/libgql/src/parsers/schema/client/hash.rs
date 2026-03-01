@@ -88,7 +88,7 @@ pub fn hash_input_field_spec<T: std::hash::Hasher>(
         shared::ast::NonCallableFieldSpec::Array(array) => {
             hasher.write_u8(b'a');
             std::hash::Hash::hash(&array.nullable, hasher);
-            hash_input_type_spec(hasher, &array.r#type);
+            hash_input_field_spec(hasher, &array.r#type);
             if let Some(default_value) = &array.default_value {
                 hash_array_default_value(hasher, default_value);
             }

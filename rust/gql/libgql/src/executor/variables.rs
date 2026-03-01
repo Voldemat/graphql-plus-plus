@@ -119,53 +119,54 @@ fn resolve_array<S: Scalar, R: Registry<S>>(
     array_type: &shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>,
     elements: &[Variable<S>],
 ) -> Result<Box<dyn std::any::Any>, String> {
-    match &array_type.r#type {
-        shared::ast::InputTypeSpec::Enum(e) => {
-            R::parse_enum_array(registry, &e, &elements.iter().map(|e| {
-                if let Variable::NonNullable(NonNullableVariable::Literal(
-                    LiteralVariable::Scalar(scalar),
-                )) = e && let Some(s) = scalar.get_str()
-                {
-                    Ok(s)
-                } else {
-                    Err(format!(
-                        "Expected string scalar for enum value, received: {:?}",
-                        e
-                    ))
-                }
-            }).collect::<Result<Vec<&str>, String>>()?)
-        }
-        shared::ast::InputTypeSpec::Scalar(scalar_name) => {
-            R::parse_scalar_array(registry, &scalar_name, &elements.iter().map(|e| {
-                if let Variable::NonNullable(NonNullableVariable::Literal(
-                    LiteralVariable::Scalar(scalar),
-                )) = e
-                {
-                    Ok(scalar)
-                } else {
-                    Err(format!(
-                        "Expected scalar, received: {:?}",
-                        e
-                    ))
-                }
-            }).collect::<Result<Vec<_>, String>>()?)
-        }
-        shared::ast::InputTypeSpec::InputType(input_type) => {
-            R::parse_input_array(registry, &input_type.borrow(), &elements.iter().map(|e| {
-                if let Variable::NonNullable(NonNullableVariable::Literal(
-                    LiteralVariable::Object(object),
-                )) = e
-                {
-                    Ok(object)
-                } else {
-                    Err(format!(
-                        "Expected object, received: {:?}",
-                        e
-                    ))
-                }
-            }).collect::<Result<Vec<_>, String>>()?)
-        }
-    }
+    return Ok(Box::new(1));
+    //match &array_type.r#type {
+    //    shared::ast::InputTypeSpec::Enum(e) => {
+    //        R::parse_enum_array(registry, &e, &elements.iter().map(|e| {
+    //            if let Variable::NonNullable(NonNullableVariable::Literal(
+    //                LiteralVariable::Scalar(scalar),
+    //            )) = e && let Some(s) = scalar.get_str()
+    //            {
+    //                Ok(s)
+    //            } else {
+    //                Err(format!(
+    //                    "Expected string scalar for enum value, received: {:?}",
+    //                    e
+    //                ))
+    //            }
+    //        }).collect::<Result<Vec<&str>, String>>()?)
+    //    }
+    //    shared::ast::InputTypeSpec::Scalar(scalar_name) => {
+    //        R::parse_scalar_array(registry, &scalar_name, &elements.iter().map(|e| {
+    //            if let Variable::NonNullable(NonNullableVariable::Literal(
+    //                LiteralVariable::Scalar(scalar),
+    //            )) = e
+    //            {
+    //                Ok(scalar)
+    //            } else {
+    //                Err(format!(
+    //                    "Expected scalar, received: {:?}",
+    //                    e
+    //                ))
+    //            }
+    //        }).collect::<Result<Vec<_>, String>>()?)
+    //    }
+    //    shared::ast::InputTypeSpec::InputType(input_type) => {
+    //        R::parse_input_array(registry, &input_type.borrow(), &elements.iter().map(|e| {
+    //            if let Variable::NonNullable(NonNullableVariable::Literal(
+    //                LiteralVariable::Object(object),
+    //            )) = e
+    //            {
+    //                Ok(object)
+    //            } else {
+    //                Err(format!(
+    //                    "Expected object, received: {:?}",
+    //                    e
+    //                ))
+    //            }
+    //        }).collect::<Result<Vec<_>, String>>()?)
+    //    }
+    //}
 }
 
 fn literal_to_literal_variable<S: Scalar>(

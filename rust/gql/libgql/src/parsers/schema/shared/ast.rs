@@ -56,7 +56,7 @@ pub struct LiteralFieldSpec<T> {
 
 #[derive(Debug, Clone)]
 pub struct ArrayFieldSpec<T> {
-    pub r#type: T,
+    pub r#type: Box<NonCallableFieldSpec<T>>,
     pub nullable: bool,
     pub default_value: Option<Option<ArrayLiteral>>,
     pub directive_invocations: Vec<ServerDirectiveInvocation>,
@@ -85,7 +85,7 @@ impl<T> NonCallableFieldSpec<T> {
     pub fn get_type_spec(self: &Self) -> &T {
         match self {
             Self::Literal(literal) => &literal.r#type,
-            Self::Array(array) => &array.r#type,
+            Self::Array(array) => &array.r#type.get_type_spec(),
         }
     }
 }

@@ -31,10 +31,10 @@ impl Error {
         }
     }
 
-    pub fn get_location(self: &Self) -> lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
         match self {
-        Self::Base(b) => b.get_location(),
-        Self::UnknownStartOfAstNode { token } => token.location.clone()
+            Self::Base(b) => b.get_location(),
+            Self::UnknownStartOfAstNode { token } => &token.location,
         }
     }
 }
@@ -55,13 +55,17 @@ impl<T: tokens_source::TokensSource> Parser<T> {
     ) -> Result<Vec<ast::ASTNode>, Error> {
         let mut nodes = Vec::<ast::ASTNode>::new();
         'l: loop {
-            match self.parse_ast_node() {
-                Ok(node) => nodes.push(node),
-                Err(error) => {
-                    if error.is_eof() {
-                        break 'l;
+            if T::get_current_token(&self.base.tokens_source).token_type
+                != ComplexTokenType::String.into()
+            {
+                match self.parse_ast_node() {
+                    Ok(node) => nodes.push(node),
+                    Err(error) => {
+                        if error.is_eof() {
+                            break 'l;
+                        }
+                        return Err(error);
                     }
-                    return Err(error);
                 }
             }
             if let Some(e) = self.base.tokens_source.advance().err() {
@@ -121,6 +125,10 @@ impl<T: tokens_source::TokensSource> Parser<T> {
             &mut self.base.tokens_source,
             SimpleTokenType::Equal.into(),
         )?;
+        T::consume_if_is_ahead(
+            &mut self.base.tokens_source,
+            SimpleTokenType::Vslash.into(),
+        );
         let mut values = vec![self.base.parse_name_node(false)?];
         while T::consume_if_is_ahead(
             &mut self.base.tokens_source,
@@ -176,7 +184,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
             values.push(self.parse_enum_value_definition_node()?);
             T::consume_if_is_ahead(
                 &mut self.base.tokens_source,
-                SimpleTokenType::Comma.into()
+                SimpleTokenType::Comma.into(),
             );
         }
         T::consume(
@@ -265,7 +273,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
             fields.push(self.base.parse_input_field_definition_node()?);
             T::consume_if_is_ahead(
                 &mut self.base.tokens_source,
-                SimpleTokenType::Comma.into()
+                SimpleTokenType::Comma.into(),
             );
         }
         T::consume(

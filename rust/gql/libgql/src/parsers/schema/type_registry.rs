@@ -1,8 +1,11 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::parsers::{
-    file,
-    schema::{client, server, shared},
+use crate::{
+    lexer,
+    parsers::{
+        file,
+        schema::{client, server, shared},
+    },
 };
 
 pub type FieldMapping = indexmap::IndexMap<
@@ -32,6 +35,25 @@ pub struct TypeRegistry {
 pub enum Error {
     UnknownType(file::shared::ast::NameNode),
     UnknownArgument(file::shared::ast::NameNode),
+}
+
+impl Error {
+    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
+        match self {
+            Self::UnknownType(name_node) => {
+                &name_node.location.start_token.location
+            }
+            Self::UnknownArgument(name_node) => {
+                &name_node.location.end_token.location
+            }
+        }
+    }
+    pub fn get_source_file(self: &Self) -> &Rc<file::shared::ast::SourceFile> {
+        match self {
+            Self::UnknownType(name_node) => &name_node.location.source,
+            Self::UnknownArgument(name_node) => &name_node.location.source,
+        }
+    }
 }
 
 impl TypeRegistry {

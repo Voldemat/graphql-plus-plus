@@ -36,7 +36,7 @@ pub fn format_line(
 
 pub fn format_error(
     exc: &str,
-    location: libgql::lexer::tokens::Location,
+    location: &libgql::lexer::tokens::Location,
     source: &Rc<libgql::parsers::file::shared::ast::SourceFile>,
 ) -> String {
     let mut buffer = format!("{}\n", source.filepath.display());
@@ -150,6 +150,7 @@ pub fn load_server_schema_from_inputs(
                 continue;
             }
         };
+
         nodes.extend(file_nodes);
     }
     if errors.len() > 0 {
@@ -205,9 +206,19 @@ pub fn load_client_schema_from_inputs(
     if errors.len() > 0 {
         return Err(errors);
     }
-    let new_schema =
-        libgql::parsers::schema::client::parse_client_schema(registry, &nodes)
-            .unwrap();
+    let new_schema = match libgql::parsers::schema::client::parse_client_schema(
+        registry, &nodes,
+    ) {
+        Ok(schema) => schema,
+        Err(error) => {
+            errors.push(format_error(
+                &format!("{:?}", error),
+                error.get_location(),
+                &error.get_source_file(),
+            ));
+            return Err(errors);
+        }
+    };
     schema.append_schema(new_schema);
     return Ok(schema);
 }
@@ -229,17 +240,28 @@ pub fn run_config_action<'a>(
             for e in errors {
                 println!("{}", e);
             }
-            return Ok(())
+            return Ok(());
         }
     };
-    let client_schema = config.client.as_ref().map(|client_config| {
-        load_client_schema_from_inputs(
+    let client_schema = match config.client.as_ref().map(|client_config| {
+        match load_client_schema_from_inputs(
             &mut registry,
             config_path.parent().unwrap(),
             &client_config.inputs,
-        )
-        .unwrap()
-    });
+        ) {
+            Ok(schema) => Some(schema),
+            Err(errors) => {
+                for e in errors {
+                    println!("{}", e);
+                }
+                return None;
+            }
+        }
+    }) {
+        None => None,
+        Some(None) => return Ok(()),
+        Some(s) => s,
+    };
     if let Some(outputs) = config.server.outputs.as_ref() {
         let json_string =
             libgql::json::serializers::schema::serialize_server_schema(

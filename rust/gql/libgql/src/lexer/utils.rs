@@ -28,5 +28,8 @@ pub fn parse_buffer_into_tokens(
     if errors.len() > 0 {
         return Err(errors);
     };
+    if let Some(last_token) = lexer.maybe_extract_token() {
+        tokens.push(last_token)
+    }
     return Ok(tokens);
 }

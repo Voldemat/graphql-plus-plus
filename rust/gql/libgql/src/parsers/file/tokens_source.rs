@@ -26,14 +26,12 @@ impl ConsumeError {
         }
     }
 
-    pub fn get_location(self: &Self) -> lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
         match self {
-            Self::EOF { token } => token.location.clone(),
-            Self::WrongType { received_token, .. } => {
-                received_token.location.clone()
-            }
+            Self::EOF { token } => &token.location,
+            Self::WrongType { received_token, .. } => &received_token.location,
             Self::UnexpectedLexeme { received_token, .. } => {
-                received_token.location.clone()
+                &received_token.location
             }
         }
     }

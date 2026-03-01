@@ -26,14 +26,14 @@ impl Error {
         }
     }
 
-    pub fn get_location(self: &Self) -> lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
         match self {
             Self::Consume(e) => e.get_location(),
-            Self::IdentifierIsKeyword { token } => token.location.clone(),
-            Self::ExpectedComplexType { token } => token.location.clone(),
-            Self::CannotParseNumberLiteral { token } => token.location.clone(),
-            Self::UnexpectedSpreadInLiteral { token } => token.location.clone(),
-            Self::UnknownDirectiveLocation { token } => token.location.clone(),
+            Self::IdentifierIsKeyword { token } => &token.location,
+            Self::ExpectedComplexType { token } => &token.location,
+            Self::CannotParseNumberLiteral { token } => &token.location,
+            Self::UnexpectedSpreadInLiteral { token } => &token.location,
+            Self::UnknownDirectiveLocation { token } => &token.location,
         }
     }
 }
@@ -122,7 +122,7 @@ impl<
             SimpleTokenType::LeftBracket.into(),
         )?
         .clone();
-        let type_node = self.parse_named_type_node()?;
+        let type_node = self.parse_type_node()?;
         T::consume(
             &mut self.tokens_source,
             SimpleTokenType::RightBracket.into(),
@@ -137,7 +137,7 @@ impl<
                 end_token: T::get_current_token(&self.tokens_source).clone(),
                 source: T::get_source_file(&self.tokens_source),
             },
-            r#type: type_node,
+            r#type: Box::new(type_node),
             nullable,
         });
     }
@@ -171,6 +171,10 @@ impl<
             &mut self.tokens_source,
             SimpleTokenType::LeftParen.into(),
         ) {
+            T::consume_if_is_ahead(
+                &mut self.tokens_source,
+                ComplexTokenType::String.into(),
+            );
             while T::is_ahead(
                 &self.tokens_source,
                 ComplexTokenType::Identifier.into(),
@@ -179,6 +183,10 @@ impl<
                 T::consume_if_is_ahead(
                     &mut self.tokens_source,
                     SimpleTokenType::Comma.into(),
+                );
+                T::consume_if_is_ahead(
+                    &mut self.tokens_source,
+                    ComplexTokenType::String.into(),
                 );
             }
             T::consume(

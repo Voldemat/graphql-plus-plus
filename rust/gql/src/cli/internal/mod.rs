@@ -1,6 +1,6 @@
+pub mod executor;
 pub mod lexer;
 pub mod parsers;
-pub mod executor;
 
 #[derive(clap::Subcommand)]
 pub enum Commands {

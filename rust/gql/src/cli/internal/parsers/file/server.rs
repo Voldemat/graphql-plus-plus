@@ -26,14 +26,16 @@ fn parse(args: &ParseArgs) {
         serde_json::from_str(&buffer).unwrap();
     let source_file = Rc::new(libgql::parsers::file::shared::ast::SourceFile {
         buffer,
-        filepath: args.filepath.clone()
+        filepath: args.filepath.clone(),
     });
     let nodes = libgql::parsers::file::server::Parser::new(
         libgql::parsers::file::tokens_sources::VecTokensSource::new(
             tokens,
-            source_file
-        )
-    ).parse_ast_nodes().unwrap();
+            source_file,
+        ),
+    )
+    .parse_ast_nodes()
+    .unwrap();
     utils::print_result(args.pretty, &nodes);
 }
 

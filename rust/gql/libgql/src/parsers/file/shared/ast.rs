@@ -9,7 +9,9 @@ pub struct SourceFile {
 
 impl std::fmt::Debug for SourceFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("SourceFile").field("filepath", &self.filepath).finish()
+        f.debug_struct("SourceFile")
+            .field("filepath", &self.filepath)
+            .finish()
     }
 }
 
@@ -66,6 +68,27 @@ pub enum LiteralNode {
     EnumValue(LiteralEnumValueNode),
 }
 
+impl LiteralNode {
+    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
+        match self {
+            Self::Int(node) => &node.location.start_token.location,
+            Self::Float(node) => &node.location.start_token.location,
+            Self::String(node) => &node.location.start_token.location,
+            Self::Boolean(node) => &node.location.start_token.location,
+            Self::EnumValue(node) => &node.location.start_token.location,
+        }
+    }
+    pub fn get_source_file(self: &Self) -> &Rc<SourceFile> {
+        match self {
+            Self::Int(node) => &node.location.source,
+            Self::Float(node) => &node.location.source,
+            Self::String(node) => &node.location.source,
+            Self::Boolean(node) => &node.location.source,
+            Self::EnumValue(node) => &node.location.source,
+        }
+    }
+}
+
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct NamedTypeNode {
     pub location: NodeLocation,
@@ -76,7 +99,7 @@ pub struct NamedTypeNode {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct ListTypeNode {
     pub location: NodeLocation,
-    pub r#type: NamedTypeNode,
+    pub r#type: Box<TypeNode>,
     pub nullable: bool,
 }
 
@@ -84,6 +107,15 @@ pub struct ListTypeNode {
 pub enum TypeNode {
     Named(NamedTypeNode),
     List(ListTypeNode),
+}
+
+impl TypeNode {
+    pub fn get_nullable(self: &Self) -> bool {
+        match self {
+            Self::Named(named) => named.nullable,
+            Self::List(list) => list.nullable,
+        }
+    }
 }
 
 #[derive(Debug, Clone, derive_more::From, serde::Serialize)]

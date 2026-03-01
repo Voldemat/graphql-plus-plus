@@ -254,7 +254,10 @@ fn visit_non_callable_field_spec_object_type_spec(
             {
                 hook(array);
             }
-            visit_object_type_spec(hooks, &array.r#type);
+            visit_non_callable_field_spec_object_type_spec(
+                hooks,
+                &array.r#type,
+            );
         }
     }
 }
@@ -281,7 +284,10 @@ fn visit_object_field_spec(
             {
                 hook(array);
             }
-            visit_object_type_spec(hooks, &array.r#type);
+            visit_non_callable_field_spec_object_type_spec(
+                hooks,
+                &array.r#type,
+            );
         }
         server::ast::ObjectFieldSpec::Callable(callable) => {
             if let Some(hook) = hooks.visit_callable_field_spec.as_mut() {
@@ -444,7 +450,7 @@ fn visit_input_field_spec(
             {
                 hook(array)
             }
-            visit_input_type_spec(hooks, &array.r#type)
+            visit_input_field_spec(hooks, &array.r#type)
         }
     }
 }
