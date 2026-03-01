@@ -152,10 +152,10 @@ function buildInputFieldSpec(
     spec: z.infer<typeof inputFieldSpecSchema>
 ): string {
     switch (spec._type) {
-    case 'literal': return spec.type._type
+    case 'literal': return spec.type.name
     case 'array':
         return '[' + buildInputFieldSpec(spec.type) +
-                spec.nullable ? '' : '!' + ']'
+                (spec.nullable ? '' : '!') + ']'
     }
 }
 

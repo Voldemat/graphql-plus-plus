@@ -11,6 +11,7 @@ import {
 import { z } from 'zod/v4';
 import { generateSchemaName, generateZodInferTypeAlias } from './shared.js';
 import { assertUnreachable } from '../../../../../utils.js';
+import { invokeMethod } from '../../../shared.js';
 
 function generateZodObjectTypeSpec(
     scalarsMapping: ScalarsMapping,
@@ -88,7 +89,14 @@ export function generateZodObjectFieldSpec(
         assertUnreachable(field.spec)
     }
     }
-    return expression
+    if (!field.nullable) {
+        return expression
+    }
+    return invokeMethod(
+        invokeMethod(expression, 'nullable', []),
+        'optional',
+        []
+    )
 }
 
 const lazyTypes: z.infer<typeof objectTypeSchema>['_type'][] = [
