@@ -171,11 +171,11 @@ function extractTypeFromObjectFieldSpec(
     spec: z.infer<typeof objectFieldSpecSchema>
 ) {
     switch (spec._type) {
-    case 'literal':
+    case 'literal': return spec.type
     case 'array':
-        return spec.type
+        return extractTypeFromObjectFieldSpec(spec.type)
     case 'callable':
-        return spec.returnType.type
+        return extractTypeFromObjectFieldSpec(spec.returnType)
     }
 }
 
@@ -231,26 +231,24 @@ export function buildSelectionFromFieldSpec(
     spec: z.infer<typeof objectFieldSpecSchema>
 ): z.infer<typeof fragmentSpecSchema> | null {
     const type = extractTypeFromObjectFieldSpec(spec)
-    if (type._type === 'array') return buildSelectionFromFieldSpec(type.type)
-    if (type._type !== 'literal') throw new Error('Unexpected condition')
-    switch (type.type._type) {
+    switch (type._type) {
     case 'Enum':
     case 'Scalar': return null
     case 'ObjectType':
     case 'InterfaceType':
         return {
             _type: 'ObjectFragmentSpec',
-            name: type.type.name,
+            name: type.name,
             selections: [
-                { _type: 'SpreadSelection', fragment: type.type.name }
+                { _type: 'SpreadSelection', fragment: type.name }
             ]
         }
     case 'Union':
         return {
             _type: 'UnionFragmentSpec',
-            name: type.type.name,
+            name: type.name,
             selections: [
-                { _type: 'SpreadSelection', fragment: type.type.name }
+                { _type: 'SpreadSelection', fragment: type.name }
             ]
         }
     }
