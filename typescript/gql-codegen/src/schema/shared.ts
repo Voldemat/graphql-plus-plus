@@ -39,8 +39,13 @@ export const inputLiteralSpecSchema = z.object({
 export const inputArraySpecSchema = z.object({
     _type: z.literal('array'),
     nullable: z.boolean(),
-    type: inputTypeSchema,
-    defaultValue: arrayLiteralSchema.optional().nullable()
+    defaultValue: arrayLiteralSchema.optional().nullable(),
+    get type(): z.ZodDiscriminatedUnion<
+        [typeof inputLiteralSpecSchema, typeof inputArraySpecSchema]
+        > {
+        // eslint-disable-next-line no-use-before-define
+        return inputFieldSpecSchema
+    },
 })
 
 export const inputFieldSpecSchema = z.discriminatedUnion('_type', [

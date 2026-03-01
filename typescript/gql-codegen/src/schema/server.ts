@@ -33,10 +33,16 @@ export const objectLiteralSpecSchema = z.object({
     _type: z.literal('literal'),
     type: objectTypeSchema
 })
+
 export const objectArraySpecSchema = z.object({
     _type: z.literal('array'),
     nullable: z.boolean(),
-    type: objectTypeSchema
+    get type(): z.ZodDiscriminatedUnion<[
+        typeof objectLiteralSpecSchema, typeof objectArraySpecSchema
+    ]> {
+        // eslint-disable-next-line no-use-before-define
+        return objectNonCallableFieldSpecSchema
+    }
 })
 
 export const objectNonCallableFieldSpecSchema = z.discriminatedUnion('_type', [
@@ -60,7 +66,7 @@ export const objectFieldSchema = z.object({
 })
 export const objectSchema = z.object({
     name: z.string(),
-    implements: z.record(z.string(), z.string()),
+    implements: z.record(z.string(), z.any()),
     fields: z.record(z.string(), objectFieldSchema),
 })
 
