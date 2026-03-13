@@ -1,15 +1,14 @@
+pub mod ast;
 pub mod hashmap_registry;
 pub mod registry;
 pub mod scalar;
 pub mod variables;
+pub use ast::{LiteralValue, NonNullableValue, Value, Values};
 pub use hashmap_registry::{GQLEnum, GQLInput, GQLScalar, HashMapRegistry};
 pub use registry::Registry;
 pub use scalar::Scalar;
 use std::collections::HashMap;
-pub use variables::{
-    LiteralVariable, NonNullableVariable, ResolvedVariables, Variable,
-    Variables, resolve_operation_parameters,
-};
+pub use variables::{ResolvedVariables, resolve_operation_parameters};
 
 use crate::{
     lexer,
@@ -28,25 +27,62 @@ pub enum Error {
     NoOperationsAreDefined,
 }
 
-type ResolverRoot<S> = Variable<S>;
+pub type ResolverRoot<S> = Values<S>;
 
-type Resolver<C, S> = Box<
+pub type Resolver<C, S> = Box<
     dyn Fn(
         &ResolverRoot<S>,
         &mut C,
         &ResolvedVariables,
-    ) -> Result<Variable<S>, String>,
+    ) -> Result<Value<S>, String>,
 >;
-type ResolversMap<C, S> = HashMap<(String, String), Resolver<C, S>>;
+pub type ResolversMap<C, S> = HashMap<(String, String), Resolver<C, S>>;
+
+fn execute_fragment_on_value<C, S: Scalar>(
+    context: &mut C,
+    registry: &TypeRegistry,
+    resolvers: &ResolversMap<C, S>,
+    parent: &mut Value<S>,
+    spec: &client::ast::FragmentSpec,
+    variables: &ResolvedVariables,
+) -> Result<(), String> {
+    let Value::NonNullable(non_nullable) = parent else {
+        return Ok(());
+    };
+    match non_nullable {
+        NonNullableValue::Literal(literal) => {
+            let LiteralValue::Object(object_value) = literal else {
+                panic!("Unexpected fragment field selection on scalar");
+            };
+            execute_fragment(
+                context,
+                registry,
+                resolvers,
+                object_value,
+                spec,
+                variables,
+            )?;
+            return Ok(());
+        }
+        NonNullableValue::Array(array) => {
+            for value in array {
+                execute_fragment_on_value(
+                    context, registry, resolvers, value, spec, variables,
+                )?;
+            }
+            return Ok(());
+        }
+    }
+}
 
 fn execute_fragment<C, S: Scalar>(
     context: &mut C,
     registry: &TypeRegistry,
     resolvers: &ResolversMap<C, S>,
-    parent: &ResolverRoot<S>,
+    parent: &mut ResolverRoot<S>,
     spec: &client::ast::FragmentSpec,
     variables: &ResolvedVariables,
-) -> Result<Variables<S>, String> {
+) -> Result<(), String> {
     match spec {
         client::ast::FragmentSpec::Object(obj) => execute_object_selection_set(
             context,
@@ -61,12 +97,12 @@ fn execute_fragment<C, S: Scalar>(
         client::ast::FragmentSpec::Union(union) => {
             // runtime type check required
             // choose matching conditional spread
-            Ok(Variables::<S>::new())
+            Ok(())
         }
 
         client::ast::FragmentSpec::Interface(interface) => {
             // resolve runtime object type
-            Ok(Variables::<S>::new())
+            Ok(())
         }
     }
 }
@@ -79,18 +115,18 @@ fn execute_field<C, S: Scalar>(
     parent: &ResolverRoot<S>,
     field: &client::ast::FieldSelection,
     variables: &ResolvedVariables,
-) -> Result<Variable<S>, String> {
+) -> Result<Value<S>, String> {
     let resolver_key = (object_type.name.clone(), field.name.clone());
 
     let resolver = resolvers
         .get(&resolver_key)
         .ok_or_else(|| format!("No resolver for {}", field.name))?;
 
-    let value = resolver(parent, context, variables)?;
+    let mut value = resolver(parent, context, variables)?;
 
     if let Some(fragment) = &field.selection {
-        execute_fragment(
-            context, registry, resolvers, &value, fragment, variables,
+        execute_fragment_on_value(
+            context, registry, resolvers, &mut value, fragment, variables,
         )?;
     }
 
@@ -102,25 +138,28 @@ fn execute_object_selection_set<C, S: Scalar>(
     registry: &TypeRegistry,
     resolvers: &ResolversMap<C, S>,
     object_type: &server::ast::ObjectType,
-    parent: &ResolverRoot<S>,
+    parent: &mut ResolverRoot<S>,
     selections: &[client::ast::ObjectSelection],
     variables: &ResolvedVariables,
-) -> Result<Variables<S>, String> {
-    let mut result = Variables::<S>::new();
+) -> Result<(), String> {
     for selection in selections {
         match selection {
             client::ast::ObjectSelection::TypenameField(_) => {
                 let typename = object_type.name.clone();
-                result.insert(
+                parent.insert(
                     "__typename".into(),
-                    Variable::NonNullable(NonNullableVariable::Literal(
-                        LiteralVariable::Scalar(S::from_string(&typename)?),
+                    Value::NonNullable(NonNullableValue::Literal(
+                        LiteralValue::Scalar(S::from_string(&typename)?),
                     )),
                 );
+                return Ok(());
             }
 
             client::ast::ObjectSelection::FieldSelection(field) => {
-                execute_field(
+                if parent.contains_key(&field.alias) {
+                    return Ok(());
+                }
+                let value = execute_field(
                     context,
                     registry,
                     resolvers,
@@ -129,6 +168,8 @@ fn execute_object_selection_set<C, S: Scalar>(
                     field,
                     variables,
                 )?;
+                parent.insert(field.alias.clone(), value);
+                return Ok(());
             }
 
             client::ast::ObjectSelection::SpreadSelection(spread) => {
@@ -141,10 +182,11 @@ fn execute_object_selection_set<C, S: Scalar>(
                     &fragment.spec,
                     variables,
                 )?;
+                return Ok(());
             }
         };
-    };
-    Ok(result)
+    }
+    return Ok(());
 }
 
 fn execute_sync_operation<C, S: Scalar>(
@@ -154,23 +196,24 @@ fn execute_sync_operation<C, S: Scalar>(
     object: &server::ast::ObjectType,
     operation: &client::ast::Operation,
     variables: &ResolvedVariables,
-) -> Result<Variables<S>, String> {
+) -> Result<Values<S>, String> {
     let client::ast::FragmentSpec::Object(fragment_spec) =
         &operation.fragment_spec
     else {
         return Err("Root operation must select an object".into());
     };
 
-    let root_value: ResolverRoot<S> = Variable::Null;
+    let mut root_value: ResolverRoot<S> = Values::<S>::new();
     execute_object_selection_set(
         context,
         registry,
         resolvers,
         object,
-        &root_value,
+        &mut root_value,
         &fragment_spec.selections,
         variables,
-    )
+    )?;
+    return Ok(root_value);
 }
 
 fn execute_subscription_operation<C, S: Scalar>(
@@ -180,8 +223,8 @@ fn execute_subscription_operation<C, S: Scalar>(
     object: &server::ast::ObjectType,
     operation: &client::ast::Operation,
     variables: &ResolvedVariables,
-) -> Result<Variables<S>, String> {
-    Ok(Variables::<S>::new())
+) -> Result<Values<S>, String> {
+    Ok(Values::<S>::new())
 }
 
 fn execute_operation<C, S: Scalar, R: Registry<S>>(
@@ -190,8 +233,8 @@ fn execute_operation<C, S: Scalar, R: Registry<S>>(
     resolvers: &ResolversMap<C, S>,
     parse_registry: &R,
     operation: &client::ast::Operation,
-    variables: &Variables<S>,
-) -> Result<Variables<S>, String> {
+    variables: &Values<S>,
+) -> Result<Values<S>, String> {
     let resolved_variables = resolve_operation_parameters(
         parse_registry,
         &operation.parameters,
@@ -233,7 +276,7 @@ pub fn execute<C, S: Scalar, R: Registry<S>>(
     resolvers: &ResolversMap<C, S>,
     parse_registry: &R,
     client_query: &str,
-    variables: &Variables<S>,
+    variables: &Values<S>,
     operation: &Option<String>,
 ) -> Result<(), Error> {
     let tokens = lexer::utils::parse_buffer_into_tokens(client_query)?;

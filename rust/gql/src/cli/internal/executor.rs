@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use libgql::parsers::schema::type_registry::TypeRegistry;
+use libgql::{
+    executor::ast::TryGetStr, parsers::schema::type_registry::TypeRegistry,
+};
 
 use crate::cli::utils;
 
@@ -11,13 +13,8 @@ pub enum Commands {
 
 #[derive(clap::Args)]
 pub struct ParseArgs {
-    #[arg(
-        short,
-        long,
-        help = "filepath to server json schema, \"-\" for stdin",
-        default_value = "-"
-    )]
-    server_schema: std::path::PathBuf,
+    #[arg(short, long, help = "filepath to server json schema")]
+    server_schema_path: std::path::PathBuf,
     #[arg(short, long, help = "path to client query to execute")]
     query_path: std::path::PathBuf,
     #[arg(short, long, help = "variables for client query")]
@@ -28,48 +25,42 @@ pub struct ParseArgs {
 
 fn parse_variable_from_json<S: libgql::executor::Scalar>(
     value: &serde_json::Value,
-) -> Result<libgql::executor::Variable<S>, String> {
+) -> Result<libgql::executor::Value<S>, String> {
     match value {
-        serde_json::Value::Null => Ok(libgql::executor::Variable::Null),
+        serde_json::Value::Null => Ok(libgql::executor::Value::Null),
         serde_json::Value::String(s) => {
-            Ok(libgql::executor::Variable::NonNullable(
-                libgql::executor::NonNullableVariable::Literal(
-                    libgql::executor::LiteralVariable::Scalar(S::from_string(
-                        s,
-                    )?),
+            Ok(libgql::executor::Value::NonNullable(
+                libgql::executor::NonNullableValue::Literal(
+                    libgql::executor::LiteralValue::Scalar(S::from_string(s)?),
                 ),
             ))
         }
-        serde_json::Value::Bool(b) => {
-            Ok(libgql::executor::Variable::NonNullable(
-                libgql::executor::NonNullableVariable::Literal(
-                    libgql::executor::LiteralVariable::Scalar(S::from_bool(
-                        *b,
-                    )?),
-                ),
-            ))
-        }
+        serde_json::Value::Bool(b) => Ok(libgql::executor::Value::NonNullable(
+            libgql::executor::NonNullableValue::Literal(
+                libgql::executor::LiteralValue::Scalar(S::from_bool(*b)?),
+            ),
+        )),
         serde_json::Value::Number(n) => {
             if let Some(u64_n) = n.as_u64() {
-                Ok(libgql::executor::Variable::NonNullable(
-                    libgql::executor::NonNullableVariable::Literal(
-                        libgql::executor::LiteralVariable::Scalar(S::from_u64(
+                Ok(libgql::executor::Value::NonNullable(
+                    libgql::executor::NonNullableValue::Literal(
+                        libgql::executor::LiteralValue::Scalar(S::from_u64(
                             u64_n,
                         )?),
                     ),
                 ))
             } else if let Some(i64_n) = n.as_i64() {
-                Ok(libgql::executor::Variable::NonNullable(
-                    libgql::executor::NonNullableVariable::Literal(
-                        libgql::executor::LiteralVariable::Scalar(S::from_i64(
+                Ok(libgql::executor::Value::NonNullable(
+                    libgql::executor::NonNullableValue::Literal(
+                        libgql::executor::LiteralValue::Scalar(S::from_i64(
                             i64_n,
                         )?),
                     ),
                 ))
             } else if let Some(f64_n) = n.as_f64() {
-                Ok(libgql::executor::Variable::NonNullable(
-                    libgql::executor::NonNullableVariable::Literal(
-                        libgql::executor::LiteralVariable::Scalar(S::from_f64(
+                Ok(libgql::executor::Value::NonNullable(
+                    libgql::executor::NonNullableValue::Literal(
+                        libgql::executor::LiteralValue::Scalar(S::from_f64(
                             f64_n,
                         )?),
                     ),
@@ -79,8 +70,8 @@ fn parse_variable_from_json<S: libgql::executor::Scalar>(
             }
         }
         serde_json::Value::Array(a) => {
-            Ok(libgql::executor::Variable::NonNullable(
-                libgql::executor::NonNullableVariable::Array(
+            Ok(libgql::executor::Value::NonNullable(
+                libgql::executor::NonNullableValue::Array(
                     a.iter()
                         .map(|element| parse_variable_from_json::<S>(element))
                         .collect::<Result<Vec<_>, String>>()?,
@@ -88,13 +79,13 @@ fn parse_variable_from_json<S: libgql::executor::Scalar>(
             ))
         }
         serde_json::Value::Object(o) => {
-            let mut variables = libgql::executor::Variables::<S>::new();
+            let mut variables = libgql::executor::Values::<S>::new();
             for (key, value) in o {
                 variables.insert(key.clone(), parse_variable_from_json(value)?);
             }
-            Ok(libgql::executor::Variable::NonNullable(
-                libgql::executor::NonNullableVariable::Literal(
-                    libgql::executor::LiteralVariable::Object(variables),
+            Ok(libgql::executor::Value::NonNullable(
+                libgql::executor::NonNullableValue::Literal(
+                    libgql::executor::LiteralValue::Object(variables),
                 ),
             ))
         }
@@ -103,9 +94,9 @@ fn parse_variable_from_json<S: libgql::executor::Scalar>(
 
 fn parse_variables_from_json<S: libgql::executor::Scalar>(
     value: &serde_json::Value,
-) -> Result<libgql::executor::Variables<S>, String> {
+) -> Result<libgql::executor::Values<S>, String> {
     match value {
-        serde_json::Value::Null => Ok(libgql::executor::Variables::new()),
+        serde_json::Value::Null => Ok(libgql::executor::Values::new()),
         serde_json::Value::String(_) => {
             Err("Variables must be json object, received a string".into())
         }
@@ -119,7 +110,7 @@ fn parse_variables_from_json<S: libgql::executor::Scalar>(
             Err("Variables must be json object, received an array".into())
         }
         serde_json::Value::Object(o) => {
-            let mut variables = libgql::executor::Variables::<S>::new();
+            let mut variables = libgql::executor::Values::<S>::new();
             for (key, value) in o {
                 variables.insert(key.clone(), parse_variable_from_json(value)?);
             }
@@ -204,18 +195,18 @@ struct UsersTagSortBy {
 
 impl libgql::executor::GQLInput<ExampleScalar> for UsersTagSortBy {
     fn from_variables(
-        vars: &libgql::executor::Variables<ExampleScalar>,
+        vars: &libgql::executor::Values<ExampleScalar>,
     ) -> Result<Self, String> {
         let direction = <Direction as libgql::executor::GQLEnum>::from_str(
             vars.get("direction")
                 .ok_or("Missing required field \"direction\"")?
-                .get_str()
+                .try_get_str()
                 .ok_or("Invalid scalar for enum EUsersTagField")?,
         )?;
         let field = <EUsersTagField as libgql::executor::GQLEnum>::from_str(
             vars.get("field")
                 .ok_or("Missing required field \"field\"")?
-                .get_str()
+                .try_get_str()
                 .ok_or("Invalid scalar for enum EUsersTagField")?,
         )?;
         return Ok(UsersTagSortBy { direction, field });
@@ -260,8 +251,30 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
 
 type Context = ();
 
+fn login_resolver(
+    root: &libgql::executor::ResolverRoot<ExampleScalar>,
+    context: &mut Context,
+    variables: &libgql::executor::ResolvedVariables,
+) -> Result<libgql::executor::Value<ExampleScalar>, String> {
+    println!(
+        "login_resolver: {:?}, email: {}, password: {}",
+        root,
+        variables
+            .get("email")
+            .unwrap()
+            .downcast_ref::<String>()
+            .unwrap(),
+        variables
+            .get("password")
+            .unwrap()
+            .downcast_ref::<String>()
+            .unwrap()
+    );
+    Ok(libgql::executor::Value::Null)
+}
+
 fn execute(args: &ParseArgs) {
-    let buffer = utils::read_buffer_from_filepath(&args.server_schema);
+    let buffer = utils::read_buffer_from_filepath(&args.server_schema_path);
     let mut registry = TypeRegistry::new();
     libgql::json::parsers::schema::parse_server_schema(
         &mut registry,
@@ -275,6 +288,11 @@ fn execute(args: &ParseArgs) {
     parse_registry.add_scalar::<i32>("Int");
     parse_registry.add_scalar::<f32>("Float");
     parse_registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
+    let mut resolvers = libgql::executor::ResolversMap::new();
+    resolvers.insert(
+        ("Mutation".to_string(), "login".to_string()),
+        Box::new(login_resolver),
+    );
     libgql::executor::execute::<
         Context,
         ExampleScalar,
@@ -282,18 +300,18 @@ fn execute(args: &ParseArgs) {
     >(
         &mut (),
         &registry,
-        &HashMap::new(),
+        &resolvers,
         &parse_registry,
         &utils::read_buffer_from_filepath(&args.query_path),
-        &args.variables.as_ref().map_or(
-            libgql::executor::Variables::new(),
-            |v| {
+        &args
+            .variables
+            .as_ref()
+            .map_or(libgql::executor::Values::new(), |v| {
                 parse_variables_from_json(
                     &serde_json::from_str::<serde_json::Value>(&v).unwrap(),
                 )
                 .unwrap()
-            },
-        ),
+            }),
         &args.operation,
     )
     .unwrap()

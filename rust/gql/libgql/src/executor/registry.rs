@@ -1,9 +1,7 @@
-use std::collections::HashMap;
-
 use crate::parsers::schema::shared;
 
 use super::scalar::Scalar;
-use super::variables::Variables;
+use super::ast::Values;
 
 pub trait Registry<S: Scalar> {
     fn parse_scalar(
@@ -29,11 +27,11 @@ pub trait Registry<S: Scalar> {
     fn parse_input(
         self: &Self,
         input_type: &shared::ast::InputType,
-        value: &Variables<S>,
+        value: &Values<S>,
     ) -> Result<Box<dyn std::any::Any>, String>;
     fn parse_input_array(
         self: &Self,
         input_type: &shared::ast::InputType,
-        value: &[&Variables<S>],
+        value: &[&Values<S>],
     ) -> Result<Box<dyn std::any::Any>, String>;
 }

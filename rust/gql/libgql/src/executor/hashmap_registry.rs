@@ -4,7 +4,7 @@ use crate::parsers::schema::shared;
 
 use super::registry::Registry;
 use super::scalar::Scalar;
-use super::variables::Variables;
+use super::ast::Values;
 
 pub trait GQLScalar<S: Scalar>: Sized
 where
@@ -53,22 +53,22 @@ pub trait GQLInput<S: Scalar>: Sized
 where
     Self: 'static,
 {
-    fn from_variables(vars: &Variables<S>) -> Result<Self, String>;
+    fn from_variables(vars: &Values<S>) -> Result<Self, String>;
     fn from_variables_to_any(
-        vars: &Variables<S>,
+        vars: &Values<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_variables(vars)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
     fn from_variables_array(
-        vars: &[&Variables<S>],
+        vars: &[&Values<S>],
     ) -> Result<Vec<Self>, String> {
         vars.iter()
             .map(|s| Self::from_variables(s))
             .collect::<Result<Vec<_>, String>>()
     }
     fn from_variables_to_any_array(
-        vars: &[&Variables<S>],
+        vars: &[&Values<S>],
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_variables_array(vars)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
@@ -86,7 +86,7 @@ pub struct HashMapRegistry<S: Scalar> {
     >,
     pub inputs: HashMap<
         String,
-        Box<dyn Fn(&Variables<S>) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<dyn Fn(&Values<S>) -> Result<Box<dyn std::any::Any>, String>>,
     >,
     pub scalars_array: HashMap<
         String,
@@ -98,7 +98,7 @@ pub struct HashMapRegistry<S: Scalar> {
     >,
     pub inputs_array: HashMap<
         String,
-        Box<dyn Fn(&[&Variables<S>]) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<dyn Fn(&[&Values<S>]) -> Result<Box<dyn std::any::Any>, String>>,
     >,
 }
 
@@ -174,7 +174,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_input(
         self: &Self,
         input_type: &shared::ast::InputType,
-        value: &Variables<S>,
+        value: &Values<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.inputs.get(&input_type.name).unwrap()(value)
     }
@@ -182,7 +182,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_input_array(
         self: &Self,
         input_type: &shared::ast::InputType,
-        values: &[&Variables<S>],
+        values: &[&Values<S>],
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.inputs_array.get(&input_type.name).unwrap()(values)
     }

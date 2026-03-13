@@ -6,53 +6,7 @@ use crate::parsers::schema::shared;
 
 use super::registry::Registry;
 use super::scalar::Scalar;
-
-#[derive(Debug)]
-pub enum Variable<S: Scalar> {
-    Null,
-    NonNullable(NonNullableVariable<S>),
-}
-
-impl<S: Scalar> Variable<S> {
-    pub fn get_str(self: &Self) -> Option<&str> {
-        match self {
-            Variable::NonNullable(n) => n.get_str(),
-            _ => None,
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum NonNullableVariable<S: Scalar> {
-    Array(Vec<Variable<S>>),
-    Literal(LiteralVariable<S>),
-}
-
-impl<S: Scalar> NonNullableVariable<S> {
-    fn get_str(self: &Self) -> Option<&str> {
-        match self {
-            NonNullableVariable::Literal(l) => l.get_str(),
-            _ => None,
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum LiteralVariable<S: Scalar> {
-    Object(Variables<S>),
-    Scalar(S),
-}
-
-impl<S: Scalar> LiteralVariable<S> {
-    fn get_str(self: &Self) -> Option<&str> {
-        match self {
-            LiteralVariable::Scalar(s) => s.get_str(),
-            _ => None,
-        }
-    }
-}
-
-pub type Variables<S> = HashMap<String, Variable<S>>;
+use super::ast::{Value, Values, NonNullableValue, LiteralValue};
 
 pub type ResolvedVariable = Box<dyn std::any::Any>;
 pub type ResolvedVariables = HashMap<String, ResolvedVariable>;
@@ -60,12 +14,12 @@ pub type ResolvedVariables = HashMap<String, ResolvedVariable>;
 fn resolve_type_spec<S: Scalar, R: Registry<S>>(
     registry: &R,
     spec: &shared::ast::InputTypeSpec,
-    variable: &LiteralVariable<S>,
+    variable: &LiteralValue<S>,
 ) -> Result<ResolvedVariable, String> {
     match (spec, variable) {
         (
             shared::ast::InputTypeSpec::Scalar(scalar_name),
-            LiteralVariable::Scalar(scalar),
+            LiteralValue::Scalar(scalar),
         ) => Ok(R::parse_scalar(registry, scalar_name, scalar)?),
         (shared::ast::InputTypeSpec::Scalar(scalar_name), other) => {
             Err(format!(
@@ -75,7 +29,7 @@ fn resolve_type_spec<S: Scalar, R: Registry<S>>(
         }
         (
             shared::ast::InputTypeSpec::Enum(enum_type),
-            LiteralVariable::Scalar(scalar),
+            LiteralValue::Scalar(scalar),
         ) => {
             if let Some(enum_value) = scalar.get_str() {
                 return Ok(R::parse_enum(registry, enum_type, enum_value)?);
@@ -92,7 +46,7 @@ fn resolve_type_spec<S: Scalar, R: Registry<S>>(
         )),
         (
             shared::ast::InputTypeSpec::InputType(input_type),
-            LiteralVariable::Object(object),
+            LiteralValue::Object(object),
         ) => {
             return Ok(R::parse_input(registry, &input_type.borrow(), object)?);
         }
@@ -109,7 +63,7 @@ fn resolve_type_spec<S: Scalar, R: Registry<S>>(
 fn resolve_literal<S: Scalar, R: Registry<S>>(
     registry: &R,
     spec: &shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>,
-    var: &LiteralVariable<S>,
+    var: &LiteralValue<S>,
 ) -> Result<ResolvedVariable, String> {
     return resolve_type_spec(registry, &spec.r#type, var);
 }
@@ -117,14 +71,14 @@ fn resolve_literal<S: Scalar, R: Registry<S>>(
 fn resolve_array<S: Scalar, R: Registry<S>>(
     registry: &R,
     array_type: &shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>,
-    elements: &[Variable<S>],
+    elements: &[Value<S>],
 ) -> Result<Box<dyn std::any::Any>, String> {
     return Ok(Box::new(1));
     //match &array_type.r#type {
     //    shared::ast::InputTypeSpec::Enum(e) => {
     //        R::parse_enum_array(registry, &e, &elements.iter().map(|e| {
-    //            if let Variable::NonNullable(NonNullableVariable::Literal(
-    //                LiteralVariable::Scalar(scalar),
+    //            if let Value::NonNullable(NonNullableValue::Literal(
+    //                LiteralValue::Scalar(scalar),
     //            )) = e && let Some(s) = scalar.get_str()
     //            {
     //                Ok(s)
@@ -138,8 +92,8 @@ fn resolve_array<S: Scalar, R: Registry<S>>(
     //    }
     //    shared::ast::InputTypeSpec::Scalar(scalar_name) => {
     //        R::parse_scalar_array(registry, &scalar_name, &elements.iter().map(|e| {
-    //            if let Variable::NonNullable(NonNullableVariable::Literal(
-    //                LiteralVariable::Scalar(scalar),
+    //            if let Value::NonNullable(NonNullableValue::Literal(
+    //                LiteralValue::Scalar(scalar),
     //            )) = e
     //            {
     //                Ok(scalar)
@@ -153,8 +107,8 @@ fn resolve_array<S: Scalar, R: Registry<S>>(
     //    }
     //    shared::ast::InputTypeSpec::InputType(input_type) => {
     //        R::parse_input_array(registry, &input_type.borrow(), &elements.iter().map(|e| {
-    //            if let Variable::NonNullable(NonNullableVariable::Literal(
-    //                LiteralVariable::Object(object),
+    //            if let Value::NonNullable(NonNullableValue::Literal(
+    //                LiteralValue::Object(object),
     //            )) = e
     //            {
     //                Ok(object)
@@ -171,19 +125,19 @@ fn resolve_array<S: Scalar, R: Registry<S>>(
 
 fn literal_to_literal_variable<S: Scalar>(
     literal: &shared::ast::Literal,
-) -> Result<LiteralVariable<S>, String> {
+) -> Result<LiteralValue<S>, String> {
     match literal {
         shared::ast::Literal::Int(i) => {
-            Ok(LiteralVariable::Scalar(S::from_i64(*i)?))
+            Ok(LiteralValue::Scalar(S::from_i64(*i)?))
         }
         shared::ast::Literal::Float(f) => {
-            Ok(LiteralVariable::Scalar(S::from_f64(*f)?))
+            Ok(LiteralValue::Scalar(S::from_f64(*f)?))
         }
         shared::ast::Literal::String(s) => {
-            Ok(LiteralVariable::Scalar(S::from_string(s)?))
+            Ok(LiteralValue::Scalar(S::from_string(s)?))
         }
         shared::ast::Literal::Boolean(b) => {
-            Ok(LiteralVariable::Scalar(S::from_bool(*b)?))
+            Ok(LiteralValue::Scalar(S::from_bool(*b)?))
         }
     }
 }
@@ -191,9 +145,9 @@ fn literal_to_literal_variable<S: Scalar>(
 fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
     registry: &R,
     param: &shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
-    variable: &Variable<S>,
+    variable: &Value<S>,
 ) -> Result<Option<ResolvedVariable>, String> {
-    let Variable::NonNullable(nonnullable_variable) = variable else {
+    let Value::NonNullable(nonnullable_variable) = variable else {
         if param.nullable {
             return Ok(None);
         } else if param.spec.has_default_value() {
@@ -225,7 +179,7 @@ fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
     };
     match &param.spec {
         shared::ast::NonCallableFieldSpec::Array(spec) => {
-            if let NonNullableVariable::Array(array) = nonnullable_variable {
+            if let NonNullableValue::Array(array) = nonnullable_variable {
                 Ok(Some(resolve_array(registry, spec, array)?))
             } else {
                 Err(format!(
@@ -235,7 +189,7 @@ fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
             }
         }
         shared::ast::NonCallableFieldSpec::Literal(spec) => {
-            if let NonNullableVariable::Literal(l) = nonnullable_variable {
+            if let NonNullableValue::Literal(l) = nonnullable_variable {
                 Ok(Some(resolve_literal(registry, spec, l)?))
             } else {
                 Err(format!(
@@ -253,7 +207,7 @@ pub fn resolve_operation_parameters<S: Scalar, R: Registry<S>>(
         String,
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >,
-    variables: &Variables<S>,
+    variables: &Values<S>,
 ) -> Result<ResolvedVariables, String> {
     let mut vars = ResolvedVariables::new();
     for param in op_parameters.values() {
