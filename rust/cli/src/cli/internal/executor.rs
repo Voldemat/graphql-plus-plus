@@ -187,6 +187,22 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
     }
 }
 
+#[derive(Debug)]
+enum EGroupUsersField {
+    Name,
+    Email
+}
+
+impl libgql::executor::GQLEnum for EGroupUsersField {
+    fn from_str(s: &str) -> Result<Self, String> {
+        match s {
+        "NAME" => Ok(Self::Name),
+        "EMAIL" => Ok(Self::Email),
+        _ => Err(format!("EGroupUsersField: Unknown enum value {}", s))
+        }
+    }
+}
+
 type Context = ();
 
 fn login_resolver(
@@ -267,7 +283,7 @@ fn create_group_resolver(
     variables: &libgql::executor::ResolvedVariables,
 ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
     println!(
-        "create_group_resolver: {:?}, groupIn: {:?}, userIds: {:?}",
+        "create_group_resolver: {:?}, groupIn: {:?}, userIds: {:?}, field: {:?}",
         root,
         variables
             .get("groupIn")
@@ -281,7 +297,12 @@ fn create_group_resolver(
             .unwrap()
             .iter()
             .map(|v| v.downcast_ref::<Vec<UUID>>().unwrap())
-            .collect::<Vec<_>>()
+            .collect::<Vec<_>>(),
+        variables
+            .get("field")
+            .unwrap()
+            .downcast_ref::<EGroupUsersField>()
+            .unwrap()
     );
     Ok(libgql::executor::Value::NonNullable(
         libgql::executor::NonNullableValue::Literal(
@@ -378,6 +399,7 @@ fn execute(args: &ParseArgs) {
     parse_registry.add_scalar::<i32>("Int");
     parse_registry.add_scalar::<f32>("Float");
     parse_registry.add_scalar::<UUID>("UUID");
+    parse_registry.add_enum::<EGroupUsersField>("EGroupUsersField");
     parse_registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
     parse_registry.add_input::<GroupIn>("GroupIn");
     let mut resolvers = libgql::executor::ResolversMap::new();
