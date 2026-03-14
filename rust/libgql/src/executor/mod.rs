@@ -376,7 +376,6 @@ fn execute_subscription_operation<C, S: Scalar>(
 fn execute_operation<C, S: Scalar, R: Registry<S>>(
     context: &mut C,
     registry: &TypeRegistry,
-    literal_to_scalar: &impl Fn(&shared::ast::Literal) -> Result<S, String>,
     resolvers: &ResolversMap<C, S>,
     parse_registry: &R,
     operation: &client::ast::Operation,
@@ -384,7 +383,6 @@ fn execute_operation<C, S: Scalar, R: Registry<S>>(
 ) -> Result<Values<S>, String> {
     let resolved_variables = resolve_operation_parameters(
         parse_registry,
-        literal_to_scalar,
         &operation.parameters,
         variables,
     )?;
@@ -421,7 +419,6 @@ fn execute_operation<C, S: Scalar, R: Registry<S>>(
 pub fn execute<C, S: Scalar, R: Registry<S>>(
     context: &mut C,
     registry: &TypeRegistry,
-    literal_to_scalar: &impl Fn(&shared::ast::Literal) -> Result<S, String>,
     resolvers: &ResolversMap<C, S>,
     parse_registry: &R,
     client_query: &str,
@@ -460,7 +457,6 @@ pub fn execute<C, S: Scalar, R: Registry<S>>(
     let result = execute_operation::<C, S, R>(
         context,
         &mut local_registry,
-        literal_to_scalar,
         resolvers,
         parse_registry,
         &operation.borrow(),

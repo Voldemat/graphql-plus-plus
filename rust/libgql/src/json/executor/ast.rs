@@ -4,16 +4,29 @@ pub enum JSONScalar<'a> {
     Number(&'a serde_json::Number),
 }
 
-pub fn parse_variable_from_json<S: crate::executor::Scalar>(
+pub trait JSONSerializableScalar {
+    fn to_json_value(self: &Self) -> Result<serde_json::Value, String>;
+}
+
+pub trait JSONParsableScalar: Sized {
+    fn from_json_scalar(json_scalar: JSONScalar) -> Result<Self, String>;
+}
+
+trait InputScalar: crate::executor::Scalar + JSONParsableScalar {}
+impl<T: crate::executor::Scalar + JSONParsableScalar> InputScalar for T {}
+
+trait OutputScalar: crate::executor::Scalar + JSONSerializableScalar {}
+impl<T: crate::executor::Scalar + JSONSerializableScalar> OutputScalar for T {}
+
+pub fn parse_variable_from_json<S: InputScalar>(
     value: &serde_json::Value,
-    scalar_parser: &impl Fn(JSONScalar) -> Result<S, String>,
 ) -> Result<crate::executor::Value<S>, String> {
     match value {
         serde_json::Value::Null => Ok(crate::executor::Value::Null),
         serde_json::Value::String(s) => {
             Ok(crate::executor::Value::NonNullable(
                 crate::executor::NonNullableValue::Literal(
-                    crate::executor::LiteralValue::Scalar(scalar_parser(
+                    crate::executor::LiteralValue::Scalar(S::from_json_scalar(
                         JSONScalar::String(s),
                     )?),
                 ),
@@ -21,7 +34,7 @@ pub fn parse_variable_from_json<S: crate::executor::Scalar>(
         }
         serde_json::Value::Bool(b) => Ok(crate::executor::Value::NonNullable(
             crate::executor::NonNullableValue::Literal(
-                crate::executor::LiteralValue::Scalar(scalar_parser(
+                crate::executor::LiteralValue::Scalar(S::from_json_scalar(
                     JSONScalar::Bool(*b),
                 )?),
             ),
@@ -29,7 +42,7 @@ pub fn parse_variable_from_json<S: crate::executor::Scalar>(
         serde_json::Value::Number(n) => {
             Ok(crate::executor::Value::NonNullable(
                 crate::executor::NonNullableValue::Literal(
-                    crate::executor::LiteralValue::Scalar(scalar_parser(
+                    crate::executor::LiteralValue::Scalar(S::from_json_scalar(
                         JSONScalar::Number(n),
                     )?),
                 ),
@@ -38,19 +51,14 @@ pub fn parse_variable_from_json<S: crate::executor::Scalar>(
         serde_json::Value::Array(a) => Ok(crate::executor::Value::NonNullable(
             crate::executor::NonNullableValue::Array(
                 a.iter()
-                    .map(|element| {
-                        parse_variable_from_json::<S>(element, scalar_parser)
-                    })
+                    .map(|element| parse_variable_from_json::<S>(element))
                     .collect::<Result<Vec<_>, String>>()?,
             ),
         )),
         serde_json::Value::Object(o) => {
             let mut variables = crate::executor::Values::<S>::new();
             for (key, value) in o {
-                variables.insert(
-                    key.clone(),
-                    parse_variable_from_json(value, scalar_parser)?,
-                );
+                variables.insert(key.clone(), parse_variable_from_json(value)?);
             }
             Ok(crate::executor::Value::NonNullable(
                 crate::executor::NonNullableValue::Literal(
@@ -64,9 +72,8 @@ pub fn parse_variable_from_json<S: crate::executor::Scalar>(
     }
 }
 
-pub fn parse_variables_from_json<S: crate::executor::Scalar>(
+pub fn parse_variables_from_json<S: InputScalar>(
     value: &serde_json::Value,
-    scalar_parser: &impl Fn(JSONScalar) -> Result<S, String>,
 ) -> Result<crate::executor::Values<S>, String> {
     match value {
         serde_json::Value::Null => Ok(crate::executor::Values::new()),
@@ -87,7 +94,7 @@ pub fn parse_variables_from_json<S: crate::executor::Scalar>(
             for (key, value) in o {
                 variables.insert(
                     key.clone(),
-                    parse_variable_from_json(value, scalar_parser)?,
+                    parse_variable_from_json(value)?,
                 );
             }
             Ok(variables)
@@ -95,59 +102,58 @@ pub fn parse_variables_from_json<S: crate::executor::Scalar>(
     }
 }
 
-pub fn serialize_literal_value_to_json<S: crate::executor::Scalar>(
+pub fn serialize_literal_value_to_json<S: OutputScalar>(
     value: &crate::executor::LiteralValue<S>,
-    scalar_serializer: &impl Fn(&S) -> Result<serde_json::Value, String>,
 ) -> Result<serde_json::Value, String> {
     match value {
         crate::executor::LiteralValue::Scalar(scalar) => {
-            scalar_serializer(scalar)
+            S::to_json_value(scalar)
         }
         crate::executor::LiteralValue::Object(_, object_value) => {
-            serialize_values_to_json(object_value, scalar_serializer)
+            serialize_values_to_json(object_value)
         }
     }
 }
 
-pub fn serialize_array_value_to_json<S: crate::executor::Scalar>(
+pub fn serialize_array_value_to_json<
+    S: crate::executor::Scalar + JSONSerializableScalar,
+>(
     values: &[crate::executor::Value<S>],
-    scalar_serializer: &impl Fn(&S) -> Result<serde_json::Value, String>,
 ) -> Result<serde_json::Value, String> {
     let mut array = Vec::<serde_json::Value>::new();
     for value in values {
-        array.push(serialize_value_to_json(value, scalar_serializer)?);
+        array.push(serialize_value_to_json(value)?);
     }
     return Ok(serde_json::Value::Array(array));
 }
 
-pub fn serialize_value_to_json<S: crate::executor::Scalar>(
+pub fn serialize_value_to_json<
+    S: crate::executor::Scalar + JSONSerializableScalar,
+>(
     value: &crate::executor::Value<S>,
-    scalar_serializer: &impl Fn(&S) -> Result<serde_json::Value, String>,
 ) -> Result<serde_json::Value, String> {
     match value {
         crate::executor::Value::Null => Ok(serde_json::Value::Null),
         crate::executor::Value::NonNullable(non_nullable) => match non_nullable
         {
             crate::executor::NonNullableValue::Literal(literal) => {
-                serialize_literal_value_to_json(literal, scalar_serializer)
+                serialize_literal_value_to_json(literal)
             }
             crate::executor::NonNullableValue::Array(array) => {
-                serialize_array_value_to_json(array, scalar_serializer)
+                serialize_array_value_to_json(array)
             }
         },
     }
 }
 
-pub fn serialize_values_to_json<S: crate::executor::Scalar>(
+pub fn serialize_values_to_json<
+    S: crate::executor::Scalar + JSONSerializableScalar,
+>(
     values: &crate::executor::Values<S>,
-    scalar_serializer: &impl Fn(&S) -> Result<serde_json::Value, String>,
 ) -> Result<serde_json::Value, String> {
     let mut map = serde_json::Map::new();
     for (key, value) in values {
-        map.insert(
-            key.clone(),
-            serialize_value_to_json(value, scalar_serializer)?,
-        );
+        map.insert(key.clone(), serialize_value_to_json(value)?);
     }
     return Ok(serde_json::Value::Object(map));
 }

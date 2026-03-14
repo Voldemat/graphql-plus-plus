@@ -155,7 +155,6 @@ fn resolve_array<S: Scalar, R: Registry<S>>(
 
 fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
     registry: &R,
-    literal_to_scalar: &impl Fn(&shared::ast::Literal) -> Result<S, String>,
     param: &shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     variable: &Value<S>,
 ) -> Result<Option<ResolvedVariable>, String> {
@@ -171,7 +170,7 @@ fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
                     return Ok(Some(resolve_literal(
                         registry,
                         spec,
-                        &LiteralValue::Scalar(literal_to_scalar(
+                        &LiteralValue::Scalar(S::from_literal(
                             &spec
                                 .default_value
                                 .as_ref()
@@ -215,7 +214,6 @@ fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
 
 pub fn resolve_operation_parameters<S: Scalar, R: Registry<S>>(
     registry: &R,
-    literal_to_scalar: &impl Fn(&shared::ast::Literal) -> Result<S, String>,
     op_parameters: &IndexMap<
         String,
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
@@ -227,7 +225,6 @@ pub fn resolve_operation_parameters<S: Scalar, R: Registry<S>>(
         if let Some(variable) = variables.get(&param.name[1..]) {
             if let Some(resolved_variable) = resolve_operation_parameter(
                 registry,
-                literal_to_scalar,
                 param,
                 variable,
             )? {
