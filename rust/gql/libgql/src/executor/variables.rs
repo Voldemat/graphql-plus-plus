@@ -46,7 +46,7 @@ fn resolve_type_spec<S: Scalar, R: Registry<S>>(
         )),
         (
             shared::ast::InputTypeSpec::InputType(input_type),
-            LiteralValue::Object(object),
+            LiteralValue::Object(object_name, object),
         ) => {
             return Ok(R::parse_input(registry, &input_type.borrow(), object)?);
         }

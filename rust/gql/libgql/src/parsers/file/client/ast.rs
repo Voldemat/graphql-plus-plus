@@ -188,6 +188,14 @@ impl OpType {
             _ => None,
         }
     }
+
+    pub fn to_object_name(self: &Self) -> &str {
+        match self {
+            Self::Query => "Query",
+            Self::Mutation => "Mutation",
+            Self::Subscription => "Subscription",
+        }
+    }
 }
 
 impl TryFrom<&str> for OpType {

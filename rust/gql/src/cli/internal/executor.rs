@@ -85,7 +85,10 @@ fn parse_variable_from_json<S: libgql::executor::Scalar>(
             }
             Ok(libgql::executor::Value::NonNullable(
                 libgql::executor::NonNullableValue::Literal(
-                    libgql::executor::LiteralValue::Object(variables),
+                    libgql::executor::LiteralValue::Object(
+                        "".to_string(),
+                        variables,
+                    ),
                 ),
             ))
         }
@@ -270,7 +273,45 @@ fn login_resolver(
             .downcast_ref::<String>()
             .unwrap()
     );
-    Ok(libgql::executor::Value::Null)
+    Ok(libgql::executor::Value::NonNullable(
+        libgql::executor::NonNullableValue::Literal(
+            libgql::executor::LiteralValue::Object(
+                "ErrorInvalidCredentials".to_string(),
+                libgql::executor::Values::new(),
+            ),
+        ),
+    ))
+}
+
+fn confirm_otp_code_resolver(
+    root: &libgql::executor::ResolverRoot<ExampleScalar>,
+    context: &mut Context,
+    variables: &libgql::executor::ResolvedVariables,
+) -> Result<libgql::executor::Value<ExampleScalar>, String> {
+    println!(
+        "confirm_otp_code_resolver: {:?}, email: {}, code: {}",
+        root,
+        variables
+            .get("email")
+            .unwrap()
+            .downcast_ref::<String>()
+            .unwrap(),
+        variables
+            .get("code")
+            .unwrap()
+            .downcast_ref::<String>()
+            .unwrap()
+    );
+    Ok(libgql::executor::Value::NonNullable(
+        libgql::executor::NonNullableValue::Literal(
+            libgql::executor::LiteralValue::Object(
+                "OTPToken".to_string(),
+                libgql::executor::Values::from_iter([
+                    ("token".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(libgql::executor::LiteralValue::Scalar(<ExampleScalar as libgql::executor::Scalar>::from_string("sample-token")?)))),
+                ].into_iter()),
+            ),
+        ),
+    ))
 }
 
 fn execute(args: &ParseArgs) {
@@ -293,7 +334,11 @@ fn execute(args: &ParseArgs) {
         ("Mutation".to_string(), "login".to_string()),
         Box::new(login_resolver),
     );
-    libgql::executor::execute::<
+    resolvers.insert(
+        ("Mutation".to_string(), "confirmOTPCode".to_string()),
+        Box::new(confirm_otp_code_resolver),
+    );
+    let result = libgql::executor::execute::<
         Context,
         ExampleScalar,
         libgql::executor::HashMapRegistry<ExampleScalar>,
@@ -314,7 +359,8 @@ fn execute(args: &ParseArgs) {
             }),
         &args.operation,
     )
-    .unwrap()
+    .unwrap();
+    println!("result: {:?}", result);
 }
 
 impl Commands {

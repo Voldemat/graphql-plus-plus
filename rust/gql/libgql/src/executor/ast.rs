@@ -37,7 +37,7 @@ impl<S: Scalar> TryGetStr for NonNullableValue<S> {
 
 #[derive(Debug)]
 pub enum LiteralValue<S: Scalar> {
-    Object(Values<S>),
+    Object(String, Values<S>),
     Scalar(S),
 }
 
