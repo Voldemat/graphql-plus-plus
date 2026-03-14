@@ -44,10 +44,10 @@ RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
         --target=aarch64-unknown-linux-musl \
         --target=x86_64-unknown-linux-musl && \
     mkdir targets && \
-    mv target/x86_64-apple-darwin/release/gql ./targets/x86_64-darwin && \
-    mv target/aarch64-apple-darwin/release/gql ./targets/aarch64-darwin && \
-    mv target/x86_64-unknown-linux-musl/release/gql ./targets/x86_64-linux && \
-    mv target/aarch64-unknown-linux-musl/release/gql ./targets/aarch64-linux
+    mv target/x86_64-apple-darwin/release/cli ./targets/x86_64-darwin && \
+    mv target/aarch64-apple-darwin/release/cli ./targets/aarch64-darwin && \
+    mv target/x86_64-unknown-linux-musl/release/cli ./targets/x86_64-linux && \
+    mv target/aarch64-unknown-linux-musl/release/cli ./targets/aarch64-linux
 
 FROM scratch AS targets
 COPY --from=builder /usr/local/app/rust/cli/targets /targets
