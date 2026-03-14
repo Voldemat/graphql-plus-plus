@@ -1,0 +1,33 @@
+name: "rust-libgql"
+
+on:
+  push:
+    paths:
+    - rust/libgql/**
+    - .github/workflows/rust-libgql.yaml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        BUILD_TARGET: [release]
+    outputs:
+      release_built: ${{ steps.set-output.outputs.release_built }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - uses: actions/checkout@v5
+    - name: Build binaries in "${{ matrix.BUILD_TARGET }}" mode
+      working-directory: rust/libgql
+      run: cargo build --profile ${{ matrix.BUILD_TARGET }}
+    - name: Run tests in "${{ matrix.BUILD_TARGET }}" mode
+      working-directory: rust/libgql
+      run: cargo test --profile ${{ matrix.BUILD_TARGET }}
+    - name: Publish crate
+      if: github.ref_type == 'tag'
+      run: |
+        cargo install cargo-edit
+        cargo set-version ${{ github.ref_name }}
+        cargo publish
