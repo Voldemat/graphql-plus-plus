@@ -1,7 +1,7 @@
 use crate::parsers::schema::shared;
 
-use super::scalar::Scalar;
 use super::ast::Values;
+use super::scalar::Scalar;
 
 pub trait Registry<S: Scalar> {
     fn parse_scalar(

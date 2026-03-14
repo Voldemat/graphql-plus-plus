@@ -3,7 +3,9 @@ mod tests {
     use std::num::Wrapping;
 
     use crate::lexer::{
-        token_type::SimpleTokenType, tokens::{Location, Token}, ComplexTokenType, Lexer
+        ComplexTokenType, Lexer,
+        token_type::SimpleTokenType,
+        tokens::{Location, Token},
     };
 
     #[test]

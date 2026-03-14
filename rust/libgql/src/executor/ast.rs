@@ -5,6 +5,10 @@ pub trait TryGetStr {
     fn try_get_str(self: &Self) -> Option<&str>;
 }
 
+pub trait TryGetScalar<S: Scalar> {
+    fn try_get_scalar(self: &Self) -> Option<&S>;
+}
+
 #[derive(Debug)]
 pub enum Value<S: Scalar> {
     Null,
@@ -16,6 +20,15 @@ impl<S: Scalar> TryGetStr for Value<S> {
         match self {
             Self::NonNullable(n) => n.try_get_str(),
             _ => None,
+        }
+    }
+}
+
+impl<S: Scalar> TryGetScalar<S> for Value<S> {
+    fn try_get_scalar(self: &Self) -> Option<&S> {
+        match self {
+            Self::Null => None,
+            Self::NonNullable(non_nullable) => non_nullable.try_get_scalar(),
         }
     }
 }
@@ -35,6 +48,15 @@ impl<S: Scalar> TryGetStr for NonNullableValue<S> {
     }
 }
 
+impl<S: Scalar> TryGetScalar<S> for NonNullableValue<S> {
+    fn try_get_scalar(self: &Self) -> Option<&S> {
+        match self {
+            Self::Array(_) => None,
+            Self::Literal(literal) => literal.try_get_scalar(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum LiteralValue<S: Scalar> {
     Object(String, Values<S>),
@@ -46,6 +68,15 @@ impl<S: Scalar> TryGetStr for LiteralValue<S> {
         match self {
             LiteralValue::Scalar(s) => s.get_str(),
             _ => None,
+        }
+    }
+}
+
+impl<S: Scalar> TryGetScalar<S> for LiteralValue<S> {
+    fn try_get_scalar(self: &Self) -> Option<&S> {
+        match self {
+            Self::Object(_, _) => None,
+            Self::Scalar(scalar) => Some(scalar),
         }
     }
 }

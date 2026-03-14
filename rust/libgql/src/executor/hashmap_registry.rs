@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use crate::parsers::schema::shared;
 
+use super::ast::Values;
 use super::registry::Registry;
 use super::scalar::Scalar;
-use super::ast::Values;
 
 pub trait GQLScalar<S: Scalar>: Sized
 where
@@ -60,9 +60,7 @@ where
         Self::from_variables(vars)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
-    fn from_variables_array(
-        vars: &[&Values<S>],
-    ) -> Result<Vec<Self>, String> {
+    fn from_variables_array(vars: &[&Values<S>]) -> Result<Vec<Self>, String> {
         vars.iter()
             .map(|s| Self::from_variables(s))
             .collect::<Result<Vec<_>, String>>()
@@ -176,7 +174,11 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         input_type: &shared::ast::InputType,
         value: &Values<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.inputs.get(&input_type.name).unwrap()(value)
+        self.inputs
+            .get(&input_type.name)
+            .ok_or(format!("Failed to find {} input parser", input_type.name))?(
+            value,
+        )
     }
 
     fn parse_input_array(

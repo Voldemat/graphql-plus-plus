@@ -22,7 +22,7 @@ pub enum Error {
     },
     UnknownServerDirective(file::shared::ast::NameNode),
     UnknownInterface(file::shared::ast::NameNode),
-    UnknownObject(file::shared::ast::NameNode)
+    UnknownObject(file::shared::ast::NameNode),
 }
 
 impl From<type_registry::Error> for Error {

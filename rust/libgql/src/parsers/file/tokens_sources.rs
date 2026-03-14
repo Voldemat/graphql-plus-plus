@@ -20,8 +20,8 @@ impl VecTokensSource {
         return Self {
             tokens,
             source_file,
-            current_index: 0
-        }
+            current_index: 0,
+        };
     }
 }
 
@@ -32,12 +32,12 @@ impl TokensSource for VecTokensSource {
 
     fn advance(self: &mut Self) -> Result<(), ConsumeError> {
         if self.current_index + 1 == self.tokens.len() {
-            return Err(ConsumeError::EOF{
-                token: self.get_current_token().clone()
-            })
+            return Err(ConsumeError::EOF {
+                token: self.get_current_token().clone(),
+            });
         }
         self.current_index += 1;
-        return Ok(())
+        return Ok(());
     }
 
     fn consume(

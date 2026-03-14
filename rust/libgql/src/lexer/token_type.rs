@@ -15,7 +15,7 @@ pub enum SimpleTokenType {
     LeftBracket,
     RightBracket,
     AtSign,
-    Ampersand
+    Ampersand,
 }
 
 #[derive(

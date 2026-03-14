@@ -8,8 +8,8 @@ pub mod object;
 pub mod schema;
 pub mod union;
 
-pub use errors::Error;
 use crate::parsers::{file, schema::type_registry::TypeRegistry};
+pub use errors::Error;
 
 pub fn parse_server_schema(
     mut registry: &mut TypeRegistry,

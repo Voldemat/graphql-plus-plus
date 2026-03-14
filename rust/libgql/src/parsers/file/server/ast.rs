@@ -38,7 +38,7 @@ impl TryFrom<&str> for DirectiveLocation {
             "INPUT_FIELD_DEFINITION" => {
                 Ok(DirectiveLocation::InputFieldDefinition)
             }
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
@@ -46,17 +46,17 @@ impl TryFrom<&str> for DirectiveLocation {
 impl DirectiveLocation {
     pub fn into_str(self: &Self) -> &'static str {
         match self {
-			Self::Schema => "SCHEMA",
-			Self::Scalar => "SCALAR",
-			Self::Object => "OBJECT",
-			Self::FieldDefinition => "FIELD_DEFINITION",
-			Self::ArgumentDefinition => "ARGUMENT_DEFINITION",
-			Self::Interface => "INTERFACE",
-			Self::Union => "UNION",
-			Self::Enum => "ENUM",
-			Self::EnumValue => "ENUM_VALUE",
-			Self::InputObject => "INPUT_OBJECT",
-			Self::InputFieldDefinition => "INPUT_FIELD_DEFINITION",
+            Self::Schema => "SCHEMA",
+            Self::Scalar => "SCALAR",
+            Self::Object => "OBJECT",
+            Self::FieldDefinition => "FIELD_DEFINITION",
+            Self::ArgumentDefinition => "ARGUMENT_DEFINITION",
+            Self::Interface => "INTERFACE",
+            Self::Union => "UNION",
+            Self::Enum => "ENUM",
+            Self::EnumValue => "ENUM_VALUE",
+            Self::InputObject => "INPUT_OBJECT",
+            Self::InputFieldDefinition => "INPUT_FIELD_DEFINITION",
         }
     }
 }

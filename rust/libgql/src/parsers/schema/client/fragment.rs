@@ -405,7 +405,9 @@ fn parse_object_field_selection_node<T: Clone + Into<errors::FieldType>>(
         selection: node
             .spec
             .as_ref()
-            .map(|spec| fragment_spec_from_field_definition(registry, field_type, spec))
+            .map(|spec| {
+                fragment_spec_from_field_definition(registry, field_type, spec)
+            })
             .transpose()?,
         arguments: match &node.field {
             file::client::ast::ObjectFieldSpec::Literal(_) => {
