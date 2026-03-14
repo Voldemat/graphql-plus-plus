@@ -1,6 +1,6 @@
 FROM crazymax/osxcross:15.5-alpine AS osxcross
 FROM rust:alpine3.23 AS builder
-WORKDIR /usr/local/app/
+WORKDIR /usr/local/app/rust/gql/
 RUN rustup target add \
     x86_64-apple-darwin aarch64-apple-darwin \
     aarch64-unknown-linux-musl x86_64-unknown-linux-musl && \
@@ -20,7 +20,7 @@ RUN rustup target add \
         ln -sf /usr/bin/cc /usr/local/bin/linker-aarch64; \
     fi && \
     mkdir .cargo && \
-    cat > /usr/local/app/.cargo/config.toml << 'EOF'
+    cat > /usr/local/app/rust/gql/.cargo/config.toml << 'EOF'
 [target.x86_64-apple-darwin]
 linker = "x86_64-apple-darwin24.5-clang"
 rustflags = ["-C", "link-arg=-mmacosx-version-min=15.0", "-C", "link-arg=-L/osxcross/lib"]
@@ -35,6 +35,7 @@ linker = "/usr/local/bin/linker-x86_64"
 [target.aarch64-unknown-linux-musl]
 linker = "/usr/local/bin/linker-aarch64"
 EOF
+COPY rust/libgql/ /usr/local/app/rust/libgql/
 COPY rust/gql/ ./
 RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
     LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH" PATH="/osxcross/bin/:$PATH" cargo build --release \
@@ -49,7 +50,7 @@ RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
     mv target/aarch64-unknown-linux-musl/release/gql ./targets/aarch64-linux
 
 FROM scratch AS targets
-COPY --from=builder /usr/local/app/targets /targets
+COPY --from=builder /usr/local/app/rust/gql/targets /targets
 
 FROM scratch AS x86_64-darwin-scratch
 COPY --from=targets /targets/x86_64-darwin /gql
