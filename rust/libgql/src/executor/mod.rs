@@ -14,7 +14,7 @@ use crate::{
     lexer,
     parsers::{
         file,
-        schema::{client, server, shared, type_registry::TypeRegistry},
+        schema::{client, server, type_registry::TypeRegistry},
     },
 };
 

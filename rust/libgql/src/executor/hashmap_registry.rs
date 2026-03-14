@@ -26,6 +26,22 @@ where
         Self::from_scalar_array(s)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
+
+    fn from_optional_scalar_array(
+        scalars: &[Option<&S>],
+    ) -> Result<Vec<Option<Self>>, String> {
+        scalars
+            .iter()
+            .map(|o| o.map(|s| Self::from_scalar(s)).transpose())
+            .collect::<Result<Vec<_>, String>>()
+    }
+
+    fn from_optional_scalar_array_to_any(
+        s: &[Option<&S>],
+    ) -> Result<Box<dyn std::any::Any>, String> {
+        Self::from_optional_scalar_array(s)
+            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+    }
 }
 
 pub trait GQLEnum: Sized
@@ -45,6 +61,22 @@ where
         s: &[&str],
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_str_array(s)
+            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+    }
+
+    fn from_optional_str_array(
+        values: &[Option<&str>],
+    ) -> Result<Vec<Option<Self>>, String> {
+        values
+            .iter()
+            .map(|o| o.map(|s| Self::from_str(s)).transpose())
+            .collect::<Result<Vec<_>, String>>()
+    }
+
+    fn from_optional_str_array_to_any(
+        s: &[Option<&str>],
+    ) -> Result<Box<dyn std::any::Any>, String> {
+        Self::from_optional_str_array(s)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
 }
@@ -78,25 +110,41 @@ pub struct HashMapRegistry<S: Scalar> {
         String,
         Box<dyn Fn(&S) -> Result<Box<dyn std::any::Any>, String>>,
     >,
-    pub enum_types: HashMap<
-        String,
-        Box<dyn Fn(&str) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    pub inputs: HashMap<
-        String,
-        Box<dyn Fn(&Values<S>) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
     pub scalars_array: HashMap<
         String,
         Box<dyn Fn(&[&S]) -> Result<Box<dyn std::any::Any>, String>>,
+    >,
+    pub scalars_optional_array: HashMap<
+        String,
+        Box<dyn Fn(&[Option<&S>]) -> Result<Box<dyn std::any::Any>, String>>,
+    >,
+    pub enum_types: HashMap<
+        String,
+        Box<dyn Fn(&str) -> Result<Box<dyn std::any::Any>, String>>,
     >,
     pub enum_types_array: HashMap<
         String,
         Box<dyn Fn(&[&str]) -> Result<Box<dyn std::any::Any>, String>>,
     >,
+    pub enum_types_optional_array: HashMap<
+        String,
+        Box<dyn Fn(&[Option<&str>]) -> Result<Box<dyn std::any::Any>, String>>,
+    >,
+    pub inputs: HashMap<
+        String,
+        Box<dyn Fn(&Values<S>) -> Result<Box<dyn std::any::Any>, String>>,
+    >,
     pub inputs_array: HashMap<
         String,
         Box<dyn Fn(&[&Values<S>]) -> Result<Box<dyn std::any::Any>, String>>,
+    >,
+    pub inputs_optional_array: HashMap<
+        String,
+        Box<
+            dyn Fn(
+                &[Option<&Values<S>>],
+            ) -> Result<Box<dyn std::any::Any>, String>,
+        >,
     >,
 }
 
@@ -104,11 +152,14 @@ impl<S: Scalar> Default for HashMapRegistry<S> {
     fn default() -> Self {
         Self {
             scalars: HashMap::default(),
-            enum_types: HashMap::default(),
-            inputs: HashMap::default(),
             scalars_array: HashMap::default(),
+            scalars_optional_array: HashMap::default(),
+            enum_types: HashMap::default(),
             enum_types_array: HashMap::default(),
+            enum_types_optional_array: HashMap::default(),
+            inputs: HashMap::default(),
             inputs_array: HashMap::default(),
+            inputs_optional_array: HashMap::default(),
         }
     }
 }
@@ -119,6 +170,10 @@ impl<S: Scalar + 'static> HashMapRegistry<S> {
             .insert(name.into(), Box::new(T::from_scalar_to_any));
         self.scalars_array
             .insert(name.into(), Box::new(T::from_scalar_array_to_any));
+        self.scalars_optional_array.insert(
+            name.into(),
+            Box::new(T::from_optional_scalar_array_to_any),
+        );
     }
 
     pub fn add_enum<T: GQLEnum>(self: &mut Self, name: &str) {
@@ -153,6 +208,14 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         self.scalars_array.get(scalar_name).unwrap()(values)
     }
 
+    fn parse_scalar_optional_array(
+        self: &Self,
+        scalar_name: &str,
+        values: &[Option<&S>],
+    ) -> Result<Box<dyn std::any::Any>, String> {
+        self.scalars_optional_array.get(scalar_name).unwrap()(values)
+    }
+
     fn parse_enum(
         self: &Self,
         enum_type: &shared::ast::Enum,
@@ -167,6 +230,14 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         values: &[&str],
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.enum_types_array.get(&enum_type.name).unwrap()(values)
+    }
+
+    fn parse_enum_optional_array(
+        self: &Self,
+        enum_type: &shared::ast::Enum,
+        values: &[Option<&str>],
+    ) -> Result<Box<dyn std::any::Any>, String> {
+        self.enum_types_optional_array.get(&enum_type.name).unwrap()(values)
     }
 
     fn parse_input(
@@ -187,5 +258,13 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         values: &[&Values<S>],
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.inputs_array.get(&input_type.name).unwrap()(values)
+    }
+
+    fn parse_input_optional_array(
+        self: &Self,
+        input_type: &shared::ast::InputType,
+        values: &[Option<&Values<S>>],
+    ) -> Result<Box<dyn std::any::Any>, String> {
+        self.inputs_optional_array.get(&input_type.name).unwrap()(values)
     }
 }
