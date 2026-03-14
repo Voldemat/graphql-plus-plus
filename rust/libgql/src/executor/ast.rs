@@ -82,11 +82,3 @@ impl<S: Scalar> TryGetScalar<S> for LiteralValue<S> {
 }
 
 pub type Values<S> = HashMap<String, Value<S>>;
-
-pub trait ToValue<S: Scalar> {
-    fn to_value(self: &Self) -> Value<S>;
-}
-
-pub trait FromValue<S: Scalar> {
-    fn from_value(value: &Value<S>) -> Self;
-}
