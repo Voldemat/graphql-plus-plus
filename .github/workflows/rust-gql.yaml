@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - rust/gql/**
+      - rust/libgql/**
       - .github/workflows/rust-gql.yaml
       - shared/dockerfiles/gql
       - shared/dockerfiles/gql.dockerignore
