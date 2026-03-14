@@ -129,6 +129,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1d728cc89cf3aee9ff92b05e62b19ee65a02b5702cff7d5a377e32c6ae29d8d"
 
 [[package]]
+name = "cli"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "glob",
+ "indexmap",
+ "libgql",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serde_json_path_to_error",
+ "serde_yaml",
+ "url",
+]
+
+[[package]]
 name = "colorchoice"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -257,22 +273,6 @@ name = "glob"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
-
-[[package]]
-name = "gql"
-version = "0.1.0"
-dependencies = [
- "clap",
- "glob",
- "indexmap",
- "libgql",
- "reqwest",
- "serde",
- "serde_json",
- "serde_json_path_to_error",
- "serde_yaml",
- "url",
-]
 
 [[package]]
 name = "hashbrown"

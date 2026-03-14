@@ -3,11 +3,11 @@ name: "rust gql build"
 on:
   push:
     paths:
-      - rust/gql/**
-      - rust/libgql/**
-      - .github/workflows/rust-gql.yaml
-      - shared/dockerfiles/gql
-      - shared/dockerfiles/gql.dockerignore
+    - rust/cli/**
+    - rust/libgql/**
+    - .github/workflows/rust-cli.yaml
+    - shared/dockerfiles/cli
+    - shared/dockerfiles/cli.dockerignore
 
 jobs:
   docker:
@@ -29,7 +29,7 @@ jobs:
         - name: Build gql targets image
           uses: docker/build-push-action@v6
           with:
-            file: shared/dockerfiles/gql
+            file: shared/dockerfiles/cli
             push: true
             target: targets
             tags: vladimirdev635/gql-targets:${{ github.ref_name }}
@@ -40,7 +40,7 @@ jobs:
         - name: Build gql linux x86_64
           uses: docker/build-push-action@v6
           with:
-            file: shared/dockerfiles/gql
+            file: shared/dockerfiles/cli
             push: true
             target: x86_64-linux-scratch
             tags: vladimirdev635/gql-linux-x86_64:${{ github.ref_name }}
@@ -51,7 +51,7 @@ jobs:
         - name: Build gql linux arm64
           uses: docker/build-push-action@v6
           with:
-            file: shared/dockerfiles/gql
+            file: shared/dockerfiles/cli
             push: true
             target: aarch64-linux-scratch
             tags: vladimirdev635/gql-linux-arm64:${{ github.ref_name }}
@@ -62,7 +62,7 @@ jobs:
         - name: Build gql linux x86_64 alpine
           uses: docker/build-push-action@v6
           with:
-            file: shared/dockerfiles/gql
+            file: shared/dockerfiles/cli
             push: true
             target: x86_64-alpine
             tags: vladimirdev635/gql-alpine-linux-x86_64:${{ github.ref_name }}
@@ -73,7 +73,7 @@ jobs:
         - name: Build gql linux arm64 alpine
           uses: docker/build-push-action@v6
           with:
-            file: shared/dockerfiles/gql
+            file: shared/dockerfiles/cli
             push: true
             target: aarch64-alpine
             tags: vladimirdev635/gql-alpine-linux-arm64:${{ github.ref_name }}
@@ -84,7 +84,7 @@ jobs:
         - name: Build gql darwin x86_64
           uses: docker/build-push-action@v6
           with:
-            file: shared/dockerfiles/gql
+            file: shared/dockerfiles/cli
             push: true
             target: x86_64-darwin-scratch
             tags: vladimirdev635/gql-darwin-x86_64:${{ github.ref_name }}
@@ -95,7 +95,7 @@ jobs:
         - name: Build gql darwin arm64
           uses: docker/build-push-action@v6
           with:
-            file: shared/dockerfiles/gql
+            file: shared/dockerfiles/cli
             push: true
             target: aarch64-darwin-scratch
             tags: vladimirdev635/gql-darwin-arm64:${{ github.ref_name }}
