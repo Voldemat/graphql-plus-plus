@@ -1,8 +1,7 @@
+pub mod diff;
 pub mod executor;
 pub mod lexer;
 pub mod parsers;
-pub mod diff;
-
 
 #[derive(clap::Subcommand)]
 pub enum Commands {
@@ -14,7 +13,6 @@ pub enum Commands {
     Executor(executor::Commands),
     Diff(diff::DiffArgs),
 }
-
 
 impl Commands {
     pub fn execute(self: &Self) {
