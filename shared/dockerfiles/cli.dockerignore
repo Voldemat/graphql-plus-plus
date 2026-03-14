@@ -1,5 +1,5 @@
 *
-!rust/gql/
+!rust/cli/
 !rust/libgql/
-rust/gql/target
+rust/cli/target
 rust/libgql/target
