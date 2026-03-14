@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use libgql::{
     executor::ast::TryGetStr, parsers::schema::type_registry::TypeRegistry,
 };
@@ -41,6 +39,27 @@ impl libgql::executor::Scalar for ExampleScalar {
 
     fn from_string(str: &str) -> Result<Self, String> {
         Ok(Self::String(str.to_string()))
+    }
+
+    fn from_literal(
+        literal: &libgql::parsers::schema::shared::ast::Literal,
+    ) -> Result<ExampleScalar, String> {
+        match literal {
+            libgql::parsers::schema::shared::ast::Literal::Int(i) => {
+                Ok(ExampleScalar::Int(
+                    TryInto::<i32>::try_into(*i).map_err(|e| e.to_string())?,
+                ))
+            }
+            libgql::parsers::schema::shared::ast::Literal::Float(f) => {
+                Ok(ExampleScalar::Float(*f as f32))
+            }
+            libgql::parsers::schema::shared::ast::Literal::String(s) => {
+                Ok(ExampleScalar::String(s.to_string()))
+            }
+            libgql::parsers::schema::shared::ast::Literal::Boolean(b) => {
+                Ok(ExampleScalar::Boolean(*b))
+            }
+        }
     }
 }
 
@@ -190,15 +209,15 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
 #[derive(Debug)]
 enum EGroupUsersField {
     Name,
-    Email
+    Email,
 }
 
 impl libgql::executor::GQLEnum for EGroupUsersField {
     fn from_str(s: &str) -> Result<Self, String> {
         match s {
-        "NAME" => Ok(Self::Name),
-        "EMAIL" => Ok(Self::Email),
-        _ => Err(format!("EGroupUsersField: Unknown enum value {}", s))
+            "NAME" => Ok(Self::Name),
+            "EMAIL" => Ok(Self::Email),
+            _ => Err(format!("EGroupUsersField: Unknown enum value {}", s)),
         }
     }
 }
@@ -314,73 +333,54 @@ fn create_group_resolver(
     ))
 }
 
-fn json_scalar_parser<'a>(
-    json_scalar: libgql::json::executor::ast::JSONScalar<'a>,
-) -> Result<ExampleScalar, String> {
-    match json_scalar {
-        libgql::json::executor::ast::JSONScalar::Bool(b) => {
-            Ok(ExampleScalar::Boolean(b))
-        }
-        libgql::json::executor::ast::JSONScalar::String(s) => {
-            Ok(ExampleScalar::String(s.to_string()))
-        }
-        libgql::json::executor::ast::JSONScalar::Number(n) => {
-            if let Some(u64_n) = n.as_u64() {
-                Ok(ExampleScalar::Int(
-                    TryInto::<i32>::try_into(u64_n)
-                        .map_err(|e| e.to_string())?,
-                ))
-            } else if let Some(i64_n) = n.as_i64() {
-                Ok(ExampleScalar::Int(
-                    TryInto::<i32>::try_into(i64_n)
-                        .map_err(|e| e.to_string())?,
-                ))
-            } else if let Some(f64_n) = n.as_f64() {
-                Ok(ExampleScalar::Float(f64_n as f32))
-            } else {
-                unreachable!()
+impl libgql::json::executor::ast::JSONParsableScalar for ExampleScalar {
+    fn from_json_scalar<'a>(
+        json_scalar: libgql::json::executor::ast::JSONScalar<'a>,
+    ) -> Result<ExampleScalar, String> {
+        match json_scalar {
+            libgql::json::executor::ast::JSONScalar::Bool(b) => {
+                Ok(ExampleScalar::Boolean(b))
+            }
+            libgql::json::executor::ast::JSONScalar::String(s) => {
+                Ok(ExampleScalar::String(s.to_string()))
+            }
+            libgql::json::executor::ast::JSONScalar::Number(n) => {
+                if let Some(u64_n) = n.as_u64() {
+                    Ok(ExampleScalar::Int(
+                        TryInto::<i32>::try_into(u64_n)
+                            .map_err(|e| e.to_string())?,
+                    ))
+                } else if let Some(i64_n) = n.as_i64() {
+                    Ok(ExampleScalar::Int(
+                        TryInto::<i32>::try_into(i64_n)
+                            .map_err(|e| e.to_string())?,
+                    ))
+                } else if let Some(f64_n) = n.as_f64() {
+                    Ok(ExampleScalar::Float(f64_n as f32))
+                } else {
+                    unreachable!()
+                }
             }
         }
     }
 }
 
-fn literal_to_scalar(
-    literal: &libgql::parsers::schema::shared::ast::Literal,
-) -> Result<ExampleScalar, String> {
-    match literal {
-        libgql::parsers::schema::shared::ast::Literal::Int(i) => {
-            Ok(ExampleScalar::Int(
-                TryInto::<i32>::try_into(*i).map_err(|e| e.to_string())?,
-            ))
+impl libgql::json::executor::ast::JSONSerializableScalar for ExampleScalar {
+    fn to_json_value(self: &Self) -> Result<serde_json::Value, String> {
+        match self {
+            Self::Int(i) => Ok(serde_json::Value::Number(
+                serde_json::Number::from_i128(*i as i128).ok_or(
+                    "Failed to convert ExampleScalar::Int to serde_json::Number",
+                )?,
+            )),
+            Self::Float(f) => Ok(serde_json::Value::Number(
+                serde_json::Number::from_f64(*f as f64).ok_or(
+                    "Failed to convert ExampleScalar::Float to serde_json::Number",
+                )?,
+            )),
+            Self::Boolean(b) => Ok(serde_json::Value::Bool(*b)),
+            Self::String(s) => Ok(serde_json::Value::String(s.clone())),
         }
-        libgql::parsers::schema::shared::ast::Literal::Float(f) => {
-            Ok(ExampleScalar::Float(*f as f32))
-        }
-        libgql::parsers::schema::shared::ast::Literal::String(s) => {
-            Ok(ExampleScalar::String(s.to_string()))
-        }
-        libgql::parsers::schema::shared::ast::Literal::Boolean(b) => {
-            Ok(ExampleScalar::Boolean(*b))
-        }
-    }
-}
-
-fn scalar_serializer(
-    scalar: &ExampleScalar,
-) -> Result<serde_json::Value, String> {
-    match scalar {
-        ExampleScalar::Int(i) => Ok(serde_json::Value::Number(
-            serde_json::Number::from_i128(*i as i128).ok_or(
-                "Failed to convert ExampleScalar::Int to serde_json::Number",
-            )?,
-        )),
-        ExampleScalar::Float(f) => Ok(serde_json::Value::Number(
-            serde_json::Number::from_f64(*f as f64).ok_or(
-                "Failed to convert ExampleScalar::Float to serde_json::Number",
-            )?,
-        )),
-        ExampleScalar::Boolean(b) => Ok(serde_json::Value::Bool(*b)),
-        ExampleScalar::String(s) => Ok(serde_json::Value::String(s.clone())),
     }
 }
 
@@ -422,7 +422,6 @@ fn execute(args: &ParseArgs) {
     >(
         &mut (),
         &registry,
-        &literal_to_scalar,
         &resolvers,
         &parse_registry,
         &utils::read_buffer_from_filepath(&args.query_path),
@@ -432,18 +431,14 @@ fn execute(args: &ParseArgs) {
             .map_or(libgql::executor::Values::new(), |v| {
                 libgql::json::executor::ast::parse_variables_from_json(
                     &serde_json::from_str::<serde_json::Value>(&v).unwrap(),
-                    &json_scalar_parser,
                 )
                 .unwrap()
             }),
         &args.operation,
     )
     .unwrap();
-    let json_result = libgql::json::executor::ast::serialize_values_to_json(
-        &result,
-        &scalar_serializer,
-    )
-    .unwrap();
+    let json_result =
+        libgql::json::executor::ast::serialize_values_to_json(&result).unwrap();
     println!("result: {}", json_result);
 }
 
