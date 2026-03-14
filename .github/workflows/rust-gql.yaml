@@ -7,10 +7,6 @@ on:
       - .github/workflows/rust-gql.yaml
       - shared/dockerfiles/gql
       - shared/dockerfiles/gql.dockerignore
-      - shared/dockerfiles/gql-darwin
-      - shared/dockerfiles/gql-darwin.dockerignore
-      - shared/dockerfiles/gql-arm64
-      - shared/dockerfiles/gql-arm64.dockerignore
 
 jobs:
   docker:
