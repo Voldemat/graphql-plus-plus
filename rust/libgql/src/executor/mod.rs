@@ -29,19 +29,34 @@ pub enum Error {
 
 pub type ResolverRoot<S> = Values<S>;
 
-pub type Resolver<C, S> = Box<
+pub type SyncResolver<C, S> = Box<
     dyn Fn(
         &ResolverRoot<S>,
         &mut C,
         &ResolvedVariables,
     ) -> Result<Value<S>, String>,
 >;
-pub type ResolversMap<C, S> = HashMap<(String, String), Resolver<C, S>>;
+pub type SubscriptionResolver<C, S, Stream> = Box<
+    dyn Fn(
+        &ResolverRoot<S>,
+        &mut C,
+        &ResolvedVariables,
+    ) -> Result<Stream, String>,
+>;
+pub type SyncResolversMap<C, S> = HashMap<(String, String), SyncResolver<C, S>>;
+pub type SubscriptionResolversMap<C, S, Stream> =
+    HashMap<String, SubscriptionResolver<C, S, Stream>>;
+pub enum OperationResult<
+    S: Scalar,
+    Stream: futures_core::Stream<Item = Value<S>>,
+> {
+    Immediate(Values<S>),
+    Stream(SubscriptionStream<S, Stream>),
+}
 
 fn execute_fragment_on_value<C, S: Scalar>(
     context: &mut C,
-    registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
+    resolvers: &SyncResolversMap<C, S>,
     parent: &mut Value<S>,
     spec: &client::ast::FragmentSpec,
     variables: &ResolvedVariables,
@@ -54,7 +69,6 @@ fn execute_fragment_on_value<C, S: Scalar>(
             LiteralValue::Object(object_name, object_value) => {
                 execute_fragment(
                     context,
-                    registry,
                     resolvers,
                     object_name,
                     object_value,
@@ -70,7 +84,7 @@ fn execute_fragment_on_value<C, S: Scalar>(
         NonNullableValue::Array(array) => {
             for value in array {
                 execute_fragment_on_value(
-                    context, registry, resolvers, value, spec, variables,
+                    context, resolvers, value, spec, variables,
                 )?;
             }
             return Ok(());
@@ -80,8 +94,7 @@ fn execute_fragment_on_value<C, S: Scalar>(
 
 fn execute_fragment<C, S: Scalar>(
     context: &mut C,
-    registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
+    resolvers: &SyncResolversMap<C, S>,
     object_name: &str,
     parent: &mut Values<S>,
     spec: &client::ast::FragmentSpec,
@@ -90,7 +103,6 @@ fn execute_fragment<C, S: Scalar>(
     match spec {
         client::ast::FragmentSpec::Object(obj) => execute_object_selection_set(
             context,
-            registry,
             resolvers,
             &obj.r#type.borrow(),
             object_name,
@@ -101,7 +113,6 @@ fn execute_fragment<C, S: Scalar>(
 
         client::ast::FragmentSpec::Union(union) => execute_union_selection_set(
             context,
-            registry,
             resolvers,
             &union.r#type.borrow(),
             object_name,
@@ -112,7 +123,6 @@ fn execute_fragment<C, S: Scalar>(
         client::ast::FragmentSpec::Interface(interface) => {
             execute_interface_selection_set(
                 context,
-                registry,
                 resolvers,
                 &interface.r#type.borrow(),
                 object_name,
@@ -126,8 +136,7 @@ fn execute_fragment<C, S: Scalar>(
 
 fn execute_field<C, S: Scalar>(
     context: &mut C,
-    registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
+    resolvers: &SyncResolversMap<C, S>,
     object_name: &str,
     parent: &Values<S>,
     field: &client::ast::FieldSelection,
@@ -143,7 +152,7 @@ fn execute_field<C, S: Scalar>(
 
     if let Some(fragment) = &field.selection {
         execute_fragment_on_value(
-            context, registry, resolvers, &mut value, fragment, variables,
+            context, resolvers, &mut value, fragment, variables,
         )?;
     }
 
@@ -172,8 +181,7 @@ fn execute_typename_field<S: Scalar>(
 
 fn execute_union_selection_set<C, S: Scalar>(
     context: &mut C,
-    registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
+    resolvers: &SyncResolversMap<C, S>,
     union_type: &server::ast::Union,
     object_name: &str,
     parent: &mut Values<S>,
@@ -194,7 +202,6 @@ fn execute_union_selection_set<C, S: Scalar>(
                 }
                 execute_object_selection_set(
                     context,
-                    registry,
                     resolvers,
                     &union_type.items.get(object_name).unwrap().borrow(),
                     object_name,
@@ -212,7 +219,6 @@ fn execute_union_selection_set<C, S: Scalar>(
                 let fragment = spread.fragment.borrow();
                 execute_fragment(
                     context,
-                    registry,
                     resolvers,
                     object_name,
                     parent,
@@ -228,8 +234,7 @@ fn execute_union_selection_set<C, S: Scalar>(
 
 fn execute_object_selection_set<C, S: Scalar>(
     context: &mut C,
-    registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
+    resolvers: &SyncResolversMap<C, S>,
     object_type: &server::ast::ObjectType,
     object_name: &str,
     parent: &mut Values<S>,
@@ -248,7 +253,6 @@ fn execute_object_selection_set<C, S: Scalar>(
                 }
                 let value = execute_field(
                     context,
-                    registry,
                     resolvers,
                     &object_type.name,
                     parent,
@@ -263,7 +267,6 @@ fn execute_object_selection_set<C, S: Scalar>(
                 let fragment = spread.fragment.borrow();
                 execute_fragment(
                     context,
-                    registry,
                     resolvers,
                     object_name,
                     parent,
@@ -279,8 +282,7 @@ fn execute_object_selection_set<C, S: Scalar>(
 
 fn execute_interface_selection_set<C, S: Scalar>(
     context: &mut C,
-    registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
+    resolvers: &SyncResolversMap<C, S>,
     interface_type: &server::ast::Interface,
     object_name: &str,
     parent: &mut Values<S>,
@@ -305,7 +307,6 @@ fn execute_interface_selection_set<C, S: Scalar>(
                 }
                 let value = execute_field(
                     context,
-                    registry,
                     resolvers,
                     &interface_type.name,
                     parent,
@@ -320,7 +321,6 @@ fn execute_interface_selection_set<C, S: Scalar>(
                 let fragment = spread.fragment.borrow();
                 execute_fragment(
                     context,
-                    registry,
                     resolvers,
                     object_name,
                     parent,
@@ -336,8 +336,7 @@ fn execute_interface_selection_set<C, S: Scalar>(
 
 fn execute_sync_operation<C, S: Scalar>(
     context: &mut C,
-    registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
+    resolvers: &SyncResolversMap<C, S>,
     object: &server::ast::ObjectType,
     operation: &client::ast::Operation,
     variables: &ResolvedVariables,
@@ -351,7 +350,6 @@ fn execute_sync_operation<C, S: Scalar>(
     let mut root_value: ResolverRoot<S> = Values::<S>::new();
     execute_object_selection_set(
         context,
-        registry,
         resolvers,
         object,
         operation.r#type.to_object_name(),
@@ -362,69 +360,132 @@ fn execute_sync_operation<C, S: Scalar>(
     return Ok(root_value);
 }
 
-fn execute_subscription_operation<C, S: Scalar>(
-    context: &mut C,
-    registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
-    object: &server::ast::ObjectType,
-    operation: &client::ast::Operation,
-    variables: &ResolvedVariables,
-) -> Result<Values<S>, String> {
-    Ok(Values::<S>::new())
+pub struct SubscriptionStream<
+    S: Scalar,
+    Stream: futures_core::Stream<Item = Value<S>>,
+> {
+    field_name: String,
+    stream: std::pin::Pin<Box<Stream>>,
 }
 
-fn execute_operation<C, S: Scalar, R: Registry<S>>(
+impl<'f, S: Scalar, Stream: futures_core::Stream<Item = Value<S>>>
+    futures_core::Stream for SubscriptionStream<S, Stream>
+{
+    type Item = Values<S>;
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        context: &mut std::task::Context,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        <Stream as futures_core::Stream>::poll_next(
+            self.stream.as_mut(),
+            context,
+        )
+        .map(|o| o.map(|v| Values::from_iter([(self.field_name.clone(), v)])))
+    }
+}
+
+fn execute_subscription_operation<
+    C,
+    S: Scalar,
+    Stream: futures_core::Stream<Item = Value<S>>,
+>(
+    context: &mut C,
+    resolvers: &SubscriptionResolversMap<C, S, Stream>,
+    operation: &client::ast::Operation,
+    variables: &ResolvedVariables,
+) -> Result<SubscriptionStream<S, Stream>, String> {
+    let client::ast::FragmentSpec::Object(fragment_spec) =
+        &operation.fragment_spec
+    else {
+        return Err("Root operation must select an object".into());
+    };
+
+    let client::ast::ObjectSelection::FieldSelection(selection) =
+        &fragment_spec.selections[0]
+    else {
+        return Err("Unexpected selection for subscription".into());
+    };
+
+    let resolver = resolvers.get(&selection.name).ok_or_else(|| {
+        format!("No subscription resolver for {}", selection.name)
+    })?;
+
+    let parent = Values::new();
+    let value = resolver(&parent, context, variables)?;
+    return Ok(SubscriptionStream {
+        stream: Box::pin(value),
+        field_name: selection.alias.clone(),
+    });
+}
+
+fn execute_operation<
+    C,
+    S: Scalar,
+    R: Registry<S>,
+    Stream: futures_core::Stream<Item = Value<S>>,
+>(
     context: &mut C,
     registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
+    sync_resolvers: &SyncResolversMap<C, S>,
+    subscription_resolvers: &SubscriptionResolversMap<C, S, Stream>,
     parse_registry: &R,
     operation: &client::ast::Operation,
     variables: &Values<S>,
-) -> Result<Values<S>, String> {
+) -> Result<OperationResult<S, Stream>, String> {
     let resolved_variables = resolve_operation_parameters(
         parse_registry,
         &operation.parameters,
         variables,
     )?;
     match operation.r#type {
-        client::ast::OpType::Query => execute_sync_operation::<C, S>(
-            context,
-            registry,
-            resolvers,
-            &registry.get_query_object().unwrap().borrow(),
-            operation,
-            &resolved_variables,
-        ),
-        client::ast::OpType::Mutation => execute_sync_operation::<C, S>(
-            context,
-            registry,
-            resolvers,
-            &registry.get_mutation_object().unwrap().borrow(),
-            operation,
-            &resolved_variables,
-        ),
-        client::ast::OpType::Subscription => {
-            execute_subscription_operation::<C, S>(
+        client::ast::OpType::Query => {
+            Ok(OperationResult::Immediate(execute_sync_operation::<C, S>(
                 context,
-                registry,
-                resolvers,
-                &registry.get_subscription_object().unwrap().borrow(),
+                sync_resolvers,
+                &registry.get_query_object().unwrap().borrow(),
                 operation,
                 &resolved_variables,
-            )
+            )?))
+        }
+        client::ast::OpType::Mutation => {
+            Ok(OperationResult::Immediate(execute_sync_operation::<C, S>(
+                context,
+                sync_resolvers,
+                &registry.get_mutation_object().unwrap().borrow(),
+                operation,
+                &resolved_variables,
+            )?))
+        }
+        client::ast::OpType::Subscription => {
+            Ok(OperationResult::Stream(execute_subscription_operation::<
+                C,
+                S,
+                Stream,
+            >(
+                context,
+                subscription_resolvers,
+                operation,
+                &resolved_variables,
+            )?))
         }
     }
 }
 
-pub fn execute<C, S: Scalar, R: Registry<S>>(
+pub fn execute<
+    C,
+    S: Scalar,
+    R: Registry<S>,
+    Stream: futures_core::Stream<Item = Value<S>>,
+>(
     context: &mut C,
     registry: &TypeRegistry,
-    resolvers: &ResolversMap<C, S>,
+    sync_resolvers: &SyncResolversMap<C, S>,
+    subscription_resolvers: &SubscriptionResolversMap<C, S, Stream>,
     parse_registry: &R,
     client_query: &str,
     variables: &Values<S>,
     operation: &Option<String>,
-) -> Result<Values<S>, Error> {
+) -> Result<OperationResult<S, Stream>, Error> {
     let tokens = lexer::utils::parse_buffer_into_tokens(client_query)?;
     let source_file = std::rc::Rc::new(file::shared::ast::SourceFile {
         filepath: "<request>".into(),
@@ -454,10 +515,11 @@ pub fn execute<C, S: Scalar, R: Registry<S>>(
         .operations
         .get(operation_name)
         .ok_or(Error::OperationIsNotDefined(operation_name.clone()))?;
-    let result = execute_operation::<C, S, R>(
+    let result = execute_operation::<C, S, R, Stream>(
         context,
         &mut local_registry,
-        resolvers,
+        sync_resolvers,
+        subscription_resolvers,
         parse_registry,
         &operation.borrow(),
         variables,

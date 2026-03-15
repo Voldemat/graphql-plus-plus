@@ -12,10 +12,10 @@ pub trait JSONParsableScalar: Sized {
     fn from_json_scalar(json_scalar: JSONScalar) -> Result<Self, String>;
 }
 
-trait InputScalar: crate::executor::Scalar + JSONParsableScalar {}
+pub trait InputScalar: crate::executor::Scalar + JSONParsableScalar {}
 impl<T: crate::executor::Scalar + JSONParsableScalar> InputScalar for T {}
 
-trait OutputScalar: crate::executor::Scalar + JSONSerializableScalar {}
+pub trait OutputScalar: crate::executor::Scalar + JSONSerializableScalar {}
 impl<T: crate::executor::Scalar + JSONSerializableScalar> OutputScalar for T {}
 
 pub fn parse_variable_from_json<S: InputScalar>(
