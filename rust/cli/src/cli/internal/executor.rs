@@ -1,6 +1,13 @@
+use std::{
+    cell::RefCell,
+    sync::{Arc, RwLock, atomic::AtomicBool},
+};
+
+use chrono::prelude::*;
 use libgql::{
     executor::ast::TryGetStr, parsers::schema::type_registry::TypeRegistry,
 };
+use tokio_stream::StreamExt;
 
 use crate::cli::utils;
 
@@ -384,7 +391,91 @@ impl libgql::json::executor::ast::JSONSerializableScalar for ExampleScalar {
     }
 }
 
+struct ExampleValueStream<S: libgql::executor::Scalar> {
+    handle: Option<std::thread::JoinHandle<()>>,
+    receiver: std::sync::mpsc::Receiver<libgql::executor::Value<S>>,
+    signal: Arc<AtomicBool>,
+    waker: Arc<RwLock<Option<std::task::Waker>>>,
+}
+
+impl<S: libgql::executor::Scalar> Drop for ExampleValueStream<S> {
+    fn drop(&mut self) {
+        self.signal
+            .store(true, std::sync::atomic::Ordering::Relaxed);
+        if let Some(handle) = self.handle.take() {
+            handle.join().unwrap();
+        }
+    }
+}
+
+impl<S: libgql::executor::Scalar> futures_core::Stream
+    for ExampleValueStream<S>
+{
+    type Item = libgql::executor::Value<S>;
+    fn poll_next(
+        self: std::pin::Pin<&mut Self>,
+        context: &mut std::task::Context,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        self.waker.write().unwrap().replace(context.waker().clone());
+        match self.receiver.try_recv() {
+            Ok(data) => std::task::Poll::Ready(Some(data)),
+            Err(std::sync::mpsc::TryRecvError::Empty) => {
+                std::task::Poll::Pending
+            }
+            Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                std::task::Poll::Ready(None)
+            }
+        }
+    }
+}
+
+fn get_events_subscription(
+    root: &libgql::executor::ResolverRoot<ExampleScalar>,
+    context: &mut Context,
+    variables: &libgql::executor::ResolvedVariables,
+) -> Result<ExampleValueStream<ExampleScalar>, String> {
+    let (sender, receiver) =
+        std::sync::mpsc::channel::<libgql::executor::Value<ExampleScalar>>();
+    let signal = Arc::new(AtomicBool::new(false));
+    let thread_signal = signal.clone();
+    let waker = Arc::new(RwLock::new(None::<std::task::Waker>));
+    let thread_waker = waker.clone();
+    let handle = std::thread::spawn(move || {
+        loop {
+            if thread_signal.load(std::sync::atomic::Ordering::Relaxed) {
+                println!("get_events_subscription received signal to stop");
+                break;
+            }
+            sender
+                .send(libgql::executor::Value::NonNullable(
+                    libgql::executor::NonNullableValue::Literal(
+                        libgql::executor::LiteralValue::Scalar(
+                            ExampleScalar::String(Utc::now().to_string()),
+                        ),
+                    ),
+                ))
+                .unwrap();
+            if let Some(current_waker) = thread_waker.read().unwrap().as_ref() {
+                current_waker.wake_by_ref();
+            }
+            std::thread::sleep(std::time::Duration::from_secs(1));
+        }
+    });
+    return Ok(ExampleValueStream {
+        handle: Some(handle),
+        receiver,
+        signal,
+        waker,
+    });
+}
+
 fn execute(args: &ParseArgs) {
+    let term = Arc::new(AtomicBool::new(false));
+    signal_hook::flag::register(
+        signal_hook::consts::SIGTERM,
+        Arc::clone(&term),
+    )
+    .unwrap();
     let buffer = utils::read_buffer_from_filepath(&args.server_schema_path);
     let mut registry = TypeRegistry::new();
     libgql::json::parsers::schema::parse_server_schema(
@@ -402,27 +493,33 @@ fn execute(args: &ParseArgs) {
     parse_registry.add_enum::<EGroupUsersField>("EGroupUsersField");
     parse_registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
     parse_registry.add_input::<GroupIn>("GroupIn");
-    let mut resolvers = libgql::executor::ResolversMap::new();
-    resolvers.insert(
+    let mut sync_resolvers = libgql::executor::SyncResolversMap::new();
+    sync_resolvers.insert(
         ("Mutation".to_string(), "login".to_string()),
         Box::new(login_resolver),
     );
-    resolvers.insert(
+    sync_resolvers.insert(
         ("Mutation".to_string(), "confirmOTPCode".to_string()),
         Box::new(confirm_otp_code_resolver),
     );
-    resolvers.insert(
+    sync_resolvers.insert(
         ("Mutation".to_string(), "createGroup".to_string()),
         Box::new(create_group_resolver),
     );
-    let result = libgql::executor::execute::<
+    let mut subscription_resolvers =
+        libgql::executor::SubscriptionResolversMap::new();
+    subscription_resolvers
+        .insert("getEvents".to_string(), Box::new(get_events_subscription));
+    let operation_result = libgql::executor::execute::<
         Context,
         ExampleScalar,
         libgql::executor::HashMapRegistry<ExampleScalar>,
+        ExampleValueStream<ExampleScalar>,
     >(
         &mut (),
         &registry,
-        &resolvers,
+        &sync_resolvers,
+        &subscription_resolvers,
         &parse_registry,
         &utils::read_buffer_from_filepath(&args.query_path),
         &args
@@ -437,9 +534,42 @@ fn execute(args: &ParseArgs) {
         &args.operation,
     )
     .unwrap();
-    let json_result =
-        libgql::json::executor::ast::serialize_values_to_json(&result).unwrap();
-    println!("result: {}", json_result);
+    match operation_result {
+        libgql::executor::OperationResult::Immediate(result) => {
+            let json_result =
+                libgql::json::executor::ast::serialize_values_to_json(&result)
+                    .unwrap();
+            println!("result: {}", json_result);
+        }
+        libgql::executor::OperationResult::Stream(mut stream) => {
+            let runtime = tokio::runtime::Runtime::new().unwrap();
+            runtime.block_on(async move {
+                loop {
+                    if term.load(std::sync::atomic::Ordering::Relaxed) {
+                        println!("term signal received in main loop");
+                        break;
+                    }
+                    let Ok(next_item) = tokio::time::timeout(
+                        std::time::Duration::from_millis(100),
+                        stream.next(),
+                    )
+                    .await
+                    else {
+                        continue;
+                    };
+                    let Some(item) = next_item else {
+                        break;
+                    };
+                    let json_result =
+                        libgql::json::executor::ast::serialize_values_to_json(
+                            &item,
+                        )
+                        .unwrap();
+                    println!("result: {}", json_result);
+                }
+            });
+        }
+    }
 }
 
 impl Commands {
