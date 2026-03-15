@@ -2,19 +2,20 @@ pub mod ast;
 pub mod hashmap_registry;
 pub mod registry;
 pub mod scalar;
+pub mod subscription;
+pub mod sync;
 pub mod variables;
-pub use ast::{LiteralValue, NonNullableValue, Value, Values};
+pub use ast::{LiteralValue, NonNullableValue, ResolverRoot, Value, Values};
 pub use hashmap_registry::{GQLEnum, GQLInput, GQLScalar, HashMapRegistry};
 pub use registry::Registry;
 pub use scalar::Scalar;
-use std::collections::HashMap;
 pub use variables::{ResolvedVariables, resolve_operation_parameters};
 
 use crate::{
     lexer,
     parsers::{
         file,
-        schema::{client, server, type_registry::TypeRegistry},
+        schema::{client, type_registry::TypeRegistry},
     },
 };
 
@@ -27,398 +28,15 @@ pub enum Error {
     NoOperationsAreDefined,
 }
 
-pub type ResolverRoot<S> = Values<S>;
-
-pub type SyncResolver<C, S> = Box<
-    dyn Fn(
-        &ResolverRoot<S>,
-        &mut C,
-        &ResolvedVariables,
-    ) -> Result<Value<S>, String>,
->;
-pub type SubscriptionResolver<C, S, Stream> = Box<
-    dyn Fn(
-        &ResolverRoot<S>,
-        &mut C,
-        &ResolvedVariables,
-    ) -> Result<Stream, String>,
->;
-pub type SyncResolversMap<C, S> = HashMap<(String, String), SyncResolver<C, S>>;
-pub type SubscriptionResolversMap<C, S, Stream> =
-    HashMap<String, SubscriptionResolver<C, S, Stream>>;
 pub enum OperationResult<
     S: Scalar,
     Stream: futures_core::Stream<Item = Value<S>>,
 > {
     Immediate(Values<S>),
-    Stream(SubscriptionStream<S, Stream>),
+    Stream(subscription::SubscriptionStream<S, Stream>),
 }
 
-fn execute_fragment_on_value<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
-    parent: &mut Value<S>,
-    spec: &client::ast::FragmentSpec,
-    variables: &ResolvedVariables,
-) -> Result<(), String> {
-    let Value::NonNullable(non_nullable) = parent else {
-        return Ok(());
-    };
-    match non_nullable {
-        NonNullableValue::Literal(literal) => match literal {
-            LiteralValue::Object(object_name, object_value) => {
-                execute_fragment(
-                    context,
-                    resolvers,
-                    object_name,
-                    object_value,
-                    spec,
-                    variables,
-                )?;
-                return Ok(());
-            }
-            LiteralValue::Scalar(_) => {
-                panic!("Unexpected fragment selection on scalar value")
-            }
-        },
-        NonNullableValue::Array(array) => {
-            for value in array {
-                execute_fragment_on_value(
-                    context, resolvers, value, spec, variables,
-                )?;
-            }
-            return Ok(());
-        }
-    }
-}
-
-fn execute_fragment<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
-    object_name: &str,
-    parent: &mut Values<S>,
-    spec: &client::ast::FragmentSpec,
-    variables: &ResolvedVariables,
-) -> Result<(), String> {
-    match spec {
-        client::ast::FragmentSpec::Object(obj) => execute_object_selection_set(
-            context,
-            resolvers,
-            &obj.r#type.borrow(),
-            object_name,
-            parent,
-            &obj.selections,
-            variables,
-        ),
-
-        client::ast::FragmentSpec::Union(union) => execute_union_selection_set(
-            context,
-            resolvers,
-            &union.r#type.borrow(),
-            object_name,
-            parent,
-            &union.selections,
-            variables,
-        ),
-        client::ast::FragmentSpec::Interface(interface) => {
-            execute_interface_selection_set(
-                context,
-                resolvers,
-                &interface.r#type.borrow(),
-                object_name,
-                parent,
-                &interface.selections,
-                variables,
-            )
-        }
-    }
-}
-
-fn execute_field<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
-    object_name: &str,
-    parent: &Values<S>,
-    field: &client::ast::FieldSelection,
-    variables: &ResolvedVariables,
-) -> Result<Value<S>, String> {
-    let resolver_key = (object_name.to_string(), field.name.clone());
-
-    let resolver = resolvers.get(&resolver_key).ok_or_else(|| {
-        format!("No resolver for {}.{}", object_name, field.name)
-    })?;
-
-    let mut value = resolver(parent, context, variables)?;
-
-    if let Some(fragment) = &field.selection {
-        execute_fragment_on_value(
-            context, resolvers, &mut value, fragment, variables,
-        )?;
-    }
-
-    Ok(value)
-}
-
-fn execute_typename_field<S: Scalar>(
-    object_name: &str,
-    parent: &mut Values<S>,
-    field: &client::ast::TypenameField,
-) -> Result<(), String> {
-    let typename = object_name.to_string();
-    parent.insert(
-        field
-            .alias
-            .as_ref()
-            .map(|v| v.as_str())
-            .unwrap_or("__typename")
-            .into(),
-        Value::NonNullable(NonNullableValue::Literal(LiteralValue::Scalar(
-            S::from_string(&typename)?,
-        ))),
-    );
-    Ok(())
-}
-
-fn execute_union_selection_set<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
-    union_type: &server::ast::Union,
-    object_name: &str,
-    parent: &mut Values<S>,
-    selections: &[client::ast::UnionSelection],
-    variables: &ResolvedVariables,
-) -> Result<(), String> {
-    for selection in selections {
-        match selection {
-            client::ast::UnionSelection::TypenameField(typename_field) => {
-                execute_typename_field(object_name, parent, typename_field)?;
-            }
-            client::ast::UnionSelection::ObjectConditionalSpreadSelection(
-                spread,
-            ) => {
-                let spread_object_name = &spread.selection.r#type.borrow().name;
-                if spread_object_name != object_name {
-                    return Ok(());
-                }
-                execute_object_selection_set(
-                    context,
-                    resolvers,
-                    &union_type.items.get(object_name).unwrap().borrow(),
-                    object_name,
-                    parent,
-                    &spread.selection.selections,
-                    variables,
-                )?;
-                ()
-            }
-            client::ast::UnionSelection::UnionConditionalSpreadSelection(_) => {
-                panic!("Unexpected UnionConditionalSpreadSelection on union")
-            }
-
-            client::ast::UnionSelection::SpreadSelection(spread) => {
-                let fragment = spread.fragment.borrow();
-                execute_fragment(
-                    context,
-                    resolvers,
-                    object_name,
-                    parent,
-                    &fragment.spec,
-                    variables,
-                )?;
-                return Ok(());
-            }
-        };
-    }
-    return Ok(());
-}
-
-fn execute_object_selection_set<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
-    object_type: &server::ast::ObjectType,
-    object_name: &str,
-    parent: &mut Values<S>,
-    selections: &[client::ast::ObjectSelection],
-    variables: &ResolvedVariables,
-) -> Result<(), String> {
-    for selection in selections {
-        match selection {
-            client::ast::ObjectSelection::TypenameField(field) => {
-                execute_typename_field(object_name, parent, field)?;
-            }
-
-            client::ast::ObjectSelection::FieldSelection(field) => {
-                if parent.contains_key(&field.alias) {
-                    return Ok(());
-                }
-                let value = execute_field(
-                    context,
-                    resolvers,
-                    &object_type.name,
-                    parent,
-                    field,
-                    variables,
-                )?;
-                parent.insert(field.alias.clone(), value);
-                return Ok(());
-            }
-
-            client::ast::ObjectSelection::SpreadSelection(spread) => {
-                let fragment = spread.fragment.borrow();
-                execute_fragment(
-                    context,
-                    resolvers,
-                    object_name,
-                    parent,
-                    &fragment.spec,
-                    variables,
-                )?;
-                return Ok(());
-            }
-        };
-    }
-    return Ok(());
-}
-
-fn execute_interface_selection_set<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
-    interface_type: &server::ast::Interface,
-    object_name: &str,
-    parent: &mut Values<S>,
-    selections: &[client::ast::ObjectSelection],
-    variables: &ResolvedVariables,
-) -> Result<(), String> {
-    for selection in selections {
-        match selection {
-            client::ast::ObjectSelection::TypenameField(_) => {
-                parent.insert(
-                    "__typename".into(),
-                    Value::NonNullable(NonNullableValue::Literal(
-                        LiteralValue::Scalar(S::from_string(object_name)?),
-                    )),
-                );
-                return Ok(());
-            }
-
-            client::ast::ObjectSelection::FieldSelection(field) => {
-                if parent.contains_key(&field.alias) {
-                    return Ok(());
-                }
-                let value = execute_field(
-                    context,
-                    resolvers,
-                    &interface_type.name,
-                    parent,
-                    field,
-                    variables,
-                )?;
-                parent.insert(field.alias.clone(), value);
-                return Ok(());
-            }
-
-            client::ast::ObjectSelection::SpreadSelection(spread) => {
-                let fragment = spread.fragment.borrow();
-                execute_fragment(
-                    context,
-                    resolvers,
-                    object_name,
-                    parent,
-                    &fragment.spec,
-                    variables,
-                )?;
-                return Ok(());
-            }
-        };
-    }
-    return Ok(());
-}
-
-fn execute_sync_operation<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
-    object: &server::ast::ObjectType,
-    operation: &client::ast::Operation,
-    variables: &ResolvedVariables,
-) -> Result<Values<S>, String> {
-    let client::ast::FragmentSpec::Object(fragment_spec) =
-        &operation.fragment_spec
-    else {
-        return Err("Root operation must select an object".into());
-    };
-
-    let mut root_value: ResolverRoot<S> = Values::<S>::new();
-    execute_object_selection_set(
-        context,
-        resolvers,
-        object,
-        operation.r#type.to_object_name(),
-        &mut root_value,
-        &fragment_spec.selections,
-        variables,
-    )?;
-    return Ok(root_value);
-}
-
-pub struct SubscriptionStream<
-    S: Scalar,
-    Stream: futures_core::Stream<Item = Value<S>>,
-> {
-    field_name: String,
-    stream: std::pin::Pin<Box<Stream>>,
-}
-
-impl<'f, S: Scalar, Stream: futures_core::Stream<Item = Value<S>>>
-    futures_core::Stream for SubscriptionStream<S, Stream>
-{
-    type Item = Values<S>;
-    fn poll_next(
-        mut self: std::pin::Pin<&mut Self>,
-        context: &mut std::task::Context,
-    ) -> std::task::Poll<Option<Self::Item>> {
-        <Stream as futures_core::Stream>::poll_next(
-            self.stream.as_mut(),
-            context,
-        )
-        .map(|o| o.map(|v| Values::from_iter([(self.field_name.clone(), v)])))
-    }
-}
-
-fn execute_subscription_operation<
-    C,
-    S: Scalar,
-    Stream: futures_core::Stream<Item = Value<S>>,
->(
-    context: &mut C,
-    resolvers: &SubscriptionResolversMap<C, S, Stream>,
-    operation: &client::ast::Operation,
-    variables: &ResolvedVariables,
-) -> Result<SubscriptionStream<S, Stream>, String> {
-    let client::ast::FragmentSpec::Object(fragment_spec) =
-        &operation.fragment_spec
-    else {
-        return Err("Root operation must select an object".into());
-    };
-
-    let client::ast::ObjectSelection::FieldSelection(selection) =
-        &fragment_spec.selections[0]
-    else {
-        return Err("Unexpected selection for subscription".into());
-    };
-
-    let resolver = resolvers.get(&selection.name).ok_or_else(|| {
-        format!("No subscription resolver for {}", selection.name)
-    })?;
-
-    let parent = Values::new();
-    let value = resolver(&parent, context, variables)?;
-    return Ok(SubscriptionStream {
-        stream: Box::pin(value),
-        field_name: selection.alias.clone(),
-    });
-}
-
-fn execute_operation<
+async fn execute_operation<
     C,
     S: Scalar,
     R: Registry<S>,
@@ -426,8 +44,12 @@ fn execute_operation<
 >(
     context: &mut C,
     registry: &TypeRegistry,
-    sync_resolvers: &SyncResolversMap<C, S>,
-    subscription_resolvers: &SubscriptionResolversMap<C, S, Stream>,
+    sync_resolvers: &sync::SyncResolversMap<C, S>,
+    subscription_resolvers: &subscription::SubscriptionResolversMap<
+        C,
+        S,
+        Stream,
+    >,
     parse_registry: &R,
     operation: &client::ast::Operation,
     variables: &Values<S>,
@@ -438,40 +60,39 @@ fn execute_operation<
         variables,
     )?;
     match operation.r#type {
-        client::ast::OpType::Query => {
-            Ok(OperationResult::Immediate(execute_sync_operation::<C, S>(
+        client::ast::OpType::Query => Ok(OperationResult::Immediate(
+            sync::execute_sync_operation(
                 context,
                 sync_resolvers,
                 &registry.get_query_object().unwrap().borrow(),
                 operation,
                 &resolved_variables,
-            )?))
-        }
-        client::ast::OpType::Mutation => {
-            Ok(OperationResult::Immediate(execute_sync_operation::<C, S>(
+            )
+            .await?,
+        )),
+        client::ast::OpType::Mutation => Ok(OperationResult::Immediate(
+            sync::execute_sync_operation(
                 context,
                 sync_resolvers,
                 &registry.get_mutation_object().unwrap().borrow(),
                 operation,
                 &resolved_variables,
-            )?))
-        }
-        client::ast::OpType::Subscription => {
-            Ok(OperationResult::Stream(execute_subscription_operation::<
-                C,
-                S,
-                Stream,
-            >(
+            )
+            .await?,
+        )),
+        client::ast::OpType::Subscription => Ok(OperationResult::Stream(
+            subscription::execute_subscription_operation(
                 context,
                 subscription_resolvers,
                 operation,
                 &resolved_variables,
-            )?))
-        }
+            )
+            .await?,
+        )),
     }
 }
 
-pub fn execute<
+pub async fn execute<
     C,
     S: Scalar,
     R: Registry<S>,
@@ -479,8 +100,12 @@ pub fn execute<
 >(
     context: &mut C,
     registry: &TypeRegistry,
-    sync_resolvers: &SyncResolversMap<C, S>,
-    subscription_resolvers: &SubscriptionResolversMap<C, S, Stream>,
+    sync_resolvers: &sync::SyncResolversMap<C, S>,
+    subscription_resolvers: &subscription::SubscriptionResolversMap<
+        C,
+        S,
+        Stream,
+    >,
     parse_registry: &R,
     client_query: &str,
     variables: &Values<S>,
@@ -515,7 +140,7 @@ pub fn execute<
         .operations
         .get(operation_name)
         .ok_or(Error::OperationIsNotDefined(operation_name.clone()))?;
-    let result = execute_operation::<C, S, R, Stream>(
+    let result = execute_operation(
         context,
         &mut local_registry,
         sync_resolvers,
@@ -524,6 +149,7 @@ pub fn execute<
         &operation.borrow(),
         variables,
     )
+    .await
     .unwrap();
     Ok(result)
 }

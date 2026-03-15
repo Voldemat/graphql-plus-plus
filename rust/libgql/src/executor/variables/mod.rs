@@ -140,11 +140,9 @@ pub fn resolve_operation_parameters<S: Scalar, R: Registry<S>>(
     let mut vars = ResolvedVariables::new();
     for param in op_parameters.values() {
         if let Some(variable) = variables.get(&param.name[1..]) {
-            if let Some(resolved_variable) = resolve_operation_parameter(
-                registry,
-                param,
-                variable,
-            )? {
+            if let Some(resolved_variable) =
+                resolve_operation_parameter(registry, param, variable)?
+            {
                 vars.insert(param.name[1..].to_string(), resolved_variable);
             }
             continue;

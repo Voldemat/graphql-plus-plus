@@ -15,7 +15,10 @@ pub trait JSONParsableScalar: Sized {
 pub trait InputScalar: crate::executor::Scalar + JSONParsableScalar {}
 impl<T: crate::executor::Scalar + JSONParsableScalar> InputScalar for T {}
 
-pub trait OutputScalar: crate::executor::Scalar + JSONSerializableScalar {}
+pub trait OutputScalar:
+    crate::executor::Scalar + JSONSerializableScalar
+{
+}
 impl<T: crate::executor::Scalar + JSONSerializableScalar> OutputScalar for T {}
 
 pub fn parse_variable_from_json<S: InputScalar>(
@@ -92,10 +95,7 @@ pub fn parse_variables_from_json<S: InputScalar>(
         serde_json::Value::Object(o) => {
             let mut variables = crate::executor::Values::<S>::new();
             for (key, value) in o {
-                variables.insert(
-                    key.clone(),
-                    parse_variable_from_json(value)?,
-                );
+                variables.insert(key.clone(), parse_variable_from_json(value)?);
             }
             Ok(variables)
         }

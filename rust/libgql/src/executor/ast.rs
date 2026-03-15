@@ -82,3 +82,4 @@ impl<S: Scalar> TryGetScalar<S> for LiteralValue<S> {
 }
 
 pub type Values<S> = HashMap<String, Value<S>>;
+pub type ResolverRoot<S> = Values<S>;
