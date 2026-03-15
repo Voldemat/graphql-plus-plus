@@ -1,7 +1,4 @@
-use std::{
-    cell::RefCell,
-    sync::{Arc, RwLock, atomic::AtomicBool},
-};
+use std::sync::{Arc, RwLock, atomic::AtomicBool};
 
 use chrono::prelude::*;
 use libgql::{
@@ -235,7 +232,13 @@ fn login_resolver(
     root: &libgql::executor::ResolverRoot<ExampleScalar>,
     context: &mut Context,
     variables: &libgql::executor::ResolvedVariables,
-) -> Result<libgql::executor::Value<ExampleScalar>, String> {
+) -> std::pin::Pin<
+    Box<
+        dyn Future<
+            Output = Result<libgql::executor::Value<ExampleScalar>, String>,
+        >,
+    >,
+> {
     println!(
         "login_resolver: {:?}, email: {}, password: {}",
         root,
@@ -250,21 +253,29 @@ fn login_resolver(
             .downcast_ref::<String>()
             .unwrap()
     );
-    Ok(libgql::executor::Value::NonNullable(
-        libgql::executor::NonNullableValue::Literal(
-            libgql::executor::LiteralValue::Object(
-                "ErrorInvalidCredentials".to_string(),
-                libgql::executor::Values::new(),
+    Box::pin(async move {
+        Ok(libgql::executor::Value::NonNullable(
+            libgql::executor::NonNullableValue::Literal(
+                libgql::executor::LiteralValue::Object(
+                    "ErrorInvalidCredentials".to_string(),
+                    libgql::executor::Values::new(),
+                ),
             ),
-        ),
-    ))
+        ))
+    })
 }
 
 fn confirm_otp_code_resolver(
     root: &libgql::executor::ResolverRoot<ExampleScalar>,
     context: &mut Context,
     variables: &libgql::executor::ResolvedVariables,
-) -> Result<libgql::executor::Value<ExampleScalar>, String> {
+) -> std::pin::Pin<
+    Box<
+        dyn Future<
+            Output = Result<libgql::executor::Value<ExampleScalar>, String>,
+        >,
+    >,
+> {
     println!(
         "confirm_otp_code_resolver: {:?}, email: {}, code: {}",
         root,
@@ -279,35 +290,43 @@ fn confirm_otp_code_resolver(
             .downcast_ref::<String>()
             .unwrap()
     );
-    Ok(libgql::executor::Value::NonNullable(
-        libgql::executor::NonNullableValue::Literal(
-            libgql::executor::LiteralValue::Object(
-                "OTPToken".to_string(),
-                libgql::executor::Values::from_iter(
-                    [(
-                        "token".to_string(),
-                        libgql::executor::Value::NonNullable(
-                            libgql::executor::NonNullableValue::Literal(
-                                libgql::executor::LiteralValue::Scalar(
-                                    ExampleScalar::String(
-                                        "sample-token".into(),
+    Box::pin(async move {
+        Ok(libgql::executor::Value::NonNullable(
+            libgql::executor::NonNullableValue::Literal(
+                libgql::executor::LiteralValue::Object(
+                    "OTPToken".to_string(),
+                    libgql::executor::Values::from_iter(
+                        [(
+                            "token".to_string(),
+                            libgql::executor::Value::NonNullable(
+                                libgql::executor::NonNullableValue::Literal(
+                                    libgql::executor::LiteralValue::Scalar(
+                                        ExampleScalar::String(
+                                            "sample-token".into(),
+                                        ),
                                     ),
                                 ),
                             ),
-                        ),
-                    )]
-                    .into_iter(),
+                        )]
+                        .into_iter(),
+                    ),
                 ),
             ),
-        ),
-    ))
+        ))
+    })
 }
 
 fn create_group_resolver(
     root: &libgql::executor::ResolverRoot<ExampleScalar>,
     context: &mut Context,
     variables: &libgql::executor::ResolvedVariables,
-) -> Result<libgql::executor::Value<ExampleScalar>, String> {
+) -> std::pin::Pin<
+    Box<
+        dyn Future<
+            Output = Result<libgql::executor::Value<ExampleScalar>, String>,
+        >,
+    >,
+> {
     println!(
         "create_group_resolver: {:?}, groupIn: {:?}, userIds: {:?}, field: {:?}",
         root,
@@ -330,14 +349,16 @@ fn create_group_resolver(
             .downcast_ref::<EGroupUsersField>()
             .unwrap()
     );
-    Ok(libgql::executor::Value::NonNullable(
-        libgql::executor::NonNullableValue::Literal(
-            libgql::executor::LiteralValue::Object(
-                "ErrorAlreadyExists".to_string(),
-                libgql::executor::Values::new(),
+    Box::pin(async move {
+        Ok(libgql::executor::Value::NonNullable(
+            libgql::executor::NonNullableValue::Literal(
+                libgql::executor::LiteralValue::Object(
+                    "ErrorAlreadyExists".to_string(),
+                    libgql::executor::Values::new(),
+                ),
             ),
-        ),
-    ))
+        ))
+    })
 }
 
 impl libgql::json::executor::ast::JSONParsableScalar for ExampleScalar {
@@ -433,7 +454,9 @@ fn get_events_subscription(
     root: &libgql::executor::ResolverRoot<ExampleScalar>,
     context: &mut Context,
     variables: &libgql::executor::ResolvedVariables,
-) -> Result<ExampleValueStream<ExampleScalar>, String> {
+) -> std::pin::Pin<
+    Box<dyn Future<Output = Result<ExampleValueStream<ExampleScalar>, String>>>,
+> {
     let (sender, receiver) =
         std::sync::mpsc::channel::<libgql::executor::Value<ExampleScalar>>();
     let signal = Arc::new(AtomicBool::new(false));
@@ -461,15 +484,17 @@ fn get_events_subscription(
             std::thread::sleep(std::time::Duration::from_secs(1));
         }
     });
-    return Ok(ExampleValueStream {
-        handle: Some(handle),
-        receiver,
-        signal,
-        waker,
-    });
+    Box::pin(async move {
+        Ok(ExampleValueStream {
+            handle: Some(handle),
+            receiver,
+            signal,
+            waker,
+        })
+    })
 }
 
-fn execute(args: &ParseArgs) {
+async fn execute(args: &ParseArgs) {
     let term = Arc::new(AtomicBool::new(false));
     signal_hook::flag::register(
         signal_hook::consts::SIGTERM,
@@ -493,7 +518,7 @@ fn execute(args: &ParseArgs) {
     parse_registry.add_enum::<EGroupUsersField>("EGroupUsersField");
     parse_registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
     parse_registry.add_input::<GroupIn>("GroupIn");
-    let mut sync_resolvers = libgql::executor::SyncResolversMap::new();
+    let mut sync_resolvers = libgql::executor::sync::SyncResolversMap::new();
     sync_resolvers.insert(
         ("Mutation".to_string(), "login".to_string()),
         Box::new(login_resolver),
@@ -507,7 +532,7 @@ fn execute(args: &ParseArgs) {
         Box::new(create_group_resolver),
     );
     let mut subscription_resolvers =
-        libgql::executor::SubscriptionResolversMap::new();
+        libgql::executor::subscription::SubscriptionResolversMap::new();
     subscription_resolvers
         .insert("getEvents".to_string(), Box::new(get_events_subscription));
     let operation_result = libgql::executor::execute::<
@@ -533,6 +558,7 @@ fn execute(args: &ParseArgs) {
             }),
         &args.operation,
     )
+    .await
     .unwrap();
     match operation_result {
         libgql::executor::OperationResult::Immediate(result) => {
@@ -541,41 +567,36 @@ fn execute(args: &ParseArgs) {
                     .unwrap();
             println!("result: {}", json_result);
         }
-        libgql::executor::OperationResult::Stream(mut stream) => {
-            let runtime = tokio::runtime::Runtime::new().unwrap();
-            runtime.block_on(async move {
-                loop {
-                    if term.load(std::sync::atomic::Ordering::Relaxed) {
-                        println!("term signal received in main loop");
-                        break;
-                    }
-                    let Ok(next_item) = tokio::time::timeout(
-                        std::time::Duration::from_millis(100),
-                        stream.next(),
-                    )
-                    .await
-                    else {
-                        continue;
-                    };
-                    let Some(item) = next_item else {
-                        break;
-                    };
-                    let json_result =
-                        libgql::json::executor::ast::serialize_values_to_json(
-                            &item,
-                        )
-                        .unwrap();
-                    println!("result: {}", json_result);
-                }
-            });
-        }
+        libgql::executor::OperationResult::Stream(mut stream) => loop {
+            if term.load(std::sync::atomic::Ordering::Relaxed) {
+                println!("term signal received in main loop");
+                break;
+            }
+            let Ok(next_item) = tokio::time::timeout(
+                std::time::Duration::from_millis(100),
+                stream.next(),
+            )
+            .await
+            else {
+                continue;
+            };
+            let Some(item) = next_item else {
+                break;
+            };
+            let json_result =
+                libgql::json::executor::ast::serialize_values_to_json(&item)
+                    .unwrap();
+            println!("result: {}", json_result);
+        },
     }
 }
 
 impl Commands {
     pub fn execute(self: &Self) {
         match self {
-            Commands::Execute(args) => execute(args),
+            Commands::Execute(args) => tokio::runtime::Runtime::new()
+                .unwrap()
+                .block_on(execute(args)),
         }
     }
 }
