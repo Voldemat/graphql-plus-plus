@@ -4,7 +4,7 @@ version = "0.0.1"
 edition = "2024"
 license = "MIT"
 description = "Library for parsing and executing gql queries"
-repository = "https://github.com/Voldemat/graphql++"
+repository = "https://github.com/Voldemat/graphql-plus-plus"
 
 [dependencies]
 derive_more = { version = "2.1.0", features = ["from", "display"] }
