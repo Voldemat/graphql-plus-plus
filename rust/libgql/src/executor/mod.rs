@@ -28,32 +28,20 @@ pub enum Error {
     NoOperationsAreDefined,
 }
 
-pub enum OperationResult<
-    S: Scalar,
-    Stream: futures_core::Stream<Item = Value<S>>,
-> {
+pub enum OperationResult<S: Scalar> {
     Immediate(Values<S>),
-    Stream(subscription::SubscriptionStream<S, Stream>),
+    Stream(subscription::SubscriptionStream<S>),
 }
 
-async fn execute_operation<
-    C,
-    S: Scalar,
-    R: Registry<S>,
-    Stream: futures_core::Stream<Item = Value<S>>,
->(
+async fn execute_operation<C, S: Scalar, R: Registry<S>>(
     context: &mut C,
     registry: &TypeRegistry,
     sync_resolvers: &sync::SyncResolversMap<C, S>,
-    subscription_resolvers: &subscription::SubscriptionResolversMap<
-        C,
-        S,
-        Stream,
-    >,
+    subscription_resolvers: &subscription::SubscriptionResolversMap<C, S>,
     parse_registry: &R,
     operation: &client::ast::Operation,
     variables: &Values<S>,
-) -> Result<OperationResult<S, Stream>, String> {
+) -> Result<OperationResult<S>, String> {
     let resolved_variables = resolve_operation_parameters(
         parse_registry,
         &operation.parameters,
@@ -92,25 +80,16 @@ async fn execute_operation<
     }
 }
 
-pub async fn execute<
-    C,
-    S: Scalar,
-    R: Registry<S>,
-    Stream: futures_core::Stream<Item = Value<S>>,
->(
+pub async fn execute<C, S: Scalar, R: Registry<S>>(
     context: &mut C,
     registry: &TypeRegistry,
     sync_resolvers: &sync::SyncResolversMap<C, S>,
-    subscription_resolvers: &subscription::SubscriptionResolversMap<
-        C,
-        S,
-        Stream,
-    >,
+    subscription_resolvers: &subscription::SubscriptionResolversMap<C, S>,
     parse_registry: &R,
     client_query: &str,
     variables: &Values<S>,
     operation: &Option<String>,
-) -> Result<OperationResult<S, Stream>, Error> {
+) -> Result<OperationResult<S>, Error> {
     let tokens = lexer::utils::parse_buffer_into_tokens(client_query)?;
     let source_file = std::rc::Rc::new(file::shared::ast::SourceFile {
         filepath: "<request>".into(),

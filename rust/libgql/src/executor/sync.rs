@@ -8,15 +8,14 @@ use crate::{
     parsers::schema::{client, server},
 };
 
+pub type ResolverFuture<S> =
+    std::pin::Pin<Box<dyn Future<Output = Result<Value<S>, String>>>>;
 pub type SyncResolver<C, S> = Box<
-    dyn Fn(
-        &ResolverRoot<S>,
-        &mut C,
-        &ResolvedVariables,
-    )
-        -> std::pin::Pin<Box<dyn Future<Output = Result<Value<S>, String>>>>,
+    dyn Fn(&ResolverRoot<S>, &mut C, &ResolvedVariables) -> ResolverFuture<S>,
 >;
 pub type SyncResolversMap<C, S> = HashMap<(String, String), SyncResolver<C, S>>;
+type EmptyFuture<'a> =
+    std::pin::Pin<Box<dyn Future<Output = Result<(), String>> + 'a>>;
 
 fn execute_fragment_on_value<'a, C, S: Scalar>(
     context: &'a mut C,
@@ -24,7 +23,7 @@ fn execute_fragment_on_value<'a, C, S: Scalar>(
     parent: &'a mut Value<S>,
     spec: &'a client::ast::FragmentSpec,
     variables: &'a ResolvedVariables,
-) -> std::pin::Pin<Box<dyn Future<Output = Result<(), String>> + 'a>> {
+) -> EmptyFuture<'a> {
     Box::pin(async move {
         let Value::NonNullable(non_nullable) = parent else {
             return Ok(());
@@ -67,7 +66,7 @@ fn execute_fragment<'a, C, S: Scalar>(
     parent: &'a mut Values<S>,
     spec: &'a client::ast::FragmentSpec,
     variables: &'a ResolvedVariables,
-) -> std::pin::Pin<Box<dyn Future<Output = Result<(), String>> + 'a>> {
+) -> EmptyFuture<'a> {
     Box::pin(async move {
         match spec {
             client::ast::FragmentSpec::Object(obj) => {

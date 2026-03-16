@@ -8,52 +8,45 @@ use super::scalar::Scalar;
 use super::ast::ResolverRoot;
 use super::variables::ResolvedVariables;
 
-pub type SubscriptionResolver<C, S, Stream> = Box<
+pub type SubscriptionResolverStream<S> =
+    std::pin::Pin<Box<dyn futures_core::Stream<Item = Value<S>>>>;
+pub type SubscriptionResolverFuture<S> = std::pin::Pin<
+    Box<dyn Future<Output = Result<SubscriptionResolverStream<S>, String>>>,
+>;
+pub type SubscriptionResolver<C, S> = Box<
     dyn Fn(
         &ResolverRoot<S>,
         &mut C,
         &ResolvedVariables,
-    )
-        -> std::pin::Pin<Box<dyn Future<Output = Result<Stream, String>>>>,
+    ) -> SubscriptionResolverFuture<S>,
 >;
 
-pub type SubscriptionResolversMap<C, S, Stream> =
-    HashMap<String, SubscriptionResolver<C, S, Stream>>;
+pub type SubscriptionResolversMap<C, S> =
+    HashMap<String, SubscriptionResolver<C, S>>;
 
-pub struct SubscriptionStream<
-    S: Scalar,
-    Stream: futures_core::Stream<Item = Value<S>>,
-> {
+pub struct SubscriptionStream<S: Scalar> {
     field_name: String,
-    stream: std::pin::Pin<Box<Stream>>,
+    stream: SubscriptionResolverStream<S>,
 }
 
-impl<'f, S: Scalar, Stream: futures_core::Stream<Item = Value<S>>>
-    futures_core::Stream for SubscriptionStream<S, Stream>
-{
+impl<S: Scalar> futures_core::Stream for SubscriptionStream<S> {
     type Item = Values<S>;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
         context: &mut std::task::Context,
     ) -> std::task::Poll<Option<Self::Item>> {
-        <Stream as futures_core::Stream>::poll_next(
-            self.stream.as_mut(),
-            context,
-        )
-        .map(|o| o.map(|v| Values::from_iter([(self.field_name.clone(), v)])))
+        self.stream.as_mut().poll_next(context).map(|o| {
+            o.map(|v| Values::from_iter([(self.field_name.clone(), v)]))
+        })
     }
 }
 
-pub async fn execute_subscription_operation<
-    C,
-    S: Scalar,
-    Stream: futures_core::Stream<Item = Value<S>>,
->(
+pub async fn execute_subscription_operation<C, S: Scalar>(
     context: &mut C,
-    resolvers: &SubscriptionResolversMap<C, S, Stream>,
+    resolvers: &SubscriptionResolversMap<C, S>,
     operation: &client::ast::Operation,
     variables: &ResolvedVariables,
-) -> Result<SubscriptionStream<S, Stream>, String> {
+) -> Result<SubscriptionStream<S>, String> {
     let client::ast::FragmentSpec::Object(fragment_spec) =
         &operation.fragment_spec
     else {
@@ -73,7 +66,7 @@ pub async fn execute_subscription_operation<
     let parent = Values::new();
     let value = resolver(&parent, context, variables).await?;
     return Ok(SubscriptionStream {
-        stream: Box::pin(value),
+        stream: value,
         field_name: selection.alias.clone(),
     });
 }
