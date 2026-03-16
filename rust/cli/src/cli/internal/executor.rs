@@ -412,86 +412,49 @@ impl libgql::json::executor::ast::JSONSerializableScalar for ExampleScalar {
     }
 }
 
-struct ExampleValueStream<S: libgql::executor::Scalar> {
-    handle: Option<std::thread::JoinHandle<()>>,
-    receiver: std::sync::mpsc::Receiver<libgql::executor::Value<S>>,
-    signal: Arc<AtomicBool>,
-    waker: Arc<RwLock<Option<std::task::Waker>>>,
-}
-
-impl<S: libgql::executor::Scalar> Drop for ExampleValueStream<S> {
-    fn drop(&mut self) {
-        self.signal
-            .store(true, std::sync::atomic::Ordering::Relaxed);
-        if let Some(handle) = self.handle.take() {
-            handle.join().unwrap();
-        }
-    }
-}
-
-impl<S: libgql::executor::Scalar> futures_core::Stream
-    for ExampleValueStream<S>
-{
-    type Item = libgql::executor::Value<S>;
-    fn poll_next(
-        self: std::pin::Pin<&mut Self>,
-        context: &mut std::task::Context,
-    ) -> std::task::Poll<Option<Self::Item>> {
-        self.waker.write().unwrap().replace(context.waker().clone());
-        match self.receiver.try_recv() {
-            Ok(data) => std::task::Poll::Ready(Some(data)),
-            Err(std::sync::mpsc::TryRecvError::Empty) => {
-                std::task::Poll::Pending
-            }
-            Err(std::sync::mpsc::TryRecvError::Disconnected) => {
-                std::task::Poll::Ready(None)
-            }
-        }
-    }
-}
-
 fn get_events_subscription(
     root: &libgql::executor::ResolverRoot<ExampleScalar>,
     context: &mut Context,
     variables: &libgql::executor::ResolvedVariables,
 ) -> std::pin::Pin<
-    Box<dyn Future<Output = Result<ExampleValueStream<ExampleScalar>, String>>>,
+    Box<
+        dyn Future<
+            Output = Result<
+                std::pin::Pin<
+                    Box<
+                        dyn futures_core::Stream<
+                                Item = libgql::executor::Value<ExampleScalar>,
+                            >,
+                    >,
+                >,
+                String,
+            >,
+        >,
+    >,
 > {
-    let (sender, receiver) =
-        std::sync::mpsc::channel::<libgql::executor::Value<ExampleScalar>>();
-    let signal = Arc::new(AtomicBool::new(false));
-    let thread_signal = signal.clone();
-    let waker = Arc::new(RwLock::new(None::<std::task::Waker>));
-    let thread_waker = waker.clone();
-    let handle = std::thread::spawn(move || {
+    let resolver_stream = async_stream::stream! {
         loop {
-            if thread_signal.load(std::sync::atomic::Ordering::Relaxed) {
-                println!("get_events_subscription received signal to stop");
-                break;
-            }
-            sender
-                .send(libgql::executor::Value::NonNullable(
-                    libgql::executor::NonNullableValue::Literal(
-                        libgql::executor::LiteralValue::Scalar(
-                            ExampleScalar::String(Utc::now().to_string()),
-                        ),
-                    ),
-                ))
-                .unwrap();
-            if let Some(current_waker) = thread_waker.read().unwrap().as_ref() {
-                current_waker.wake_by_ref();
-            }
-            std::thread::sleep(std::time::Duration::from_secs(1));
+            yield ExampleScalar::String(Utc::now().to_string());
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
-    });
-    Box::pin(async move {
-        Ok(ExampleValueStream {
-            handle: Some(handle),
-            receiver,
-            signal,
-            waker,
-        })
-    })
+    };
+    let stream = Box::pin(resolver_stream.map(
+        |v| -> libgql::executor::Value<ExampleScalar> {
+            libgql::executor::Value::NonNullable(
+                libgql::executor::NonNullableValue::Literal(
+                    libgql::executor::LiteralValue::Scalar(v),
+                ),
+            )
+        },
+    ))
+        as std::pin::Pin<
+            Box<
+                dyn futures_core::Stream<
+                        Item = libgql::executor::Value<ExampleScalar>,
+                    >,
+            >,
+        >;
+    Box::pin(async move { Ok(stream) })
 }
 
 async fn execute(args: &ParseArgs) {
@@ -539,7 +502,6 @@ async fn execute(args: &ParseArgs) {
         Context,
         ExampleScalar,
         libgql::executor::HashMapRegistry<ExampleScalar>,
-        ExampleValueStream<ExampleScalar>,
     >(
         &mut (),
         &registry,
