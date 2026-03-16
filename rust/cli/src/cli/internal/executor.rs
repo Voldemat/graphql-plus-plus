@@ -1,4 +1,4 @@
-use std::sync::{Arc, RwLock, atomic::AtomicBool};
+use std::sync::{Arc, atomic::AtomicBool};
 
 use chrono::prelude::*;
 use libgql::{
@@ -232,13 +232,7 @@ fn login_resolver(
     root: &libgql::executor::ResolverRoot<ExampleScalar>,
     context: &mut Context,
     variables: &libgql::executor::ResolvedVariables,
-) -> std::pin::Pin<
-    Box<
-        dyn Future<
-            Output = Result<libgql::executor::Value<ExampleScalar>, String>,
-        >,
-    >,
-> {
+) -> libgql::executor::sync::ResolverFuture<ExampleScalar> {
     println!(
         "login_resolver: {:?}, email: {}, password: {}",
         root,
@@ -269,13 +263,7 @@ fn confirm_otp_code_resolver(
     root: &libgql::executor::ResolverRoot<ExampleScalar>,
     context: &mut Context,
     variables: &libgql::executor::ResolvedVariables,
-) -> std::pin::Pin<
-    Box<
-        dyn Future<
-            Output = Result<libgql::executor::Value<ExampleScalar>, String>,
-        >,
-    >,
-> {
+) -> libgql::executor::sync::ResolverFuture<ExampleScalar> {
     println!(
         "confirm_otp_code_resolver: {:?}, email: {}, code: {}",
         root,
@@ -320,13 +308,7 @@ fn create_group_resolver(
     root: &libgql::executor::ResolverRoot<ExampleScalar>,
     context: &mut Context,
     variables: &libgql::executor::ResolvedVariables,
-) -> std::pin::Pin<
-    Box<
-        dyn Future<
-            Output = Result<libgql::executor::Value<ExampleScalar>, String>,
-        >,
-    >,
-> {
+) -> libgql::executor::sync::ResolverFuture<ExampleScalar> {
     println!(
         "create_group_resolver: {:?}, groupIn: {:?}, userIds: {:?}, field: {:?}",
         root,
@@ -416,22 +398,7 @@ fn get_events_subscription(
     root: &libgql::executor::ResolverRoot<ExampleScalar>,
     context: &mut Context,
     variables: &libgql::executor::ResolvedVariables,
-) -> std::pin::Pin<
-    Box<
-        dyn Future<
-            Output = Result<
-                std::pin::Pin<
-                    Box<
-                        dyn futures_core::Stream<
-                                Item = libgql::executor::Value<ExampleScalar>,
-                            >,
-                    >,
-                >,
-                String,
-            >,
-        >,
-    >,
-> {
+) -> libgql::executor::subscription::SubscriptionResolverFuture<ExampleScalar> {
     let resolver_stream = async_stream::stream! {
         loop {
             yield ExampleScalar::String(Utc::now().to_string());
@@ -447,12 +414,8 @@ fn get_events_subscription(
             )
         },
     ))
-        as std::pin::Pin<
-            Box<
-                dyn futures_core::Stream<
-                        Item = libgql::executor::Value<ExampleScalar>,
-                    >,
-            >,
+        as libgql::executor::subscription::SubscriptionResolverStream<
+            ExampleScalar,
         >;
     Box::pin(async move { Ok(stream) })
 }
