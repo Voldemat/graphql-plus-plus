@@ -18,7 +18,7 @@ pub enum ObjectNonCallableFieldSpec {
     #[serde(rename(deserialize = "literal"))]
     Literal(LiteralFieldSpec<ObjectType>),
     #[serde(rename(deserialize = "array"))]
-    Array(ArrayFieldSpec<ObjectType>),
+    Array(ArrayFieldSpec<ObjectNonCallableFieldSpec>),
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -35,7 +35,7 @@ pub enum ObjectFieldSpec {
     #[serde(rename(deserialize = "literal"))]
     Literal(LiteralFieldSpec<ObjectType>),
     #[serde(rename(deserialize = "array"))]
-    Array(ArrayFieldSpec<ObjectType>),
+    Array(ArrayFieldSpec<ObjectNonCallableFieldSpec>),
     #[serde(rename(deserialize = "callable"))]
     Callable(CallableFieldSpec),
 }
@@ -58,58 +58,60 @@ mod tests {
         let _: Object = serde_json_path_to_error::from_str(
             r##"
 {
-    "name": "User",
-    "implements": {},
-    "fields": {
-      "createdAt": {
+  "name": "User",
+  "implements": {},
+  "fields": {
+    "createdAt": {
+      "nullable": false,
+      "spec": {
+        "_type": "literal",
+        "type": {
+          "_type": "Scalar",
+          "name": "Datetime"
+        },
+        "invocations": {}
+      }
+    },
+    "email": {
+      "nullable": false,
+      "spec": {
+        "_type": "literal",
+        "type": {
+          "_type": "Scalar",
+          "name": "String"
+        },
+        "invocations": {}
+      }
+    },
+    "id": {
+      "nullable": false,
+      "spec": {
+        "_type": "literal",
+        "type": {
+          "_type": "Scalar",
+          "name": "UUID"
+        },
+        "invocations": {}
+      }
+    },
+    "name": {
+      "nullable": false,
+      "spec": {
+        "_type": "literal",
+        "type": {
+          "_type": "Scalar",
+          "name": "String"
+        },
+        "invocations": {}
+      }
+    },
+    "tenGroups": {
+      "nullable": false,
+      "spec": {
+        "_type": "array",
         "nullable": false,
-        "spec": {
+        "type": {
           "_type": "literal",
-          "type": {
-            "_type": "Scalar",
-            "name": "Datetime"
-          },
-          "invocations": {}
-        }
-      },
-      "email": {
-        "nullable": false,
-        "spec": {
-          "_type": "literal",
-          "type": {
-            "_type": "Scalar",
-            "name": "String"
-          },
-          "invocations": {}
-        }
-      },
-      "id": {
-        "nullable": false,
-        "spec": {
-          "_type": "literal",
-          "type": {
-            "_type": "Scalar",
-            "name": "UUID"
-          },
-          "invocations": {}
-        }
-      },
-      "name": {
-        "nullable": false,
-        "spec": {
-          "_type": "literal",
-          "type": {
-            "_type": "Scalar",
-            "name": "String"
-          },
-          "invocations": {}
-        }
-      },
-      "tenGroups": {
-        "nullable": false,
-        "spec": {
-          "_type": "array",
-          "nullable": false,
           "type": {
             "_type": "ObjectType",
             "name": "Group",
@@ -118,6 +120,7 @@ mod tests {
         }
       }
     }
+  }
 }
         "##,
         )

@@ -35,7 +35,7 @@ pub struct LiteralFieldSpec<T> {
 pub struct ArrayFieldSpec<T> {
     pub nullable: bool,
     #[serde(rename(deserialize = "type"))]
-    pub field_type: T,
+    pub field_type: Box<T>,
     #[serde(rename(deserialize = "defaultValue"))]
     pub default_value: Option<ArrayLiteral>,
 }
@@ -46,7 +46,7 @@ pub enum InputFieldSpec {
     #[serde(rename(deserialize = "literal"))]
     Literal(LiteralFieldSpec<InputType>),
     #[serde(rename(deserialize = "array"))]
-    Array(ArrayFieldSpec<InputType>),
+    Array(ArrayFieldSpec<InputFieldSpec>),
 }
 
 #[derive(Debug, PartialEq, serde::Deserialize)]

@@ -25,11 +25,11 @@ impl<'de> serde::de::Visitor<'de> for DirectiveLocationVisitor {
         formatter.write_str("A directive location enum")
     }
 
-    fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
     where
         E: serde::de::Error,
     {
-        match value.as_str() {
+        match value {
             "SCHEMA" => Ok(DirectiveLocation::Schema),
             "SCALAR" => Ok(DirectiveLocation::Scalar),
             "OBJECT" => Ok(DirectiveLocation::Object),

@@ -1,161 +1,111 @@
-use std::borrow::Cow;
-
-use derive_more::with_trait::{Deref, Display, Error, From, TryInto};
-use juniper::ScalarValue;
-
-#[derive(
-    Clone,
-    Display,
-    Debug,
-    From,
-    TryInto,
-    PartialEq,
-    juniper::ScalarValue,
-    serde::Serialize,
-)]
-#[serde(untagged)]
-pub enum MyScalarValue {
-    #[from]
-    Long(i64),
-    #[from]
-    #[value(to_float, to_int)]
-    Int(i32),
-    #[from]
-    #[value(to_float)]
-    Float(f64),
-    #[from(&str, Cow<'_, str>, String)]
-    #[value(as_str, to_string)]
+#[derive(Debug)]
+pub enum ExampleScalar {
     String(String),
-    #[from]
-    #[value(to_bool)]
+    Int(i32),
+    Int64(i64),
+    Float(f32),
     Boolean(bool),
 }
 
-impl<'de> serde::Deserialize<'de> for MyScalarValue {
-    fn deserialize<D: serde::Deserializer<'de>>(
-        de: D,
-    ) -> Result<Self, D::Error> {
-        struct Visitor;
+impl libgql::executor::Scalar for ExampleScalar {
+    fn get_str(self: &Self) -> Option<&str> {
+        match self {
+            Self::String(s) => Some(s),
+            _ => None,
+        }
+    }
 
-        impl<'de> serde::de::Visitor<'de> for Visitor {
-            type Value = MyScalarValue;
+    fn from_string(str: &str) -> Result<Self, String> {
+        Ok(Self::String(str.to_string()))
+    }
 
-            fn expecting(
-                &self,
-                f: &mut std::fmt::Formatter,
-            ) -> std::fmt::Result {
-                f.write_str("a valid input value")
+    fn from_literal(
+        literal: &libgql::parsers::schema::shared::ast::Literal,
+    ) -> Result<ExampleScalar, String> {
+        match literal {
+            libgql::parsers::schema::shared::ast::Literal::Int(i) => {
+                Ok(ExampleScalar::Int(
+                    TryInto::<i32>::try_into(*i).map_err(|e| e.to_string())?,
+                ))
             }
-
-            fn visit_bool<E: serde::de::Error>(
-                self,
-                b: bool,
-            ) -> Result<Self::Value, E> {
-                Ok(MyScalarValue::Boolean(b))
+            libgql::parsers::schema::shared::ast::Literal::Float(f) => {
+                Ok(ExampleScalar::Float(*f as f32))
             }
-
-            fn visit_i32<E: serde::de::Error>(
-                self,
-                n: i32,
-            ) -> Result<Self::Value, E> {
-                Ok(MyScalarValue::Int(n))
+            libgql::parsers::schema::shared::ast::Literal::String(s) => {
+                Ok(ExampleScalar::String(s.to_string()))
             }
-
-            fn visit_i64<E: serde::de::Error>(
-                self,
-                n: i64,
-            ) -> Result<Self::Value, E> {
-                if n <= i64::from(i32::MAX) {
-                    self.visit_i32(n.try_into().unwrap())
-                } else {
-                    Ok(MyScalarValue::Long(n))
-                }
-            }
-
-            fn visit_u32<E: serde::de::Error>(
-                self,
-                n: u32,
-            ) -> Result<Self::Value, E> {
-                if n <= i32::MAX as u32 {
-                    self.visit_i32(n.try_into().unwrap())
-                } else {
-                    self.visit_u64(n.into())
-                }
-            }
-
-            fn visit_u64<E: serde::de::Error>(
-                self,
-                n: u64,
-            ) -> Result<Self::Value, E> {
-                if n <= i64::MAX as u64 {
-                    self.visit_i64(n.try_into().unwrap())
-                } else {
-                    // Browser's `JSON.stringify()` serialize all numbers
-                    // having no fractional part as integers (no decimal
-                    // point), so we must parse large integers as floating
-                    // point, otherwise we would error on transferring large
-                    // floating point numbers.
-                    Ok(MyScalarValue::Float(n as f64))
-                }
-            }
-
-            fn visit_f64<E: serde::de::Error>(
-                self,
-                f: f64,
-            ) -> Result<Self::Value, E> {
-                Ok(MyScalarValue::Float(f))
-            }
-
-            fn visit_str<E: serde::de::Error>(
-                self,
-                s: &str,
-            ) -> Result<Self::Value, E> {
-                self.visit_string(s.into())
-            }
-
-            fn visit_string<E: serde::de::Error>(
-                self,
-                s: String,
-            ) -> Result<Self::Value, E> {
-                Ok(MyScalarValue::String(s))
+            libgql::parsers::schema::shared::ast::Literal::Boolean(b) => {
+                Ok(ExampleScalar::Boolean(*b))
             }
         }
-
-        de.deserialize_any(Visitor)
     }
 }
 
-#[juniper::graphql_scalar]
-#[graphql(scalar = MyScalarValue, with = int64_impl)]
-type Int64 = i64;
-
-mod int64_impl {
-    use super::*;
-
-    pub(super) fn to_output(value: &Int64) -> MyScalarValue {
-        (*value).into()
+impl libgql::executor::GQLScalar<ExampleScalar> for i32 {
+    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::Int(i) => Ok(*i),
+            _ => Err(format!("Invalid scalar for i32 {:?}", s)),
+        }
     }
+}
 
-    pub(super) fn from_input(
-        v: &juniper::Scalar<MyScalarValue>,
-    ) -> Result<Int64, Box<str>> {
-        let value = v.try_as_str().unwrap();
-        println!("from_input: {}", value);
-        Ok(value.parse::<i64>().unwrap())
+impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
+    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::Float(f) => Ok(*f),
+            _ => Err(format!("Invalid scalar for f32 {:?}", s)),
+        }
     }
+}
 
-    pub(super) fn parse_token(
-        value: juniper::ScalarToken<'_>,
-    ) -> juniper::ParseScalarResult<MyScalarValue> {
-        match value {
-            juniper::ScalarToken::Int(a) => {
-                juniper::ParseScalarResult::Ok(MyScalarValue::from(a))
+impl libgql::executor::GQLScalar<ExampleScalar> for String {
+    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::String(s) => Ok(s.clone()),
+            _ => Err(format!("Invalid scalar for String {:?}", s)),
+        }
+    }
+}
+
+impl libgql::executor::GQLScalar<ExampleScalar> for i64 {
+    fn from_scalar(scalar: &ExampleScalar) -> Result<Self, String> {
+        match scalar {
+            ExampleScalar::Int64(i) => Ok(*i),
+            _ => Err(format!("Invalid scalar for Int64 {:?}", scalar)),
+        }
+    }
+}
+
+impl libgql::executor::GQLScalar<ExampleScalar>
+    for chrono::DateTime<chrono::Utc>
+{
+    fn from_scalar(scalar: &ExampleScalar) -> Result<Self, String> {
+        match scalar {
+            ExampleScalar::String(s) => chrono::DateTime::parse_from_rfc3339(s)
+                .map_err(|e| e.to_string())
+                .map(|v| v.with_timezone(&chrono::Utc)),
+            _ => Err(format!("Invalid scalar for Datetime {:?}", scalar)),
+        }
+    }
+}
+
+impl libgql::executor::GQLScalar<ExampleScalar> for uuid::Uuid {
+    fn from_scalar(scalar: &ExampleScalar) -> Result<Self, String> {
+        match scalar {
+            ExampleScalar::String(s) => {
+                uuid::Uuid::parse_str(s).map_err(|e| e.to_string())
             }
-            _ => juniper::ParseScalarResult::Err(
-                juniper::ParseError::UnexpectedToken(
-                    "Only int is accepted".into(),
-                ),
-            ),
+            _ => Err(format!("Invalid scalar for UUID {:?}", scalar)),
+        }
+    }
+}
+
+impl libgql::executor::GQLScalar<ExampleScalar> for bool {
+    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::Boolean(b) => Ok(*b),
+            _ => Err(format!("Invalid scalar for bool {:?}", s)),
         }
     }
 }

@@ -21,51 +21,63 @@ mod tests {
         let schema: Input = serde_json_path_to_error::from_str(
             r#"
 {
-    "name": "GroupIn",
-    "fields": {
-      "limitOfDownloadsPerDay": {
+  "name": "GroupIn",
+  "fields": {
+    "limitOfDownloadsPerDay": {
+      "nullable": false,
+      "spec": {
+        "_type": "literal",
+        "type": {
+          "_type": "Scalar",
+          "name": "Int"
+        },
+        "defaultValue": null
+      }
+    },
+    "name": {
+      "nullable": false,
+      "spec": {
+        "_type": "literal",
+        "type": {
+          "_type": "Scalar",
+          "name": "String"
+        },
+        "defaultValue": null
+      }
+    },
+    "tagIds": {
+      "nullable": false,
+      "spec": {
+        "_type": "array",
         "nullable": false,
-        "spec": {
+        "type": {
           "_type": "literal",
-          "type": {
-            "_type": "Scalar",
-            "name": "Int"
-          }
-        }
-      },
-      "name": {
-        "nullable": false,
-        "spec": {
-          "_type": "literal",
-          "type": {
-            "_type": "Scalar",
-            "name": "String"
-          }
-        }
-      },
-      "tagIds": {
-        "nullable": false,
-        "spec": {
-          "_type": "array",
-          "nullable": false,
           "type": {
             "_type": "Scalar",
             "name": "UUID"
-          }
-        }
+          },
+          "defaultValue": null
+        },
+        "defaultValue": null
       }
     }
   }
+}
         "#,
         )
         .unwrap();
         let tag_ids_field = InputField {
             nullable: false,
-            spec: InputFieldSpec::Array(ArrayFieldSpec::<InputType> {
+            spec: InputFieldSpec::Array(ArrayFieldSpec::<InputFieldSpec> {
                 nullable: false,
-                field_type: InputType::Scalar {
-                    name: "UUID".into(),
-                },
+                field_type: Box::new(InputFieldSpec::Literal(
+                    LiteralFieldSpec {
+                        field_type: InputType::Scalar {
+                            name: "UUID".into(),
+                        },
+                        default_value: None,
+                    },
+                )),
                 default_value: None,
             }),
         };
