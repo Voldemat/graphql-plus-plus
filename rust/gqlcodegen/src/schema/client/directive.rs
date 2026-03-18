@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::schema::shared::InputField;
 
 #[derive(Debug, serde::Deserialize)]
@@ -25,6 +23,6 @@ pub enum DirectiveLocation {
 #[derive(Debug, serde::Deserialize)]
 pub struct Directive {
     name: String,
-    arguments: HashMap<String, InputField>,
+    arguments: indexmap::IndexMap<String, InputField>,
     locations: Vec<DirectiveLocation>
 }

@@ -1,12 +1,10 @@
-use std::collections::HashMap;
-
 use super::{directive::Directive, fragment::Fragment, operation::Operation};
 
 #[derive(Debug, serde::Deserialize)]
 pub struct Schema {
-    fragments: HashMap<String, Fragment>,
-    operations: HashMap<String, Operation>,
-    directives: HashMap<String, Directive>,
+    fragments: indexmap::IndexMap<String, Fragment>,
+    operations: indexmap::IndexMap<String, Operation>,
+    directives: indexmap::IndexMap<String, Directive>,
 }
 
 #[cfg(test)]

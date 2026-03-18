@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use super::fragment::FragmentSpec;
 use crate::schema::shared::InputField;
 
@@ -18,7 +16,7 @@ pub struct Operation {
     name: String,
     #[serde(rename(deserialize = "type"))]
     optype: OperationType,
-    parameters: HashMap<String, InputField>,
+    parameters: indexmap::IndexMap<String, InputField>,
     #[serde(rename(deserialize = "fragmentSpec"))]
     fragment_spec: FragmentSpec,
     #[serde(rename(deserialize = "sourceText"))]

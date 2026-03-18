@@ -6,7 +6,7 @@ use crate::schema::client::argument::Argument;
 pub struct FieldSelection {
     pub name: String,
     pub alias: String,
-    pub arguments: HashMap<String, Argument>,
+    pub arguments: indexmap::IndexMap<String, Argument>,
     pub selection: Option<FragmentSpec>
 }
 

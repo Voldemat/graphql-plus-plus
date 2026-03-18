@@ -73,7 +73,6 @@ fn generate_input_type(
         schema::shared::InputType::InputType { name } => name.clone(),
         schema::shared::InputType::Enum { name } => name.clone(),
         schema::shared::InputType::Scalar { name } => {
-            println!("{}", name);
             config.scalars_mapping[name].clone()
         }
     }
@@ -87,7 +86,6 @@ fn generate_object_type(
         ObjectType::ObjectType { name } => name.clone(),
         ObjectType::Enum { name } => name.clone(),
         ObjectType::Scalar { name } => {
-            println!("{}", name);
             config.scalars_mapping[name].clone()
         }
         ObjectType::Union { name } => name.clone(),
@@ -185,7 +183,7 @@ fn generate_input_field_spec_value(
         }
         schema::shared::InputFieldSpec::Literal(literal) => {
             return format!(
-                "{}.get_literal().ok_or(\"Unexpected array value for literal\".to_string()).map({}).flatten()",
+                "\n            {}.get_literal()\n            .ok_or(\"Unexpected array value for literal\".to_string())\n            .map({})\n            .flatten()",
                 input_expression,
                 generate_input_type_value_func(config, &literal.field_type)
             );
@@ -201,12 +199,12 @@ fn generate_input_field_value(
     field: &schema::shared::InputField,
 ) -> String {
     let var = format!(
-        "{}.get(\"{}\").map(libgql::executor::Value::to_non_nullable_option).flatten()\n",
+        "{}.get(\"{}\")\n        .map(libgql::executor::Value::to_non_nullable_option)\n        .flatten()\n",
         variables_var_name, field_name
     );
     if field.nullable {
         format!(
-            "{}.map(|v| {}).transpose()?",
+            "{}        .map(|v| {}        \n        ).transpose()?",
             var,
             generate_input_field_spec_value(
                 config,
@@ -217,7 +215,7 @@ fn generate_input_field_value(
         )
     } else {
         format!(
-            "{}.ok_or(\"{}: Required field {} is missing or null\".to_string()).map(|v| {}).flatten()?",
+            "{}        .ok_or(\"{}: Required field {} is missing or null\".to_string())\n        .map(|v| {}\n        )\n        .flatten()?",
             var,
             input_name,
             field_name,
@@ -348,7 +346,7 @@ fn generate_object_definition(
         );
         field.visibility = Some("pub".into());
         local.push_field(field);
-    }
+    };
 }
 
 pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {

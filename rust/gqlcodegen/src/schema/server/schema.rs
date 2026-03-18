@@ -8,12 +8,12 @@ use super::input::Input;
 
 #[derive(Debug, serde::Deserialize)]
 pub struct Schema {
-    pub objects: HashMap<String, Object>,
-    pub directives: HashMap<String, Directive>,
-    pub unions: HashMap<String, Union>,
-    pub enums: HashMap<String, Enum>,
+    pub objects: indexmap::IndexMap<String, Object>,
+    pub directives: indexmap::IndexMap<String, Directive>,
+    pub unions: indexmap::IndexMap<String, Union>,
+    pub enums: indexmap::IndexMap<String, Enum>,
     pub scalars: Vec<String>,
-    pub inputs: HashMap<String, Input>
+    pub inputs: indexmap::IndexMap<String, Input>
 }
 
 #[cfg(test)]

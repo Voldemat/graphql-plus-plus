@@ -25,7 +25,7 @@ pub enum ObjectNonCallableFieldSpec {
 pub struct CallableFieldSpec {
     #[serde(rename(deserialize = "returnType"))]
     pub return_type: ObjectNonCallableFieldSpec,
-    pub arguments: HashMap<String, InputField>
+    pub arguments: indexmap::IndexMap<String, InputField>
 }
 
 
@@ -45,8 +45,8 @@ type ObjectField = Field<ObjectFieldSpec>;
 #[derive(Debug, serde::Deserialize)]
 pub struct Object {
     pub name: String,
-    pub implements: HashMap<String, String>,
-    pub fields: HashMap<String, ObjectField>,
+    pub implements: indexmap::IndexMap<String, String>,
+    pub fields: indexmap::IndexMap<String, ObjectField>,
 }
 
 #[cfg(test)]

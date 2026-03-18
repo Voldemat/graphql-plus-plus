@@ -1,11 +1,9 @@
-use std::collections::HashMap;
-
 use crate::schema::shared::InputField;
 
 #[derive(Debug, PartialEq, serde::Deserialize)]
 pub struct Input {
     pub name: String,
-    pub fields: HashMap<String, InputField>,
+    pub fields: indexmap::IndexMap<String, InputField>,
 }
 
 #[cfg(test)]
