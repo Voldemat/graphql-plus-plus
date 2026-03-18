@@ -141,12 +141,12 @@ mod tests {
             todo!()
         }
 
-        fn from_str(str: &str) -> Result<Self, String> {
+        fn from_str(_: &str) -> Result<Self, String> {
             todo!()
         }
 
         fn from_literal(
-            literal: &shared::ast::Literal,
+            _: &shared::ast::Literal,
         ) -> Result<Self, String> {
             todo!()
         }

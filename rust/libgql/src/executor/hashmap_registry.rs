@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::parsers::schema::shared;
 
-use super::ast::Values;
+use super::ast::{LiteralValue, NonNullableValue, Value, Values};
 use super::registry::Registry;
 use super::scalar::Scalar;
 
@@ -13,46 +13,47 @@ where
     fn from_scalar(s: S) -> Result<Self, String>;
     fn to_scalar(self: Self) -> Result<S, String>;
 
-    fn to_value(self: Self) -> Result<super::ast::Value<S>, String> {
-        self.to_scalar().map(|scalar| {
-            super::ast::Value::NonNullable(
-                super::ast::NonNullableValue::Literal(
-                    super::ast::LiteralValue::Scalar(scalar),
-                ),
-            )
-        })
+    fn to_value(self: Self) -> Result<Value<S>, String> {
+        self.to_non_nullable_value().map(|v| Value::NonNullable(v))
     }
 
-    fn from_literal_value(
-        value: super::ast::LiteralValue<S>,
-    ) -> Result<Self, String> {
+    fn to_non_nullable_value(
+        self: Self,
+    ) -> Result<NonNullableValue<S>, String> {
+        self.to_literal_value()
+            .map(|v| NonNullableValue::Literal(v))
+    }
+
+    fn to_literal_value(self: Self) -> Result<LiteralValue<S>, String> {
+        self.to_scalar().map(|scalar| LiteralValue::Scalar(scalar))
+    }
+
+    fn from_literal_value(value: LiteralValue<S>) -> Result<Self, String> {
         match value {
-            super::ast::LiteralValue::Scalar(scalar) => {
-                Self::from_scalar(scalar)
-            }
-            super::ast::LiteralValue::Object(_, object) => {
+            LiteralValue::Scalar(scalar) => Self::from_scalar(scalar),
+            LiteralValue::Object(_, object) => {
                 Err(format!("Unexpected object value for scalar: {:?}", object))
             }
         }
     }
 
     fn from_non_nullable_value(
-        value: super::ast::NonNullableValue<S>,
+        value: NonNullableValue<S>,
     ) -> Result<Self, String> {
         match value {
-            super::ast::NonNullableValue::Literal(literal) => {
+            NonNullableValue::Literal(literal) => {
                 Self::from_literal_value(literal)
             }
-            super::ast::NonNullableValue::Array(array) => {
+            NonNullableValue::Array(array) => {
                 Err(format!("Unexpected array value for scalar: {:?}", array))
             }
         }
     }
 
-    fn from_value(value: super::ast::Value<S>) -> Result<Option<Self>, String> {
+    fn from_value(value: Value<S>) -> Result<Option<Self>, String> {
         match value {
-            super::ast::Value::Null => Ok(None),
-            super::ast::Value::NonNullable(non_nullable) => {
+            Value::Null => Ok(None),
+            Value::NonNullable(non_nullable) => {
                 Self::from_non_nullable_value(non_nullable).map(|v| Some(v))
             }
         }
@@ -97,50 +98,57 @@ where
 {
     fn from_string(s: String) -> Result<Self, String>;
     fn to_str(self: Self) -> Result<&'static str, String>;
-    fn to_value(self: Self) -> Result<super::ast::Value<S>, String> {
-        self.to_str().map(S::from_str).flatten().map(|scalar| {
-            super::ast::Value::NonNullable(
-                super::ast::NonNullableValue::Literal(
-                    super::ast::LiteralValue::Scalar(scalar),
-                ),
-            )
-        })
+
+    fn to_value(self: Self) -> Result<Value<S>, String> {
+        self.to_non_nullable_value().map(|v| Value::NonNullable(v))
     }
 
-    fn from_literal_value(
-        value: super::ast::LiteralValue<S>,
-    ) -> Result<Self, String> {
+    fn to_non_nullable_value(
+        self: Self,
+    ) -> Result<NonNullableValue<S>, String> {
+        self.to_literal_value()
+            .map(|v| NonNullableValue::Literal(v))
+    }
+
+    fn to_literal_value(self: Self) -> Result<LiteralValue<S>, String> {
+        self.to_str()
+            .map(S::from_str)
+            .flatten()
+            .map(|scalar| LiteralValue::Scalar(scalar))
+    }
+
+    fn from_literal_value(value: LiteralValue<S>) -> Result<Self, String> {
         match value {
-            super::ast::LiteralValue::Scalar(scalar) => scalar
+            LiteralValue::Scalar(scalar) => scalar
                 .try_to_string()
                 .map_err(|_| {
                     "Unexpected non-string scalar for enum".to_string()
                 })
                 .map(Self::from_string)
                 .flatten(),
-            super::ast::LiteralValue::Object(_, object) => {
+            LiteralValue::Object(_, object) => {
                 Err(format!("Unexpected object value for enum: {:?}", object))
             }
         }
     }
 
     fn from_non_nullable_value(
-        value: super::ast::NonNullableValue<S>,
+        value: NonNullableValue<S>,
     ) -> Result<Self, String> {
         match value {
-            super::ast::NonNullableValue::Literal(literal) => {
+            NonNullableValue::Literal(literal) => {
                 Self::from_literal_value(literal)
             }
-            super::ast::NonNullableValue::Array(array) => {
+            NonNullableValue::Array(array) => {
                 Err(format!("Unexpected array value for enum: {:?}", array))
             }
         }
     }
 
-    fn from_value(value: super::ast::Value<S>) -> Result<Option<Self>, String> {
+    fn from_value(value: Value<S>) -> Result<Option<Self>, String> {
         match value {
-            super::ast::Value::Null => Ok(None),
-            super::ast::Value::NonNullable(non_nullable) => {
+            Value::Null => Ok(None),
+            Value::NonNullable(non_nullable) => {
                 Self::from_non_nullable_value(non_nullable).map(|v| Some(v))
             }
         }
@@ -149,11 +157,13 @@ where
     fn from_str_to_any(s: String) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_string(s).map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
+
     fn from_str_array(s: Vec<String>) -> Result<Vec<Self>, String> {
         s.into_iter()
             .map(|e| Self::from_string(e))
             .collect::<Result<Vec<_>, String>>()
     }
+
     fn from_str_array_to_any(
         s: Vec<String>,
     ) -> Result<Box<dyn std::any::Any>, String> {
@@ -184,36 +194,32 @@ where
 {
     fn from_variables(vars: Values<S>) -> Result<Self, String>;
 
-    fn from_literal_value(
-        value: super::ast::LiteralValue<S>,
-    ) -> Result<Self, String> {
+    fn from_literal_value(value: LiteralValue<S>) -> Result<Self, String> {
         match value {
-            super::ast::LiteralValue::Object(_, object) => {
-                Self::from_variables(object)
-            }
-            super::ast::LiteralValue::Scalar(scalar) => {
+            LiteralValue::Object(_, object) => Self::from_variables(object),
+            LiteralValue::Scalar(scalar) => {
                 Err(format!("Unexpected scalar value for input: {:?}", scalar))
             }
         }
     }
 
     fn from_non_nullable_value(
-        value: super::ast::NonNullableValue<S>,
+        value: NonNullableValue<S>,
     ) -> Result<Self, String> {
         match value {
-            super::ast::NonNullableValue::Literal(literal) => {
+            NonNullableValue::Literal(literal) => {
                 Self::from_literal_value(literal)
             }
-            super::ast::NonNullableValue::Array(array) => {
+            NonNullableValue::Array(array) => {
                 Err(format!("Unexpected array value for input: {:?}", array))
             }
         }
     }
 
-    fn from_value(value: super::ast::Value<S>) -> Result<Option<Self>, String> {
+    fn from_value(value: Value<S>) -> Result<Option<Self>, String> {
         match value {
-            super::ast::Value::Null => Ok(None),
-            super::ast::Value::NonNullable(non_nullable) => {
+            Value::Null => Ok(None),
+            Value::NonNullable(non_nullable) => {
                 Self::from_non_nullable_value(non_nullable).map(|v| Some(v))
             }
         }
@@ -225,11 +231,13 @@ where
         Self::from_variables(vars)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
+
     fn from_variables_array(vars: Vec<Values<S>>) -> Result<Vec<Self>, String> {
         vars.into_iter()
             .map(|s| Self::from_variables(s))
             .collect::<Result<Vec<_>, String>>()
     }
+
     fn from_variables_to_any_array(
         vars: Vec<Values<S>>,
     ) -> Result<Box<dyn std::any::Any>, String> {

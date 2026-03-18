@@ -60,5 +60,10 @@ pub enum LiteralValue<S: Scalar> {
     Scalar(S),
 }
 
+impl<S: Scalar> From<(String, Values<S>)> for LiteralValue<S> {
+    fn from((a, b): (String, Values<S>)) -> Self {
+        Self::Object(a, b)
+    }
+}
 pub type Values<S> = HashMap<String, Value<S>>;
 pub type ResolverRoot<S> = Values<S>;
