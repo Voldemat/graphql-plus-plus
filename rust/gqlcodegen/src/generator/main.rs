@@ -69,17 +69,14 @@ fn generate_union_definition(
         config.scalar_type
     ));
     impl_block.associate_type("Error", "String");
-    let try_into_func = impl_block
-        .new_fn("try_into")
-        .arg_self()
-        .ret(format!(
-            "Result<(String, libgql::executor::Values<{}>), Self::Error>",
-            config.scalar_type
-        ));
+    let try_into_func = impl_block.new_fn("try_into").arg_self().ret(format!(
+        "Result<(String, libgql::executor::Values<{}>), Self::Error>",
+        config.scalar_type
+    ));
     try_into_func.line("match self {");
     for item in union.items.keys() {
         try_into_func.line(format!("Self::{}(item) => TryInto::<(String, libgql::executor::Values::<{}>)>::try_into(item),", item, config.scalar_type));
-    };
+    }
     try_into_func.line("}");
 }
 
@@ -349,19 +346,36 @@ fn generate_object_type_value(
 ) -> String {
     match type_spec {
         schema::server::object::ObjectType::ObjectType { name: _ } => {
-            format!("TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()", config.scalar_type, input_expression)
+            format!(
+                "TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()",
+                config.scalar_type, input_expression
+            )
         }
         schema::server::object::ObjectType::Union { name: _ } => {
-            format!("TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()", config.scalar_type, input_expression)
+            format!(
+                "TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()",
+                config.scalar_type, input_expression
+            )
         }
         schema::server::object::ObjectType::InterfaceType { name: _ } => {
-            format!("TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()", config.scalar_type, input_expression)
+            format!(
+                "TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()",
+                config.scalar_type, input_expression
+            )
         }
         schema::server::object::ObjectType::Enum { name } => {
-            format!("<{} as libgql::executor::GQLEnum<{}>>::to_literal_value({})?", name, config.scalar_type, input_expression)
+            format!(
+                "<{} as libgql::executor::GQLEnum<{}>>::to_literal_value({})?",
+                name, config.scalar_type, input_expression
+            )
         }
         schema::server::object::ObjectType::Scalar { name } => {
-            format!("<{} as libgql::executor::GQLScalar<{}>>::to_literal_value({})?", config.scalars_mapping[name], config.scalar_type, input_expression)
+            format!(
+                "<{} as libgql::executor::GQLScalar<{}>>::to_literal_value({})?",
+                config.scalars_mapping[name],
+                config.scalar_type,
+                input_expression
+            )
         }
     }
 }
@@ -510,7 +524,11 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
     for input in schema.server.inputs.values() {
         generate_input_definition(config, &mut scope, input);
     }
-    for object in schema.server.objects.values() {
+    for object in schema.server.objects.values().filter(|object| {
+        object.name != "Mutation"
+            && object.name != "Query"
+            && object.name != "Subscription"
+    }) {
         generate_object_definition(config, &mut scope, object);
     }
     for union in schema.server.unions.values() {

@@ -1615,48 +1615,6 @@ impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> f
     }
 }
 
-pub struct Mutation {
-    pub add_tags_to_files: Option<AddTagsToFilesError>,
-    pub add_user_to_group: Option<ErrorGroupNotFoundOrErrorNotFound>,
-    pub approve_tag: Option<ApproveTagError>,
-    pub change_password: Option<ErrorInvalidCredentials>,
-    pub commit_multipart_file_session: Option<CommitMultipartFileSessionResponse>,
-    pub commit_put_file_session: Option<CommitPutFileSessionResponse>,
-    pub confirm_otp_code: ConfirmOTPCodeResponse,
-    pub confirm_user: Option<ConfirmUserError>,
-    pub create_group: Option<CreateGroupError>,
-    pub create_multipart_file_session: CreateMultipartFileSessionResponse,
-    pub create_put_file_session: CreatePutFileSessionResponse,
-    pub create_tag: Option<CreateTagError>,
-    pub create_user: Option<CreateUserError>,
-    pub decide_on_download_request: Option<DecideOnDownloadRequestError>,
-    pub delete_file: Option<DeleteFileError>,
-    pub delete_files: Option<DeleteFilesError>,
-    pub delete_group: Option<ErrorGroupNotFound>,
-    pub delete_pending_user: Option<ErrorNotFound>,
-    pub delete_tag: Option<ErrorNotFound>,
-    pub delete_user: Option<ErrorNotFound>,
-    pub edit_group: Option<EditGroupError>,
-    pub edit_tag: Option<EditTagError>,
-    pub login: Option<ErrorInvalidCredentials>,
-    pub logout: (),
-    pub remove_user_from_group: Option<ErrorGroupNotFoundOrErrorNotFound>,
-    pub reset_password: Option<ResetPasswordError>,
-    pub send_otp_code: Option<ErrorInvalidCredentials>,
-    pub set_tag_is_favourite: Option<ErrorAlreadyDoneOrUnknownTags>,
-    pub update_file: Option<UpdateFileError>,
-    pub update_files_autotags: Option<ErrorCantAddAutotags>,
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Mutation {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("Mutation".to_string(), libgql::executor::Values::from_iter([("logout".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<() as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.logout)?))),
-        ])))
-    }
-}
-
 pub struct OTPToken {
     pub token: String,
 }
@@ -1702,60 +1660,6 @@ impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> f
     fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
         Ok(("PutUploadSession".to_string(), libgql::executor::Values::from_iter([("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.id)?))),
         ("uploadURL".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.upload_url)?.into()))),
-        ])))
-    }
-}
-
-pub struct Query {
-    pub get_deal_columns: Vec<DealColumn>,
-    pub get_deal_info: GetDealInfoResponse,
-    pub get_deals: Vec<String>,
-    pub get_events: GetEventsResponse,
-    pub get_favourite_tags: Vec<Tag>,
-    pub get_file_url: GetFileURLResponse,
-    pub get_files: GetFilesResponse,
-    pub get_files_count: IntObjectOrErrorUnknownTags,
-    pub get_files_deal_info: FilesDealInfoOrError,
-    pub get_group_tags: GetGroupTagsResponse,
-    pub get_group_users: GetGroupUsersResponse,
-    pub get_group_users_and_users: GetGroupUsersAndUsersResponse,
-    pub get_group_users_total: GetGroupUsersTotalResponse,
-    pub get_groups: Vec<Group>,
-    pub get_groups_total: i32,
-    pub get_me: User,
-    pub get_my_tags: Vec<Tag>,
-    pub get_my_tags_count: i32,
-    pub get_next_multipart_upload_urls: GetNextMultipartUploadUrlsResponse,
-    pub get_path_to_tag: GetPathToTagResponse,
-    pub get_pending_users: Vec<PendingUser>,
-    pub get_popular_tags: Vec<Tag>,
-    pub get_tag_children: GetTagsResponse,
-    pub get_tag_info: GetTagInfoResponse,
-    pub get_tags: GetTagsResponse,
-    pub get_tags_count: IntObjectOrErrorUnknownTags,
-    pub get_uploaded_files: Vec<SearchFile>,
-    pub get_uploaded_files_count: i32,
-    pub get_users: Vec<User>,
-    pub get_users_tags: Vec<UsersTag>,
-    pub get_users_tags_count: i32,
-    pub get_users_total: i32,
-    pub is_allowed_to_download: IsAllowedToDownloadResponse,
-    pub is_tag_exists: bool,
-    pub retrieve_file: RetrieveFileResponse,
-    pub retrieve_group: RetrieveGroupResponse,
-    pub search_tags: Vec<Tag>,
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Query {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("Query".to_string(), libgql::executor::Values::from_iter([("getDealColumns".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.get_deal_columns.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ("getGroupsTotal".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.get_groups_total)?))),
-        ("getMe".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.get_me)?.into()))),
-        ("getMyTagsCount".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.get_my_tags_count)?))),
-        ("getPendingUsers".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.get_pending_users.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ("getUploadedFilesCount".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.get_uploaded_files_count)?))),
         ])))
     }
 }
