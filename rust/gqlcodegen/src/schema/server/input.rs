@@ -99,7 +99,7 @@ mod tests {
             schema,
             Input {
                 name: "GroupIn".into(),
-                fields: HashMap::<String, InputField>::from([
+                fields: indexmap::IndexMap::<String, InputField>::from([
                     (String::from("tagIds"), tag_ids_field),
                     (
                         String::from("limitOfDownloadsPerDay"),

@@ -401,8 +401,8 @@ mod tests {
 }
 
 impl libgql::executor::GQLEnum<ExampleScalar> for Check {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
         "FIRST_VALUE" => Ok(Self::FirstValue),
         "SECOND_VALUE" => Ok(Self::SecondValue),
         "THIRD_VALUE" => Ok(Self::ThirdValue),
@@ -410,7 +410,7 @@ impl libgql::executor::GQLEnum<ExampleScalar> for Check {
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
         Self::FirstValue => Ok("FIRST_VALUE"),
         Self::SecondValue => Ok("SECOND_VALUE"),
