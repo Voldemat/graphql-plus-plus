@@ -1,9 +1,7 @@
 use std::sync::{Arc, atomic::AtomicBool};
 
 use chrono::prelude::*;
-use libgql::{
-    executor::ast::TryGetStr, parsers::schema::type_registry::TypeRegistry,
-};
+use libgql::parsers::schema::type_registry::TypeRegistry;
 use tokio_stream::StreamExt;
 
 use crate::cli::utils;
@@ -34,10 +32,10 @@ enum ExampleScalar {
 }
 
 impl libgql::executor::Scalar for ExampleScalar {
-    fn get_str(self: &Self) -> Option<&str> {
+    fn try_to_string(self: Self) -> Result<String, String> {
         match self {
-            Self::String(s) => Some(s),
-            _ => None,
+            Self::String(s) => Ok(s),
+            _ => Err("Invalid scalar type for string".to_string()),
         }
     }
 
@@ -73,15 +71,15 @@ enum Direction {
 }
 
 impl libgql::executor::GQLEnum<ExampleScalar> for Direction {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
             "ASC" => Ok(Self::Asc),
             "DSC" => Ok(Self::Dsc),
             _ => Err(format!("Invalid value {} for enum Direction", s)),
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
             Self::Asc => Ok("ASC"),
             Self::Dsc => Ok("DSC"),
@@ -94,14 +92,14 @@ enum EUsersTagField {
 }
 
 impl libgql::executor::GQLEnum<ExampleScalar> for EUsersTagField {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
             "NAME" => Ok(Self::Name),
             _ => Err(format!("Invalid value {} for enum EUsersTagField", s)),
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
             Self::Name => Ok("NAME"),
         }
@@ -115,17 +113,17 @@ struct UsersTagSortBy {
 
 impl libgql::executor::GQLInput<ExampleScalar> for UsersTagSortBy {
     fn from_variables(
-        vars: &libgql::executor::Values<ExampleScalar>,
+        mut vars: libgql::executor::Values<ExampleScalar>,
     ) -> Result<Self, String> {
         let direction =
-                vars.get("direction").map(|v| v.to_non_nullable_option())
+                vars.remove("direction").map(|v| v.to_non_nullable_option())
                     .flatten()
                     .ok_or("Missing required field \"direction\"".to_string())
                     .map(<Direction as libgql::executor::GQLEnum<ExampleScalar>>::from_non_nullable_value
                     )
                     .flatten()?;
         let field =
-            vars.get("field")
+            vars.remove("field")
                 .map(|v| v.to_non_nullable_option())
                 .flatten()
                 .ok_or("Missing required field \"field\"".to_string())
@@ -143,107 +141,65 @@ impl libgql::executor::GQLInput<ExampleScalar> for UsersTagSortBy {
 struct UUID(String);
 
 impl libgql::executor::GQLScalar<ExampleScalar> for UUID {
-    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+    fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
-            ExampleScalar::String(s) => Ok(Self(s.clone())),
+            ExampleScalar::String(s) => Ok(Self(s)),
             _ => Err(format!("Invalid scalar for UUID {:?}", s)),
         }
     }
 
-    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::String(self.0.clone()))
-    }
-}
-
-#[derive(Debug)]
-struct GroupIn {
-    name: String,
-    tag_ids: Vec<UUID>,
-    limit_of_downloads_per_day: i32,
-}
-
-impl libgql::executor::GQLInput<ExampleScalar> for GroupIn {
-    fn from_variables(
-        vars: &libgql::executor::Values<ExampleScalar>,
-    ) -> Result<Self, String> {
-        let name = vars
-            .get("name")
-            .ok_or("Missing required field \"name\"")?
-            .try_get_str()
-            .ok_or("Invalid value for String")?
-            .to_string();
-        let tag_ids = match vars.get("tagIds")
-                    .ok_or("Missing required field \"tagIds\"")? {
-            libgql::executor::Value::Null => {
-                Err("Unexpected null for tagIds".to_string())
-            },
-            libgql::executor::Value::NonNullable(non_nullable) => match non_nullable {
-                libgql::executor::NonNullableValue::Literal(_) =>
-                    Err("Unexpected literal for array field tagIds".to_string()),
-                libgql::executor::NonNullableValue::Array(array) =>
-                    array.iter().map(|item| {
-                        <UUID as libgql::executor::GQLScalar<ExampleScalar>>::from_scalar(
-                        <libgql::executor::Value<ExampleScalar> as libgql::executor::ast::TryGetScalar<ExampleScalar>>::try_get_scalar(item)
-                        .ok_or("Invalid value for UUID")?
-                    )
-                }).collect::<Result<Vec<UUID>, String>>()
-            }
-        }?;
-        return Ok(GroupIn {
-            name,
-            tag_ids,
-            limit_of_downloads_per_day: 0,
-        });
+    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.0))
     }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for i32 {
-    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+    fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
-            ExampleScalar::Int(i) => Ok(*i),
+            ExampleScalar::Int(i) => Ok(i),
             _ => Err(format!("Invalid scalar for i32 {:?}", s)),
         }
     }
 
-    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::Int(*self))
+    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Int(self))
     }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
-    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+    fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
-            ExampleScalar::Float(f) => Ok(*f),
+            ExampleScalar::Float(f) => Ok(f),
             _ => Err(format!("Invalid scalar for f32 {:?}", s)),
         }
     }
 
-    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::Float(*self))
+    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Float(self))
     }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for String {
-    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+    fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
-            ExampleScalar::String(s) => Ok(s.clone()),
+            ExampleScalar::String(s) => Ok(s),
             _ => Err(format!("Invalid scalar for String {:?}", s)),
         }
     }
-    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::String(self.clone()))
+    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self))
     }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for bool {
-    fn from_scalar(s: &ExampleScalar) -> Result<Self, String> {
+    fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
-            ExampleScalar::Boolean(b) => Ok(*b),
+            ExampleScalar::Boolean(b) => Ok(b),
             _ => Err(format!("Invalid scalar for bool {:?}", s)),
         }
     }
-    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::Boolean(*self))
+    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Boolean(self))
     }
 }
 
@@ -254,18 +210,18 @@ enum EGroupUsersField {
 }
 
 impl libgql::executor::GQLEnum<ExampleScalar> for EGroupUsersField {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
             "NAME" => Ok(Self::Name),
             "EMAIL" => Ok(Self::Email),
             _ => Err(format!("EGroupUsersField: Unknown enum value {}", s)),
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
-        Self::Name => Ok("NAME"),
-        Self::Email => Ok("EMAIL")
+            Self::Name => Ok("NAME"),
+            Self::Email => Ok("EMAIL"),
         }
     }
 }
@@ -342,45 +298,6 @@ fn confirm_otp_code_resolver(
                         )]
                         .into_iter(),
                     ),
-                ),
-            ),
-        ))
-    })
-}
-
-fn create_group_resolver(
-    root: &libgql::executor::ResolverRoot<ExampleScalar>,
-    context: &mut Context,
-    variables: &libgql::executor::ResolvedVariables,
-) -> libgql::executor::sync::ResolverFuture<ExampleScalar> {
-    println!(
-        "create_group_resolver: {:?}, groupIn: {:?}, userIds: {:?}, field: {:?}",
-        root,
-        variables
-            .get("groupIn")
-            .unwrap()
-            .downcast_ref::<GroupIn>()
-            .unwrap(),
-        variables
-            .get("userIds")
-            .unwrap()
-            .downcast_ref::<Vec<Box<dyn std::any::Any>>>()
-            .unwrap()
-            .iter()
-            .map(|v| v.downcast_ref::<Vec<UUID>>().unwrap())
-            .collect::<Vec<_>>(),
-        variables
-            .get("field")
-            .unwrap()
-            .downcast_ref::<EGroupUsersField>()
-            .unwrap()
-    );
-    Box::pin(async move {
-        Ok(libgql::executor::Value::NonNullable(
-            libgql::executor::NonNullableValue::Literal(
-                libgql::executor::LiteralValue::Object(
-                    "ErrorAlreadyExists".to_string(),
-                    libgql::executor::Values::new(),
                 ),
             ),
         ))
@@ -487,7 +404,6 @@ async fn execute(args: &ParseArgs) {
     parse_registry.add_scalar::<UUID>("UUID");
     parse_registry.add_enum::<EGroupUsersField>("EGroupUsersField");
     parse_registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
-    parse_registry.add_input::<GroupIn>("GroupIn");
     let mut sync_resolvers = libgql::executor::sync::SyncResolversMap::new();
     sync_resolvers.insert(
         ("Mutation".to_string(), "login".to_string()),
@@ -496,10 +412,6 @@ async fn execute(args: &ParseArgs) {
     sync_resolvers.insert(
         ("Mutation".to_string(), "confirmOTPCode".to_string()),
         Box::new(confirm_otp_code_resolver),
-    );
-    sync_resolvers.insert(
-        ("Mutation".to_string(), "createGroup".to_string()),
-        Box::new(create_group_resolver),
     );
     let mut subscription_resolvers =
         libgql::executor::subscription::SubscriptionResolversMap::new();
@@ -516,8 +428,7 @@ async fn execute(args: &ParseArgs) {
         &subscription_resolvers,
         &parse_registry,
         &utils::read_buffer_from_filepath(&args.query_path),
-        &args
-            .variables
+        args.variables
             .as_ref()
             .map_or(libgql::executor::Values::new(), |v| {
                 libgql::json::executor::ast::parse_variables_from_json(
