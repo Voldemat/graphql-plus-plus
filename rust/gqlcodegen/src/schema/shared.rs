@@ -6,7 +6,7 @@ pub enum InputType {
     Enum { name: String },
 }
 
-#[derive(Debug, PartialEq, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 #[serde(untagged)]
 pub enum Literal {
     String(String),
@@ -15,7 +15,7 @@ pub enum Literal {
     Bool(bool),
 }
 
-#[derive(Debug, PartialEq, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 pub enum ArrayLiteral {
     String(Vec<String>),
     Int(Vec<i32>),
@@ -23,7 +23,7 @@ pub enum ArrayLiteral {
     Bool(Vec<bool>),
 }
 
-#[derive(Debug, PartialEq, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 pub struct LiteralFieldSpec<T> {
     #[serde(rename(deserialize = "type"))]
     pub field_type: T,
@@ -31,7 +31,7 @@ pub struct LiteralFieldSpec<T> {
     pub default_value: Option<Literal>,
 }
 
-#[derive(Debug, PartialEq, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 pub struct ArrayFieldSpec<T> {
     pub nullable: bool,
     #[serde(rename(deserialize = "type"))]

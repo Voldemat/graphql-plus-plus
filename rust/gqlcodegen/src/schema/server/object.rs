@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use crate::schema::shared::{ArrayFieldSpec, Field, InputField, LiteralFieldSpec};
 
-#[derive(Debug, PartialEq, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 #[serde(tag = "_type")]
 pub enum ObjectType {
     ObjectType { name: String },
@@ -12,7 +10,7 @@ pub enum ObjectType {
     Enum { name: String },
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 #[serde(tag = "_type")]
 pub enum ObjectNonCallableFieldSpec {
     #[serde(rename(deserialize = "literal"))]
@@ -40,7 +38,7 @@ pub enum ObjectFieldSpec {
     Callable(CallableFieldSpec),
 }
 
-type ObjectField = Field<ObjectFieldSpec>;
+pub type ObjectField = Field<ObjectFieldSpec>;
 
 #[derive(Debug, serde::Deserialize)]
 pub struct Object {

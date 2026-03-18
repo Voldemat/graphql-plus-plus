@@ -139,3 +139,28 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
         Ok(ExampleScalar::Boolean(self))
     }
 }
+
+impl libgql::executor::GQLScalar<ExampleScalar> for url::Url {
+    fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::String(s) => {
+                url::Url::parse(&s).map_err(|e| e.to_string())
+            }
+            _ => Err(format!("Invalid scalar for Url {:?}", s)),
+        }
+    }
+
+    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.to_string()))
+    }
+}
+
+impl libgql::executor::GQLScalar<ExampleScalar> for () {
+    fn from_scalar(_: ExampleScalar) -> Result<Self, String> {
+        return Ok(())
+    }
+
+    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String("".to_string()))
+    }
+}

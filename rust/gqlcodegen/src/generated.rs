@@ -818,8 +818,26 @@ pub struct BooleanObject {
     pub bvalue: bool,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for BooleanObject {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("BooleanObject".to_string(), libgql::executor::Values::from_iter([("bvalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.bvalue)?))),
+        ])))
+    }
+}
+
 pub struct DatetimeObject {
     pub dvalue: chrono::DateTime<chrono::Utc>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DatetimeObject {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("DatetimeObject".to_string(), libgql::executor::Values::from_iter([("dvalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.dvalue)?))),
+        ])))
+    }
 }
 
 pub struct DealColumn {
@@ -829,9 +847,31 @@ pub struct DealColumn {
     pub r#type: EDealColumnType,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DealColumn {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("DealColumn".to_string(), libgql::executor::Values::from_iter([("availableValues".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.available_values.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(element)?)))).collect::<Result<Vec<_>, String>>()?))),
+        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.id)?))),
+        ("name".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.name)?))),
+        ("type".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<EDealColumnType as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::to_literal_value(self.r#type)?))),
+        ])))
+    }
+}
+
 pub struct DealEntry {
     pub column_name: String,
     pub value: Tag,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DealEntry {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("DealEntry".to_string(), libgql::executor::Values::from_iter([("columnName".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.column_name)?))),
+        ("value".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.value)?.into()))),
+        ])))
+    }
 }
 
 pub struct DealInfo {
@@ -839,157 +879,510 @@ pub struct DealInfo {
     pub values: Vec<DealEntry>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DealInfo {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("DealInfo".to_string(), libgql::executor::Values::from_iter([("stageToWorktypesMap".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.stage_to_worktypes_map.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ("values".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.values.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct ErrorAlreadyApprovedByAdmin {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyApprovedByAdmin {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorAlreadyApprovedByAdmin".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorAlreadyDone {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyDone {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorAlreadyDone".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorAlreadyExists {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyExists {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorAlreadyExists".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorAlreadyPending {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyPending {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorAlreadyPending".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorCantAddAutotags {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorCantAddAutotags {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorCantAddAutotags".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorChangeForbidden {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorChangeForbidden {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorChangeForbidden".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorDateRangeIsInvalid {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorDateRangeIsInvalid {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorDateRangeIsInvalid".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorEmailCollision {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorEmailCollision {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorEmailCollision".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorFileNotUploaded {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorFileNotUploaded {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorFileNotUploaded".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorFilesChangeForbidden {
     pub ids: Vec<uuid::Uuid>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorFilesChangeForbidden {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorFilesChangeForbidden".to_string(), libgql::executor::Values::from_iter([("ids".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(element)?)))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct ErrorGroupNotFound {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorGroupNotFound {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorGroupNotFound".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorInvalidCredentials {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidCredentials {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorInvalidCredentials".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorInvalidEmail {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidEmail {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorInvalidEmail".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorInvalidGroupName {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidGroupName {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorInvalidGroupName".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorInvalidLimitOfDownloadsPerDay {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidLimitOfDownloadsPerDay {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorInvalidLimitOfDownloadsPerDay".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorInvalidOTPCode {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidOTPCode {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorInvalidOTPCode".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorInvalidPassword {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidPassword {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorInvalidPassword".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorInvalidToken {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidToken {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorInvalidToken".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorInvalidUserName {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidUserName {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorInvalidUserName".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorMultipartUploadFileIsTooBig {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorMultipartUploadFileIsTooBig {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorMultipartUploadFileIsTooBig".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorMultipartUploadFileIsTooLight {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorMultipartUploadFileIsTooLight {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorMultipartUploadFileIsTooLight".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorMultipartUploadFilePartSizeIsTooBig {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorMultipartUploadFilePartSizeIsTooBig {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorMultipartUploadFilePartSizeIsTooBig".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorMultipartUploadFilePartSizeIsTooSmall {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorMultipartUploadFilePartSizeIsTooSmall {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorMultipartUploadFilePartSizeIsTooSmall".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorNoDealTag {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorNoDealTag {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorNoDealTag".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorNotFound {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorNotFound {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorNotFound".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorOTPCodeExpired {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorOTPCodeExpired {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorOTPCodeExpired".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorOTPTokenExpired {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorOTPTokenExpired {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorOTPTokenExpired".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorPutUploadFileIsTooBig {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorPutUploadFileIsTooBig {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorPutUploadFileIsTooBig".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorUnknownFile {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownFile {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorUnknownFile".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorUnknownFiles {
     pub ids: Vec<uuid::Uuid>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownFiles {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorUnknownFiles".to_string(), libgql::executor::Values::from_iter([("ids".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(element)?)))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct ErrorUnknownGroupIds {
     pub group_ids: Vec<uuid::Uuid>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownGroupIds {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorUnknownGroupIds".to_string(), libgql::executor::Values::from_iter([("groupIds".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.group_ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(element)?)))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
 }
 
 pub struct ErrorUnknownGroups {
     pub group_ids: Vec<uuid::Uuid>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownGroups {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorUnknownGroups".to_string(), libgql::executor::Values::from_iter([("groupIds".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.group_ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(element)?)))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct ErrorUnknownParentId {
     pub a: Option<bool>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownParentId {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorUnknownParentId".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
 }
 
 pub struct ErrorUnknownSessionId {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownSessionId {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorUnknownSessionId".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorUnknownTags {
     pub tag_ids: Vec<uuid::Uuid>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownTags {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorUnknownTags".to_string(), libgql::executor::Values::from_iter([("tagIds".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.tag_ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(element)?)))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
 }
 
 pub struct ErrorUnknownUser {
     pub a: Option<bool>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownUser {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorUnknownUser".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct ErrorUnknownUsers {
     pub user_ids: Vec<uuid::Uuid>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownUsers {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("ErrorUnknownUsers".to_string(), libgql::executor::Values::from_iter([("userIds".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.user_ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(element)?)))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
 }
 
 pub struct EventFileDeleted {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileDeleted {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("EventFileDeleted".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
+        ])))
+    }
 }
 
 pub struct EventFileDownloadRequested {
@@ -999,9 +1392,31 @@ pub struct EventFileDownloadRequested {
     pub user: User,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileDownloadRequested {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("EventFileDownloadRequested".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("decision".to_string(), self.decision.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
+        ("user".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.user)?.into()))),
+        ])))
+    }
+}
+
 pub struct EventFileDownloaded {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileDownloaded {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("EventFileDownloaded".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
+        ])))
+    }
 }
 
 pub struct EventFileTagsEdited {
@@ -1011,9 +1426,31 @@ pub struct EventFileTagsEdited {
     pub removed_tags: Vec<Tag>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileTagsEdited {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("EventFileTagsEdited".to_string(), libgql::executor::Values::from_iter([("addedTags".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.added_tags.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
+        ("removedTags".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.removed_tags.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct EventFileUploaded {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileUploaded {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("EventFileUploaded".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
+        ])))
+    }
 }
 
 pub struct EventTagApprovalIsRequested {
@@ -1023,8 +1460,29 @@ pub struct EventTagApprovalIsRequested {
     pub tag: Tag,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventTagApprovalIsRequested {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("EventTagApprovalIsRequested".to_string(), libgql::executor::Values::from_iter([("alreadyInCatalog".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.already_in_catalog)?))),
+        ("author".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.author)?.into()))),
+        ("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("tag".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.tag)?.into()))),
+        ])))
+    }
+}
+
 pub struct EventsList {
     pub events: Vec<Event>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventsList {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("EventsList".to_string(), libgql::executor::Values::from_iter([("events".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.events.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
 }
 
 pub struct File {
@@ -1037,14 +1495,49 @@ pub struct File {
     pub user: User,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for File {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("File".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("filename".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.filename)?))),
+        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.id)?))),
+        ("mimeType".to_string(), self.mime_type.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ("previewUrl".to_string(), self.preview_url.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<url::Url as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ("sizeInBytes".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i64 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.size_in_bytes)?))),
+        ("user".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.user)?.into()))),
+        ])))
+    }
+}
+
 pub struct FilesDealInfo {
     pub deal_info: DealInfo,
     pub deal_name: Tag,
     pub unset_columns: Vec<DealColumn>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for FilesDealInfo {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("FilesDealInfo".to_string(), libgql::executor::Values::from_iter([("dealInfo".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.deal_info)?.into()))),
+        ("dealName".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.deal_name)?.into()))),
+        ("unsetColumns".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.unset_columns.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct FloatObject {
     pub fvalue: f32,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for FloatObject {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("FloatObject".to_string(), libgql::executor::Values::from_iter([("fvalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<f32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.fvalue)?))),
+        ])))
+    }
 }
 
 pub struct Group {
@@ -1054,22 +1547,72 @@ pub struct Group {
     pub name: String,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Group {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("Group".to_string(), libgql::executor::Values::from_iter([("first10Tags".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.first_10_tags.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.id)?))),
+        ("limitOfDownloadsPerDay".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.limit_of_downloads_per_day)?))),
+        ("name".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.name)?))),
+        ])))
+    }
+}
+
 pub struct GroupUser {
     pub in_group: bool,
     pub user: User,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GroupUser {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("GroupUser".to_string(), libgql::executor::Values::from_iter([("inGroup".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.in_group)?))),
+        ("user".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.user)?.into()))),
+        ])))
+    }
 }
 
 pub struct GroupUserList {
     pub users: Vec<GroupUser>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GroupUserList {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("GroupUserList".to_string(), libgql::executor::Values::from_iter([("users".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.users.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct IntObject {
     pub ivalue: i32,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for IntObject {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("IntObject".to_string(), libgql::executor::Values::from_iter([("ivalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.ivalue)?))),
+        ])))
+    }
 }
 
 pub struct MultipartUploadSession {
     pub id: uuid::Uuid,
     pub initial_upload_ur_ls: Vec<UploadUrl>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for MultipartUploadSession {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("MultipartUploadSession".to_string(), libgql::executor::Values::from_iter([("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.id)?))),
+        ("initialUploadURLs".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.initial_upload_ur_ls.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
 }
 
 pub struct Mutation {
@@ -1105,8 +1648,26 @@ pub struct Mutation {
     pub update_files_autotags: Option<ErrorCantAddAutotags>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Mutation {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("Mutation".to_string(), libgql::executor::Values::from_iter([("logout".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<() as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.logout)?))),
+        ])))
+    }
+}
+
 pub struct OTPToken {
     pub token: String,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for OTPToken {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("OTPToken".to_string(), libgql::executor::Values::from_iter([("token".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.token)?))),
+        ])))
+    }
 }
 
 pub struct PendingUser {
@@ -1117,9 +1678,32 @@ pub struct PendingUser {
     pub ttl: f32,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for PendingUser {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("PendingUser".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("email".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.email)?))),
+        ("groups".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.groups.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ("name".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.name)?))),
+        ("ttl".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<f32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.ttl)?))),
+        ])))
+    }
+}
+
 pub struct PutUploadSession {
     pub id: uuid::Uuid,
     pub upload_url: UploadUrl,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for PutUploadSession {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("PutUploadSession".to_string(), libgql::executor::Values::from_iter([("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.id)?))),
+        ("uploadURL".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.upload_url)?.into()))),
+        ])))
+    }
 }
 
 pub struct Query {
@@ -1162,13 +1746,46 @@ pub struct Query {
     pub search_tags: Vec<Tag>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Query {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("Query".to_string(), libgql::executor::Values::from_iter([("getDealColumns".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.get_deal_columns.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ("getGroupsTotal".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.get_groups_total)?))),
+        ("getMe".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.get_me)?.into()))),
+        ("getMyTagsCount".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.get_my_tags_count)?))),
+        ("getPendingUsers".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.get_pending_users.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ("getUploadedFilesCount".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.get_uploaded_files_count)?))),
+        ])))
+    }
+}
+
 pub struct SearchFile {
     pub file: File,
     pub tags: Vec<Tag>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for SearchFile {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("SearchFile".to_string(), libgql::executor::Values::from_iter([("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
+        ("tags".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.tags.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct SearchFileList {
     pub files: Vec<SearchFile>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for SearchFileList {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("SearchFileList".to_string(), libgql::executor::Values::from_iter([("files".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.files.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
 }
 
 pub struct StageToWorktypesMapEntry {
@@ -1176,17 +1793,55 @@ pub struct StageToWorktypesMapEntry {
     pub worktypes: Vec<Tag>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for StageToWorktypesMapEntry {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("StageToWorktypesMapEntry".to_string(), libgql::executor::Values::from_iter([("stage".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.stage)?.into()))),
+        ("worktypes".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.worktypes.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct StringEntry {
     pub key: String,
     pub value: String,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for StringEntry {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("StringEntry".to_string(), libgql::executor::Values::from_iter([("key".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.key)?))),
+        ("value".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.value)?))),
+        ])))
+    }
 }
 
 pub struct StringList {
     pub values: Vec<String>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for StringList {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("StringList".to_string(), libgql::executor::Values::from_iter([("values".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.values.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(element)?)))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct StringObject {
     pub svalue: String,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for StringObject {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("StringObject".to_string(), libgql::executor::Values::from_iter([("svalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.svalue)?))),
+        ])))
+    }
 }
 
 pub struct Tag {
@@ -1198,13 +1853,46 @@ pub struct Tag {
     pub value: Option<TagValue>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Tag {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("Tag".to_string(), libgql::executor::Values::from_iter([("hasChildren".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.has_children)?))),
+        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.id)?))),
+        ("isApproved".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.is_approved)?))),
+        ("isFavourite".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.is_favourite)?))),
+        ("tag".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.tag)?))),
+        ("value".to_string(), self.value.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(v)?.into())))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ])))
+    }
+}
+
 pub struct TagInfo {
     pub parent_tag: Option<Tag>,
     pub tag: String,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for TagInfo {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("TagInfo".to_string(), libgql::executor::Values::from_iter([("parentTag".to_string(), self.parent_tag.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(v)?.into())))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
+        ("tag".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.tag)?))),
+        ])))
+    }
+}
+
 pub struct TagList {
     pub list: Vec<Tag>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for TagList {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("TagList".to_string(), libgql::executor::Values::from_iter([("list".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.list.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
 }
 
 pub struct UploadUrl {
@@ -1212,12 +1900,40 @@ pub struct UploadUrl {
     pub url: url::Url,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UploadUrl {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("UploadUrl".to_string(), libgql::executor::Values::from_iter([("headers".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.headers.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ("url".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<url::Url as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.url)?))),
+        ])))
+    }
+}
+
 pub struct UploadUrlList {
     pub urls: Vec<UploadUrl>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UploadUrlList {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("UploadUrlList".to_string(), libgql::executor::Values::from_iter([("urls".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.urls.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct UrlObject {
     pub uvalue: url::Url,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UrlObject {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("UrlObject".to_string(), libgql::executor::Values::from_iter([("uvalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<url::Url as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.uvalue)?))),
+        ])))
+    }
 }
 
 pub struct User {
@@ -1228,8 +1944,30 @@ pub struct User {
     pub ten_groups: Vec<Group>,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for User {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("User".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("email".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.email)?))),
+        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.id)?))),
+        ("name".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.name)?))),
+        ("tenGroups".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.ten_groups.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
+}
+
 pub struct UsersList {
     pub users: Vec<User>,
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UsersList {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("UsersList".to_string(), libgql::executor::Values::from_iter([("users".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.users.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
+        ])))
+    }
 }
 
 pub struct UsersTag {
@@ -1238,9 +1976,31 @@ pub struct UsersTag {
     pub users_count: i32,
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UsersTag {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        Ok(("UsersTag".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.created_at)?))),
+        ("tag".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.tag)?.into()))),
+        ("usersCount".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(self.users_count)?))),
+        ])))
+    }
+}
+
 pub enum AddTagsToFilesError {
     ErrorUnknownFiles(ErrorUnknownFiles),
     ErrorUnknownTags(ErrorUnknownTags),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for AddTagsToFilesError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorUnknownFiles(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum ApproveTagError {
@@ -1249,10 +2009,34 @@ pub enum ApproveTagError {
     ErrorUnknownGroupIds(ErrorUnknownGroupIds),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ApproveTagError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownGroupIds(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum CommitMultipartFileSessionResponse {
     ErrorFileNotUploaded(ErrorFileNotUploaded),
     ErrorUnknownSessionId(ErrorUnknownSessionId),
     File(File),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CommitMultipartFileSessionResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorFileNotUploaded(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownSessionId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::File(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum CommitPutFileSessionResponse {
@@ -1261,15 +2045,50 @@ pub enum CommitPutFileSessionResponse {
     File(File),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CommitPutFileSessionResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorFileNotUploaded(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownSessionId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::File(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum ConfirmOTPCodeResponse {
     ErrorInvalidOTPCode(ErrorInvalidOTPCode),
     ErrorOTPCodeExpired(ErrorOTPCodeExpired),
     OTPToken(OTPToken),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ConfirmOTPCodeResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorInvalidOTPCode(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorOTPCodeExpired(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::OTPToken(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum ConfirmUserError {
     ErrorInvalidPassword(ErrorInvalidPassword),
     ErrorInvalidToken(ErrorInvalidToken),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ConfirmUserError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorInvalidPassword(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidToken(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum CreateGroupError {
@@ -1278,6 +2097,20 @@ pub enum CreateGroupError {
     ErrorInvalidLimitOfDownloadsPerDay(ErrorInvalidLimitOfDownloadsPerDay),
     ErrorUnknownTags(ErrorUnknownTags),
     ErrorUnknownUsers(ErrorUnknownUsers),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreateGroupError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidGroupName(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidLimitOfDownloadsPerDay(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownUsers(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum CreateMultipartFileSessionResponse {
@@ -1290,6 +2123,22 @@ pub enum CreateMultipartFileSessionResponse {
     MultipartUploadSession(MultipartUploadSession),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreateMultipartFileSessionResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorMultipartUploadFileIsTooBig(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorMultipartUploadFileIsTooLight(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorMultipartUploadFilePartSizeIsTooBig(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorMultipartUploadFilePartSizeIsTooSmall(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNoDealTag(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::MultipartUploadSession(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum CreatePutFileSessionResponse {
     ErrorNoDealTag(ErrorNoDealTag),
     ErrorPutUploadFileIsTooBig(ErrorPutUploadFileIsTooBig),
@@ -1297,9 +2146,33 @@ pub enum CreatePutFileSessionResponse {
     PutUploadSession(PutUploadSession),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreatePutFileSessionResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorNoDealTag(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorPutUploadFileIsTooBig(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::PutUploadSession(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum CreateTagError {
     ErrorAlreadyExists(ErrorAlreadyExists),
     ErrorUnknownParentId(ErrorUnknownParentId),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreateTagError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownParentId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum CreateUserError {
@@ -1310,6 +2183,20 @@ pub enum CreateUserError {
     ErrorUnknownGroups(ErrorUnknownGroups),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreateUserError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorAlreadyPending(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorEmailCollision(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidEmail(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidUserName(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownGroups(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum DecideOnDownloadRequestError {
     ErrorAlreadyDone(ErrorAlreadyDone),
     ErrorNotFound(ErrorNotFound),
@@ -1317,14 +2204,49 @@ pub enum DecideOnDownloadRequestError {
     ErrorUnknownUser(ErrorUnknownUser),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DecideOnDownloadRequestError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorAlreadyDone(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownUser(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum DeleteFileError {
     ErrorChangeForbidden(ErrorChangeForbidden),
     ErrorUnknownFile(ErrorUnknownFile),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DeleteFileError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorChangeForbidden(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum DeleteFilesError {
     ErrorFilesChangeForbidden(ErrorFilesChangeForbidden),
     ErrorUnknownFiles(ErrorUnknownFiles),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DeleteFilesError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorFilesChangeForbidden(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownFiles(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum EditGroupError {
@@ -1335,6 +2257,20 @@ pub enum EditGroupError {
     ErrorUnknownTags(ErrorUnknownTags),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EditGroupError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorGroupNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidGroupName(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidLimitOfDownloadsPerDay(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum EditTagError {
     ErrorAlreadyApprovedByAdmin(ErrorAlreadyApprovedByAdmin),
     ErrorAlreadyExists(ErrorAlreadyExists),
@@ -1342,14 +2278,49 @@ pub enum EditTagError {
     ErrorUnknownParentId(ErrorUnknownParentId),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EditTagError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorAlreadyApprovedByAdmin(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownParentId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum ErrorAlreadyDoneOrUnknownTags {
     ErrorAlreadyDone(ErrorAlreadyDone),
     ErrorUnknownTags(ErrorUnknownTags),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyDoneOrUnknownTags {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorAlreadyDone(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum ErrorGroupNotFoundOrErrorNotFound {
     ErrorGroupNotFound(ErrorGroupNotFound),
     ErrorNotFound(ErrorNotFound),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorGroupNotFoundOrErrorNotFound {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorGroupNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum Event {
@@ -1361,9 +2332,35 @@ pub enum Event {
     EventTagApprovalIsRequested(EventTagApprovalIsRequested),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Event {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::EventFileDeleted(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::EventFileDownloadRequested(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::EventFileDownloaded(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::EventFileTagsEdited(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::EventFileUploaded(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::EventTagApprovalIsRequested(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum FilesDealInfoOrError {
     ErrorCantAddAutotags(ErrorCantAddAutotags),
     FilesDealInfo(FilesDealInfo),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for FilesDealInfoOrError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorCantAddAutotags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::FilesDealInfo(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum GetDealInfoResponse {
@@ -1371,9 +2368,31 @@ pub enum GetDealInfoResponse {
     ErrorNotFound(ErrorNotFound),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetDealInfoResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::DealInfo(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum GetEventsResponse {
     ErrorDateRangeIsInvalid(ErrorDateRangeIsInvalid),
     EventsList(EventsList),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetEventsResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorDateRangeIsInvalid(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::EventsList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum GetFileURLResponse {
@@ -1381,9 +2400,31 @@ pub enum GetFileURLResponse {
     UrlObject(UrlObject),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetFileURLResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::UrlObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum GetFilesResponse {
     ErrorUnknownTags(ErrorUnknownTags),
     SearchFileList(SearchFileList),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetFilesResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::SearchFileList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum GetGroupTagsResponse {
@@ -1391,9 +2432,31 @@ pub enum GetGroupTagsResponse {
     TagList(TagList),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetGroupTagsResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::TagList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum GetGroupUsersAndUsersResponse {
     ErrorGroupNotFound(ErrorGroupNotFound),
     GroupUserList(GroupUserList),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetGroupUsersAndUsersResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorGroupNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::GroupUserList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum GetGroupUsersResponse {
@@ -1401,9 +2464,31 @@ pub enum GetGroupUsersResponse {
     UsersList(UsersList),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetGroupUsersResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::UsersList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum GetGroupUsersTotalResponse {
     ErrorNotFound(ErrorNotFound),
     IntObject(IntObject),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetGroupUsersTotalResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::IntObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum GetNextMultipartUploadUrlsResponse {
@@ -1411,9 +2496,31 @@ pub enum GetNextMultipartUploadUrlsResponse {
     UploadUrlList(UploadUrlList),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetNextMultipartUploadUrlsResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorUnknownSessionId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::UploadUrlList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum GetPathToTagResponse {
     ErrorUnknownTags(ErrorUnknownTags),
     StringList(StringList),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetPathToTagResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::StringList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum GetTagInfoResponse {
@@ -1421,9 +2528,31 @@ pub enum GetTagInfoResponse {
     TagInfo(TagInfo),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetTagInfoResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::TagInfo(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum GetTagsResponse {
     ErrorUnknownTags(ErrorUnknownTags),
     TagList(TagList),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetTagsResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::TagList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum IntObjectOrErrorUnknownTags {
@@ -1431,9 +2560,31 @@ pub enum IntObjectOrErrorUnknownTags {
     IntObject(IntObject),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for IntObjectOrErrorUnknownTags {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::IntObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum IsAllowedToDownloadResponse {
     BooleanObject(BooleanObject),
     ErrorUnknownFile(ErrorUnknownFile),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for IsAllowedToDownloadResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::BooleanObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum ResetPasswordError {
@@ -1441,14 +2592,47 @@ pub enum ResetPasswordError {
     ErrorOTPTokenExpired(ErrorOTPTokenExpired),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ResetPasswordError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorInvalidPassword(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorOTPTokenExpired(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum RetrieveFileResponse {
     ErrorUnknownFile(ErrorUnknownFile),
     SearchFile(SearchFile),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for RetrieveFileResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::SearchFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum RetrieveGroupResponse {
     ErrorNotFound(ErrorNotFound),
     Group(Group),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for RetrieveGroupResponse {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::Group(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }
 
 pub enum TagValue {
@@ -1457,8 +2641,32 @@ pub enum TagValue {
     StringObject(StringObject),
 }
 
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for TagValue {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::DatetimeObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::FloatObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::StringObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
+}
+
 pub enum UpdateFileError {
     ErrorChangeForbidden(ErrorChangeForbidden),
     ErrorUnknownFile(ErrorUnknownFile),
     ErrorUnknownTags(ErrorUnknownTags),
+}
+
+impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UpdateFileError {
+    type Error = String;
+
+    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+        match self {
+        Self::ErrorChangeForbidden(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        }
+    }
 }

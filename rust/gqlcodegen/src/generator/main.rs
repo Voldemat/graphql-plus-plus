@@ -63,6 +63,24 @@ fn generate_union_definition(
         variant.tuple(&item);
         local.push_variant(variant);
     }
+
+    let impl_block = scope.new_impl(&union.name).impl_trait(format!(
+        "TryInto<(String, libgql::executor::Values<{}>)>",
+        config.scalar_type
+    ));
+    impl_block.associate_type("Error", "String");
+    let try_into_func = impl_block
+        .new_fn("try_into")
+        .arg_self()
+        .ret(format!(
+            "Result<(String, libgql::executor::Values<{}>), Self::Error>",
+            config.scalar_type
+        ));
+    try_into_func.line("match self {");
+    for item in union.items.keys() {
+        try_into_func.line(format!("Self::{}(item) => TryInto::<(String, libgql::executor::Values::<{}>)>::try_into(item),", item, config.scalar_type));
+    };
+    try_into_func.line("}");
 }
 
 fn generate_input_type(
@@ -85,9 +103,7 @@ fn generate_object_type(
     match field_type {
         ObjectType::ObjectType { name } => name.clone(),
         ObjectType::Enum { name } => name.clone(),
-        ObjectType::Scalar { name } => {
-            config.scalars_mapping[name].clone()
-        }
+        ObjectType::Scalar { name } => config.scalars_mapping[name].clone(),
         ObjectType::Union { name } => name.clone(),
         ObjectType::InterfaceType { name } => name.clone(),
     }
@@ -236,10 +252,7 @@ fn generate_input_definition(
 ) {
     let local = scope.new_struct(&input.name).vis("pub");
     for (name, field) in &input.fields {
-        let mut field_name = super::shared::format_field_name(name);
-        if field_name == "type" {
-            field_name = "r#type".to_string();
-        };
+        let field_name = super::shared::format_field_name(name);
         let mut field = codegen::Field::new(
             &field_name,
             generate_field_type(config, field, generate_input_field_spec_type),
@@ -329,6 +342,132 @@ fn generate_object_field_spec_type(
     }
 }
 
+fn generate_object_type_value(
+    config: &Config,
+    input_expression: &str,
+    type_spec: &schema::server::object::ObjectType,
+) -> String {
+    match type_spec {
+        schema::server::object::ObjectType::ObjectType { name: _ } => {
+            format!("TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()", config.scalar_type, input_expression)
+        }
+        schema::server::object::ObjectType::Union { name: _ } => {
+            format!("TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()", config.scalar_type, input_expression)
+        }
+        schema::server::object::ObjectType::InterfaceType { name: _ } => {
+            format!("TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()", config.scalar_type, input_expression)
+        }
+        schema::server::object::ObjectType::Enum { name } => {
+            format!("<{} as libgql::executor::GQLEnum<{}>>::to_literal_value({})?", name, config.scalar_type, input_expression)
+        }
+        schema::server::object::ObjectType::Scalar { name } => {
+            format!("<{} as libgql::executor::GQLScalar<{}>>::to_literal_value({})?", config.scalars_mapping[name], config.scalar_type, input_expression)
+        }
+    }
+}
+
+fn generate_object_non_callable_field_spec_value(
+    config: &Config,
+    input_expression: &str,
+    spec: &schema::server::object::ObjectNonCallableFieldSpec,
+) -> String {
+    match spec {
+        schema::server::object::ObjectNonCallableFieldSpec::Literal(
+            literal,
+        ) => {
+            format!(
+                "libgql::executor::NonNullableValue::Literal({})",
+                generate_object_type_value(
+                    config,
+                    input_expression,
+                    &literal.field_type
+                )
+            )
+        }
+        schema::server::object::ObjectNonCallableFieldSpec::Array(array) => {
+            format!(
+                "libgql::executor::NonNullableValue::Array({}.into_iter().map(|element| Ok({})).collect::<Result<Vec<_>, String>>()?)",
+                input_expression,
+                generate_object_field_value(
+                    config,
+                    "element",
+                    array.nullable,
+                    array.field_type.as_ref()
+                )
+            )
+        }
+    }
+}
+
+fn generate_object_field_value(
+    config: &Config,
+    input_expression: &str,
+    nullable: bool,
+    spec: &schema::server::object::ObjectNonCallableFieldSpec,
+) -> String {
+    if !nullable {
+        format!(
+            "libgql::executor::Value::NonNullable({})",
+            generate_object_non_callable_field_spec_value(
+                config,
+                input_expression,
+                spec
+            )
+        )
+    } else {
+        format!(
+            "{}.map(|v| -> Result<libgql::executor::Value<{}>, String> {{Ok(libgql::executor::Value::NonNullable({}))}}).transpose()?.unwrap_or(libgql::executor::Value::Null)",
+            input_expression,
+            config.scalar_type,
+            generate_object_non_callable_field_spec_value(config, "v", spec)
+        )
+    }
+}
+
+fn generate_object_fields_value(
+    config: &Config,
+    fields: &indexmap::IndexMap<String, schema::server::object::ObjectField>,
+) -> String {
+    let mut s = "[".to_string();
+    for (field_name, nullable, spec) in
+        fields
+            .iter()
+            .filter_map(|(field_name, field)| match &field.spec {
+                schema::server::object::ObjectFieldSpec::Literal(l) => Some((
+                    field_name,
+                    field.nullable,
+                    schema::server::object::ObjectNonCallableFieldSpec::Literal(
+                        l.clone(),
+                    ),
+                )),
+                schema::server::object::ObjectFieldSpec::Array(a) => Some((
+                    field_name,
+                    field.nullable,
+                    schema::server::object::ObjectNonCallableFieldSpec::Array(
+                        a.clone(),
+                    ),
+                )),
+                schema::server::object::ObjectFieldSpec::Callable(_) => None,
+            })
+    {
+        s += &format!(
+            "(\"{}\".to_string(), {}),\n",
+            field_name,
+            generate_object_field_value(
+                config,
+                &format!(
+                    "self.{}",
+                    super::shared::format_field_name(field_name)
+                ),
+                nullable,
+                &spec
+            )
+        )
+    }
+    s += "]";
+    return s;
+}
+
 fn generate_object_definition(
     config: &Config,
     scope: &mut codegen::Scope,
@@ -336,17 +475,31 @@ fn generate_object_definition(
 ) {
     let local = scope.new_struct(&object.name).vis("pub");
     for (name, field) in &object.fields {
-        let mut field_name = super::shared::format_field_name(name);
-        if field_name == "type" {
-            field_name = "r#type".to_string();
-        }
+        let field_name = super::shared::format_field_name(name);
         let mut field = codegen::Field::new(
             &field_name,
             generate_field_type(config, field, generate_object_field_spec_type),
         );
         field.visibility = Some("pub".into());
         local.push_field(field);
-    };
+    }
+    let impl_block = scope.new_impl(&object.name).impl_trait(format!(
+        "TryInto<(String, libgql::executor::Values<{}>)>",
+        config.scalar_type
+    ));
+    impl_block.associate_type("Error", "String");
+    impl_block
+        .new_fn("try_into")
+        .arg_self()
+        .ret(format!(
+            "Result<(String, libgql::executor::Values<{}>), Self::Error>",
+            config.scalar_type
+        ))
+        .line(format!(
+            "Ok((\"{}\".to_string(), libgql::executor::Values::from_iter({})))",
+            object.name,
+            generate_object_fields_value(config, &object.fields)
+        ));
 }
 
 pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
