@@ -5,6 +5,7 @@ use schema::server::object::ObjectNonCallableFieldSpec;
 use schema::server::object::ObjectType;
 
 fn generate_enum_definition(
+    config: &Config,
     scope: &mut codegen::Scope,
     gqlenum: &schema::server::gqlenum::Enum,
 ) {
@@ -14,9 +15,10 @@ fn generate_enum_definition(
             &super::shared::format_enum_variant(value),
         ));
     }
-    let impl_block = scope
-        .new_impl(&gqlenum.name)
-        .impl_trait("libgql::executor::GQLEnum".to_string());
+    let impl_block = scope.new_impl(&gqlenum.name).impl_trait(format!(
+        "libgql::executor::GQLEnum<{}>",
+        config.scalar_type
+    ));
     let from_str_fn = impl_block
         .new_fn("from_str")
         .arg("s", "&str")
@@ -34,6 +36,20 @@ fn generate_enum_definition(
         gqlenum.name
     ));
     from_str_fn.line("}");
+
+    let to_str_fn = impl_block
+        .new_fn("to_str")
+        .arg("self", "&Self")
+        .ret("Result<&str, String>");
+    to_str_fn.line("match self {");
+    for value in &gqlenum.values {
+        to_str_fn.line(format!(
+            "Self::{} => Ok(\"{}\"),",
+            super::shared::format_enum_variant(value),
+            value,
+        ));
+    }
+    to_str_fn.line("}");
 }
 
 fn generate_union_definition(
@@ -109,58 +125,28 @@ fn generate_field_type<T>(
     return t;
 }
 
-fn generate_input_type_value(
+fn generate_input_type_value_func(
     config: &Config,
-    input_expression: &str,
     input_type: &schema::shared::InputType,
 ) -> String {
     match input_type {
         schema::shared::InputType::Scalar { name } => {
-            let mut m = format!("match {} {{", input_expression);
-            m += "libgql::executor::LiteralValue::Scalar(scalar) => ";
-            m += &format!(
-                "<{} as libgql::executor::GQLScalar<{}>>::from_scalar(scalar),\n",
-                config.scalars_mapping[name], config.scalar_type
-            );
-            m += "libgql::executor::LiteralValue::Object(_, o) => Err(";
-            m += "format!(\"Unexpected object value for scalar field: {:?}\", o)";
-            m += ")\n";
-            m += "}";
-            return m;
+            format!(
+                "<{} as libgql::executor::GQLScalar<{}>>::from_literal_value",
+                config.scalars_mapping[name], config.scalar_type,
+            )
         }
         schema::shared::InputType::Enum { name } => {
-            let mut m = format!("match {} {{", input_expression);
-            m += "libgql::executor::LiteralValue::Scalar(scalar) => ";
-            m += &format!(
-                "<{} as libgql::executor::GQLEnum>::from_str({}),\n",
-                name,
-                format!(
-                    "<{} as libgql::executor::Scalar>::get_str(scalar)",
-                    config.scalar_type
-                ) + &format!(
-                    ".ok_or(\"Unexpected non-string scalar for enum: {}\".to_string())?",
-                    name
-                )
-            );
-            m += "libgql::executor::LiteralValue::Object(_, o) => Err(";
-            m += "format!(\"Unexpected object value for scalar field: {:?}\", o)";
-            m += ")\n";
-            m += "}";
-            return m;
+            format!(
+                "<{} as libgql::executor::GQLEnum<{}>>::from_literal_value",
+                name, config.scalar_type
+            )
         }
         schema::shared::InputType::InputType { name } => {
-            let mut m = format!("match {} {{", input_expression);
-            m += "libgql::executor::LiteralValue::Object(_, o) => ";
-            m += &format!(
-                "<{} as libgql::executor::GQLInput<{}>>",
+            format!(
+                "<{} as libgql::executor::GQLInput<{}>>::from_literal_value",
                 name, config.scalar_type
-            );
-            m += &format!("::from_variables(o),\n");
-            m += "libgql::executor::LiteralValue::Scalar(scalar) => Err(";
-            m += "format!(\"Unexpected scalar value for input field: {:?}\", scalar)";
-            m += ")\n";
-            m += "}";
-            return m;
+            )
         }
     }
 }
@@ -173,51 +159,36 @@ fn generate_input_field_spec_value(
 ) -> String {
     match spec {
         schema::shared::InputFieldSpec::Array(array) => {
-            let mut m = format!("match {} {{", input_expression);
-            m += "libgql::executor::NonNullableValue::Array(array) =>";
-            m += "array.iter().map(|element| match element {\n";
-            m += "libgql::executor::Value::Null => ";
-            if array.nullable {
-                m += "Ok(None)";
-            } else {
-                m += "Err(\"Unexpected null in non-nullable array\".to_string())";
-            };
-            m += ",\n";
-            m += "libgql::executor::Value::NonNullable(n) => ";
-            let field_spec_value = generate_input_field_spec_value(
-                    config,
-                    field_name,
-                    "n",
-                    array.field_type.as_ref()
-                );
-            if array.nullable {
-                m += &format!("{}.map(|v| Some(v))", field_spec_value);
-            } else {
-                m += &field_spec_value;
-            };
-            m += "})\n";
-            m += ".collect::<Result<Vec<_>, String>>()";
-            m += ",\n";
-            m += "libgql::executor::NonNullableValue::Literal(l) => Err(";
-            m += &format!(
-                "format!(\"{}: Unexpected literal value for array: {{:?}}\", l))",
-                field_name
+            let mut element_func = format!(
+                "|element: &libgql::executor::Value<{}>| element.to_non_nullable_option()",
+                config.scalar_type
             );
-            m += "}";
-            return m;
+            let field_spec_value = generate_input_field_spec_value(
+                config,
+                field_name,
+                "v",
+                array.field_type.as_ref(),
+            );
+            if array.nullable {
+                element_func +=
+                    &format!(".map(|v| {}).transpose()", field_spec_value);
+            } else {
+                element_func += &format!(
+                    ".ok_or(\"Unexpected null in non-nullable array\".to_string()).map(|v| {}).flatten()",
+                    field_spec_value
+                );
+            };
+            return format!(
+                "libgql::executor::ast::extract_array({}, {})",
+                input_expression, element_func
+            );
         }
         schema::shared::InputFieldSpec::Literal(literal) => {
-            let mut m = format!("match {} {{", input_expression);
-            m += "libgql::executor::NonNullableValue::Literal(l) => ";
-            m += &generate_input_type_value(config, "l", &literal.field_type);
-            m += ",\n";
-            m += "libgql::executor::NonNullableValue::Array(a) => Err(";
-            m += &format!(
-                "format!(\"{}: Unexpected array value for literal: {{:?}}\", a))",
-                field_name
+            return format!(
+                "{}.get_literal().ok_or(\"Unexpected array value for literal\".to_string()).map({}).flatten()",
+                input_expression,
+                generate_input_type_value_func(config, &literal.field_type)
             );
-            m += "}";
-            return m;
         }
     }
 }
@@ -229,13 +200,10 @@ fn generate_input_field_value(
     field_name: &str,
     field: &schema::shared::InputField,
 ) -> String {
-    let mut var = format!(
-        "{}.get(\"{}\").map(|v| match v {{\n",
+    let var = format!(
+        "{}.get(\"{}\").map(libgql::executor::Value::to_non_nullable_option).flatten()\n",
         variables_var_name, field_name
     );
-    var += &format!("    libgql::executor::Value::Null => None,\n");
-    var += &format!("    libgql::executor::Value::NonNullable(n) => Some(n)\n");
-    var += &format!("}}).flatten()");
     if field.nullable {
         format!(
             "{}.map(|v| {}).transpose()?",
@@ -249,14 +217,14 @@ fn generate_input_field_value(
         )
     } else {
         format!(
-            "{}?",
+            "{}.ok_or(\"{}: Required field {} is missing or null\".to_string()).map(|v| {}).flatten()?",
+            var,
+            input_name,
+            field_name,
             generate_input_field_spec_value(
                 config,
                 field_name,
-                &format!(
-                    "{}.ok_or(\"{}: Required field {} is missing or null\")?",
-                    var, input_name, field_name
-                ),
+                "v",
                 &field.spec,
             )
         )
@@ -386,7 +354,7 @@ fn generate_object_definition(
 pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
     let mut scope = codegen::Scope::new();
     for gqlenum in schema.server.enums.values() {
-        generate_enum_definition(&mut scope, gqlenum);
+        generate_enum_definition(config, &mut scope, gqlenum);
     }
     for input in schema.server.inputs.values() {
         generate_input_definition(config, &mut scope, input);
@@ -402,6 +370,8 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use super::*;
 
     #[test]
@@ -415,9 +385,16 @@ mod tests {
             ],
         };
         let mut scope = codegen::Scope::new();
-        generate_enum_definition(&mut scope, &gqlenum);
+        generate_enum_definition(
+            &Config {
+                scalar_type: "ExampleScalar".to_string(),
+                scalars_mapping: HashMap::new(),
+            },
+            &mut scope,
+            &gqlenum,
+        );
         let output = scope.to_string();
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             output,
             r#"pub enum Check {
     FirstValue,
@@ -425,13 +402,21 @@ mod tests {
     ThirdValue,
 }
 
-impl libgql::executor::GQLEnum for Check {
+impl libgql::executor::GQLEnum<ExampleScalar> for Check {
     fn from_str(s: &str) -> Result<Self, String> {
         match s {
         "FIRST_VALUE" => Ok(Self::FirstValue),
         "SECOND_VALUE" => Ok(Self::SecondValue),
         "THIRD_VALUE" => Ok(Self::ThirdValue),
         _ => Err(format!("Unexpected value {} for enum Check", s))
+        }
+    }
+
+    fn to_str(self: &Self) -> Result<&str, String> {
+        match self {
+        Self::FirstValue => Ok("FIRST_VALUE"),
+        Self::SecondValue => Ok("SECOND_VALUE"),
+        Self::ThirdValue => Ok("THIRD_VALUE"),
         }
     }
 }"#

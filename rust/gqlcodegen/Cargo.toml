@@ -13,3 +13,6 @@ serde_json_path_to_error = "0.1.5"
 url = "2.5.7"
 uuid = "1.19.0"
 libgql = { path = "../libgql" }
+
+[dev-dependencies]
+pretty_assertions = "1.4.1"

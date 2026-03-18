@@ -15,7 +15,7 @@ impl libgql::executor::Scalar for ExampleScalar {
         }
     }
 
-    fn from_string(str: &str) -> Result<Self, String> {
+    fn from_str(str: &str) -> Result<Self, String> {
         Ok(Self::String(str.to_string()))
     }
 
@@ -48,6 +48,10 @@ impl libgql::executor::GQLScalar<ExampleScalar> for i32 {
             _ => Err(format!("Invalid scalar for i32 {:?}", s)),
         }
     }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Int(*self))
+    }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
@@ -56,6 +60,10 @@ impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
             ExampleScalar::Float(f) => Ok(*f),
             _ => Err(format!("Invalid scalar for f32 {:?}", s)),
         }
+    }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Float(*self))
     }
 }
 
@@ -66,6 +74,10 @@ impl libgql::executor::GQLScalar<ExampleScalar> for String {
             _ => Err(format!("Invalid scalar for String {:?}", s)),
         }
     }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.clone()))
+    }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for i64 {
@@ -74,6 +86,10 @@ impl libgql::executor::GQLScalar<ExampleScalar> for i64 {
             ExampleScalar::Int64(i) => Ok(*i),
             _ => Err(format!("Invalid scalar for Int64 {:?}", scalar)),
         }
+    }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Int64(*self))
     }
 }
 
@@ -88,6 +104,10 @@ impl libgql::executor::GQLScalar<ExampleScalar>
             _ => Err(format!("Invalid scalar for Datetime {:?}", scalar)),
         }
     }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.to_rfc3339()))
+    }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for uuid::Uuid {
@@ -99,6 +119,10 @@ impl libgql::executor::GQLScalar<ExampleScalar> for uuid::Uuid {
             _ => Err(format!("Invalid scalar for UUID {:?}", scalar)),
         }
     }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.to_string()))
+    }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for bool {
@@ -107,5 +131,9 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
             ExampleScalar::Boolean(b) => Ok(*b),
             _ => Err(format!("Invalid scalar for bool {:?}", s)),
         }
+    }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Boolean(*self))
     }
 }
