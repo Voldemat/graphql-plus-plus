@@ -5,8 +5,8 @@ pub enum EDealColumnType {
 }
 
 impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EDealColumnType {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
         "LIST" => Ok(Self::List),
         "NUMBER" => Ok(Self::Number),
         "DATE" => Ok(Self::Date),
@@ -14,7 +14,7 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EDealColumnType
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
         Self::List => Ok("LIST"),
         Self::Number => Ok("NUMBER"),
@@ -33,8 +33,8 @@ pub enum EFileField {
 }
 
 impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EFileField {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
         "NAME" => Ok(Self::Name),
         "MIMETYPE" => Ok(Self::Mimetype),
         "SIZE_IN_BYTES" => Ok(Self::SizeInBytes),
@@ -45,7 +45,7 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EFileField {
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
         Self::Name => Ok("NAME"),
         Self::Mimetype => Ok("MIMETYPE"),
@@ -64,8 +64,8 @@ pub enum EGroupField {
 }
 
 impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EGroupField {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
         "NAME" => Ok(Self::Name),
         "CREATED_AT" => Ok(Self::CreatedAt),
         "LIMIT_OF_DOWNLOADS_PER_DAY" => Ok(Self::LimitOfDownloadsPerDay),
@@ -73,7 +73,7 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EGroupField {
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
         Self::Name => Ok("NAME"),
         Self::CreatedAt => Ok("CREATED_AT"),
@@ -88,15 +88,15 @@ pub enum EGroupUsersField {
 }
 
 impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EGroupUsersField {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
         "NAME" => Ok(Self::Name),
         "EMAIL" => Ok(Self::Email),
         _ => Err(format!("Unexpected value {} for enum EGroupUsersField", s))
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
         Self::Name => Ok("NAME"),
         Self::Email => Ok("EMAIL"),
@@ -110,15 +110,15 @@ pub enum ESortDirection {
 }
 
 impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for ESortDirection {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
         "ASC" => Ok(Self::Asc),
         "DSC" => Ok(Self::Dsc),
         _ => Err(format!("Unexpected value {} for enum ESortDirection", s))
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
         Self::Asc => Ok("ASC"),
         Self::Dsc => Ok("DSC"),
@@ -133,8 +133,8 @@ pub enum EUserField {
 }
 
 impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EUserField {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
         "NAME" => Ok(Self::Name),
         "EMAIL" => Ok(Self::Email),
         "CREATED_AT" => Ok(Self::CreatedAt),
@@ -142,7 +142,7 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EUserField {
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
         Self::Name => Ok("NAME"),
         Self::Email => Ok("EMAIL"),
@@ -158,8 +158,8 @@ pub enum EUsersTagField {
 }
 
 impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EUsersTagField {
-    fn from_str(s: &str) -> Result<Self, String> {
-        match s {
+    fn from_string(s: String) -> Result<Self, String> {
+        match s.as_str() {
         "TAG" => Ok(Self::Tag),
         "USERS_COUNT" => Ok(Self::UsersCount),
         "CREATED_AT" => Ok(Self::CreatedAt),
@@ -167,7 +167,7 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EUsersTagField 
         }
     }
 
-    fn to_str(self: &Self) -> Result<&str, String> {
+    fn to_str(self: Self) -> Result<&'static str, String> {
         match self {
         Self::Tag => Ok("TAG"),
         Self::UsersCount => Ok("USERS_COUNT"),
@@ -182,9 +182,9 @@ pub struct DateRange {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for DateRange {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(DateRange{
-            end_at: variables.get("endAt")
+            end_at: variables.remove("endAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("DateRange: Required field endAt is missing or null".to_string())
@@ -195,7 +195,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for DateRange {
                     .flatten()
                 )
                 .flatten()?,
-            start_at: variables.get("startAt")
+            start_at: variables.remove("startAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("DateRange: Required field startAt is missing or null".to_string())
@@ -220,9 +220,9 @@ pub struct EventFiltersIn {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(EventFiltersIn{
-            event_file_deleted: variables.get("eventFileDeleted")
+            event_file_deleted: variables.remove("eventFileDeleted")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileDeleted is missing or null".to_string())
@@ -233,7 +233,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                     .flatten()
                 )
                 .flatten()?,
-            event_file_download_requested: variables.get("eventFileDownloadRequested")
+            event_file_download_requested: variables.remove("eventFileDownloadRequested")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileDownloadRequested is missing or null".to_string())
@@ -244,7 +244,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                     .flatten()
                 )
                 .flatten()?,
-            event_file_downloaded: variables.get("eventFileDownloaded")
+            event_file_downloaded: variables.remove("eventFileDownloaded")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileDownloaded is missing or null".to_string())
@@ -255,7 +255,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                     .flatten()
                 )
                 .flatten()?,
-            event_file_tags_edited: variables.get("eventFileTagsEdited")
+            event_file_tags_edited: variables.remove("eventFileTagsEdited")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileTagsEdited is missing or null".to_string())
@@ -266,7 +266,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                     .flatten()
                 )
                 .flatten()?,
-            event_file_uploaded: variables.get("eventFileUploaded")
+            event_file_uploaded: variables.remove("eventFileUploaded")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileUploaded is missing or null".to_string())
@@ -277,7 +277,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                     .flatten()
                 )
                 .flatten()?,
-            event_tag_approval_is_requested: variables.get("eventTagApprovalIsRequested")
+            event_tag_approval_is_requested: variables.remove("eventTagApprovalIsRequested")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventTagApprovalIsRequested is missing or null".to_string())
@@ -298,9 +298,9 @@ pub struct FileSortBy {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for FileSortBy {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(FileSortBy{
-            direction: variables.get("direction")
+            direction: variables.remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("FileSortBy: Required field direction is missing or null".to_string())
@@ -311,7 +311,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for FileSortBy {
                     .flatten()
                 )
                 .flatten()?,
-            field: variables.get("field")
+            field: variables.remove("field")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("FileSortBy: Required field field is missing or null".to_string())
@@ -334,9 +334,9 @@ pub struct Filter {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for Filter {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(Filter{
-            column_id: variables.get("columnId")
+            column_id: variables.remove("columnId")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("Filter: Required field columnId is missing or null".to_string())
@@ -347,7 +347,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for Filter {
                     .flatten()
                 )
                 .flatten()?,
-            date_range: variables.get("dateRange")
+            date_range: variables.remove("dateRange")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .map(|v| 
@@ -356,16 +356,16 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for Filter {
                     .map(<FilterDateRange as libgql::executor::GQLInput<super::scalar::ExampleScalar>>::from_literal_value)
                     .flatten()        
                 ).transpose()?,
-            list_values: variables.get("listValues")
+            list_values: variables.remove("listValues")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .map(|v| libgql::executor::ast::extract_array(v, |element: &libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
                     .flatten()).flatten())        
                 ).transpose()?,
-            number_range: variables.get("numberRange")
+            number_range: variables.remove("numberRange")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .map(|v| 
@@ -384,9 +384,9 @@ pub struct FilterDateRange {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for FilterDateRange {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(FilterDateRange{
-            end_at: variables.get("endAt")
+            end_at: variables.remove("endAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .map(|v| 
@@ -395,7 +395,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for FilterDateRang
                     .map(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
                     .flatten()        
                 ).transpose()?,
-            start_at: variables.get("startAt")
+            start_at: variables.remove("startAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .map(|v| 
@@ -414,9 +414,9 @@ pub struct GetGroupUsersSortBy {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetGroupUsersSortBy {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(GetGroupUsersSortBy{
-            direction: variables.get("direction")
+            direction: variables.remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetGroupUsersSortBy: Required field direction is missing or null".to_string())
@@ -427,7 +427,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetGroupUsersS
                     .flatten()
                 )
                 .flatten()?,
-            field: variables.get("field")
+            field: variables.remove("field")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetGroupUsersSortBy: Required field field is missing or null".to_string())
@@ -448,9 +448,9 @@ pub struct GetGroupsSortBy {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetGroupsSortBy {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(GetGroupsSortBy{
-            direction: variables.get("direction")
+            direction: variables.remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetGroupsSortBy: Required field direction is missing or null".to_string())
@@ -461,7 +461,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetGroupsSortB
                     .flatten()
                 )
                 .flatten()?,
-            field: variables.get("field")
+            field: variables.remove("field")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetGroupsSortBy: Required field field is missing or null".to_string())
@@ -482,9 +482,9 @@ pub struct GetUsersSortBy {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetUsersSortBy {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(GetUsersSortBy{
-            direction: variables.get("direction")
+            direction: variables.remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetUsersSortBy: Required field direction is missing or null".to_string())
@@ -495,7 +495,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetUsersSortBy
                     .flatten()
                 )
                 .flatten()?,
-            field: variables.get("field")
+            field: variables.remove("field")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetUsersSortBy: Required field field is missing or null".to_string())
@@ -517,9 +517,9 @@ pub struct GroupIn {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GroupIn {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(GroupIn{
-            limit_of_downloads_per_day: variables.get("limitOfDownloadsPerDay")
+            limit_of_downloads_per_day: variables.remove("limitOfDownloadsPerDay")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GroupIn: Required field limitOfDownloadsPerDay is missing or null".to_string())
@@ -530,7 +530,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GroupIn {
                     .flatten()
                 )
                 .flatten()?,
-            name: variables.get("name")
+            name: variables.remove("name")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GroupIn: Required field name is missing or null".to_string())
@@ -541,11 +541,11 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GroupIn {
                     .flatten()
                 )
                 .flatten()?,
-            tag_ids: variables.get("tagIds")
+            tag_ids: variables.remove("tagIds")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GroupIn: Required field tagIds is missing or null".to_string())
-                .map(|v| libgql::executor::ast::extract_array(v, |element: &libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -565,9 +565,9 @@ pub struct MultipartUploadFileIn {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploadFileIn {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(MultipartUploadFileIn{
-            initial_parts_count: variables.get("initialPartsCount")
+            initial_parts_count: variables.remove("initialPartsCount")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field initialPartsCount is missing or null".to_string())
@@ -578,7 +578,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploa
                     .flatten()
                 )
                 .flatten()?,
-            name: variables.get("name")
+            name: variables.remove("name")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field name is missing or null".to_string())
@@ -589,7 +589,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploa
                     .flatten()
                 )
                 .flatten()?,
-            part_size_in_bytes: variables.get("partSizeInBytes")
+            part_size_in_bytes: variables.remove("partSizeInBytes")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field partSizeInBytes is missing or null".to_string())
@@ -600,7 +600,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploa
                     .flatten()
                 )
                 .flatten()?,
-            size_in_bytes: variables.get("sizeInBytes")
+            size_in_bytes: variables.remove("sizeInBytes")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field sizeInBytes is missing or null".to_string())
@@ -611,11 +611,11 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploa
                     .flatten()
                 )
                 .flatten()?,
-            tag_ids: variables.get("tagIds")
+            tag_ids: variables.remove("tagIds")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field tagIds is missing or null".to_string())
-                .map(|v| libgql::executor::ast::extract_array(v, |element: &libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -632,9 +632,9 @@ pub struct NumberRange {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for NumberRange {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(NumberRange{
-            end_at: variables.get("endAt")
+            end_at: variables.remove("endAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .map(|v| 
@@ -643,7 +643,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for NumberRange {
                     .map(<f32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
                     .flatten()        
                 ).transpose()?,
-            start_at: variables.get("startAt")
+            start_at: variables.remove("startAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .map(|v| 
@@ -663,9 +663,9 @@ pub struct PutUploadFileIn {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for PutUploadFileIn {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(PutUploadFileIn{
-            name: variables.get("name")
+            name: variables.remove("name")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("PutUploadFileIn: Required field name is missing or null".to_string())
@@ -676,7 +676,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for PutUploadFileI
                     .flatten()
                 )
                 .flatten()?,
-            size_in_bytes: variables.get("sizeInBytes")
+            size_in_bytes: variables.remove("sizeInBytes")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("PutUploadFileIn: Required field sizeInBytes is missing or null".to_string())
@@ -687,11 +687,11 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for PutUploadFileI
                     .flatten()
                 )
                 .flatten()?,
-            tag_ids: variables.get("tagIds")
+            tag_ids: variables.remove("tagIds")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("PutUploadFileIn: Required field tagIds is missing or null".to_string())
-                .map(|v| libgql::executor::ast::extract_array(v, |element: &libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -708,9 +708,9 @@ pub struct TagIn {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for TagIn {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(TagIn{
-            parent_tag_id: variables.get("parentTagId")
+            parent_tag_id: variables.remove("parentTagId")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .map(|v| 
@@ -719,7 +719,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for TagIn {
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
                     .flatten()        
                 ).transpose()?,
-            tag: variables.get("tag")
+            tag: variables.remove("tag")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("TagIn: Required field tag is missing or null".to_string())
@@ -741,9 +741,9 @@ pub struct UserIn {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UserIn {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(UserIn{
-            email: variables.get("email")
+            email: variables.remove("email")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UserIn: Required field email is missing or null".to_string())
@@ -754,18 +754,18 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UserIn {
                     .flatten()
                 )
                 .flatten()?,
-            group_ids: variables.get("groupIds")
+            group_ids: variables.remove("groupIds")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UserIn: Required field groupIds is missing or null".to_string())
-                .map(|v| libgql::executor::ast::extract_array(v, |element: &libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
                     .flatten()).flatten())
                 )
                 .flatten()?,
-            name: variables.get("name")
+            name: variables.remove("name")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UserIn: Required field name is missing or null".to_string())
@@ -786,9 +786,9 @@ pub struct UsersTagSortBy {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UsersTagSortBy {
-    fn from_variables(variables: &libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
         Ok(UsersTagSortBy{
-            direction: variables.get("direction")
+            direction: variables.remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UsersTagSortBy: Required field direction is missing or null".to_string())
@@ -799,7 +799,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UsersTagSortBy
                     .flatten()
                 )
                 .flatten()?,
-            field: variables.get("field")
+            field: variables.remove("field")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UsersTagSortBy: Required field field is missing or null".to_string())

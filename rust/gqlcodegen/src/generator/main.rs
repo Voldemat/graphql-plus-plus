@@ -20,10 +20,10 @@ fn generate_enum_definition(
         config.scalar_type
     ));
     let from_str_fn = impl_block
-        .new_fn("from_str")
-        .arg("s", "&str")
+        .new_fn("from_string")
+        .arg("s", "String")
         .ret("Result<Self, String>");
-    from_str_fn.line("match s {");
+    from_str_fn.line("match s.as_str() {");
     for value in &gqlenum.values {
         from_str_fn.line(format!(
             "\"{}\" => Ok(Self::{}),",
@@ -39,8 +39,8 @@ fn generate_enum_definition(
 
     let to_str_fn = impl_block
         .new_fn("to_str")
-        .arg("self", "&Self")
-        .ret("Result<&str, String>");
+        .arg("self", "Self")
+        .ret("Result<&'static str, String>");
     to_str_fn.line("match self {");
     for value in &gqlenum.values {
         to_str_fn.line(format!(
@@ -158,7 +158,7 @@ fn generate_input_field_spec_value(
     match spec {
         schema::shared::InputFieldSpec::Array(array) => {
             let mut element_func = format!(
-                "|element: &libgql::executor::Value<{}>| element.to_non_nullable_option()",
+                "|element: libgql::executor::Value<{}>| element.to_non_nullable_option()",
                 config.scalar_type
             );
             let field_spec_value = generate_input_field_spec_value(
@@ -199,7 +199,7 @@ fn generate_input_field_value(
     field: &schema::shared::InputField,
 ) -> String {
     let var = format!(
-        "{}.get(\"{}\")\n        .map(libgql::executor::Value::to_non_nullable_option)\n        .flatten()\n",
+        "{}.remove(\"{}\")\n        .map(libgql::executor::Value::to_non_nullable_option)\n        .flatten()\n",
         variables_var_name, field_name
     );
     if field.nullable {
@@ -255,8 +255,8 @@ fn generate_input_definition(
     let from_variables_func = impl_block
         .new_fn("from_variables")
         .arg(
-            "variables",
-            format!("&libgql::executor::Values<{}>", config.scalar_type),
+            "mut variables",
+            format!("libgql::executor::Values<{}>", config.scalar_type),
         )
         .ret("Result<Self, String>");
     let mut value_construction = format!("Ok({}{{\n", input.name);
