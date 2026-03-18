@@ -7,46 +7,46 @@ pub trait Registry<S: Scalar> {
     fn parse_scalar(
         self: &Self,
         scalar_name: &str,
-        value: &S,
+        value: S,
     ) -> Result<Box<dyn std::any::Any>, String>;
     fn parse_scalar_array(
         self: &Self,
         scalar_name: &str,
-        values: &[&S],
+        values: Vec<S>,
     ) -> Result<Box<dyn std::any::Any>, String>;
     fn parse_scalar_optional_array(
         self: &Self,
         scalar_name: &str,
-        values: &[Option<&S>],
+        values: Vec<Option<S>>,
     ) -> Result<Box<dyn std::any::Any>, String>;
     fn parse_enum(
         self: &Self,
         enum_type: &shared::ast::Enum,
-        value: &str,
+        value: String,
     ) -> Result<Box<dyn std::any::Any>, String>;
     fn parse_enum_array(
         self: &Self,
         enum_type: &shared::ast::Enum,
-        values: &[&str],
+        values: Vec<String>,
     ) -> Result<Box<dyn std::any::Any>, String>;
     fn parse_enum_optional_array(
         self: &Self,
         enum_type: &shared::ast::Enum,
-        values: &[Option<&str>],
+        values: Vec<Option<String>>,
     ) -> Result<Box<dyn std::any::Any>, String>;
     fn parse_input(
         self: &Self,
         input_type: &shared::ast::InputType,
-        value: &Values<S>,
+        value: Values<S>,
     ) -> Result<Box<dyn std::any::Any>, String>;
     fn parse_input_array(
         self: &Self,
         input_type: &shared::ast::InputType,
-        value: &[&Values<S>],
+        value: Vec<Values<S>>,
     ) -> Result<Box<dyn std::any::Any>, String>;
     fn parse_input_optional_array(
         self: &Self,
         input_type: &shared::ast::InputType,
-        value: &[Option<&Values<S>>],
+        value: Vec<Option<Values<S>>>,
     ) -> Result<Box<dyn std::any::Any>, String>;
 }

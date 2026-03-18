@@ -40,7 +40,7 @@ async fn execute_operation<C, S: Scalar, R: Registry<S>>(
     subscription_resolvers: &subscription::SubscriptionResolversMap<C, S>,
     parse_registry: &R,
     operation: &client::ast::Operation,
-    variables: &Values<S>,
+    variables: Values<S>,
 ) -> Result<OperationResult<S>, String> {
     let resolved_variables = resolve_operation_parameters(
         parse_registry,
@@ -87,7 +87,7 @@ pub async fn execute<C, S: Scalar, R: Registry<S>>(
     subscription_resolvers: &subscription::SubscriptionResolversMap<C, S>,
     parse_registry: &R,
     client_query: &str,
-    variables: &Values<S>,
+    variables: Values<S>,
     operation: &Option<String>,
 ) -> Result<OperationResult<S>, Error> {
     let tokens = lexer::utils::parse_buffer_into_tokens(client_query)?;

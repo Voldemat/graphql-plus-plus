@@ -7,27 +7,26 @@ fn resolve_literal_array<S: Scalar, R: Registry<S>>(
     registry: &R,
     literal_type: &shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>,
     nullable: bool,
-    elements: &[Value<S>],
+    elements: Vec<Value<S>>,
 ) -> Result<Box<dyn std::any::Any>, String> {
     match &literal_type.r#type {
         shared::ast::InputTypeSpec::Enum(e) => {
-            R::parse_enum_array(registry, &e, &elements.iter().map(|e| {
+            R::parse_enum_array(registry, &e, elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Scalar(scalar),
-                )) = e && let Some(s) = scalar.get_str()
+                )) = e && let Ok(s) = scalar.try_to_string()
                 {
                     Ok(s)
                 } else {
                     Err(format!(
-                        "Expected string scalar for enum value, received: {:?}",
-                        e
+                        "Expected string scalar for enum value, received wrong type"
                     ))
                 }
-            }).collect::<Result<Vec<&str>, String>>()?)
+            }).collect::<Result<Vec<String>, String>>()?)
         }
         shared::ast::InputTypeSpec::Scalar(scalar_name) => {
             match nullable {
-            false => R::parse_scalar_array(registry, &scalar_name, &elements.iter().map(|e| {
+            false => R::parse_scalar_array(registry, &scalar_name, elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Scalar(scalar),
                 )) = e
@@ -40,7 +39,7 @@ fn resolve_literal_array<S: Scalar, R: Registry<S>>(
                     ))
                 }
             }).collect::<Result<Vec<_>, String>>()?),
-            true => R::parse_scalar_optional_array(registry, &scalar_name, &elements.iter().map(|e| {
+            true => R::parse_scalar_optional_array(registry, &scalar_name, elements.into_iter().map(|e| {
                 match e {
                 Value::Null => Ok(None),
                 Value::NonNullable(NonNullableValue::Literal(
@@ -55,7 +54,7 @@ fn resolve_literal_array<S: Scalar, R: Registry<S>>(
             }
         }
         shared::ast::InputTypeSpec::InputType(input_type) => {
-            R::parse_input_array(registry, &input_type.borrow(), &elements.iter().map(|e| {
+            R::parse_input_array(registry, &input_type.borrow(), elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Object(_, object),
                 )) = e
@@ -75,7 +74,7 @@ fn resolve_literal_array<S: Scalar, R: Registry<S>>(
 pub fn resolve_array<S: Scalar, R: Registry<S>>(
     registry: &R,
     array_type: &shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>,
-    elements: &[Value<S>],
+    elements: Vec<Value<S>>,
 ) -> Result<Box<dyn std::any::Any>, String> {
     match array_type.r#type.as_ref() {
         shared::ast::NonCallableFieldSpec::Literal(literal) => {
@@ -96,7 +95,7 @@ pub fn resolve_array<S: Scalar, R: Registry<S>>(
                     else {
                         return Err("Unexpected value for nested array".into());
                     };
-                    a.push(resolve_array(registry, array, &nested_elements)?);
+                    a.push(resolve_array(registry, array, nested_elements)?);
                 }
                 return Ok(Box::new(a));
             } else {
@@ -109,7 +108,7 @@ pub fn resolve_array<S: Scalar, R: Registry<S>>(
                         )) => a.push(Some(resolve_array(
                             registry,
                             array,
-                            &nested_elements,
+                            nested_elements,
                         )?)),
                         _ => {
                             return Err(
@@ -138,11 +137,11 @@ mod tests {
     }
 
     impl Scalar for TestScalar {
-        fn get_str(self: &Self) -> Option<&str> {
+        fn try_to_string(self: Self) -> Result<String, String> {
             todo!()
         }
 
-        fn from_string(str: &str) -> Result<Self, String> {
+        fn from_str(str: &str) -> Result<Self, String> {
             todo!()
         }
 
@@ -157,10 +156,14 @@ mod tests {
     struct EmptyScalar(());
 
     impl GQLScalar<TestScalar> for EmptyScalar {
-        fn from_scalar(s: &TestScalar) -> Result<Self, String> {
+        fn from_scalar(s: TestScalar) -> Result<Self, String> {
             match s {
                 TestScalar::Empty(_) => Ok(Self(())),
             }
+        }
+
+        fn to_scalar(self: Self) -> Result<TestScalar, String> {
+            Ok(TestScalar::Empty(()))
         }
     }
 
@@ -184,7 +187,7 @@ mod tests {
                 )),
                 directive_invocations: Vec::new(),
             },
-            &[
+            vec![
                 Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Scalar(TestScalar::Empty(())),
                 )),
@@ -226,7 +229,7 @@ mod tests {
                 nullable: true,
                 directive_invocations: Vec::new(),
             },
-            &[
+            vec![
                 Value::Null,
                 Value::NonNullable(NonNullableValue::Array(vec![
                     Value::NonNullable(NonNullableValue::Literal(

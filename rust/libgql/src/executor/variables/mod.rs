@@ -16,7 +16,7 @@ pub type ResolvedVariables = HashMap<String, ResolvedVariable>;
 fn resolve_type_spec<S: Scalar, R: Registry<S>>(
     registry: &R,
     spec: &shared::ast::InputTypeSpec,
-    variable: &LiteralValue<S>,
+    variable: LiteralValue<S>,
 ) -> Result<ResolvedVariable, String> {
     match (spec, variable) {
         (
@@ -32,16 +32,10 @@ fn resolve_type_spec<S: Scalar, R: Registry<S>>(
         (
             shared::ast::InputTypeSpec::Enum(enum_type),
             LiteralValue::Scalar(scalar),
-        ) => {
-            if let Some(enum_value) = scalar.get_str() {
-                return Ok(R::parse_enum(registry, enum_type, enum_value)?);
-            } else {
-                Err(format!(
-                    "Enum value must be string, received: {:?}",
-                    scalar
-                ))
-            }
-        }
+        ) => scalar
+            .try_to_string()
+            .map(|s| R::parse_enum(registry, enum_type, s))
+            .flatten(),
         (shared::ast::InputTypeSpec::Enum(enum_type), other) => Err(format!(
             "Received invalid type for enum({}): {:?}",
             enum_type.name, other
@@ -65,7 +59,7 @@ fn resolve_type_spec<S: Scalar, R: Registry<S>>(
 fn resolve_literal<S: Scalar, R: Registry<S>>(
     registry: &R,
     spec: &shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>,
-    var: &LiteralValue<S>,
+    var: LiteralValue<S>,
 ) -> Result<ResolvedVariable, String> {
     return resolve_type_spec(registry, &spec.r#type, var);
 }
@@ -73,7 +67,7 @@ fn resolve_literal<S: Scalar, R: Registry<S>>(
 fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
     registry: &R,
     param: &shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
-    variable: &Value<S>,
+    variable: Value<S>,
 ) -> Result<Option<ResolvedVariable>, String> {
     let Value::NonNullable(nonnullable_variable) = variable else {
         if param.nullable {
@@ -87,7 +81,7 @@ fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
                     return Ok(Some(resolve_literal(
                         registry,
                         spec,
-                        &LiteralValue::Scalar(S::from_literal(
+                        LiteralValue::Scalar(S::from_literal(
                             &spec
                                 .default_value
                                 .as_ref()
@@ -112,7 +106,7 @@ fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
             } else {
                 Err(format!(
                     "Expected array for parameter: {}, received: {:?}",
-                    param.name, variable
+                    param.name, nonnullable_variable
                 ))
             }
         }
@@ -122,7 +116,7 @@ fn resolve_operation_parameter<S: Scalar, R: Registry<S>>(
             } else {
                 Err(format!(
                     "Expected literal variable for parameter: {}, received: {:?}",
-                    param.name, variable
+                    param.name, nonnullable_variable
                 ))
             }
         }
@@ -135,11 +129,11 @@ pub fn resolve_operation_parameters<S: Scalar, R: Registry<S>>(
         String,
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >,
-    variables: &Values<S>,
+    mut variables: Values<S>,
 ) -> Result<ResolvedVariables, String> {
     let mut vars = ResolvedVariables::new();
     for param in op_parameters.values() {
-        if let Some(variable) = variables.get(&param.name[1..]) {
+        if let Some(variable) = variables.remove(&param.name[1..]) {
             if let Some(resolved_variable) =
                 resolve_operation_parameter(registry, param, variable)?
             {

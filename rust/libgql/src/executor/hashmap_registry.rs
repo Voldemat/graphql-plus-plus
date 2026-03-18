@@ -10,10 +10,10 @@ pub trait GQLScalar<S: Scalar>: Sized
 where
     Self: 'static,
 {
-    fn from_scalar(s: &S) -> Result<Self, String>;
-    fn to_scalar(self: &Self) -> Result<S, String>;
+    fn from_scalar(s: S) -> Result<Self, String>;
+    fn to_scalar(self: Self) -> Result<S, String>;
 
-    fn to_value(self: &Self) -> Result<super::ast::Value<S>, String> {
+    fn to_value(self: Self) -> Result<super::ast::Value<S>, String> {
         self.to_scalar().map(|scalar| {
             super::ast::Value::NonNullable(
                 super::ast::NonNullableValue::Literal(
@@ -24,7 +24,7 @@ where
     }
 
     fn from_literal_value(
-        value: &super::ast::LiteralValue<S>,
+        value: super::ast::LiteralValue<S>,
     ) -> Result<Self, String> {
         match value {
             super::ast::LiteralValue::Scalar(scalar) => {
@@ -37,7 +37,7 @@ where
     }
 
     fn from_non_nullable_value(
-        value: &super::ast::NonNullableValue<S>,
+        value: super::ast::NonNullableValue<S>,
     ) -> Result<Self, String> {
         match value {
             super::ast::NonNullableValue::Literal(literal) => {
@@ -49,9 +49,7 @@ where
         }
     }
 
-    fn from_value(
-        value: &super::ast::Value<S>,
-    ) -> Result<Option<Self>, String> {
+    fn from_value(value: super::ast::Value<S>) -> Result<Option<Self>, String> {
         match value {
             super::ast::Value::Null => Ok(None),
             super::ast::Value::NonNullable(non_nullable) => {
@@ -60,33 +58,33 @@ where
         }
     }
 
-    fn from_scalar_to_any(s: &S) -> Result<Box<dyn std::any::Any>, String> {
+    fn from_scalar_to_any(s: S) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_scalar(s).map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
-    fn from_scalar_array(scalars: &[&S]) -> Result<Vec<Self>, String> {
+    fn from_scalar_array(scalars: Vec<S>) -> Result<Vec<Self>, String> {
         scalars
-            .iter()
+            .into_iter()
             .map(|s| Self::from_scalar(s))
             .collect::<Result<Vec<_>, String>>()
     }
     fn from_scalar_array_to_any(
-        s: &[&S],
+        s: Vec<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_scalar_array(s)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
 
     fn from_optional_scalar_array(
-        scalars: &[Option<&S>],
+        scalars: Vec<Option<S>>,
     ) -> Result<Vec<Option<Self>>, String> {
         scalars
-            .iter()
+            .into_iter()
             .map(|o| o.map(|s| Self::from_scalar(s)).transpose())
             .collect::<Result<Vec<_>, String>>()
     }
 
     fn from_optional_scalar_array_to_any(
-        s: &[Option<&S>],
+        s: Vec<Option<S>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_optional_scalar_array(s)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
@@ -97,9 +95,9 @@ pub trait GQLEnum<S: Scalar>: Sized
 where
     Self: 'static,
 {
-    fn from_str(s: &str) -> Result<Self, String>;
-    fn to_str(self: &Self) -> Result<&str, String>;
-    fn to_value(self: &Self) -> Result<super::ast::Value<S>, String> {
+    fn from_string(s: String) -> Result<Self, String>;
+    fn to_str(self: Self) -> Result<&'static str, String>;
+    fn to_value(self: Self) -> Result<super::ast::Value<S>, String> {
         self.to_str().map(S::from_str).flatten().map(|scalar| {
             super::ast::Value::NonNullable(
                 super::ast::NonNullableValue::Literal(
@@ -110,13 +108,15 @@ where
     }
 
     fn from_literal_value(
-        value: &super::ast::LiteralValue<S>,
+        value: super::ast::LiteralValue<S>,
     ) -> Result<Self, String> {
         match value {
             super::ast::LiteralValue::Scalar(scalar) => scalar
-                .get_str()
-                .ok_or("Unexpected non-string scalar for enum".to_string())
-                .map(Self::from_str)
+                .try_to_string()
+                .map_err(|_| {
+                    "Unexpected non-string scalar for enum".to_string()
+                })
+                .map(Self::from_string)
                 .flatten(),
             super::ast::LiteralValue::Object(_, object) => {
                 Err(format!("Unexpected object value for enum: {:?}", object))
@@ -125,7 +125,7 @@ where
     }
 
     fn from_non_nullable_value(
-        value: &super::ast::NonNullableValue<S>,
+        value: super::ast::NonNullableValue<S>,
     ) -> Result<Self, String> {
         match value {
             super::ast::NonNullableValue::Literal(literal) => {
@@ -137,9 +137,7 @@ where
         }
     }
 
-    fn from_value(
-        value: &super::ast::Value<S>,
-    ) -> Result<Option<Self>, String> {
+    fn from_value(value: super::ast::Value<S>) -> Result<Option<Self>, String> {
         match value {
             super::ast::Value::Null => Ok(None),
             super::ast::Value::NonNullable(non_nullable) => {
@@ -148,32 +146,32 @@ where
         }
     }
 
-    fn from_str_to_any(s: &str) -> Result<Box<dyn std::any::Any>, String> {
-        Self::from_str(s).map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+    fn from_str_to_any(s: String) -> Result<Box<dyn std::any::Any>, String> {
+        Self::from_string(s).map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
-    fn from_str_array(s: &[&str]) -> Result<Vec<Self>, String> {
-        s.iter()
-            .map(|e| Self::from_str(e))
+    fn from_str_array(s: Vec<String>) -> Result<Vec<Self>, String> {
+        s.into_iter()
+            .map(|e| Self::from_string(e))
             .collect::<Result<Vec<_>, String>>()
     }
     fn from_str_array_to_any(
-        s: &[&str],
+        s: Vec<String>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_str_array(s)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
 
     fn from_optional_str_array(
-        values: &[Option<&str>],
+        values: Vec<Option<String>>,
     ) -> Result<Vec<Option<Self>>, String> {
         values
-            .iter()
-            .map(|o| o.map(|s| Self::from_str(s)).transpose())
+            .into_iter()
+            .map(|o| o.map(|s| Self::from_string(s)).transpose())
             .collect::<Result<Vec<_>, String>>()
     }
 
     fn from_optional_str_array_to_any(
-        s: &[Option<&str>],
+        s: Vec<Option<String>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_optional_str_array(s)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
@@ -184,10 +182,10 @@ pub trait GQLInput<S: Scalar>: Sized
 where
     Self: 'static,
 {
-    fn from_variables(vars: &Values<S>) -> Result<Self, String>;
+    fn from_variables(vars: Values<S>) -> Result<Self, String>;
 
     fn from_literal_value(
-        value: &super::ast::LiteralValue<S>,
+        value: super::ast::LiteralValue<S>,
     ) -> Result<Self, String> {
         match value {
             super::ast::LiteralValue::Object(_, object) => {
@@ -200,7 +198,7 @@ where
     }
 
     fn from_non_nullable_value(
-        value: &super::ast::NonNullableValue<S>,
+        value: super::ast::NonNullableValue<S>,
     ) -> Result<Self, String> {
         match value {
             super::ast::NonNullableValue::Literal(literal) => {
@@ -212,9 +210,7 @@ where
         }
     }
 
-    fn from_value(
-        value: &super::ast::Value<S>,
-    ) -> Result<Option<Self>, String> {
+    fn from_value(value: super::ast::Value<S>) -> Result<Option<Self>, String> {
         match value {
             super::ast::Value::Null => Ok(None),
             super::ast::Value::NonNullable(non_nullable) => {
@@ -224,18 +220,18 @@ where
     }
 
     fn from_variables_to_any(
-        vars: &Values<S>,
+        vars: Values<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_variables(vars)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
-    fn from_variables_array(vars: &[&Values<S>]) -> Result<Vec<Self>, String> {
-        vars.iter()
+    fn from_variables_array(vars: Vec<Values<S>>) -> Result<Vec<Self>, String> {
+        vars.into_iter()
             .map(|s| Self::from_variables(s))
             .collect::<Result<Vec<_>, String>>()
     }
     fn from_variables_to_any_array(
-        vars: &[&Values<S>],
+        vars: Vec<Values<S>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_variables_array(vars)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
@@ -245,41 +241,45 @@ where
 pub struct HashMapRegistry<S: Scalar> {
     pub scalars: HashMap<
         String,
-        Box<dyn Fn(&S) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<dyn Fn(S) -> Result<Box<dyn std::any::Any>, String>>,
     >,
     pub scalars_array: HashMap<
         String,
-        Box<dyn Fn(&[&S]) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<dyn Fn(Vec<S>) -> Result<Box<dyn std::any::Any>, String>>,
     >,
     pub scalars_optional_array: HashMap<
         String,
-        Box<dyn Fn(&[Option<&S>]) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<dyn Fn(Vec<Option<S>>) -> Result<Box<dyn std::any::Any>, String>>,
     >,
     pub enum_types: HashMap<
         String,
-        Box<dyn Fn(&str) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<dyn Fn(String) -> Result<Box<dyn std::any::Any>, String>>,
     >,
     pub enum_types_array: HashMap<
         String,
-        Box<dyn Fn(&[&str]) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<dyn Fn(Vec<String>) -> Result<Box<dyn std::any::Any>, String>>,
     >,
     pub enum_types_optional_array: HashMap<
         String,
-        Box<dyn Fn(&[Option<&str>]) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<
+            dyn Fn(
+                Vec<Option<String>>,
+            ) -> Result<Box<dyn std::any::Any>, String>,
+        >,
     >,
     pub inputs: HashMap<
         String,
-        Box<dyn Fn(&Values<S>) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<dyn Fn(Values<S>) -> Result<Box<dyn std::any::Any>, String>>,
     >,
     pub inputs_array: HashMap<
         String,
-        Box<dyn Fn(&[&Values<S>]) -> Result<Box<dyn std::any::Any>, String>>,
+        Box<dyn Fn(Vec<Values<S>>) -> Result<Box<dyn std::any::Any>, String>>,
     >,
     pub inputs_optional_array: HashMap<
         String,
         Box<
             dyn Fn(
-                &[Option<&Values<S>>],
+                Vec<Option<Values<S>>>,
             ) -> Result<Box<dyn std::any::Any>, String>,
         >,
     >,
@@ -332,7 +332,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_scalar(
         self: &Self,
         scalar_name: &str,
-        value: &S,
+        value: S,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.scalars.get(scalar_name).unwrap()(value)
     }
@@ -340,7 +340,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_scalar_array(
         self: &Self,
         scalar_name: &str,
-        values: &[&S],
+        values: Vec<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.scalars_array.get(scalar_name).unwrap()(values)
     }
@@ -348,7 +348,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_scalar_optional_array(
         self: &Self,
         scalar_name: &str,
-        values: &[Option<&S>],
+        values: Vec<Option<S>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.scalars_optional_array.get(scalar_name).unwrap()(values)
     }
@@ -356,7 +356,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_enum(
         self: &Self,
         enum_type: &shared::ast::Enum,
-        value: &str,
+        value: String,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.enum_types.get(&enum_type.name).unwrap()(value)
     }
@@ -364,7 +364,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_enum_array(
         self: &Self,
         enum_type: &shared::ast::Enum,
-        values: &[&str],
+        values: Vec<String>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.enum_types_array.get(&enum_type.name).unwrap()(values)
     }
@@ -372,7 +372,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_enum_optional_array(
         self: &Self,
         enum_type: &shared::ast::Enum,
-        values: &[Option<&str>],
+        values: Vec<Option<String>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.enum_types_optional_array.get(&enum_type.name).unwrap()(values)
     }
@@ -380,7 +380,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_input(
         self: &Self,
         input_type: &shared::ast::InputType,
-        value: &Values<S>,
+        value: Values<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.inputs
             .get(&input_type.name)
@@ -392,7 +392,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_input_array(
         self: &Self,
         input_type: &shared::ast::InputType,
-        values: &[&Values<S>],
+        values: Vec<Values<S>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.inputs_array.get(&input_type.name).unwrap()(values)
     }
@@ -400,7 +400,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
     fn parse_input_optional_array(
         self: &Self,
         input_type: &shared::ast::InputType,
-        values: &[Option<&Values<S>>],
+        values: Vec<Option<Values<S>>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         self.inputs_optional_array.get(&input_type.name).unwrap()(values)
     }
