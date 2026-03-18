@@ -33,6 +33,30 @@ impl<S: Scalar> TryGetScalar<S> for Value<S> {
     }
 }
 
+impl<S: Scalar> Value<S> {
+    pub fn to_non_nullable_option(self: &Self) -> Option<&NonNullableValue<S>> {
+        match self {
+            Self::Null => None,
+            Self::NonNullable(n) => Some(n),
+        }
+    }
+}
+
+pub fn extract_array<S: Scalar, E, F: Fn(&Value<S>) -> Result<E, String>>(
+    value: &NonNullableValue<S>,
+    element_validate_func: F,
+) -> Result<Vec<E>, String> {
+    value.get_array()
+        .ok_or("Unexpected literal value for array".to_string())
+        .map(|array_values| {
+            array_values
+                .iter()
+                .map(element_validate_func)
+                .collect::<Result<Vec<_>, String>>()
+        })
+        .flatten()
+}
+
 #[derive(Debug)]
 pub enum NonNullableValue<S: Scalar> {
     Array(Vec<Value<S>>),
@@ -53,6 +77,22 @@ impl<S: Scalar> TryGetScalar<S> for NonNullableValue<S> {
         match self {
             Self::Array(_) => None,
             Self::Literal(literal) => literal.try_get_scalar(),
+        }
+    }
+}
+
+impl<S: Scalar> NonNullableValue<S> {
+    pub fn get_literal(self: &Self) -> Option<&LiteralValue<S>> {
+        match self {
+            Self::Literal(literal) => Some(literal),
+            Self::Array(_) => None,
+        }
+    }
+
+    pub fn get_array(self: &Self) -> Option<&Vec<Value<S>>> {
+        match self {
+            Self::Literal(_) => None,
+            Self::Array(array) => Some(array),
         }
     }
 }

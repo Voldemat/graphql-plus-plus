@@ -149,7 +149,7 @@ fn execute_typename_field<S: Scalar>(
             .unwrap_or("__typename")
             .into(),
         Value::NonNullable(NonNullableValue::Literal(LiteralValue::Scalar(
-            S::from_string(&typename)?,
+            S::from_str(&typename)?,
         ))),
     );
     Ok(())
@@ -275,7 +275,7 @@ async fn execute_interface_selection_set<C, S: Scalar>(
                 parent.insert(
                     "__typename".into(),
                     Value::NonNullable(NonNullableValue::Literal(
-                        LiteralValue::Scalar(S::from_string(object_name)?),
+                        LiteralValue::Scalar(S::from_str(object_name)?),
                     )),
                 );
                 return Ok(());
