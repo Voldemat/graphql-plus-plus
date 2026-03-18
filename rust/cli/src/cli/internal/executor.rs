@@ -41,7 +41,7 @@ impl libgql::executor::Scalar for ExampleScalar {
         }
     }
 
-    fn from_string(str: &str) -> Result<Self, String> {
+    fn from_str(str: &str) -> Result<Self, String> {
         Ok(Self::String(str.to_string()))
     }
 
@@ -72,12 +72,19 @@ enum Direction {
     Dsc,
 }
 
-impl libgql::executor::GQLEnum for Direction {
+impl libgql::executor::GQLEnum<ExampleScalar> for Direction {
     fn from_str(s: &str) -> Result<Self, String> {
         match s {
             "ASC" => Ok(Self::Asc),
             "DSC" => Ok(Self::Dsc),
             _ => Err(format!("Invalid value {} for enum Direction", s)),
+        }
+    }
+
+    fn to_str(self: &Self) -> Result<&str, String> {
+        match self {
+            Self::Asc => Ok("ASC"),
+            Self::Dsc => Ok("DSC"),
         }
     }
 }
@@ -86,11 +93,17 @@ enum EUsersTagField {
     Name,
 }
 
-impl libgql::executor::GQLEnum for EUsersTagField {
+impl libgql::executor::GQLEnum<ExampleScalar> for EUsersTagField {
     fn from_str(s: &str) -> Result<Self, String> {
         match s {
             "NAME" => Ok(Self::Name),
             _ => Err(format!("Invalid value {} for enum EUsersTagField", s)),
+        }
+    }
+
+    fn to_str(self: &Self) -> Result<&str, String> {
+        match self {
+            Self::Name => Ok("NAME"),
         }
     }
 }
@@ -104,18 +117,24 @@ impl libgql::executor::GQLInput<ExampleScalar> for UsersTagSortBy {
     fn from_variables(
         vars: &libgql::executor::Values<ExampleScalar>,
     ) -> Result<Self, String> {
-        let direction = <Direction as libgql::executor::GQLEnum>::from_str(
-            vars.get("direction")
-                .ok_or("Missing required field \"direction\"")?
-                .try_get_str()
-                .ok_or("Invalid scalar for enum EUsersTagField")?,
-        )?;
-        let field = <EUsersTagField as libgql::executor::GQLEnum>::from_str(
+        let direction =
+                vars.get("direction").map(|v| v.to_non_nullable_option())
+                    .flatten()
+                    .ok_or("Missing required field \"direction\"".to_string())
+                    .map(<Direction as libgql::executor::GQLEnum<ExampleScalar>>::from_non_nullable_value
+                    )
+                    .flatten()?;
+        let field =
             vars.get("field")
-                .ok_or("Missing required field \"field\"")?
-                .try_get_str()
-                .ok_or("Invalid scalar for enum EUsersTagField")?,
-        )?;
+                .map(|v| v.to_non_nullable_option())
+                .flatten()
+                .ok_or("Missing required field \"field\"".to_string())
+                .map(
+                    <EUsersTagField as libgql::executor::GQLEnum<
+                        ExampleScalar,
+                    >>::from_non_nullable_value,
+                )
+                .flatten()?;
         return Ok(UsersTagSortBy { direction, field });
     }
 }
@@ -129,6 +148,10 @@ impl libgql::executor::GQLScalar<ExampleScalar> for UUID {
             ExampleScalar::String(s) => Ok(Self(s.clone())),
             _ => Err(format!("Invalid scalar for UUID {:?}", s)),
         }
+    }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.0.clone()))
     }
 }
 
@@ -181,6 +204,10 @@ impl libgql::executor::GQLScalar<ExampleScalar> for i32 {
             _ => Err(format!("Invalid scalar for i32 {:?}", s)),
         }
     }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Int(*self))
+    }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
@@ -189,6 +216,10 @@ impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
             ExampleScalar::Float(f) => Ok(*f),
             _ => Err(format!("Invalid scalar for f32 {:?}", s)),
         }
+    }
+
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Float(*self))
     }
 }
 
@@ -199,6 +230,9 @@ impl libgql::executor::GQLScalar<ExampleScalar> for String {
             _ => Err(format!("Invalid scalar for String {:?}", s)),
         }
     }
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.clone()))
+    }
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for bool {
@@ -208,6 +242,9 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
             _ => Err(format!("Invalid scalar for bool {:?}", s)),
         }
     }
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Boolean(*self))
+    }
 }
 
 #[derive(Debug)]
@@ -216,12 +253,19 @@ enum EGroupUsersField {
     Email,
 }
 
-impl libgql::executor::GQLEnum for EGroupUsersField {
+impl libgql::executor::GQLEnum<ExampleScalar> for EGroupUsersField {
     fn from_str(s: &str) -> Result<Self, String> {
         match s {
             "NAME" => Ok(Self::Name),
             "EMAIL" => Ok(Self::Email),
             _ => Err(format!("EGroupUsersField: Unknown enum value {}", s)),
+        }
+    }
+
+    fn to_str(self: &Self) -> Result<&str, String> {
+        match self {
+        Self::Name => Ok("NAME"),
+        Self::Email => Ok("EMAIL")
         }
     }
 }
