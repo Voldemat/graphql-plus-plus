@@ -1,81 +1,59 @@
-use std::collections::HashMap;
+use std::{
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 use crate::{
     executor::{
-        LiteralValue, NonNullableValue, ResolvedVariables, Scalar, Value,
-        Values, ast::ResolverRoot,
+        LiteralValue, NonNullableValue, ResolvedVariables, Scalar,
+        TypeRegistry, Value, Values,
+        ast::{ResolverIntrospectionValue, ResolverRoot},
     },
-    parsers::schema::{client, server},
+    parsers::schema::{client, server, shared},
 };
 
 pub type ResolverFuture<S> =
-    std::pin::Pin<Box<dyn Future<Output = Result<Value<S>, String>>>>;
-pub type SyncResolver<C, S> = Box<
-    dyn Fn(&ResolverRoot<S>, &mut C, &ResolvedVariables) -> ResolverFuture<S>,
->;
-pub type SyncResolversMap<C, S> = HashMap<(String, String), SyncResolver<C, S>>;
-type EmptyFuture<'a> =
-    std::pin::Pin<Box<dyn Future<Output = Result<(), String>> + 'a>>;
+    std::pin::Pin<Box<dyn Future<Output = Result<ResolverRoot<S>, String>>>>;
+pub type SyncResolver<S, C> =
+    Box<dyn Fn(&ResolverRoot<S>, &C, &ResolvedVariables) -> ResolverFuture<S>>;
+pub type SyncResolversMap<S, C> = HashMap<(String, String), SyncResolver<S, C>>;
 
-fn execute_fragment_on_value<'a, C, S: Scalar>(
-    context: &'a mut C,
-    resolvers: &'a SyncResolversMap<C, S>,
-    parent: &'a mut Value<S>,
+pub fn execute_fragment_on_value<'a, 'b, C, S: Scalar, T: TypeRegistry<S>>(
+    context: &'a C,
+    resolvers: &'a SyncResolversMap<S, C>,
+    type_registry: &'a T,
+    value: &'a ResolverIntrospectionValue<'b, S>,
     spec: &'a client::ast::FragmentSpec,
     variables: &'a ResolvedVariables,
-) -> EmptyFuture<'a> {
-    Box::pin(async move {
-        let Value::NonNullable(non_nullable) = parent else {
-            return Ok(());
-        };
-        match non_nullable {
-            NonNullableValue::Literal(literal) => match literal {
-                LiteralValue::Object(object_name, object_value) => {
-                    execute_fragment(
-                        context,
-                        resolvers,
-                        object_name,
-                        object_value,
-                        spec,
-                        variables,
-                    )
-                    .await?;
-                    return Ok(());
-                }
-                LiteralValue::Scalar(_) => {
-                    panic!("Unexpected fragment selection on scalar value")
-                }
-            },
-            NonNullableValue::Array(array) => {
-                for value in array {
-                    execute_fragment_on_value(
-                        context, resolvers, value, spec, variables,
-                    )
-                    .await?;
-                }
-                return Ok(());
-            }
-        }
-    })
+) -> std::pin::Pin<
+    Box<dyn Future<Output = Result<Vec<(String, Value<S>)>, String>> + 'a>,
+> {
+    Box::pin(async move { Ok(Vec::new()) })
 }
 
-fn execute_fragment<'a, C, S: Scalar>(
-    context: &'a mut C,
-    resolvers: &'a SyncResolversMap<C, S>,
+fn execute_fragment<'a, C, S: Scalar, T: TypeRegistry<S>>(
+    context: &'a C,
+    resolvers: &'a SyncResolversMap<S, C>,
+    type_registry: &'a T,
+    resolver_root: &'a ResolverRoot<S>,
+    resolver_root_existing_fields: &'a HashSet<String>,
     object_name: &'a str,
-    parent: &'a mut Values<S>,
     spec: &'a client::ast::FragmentSpec,
     variables: &'a ResolvedVariables,
-) -> EmptyFuture<'a> {
+) -> std::pin::Pin<
+    Box<dyn Future<Output = Result<Vec<(String, Value<S>)>, String>> + 'a>,
+> {
     Box::pin(async move {
         match spec {
             client::ast::FragmentSpec::Object(obj) => {
                 execute_object_selection_set(
                     context,
                     resolvers,
-                    &obj.r#type.borrow(),
+                    type_registry,
                     object_name,
-                    parent,
+                    &obj.r#type.borrow().fields,
+                    resolver_root,
+                    resolver_root_existing_fields,
                     &obj.selections,
                     variables,
                 )
@@ -86,21 +64,25 @@ fn execute_fragment<'a, C, S: Scalar>(
                 execute_union_selection_set(
                     context,
                     resolvers,
+                    type_registry,
                     &union.r#type.borrow(),
                     object_name,
-                    parent,
+                    resolver_root,
+                    resolver_root_existing_fields,
                     &union.selections,
                     variables,
                 )
                 .await
             }
             client::ast::FragmentSpec::Interface(interface) => {
-                execute_interface_selection_set(
+                execute_object_selection_set(
                     context,
                     resolvers,
-                    &interface.r#type.borrow(),
+                    type_registry,
                     object_name,
-                    parent,
+                    &interface.r#type.borrow().fields,
+                    resolver_root,
+                    resolver_root_existing_fields,
                     &interface.selections,
                     variables,
                 )
@@ -110,11 +92,16 @@ fn execute_fragment<'a, C, S: Scalar>(
     })
 }
 
-async fn execute_field<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
+async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
+    context: &C,
+    resolvers: &SyncResolversMap<S, C>,
+    type_registry: &T,
+    resolver_root: &ResolverRoot<S>,
     object_name: &str,
-    parent: &Values<S>,
+    object_fields: &indexmap::IndexMap<
+        String,
+        Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+    >,
     field: &client::ast::FieldSelection,
     variables: &ResolvedVariables,
 ) -> Result<Value<S>, String> {
@@ -123,25 +110,30 @@ async fn execute_field<C, S: Scalar>(
     let resolver = resolvers.get(&resolver_key).ok_or_else(|| {
         format!("No resolver for {}.{}", object_name, field.name)
     })?;
-    let mut value = resolver(parent, context, variables).await?;
+    let value_future = resolver(resolver_root, context, variables);
+    let value = value_future.await?;
+    let mut callable_fields = Vec::new();
 
     if let Some(fragment) = &field.selection {
-        execute_fragment_on_value(
-            context, resolvers, &mut value, fragment, variables,
+        callable_fields = execute_fragment_on_value(
+            context,
+            resolvers,
+            type_registry,
+            &value.create_introspection_value(),
+            fragment,
+            variables,
         )
         .await?;
     }
 
-    Ok(value)
+    value.to_value(callable_fields)
 }
 
 fn execute_typename_field<S: Scalar>(
     object_name: &str,
-    parent: &mut Values<S>,
     field: &client::ast::TypenameField,
-) -> Result<(), String> {
-    let typename = object_name.to_string();
-    parent.insert(
+) -> Result<(String, Value<S>), String> {
+    Ok((
         field
             .alias
             .as_ref()
@@ -149,44 +141,47 @@ fn execute_typename_field<S: Scalar>(
             .unwrap_or("__typename")
             .into(),
         Value::NonNullable(NonNullableValue::Literal(LiteralValue::Scalar(
-            S::from_str(&typename)?,
+            S::from_str(&object_name.to_string())?,
         ))),
-    );
-    Ok(())
+    ))
 }
 
-async fn execute_union_selection_set<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
+async fn execute_union_selection_set<C, S: Scalar, T: TypeRegistry<S>>(
+    context: &C,
+    resolvers: &SyncResolversMap<S, C>,
+    type_registry: &T,
     union_type: &server::ast::Union,
     object_name: &str,
-    parent: &mut Values<S>,
+    resolver_root: &ResolverRoot<S>,
+    resolver_root_existing_fields: &HashSet<String>,
     selections: &[client::ast::UnionSelection],
     variables: &ResolvedVariables,
-) -> Result<(), String> {
-    for selection in selections {
+) -> Result<Vec<(String, Value<S>)>, String> {
+    futures::future::join_all(selections.iter().map(async |selection| {
         match selection {
             client::ast::UnionSelection::TypenameField(typename_field) => {
-                execute_typename_field(object_name, parent, typename_field)?;
+                execute_typename_field(object_name, typename_field)
+                    .map(|t_field| vec![t_field])
             }
             client::ast::UnionSelection::ObjectConditionalSpreadSelection(
                 spread,
             ) => {
                 let spread_object_name = &spread.selection.r#type.borrow().name;
                 if spread_object_name != object_name {
-                    return Ok(());
-                }
+                    return Ok(Vec::new());
+                };
                 execute_object_selection_set(
                     context,
                     resolvers,
-                    &union_type.items.get(object_name).unwrap().borrow(),
+                    type_registry,
                     object_name,
-                    parent,
+                    &union_type.items.get(object_name).unwrap().borrow().fields,
+                    resolver_root,
+                    resolver_root_existing_fields,
                     &spread.selection.selections,
                     variables,
                 )
-                .await?;
-                ()
+                .await
             }
             client::ast::UnionSelection::UnionConditionalSpreadSelection(_) => {
                 panic!("Unexpected UnionConditionalSpreadSelection on union")
@@ -197,131 +192,121 @@ async fn execute_union_selection_set<C, S: Scalar>(
                 execute_fragment(
                     context,
                     resolvers,
+                    type_registry,
+                    resolver_root,
+                    resolver_root_existing_fields,
                     object_name,
-                    parent,
                     &fragment.spec,
                     variables,
                 )
-                .await?;
-                return Ok(());
+                .await
             }
-        };
-    }
-    return Ok(());
+        }
+    }))
+    .await
+    .into_iter()
+    .collect::<Result<Vec<_>, String>>()
+    .map(|a| a.into_iter().flatten().collect())
 }
 
-async fn execute_object_selection_set<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
-    object_type: &server::ast::ObjectType,
+async fn execute_field_selection<C, S: Scalar, T: TypeRegistry<S>>(
+    context: &C,
+    resolvers: &SyncResolversMap<S, C>,
+    type_registry: &T,
+    resolver_root: &ResolverRoot<S>,
+    resolver_root_existing_fields: &HashSet<String>,
     object_name: &str,
-    parent: &mut Values<S>,
+    object_fields: &indexmap::IndexMap<
+        String,
+        Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+    >,
+    field: &client::ast::FieldSelection,
+    variables: &ResolvedVariables,
+) -> Result<Vec<(String, Value<S>)>, String> {
+    if resolver_root_existing_fields.contains(&field.alias) {
+        return Ok(Vec::new());
+    };
+    let value = execute_field(
+        context,
+        resolvers,
+        type_registry,
+        resolver_root,
+        &object_name,
+        &object_fields,
+        field,
+        variables,
+    )
+    .await?;
+    Ok(vec![(field.alias.clone(), value)])
+}
+
+async fn execute_object_selection_set<C, S: Scalar, T: TypeRegistry<S>>(
+    context: &C,
+    resolvers: &SyncResolversMap<S, C>,
+    type_registry: &T,
+    object_name: &str,
+    object_fields: &indexmap::IndexMap<
+        String,
+        Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+    >,
+    resolver_root: &ResolverRoot<S>,
+    resolver_root_existing_fields: &HashSet<String>,
     selections: &[client::ast::ObjectSelection],
     variables: &ResolvedVariables,
-) -> Result<(), String> {
-    for selection in selections {
-        match selection {
-            client::ast::ObjectSelection::TypenameField(field) => {
-                execute_typename_field(object_name, parent, field)?;
-            }
-
-            client::ast::ObjectSelection::FieldSelection(field) => {
-                if parent.contains_key(&field.alias) {
-                    return Ok(());
+) -> Result<Vec<(String, Value<S>)>, String> {
+    futures::future::join_all(selections.iter().map(
+        async |selection| -> Result<Vec<(String, Value<S>)>, String> {
+            match selection {
+                client::ast::ObjectSelection::TypenameField(field) => {
+                    execute_typename_field(object_name, field)
+                        .map(|t_field| vec![t_field])
                 }
-                let value = execute_field(
-                    context,
-                    resolvers,
-                    &object_type.name,
-                    parent,
-                    field,
-                    variables,
-                )
-                .await?;
-                parent.insert(field.alias.clone(), value);
-                return Ok(());
-            }
 
-            client::ast::ObjectSelection::SpreadSelection(spread) => {
-                let fragment = spread.fragment.borrow();
-                execute_fragment(
-                    context,
-                    resolvers,
-                    object_name,
-                    parent,
-                    &fragment.spec,
-                    variables,
-                )
-                .await?;
-                return Ok(());
+                client::ast::ObjectSelection::FieldSelection(field) => {
+                    execute_field_selection(
+                        context,
+                        resolvers,
+                        type_registry,
+                        resolver_root,
+                        resolver_root_existing_fields,
+                        &object_name,
+                        &object_fields,
+                        field,
+                        variables,
+                    )
+                    .await
+                }
+
+                client::ast::ObjectSelection::SpreadSelection(spread) => {
+                    let fragment = spread.fragment.borrow();
+                    execute_fragment(
+                        context,
+                        resolvers,
+                        type_registry,
+                        resolver_root,
+                        resolver_root_existing_fields,
+                        object_name,
+                        &fragment.spec,
+                        variables,
+                    )
+                    .await
+                }
             }
-        };
-    }
-    return Ok(());
+        },
+    ))
+    .await
+    .into_iter()
+    .collect::<Result<Vec<_>, String>>()
+    .map(|a| a.into_iter().flatten().collect())
 }
 
-async fn execute_interface_selection_set<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
-    interface_type: &server::ast::Interface,
-    object_name: &str,
-    parent: &mut Values<S>,
-    selections: &[client::ast::ObjectSelection],
-    variables: &ResolvedVariables,
-) -> Result<(), String> {
-    for selection in selections {
-        match selection {
-            client::ast::ObjectSelection::TypenameField(_) => {
-                parent.insert(
-                    "__typename".into(),
-                    Value::NonNullable(NonNullableValue::Literal(
-                        LiteralValue::Scalar(S::from_str(object_name)?),
-                    )),
-                );
-                return Ok(());
-            }
-
-            client::ast::ObjectSelection::FieldSelection(field) => {
-                if parent.contains_key(&field.alias) {
-                    return Ok(());
-                }
-                let value = execute_field(
-                    context,
-                    resolvers,
-                    &interface_type.name,
-                    parent,
-                    field,
-                    variables,
-                )
-                .await?;
-                parent.insert(field.alias.clone(), value);
-                return Ok(());
-            }
-
-            client::ast::ObjectSelection::SpreadSelection(spread) => {
-                let fragment = spread.fragment.borrow();
-                execute_fragment(
-                    context,
-                    resolvers,
-                    object_name,
-                    parent,
-                    &fragment.spec,
-                    variables,
-                )
-                .await?;
-                return Ok(());
-            }
-        };
-    }
-    return Ok(());
-}
-
-pub async fn execute_sync_operation<C, S: Scalar>(
-    context: &mut C,
-    resolvers: &SyncResolversMap<C, S>,
+pub async fn execute_sync_operation<C, S: Scalar, T: TypeRegistry<S>>(
+    context: &C,
+    resolvers: &SyncResolversMap<S, C>,
+    type_registry: &T,
     object: &server::ast::ObjectType,
-    operation: &client::ast::Operation,
-    variables: &ResolvedVariables,
+    operation: client::ast::Operation,
+    variables: ResolvedVariables,
 ) -> Result<Values<S>, String> {
     let client::ast::FragmentSpec::Object(fragment_spec) =
         &operation.fragment_spec
@@ -329,16 +314,18 @@ pub async fn execute_sync_operation<C, S: Scalar>(
         return Err("Root operation must select an object".into());
     };
 
-    let mut root_value: ResolverRoot<S> = Values::<S>::new();
+    let mut root_value: ResolverRoot<S> = Box::new(&());
     execute_object_selection_set(
         context,
         resolvers,
-        object,
+        type_registry,
         operation.r#type.to_object_name(),
+        &object.fields,
         &mut root_value,
+        &HashSet::new(),
         &fragment_spec.selections,
-        variables,
+        &variables,
     )
-    .await?;
-    return Ok(root_value);
+    .await
+    .map(|entries| Values::from_iter(entries))
 }

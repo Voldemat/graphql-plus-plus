@@ -7,7 +7,9 @@ description = "Library for parsing and executing gql queries"
 repository = "https://github.com/Voldemat/graphql-plus-plus"
 
 [dependencies]
+async-stream = "0.3.6"
 derive_more = { version = "2.1.0", features = ["from", "display"] }
+futures = "0.3.32"
 futures-core = "0.3.32"
 indexmap = { version = "2.12.1", features = ["serde"] }
 serde = { version = "1.0.228", features = ["serde_derive", "rc"] }

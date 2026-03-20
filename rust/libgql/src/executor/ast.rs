@@ -66,4 +66,42 @@ impl<S: Scalar> From<(String, Values<S>)> for LiteralValue<S> {
     }
 }
 pub type Values<S> = HashMap<String, Value<S>>;
-pub type ResolverRoot<S> = Values<S>;
+
+pub enum NonNullableResolverIntrospectionValue<'a, S> {
+    Literal(&'a dyn ResolverValueSuperTrait<S>),
+    Array(Vec<ResolverIntrospectionValue<'a, S>>),
+}
+
+pub type ResolverIntrospectionValue<'a, S> =
+    Option<NonNullableResolverIntrospectionValue<'a, S>>;
+
+pub trait ResolverValue<S: Scalar> {
+    fn create_introspection_value<'a>(
+        self: &'a Self,
+    ) -> ResolverIntrospectionValue<'a, S>;
+
+    fn to_value(
+        self: Box<Self>,
+        callable_fields: Vec<(String, Value<S>)>,
+    ) -> Result<Value<S>, String>;
+}
+
+impl<S: Scalar> ResolverValue<S> for &() {
+    fn create_introspection_value<'a>(
+        self: &'a Self,
+    ) -> ResolverIntrospectionValue<'a, S> {
+        panic!("Unexpected create_introspection_value on root value");
+    }
+
+    fn to_value(
+        self: Box<Self>,
+        _: Vec<(String, Value<S>)>,
+    ) -> Result<Value<S>, String> {
+        Ok(Value::Null)
+    }
+}
+
+pub trait ResolverValueSuperTrait<S: Scalar>: std::any::Any + ResolverValue<S> {}
+impl<S: Scalar, T: std::any::Any + ResolverValue<S>> ResolverValueSuperTrait<S> for T {}
+
+pub type ResolverRoot<S> = Box<dyn ResolverValueSuperTrait<S>>;

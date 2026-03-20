@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::parsers::schema::shared;
 
 use super::ast::{LiteralValue, NonNullableValue, Value, Values};
-use super::registry::Registry;
+use super::registry::TypeRegistry;
 use super::scalar::Scalar;
 
 pub trait GQLScalar<S: Scalar>: Sized
@@ -238,111 +238,115 @@ where
             .collect::<Result<Vec<_>, String>>()
     }
 
-    fn from_variables_to_any_array(
+    fn from_variables_array_to_any(
         vars: Vec<Values<S>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
         Self::from_variables_array(vars)
             .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
     }
+
+    fn from_variables_optional_array(
+        vars: Vec<Option<Values<S>>>,
+    ) -> Result<Vec<Option<Self>>, String> {
+        vars.into_iter()
+            .map(|o| o.map(|s| Self::from_variables(s)).transpose())
+            .collect::<Result<Vec<_>, String>>()
+    }
+
+    fn from_variables_optional_array_to_any(
+        vars: Vec<Option<Values<S>>>,
+    ) -> Result<Box<dyn std::any::Any>, String> {
+        Self::from_variables_optional_array(vars)
+            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+    }
+}
+
+pub struct ScalarHooks<S: Scalar> {
+    literal: Box<dyn Fn(S) -> Result<Box<dyn std::any::Any>, String>>,
+    array: Box<dyn Fn(Vec<S>) -> Result<Box<dyn std::any::Any>, String>>,
+    optional_array:
+        Box<dyn Fn(Vec<Option<S>>) -> Result<Box<dyn std::any::Any>, String>>,
+}
+
+pub struct EnumHooks {
+    literal: Box<dyn Fn(String) -> Result<Box<dyn std::any::Any>, String>>,
+    array: Box<dyn Fn(Vec<String>) -> Result<Box<dyn std::any::Any>, String>>,
+    optional_array: Box<
+        dyn Fn(Vec<Option<String>>) -> Result<Box<dyn std::any::Any>, String>,
+    >,
+}
+
+pub struct InputHooks<S: Scalar> {
+    literal: Box<dyn Fn(Values<S>) -> Result<Box<dyn std::any::Any>, String>>,
+    array:
+        Box<dyn Fn(Vec<Values<S>>) -> Result<Box<dyn std::any::Any>, String>>,
+    optional_array: Box<
+        dyn Fn(
+            Vec<Option<Values<S>>>,
+        ) -> Result<Box<dyn std::any::Any>, String>,
+    >,
 }
 
 pub struct HashMapRegistry<S: Scalar> {
-    pub scalars: HashMap<
-        String,
-        Box<dyn Fn(S) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    pub scalars_array: HashMap<
-        String,
-        Box<dyn Fn(Vec<S>) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    pub scalars_optional_array: HashMap<
-        String,
-        Box<dyn Fn(Vec<Option<S>>) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    pub enum_types: HashMap<
-        String,
-        Box<dyn Fn(String) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    pub enum_types_array: HashMap<
-        String,
-        Box<dyn Fn(Vec<String>) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    pub enum_types_optional_array: HashMap<
-        String,
-        Box<
-            dyn Fn(
-                Vec<Option<String>>,
-            ) -> Result<Box<dyn std::any::Any>, String>,
-        >,
-    >,
-    pub inputs: HashMap<
-        String,
-        Box<dyn Fn(Values<S>) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    pub inputs_array: HashMap<
-        String,
-        Box<dyn Fn(Vec<Values<S>>) -> Result<Box<dyn std::any::Any>, String>>,
-    >,
-    pub inputs_optional_array: HashMap<
-        String,
-        Box<
-            dyn Fn(
-                Vec<Option<Values<S>>>,
-            ) -> Result<Box<dyn std::any::Any>, String>,
-        >,
-    >,
+    pub scalars: HashMap<String, ScalarHooks<S>>,
+    pub enum_types: HashMap<String, EnumHooks>,
+    pub inputs: HashMap<String, InputHooks<S>>,
 }
 
 impl<S: Scalar> Default for HashMapRegistry<S> {
     fn default() -> Self {
         Self {
             scalars: HashMap::default(),
-            scalars_array: HashMap::default(),
-            scalars_optional_array: HashMap::default(),
             enum_types: HashMap::default(),
-            enum_types_array: HashMap::default(),
-            enum_types_optional_array: HashMap::default(),
             inputs: HashMap::default(),
-            inputs_array: HashMap::default(),
-            inputs_optional_array: HashMap::default(),
         }
     }
 }
 
 impl<S: Scalar + 'static> HashMapRegistry<S> {
     pub fn add_scalar<T: GQLScalar<S>>(self: &mut Self, name: &str) {
-        self.scalars
-            .insert(name.into(), Box::new(T::from_scalar_to_any));
-        self.scalars_array
-            .insert(name.into(), Box::new(T::from_scalar_array_to_any));
-        self.scalars_optional_array.insert(
+        self.scalars.insert(
             name.into(),
-            Box::new(T::from_optional_scalar_array_to_any),
+            ScalarHooks {
+                literal: Box::new(T::from_scalar_to_any),
+                array: Box::new(T::from_scalar_array_to_any),
+                optional_array: Box::new(T::from_optional_scalar_array_to_any),
+            },
         );
     }
 
     pub fn add_enum<T: GQLEnum<S>>(self: &mut Self, name: &str) {
-        self.enum_types
-            .insert(name.into(), Box::new(T::from_str_to_any));
-        self.enum_types_array
-            .insert(name.into(), Box::new(T::from_str_array_to_any));
+        self.enum_types.insert(
+            name.into(),
+            EnumHooks {
+                literal: Box::new(T::from_str_to_any),
+                array: Box::new(T::from_str_array_to_any),
+                optional_array: Box::new(T::from_optional_str_array_to_any),
+            },
+        );
     }
 
     pub fn add_input<T: GQLInput<S>>(self: &mut Self, name: &str) {
-        self.inputs
-            .insert(name.into(), Box::new(T::from_variables_to_any));
-        self.inputs_array
-            .insert(name.into(), Box::new(T::from_variables_to_any_array));
+        self.inputs.insert(
+            name.into(),
+            InputHooks {
+                literal: Box::new(T::from_variables_to_any),
+                array: Box::new(T::from_variables_array_to_any),
+                optional_array: Box::new(
+                    T::from_variables_optional_array_to_any,
+                ),
+            },
+        );
     }
 }
 
-impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
+impl<S: Scalar> TypeRegistry<S> for HashMapRegistry<S> {
     fn parse_scalar(
         self: &Self,
         scalar_name: &str,
         value: S,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.scalars.get(scalar_name).unwrap()(value)
+        self.scalars[scalar_name].literal.as_ref()(value)
     }
 
     fn parse_scalar_array(
@@ -350,7 +354,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         scalar_name: &str,
         values: Vec<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.scalars_array.get(scalar_name).unwrap()(values)
+        self.scalars[scalar_name].array.as_ref()(values)
     }
 
     fn parse_scalar_optional_array(
@@ -358,7 +362,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         scalar_name: &str,
         values: Vec<Option<S>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.scalars_optional_array.get(scalar_name).unwrap()(values)
+        self.scalars[scalar_name].optional_array.as_ref()(values)
     }
 
     fn parse_enum(
@@ -366,7 +370,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         enum_type: &shared::ast::Enum,
         value: String,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.enum_types.get(&enum_type.name).unwrap()(value)
+        self.enum_types[&enum_type.name].literal.as_ref()(value)
     }
 
     fn parse_enum_array(
@@ -374,7 +378,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         enum_type: &shared::ast::Enum,
         values: Vec<String>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.enum_types_array.get(&enum_type.name).unwrap()(values)
+        self.enum_types[&enum_type.name].array.as_ref()(values)
     }
 
     fn parse_enum_optional_array(
@@ -382,7 +386,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         enum_type: &shared::ast::Enum,
         values: Vec<Option<String>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.enum_types_optional_array.get(&enum_type.name).unwrap()(values)
+        self.enum_types[&enum_type.name].optional_array.as_ref()(values)
     }
 
     fn parse_input(
@@ -390,11 +394,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         input_type: &shared::ast::InputType,
         value: Values<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.inputs
-            .get(&input_type.name)
-            .ok_or(format!("Failed to find {} input parser", input_type.name))?(
-            value,
-        )
+        self.inputs[&input_type.name].literal.as_ref()(value)
     }
 
     fn parse_input_array(
@@ -402,7 +402,7 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         input_type: &shared::ast::InputType,
         values: Vec<Values<S>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.inputs_array.get(&input_type.name).unwrap()(values)
+        self.inputs[&input_type.name].array.as_ref()(values)
     }
 
     fn parse_input_optional_array(
@@ -410,6 +410,6 @@ impl<S: Scalar> Registry<S> for HashMapRegistry<S> {
         input_type: &shared::ast::InputType,
         values: Vec<Option<Values<S>>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.inputs_optional_array.get(&input_type.name).unwrap()(values)
+        self.inputs[&input_type.name].optional_array.as_ref()(values)
     }
 }

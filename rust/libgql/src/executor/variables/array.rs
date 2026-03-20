@@ -1,9 +1,9 @@
 use crate::{
-    executor::{LiteralValue, NonNullableValue, Registry, Scalar, Value},
+    executor::{LiteralValue, NonNullableValue, TypeRegistry, Scalar, Value},
     parsers::schema::shared,
 };
 
-fn resolve_literal_array<S: Scalar, R: Registry<S>>(
+fn resolve_literal_array<S: Scalar, R: TypeRegistry<S>>(
     registry: &R,
     literal_type: &shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>,
     nullable: bool,
@@ -71,7 +71,7 @@ fn resolve_literal_array<S: Scalar, R: Registry<S>>(
     }
 }
 
-pub fn resolve_array<S: Scalar, R: Registry<S>>(
+pub fn resolve_array<S: Scalar, R: TypeRegistry<S>>(
     registry: &R,
     array_type: &shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>,
     elements: Vec<Value<S>>,
