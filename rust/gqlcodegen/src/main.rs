@@ -31,7 +31,10 @@ fn run_schema() {
     let s = generator::main::generate_ast(
         &generator::config::Config {
             scalars_mapping: scalars_mapping,
-            scalar_type: "super::scalar::ExampleScalar".into()
+            scalar_type: "super::scalar::ExampleScalar".into(),
+            resolvers: generator::config::ResolversConfig {
+                context_type: "()".to_string()
+            }
         },
         &schema::Schema {
             server: server_schema,

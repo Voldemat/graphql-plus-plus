@@ -516,6 +516,101 @@ fn generate_object_definition(
         ));
 }
 
+fn generate_input_type_downcast_type(
+    config: &Config,
+    input_type: &schema::shared::InputType,
+) -> String {
+    match input_type {
+        schema::shared::InputType::Scalar { name } => {
+            format!("{}", config.scalars_mapping[name])
+        }
+        schema::shared::InputType::Enum { name } => name.clone(),
+        schema::shared::InputType::InputType { name } => name.clone(),
+    }
+}
+
+fn generate_extract_input_field_spec_expression(
+    config: &Config,
+    input_expression: &str,
+    spec: &schema::shared::InputFieldSpec,
+    level: u8,
+) -> String {
+    match spec {
+        schema::shared::InputFieldSpec::Literal(literal) => {
+            generate_input_type_downcast_type(config, &literal.field_type)
+        }
+        schema::shared::InputFieldSpec::Array(array) => {
+            "".to_string()
+        }
+    }
+}
+
+fn generate_extract_arg_expression(
+    config: &Config,
+    variables_var_name: &str,
+    arg_name: &str,
+    arg: &schema::shared::InputField,
+) -> String {
+    let var = format!("{}.get(\"{}\")", variables_var_name, arg_name);
+    if arg.nullable {
+        format!(
+            "{}.map(|v| {})",
+            var,
+            generate_extract_input_field_spec_expression(
+                config, "v", &arg.spec, 0
+            )
+        )
+    } else {
+        format!(
+            "{}",
+            generate_extract_input_field_spec_expression(
+                config, &var, &arg.spec, 0
+            )
+        )
+    }
+}
+
+fn generate_root_object_definitions(
+    config: &Config,
+    scope: &mut codegen::Scope,
+    object: &schema::server::object::Object,
+) {
+    for (field_name, field) in &object.fields {
+        let rust_name = super::shared::format_field_name(field_name);
+        let wrapper_fn = scope
+            .new_fn(format!("{}_{}_wrapper", object.name, rust_name))
+            .arg(
+                "root",
+                format!(
+                    "&libgql::executor::ast::ResolverRoot<{}>",
+                    config.scalar_type
+                ),
+            )
+            .arg("context", format!("&{}", config.resolvers.context_type))
+            .arg("variables", "&libgql::executor::ResolvedVariables")
+            .ret(format!(
+                "libgql::executor::sync::ResolverFuture<{}>",
+                config.scalar_type
+            ));
+        let arguments_option = field.spec.get_arguments();
+        if let Some(arguments) = arguments_option {
+            for (arg_name, arg) in arguments {
+                let arg_rust_name = super::shared::format_field_name(arg_name);
+                wrapper_fn.line(format!(
+                    "let {} = {}",
+                    arg_rust_name,
+                    generate_extract_arg_expression(
+                        config,
+                        "variables",
+                        arg_name,
+                        arg
+                    )
+                ));
+            }
+        }
+    }
+}
+
 pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
     let mut scope = codegen::Scope::new();
     for gqlenum in schema.server.enums.values() {
@@ -524,12 +619,15 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
     for input in schema.server.inputs.values() {
         generate_input_definition(config, &mut scope, input);
     }
-    for object in schema.server.objects.values().filter(|object| {
-        object.name != "Mutation"
-            && object.name != "Query"
-            && object.name != "Subscription"
-    }) {
-        generate_object_definition(config, &mut scope, object);
+    for object in schema.server.objects.values() {
+        if object.name == "Mutation"
+            || object.name == "Query"
+            || object.name == "Subscription"
+        {
+            generate_root_object_definitions(config, &mut scope, object);
+        } else {
+            generate_object_definition(config, &mut scope, object);
+        }
     }
     for union in schema.server.unions.values() {
         generate_union_definition(config, &mut scope, union);
@@ -540,6 +638,8 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
+
+    use crate::generator::config::ResolversConfig;
 
     use super::*;
 
@@ -558,6 +658,9 @@ mod tests {
             &Config {
                 scalar_type: "ExampleScalar".to_string(),
                 scalars_mapping: HashMap::new(),
+                resolvers: ResolversConfig {
+                    context_type: "()".to_string()
+                }
             },
             &mut scope,
             &gqlenum,

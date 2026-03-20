@@ -1,4 +1,6 @@
-use crate::schema::shared::{ArrayFieldSpec, Field, InputField, LiteralFieldSpec};
+use crate::schema::shared::{
+    ArrayFieldSpec, Field, InputField, LiteralFieldSpec,
+};
 
 #[derive(Debug, Clone, PartialEq, serde::Deserialize)]
 #[serde(tag = "_type")]
@@ -23,9 +25,8 @@ pub enum ObjectNonCallableFieldSpec {
 pub struct CallableFieldSpec {
     #[serde(rename(deserialize = "returnType"))]
     pub return_type: ObjectNonCallableFieldSpec,
-    pub arguments: indexmap::IndexMap<String, InputField>
+    pub arguments: indexmap::IndexMap<String, InputField>,
 }
-
 
 #[derive(Debug, serde::Deserialize)]
 #[serde(tag = "_type")]
@@ -36,6 +37,18 @@ pub enum ObjectFieldSpec {
     Array(ArrayFieldSpec<ObjectNonCallableFieldSpec>),
     #[serde(rename(deserialize = "callable"))]
     Callable(CallableFieldSpec),
+}
+
+impl ObjectFieldSpec {
+    pub fn get_arguments(
+        self: &Self,
+    ) -> Option<&indexmap::IndexMap<String, InputField>> {
+        match self {
+            Self::Literal(_) => None,
+            Self::Array(_) => None,
+            Self::Callable(callable) => Some(&callable.arguments),
+        }
+    }
 }
 
 pub type ObjectField = Field<ObjectFieldSpec>;
