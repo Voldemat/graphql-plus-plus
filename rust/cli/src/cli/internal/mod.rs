@@ -15,7 +15,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn execute(self: &Self) {
+    pub fn execute(self: Self) {
         match self {
             Commands::Lexer(lexer) => lexer.execute(),
             Commands::Parsers(parsers) => parsers.execute(),

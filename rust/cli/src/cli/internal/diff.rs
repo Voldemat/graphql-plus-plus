@@ -455,7 +455,7 @@ fn find_difference_between_schemas(
     println!("Schema is compatible");
 }
 
-pub fn command(args: &DiffArgs) {
+pub fn command(args: DiffArgs) {
     let server_schema = libgql::json::parsers::schema::parse_server_schema(
         &mut libgql::parsers::schema::type_registry::TypeRegistry::new(),
         serde_json_path_to_error::from_str::<serde_json_path_to_error::Value>(

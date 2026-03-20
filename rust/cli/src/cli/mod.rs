@@ -29,7 +29,7 @@ pub enum Commands {
 }
 
 impl CLI {
-    pub fn execute(self: &Self) {
+    pub fn execute(self: Self) {
         self.command.execute();
     }
 }
@@ -39,8 +39,8 @@ fn parse_config(args: &MainArgs) -> config::Config {
     return serde_yaml::from_str(&buffer).unwrap();
 }
 
-fn generate(args: &MainArgs) {
-    let config = parse_config(args);
+fn generate(args: MainArgs) {
+    let config = parse_config(&args);
     utils::run_config_action(
         &args.config,
         &config,
@@ -59,8 +59,8 @@ fn generate(args: &MainArgs) {
     .unwrap();
 }
 
-fn validate(args: &MainArgs) {
-    let config = parse_config(args);
+fn validate(args: MainArgs) {
+    let config = parse_config(&args);
     utils::run_config_action(
         &args.config,
         &config,
@@ -82,7 +82,7 @@ fn validate(args: &MainArgs) {
 }
 
 impl Commands {
-    pub fn execute(self: &Self) {
+    pub fn execute(self: Self) {
         match self {
             Commands::Internal(internal) => internal.execute(),
             Commands::Generate(args) => generate(args),

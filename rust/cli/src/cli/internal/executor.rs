@@ -31,6 +31,47 @@ enum ExampleScalar {
     Boolean(bool),
 }
 
+impl libgql::executor::GQLScalar<ExampleScalar> for DateTime<Utc> {
+    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.to_rfc3339()))
+    }
+
+    fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
+        match s {
+            ExampleScalar::String(string) => {
+                DateTime::parse_from_rfc3339(&string)
+                    .map_err(|e| e.to_string())
+                    .map(|v| v.with_timezone(&Utc))
+            }
+            _ => Err("Unexpected scalar for DateTime".to_string()),
+        }
+    }
+}
+
+impl libgql::executor::ast::ResolverValue<ExampleScalar> for DateTime<Utc> {
+    fn create_introspection_value<'a>(
+        self: &'a Self,
+    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
+    {
+        Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Literal(self))
+    }
+
+    fn to_value(
+        self: Box<Self>,
+        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
+    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
+        Ok(libgql::executor::Value::NonNullable(
+            libgql::executor::NonNullableValue::Literal(
+                libgql::executor::LiteralValue::Scalar(
+                    libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(
+                        *self,
+                    )?,
+                ),
+            ),
+        ))
+    }
+}
+
 impl libgql::executor::Scalar for ExampleScalar {
     fn try_to_string(self: Self) -> Result<String, String> {
         match self {
@@ -228,11 +269,46 @@ impl libgql::executor::GQLEnum<ExampleScalar> for EGroupUsersField {
 
 type Context = ();
 
+struct ErrorInvalidCredentials {
+    a: Option<bool>,
+}
+
+impl libgql::executor::ast::ResolverValue<ExampleScalar>
+    for ErrorInvalidCredentials
+{
+    fn to_value(
+        self: Box<Self>,
+        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
+    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
+        Ok(libgql::executor::Value::NonNullable(
+            libgql::executor::NonNullableValue::Literal(
+                libgql::executor::LiteralValue::Object(
+                    "ErrorInvalidCredentials".to_string(),
+                    libgql::executor::Values::new(),
+                ),
+            ),
+        ))
+    }
+
+    fn create_introspection_value<'a>(
+        self: &'a Self,
+    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
+    {
+        Some(
+        libgql::executor::ast::NonNullableResolverIntrospectionValue::Literal(
+            self
+        )
+        )
+    }
+}
+
 fn login_resolver(
-    root: &libgql::executor::ResolverRoot<ExampleScalar>,
-    context: &mut Context,
+    root_any: &libgql::executor::ast::ResolverRoot<ExampleScalar>,
+    _: &Context,
     variables: &libgql::executor::ResolvedVariables,
 ) -> libgql::executor::sync::ResolverFuture<ExampleScalar> {
+    let r_any: &dyn std::any::Any = root_any.as_ref();
+    let root = r_any.downcast_ref::<&()>().unwrap();
     println!(
         "login_resolver: {:?}, email: {}, password: {}",
         root,
@@ -248,59 +324,8 @@ fn login_resolver(
             .unwrap()
     );
     Box::pin(async move {
-        Ok(libgql::executor::Value::NonNullable(
-            libgql::executor::NonNullableValue::Literal(
-                libgql::executor::LiteralValue::Object(
-                    "ErrorInvalidCredentials".to_string(),
-                    libgql::executor::Values::new(),
-                ),
-            ),
-        ))
-    })
-}
-
-fn confirm_otp_code_resolver(
-    root: &libgql::executor::ResolverRoot<ExampleScalar>,
-    context: &mut Context,
-    variables: &libgql::executor::ResolvedVariables,
-) -> libgql::executor::sync::ResolverFuture<ExampleScalar> {
-    println!(
-        "confirm_otp_code_resolver: {:?}, email: {}, code: {}",
-        root,
-        variables
-            .get("email")
-            .unwrap()
-            .downcast_ref::<String>()
-            .unwrap(),
-        variables
-            .get("code")
-            .unwrap()
-            .downcast_ref::<String>()
-            .unwrap()
-    );
-    Box::pin(async move {
-        Ok(libgql::executor::Value::NonNullable(
-            libgql::executor::NonNullableValue::Literal(
-                libgql::executor::LiteralValue::Object(
-                    "OTPToken".to_string(),
-                    libgql::executor::Values::from_iter(
-                        [(
-                            "token".to_string(),
-                            libgql::executor::Value::NonNullable(
-                                libgql::executor::NonNullableValue::Literal(
-                                    libgql::executor::LiteralValue::Scalar(
-                                        ExampleScalar::String(
-                                            "sample-token".into(),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        )]
-                        .into_iter(),
-                    ),
-                ),
-            ),
-        ))
+        Ok(Box::new(ErrorInvalidCredentials { a: None })
+            as libgql::executor::ast::ResolverRoot<ExampleScalar>)
     })
 }
 
@@ -356,23 +381,19 @@ impl libgql::json::executor::ast::JSONSerializableScalar for ExampleScalar {
 }
 
 fn get_events_subscription(
-    root: &libgql::executor::ResolverRoot<ExampleScalar>,
-    context: &mut Context,
+    root: &libgql::executor::ast::ResolverRoot<ExampleScalar>,
+    context: &Context,
     variables: &libgql::executor::ResolvedVariables,
 ) -> libgql::executor::subscription::SubscriptionResolverFuture<ExampleScalar> {
     let resolver_stream = async_stream::stream! {
         loop {
-            yield ExampleScalar::String(Utc::now().to_string());
+            yield Utc::now();
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
     };
     let stream = Box::pin(resolver_stream.map(
-        |v| -> libgql::executor::Value<ExampleScalar> {
-            libgql::executor::Value::NonNullable(
-                libgql::executor::NonNullableValue::Literal(
-                    libgql::executor::LiteralValue::Scalar(v),
-                ),
-            )
+        |v| -> libgql::executor::ast::ResolverRoot<ExampleScalar> {
+            Box::new(v)
         },
     ))
         as libgql::executor::subscription::SubscriptionResolverStream<
@@ -381,7 +402,7 @@ fn get_events_subscription(
     Box::pin(async move { Ok(stream) })
 }
 
-async fn execute(args: &ParseArgs) {
+async fn execute(args: ParseArgs) {
     let term = Arc::new(AtomicBool::new(false));
     signal_hook::flag::register(
         signal_hook::consts::SIGTERM,
@@ -409,20 +430,12 @@ async fn execute(args: &ParseArgs) {
         ("Mutation".to_string(), "login".to_string()),
         Box::new(login_resolver),
     );
-    sync_resolvers.insert(
-        ("Mutation".to_string(), "confirmOTPCode".to_string()),
-        Box::new(confirm_otp_code_resolver),
-    );
     let mut subscription_resolvers =
         libgql::executor::subscription::SubscriptionResolversMap::new();
     subscription_resolvers
         .insert("getEvents".to_string(), Box::new(get_events_subscription));
-    let operation_result = libgql::executor::execute::<
-        Context,
-        ExampleScalar,
-        libgql::executor::HashMapRegistry<ExampleScalar>,
-    >(
-        &mut (),
+    let operation_result = libgql::executor::execute(
+        &(),
         &registry,
         &sync_resolvers,
         &subscription_resolvers,
@@ -436,7 +449,7 @@ async fn execute(args: &ParseArgs) {
                 )
                 .unwrap()
             }),
-        &args.operation,
+        args.operation,
     )
     .await
     .unwrap();
@@ -463,8 +476,11 @@ async fn execute(args: &ParseArgs) {
             let Some(item) = next_item else {
                 break;
             };
+            let Ok(v) = item else {
+                panic!("Unexpected error in subscription stream");
+            };
             let json_result =
-                libgql::json::executor::ast::serialize_values_to_json(&item)
+                libgql::json::executor::ast::serialize_values_to_json(&v)
                     .unwrap();
             println!("result: {}", json_result);
         },
@@ -472,7 +488,7 @@ async fn execute(args: &ParseArgs) {
 }
 
 impl Commands {
-    pub fn execute(self: &Self) {
+    pub fn execute(self: Self) {
         match self {
             Commands::Execute(args) => tokio::runtime::Runtime::new()
                 .unwrap()
