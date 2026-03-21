@@ -78,7 +78,7 @@ impl From<shared::ast::NonCallableFieldSpec<ObjectTypeSpec>>
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Interface {
     pub name: String,
     pub fields: indexmap::IndexMap<

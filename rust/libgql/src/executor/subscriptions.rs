@@ -1,24 +1,24 @@
 use std::collections::HashMap;
 
-use crate::executor::{TypeRegistry, Values};
 use crate::parsers::schema::client;
 
+use super::ast::{ResolverRoot, Values};
+use super::registry::TypeRegistry;
 use super::scalar::Scalar;
-
-use super::ast::ResolverRoot;
 use super::variables::ResolvedVariables;
 
 pub type SubscriptionResolverStream<S> =
-    std::pin::Pin<Box<dyn futures_core::Stream<Item = ResolverRoot<S>>>>;
-pub type SubscriptionResolverFuture<S> = std::pin::Pin<
-    Box<dyn Future<Output = Result<SubscriptionResolverStream<S>, String>>>,
+    std::pin::Pin<Box<dyn futures_core::Stream<Item = Box<ResolverRoot<S>>>>>;
+pub type SubscriptionResolverFuture<'a, S> = std::pin::Pin<
+    Box<
+        dyn Future<Output = Result<SubscriptionResolverStream<S>, String>> + 'a,
+    >,
 >;
 pub type SubscriptionResolver<S, C> = Box<
-    dyn Fn(
-        &ResolverRoot<S>,
-        &C,
-        &ResolvedVariables,
-    ) -> SubscriptionResolverFuture<S>,
+    dyn for<'a> Fn(
+        &'a C,
+        &'a ResolvedVariables,
+    ) -> SubscriptionResolverFuture<'a, S>,
 >;
 
 pub type SubscriptionResolversMap<S, C> =
@@ -33,8 +33,8 @@ pub async fn execute_subscription_operation<
     T: TypeRegistry<S>,
 >(
     context: &'args C,
-    sync_resolvers: &'args super::sync::SyncResolversMap<S, C>,
     resolvers: &'args SubscriptionResolversMap<S, C>,
+    query_resolvers: &'args super::queries::QueryResolversMap<S, C>,
     type_registry: &'args T,
     operation: client::ast::Operation,
     variables: ResolvedVariables,
@@ -62,26 +62,24 @@ pub async fn execute_subscription_operation<
     let resolver = resolvers.get(&selection.name).ok_or_else(|| {
         format!("No subscription resolver for {}", selection.name)
     })?;
+    let vars = Box::new(variables);
 
-    let resolver_root: ResolverRoot<S> = Box::new(&());
-
-    let mut stream = resolver(&resolver_root, context, &variables).await?;
+    let mut stream = resolver(context, vars.as_ref()).await?;
     Ok(Box::pin(async_stream::stream! {
+        let vars2 = vars;
         while let Some(value) = futures::StreamExt::next(&mut stream.as_mut()).await {
-            let mut callable_fields = Vec::new();
-            if let Some(fragment_spec) = &selection.selection {
-                callable_fields = super::sync::execute_fragment_on_value(
-                    context,
-                    sync_resolvers,
-                    type_registry,
-                    &value.create_introspection_value(),
-                    &fragment_spec,
-                    &variables,
-                ).await?;
-            };
-            yield value.to_value(callable_fields).map(|v| {
-                Values::from_iter([(selection.alias.clone(), v)])
-            })
+
+            let serialized_value = super::queries::execute_potential_selection_and_serialize(
+                context,
+                query_resolvers,
+                type_registry,
+                value.as_ref(),
+                &selection.selection,
+                &vars2.as_ref(),
+            )
+            .await?;
+            yield
+                Ok(Values::from_iter([(selection.alias.clone(), serialized_value)]))
         }
     }))
 }

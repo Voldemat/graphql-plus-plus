@@ -1,9 +1,11 @@
 pub mod ast;
 pub mod hashmap_registry;
+pub mod mutations;
+pub mod queries;
 pub mod registry;
 pub mod scalar;
-pub mod subscription;
-pub mod sync;
+pub mod shared;
+pub mod subscriptions;
 pub mod variables;
 use std::{cell::RefCell, rc::Rc};
 
@@ -38,6 +40,12 @@ pub enum OperationResult<
     Stream(std::pin::Pin<Box<TStream>>),
 }
 
+pub struct Resolvers<S: Scalar, C> {
+    pub queries: queries::QueryResolversMap<S, C>,
+    pub mutations: mutations::MutationResolversMap<S, C>,
+    pub subscriptions: subscriptions::SubscriptionResolversMap<S, C>,
+}
+
 async fn execute_operation<
     'args,
     'operation,
@@ -46,9 +54,7 @@ async fn execute_operation<
     T: TypeRegistry<S>,
 >(
     context: &'args C,
-    registry: type_registry::TypeRegistry,
-    sync_resolvers: &'args sync::SyncResolversMap<S, C>,
-    subscription_resolvers: &'args subscription::SubscriptionResolversMap<S, C>,
+    resolvers: &'args Resolvers<S, C>,
     type_registry: &'args T,
     operation: client::ast::Operation,
     variables: Values<S>,
@@ -66,32 +72,31 @@ async fn execute_operation<
     )?;
     match operation.r#type {
         client::ast::OpType::Query => Ok(OperationResult::Immediate(
-            sync::execute_sync_operation(
+            queries::execute_query_operation(
                 context,
-                sync_resolvers,
+                &resolvers.queries,
                 type_registry,
-                &registry.get_query_object().unwrap().borrow(),
                 operation,
                 resolved_variables,
             )
             .await?,
         )),
         client::ast::OpType::Mutation => Ok(OperationResult::Immediate(
-            sync::execute_sync_operation(
+            mutations::execute_mutation_operation(
                 context,
-                sync_resolvers,
+                &resolvers.mutations,
+                &resolvers.queries,
                 type_registry,
-                &registry.get_mutation_object().unwrap().borrow(),
                 operation,
                 resolved_variables,
             )
             .await?,
         )),
         client::ast::OpType::Subscription => Ok(OperationResult::Stream(
-            subscription::execute_subscription_operation(
+            subscriptions::execute_subscription_operation(
                 context,
-                sync_resolvers,
-                subscription_resolvers,
+                &resolvers.subscriptions,
+                &resolvers.queries,
                 type_registry,
                 operation,
                 resolved_variables,
@@ -104,8 +109,7 @@ async fn execute_operation<
 pub async fn execute<'args, 'client_query, C, S: Scalar, T: TypeRegistry<S>>(
     context: &'args C,
     registry: &'args type_registry::TypeRegistry,
-    sync_resolvers: &'args sync::SyncResolversMap<S, C>,
-    subscription_resolvers: &'args subscription::SubscriptionResolversMap<S, C>,
+    resolvers: &'args Resolvers<S, C>,
     parse_registry: &'args T,
     client_query: &'client_query str,
     variables: Values<S>,
@@ -152,9 +156,7 @@ pub async fn execute<'args, 'client_query, C, S: Scalar, T: TypeRegistry<S>>(
             .into_inner();
     let result = execute_operation(
         context,
-        local_registry,
-        sync_resolvers,
-        subscription_resolvers,
+        resolvers,
         parse_registry,
         operation,
         variables,

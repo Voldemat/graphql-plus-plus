@@ -11,20 +11,20 @@ where
     Self: 'static,
 {
     fn from_scalar(s: S) -> Result<Self, String>;
-    fn to_scalar(self: Self) -> Result<S, String>;
+    fn to_scalar(self: &Self) -> Result<S, String>;
 
-    fn to_value(self: Self) -> Result<Value<S>, String> {
+    fn to_value(self: &Self) -> Result<Value<S>, String> {
         self.to_non_nullable_value().map(|v| Value::NonNullable(v))
     }
 
     fn to_non_nullable_value(
-        self: Self,
+        self: &Self,
     ) -> Result<NonNullableValue<S>, String> {
         self.to_literal_value()
             .map(|v| NonNullableValue::Literal(v))
     }
 
-    fn to_literal_value(self: Self) -> Result<LiteralValue<S>, String> {
+    fn to_literal_value(self: &Self) -> Result<LiteralValue<S>, String> {
         self.to_scalar().map(|scalar| LiteralValue::Scalar(scalar))
     }
 
@@ -97,20 +97,20 @@ where
     Self: 'static,
 {
     fn from_string(s: String) -> Result<Self, String>;
-    fn to_str(self: Self) -> Result<&'static str, String>;
+    fn to_str(self: &Self) -> Result<&'static str, String>;
 
-    fn to_value(self: Self) -> Result<Value<S>, String> {
+    fn to_value(self: &Self) -> Result<Value<S>, String> {
         self.to_non_nullable_value().map(|v| Value::NonNullable(v))
     }
 
     fn to_non_nullable_value(
-        self: Self,
+        self: &Self,
     ) -> Result<NonNullableValue<S>, String> {
         self.to_literal_value()
             .map(|v| NonNullableValue::Literal(v))
     }
 
-    fn to_literal_value(self: Self) -> Result<LiteralValue<S>, String> {
+    fn to_literal_value(self: &Self) -> Result<LiteralValue<S>, String> {
         self.to_str()
             .map(S::from_str)
             .flatten()
