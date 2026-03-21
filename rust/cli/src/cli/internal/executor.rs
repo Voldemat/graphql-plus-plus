@@ -1,4 +1,4 @@
-use std::sync::{Arc, atomic::AtomicBool};
+use std::{collections::HashSet, sync::{atomic::AtomicBool, Arc}};
 
 use chrono::prelude::*;
 use libgql::parsers::schema::type_registry::TypeRegistry;
@@ -32,7 +32,7 @@ enum ExampleScalar {
 }
 
 impl libgql::executor::GQLScalar<ExampleScalar> for DateTime<Utc> {
-    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
         Ok(ExampleScalar::String(self.to_rfc3339()))
     }
 
@@ -53,22 +53,26 @@ impl libgql::executor::ast::ResolverValue<ExampleScalar> for DateTime<Utc> {
         self: &'a Self,
     ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
     {
-        Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Literal(self))
+        None
     }
 
     fn to_value(
-        self: Box<Self>,
+        self: &Self,
         _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
     ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
         Ok(libgql::executor::Value::NonNullable(
             libgql::executor::NonNullableValue::Literal(
                 libgql::executor::LiteralValue::Scalar(
                     libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(
-                        *self,
+                        self,
                     )?,
                 ),
             ),
         ))
+    }
+
+    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
+        panic!()
     }
 }
 
@@ -120,7 +124,7 @@ impl libgql::executor::GQLEnum<ExampleScalar> for Direction {
         }
     }
 
-    fn to_str(self: Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&'static str, String> {
         match self {
             Self::Asc => Ok("ASC"),
             Self::Dsc => Ok("DSC"),
@@ -140,7 +144,7 @@ impl libgql::executor::GQLEnum<ExampleScalar> for EUsersTagField {
         }
     }
 
-    fn to_str(self: Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&'static str, String> {
         match self {
             Self::Name => Ok("NAME"),
         }
@@ -189,8 +193,8 @@ impl libgql::executor::GQLScalar<ExampleScalar> for UUID {
         }
     }
 
-    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::String(self.0))
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.0.clone()))
     }
 }
 
@@ -202,8 +206,8 @@ impl libgql::executor::GQLScalar<ExampleScalar> for i32 {
         }
     }
 
-    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::Int(self))
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Int(*self))
     }
 }
 
@@ -215,8 +219,8 @@ impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
         }
     }
 
-    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::Float(self))
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Float(*self))
     }
 }
 
@@ -227,8 +231,8 @@ impl libgql::executor::GQLScalar<ExampleScalar> for String {
             _ => Err(format!("Invalid scalar for String {:?}", s)),
         }
     }
-    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::String(self))
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::String(self.clone()))
     }
 }
 
@@ -239,8 +243,8 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
             _ => Err(format!("Invalid scalar for bool {:?}", s)),
         }
     }
-    fn to_scalar(self: Self) -> Result<ExampleScalar, String> {
-        Ok(ExampleScalar::Boolean(self))
+    fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
+        Ok(ExampleScalar::Boolean(*self))
     }
 }
 
@@ -259,7 +263,7 @@ impl libgql::executor::GQLEnum<ExampleScalar> for EGroupUsersField {
         }
     }
 
-    fn to_str(self: Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&'static str, String> {
         match self {
             Self::Name => Ok("NAME"),
             Self::Email => Ok("EMAIL"),
@@ -277,7 +281,7 @@ impl libgql::executor::ast::ResolverValue<ExampleScalar>
     for ErrorInvalidCredentials
 {
     fn to_value(
-        self: Box<Self>,
+        self: &Self,
         _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
     ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
         Ok(libgql::executor::Value::NonNullable(
@@ -290,28 +294,28 @@ impl libgql::executor::ast::ResolverValue<ExampleScalar>
         ))
     }
 
+    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
+        HashSet::from_iter(["a".to_string()])
+    }
+
     fn create_introspection_value<'a>(
         self: &'a Self,
     ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
     {
         Some(
         libgql::executor::ast::NonNullableResolverIntrospectionValue::Literal(
-            self
+            "ErrorInvalidCredentials".to_string(), self
         )
         )
     }
 }
 
-fn login_resolver(
-    root_any: &libgql::executor::ast::ResolverRoot<ExampleScalar>,
-    _: &Context,
-    variables: &libgql::executor::ResolvedVariables,
-) -> libgql::executor::sync::ResolverFuture<ExampleScalar> {
-    let r_any: &dyn std::any::Any = root_any.as_ref();
-    let root = r_any.downcast_ref::<&()>().unwrap();
+fn login_resolver<'a>(
+    _: &'a Context,
+    variables: &'a libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'a, ExampleScalar> {
     println!(
-        "login_resolver: {:?}, email: {}, password: {}",
-        root,
+        "login_resolver: email: {}, password: {}",
         variables
             .get("email")
             .unwrap()
@@ -325,7 +329,7 @@ fn login_resolver(
     );
     Box::pin(async move {
         Ok(Box::new(ErrorInvalidCredentials { a: None })
-            as libgql::executor::ast::ResolverRoot<ExampleScalar>)
+            as Box<libgql::executor::ast::ResolverRoot<ExampleScalar>>)
     })
 }
 
@@ -380,11 +384,10 @@ impl libgql::json::executor::ast::JSONSerializableScalar for ExampleScalar {
     }
 }
 
-fn get_events_subscription(
-    root: &libgql::executor::ast::ResolverRoot<ExampleScalar>,
-    context: &Context,
-    variables: &libgql::executor::ResolvedVariables,
-) -> libgql::executor::subscription::SubscriptionResolverFuture<ExampleScalar> {
+fn get_events_subscription<'a>(
+    context: &'a Context,
+    variables: &'a libgql::executor::ResolvedVariables,
+) -> libgql::executor::subscriptions::SubscriptionResolverFuture<'a, ExampleScalar> {
     let resolver_stream = async_stream::stream! {
         loop {
             yield Utc::now();
@@ -392,11 +395,11 @@ fn get_events_subscription(
         }
     };
     let stream = Box::pin(resolver_stream.map(
-        |v| -> libgql::executor::ast::ResolverRoot<ExampleScalar> {
+        |v| -> Box<libgql::executor::ast::ResolverRoot<ExampleScalar>> {
             Box::new(v)
         },
     ))
-        as libgql::executor::subscription::SubscriptionResolverStream<
+        as libgql::executor::subscriptions::SubscriptionResolverStream<
             ExampleScalar,
         >;
     Box::pin(async move { Ok(stream) })
@@ -425,20 +428,24 @@ async fn execute(args: ParseArgs) {
     parse_registry.add_scalar::<UUID>("UUID");
     parse_registry.add_enum::<EGroupUsersField>("EGroupUsersField");
     parse_registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
-    let mut sync_resolvers = libgql::executor::sync::SyncResolversMap::new();
-    sync_resolvers.insert(
-        ("Mutation".to_string(), "login".to_string()),
+    let mut mutation_resolvers = libgql::executor::mutations::MutationResolversMap::new();
+    mutation_resolvers.insert(
+        "login".to_string(),
         Box::new(login_resolver),
     );
     let mut subscription_resolvers =
-        libgql::executor::subscription::SubscriptionResolversMap::new();
+        libgql::executor::subscriptions::SubscriptionResolversMap::new();
     subscription_resolvers
         .insert("getEvents".to_string(), Box::new(get_events_subscription));
+    let resolvers = libgql::executor::Resolvers {
+        queries: libgql::executor::queries::QueryResolversMap::new(),
+        mutations: mutation_resolvers,
+        subscriptions: subscription_resolvers
+    };
     let operation_result = libgql::executor::execute(
         &(),
         &registry,
-        &sync_resolvers,
-        &subscription_resolvers,
+        &resolvers,
         &parse_registry,
         &utils::read_buffer_from_filepath(&args.query_path),
         args.variables
