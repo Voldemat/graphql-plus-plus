@@ -708,15 +708,18 @@ pub struct DatetimeObject {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct DealColumn {
+    #[gql(name="availableValues")]
     pub available_values: Vec<String>,
     pub id: uuid::Uuid,
     pub name: String,
+    #[gql(name="type")]
     pub r#type: EDealColumnType,
 }
 
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct DealEntry {
+    #[gql(name="columnName")]
     pub column_name: String,
 }
 
@@ -733,6 +736,7 @@ fn deal_entry_value_wrapper<'args>(root: &'args libgql::executor::ast::ResolverR
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct DealInfo {
+    #[gql(name="stageToWorktypesMap")]
     pub stage_to_worktypes_map: Vec<StageToWorktypesMapEntry>,
     pub values: Vec<DealEntry>,
 }
@@ -920,12 +924,14 @@ pub struct ErrorUnknownFiles {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownGroupIds {
+    #[gql(name="groupIds")]
     pub group_ids: Vec<uuid::Uuid>,
 }
 
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownGroups {
+    #[gql(name="groupIds")]
     pub group_ids: Vec<uuid::Uuid>,
 }
 
@@ -944,6 +950,7 @@ pub struct ErrorUnknownSessionId {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownTags {
+    #[gql(name="tagIds")]
     pub tag_ids: Vec<uuid::Uuid>,
 }
 
@@ -956,12 +963,14 @@ pub struct ErrorUnknownUser {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownUsers {
+    #[gql(name="userIds")]
     pub user_ids: Vec<uuid::Uuid>,
 }
 
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileDeleted {
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
 }
@@ -969,6 +978,7 @@ pub struct EventFileDeleted {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileDownloadRequested {
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub decision: Option<bool>,
     pub file: File,
@@ -978,6 +988,7 @@ pub struct EventFileDownloadRequested {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileDownloaded {
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
 }
@@ -985,15 +996,19 @@ pub struct EventFileDownloaded {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileTagsEdited {
+    #[gql(name="addedTags")]
     pub added_tags: Vec<Tag>,
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
+    #[gql(name="removedTags")]
     pub removed_tags: Vec<Tag>,
 }
 
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileUploaded {
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
 }
@@ -1001,8 +1016,10 @@ pub struct EventFileUploaded {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventTagApprovalIsRequested {
+    #[gql(name="alreadyInCatalog")]
     pub already_in_catalog: bool,
     pub author: User,
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub tag: Tag,
 }
@@ -1016,11 +1033,15 @@ pub struct EventsList {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct File {
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub filename: String,
     pub id: uuid::Uuid,
+    #[gql(name="mimeType")]
     pub mime_type: Option<String>,
+    #[gql(name="previewUrl")]
     pub preview_url: Option<url::Url>,
+    #[gql(name="sizeInBytes")]
     pub size_in_bytes: i64,
     pub user: User,
 }
@@ -1028,8 +1049,11 @@ pub struct File {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct FilesDealInfo {
+    #[gql(name="dealInfo")]
     pub deal_info: DealInfo,
+    #[gql(name="dealName")]
     pub deal_name: Tag,
+    #[gql(name="unsetColumns")]
     pub unset_columns: Vec<DealColumn>,
 }
 
@@ -1042,8 +1066,10 @@ pub struct FloatObject {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct Group {
+    #[gql(name="first10Tags")]
     pub first_10_tags: Vec<Tag>,
     pub id: uuid::Uuid,
+    #[gql(name="limitOfDownloadsPerDay")]
     pub limit_of_downloads_per_day: i32,
     pub name: String,
 }
@@ -1051,6 +1077,7 @@ pub struct Group {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct GroupUser {
+    #[gql(name="inGroup")]
     pub in_group: bool,
     pub user: User,
 }
@@ -1071,6 +1098,7 @@ pub struct IntObject {
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct MultipartUploadSession {
     pub id: uuid::Uuid,
+    #[gql(name="initialUploadURLs")]
     pub initial_upload_ur_ls: Vec<UploadUrl>,
 }
 
@@ -1430,6 +1458,7 @@ pub struct OTPToken {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct PendingUser {
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub email: String,
     pub groups: Vec<Group>,
@@ -1441,6 +1470,7 @@ pub struct PendingUser {
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct PutUploadSession {
     pub id: uuid::Uuid,
+    #[gql(name="uploadURL")]
     pub upload_url: UploadUrl,
 }
 
@@ -1926,9 +1956,12 @@ pub struct StringObject {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct Tag {
+    #[gql(name="hasChildren")]
     pub has_children: bool,
     pub id: uuid::Uuid,
+    #[gql(name="isApproved")]
     pub is_approved: bool,
+    #[gql(name="isFavourite")]
     pub is_favourite: bool,
     pub tag: String,
     pub value: Option<TagValue>,
@@ -1937,6 +1970,7 @@ pub struct Tag {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct TagInfo {
+    #[gql(name="parentTag")]
     pub parent_tag: Option<Tag>,
     pub tag: String,
 }
@@ -1969,10 +2003,12 @@ pub struct UrlObject {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct User {
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub email: String,
     pub id: uuid::Uuid,
     pub name: String,
+    #[gql(name="tenGroups")]
     pub ten_groups: Vec<Group>,
 }
 
@@ -1985,8 +2021,10 @@ pub struct UsersList {
 #[derive(libgqlcodegen::macros::GQLObject)]
 #[gql(scalar = super::scalar::ExampleScalar)]
 pub struct UsersTag {
+    #[gql(name="createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub tag: Tag,
+    #[gql(name="usersCount")]
     pub users_count: i32,
 }
 
@@ -2399,15 +2437,15 @@ pub fn create_parse_registry() -> libgql::executor::HashMapRegistry<super::scala
     registry.add_enum::<ESortDirection>("ESortDirection");
     registry.add_enum::<EUserField>("EUserField");
     registry.add_enum::<EUsersTagField>("EUsersTagField");
-    registry.add_scalar::<uuid::Uuid>("UUID");
-    registry.add_scalar::<()>("Void");
-    registry.add_scalar::<chrono::DateTime<chrono::Utc>>("Datetime");
-    registry.add_scalar::<f32>("Float");
     registry.add_scalar::<f32>("Duration");
     registry.add_scalar::<i64>("Int64");
+    registry.add_scalar::<chrono::DateTime<chrono::Utc>>("Datetime");
+    registry.add_scalar::<f32>("Float");
+    registry.add_scalar::<url::Url>("Url");
+    registry.add_scalar::<()>("Void");
+    registry.add_scalar::<bool>("Boolean");
     registry.add_scalar::<String>("String");
     registry.add_scalar::<i32>("Int");
-    registry.add_scalar::<bool>("Boolean");
-    registry.add_scalar::<url::Url>("Url");
+    registry.add_scalar::<uuid::Uuid>("UUID");
     return registry;
 }

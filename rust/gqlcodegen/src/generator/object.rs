@@ -102,6 +102,9 @@ pub fn generate_definition(
                 false,
             ),
         );
+        if &field_name != name {
+            field.annotation(format!("#[gql(name = \"{}\")]", name));
+        }
         field.visibility = Some("pub".into());
         local.push_field(field);
     }
