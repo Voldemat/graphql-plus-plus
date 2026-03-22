@@ -1,34 +1,13 @@
+#[derive(libgqlcodegen::macros::GQLEnum)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum EDealColumnType {
     List,
     Number,
     Date,
 }
 
-impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EDealColumnType {
-    fn from_string(s: String) -> Result<Self, String> {
-        match s.as_str() {
-        "LIST" => Ok(Self::List),
-        "NUMBER" => Ok(Self::Number),
-        "DATE" => Ok(Self::Date),
-        _ => Err(format!("Unexpected value {} for enum EDealColumnType", s))
-        }
-    }
-
-    fn to_str(self: &Self) -> Result<&str, String> {
-        match self {
-        Self::List => Ok("LIST"),
-        Self::Number => Ok("NUMBER"),
-        Self::Date => Ok("DATE"),
-        }
-    }
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EDealColumnType {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLEnum)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum EFileField {
     Name,
     Mimetype,
@@ -38,184 +17,42 @@ pub enum EFileField {
     CreatedAt,
 }
 
-impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EFileField {
-    fn from_string(s: String) -> Result<Self, String> {
-        match s.as_str() {
-        "NAME" => Ok(Self::Name),
-        "MIMETYPE" => Ok(Self::Mimetype),
-        "SIZE_IN_BYTES" => Ok(Self::SizeInBytes),
-        "AUTHOR_NAME" => Ok(Self::AuthorName),
-        "TAGS" => Ok(Self::Tags),
-        "CREATED_AT" => Ok(Self::CreatedAt),
-        _ => Err(format!("Unexpected value {} for enum EFileField", s))
-        }
-    }
-
-    fn to_str(self: &Self) -> Result<&str, String> {
-        match self {
-        Self::Name => Ok("NAME"),
-        Self::Mimetype => Ok("MIMETYPE"),
-        Self::SizeInBytes => Ok("SIZE_IN_BYTES"),
-        Self::AuthorName => Ok("AUTHOR_NAME"),
-        Self::Tags => Ok("TAGS"),
-        Self::CreatedAt => Ok("CREATED_AT"),
-        }
-    }
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EFileField {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLEnum)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum EGroupField {
     Name,
     CreatedAt,
     LimitOfDownloadsPerDay,
 }
 
-impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EGroupField {
-    fn from_string(s: String) -> Result<Self, String> {
-        match s.as_str() {
-        "NAME" => Ok(Self::Name),
-        "CREATED_AT" => Ok(Self::CreatedAt),
-        "LIMIT_OF_DOWNLOADS_PER_DAY" => Ok(Self::LimitOfDownloadsPerDay),
-        _ => Err(format!("Unexpected value {} for enum EGroupField", s))
-        }
-    }
-
-    fn to_str(self: &Self) -> Result<&str, String> {
-        match self {
-        Self::Name => Ok("NAME"),
-        Self::CreatedAt => Ok("CREATED_AT"),
-        Self::LimitOfDownloadsPerDay => Ok("LIMIT_OF_DOWNLOADS_PER_DAY"),
-        }
-    }
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EGroupField {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLEnum)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum EGroupUsersField {
     Name,
     Email,
 }
 
-impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EGroupUsersField {
-    fn from_string(s: String) -> Result<Self, String> {
-        match s.as_str() {
-        "NAME" => Ok(Self::Name),
-        "EMAIL" => Ok(Self::Email),
-        _ => Err(format!("Unexpected value {} for enum EGroupUsersField", s))
-        }
-    }
-
-    fn to_str(self: &Self) -> Result<&str, String> {
-        match self {
-        Self::Name => Ok("NAME"),
-        Self::Email => Ok("EMAIL"),
-        }
-    }
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EGroupUsersField {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLEnum)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum ESortDirection {
     Asc,
     Dsc,
 }
 
-impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for ESortDirection {
-    fn from_string(s: String) -> Result<Self, String> {
-        match s.as_str() {
-        "ASC" => Ok(Self::Asc),
-        "DSC" => Ok(Self::Dsc),
-        _ => Err(format!("Unexpected value {} for enum ESortDirection", s))
-        }
-    }
-
-    fn to_str(self: &Self) -> Result<&str, String> {
-        match self {
-        Self::Asc => Ok("ASC"),
-        Self::Dsc => Ok("DSC"),
-        }
-    }
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ESortDirection {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLEnum)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum EUserField {
     Name,
     Email,
     CreatedAt,
 }
 
-impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EUserField {
-    fn from_string(s: String) -> Result<Self, String> {
-        match s.as_str() {
-        "NAME" => Ok(Self::Name),
-        "EMAIL" => Ok(Self::Email),
-        "CREATED_AT" => Ok(Self::CreatedAt),
-        _ => Err(format!("Unexpected value {} for enum EUserField", s))
-        }
-    }
-
-    fn to_str(self: &Self) -> Result<&str, String> {
-        match self {
-        Self::Name => Ok("NAME"),
-        Self::Email => Ok("EMAIL"),
-        Self::CreatedAt => Ok("CREATED_AT"),
-        }
-    }
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EUserField {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLEnum)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum EUsersTagField {
     Tag,
     UsersCount,
     CreatedAt,
-}
-
-impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EUsersTagField {
-    fn from_string(s: String) -> Result<Self, String> {
-        match s.as_str() {
-        "TAG" => Ok(Self::Tag),
-        "USERS_COUNT" => Ok(Self::UsersCount),
-        "CREATED_AT" => Ok(Self::CreatedAt),
-        _ => Err(format!("Unexpected value {} for enum EUsersTagField", s))
-        }
-    }
-
-    fn to_str(self: &Self) -> Result<&str, String> {
-        match self {
-        Self::Tag => Ok("TAG"),
-        Self::UsersCount => Ok("USERS_COUNT"),
-        Self::CreatedAt => Ok("CREATED_AT"),
-        }
-    }
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EUsersTagField {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
-    }
 }
 
 pub struct DateRange {
@@ -2503,98 +2340,54 @@ impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for User
     }
 }
 
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum AddTagsToFilesError {
     ErrorUnknownFiles(ErrorUnknownFiles),
     ErrorUnknownTags(ErrorUnknownTags),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for AddTagsToFilesError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorUnknownFiles(item) => item.to_value(),
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum ApproveTagError {
     ErrorAlreadyExists(ErrorAlreadyExists),
     ErrorNotFound(ErrorNotFound),
     ErrorUnknownGroupIds(ErrorUnknownGroupIds),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ApproveTagError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorAlreadyExists(item) => item.to_value(),
-        Self::ErrorNotFound(item) => item.to_value(),
-        Self::ErrorUnknownGroupIds(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum CommitMultipartFileSessionResponse {
     ErrorFileNotUploaded(ErrorFileNotUploaded),
     ErrorUnknownSessionId(ErrorUnknownSessionId),
     File(File),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CommitMultipartFileSessionResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorFileNotUploaded(item) => item.to_value(),
-        Self::ErrorUnknownSessionId(item) => item.to_value(),
-        Self::File(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum CommitPutFileSessionResponse {
     ErrorFileNotUploaded(ErrorFileNotUploaded),
     ErrorUnknownSessionId(ErrorUnknownSessionId),
     File(File),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CommitPutFileSessionResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorFileNotUploaded(item) => item.to_value(),
-        Self::ErrorUnknownSessionId(item) => item.to_value(),
-        Self::File(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum ConfirmOTPCodeResponse {
     ErrorInvalidOTPCode(ErrorInvalidOTPCode),
     ErrorOTPCodeExpired(ErrorOTPCodeExpired),
     OTPToken(OTPToken),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ConfirmOTPCodeResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorInvalidOTPCode(item) => item.to_value(),
-        Self::ErrorOTPCodeExpired(item) => item.to_value(),
-        Self::OTPToken(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum ConfirmUserError {
     ErrorInvalidPassword(ErrorInvalidPassword),
     ErrorInvalidToken(ErrorInvalidToken),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ConfirmUserError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorInvalidPassword(item) => item.to_value(),
-        Self::ErrorInvalidToken(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum CreateGroupError {
     ErrorAlreadyExists(ErrorAlreadyExists),
     ErrorInvalidGroupName(ErrorInvalidGroupName),
@@ -2603,18 +2396,8 @@ pub enum CreateGroupError {
     ErrorUnknownUsers(ErrorUnknownUsers),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreateGroupError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorAlreadyExists(item) => item.to_value(),
-        Self::ErrorInvalidGroupName(item) => item.to_value(),
-        Self::ErrorInvalidLimitOfDownloadsPerDay(item) => item.to_value(),
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        Self::ErrorUnknownUsers(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum CreateMultipartFileSessionResponse {
     ErrorMultipartUploadFileIsTooBig(ErrorMultipartUploadFileIsTooBig),
     ErrorMultipartUploadFileIsTooLight(ErrorMultipartUploadFileIsTooLight),
@@ -2625,20 +2408,8 @@ pub enum CreateMultipartFileSessionResponse {
     MultipartUploadSession(MultipartUploadSession),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreateMultipartFileSessionResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorMultipartUploadFileIsTooBig(item) => item.to_value(),
-        Self::ErrorMultipartUploadFileIsTooLight(item) => item.to_value(),
-        Self::ErrorMultipartUploadFilePartSizeIsTooBig(item) => item.to_value(),
-        Self::ErrorMultipartUploadFilePartSizeIsTooSmall(item) => item.to_value(),
-        Self::ErrorNoDealTag(item) => item.to_value(),
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        Self::MultipartUploadSession(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum CreatePutFileSessionResponse {
     ErrorNoDealTag(ErrorNoDealTag),
     ErrorPutUploadFileIsTooBig(ErrorPutUploadFileIsTooBig),
@@ -2646,31 +2417,15 @@ pub enum CreatePutFileSessionResponse {
     PutUploadSession(PutUploadSession),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreatePutFileSessionResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorNoDealTag(item) => item.to_value(),
-        Self::ErrorPutUploadFileIsTooBig(item) => item.to_value(),
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        Self::PutUploadSession(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum CreateTagError {
     ErrorAlreadyExists(ErrorAlreadyExists),
     ErrorUnknownParentId(ErrorUnknownParentId),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreateTagError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorAlreadyExists(item) => item.to_value(),
-        Self::ErrorUnknownParentId(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum CreateUserError {
     ErrorAlreadyPending(ErrorAlreadyPending),
     ErrorEmailCollision(ErrorEmailCollision),
@@ -2679,18 +2434,8 @@ pub enum CreateUserError {
     ErrorUnknownGroups(ErrorUnknownGroups),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreateUserError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorAlreadyPending(item) => item.to_value(),
-        Self::ErrorEmailCollision(item) => item.to_value(),
-        Self::ErrorInvalidEmail(item) => item.to_value(),
-        Self::ErrorInvalidUserName(item) => item.to_value(),
-        Self::ErrorUnknownGroups(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum DecideOnDownloadRequestError {
     ErrorAlreadyDone(ErrorAlreadyDone),
     ErrorNotFound(ErrorNotFound),
@@ -2698,45 +2443,22 @@ pub enum DecideOnDownloadRequestError {
     ErrorUnknownUser(ErrorUnknownUser),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DecideOnDownloadRequestError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorAlreadyDone(item) => item.to_value(),
-        Self::ErrorNotFound(item) => item.to_value(),
-        Self::ErrorUnknownFile(item) => item.to_value(),
-        Self::ErrorUnknownUser(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum DeleteFileError {
     ErrorChangeForbidden(ErrorChangeForbidden),
     ErrorUnknownFile(ErrorUnknownFile),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DeleteFileError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorChangeForbidden(item) => item.to_value(),
-        Self::ErrorUnknownFile(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum DeleteFilesError {
     ErrorFilesChangeForbidden(ErrorFilesChangeForbidden),
     ErrorUnknownFiles(ErrorUnknownFiles),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DeleteFilesError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorFilesChangeForbidden(item) => item.to_value(),
-        Self::ErrorUnknownFiles(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum EditGroupError {
     ErrorAlreadyExists(ErrorAlreadyExists),
     ErrorGroupNotFound(ErrorGroupNotFound),
@@ -2745,18 +2467,8 @@ pub enum EditGroupError {
     ErrorUnknownTags(ErrorUnknownTags),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EditGroupError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorAlreadyExists(item) => item.to_value(),
-        Self::ErrorGroupNotFound(item) => item.to_value(),
-        Self::ErrorInvalidGroupName(item) => item.to_value(),
-        Self::ErrorInvalidLimitOfDownloadsPerDay(item) => item.to_value(),
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum EditTagError {
     ErrorAlreadyApprovedByAdmin(ErrorAlreadyApprovedByAdmin),
     ErrorAlreadyExists(ErrorAlreadyExists),
@@ -2764,45 +2476,22 @@ pub enum EditTagError {
     ErrorUnknownParentId(ErrorUnknownParentId),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EditTagError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorAlreadyApprovedByAdmin(item) => item.to_value(),
-        Self::ErrorAlreadyExists(item) => item.to_value(),
-        Self::ErrorNotFound(item) => item.to_value(),
-        Self::ErrorUnknownParentId(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum ErrorAlreadyDoneOrUnknownTags {
     ErrorAlreadyDone(ErrorAlreadyDone),
     ErrorUnknownTags(ErrorUnknownTags),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyDoneOrUnknownTags {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorAlreadyDone(item) => item.to_value(),
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum ErrorGroupNotFoundOrErrorNotFound {
     ErrorGroupNotFound(ErrorGroupNotFound),
     ErrorNotFound(ErrorNotFound),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorGroupNotFoundOrErrorNotFound {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorGroupNotFound(item) => item.to_value(),
-        Self::ErrorNotFound(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum Event {
     EventFileDeleted(EventFileDeleted),
     EventFileDownloadRequested(EventFileDownloadRequested),
@@ -2812,301 +2501,146 @@ pub enum Event {
     EventTagApprovalIsRequested(EventTagApprovalIsRequested),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Event {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::EventFileDeleted(item) => item.to_value(),
-        Self::EventFileDownloadRequested(item) => item.to_value(),
-        Self::EventFileDownloaded(item) => item.to_value(),
-        Self::EventFileTagsEdited(item) => item.to_value(),
-        Self::EventFileUploaded(item) => item.to_value(),
-        Self::EventTagApprovalIsRequested(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum FilesDealInfoOrError {
     ErrorCantAddAutotags(ErrorCantAddAutotags),
     FilesDealInfo(FilesDealInfo),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for FilesDealInfoOrError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorCantAddAutotags(item) => item.to_value(),
-        Self::FilesDealInfo(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetDealInfoResponse {
     DealInfo(DealInfo),
     ErrorNotFound(ErrorNotFound),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetDealInfoResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::DealInfo(item) => item.to_value(),
-        Self::ErrorNotFound(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetEventsResponse {
     ErrorDateRangeIsInvalid(ErrorDateRangeIsInvalid),
     EventsList(EventsList),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetEventsResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorDateRangeIsInvalid(item) => item.to_value(),
-        Self::EventsList(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetFileURLResponse {
     ErrorUnknownFile(ErrorUnknownFile),
     UrlObject(UrlObject),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetFileURLResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorUnknownFile(item) => item.to_value(),
-        Self::UrlObject(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetFilesResponse {
     ErrorUnknownTags(ErrorUnknownTags),
     SearchFileList(SearchFileList),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetFilesResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        Self::SearchFileList(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetGroupTagsResponse {
     ErrorNotFound(ErrorNotFound),
     TagList(TagList),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetGroupTagsResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorNotFound(item) => item.to_value(),
-        Self::TagList(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetGroupUsersAndUsersResponse {
     ErrorGroupNotFound(ErrorGroupNotFound),
     GroupUserList(GroupUserList),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetGroupUsersAndUsersResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorGroupNotFound(item) => item.to_value(),
-        Self::GroupUserList(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetGroupUsersResponse {
     ErrorNotFound(ErrorNotFound),
     UsersList(UsersList),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetGroupUsersResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorNotFound(item) => item.to_value(),
-        Self::UsersList(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetGroupUsersTotalResponse {
     ErrorNotFound(ErrorNotFound),
     IntObject(IntObject),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetGroupUsersTotalResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorNotFound(item) => item.to_value(),
-        Self::IntObject(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetNextMultipartUploadUrlsResponse {
     ErrorUnknownSessionId(ErrorUnknownSessionId),
     UploadUrlList(UploadUrlList),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetNextMultipartUploadUrlsResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorUnknownSessionId(item) => item.to_value(),
-        Self::UploadUrlList(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetPathToTagResponse {
     ErrorUnknownTags(ErrorUnknownTags),
     StringList(StringList),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetPathToTagResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        Self::StringList(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetTagInfoResponse {
     ErrorNotFound(ErrorNotFound),
     TagInfo(TagInfo),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetTagInfoResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorNotFound(item) => item.to_value(),
-        Self::TagInfo(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum GetTagsResponse {
     ErrorUnknownTags(ErrorUnknownTags),
     TagList(TagList),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetTagsResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        Self::TagList(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum IntObjectOrErrorUnknownTags {
     ErrorUnknownTags(ErrorUnknownTags),
     IntObject(IntObject),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for IntObjectOrErrorUnknownTags {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        Self::IntObject(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum IsAllowedToDownloadResponse {
     BooleanObject(BooleanObject),
     ErrorUnknownFile(ErrorUnknownFile),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for IsAllowedToDownloadResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::BooleanObject(item) => item.to_value(),
-        Self::ErrorUnknownFile(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum ResetPasswordError {
     ErrorInvalidPassword(ErrorInvalidPassword),
     ErrorOTPTokenExpired(ErrorOTPTokenExpired),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ResetPasswordError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorInvalidPassword(item) => item.to_value(),
-        Self::ErrorOTPTokenExpired(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum RetrieveFileResponse {
     ErrorUnknownFile(ErrorUnknownFile),
     SearchFile(SearchFile),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for RetrieveFileResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorUnknownFile(item) => item.to_value(),
-        Self::SearchFile(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum RetrieveGroupResponse {
     ErrorNotFound(ErrorNotFound),
     Group(Group),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for RetrieveGroupResponse {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorNotFound(item) => item.to_value(),
-        Self::Group(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum TagValue {
     DatetimeObject(DatetimeObject),
     FloatObject(FloatObject),
     StringObject(StringObject),
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for TagValue {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::DatetimeObject(item) => item.to_value(),
-        Self::FloatObject(item) => item.to_value(),
-        Self::StringObject(item) => item.to_value(),
-        }
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLUnion)]
+#[gql(scalar=super::scalar::ExampleScalar)]
 pub enum UpdateFileError {
     ErrorChangeForbidden(ErrorChangeForbidden),
     ErrorUnknownFile(ErrorUnknownFile),
     ErrorUnknownTags(ErrorUnknownTags),
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UpdateFileError {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        match self {
-        Self::ErrorChangeForbidden(item) => item.to_value(),
-        Self::ErrorUnknownFile(item) => item.to_value(),
-        Self::ErrorUnknownTags(item) => item.to_value(),
-        }
-    }
 }
 
 pub fn create_resolvers_map() -> libgql::executor::Resolvers<'static, super::scalar::ExampleScalar, ()> {
@@ -3191,8 +2725,8 @@ pub fn create_resolvers_map() -> libgql::executor::Resolvers<'static, super::sca
     }
 }
 
-pub fn create_parse_registry() -> libgql::executor::IndexMapRegistry<super::scalar::ExampleScalar> {
-    let mut registry = libgql::executor::IndexMapRegistry::<super::scalar::ExampleScalar>::default();
+pub fn create_parse_registry() -> libgql::executor::HashMapRegistry<super::scalar::ExampleScalar> {
+    let mut registry = libgql::executor::HashMapRegistry::<super::scalar::ExampleScalar>::default();
     registry.add_input::<DateRange>("DateRange");
     registry.add_input::<EventFiltersIn>("EventFiltersIn");
     registry.add_input::<FileSortBy>("FileSortBy");
@@ -3215,15 +2749,15 @@ pub fn create_parse_registry() -> libgql::executor::IndexMapRegistry<super::scal
     registry.add_enum::<ESortDirection>("ESortDirection");
     registry.add_enum::<EUserField>("EUserField");
     registry.add_enum::<EUsersTagField>("EUsersTagField");
-    registry.add_scalar::<i64>("Int64");
-    registry.add_scalar::<()>("Void");
     registry.add_scalar::<bool>("Boolean");
-    registry.add_scalar::<uuid::Uuid>("UUID");
-    registry.add_scalar::<chrono::DateTime<chrono::Utc>>("Datetime");
     registry.add_scalar::<url::Url>("Url");
-    registry.add_scalar::<i32>("Int");
+    registry.add_scalar::<()>("Void");
+    registry.add_scalar::<String>("String");
     registry.add_scalar::<f32>("Float");
     registry.add_scalar::<f32>("Duration");
-    registry.add_scalar::<String>("String");
+    registry.add_scalar::<uuid::Uuid>("UUID");
+    registry.add_scalar::<i32>("Int");
+    registry.add_scalar::<chrono::DateTime<chrono::Utc>>("Datetime");
+    registry.add_scalar::<i64>("Int64");
     return registry;
 }

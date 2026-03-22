@@ -56,9 +56,9 @@ fn generate_create_parse_registry_function(
     scope: &mut codegen::Scope,
 ) {
     let f = scope.new_fn("create_parse_registry").ret(format!(
-        "libgql::executor::IndexMapRegistry<{}>",
+        "libgql::executor::HashMapRegistry<{}>",
         config.scalar_type
-    )).vis("pub").line(format!("let mut registry = libgql::executor::IndexMapRegistry::<{}>::default();", config.scalar_type));
+    )).vis("pub").line(format!("let mut registry = libgql::executor::HashMapRegistry::<{}>::default();", config.scalar_type));
     for input_name in schema.server.inputs.keys() {
         f.line(format!(
             "registry.add_input::<{}>(\"{}\");",
