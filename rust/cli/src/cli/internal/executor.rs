@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     sync::{Arc, atomic::AtomicBool},
 };
 
@@ -421,15 +421,15 @@ async fn execute(args: ParseArgs) {
     parse_registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
     let mut mutation_resolvers =
         libgql::executor::mutations::MutationResolversMap::new();
-    mutation_resolvers.insert("login", Box::new(login_resolver));
+    mutation_resolvers.insert("login", &login_resolver);
     let mut subscription_resolvers =
         libgql::executor::subscriptions::SubscriptionResolversMap::new();
-    subscription_resolvers
-        .insert("getEvents", Box::new(get_events_subscription));
+    subscription_resolvers.insert("getEvents", &get_events_subscription);
     let resolvers = libgql::executor::Resolvers {
         queries: libgql::executor::queries::QueryResolversMap::new(),
         mutations: mutation_resolvers,
         subscriptions: subscription_resolvers,
+        object_fields: libgql::executor::object::ObjectFieldResolversMap::new(),
     };
     let operation_result = libgql::executor::execute(
         &(),
