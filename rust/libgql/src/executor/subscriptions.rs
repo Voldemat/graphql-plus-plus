@@ -13,15 +13,14 @@ pub type SubscriptionResolverFuture<'a, S> = std::pin::Pin<
         dyn Future<Output = Result<SubscriptionResolverStream<S>, String>> + 'a,
     >,
 >;
-pub type SubscriptionResolver<S, C> = Box<
+pub type SubscriptionResolver<S, C> =
     dyn for<'a> Fn(
         &'a C,
         &'a ResolvedVariables,
-    ) -> SubscriptionResolverFuture<'a, S>,
->;
+    ) -> SubscriptionResolverFuture<'a, S>;
 
-pub type SubscriptionResolversMap<S, C> =
-    HashMap<&'static str, SubscriptionResolver<S, C>>;
+pub type SubscriptionResolversMap<'a, S, C> =
+    HashMap<&'a str, &'a SubscriptionResolver<S, C>>;
 
 pub async fn execute_subscription_operation<
     'args,
@@ -31,8 +30,12 @@ pub async fn execute_subscription_operation<
     S: Scalar,
 >(
     context: &'args C,
-    resolvers: &'args SubscriptionResolversMap<S, C>,
-    query_resolvers: &'args super::queries::QueryResolversMap<S, C>,
+    resolvers: &'args SubscriptionResolversMap<'args, S, C>,
+    object_field_resolvers: &'args super::object::ObjectFieldResolversMap<
+        'args,
+        S,
+        C,
+    >,
     operation: client::ast::Operation,
     variables: ResolvedVariables,
 ) -> Result<
@@ -66,9 +69,9 @@ pub async fn execute_subscription_operation<
         let vars2 = vars;
         while let Some(value) = futures::StreamExt::next(&mut stream.as_mut()).await {
 
-            let serialized_value = super::queries::execute_potential_selection_and_serialize(
+            let serialized_value = super::object::execute_potential_selection_and_serialize(
                 context,
-                query_resolvers,
+                object_field_resolvers,
                 value.to_value()?,
                 selection.selection.as_ref(),
                 &vars2.as_ref(),

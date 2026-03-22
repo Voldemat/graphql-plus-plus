@@ -1,6 +1,7 @@
 pub mod ast;
 pub mod hashmap_registry;
 pub mod mutations;
+pub mod object;
 pub mod queries;
 pub mod registry;
 pub mod scalar;
@@ -40,10 +41,11 @@ pub enum OperationResult<
     Stream(std::pin::Pin<Box<TStream>>),
 }
 
-pub struct Resolvers<S: Scalar, C> {
-    pub queries: queries::QueryResolversMap<S, C>,
-    pub mutations: mutations::MutationResolversMap<S, C>,
-    pub subscriptions: subscriptions::SubscriptionResolversMap<S, C>,
+pub struct Resolvers<'a, S: Scalar, C> {
+    pub queries: queries::QueryResolversMap<'a, S, C>,
+    pub mutations: mutations::MutationResolversMap<'a, S, C>,
+    pub subscriptions: subscriptions::SubscriptionResolversMap<'a, S, C>,
+    pub object_fields: object::ObjectFieldResolversMap<'a, S, C>,
 }
 
 async fn execute_operation<
@@ -54,7 +56,7 @@ async fn execute_operation<
     T: ParseRegistry<S>,
 >(
     context: &'args C,
-    resolvers: &'args Resolvers<S, C>,
+    resolvers: &'args Resolvers<'args, S, C>,
     parse_registry: &'args T,
     operation: client::ast::Operation,
     variables: Values<S>,
@@ -75,6 +77,7 @@ async fn execute_operation<
             queries::execute_query_operation(
                 context,
                 &resolvers.queries,
+                &resolvers.object_fields,
                 operation,
                 resolved_variables,
             )
@@ -84,7 +87,7 @@ async fn execute_operation<
             mutations::execute_mutation_operation(
                 context,
                 &resolvers.mutations,
-                &resolvers.queries,
+                &resolvers.object_fields,
                 operation,
                 resolved_variables,
             )
@@ -94,7 +97,7 @@ async fn execute_operation<
             subscriptions::execute_subscription_operation(
                 context,
                 &resolvers.subscriptions,
-                &resolvers.queries,
+                &resolvers.object_fields,
                 operation,
                 resolved_variables,
             )
@@ -112,7 +115,7 @@ pub async fn execute<
 >(
     context: &'args C,
     registry: &'args type_registry::TypeRegistry,
-    resolvers: &'args Resolvers<S, C>,
+    resolvers: &'args Resolvers<'args, S, C>,
     parse_registry: &'args T,
     client_query: &'client_query str,
     variables: Values<S>,

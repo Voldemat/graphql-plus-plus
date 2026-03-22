@@ -3,19 +3,18 @@ use std::collections::HashMap;
 use crate::parsers::schema::client;
 
 use super::ast::{ResolverFuture, Value, Values};
-use super::queries::QueryResolversMap;
 use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
 
 pub type MutationResolver<S, C> =
-    Box<dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S>>;
-pub type MutationResolversMap<S, C> =
-    HashMap<&'static str, MutationResolver<S, C>>;
+    dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S>;
+pub type MutationResolversMap<'a, S, C> =
+    HashMap<&'a str, &'a MutationResolver<S, C>>;
 
 async fn execute_field<C, S: Scalar>(
     context: &C,
-    mutation_resolvers: &MutationResolversMap<S, C>,
-    query_resolvers: &QueryResolversMap<S, C>,
+    mutation_resolvers: &MutationResolversMap<'_, S, C>,
+    object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
     field: &client::ast::FieldSelection,
     variables: &ResolvedVariables,
 ) -> Result<Value<S>, String> {
@@ -26,9 +25,9 @@ async fn execute_field<C, S: Scalar>(
             })?;
         resolver(context, variables).await?
     };
-    super::queries::execute_potential_selection_and_serialize(
+    super::object::execute_potential_selection_and_serialize(
         context,
-        query_resolvers,
+        object_field_resolvers,
         value.to_value()?,
         field.selection.as_ref(),
         variables,
@@ -38,8 +37,8 @@ async fn execute_field<C, S: Scalar>(
 
 async fn execute_fragment<C, S: Scalar>(
     context: &C,
-    mutation_resolvers: &MutationResolversMap<S, C>,
-    query_resolvers: &QueryResolversMap<S, C>,
+    mutation_resolvers: &MutationResolversMap<'_, S, C>,
+    object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
     spec: &client::ast::FragmentSpec,
     variables: &ResolvedVariables,
 ) -> Result<Vec<(String, Value<S>)>, String> {
@@ -48,7 +47,7 @@ async fn execute_fragment<C, S: Scalar>(
             execute_object_selection_set(
                 context,
                 mutation_resolvers,
-                query_resolvers,
+                object_field_resolvers,
                 &obj.selections,
                 variables,
             )
@@ -65,15 +64,15 @@ async fn execute_fragment<C, S: Scalar>(
 
 async fn execute_field_selection<C, S: Scalar>(
     context: &C,
-    mutation_resolvers: &MutationResolversMap<S, C>,
-    query_resolvers: &QueryResolversMap<S, C>,
+    mutation_resolvers: &MutationResolversMap<'_, S, C>,
+    object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
     field: &client::ast::FieldSelection,
     variables: &ResolvedVariables,
 ) -> Result<Vec<(String, Value<S>)>, String> {
     let value = execute_field(
         context,
         mutation_resolvers,
-        query_resolvers,
+        object_field_resolvers,
         field,
         variables,
     )
@@ -83,8 +82,8 @@ async fn execute_field_selection<C, S: Scalar>(
 
 async fn execute_object_selection<C, S: Scalar>(
     context: &C,
-    mutation_resolvers: &MutationResolversMap<S, C>,
-    query_resolvers: &QueryResolversMap<S, C>,
+    mutation_resolvers: &MutationResolversMap<'_, S, C>,
+    object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
     variables: &ResolvedVariables,
     selection: &client::ast::ObjectSelection,
 ) -> Result<Vec<(String, Value<S>)>, String> {
@@ -98,7 +97,7 @@ async fn execute_object_selection<C, S: Scalar>(
             execute_field_selection(
                 context,
                 mutation_resolvers,
-                query_resolvers,
+                object_field_resolvers,
                 field,
                 variables,
             )
@@ -110,7 +109,7 @@ async fn execute_object_selection<C, S: Scalar>(
             execute_fragment(
                 context,
                 mutation_resolvers,
-                query_resolvers,
+                object_field_resolvers,
                 &fragment.spec,
                 variables,
             )
@@ -121,8 +120,8 @@ async fn execute_object_selection<C, S: Scalar>(
 
 async fn execute_object_selection_set<C, S: Scalar>(
     context: &C,
-    mutation_resolvers: &MutationResolversMap<S, C>,
-    query_resolvers: &QueryResolversMap<S, C>,
+    mutation_resolvers: &MutationResolversMap<'_, S, C>,
+    object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
     selections: &[client::ast::ObjectSelection],
     variables: &ResolvedVariables,
 ) -> Result<Vec<(String, Value<S>)>, String> {
@@ -131,7 +130,7 @@ async fn execute_object_selection_set<C, S: Scalar>(
             execute_object_selection(
                 context,
                 mutation_resolvers,
-                query_resolvers,
+                object_field_resolvers,
                 variables,
                 selection,
             )
@@ -146,8 +145,8 @@ async fn execute_object_selection_set<C, S: Scalar>(
 
 pub async fn execute_mutation_operation<C, S: Scalar>(
     context: &C,
-    mutation_resolvers: &MutationResolversMap<S, C>,
-    query_resolvers: &QueryResolversMap<S, C>,
+    mutation_resolvers: &MutationResolversMap<'_, S, C>,
+    object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
     operation: client::ast::Operation,
     variables: ResolvedVariables,
 ) -> Result<Values<S>, String> {
@@ -160,7 +159,7 @@ pub async fn execute_mutation_operation<C, S: Scalar>(
     execute_object_selection_set(
         context,
         mutation_resolvers,
-        query_resolvers,
+        object_field_resolvers,
         &fragment_spec.selections,
         &variables,
     )
