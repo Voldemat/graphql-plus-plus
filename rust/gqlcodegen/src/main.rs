@@ -1,9 +1,12 @@
-use std::{collections::{HashMap, HashSet}, fs::read_to_string};
+use std::{
+    collections::{HashMap, HashSet},
+    fs::read_to_string,
+};
 
-mod generator;
-mod schema;
 mod generated;
+mod generator;
 mod scalar;
+mod schema;
 
 fn run_schema() {
     let server_schema: schema::server::schema::Schema =
@@ -33,9 +36,12 @@ fn run_schema() {
             scalars_mapping: scalars_mapping,
             scalar_type: "super::scalar::ExampleScalar".into(),
             resolvers: generator::config::ResolversConfig {
-                context_type: "()".to_string()
+                context_type: "()".to_string(),
             },
-            field_to_resolver: HashSet::new()
+            field_to_resolver: HashSet::from_iter([(
+                "DealEntry".into(),
+                "value".into(),
+            )]),
         },
         &schema::Schema {
             server: server_schema,

@@ -894,14 +894,22 @@ impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Deal
 
 pub struct DealEntry {
     pub column_name: String,
-    pub value: Tag,
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DealEntry {
     fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DealEntry", std::collections::HashMap::from_iter([("columnName", &self.column_name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("value", &self.value as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DealEntry", std::collections::HashMap::from_iter([("columnName", &self.column_name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
+}
+
+async fn deal_entry_value(context: &()) -> Result<Tag, String> {
+    todo!()
+}
+
+fn deal_entry_value_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+    Box::pin(async move {
+        deal_entry_value(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+    })
 }
 
 pub struct DealInfo {

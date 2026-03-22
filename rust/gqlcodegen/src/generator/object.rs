@@ -68,149 +68,6 @@ fn generate_object_field_spec_type(
     }
 }
 
-fn generate_object_type_value(
-    config: &Config,
-    input_expression: &str,
-    type_spec: &schema::server::object::ObjectType,
-) -> String {
-    match type_spec {
-        schema::server::object::ObjectType::ObjectType { name: _ } => {
-            format!(
-                "TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()",
-                config.scalar_type, input_expression
-            )
-        }
-        schema::server::object::ObjectType::Union { name: _ } => {
-            format!(
-                "TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()",
-                config.scalar_type, input_expression
-            )
-        }
-        schema::server::object::ObjectType::InterfaceType { name: _ } => {
-            format!(
-                "TryInto::<(String, libgql::executor::Values::<{}>)>::try_into({})?.into()",
-                config.scalar_type, input_expression
-            )
-        }
-        schema::server::object::ObjectType::Enum { name } => {
-            format!(
-                "<{} as libgql::executor::GQLEnum<{}>>::to_literal_value(&{})?",
-                name, config.scalar_type, input_expression
-            )
-        }
-        schema::server::object::ObjectType::Scalar { name } => {
-            format!(
-                "<{} as libgql::executor::GQLScalar<{}>>::to_literal_value(&{})?",
-                config.scalars_mapping[name],
-                config.scalar_type,
-                input_expression
-            )
-        }
-    }
-}
-
-fn generate_object_non_callable_field_spec_value(
-    config: &Config,
-    input_expression: &str,
-    spec: &schema::server::object::ObjectNonCallableFieldSpec,
-) -> String {
-    match spec {
-        schema::server::object::ObjectNonCallableFieldSpec::Literal(
-            literal,
-        ) => {
-            format!(
-                "libgql::executor::NonNullableValue::Literal({})",
-                generate_object_type_value(
-                    config,
-                    input_expression,
-                    &literal.field_type
-                )
-            )
-        }
-        schema::server::object::ObjectNonCallableFieldSpec::Array(array) => {
-            format!(
-                "libgql::executor::NonNullableValue::Array({}.into_iter().map(|element| Ok({})).collect::<Result<Vec<_>, String>>()?)",
-                input_expression,
-                generate_object_field_value(
-                    config,
-                    "element",
-                    array.nullable,
-                    array.field_type.as_ref()
-                )
-            )
-        }
-    }
-}
-
-fn generate_object_field_value(
-    config: &Config,
-    input_expression: &str,
-    nullable: bool,
-    spec: &schema::server::object::ObjectNonCallableFieldSpec,
-) -> String {
-    if !nullable {
-        format!(
-            "libgql::executor::Value::NonNullable({})",
-            generate_object_non_callable_field_spec_value(
-                config,
-                input_expression,
-                spec
-            )
-        )
-    } else {
-        format!(
-            "{}.map(|v| -> Result<libgql::executor::Value<{}>, String> {{Ok(libgql::executor::Value::NonNullable({}))}}).transpose()?.unwrap_or(libgql::executor::Value::Null)",
-            input_expression,
-            config.scalar_type,
-            generate_object_non_callable_field_spec_value(config, "v", spec)
-        )
-    }
-}
-
-fn generate_object_fields_value(
-    config: &Config,
-    fields: &indexmap::IndexMap<String, schema::server::object::ObjectField>,
-) -> String {
-    let mut s = "[".to_string();
-    for (field_name, nullable, spec) in
-        fields
-            .iter()
-            .filter_map(|(field_name, field)| match &field.spec {
-                schema::server::object::ObjectFieldSpec::Literal(l) => Some((
-                    field_name,
-                    field.nullable,
-                    schema::server::object::ObjectNonCallableFieldSpec::Literal(
-                        l.clone(),
-                    ),
-                )),
-                schema::server::object::ObjectFieldSpec::Array(a) => Some((
-                    field_name,
-                    field.nullable,
-                    schema::server::object::ObjectNonCallableFieldSpec::Array(
-                        a.clone(),
-                    ),
-                )),
-                schema::server::object::ObjectFieldSpec::Callable(_) => None,
-            })
-    {
-        s += &format!(
-            "(\"{}\".to_string(), {}),\n",
-            field_name,
-            generate_object_field_value(
-                config,
-                &format!(
-                    "self.{}",
-                    super::shared::format_field_name(field_name)
-                ),
-                nullable,
-                &spec
-            )
-        )
-    }
-    s += "]";
-    return s;
-}
-
 pub fn generate_definition(
     config: &Config,
     scope: &mut codegen::Scope,
@@ -221,12 +78,14 @@ pub fn generate_definition(
     let mut local_fields = Vec::new();
     for (name, field) in &object.fields {
         if let ObjectFieldSpec::Callable(_) = field.spec {
-            resolver_fields.push((&object.name, field));
+            resolver_fields.push((name, field));
+            continue;
         } else if config
             .field_to_resolver
             .contains(&(object.name.clone(), name.clone()))
         {
-            resolver_fields.push((&object.name, field));
+            resolver_fields.push((name, field));
+            continue;
         }
         local_fields.push(name);
         let field_name = super::shared::format_field_name(name);
@@ -258,76 +117,83 @@ pub fn generate_definition(
         ))
         .line(format!("Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, \"{}\", std::collections::HashMap::from_iter([{}]))))", object.name, local_fields_str));
 
-    return Vec::new();
+    return resolver_fields
+        .iter()
+        .map(|(name, field)| {
+            generate_resolver_nodes(config, scope, &object.name, name, field);
+            (object.name.to_string(), name.to_string())
+        })
+        .collect();
 }
 
-pub fn generate_root_object_definitions(
+pub fn generate_resolver_nodes(
     config: &Config,
     scope: &mut codegen::Scope,
-    object: &schema::server::object::Object,
-) -> Vec<String> {
-    object.fields.iter().map(|(field_name, field)| {
-        let rust_name = super::shared::format_field_name(field_name);
-        let object_rust_name = super::shared::format_field_name(&object.name);
-        let resolver_fn_name = format!("{}_{}", object_rust_name, rust_name);
-        let resolver_fn = scope
-            .new_fn(&resolver_fn_name)
-            .ret(format!(
-                "Result<{}, String>",
+    object_name: &str,
+    field_name: &str,
+    field: &ObjectField,
+) {
+    let rust_name = super::shared::format_field_name(field_name);
+    let object_rust_name = super::shared::format_field_name(&object_name);
+    let resolver_fn_name = format!("{}_{}", object_rust_name, rust_name);
+    let resolver_fn = scope
+        .new_fn(&resolver_fn_name)
+        .ret(format!(
+            "Result<{}, String>",
+            super::shared::generate_field_type(
+                config,
+                field,
+                generate_object_field_spec_type,
+                false
+            )
+        ))
+        .line("todo!()")
+        .set_async(true);
+    resolver_fn.arg("context", format!("&{}", config.resolvers.context_type));
+    let arguments_option = field.spec.get_arguments();
+    let mut call_arguments = vec!["context".to_string()];
+    let mut arg_lines = Vec::new();
+    if let Some(arguments) = arguments_option {
+        for (arg_name, arg) in arguments {
+            let arg_rust_name = super::shared::format_field_name(arg_name);
+            resolver_fn.arg(
+                &arg_rust_name,
                 super::shared::generate_field_type(
                     config,
-                    field,
-                    generate_object_field_spec_type,
-                    false
-                )
-            ))
-            .line("todo!()")
-            .set_async(true);
-        resolver_fn
-            .arg("context", format!("&{}", config.resolvers.context_type));
-        let arguments_option = field.spec.get_arguments();
-        let mut call_arguments = vec!["context".to_string()];
-        let mut arg_lines = Vec::new();
-        if let Some(arguments) = arguments_option {
-            for (arg_name, arg) in arguments {
-                let arg_rust_name = super::shared::format_field_name(arg_name);
-                resolver_fn.arg(
-                    &arg_rust_name,
-                    super::shared::generate_field_type(
-                        config,
-                        arg,
-                        super::input::generate_input_field_spec_type,
-                        true,
-                    ),
-                );
-                arg_lines.push(format!(
-                    "let {} = {};",
-                    arg_rust_name,
-                    super::input::generate_extract_arg_expression(
-                        config,
-                        "variables",
-                        arg_name,
-                        arg
-                    )
-                ));
-                call_arguments.push(arg_rust_name);
-            }
-        }
-        let call_arguments_str = call_arguments.join(", ");
-
-        let wrapper_fn = scope
-            .new_fn(format!("{}_{}_wrapper", object_rust_name, rust_name))
-            .generic("'args");
-        if object.name == "Query" {
-            wrapper_fn.arg(
-                "root_any_ref",
-                format!(
-                    "&'args libgql::executor::ast::ResolverRoot<{}>",
-                    config.scalar_type
+                    arg,
+                    super::input::generate_input_field_spec_type,
+                    true,
                 ),
             );
-        };
+            arg_lines.push(format!(
+                "let {} = {};",
+                arg_rust_name,
+                super::input::generate_extract_arg_expression(
+                    config,
+                    "variables",
+                    arg_name,
+                    arg
+                )
+            ));
+            call_arguments.push(arg_rust_name);
+        }
+    }
+    let call_arguments_str = call_arguments.join(", ");
+
+    let wrapper_fn = scope
+        .new_fn(format!("{}_{}_wrapper", object_rust_name, rust_name))
+        .generic("'args");
+    if object_name == "Query" {
         wrapper_fn.arg(
+            "root_any_ref",
+            format!(
+                "&'args libgql::executor::ast::ResolverRoot<{}>",
+                config.scalar_type
+            ),
+        );
+    };
+    wrapper_fn
+        .arg(
             "context",
             format!("&'args {}", config.resolvers.context_type),
         )
@@ -336,15 +202,34 @@ pub fn generate_root_object_definitions(
             "libgql::executor::ast::ResolverFuture<'args, {}>",
             config.scalar_type
         ));
-        for line in arg_lines {
-            wrapper_fn.line(line);
-        }
-        wrapper_fn.line("Box::pin(async move {");
-        wrapper_fn.line(format!(
-            "    {}({}).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<{}>>)",
-            resolver_fn_name, call_arguments_str, config.scalar_type
-        ));
-        wrapper_fn.line("})");
-        field_name.clone()
-    }).collect()
+    for line in arg_lines {
+        wrapper_fn.line(line);
+    }
+    wrapper_fn.line("Box::pin(async move {");
+    wrapper_fn.line(format!(
+        "    {}({}).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<{}>>)",
+        resolver_fn_name, call_arguments_str, config.scalar_type
+    ));
+    wrapper_fn.line("})");
+}
+
+pub fn generate_root_object_definitions(
+    config: &Config,
+    scope: &mut codegen::Scope,
+    object: &schema::server::object::Object,
+) -> Vec<String> {
+    object
+        .fields
+        .iter()
+        .map(|(field_name, field)| {
+            generate_resolver_nodes(
+                config,
+                scope,
+                &object.name,
+                field_name,
+                field,
+            );
+            field_name.clone()
+        })
+        .collect()
 }
