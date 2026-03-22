@@ -41,6 +41,7 @@ impl libgql::executor::Scalar for ExampleScalar {
     }
 }
 
+#[libgqlcodegen_macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<ExampleScalar> for i32 {
     fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
@@ -54,18 +55,7 @@ impl libgql::executor::GQLScalar<ExampleScalar> for i32 {
     }
 }
 
-impl libgql::executor::ast::ResolverValue<ExampleScalar> for i32 {
-    fn to_value<'a>(
-        self: &'a Self,
-    ) -> Result<
-        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
-        String,
-    > {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
-            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
-    }
-}
-
+#[libgqlcodegen_macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
     fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
@@ -79,18 +69,7 @@ impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
     }
 }
 
-impl libgql::executor::ast::ResolverValue<ExampleScalar> for f32 {
-    fn to_value<'a>(
-        self: &'a Self,
-    ) -> Result<
-        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
-        String,
-    > {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
-            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
-    }
-}
-
+#[libgqlcodegen_macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<ExampleScalar> for String {
     fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
@@ -104,18 +83,7 @@ impl libgql::executor::GQLScalar<ExampleScalar> for String {
     }
 }
 
-impl libgql::executor::ast::ResolverValue<ExampleScalar> for String {
-    fn to_value<'a>(
-        self: &'a Self,
-    ) -> Result<
-        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
-        String,
-    > {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
-            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
-    }
-}
-
+#[libgqlcodegen_macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<ExampleScalar> for i64 {
     fn from_scalar(scalar: ExampleScalar) -> Result<Self, String> {
         match scalar {
@@ -129,18 +97,7 @@ impl libgql::executor::GQLScalar<ExampleScalar> for i64 {
     }
 }
 
-impl libgql::executor::ast::ResolverValue<ExampleScalar> for i64 {
-    fn to_value<'a>(
-        self: &'a Self,
-    ) -> Result<
-        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
-        String,
-    > {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
-            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
-    }
-}
-
+#[libgqlcodegen_macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<ExampleScalar>
     for chrono::DateTime<chrono::Utc>
 {
@@ -160,21 +117,7 @@ impl libgql::executor::GQLScalar<ExampleScalar>
     }
 }
 
-impl libgql::executor::ast::ResolverValue<ExampleScalar>
-    for chrono::DateTime<chrono::Utc>
-{
-
-    fn to_value<'a>(
-        self: &'a Self,
-    ) -> Result<
-        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
-        String,
-    > {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
-            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
-    }
-}
-
+#[libgqlcodegen_macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<ExampleScalar> for uuid::Uuid {
     fn from_scalar(scalar: ExampleScalar) -> Result<Self, String> {
         match scalar {
@@ -190,18 +133,7 @@ impl libgql::executor::GQLScalar<ExampleScalar> for uuid::Uuid {
     }
 }
 
-impl libgql::executor::ast::ResolverValue<ExampleScalar> for uuid::Uuid {
-    fn to_value<'a>(
-        self: &'a Self,
-    ) -> Result<
-        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
-        String,
-    > {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
-            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
-    }
-}
-
+#[libgqlcodegen_macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<ExampleScalar> for bool {
     fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
@@ -215,18 +147,7 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
     }
 }
 
-impl libgql::executor::ast::ResolverValue<ExampleScalar> for bool {
-    fn to_value<'a>(
-        self: &'a Self,
-    ) -> Result<
-        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
-        String,
-    > {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
-            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
-    }
-}
-
+#[libgqlcodegen_macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<ExampleScalar> for url::Url {
     fn from_scalar(s: ExampleScalar) -> Result<Self, String> {
         match s {
@@ -242,18 +163,7 @@ impl libgql::executor::GQLScalar<ExampleScalar> for url::Url {
     }
 }
 
-impl libgql::executor::ast::ResolverValue<ExampleScalar> for url::Url {
-    fn to_value<'a>(
-        self: &'a Self,
-    ) -> Result<
-        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
-        String,
-    > {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
-            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
-    }
-}
-
+#[libgqlcodegen_macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<ExampleScalar> for () {
     fn from_scalar(_: ExampleScalar) -> Result<Self, String> {
         return Ok(());
@@ -261,16 +171,5 @@ impl libgql::executor::GQLScalar<ExampleScalar> for () {
 
     fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
         Ok(ExampleScalar::String("".to_string()))
-    }
-}
-
-impl libgql::executor::ast::ResolverValue<ExampleScalar> for () {
-    fn to_value<'a>(
-        self: &'a Self,
-    ) -> Result<
-        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
-        String,
-    > {
-        Ok(None)
     }
 }
