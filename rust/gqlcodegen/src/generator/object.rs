@@ -73,7 +73,11 @@ pub fn generate_definition(
     scope: &mut codegen::Scope,
     object: &schema::server::object::Object,
 ) -> indexmap::IndexMap<(String, String), String> {
-    let local = scope.new_struct(&object.name).vis("pub");
+    let local = scope.new_struct(&object.name).vis("pub")
+        .derive("libgqlcodegen::macros::GQLObject")
+        .r#macro(format!(
+            "#[gql(scalar = {})]", config.scalar_type)
+        );
     let mut resolver_fields = Vec::<(&String, &ObjectField)>::new();
     let mut local_fields = Vec::new();
     for (name, field) in &object.fields {
@@ -101,22 +105,6 @@ pub fn generate_definition(
         field.visibility = Some("pub".into());
         local.push_field(field);
     }
-    let resolver_value_impl = scope.new_impl(&object.name).impl_trait(format!(
-        "libgql::executor::ast::ResolverValue<{}>",
-        config.scalar_type
-    ));
-    let local_fields_str = local_fields.iter().map(|f|
-        format!("(\"{}\", &self.{} as &libgql::executor::ast::ResolverRoot<{}>)", f, super::shared::format_field_name(f), config.scalar_type)).collect::<Vec<_>>().join(",\n");
-    resolver_value_impl
-        .new_fn("to_value")
-        .generic("'a")
-        .arg("self", "&'a Self")
-        .ret(format!(
-            "Result<libgql::executor::ast::ResolverIntrospectionValue<'a, {}>, String>",
-            config.scalar_type
-        ))
-        .line(format!("Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, \"{}\", std::collections::HashMap::from_iter([{}]))))", object.name, local_fields_str));
-
     return resolver_fields
         .iter()
         .map(|(name, field)| {

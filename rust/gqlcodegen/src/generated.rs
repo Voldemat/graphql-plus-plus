@@ -693,26 +693,20 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UsersTagSortBy
     }
 }
 
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct BooleanObject {
     pub bvalue: bool,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for BooleanObject {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "BooleanObject", std::collections::HashMap::from_iter([("bvalue", &self.bvalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct DatetimeObject {
     pub dvalue: chrono::DateTime<chrono::Utc>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DatetimeObject {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DatetimeObject", std::collections::HashMap::from_iter([("dvalue", &self.dvalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct DealColumn {
     pub available_values: Vec<String>,
     pub id: uuid::Uuid,
@@ -720,23 +714,10 @@ pub struct DealColumn {
     pub r#type: EDealColumnType,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DealColumn {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DealColumn", std::collections::HashMap::from_iter([("availableValues", &self.available_values as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("name", &self.name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("type", &self.r#type as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct DealEntry {
     pub column_name: String,
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DealEntry {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DealEntry", std::collections::HashMap::from_iter([("columnName", &self.column_name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
 }
 
 async fn deal_entry_value(root: &DealEntry, context: &()) -> Result<Tag, String> {
@@ -749,400 +730,244 @@ fn deal_entry_value_wrapper<'args>(root: &'args libgql::executor::ast::ResolverR
     })
 }
 
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct DealInfo {
     pub stage_to_worktypes_map: Vec<StageToWorktypesMapEntry>,
     pub values: Vec<DealEntry>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DealInfo {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DealInfo", std::collections::HashMap::from_iter([("stageToWorktypesMap", &self.stage_to_worktypes_map as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("values", &self.values as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorAlreadyApprovedByAdmin {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyApprovedByAdmin {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorAlreadyApprovedByAdmin", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorAlreadyDone {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyDone {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorAlreadyDone", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorAlreadyExists {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyExists {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorAlreadyExists", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorAlreadyPending {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyPending {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorAlreadyPending", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorCantAddAutotags {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorCantAddAutotags {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorCantAddAutotags", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorChangeForbidden {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorChangeForbidden {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorChangeForbidden", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorDateRangeIsInvalid {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorDateRangeIsInvalid {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorDateRangeIsInvalid", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorEmailCollision {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorEmailCollision {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorEmailCollision", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorFileNotUploaded {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorFileNotUploaded {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorFileNotUploaded", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorFilesChangeForbidden {
     pub ids: Vec<uuid::Uuid>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorFilesChangeForbidden {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorFilesChangeForbidden", std::collections::HashMap::from_iter([("ids", &self.ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorGroupNotFound {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorGroupNotFound {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorGroupNotFound", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorInvalidCredentials {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidCredentials {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidCredentials", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorInvalidEmail {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidEmail {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidEmail", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorInvalidGroupName {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidGroupName {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidGroupName", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorInvalidLimitOfDownloadsPerDay {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidLimitOfDownloadsPerDay {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidLimitOfDownloadsPerDay", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorInvalidOTPCode {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidOTPCode {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidOTPCode", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorInvalidPassword {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidPassword {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidPassword", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorInvalidToken {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidToken {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidToken", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorInvalidUserName {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidUserName {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidUserName", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorMultipartUploadFileIsTooBig {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorMultipartUploadFileIsTooBig {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorMultipartUploadFileIsTooBig", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorMultipartUploadFileIsTooLight {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorMultipartUploadFileIsTooLight {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorMultipartUploadFileIsTooLight", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorMultipartUploadFilePartSizeIsTooBig {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorMultipartUploadFilePartSizeIsTooBig {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorMultipartUploadFilePartSizeIsTooBig", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorMultipartUploadFilePartSizeIsTooSmall {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorMultipartUploadFilePartSizeIsTooSmall {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorMultipartUploadFilePartSizeIsTooSmall", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorNoDealTag {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorNoDealTag {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorNoDealTag", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorNotFound {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorNotFound {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorNotFound", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorOTPCodeExpired {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorOTPCodeExpired {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorOTPCodeExpired", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorOTPTokenExpired {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorOTPTokenExpired {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorOTPTokenExpired", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorPutUploadFileIsTooBig {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorPutUploadFileIsTooBig {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorPutUploadFileIsTooBig", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownFile {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownFile {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownFile", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownFiles {
     pub ids: Vec<uuid::Uuid>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownFiles {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownFiles", std::collections::HashMap::from_iter([("ids", &self.ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownGroupIds {
     pub group_ids: Vec<uuid::Uuid>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownGroupIds {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownGroupIds", std::collections::HashMap::from_iter([("groupIds", &self.group_ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownGroups {
     pub group_ids: Vec<uuid::Uuid>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownGroups {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownGroups", std::collections::HashMap::from_iter([("groupIds", &self.group_ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownParentId {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownParentId {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownParentId", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownSessionId {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownSessionId {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownSessionId", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownTags {
     pub tag_ids: Vec<uuid::Uuid>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownTags {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownTags", std::collections::HashMap::from_iter([("tagIds", &self.tag_ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownUser {
     pub a: Option<bool>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownUser {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownUser", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct ErrorUnknownUsers {
     pub user_ids: Vec<uuid::Uuid>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownUsers {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownUsers", std::collections::HashMap::from_iter([("userIds", &self.user_ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileDeleted {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileDeleted {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileDeleted", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileDownloadRequested {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub decision: Option<bool>,
@@ -1150,27 +975,15 @@ pub struct EventFileDownloadRequested {
     pub user: User,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileDownloadRequested {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileDownloadRequested", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("decision", &self.decision as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("user", &self.user as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileDownloaded {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileDownloaded {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileDownloaded", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileTagsEdited {
     pub added_tags: Vec<Tag>,
     pub created_at: chrono::DateTime<chrono::Utc>,
@@ -1178,27 +991,15 @@ pub struct EventFileTagsEdited {
     pub removed_tags: Vec<Tag>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileTagsEdited {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileTagsEdited", std::collections::HashMap::from_iter([("addedTags", &self.added_tags as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("removedTags", &self.removed_tags as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventFileUploaded {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub file: File,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileUploaded {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileUploaded", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventTagApprovalIsRequested {
     pub already_in_catalog: bool,
     pub author: User,
@@ -1206,25 +1007,14 @@ pub struct EventTagApprovalIsRequested {
     pub tag: Tag,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventTagApprovalIsRequested {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventTagApprovalIsRequested", std::collections::HashMap::from_iter([("alreadyInCatalog", &self.already_in_catalog as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("author", &self.author as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("tag", &self.tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct EventsList {
     pub events: Vec<Event>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventsList {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventsList", std::collections::HashMap::from_iter([("events", &self.events as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct File {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub filename: String,
@@ -1235,42 +1025,22 @@ pub struct File {
     pub user: User,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for File {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "File", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("filename", &self.filename as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("mimeType", &self.mime_type as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("previewUrl", &self.preview_url as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("sizeInBytes", &self.size_in_bytes as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("user", &self.user as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct FilesDealInfo {
     pub deal_info: DealInfo,
     pub deal_name: Tag,
     pub unset_columns: Vec<DealColumn>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for FilesDealInfo {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "FilesDealInfo", std::collections::HashMap::from_iter([("dealInfo", &self.deal_info as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("dealName", &self.deal_name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("unsetColumns", &self.unset_columns as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct FloatObject {
     pub fvalue: f32,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for FloatObject {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "FloatObject", std::collections::HashMap::from_iter([("fvalue", &self.fvalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct Group {
     pub first_10_tags: Vec<Tag>,
     pub id: uuid::Uuid,
@@ -1278,57 +1048,30 @@ pub struct Group {
     pub name: String,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Group {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "Group", std::collections::HashMap::from_iter([("first10Tags", &self.first_10_tags as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("limitOfDownloadsPerDay", &self.limit_of_downloads_per_day as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("name", &self.name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct GroupUser {
     pub in_group: bool,
     pub user: User,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GroupUser {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "GroupUser", std::collections::HashMap::from_iter([("inGroup", &self.in_group as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("user", &self.user as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct GroupUserList {
     pub users: Vec<GroupUser>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GroupUserList {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "GroupUserList", std::collections::HashMap::from_iter([("users", &self.users as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct IntObject {
     pub ivalue: i32,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for IntObject {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "IntObject", std::collections::HashMap::from_iter([("ivalue", &self.ivalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct MultipartUploadSession {
     pub id: uuid::Uuid,
     pub initial_upload_ur_ls: Vec<UploadUrl>,
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for MultipartUploadSession {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "MultipartUploadSession", std::collections::HashMap::from_iter([("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("initialUploadURLs", &self.initial_upload_ur_ls as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
 }
 
 async fn mutation_add_tags_to_files(context: &(), file_ids: &Vec<uuid::Uuid>, tag_ids: &Vec<uuid::Uuid>) -> Result<Option<AddTagsToFilesError>, String> {
@@ -1678,16 +1421,14 @@ fn mutation_update_files_autotags_wrapper<'args>(context: &'args (), variables: 
     })
 }
 
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct OTPToken {
     pub token: String,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for OTPToken {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "OTPToken", std::collections::HashMap::from_iter([("token", &self.token as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct PendingUser {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub email: String,
@@ -1696,26 +1437,11 @@ pub struct PendingUser {
     pub ttl: f32,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for PendingUser {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "PendingUser", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("email", &self.email as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("groups", &self.groups as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("name", &self.name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("ttl", &self.ttl as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct PutUploadSession {
     pub id: uuid::Uuid,
     pub upload_url: UploadUrl,
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for PutUploadSession {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "PutUploadSession", std::collections::HashMap::from_iter([("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("uploadURL", &self.upload_url as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
 }
 
 async fn query_get_deal_columns(context: &()) -> Result<Vec<DealColumn>, String> {
@@ -2158,72 +1884,47 @@ fn query_search_tags_wrapper<'args>(context: &'args (), variables: &'args libgql
     })
 }
 
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct SearchFile {
     pub file: File,
     pub tags: Vec<Tag>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for SearchFile {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "SearchFile", std::collections::HashMap::from_iter([("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("tags", &self.tags as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct SearchFileList {
     pub files: Vec<SearchFile>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for SearchFileList {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "SearchFileList", std::collections::HashMap::from_iter([("files", &self.files as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct StageToWorktypesMapEntry {
     pub stage: Tag,
     pub worktypes: Vec<Tag>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for StageToWorktypesMapEntry {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "StageToWorktypesMapEntry", std::collections::HashMap::from_iter([("stage", &self.stage as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("worktypes", &self.worktypes as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct StringEntry {
     pub key: String,
     pub value: String,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for StringEntry {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "StringEntry", std::collections::HashMap::from_iter([("key", &self.key as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("value", &self.value as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct StringList {
     pub values: Vec<String>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for StringList {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "StringList", std::collections::HashMap::from_iter([("values", &self.values as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct StringObject {
     pub svalue: String,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for StringObject {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "StringObject", std::collections::HashMap::from_iter([("svalue", &self.svalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct Tag {
     pub has_children: bool,
     pub id: uuid::Uuid,
@@ -2233,71 +1934,40 @@ pub struct Tag {
     pub value: Option<TagValue>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Tag {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "Tag", std::collections::HashMap::from_iter([("hasChildren", &self.has_children as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("isApproved", &self.is_approved as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("isFavourite", &self.is_favourite as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("tag", &self.tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("value", &self.value as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct TagInfo {
     pub parent_tag: Option<Tag>,
     pub tag: String,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for TagInfo {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "TagInfo", std::collections::HashMap::from_iter([("parentTag", &self.parent_tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("tag", &self.tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct TagList {
     pub list: Vec<Tag>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for TagList {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "TagList", std::collections::HashMap::from_iter([("list", &self.list as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct UploadUrl {
     pub headers: Vec<StringEntry>,
     pub url: url::Url,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UploadUrl {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UploadUrl", std::collections::HashMap::from_iter([("headers", &self.headers as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("url", &self.url as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct UploadUrlList {
     pub urls: Vec<UploadUrl>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UploadUrlList {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UploadUrlList", std::collections::HashMap::from_iter([("urls", &self.urls as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct UrlObject {
     pub uvalue: url::Url,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UrlObject {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UrlObject", std::collections::HashMap::from_iter([("uvalue", &self.uvalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct User {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub email: String,
@@ -2306,38 +1976,18 @@ pub struct User {
     pub ten_groups: Vec<Group>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for User {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "User", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("email", &self.email as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("name", &self.name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("tenGroups", &self.ten_groups as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct UsersList {
     pub users: Vec<User>,
 }
 
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UsersList {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UsersList", std::collections::HashMap::from_iter([("users", &self.users as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
-}
-
+#[derive(libgqlcodegen::macros::GQLObject)]
+#[gql(scalar = super::scalar::ExampleScalar)]
 pub struct UsersTag {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub tag: Tag,
     pub users_count: i32,
-}
-
-impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UsersTag {
-    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
-        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UsersTag", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("tag", &self.tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
-        ("usersCount", &self.users_count as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
-    }
 }
 
 #[derive(libgqlcodegen::macros::GQLUnion)]
@@ -2749,15 +2399,15 @@ pub fn create_parse_registry() -> libgql::executor::HashMapRegistry<super::scala
     registry.add_enum::<ESortDirection>("ESortDirection");
     registry.add_enum::<EUserField>("EUserField");
     registry.add_enum::<EUsersTagField>("EUsersTagField");
-    registry.add_scalar::<bool>("Boolean");
-    registry.add_scalar::<url::Url>("Url");
+    registry.add_scalar::<uuid::Uuid>("UUID");
     registry.add_scalar::<()>("Void");
-    registry.add_scalar::<String>("String");
+    registry.add_scalar::<chrono::DateTime<chrono::Utc>>("Datetime");
     registry.add_scalar::<f32>("Float");
     registry.add_scalar::<f32>("Duration");
-    registry.add_scalar::<uuid::Uuid>("UUID");
-    registry.add_scalar::<i32>("Int");
-    registry.add_scalar::<chrono::DateTime<chrono::Utc>>("Datetime");
     registry.add_scalar::<i64>("Int64");
+    registry.add_scalar::<String>("String");
+    registry.add_scalar::<i32>("Int");
+    registry.add_scalar::<bool>("Boolean");
+    registry.add_scalar::<url::Url>("Url");
     return registry;
 }
