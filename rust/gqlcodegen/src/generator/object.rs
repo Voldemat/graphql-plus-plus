@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::schema::{
     self,
     server::object::{
@@ -72,7 +74,7 @@ pub fn generate_definition(
     config: &Config,
     scope: &mut codegen::Scope,
     object: &schema::server::object::Object,
-) -> Vec<(String, String)> {
+) -> HashMap<(String, String), String> {
     let local = scope.new_struct(&object.name).vis("pub");
     let mut resolver_fields = Vec::<(&String, &ObjectField)>::new();
     let mut local_fields = Vec::new();
@@ -120,8 +122,18 @@ pub fn generate_definition(
     return resolver_fields
         .iter()
         .map(|(name, field)| {
-            generate_resolver_nodes(config, scope, &object.name, name, field);
-            (object.name.to_string(), name.to_string())
+            (
+                (object.name.to_string(), name.to_string()),
+                generate_resolver_nodes(
+                    config,
+                    scope,
+                    &object.name,
+                    name,
+                    field,
+                    true,
+                    true
+                ),
+            )
         })
         .collect();
 }
@@ -132,7 +144,9 @@ pub fn generate_resolver_nodes(
     object_name: &str,
     field_name: &str,
     field: &ObjectField,
-) {
+    has_root: bool,
+    resolver_has_root: bool
+) -> String {
     let rust_name = super::shared::format_field_name(field_name);
     let object_rust_name = super::shared::format_field_name(&object_name);
     let resolver_fn_name = format!("{}_{}", object_rust_name, rust_name);
@@ -149,9 +163,14 @@ pub fn generate_resolver_nodes(
         ))
         .line("todo!()")
         .set_async(true);
+    let mut call_arguments = Vec::new();
+    if resolver_has_root {
+        resolver_fn.arg("root", format!("&{}", object_name));
+        call_arguments.push(format!("(root as &dyn std::any::Any).downcast_ref::<{}>().unwrap()", object_name));
+    };
     resolver_fn.arg("context", format!("&{}", config.resolvers.context_type));
+    call_arguments.push("context".to_string());
     let arguments_option = field.spec.get_arguments();
-    let mut call_arguments = vec!["context".to_string()];
     let mut arg_lines = Vec::new();
     if let Some(arguments) = arguments_option {
         for (arg_name, arg) in arguments {
@@ -180,12 +199,11 @@ pub fn generate_resolver_nodes(
     }
     let call_arguments_str = call_arguments.join(", ");
 
-    let wrapper_fn = scope
-        .new_fn(format!("{}_{}_wrapper", object_rust_name, rust_name))
-        .generic("'args");
-    if object_name == "Query" {
+    let wrapper_fn_name = format!("{}_{}_wrapper", object_rust_name, rust_name);
+    let wrapper_fn = scope.new_fn(&wrapper_fn_name).generic("'args");
+    if has_root {
         wrapper_fn.arg(
-            "root_any_ref",
+            "root",
             format!(
                 "&'args libgql::executor::ast::ResolverRoot<{}>",
                 config.scalar_type
@@ -211,25 +229,30 @@ pub fn generate_resolver_nodes(
         resolver_fn_name, call_arguments_str, config.scalar_type
     ));
     wrapper_fn.line("})");
+    wrapper_fn_name
 }
 
 pub fn generate_root_object_definitions(
     config: &Config,
     scope: &mut codegen::Scope,
     object: &schema::server::object::Object,
-) -> Vec<String> {
+) -> Vec<(String, String)> {
     object
         .fields
         .iter()
         .map(|(field_name, field)| {
-            generate_resolver_nodes(
-                config,
-                scope,
-                &object.name,
-                field_name,
-                field,
-            );
-            field_name.clone()
+            (
+                field_name.clone(),
+                generate_resolver_nodes(
+                    config,
+                    scope,
+                    &object.name,
+                    field_name,
+                    field,
+                    object.name == "Query",
+                    false
+                ),
+            )
         })
         .collect()
 }

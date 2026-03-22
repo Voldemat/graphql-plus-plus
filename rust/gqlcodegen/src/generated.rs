@@ -902,13 +902,13 @@ impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Deal
     }
 }
 
-async fn deal_entry_value(context: &()) -> Result<Tag, String> {
+async fn deal_entry_value(root: &DealEntry, context: &()) -> Result<Tag, String> {
     todo!()
 }
 
-fn deal_entry_value_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn deal_entry_value_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     Box::pin(async move {
-        deal_entry_value(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        deal_entry_value((root as &dyn std::any::Any).downcast_ref::<DealEntry>().unwrap(), context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
     })
 }
 
@@ -1885,7 +1885,7 @@ async fn query_get_deal_columns(context: &()) -> Result<Vec<DealColumn>, String>
     todo!()
 }
 
-fn query_get_deal_columns_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_deal_columns_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     Box::pin(async move {
         query_get_deal_columns(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
     })
@@ -1895,7 +1895,7 @@ async fn query_get_deal_info(context: &(), deal_name: &String) -> Result<GetDeal
     todo!()
 }
 
-fn query_get_deal_info_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_deal_info_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let deal_name = variables.get("dealName").unwrap().downcast_ref::<String>().unwrap();
     Box::pin(async move {
         query_get_deal_info(context, deal_name).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -1906,7 +1906,7 @@ async fn query_get_deals(context: &(), limit: &i32, query: Option<&String>, skip
     todo!()
 }
 
-fn query_get_deals_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_deals_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
@@ -1919,7 +1919,7 @@ async fn query_get_events(context: &(), date_range: &DateRange, filters: &EventF
     todo!()
 }
 
-fn query_get_events_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_events_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let date_range = variables.get("dateRange").unwrap().downcast_ref::<DateRange>().unwrap();
     let filters = variables.get("filters").unwrap().downcast_ref::<EventFiltersIn>().unwrap();
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
@@ -1934,7 +1934,7 @@ async fn query_get_favourite_tags(context: &(), limit: &i32, skip: &i32) -> Resu
     todo!()
 }
 
-fn query_get_favourite_tags_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_favourite_tags_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
     Box::pin(async move {
@@ -1946,7 +1946,7 @@ async fn query_get_file_url(context: &(), id: &uuid::Uuid) -> Result<GetFileURLR
     todo!()
 }
 
-fn query_get_file_url_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_file_url_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     Box::pin(async move {
         query_get_file_url(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -1957,7 +1957,7 @@ async fn query_get_files(context: &(), filters: &Vec<Filter>, limit: &i32, skip:
     todo!()
 }
 
-fn query_get_files_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_files_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let filters = variables.get("filters").unwrap().downcast_ref::<Vec<Filter>>().unwrap();
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
@@ -1972,7 +1972,7 @@ async fn query_get_files_count(context: &(), filters: &Vec<Filter>, tag_ids: &Ve
     todo!()
 }
 
-fn query_get_files_count_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_files_count_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let filters = variables.get("filters").unwrap().downcast_ref::<Vec<Filter>>().unwrap();
     let tag_ids = variables.get("tagIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
     Box::pin(async move {
@@ -1984,7 +1984,7 @@ async fn query_get_files_deal_info(context: &(), file_ids: &Vec<uuid::Uuid>) -> 
     todo!()
 }
 
-fn query_get_files_deal_info_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_files_deal_info_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let file_ids = variables.get("fileIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
     Box::pin(async move {
         query_get_files_deal_info(context, file_ids).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -1995,7 +1995,7 @@ async fn query_get_group_tags(context: &(), id: &uuid::Uuid, limit: &i32, skip: 
     todo!()
 }
 
-fn query_get_group_tags_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_group_tags_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
@@ -2008,7 +2008,7 @@ async fn query_get_group_users(context: &(), group_id: &uuid::Uuid, limit: &i32,
     todo!()
 }
 
-fn query_get_group_users_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_group_users_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let group_id = variables.get("groupId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
@@ -2022,7 +2022,7 @@ async fn query_get_group_users_and_users(context: &(), group_id: &uuid::Uuid, li
     todo!()
 }
 
-fn query_get_group_users_and_users_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_group_users_and_users_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let group_id = variables.get("groupId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
@@ -2037,7 +2037,7 @@ async fn query_get_group_users_total(context: &(), group_id: &uuid::Uuid) -> Res
     todo!()
 }
 
-fn query_get_group_users_total_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_group_users_total_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let group_id = variables.get("groupId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     Box::pin(async move {
         query_get_group_users_total(context, group_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2048,7 +2048,7 @@ async fn query_get_groups(context: &(), limit: &i32, skip: &i32, sort_by: &GetGr
     todo!()
 }
 
-fn query_get_groups_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_groups_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
     let sort_by = variables.get("sortBy").unwrap().downcast_ref::<GetGroupsSortBy>().unwrap();
@@ -2061,7 +2061,7 @@ async fn query_get_groups_total(context: &()) -> Result<i32, String> {
     todo!()
 }
 
-fn query_get_groups_total_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_groups_total_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     Box::pin(async move {
         query_get_groups_total(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
     })
@@ -2071,7 +2071,7 @@ async fn query_get_me(context: &()) -> Result<User, String> {
     todo!()
 }
 
-fn query_get_me_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_me_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     Box::pin(async move {
         query_get_me(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
     })
@@ -2081,7 +2081,7 @@ async fn query_get_my_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<
     todo!()
 }
 
-fn query_get_my_tags_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_my_tags_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
     Box::pin(async move {
@@ -2093,7 +2093,7 @@ async fn query_get_my_tags_count(context: &()) -> Result<i32, String> {
     todo!()
 }
 
-fn query_get_my_tags_count_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_my_tags_count_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     Box::pin(async move {
         query_get_my_tags_count(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
     })
@@ -2103,7 +2103,7 @@ async fn query_get_next_multipart_upload_urls(context: &(), last_part: &i32, lim
     todo!()
 }
 
-fn query_get_next_multipart_upload_urls_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_next_multipart_upload_urls_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let last_part = variables.get("lastPart").unwrap().downcast_ref::<i32>().unwrap();
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let session_id = variables.get("sessionId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
@@ -2116,7 +2116,7 @@ async fn query_get_path_to_tag(context: &(), tag_id: &uuid::Uuid) -> Result<GetP
     todo!()
 }
 
-fn query_get_path_to_tag_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_path_to_tag_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let tag_id = variables.get("tagId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     Box::pin(async move {
         query_get_path_to_tag(context, tag_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2127,7 +2127,7 @@ async fn query_get_pending_users(context: &()) -> Result<Vec<PendingUser>, Strin
     todo!()
 }
 
-fn query_get_pending_users_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_pending_users_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     Box::pin(async move {
         query_get_pending_users(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
     })
@@ -2137,7 +2137,7 @@ async fn query_get_popular_tags(context: &(), limit: &i32, skip: &i32) -> Result
     todo!()
 }
 
-fn query_get_popular_tags_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_popular_tags_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
     Box::pin(async move {
@@ -2149,7 +2149,7 @@ async fn query_get_tag_children(context: &(), tag_id: &uuid::Uuid) -> Result<Get
     todo!()
 }
 
-fn query_get_tag_children_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_tag_children_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let tag_id = variables.get("tagId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     Box::pin(async move {
         query_get_tag_children(context, tag_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2160,7 +2160,7 @@ async fn query_get_tag_info(context: &(), tag_id: &uuid::Uuid) -> Result<GetTagI
     todo!()
 }
 
-fn query_get_tag_info_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_tag_info_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let tag_id = variables.get("tagId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     Box::pin(async move {
         query_get_tag_info(context, tag_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2171,7 +2171,7 @@ async fn query_get_tags(context: &(), limit: &i32, parent_tag_id: Option<&uuid::
     todo!()
 }
 
-fn query_get_tags_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_tags_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let parent_tag_id = variables.get("parentTagId").map(|v| v.downcast_ref::<uuid::Uuid>().unwrap());
     let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
@@ -2185,7 +2185,7 @@ async fn query_get_tags_count(context: &(), parent_tag_id: Option<&uuid::Uuid>, 
     todo!()
 }
 
-fn query_get_tags_count_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_tags_count_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let parent_tag_id = variables.get("parentTagId").map(|v| v.downcast_ref::<uuid::Uuid>().unwrap());
     let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
     Box::pin(async move {
@@ -2197,7 +2197,7 @@ async fn query_get_uploaded_files(context: &(), limit: &i32, skip: &i32, sort_by
     todo!()
 }
 
-fn query_get_uploaded_files_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_uploaded_files_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
     let sort_by = variables.get("sortBy").unwrap().downcast_ref::<FileSortBy>().unwrap();
@@ -2210,7 +2210,7 @@ async fn query_get_uploaded_files_count(context: &()) -> Result<i32, String> {
     todo!()
 }
 
-fn query_get_uploaded_files_count_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_uploaded_files_count_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     Box::pin(async move {
         query_get_uploaded_files_count(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
     })
@@ -2220,7 +2220,7 @@ async fn query_get_users(context: &(), limit: &i32, query: Option<&String>, skip
     todo!()
 }
 
-fn query_get_users_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_users_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
@@ -2234,7 +2234,7 @@ async fn query_get_users_tags(context: &(), limit: &i32, query: Option<&String>,
     todo!()
 }
 
-fn query_get_users_tags_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_users_tags_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
     let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
     let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
@@ -2248,7 +2248,7 @@ async fn query_get_users_tags_count(context: &(), query: Option<&String>) -> Res
     todo!()
 }
 
-fn query_get_users_tags_count_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_users_tags_count_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
     Box::pin(async move {
         query_get_users_tags_count(context, query).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2259,7 +2259,7 @@ async fn query_get_users_total(context: &(), query: Option<&String>) -> Result<i
     todo!()
 }
 
-fn query_get_users_total_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_users_total_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
     Box::pin(async move {
         query_get_users_total(context, query).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2270,7 +2270,7 @@ async fn query_is_allowed_to_download(context: &(), id: &uuid::Uuid) -> Result<I
     todo!()
 }
 
-fn query_is_allowed_to_download_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_is_allowed_to_download_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     Box::pin(async move {
         query_is_allowed_to_download(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2281,7 +2281,7 @@ async fn query_is_tag_exists(context: &(), tag: &String) -> Result<bool, String>
     todo!()
 }
 
-fn query_is_tag_exists_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_is_tag_exists_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let tag = variables.get("tag").unwrap().downcast_ref::<String>().unwrap();
     Box::pin(async move {
         query_is_tag_exists(context, tag).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2292,7 +2292,7 @@ async fn query_retrieve_file(context: &(), id: &uuid::Uuid) -> Result<RetrieveFi
     todo!()
 }
 
-fn query_retrieve_file_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_retrieve_file_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     Box::pin(async move {
         query_retrieve_file(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2303,7 +2303,7 @@ async fn query_retrieve_group(context: &(), id: &uuid::Uuid) -> Result<RetrieveG
     todo!()
 }
 
-fn query_retrieve_group_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_retrieve_group_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
     Box::pin(async move {
         query_retrieve_group(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -2314,7 +2314,7 @@ async fn query_search_tags(context: &(), query: &String) -> Result<Vec<Tag>, Str
     todo!()
 }
 
-fn query_search_tags_wrapper<'args>(root_any_ref: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_search_tags_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
     let query = variables.get("query").unwrap().downcast_ref::<String>().unwrap();
     Box::pin(async move {
         query_search_tags(context, query).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
@@ -3106,5 +3106,85 @@ impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Upda
         Self::ErrorUnknownFile(item) => item.to_value(),
         Self::ErrorUnknownTags(item) => item.to_value(),
         }
+    }
+}
+
+pub fn create_resolvers_map() -> libgql::executor::Resolvers<super::scalar::ExampleScalar, ()> {
+    libgql::executor::Resolvers {
+       queries: libgql::executor::queries::QueryResolversMap::from_iter([
+            (("Query", "getTagsCount"), Box::new(query_get_tags_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getUsersTagsCount"), Box::new(query_get_users_tags_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFilesDealInfo"), Box::new(query_get_files_deal_info_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getMyTagsCount"), Box::new(query_get_my_tags_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "isTagExists"), Box::new(query_is_tag_exists_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getDealInfo"), Box::new(query_get_deal_info_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroupUsers"), Box::new(query_get_group_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "searchTags"), Box::new(query_search_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getDealColumns"), Box::new(query_get_deal_columns_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroupUsersTotal"), Box::new(query_get_group_users_total_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroupsTotal"), Box::new(query_get_groups_total_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFavouriteTags"), Box::new(query_get_favourite_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroups"), Box::new(query_get_groups_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getMe"), Box::new(query_get_me_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("DealEntry", "value"), Box::new(deal_entry_value_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "retrieveGroup"), Box::new(query_retrieve_group_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getPopularTags"), Box::new(query_get_popular_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getUploadedFilesCount"), Box::new(query_get_uploaded_files_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "isAllowedToDownload"), Box::new(query_is_allowed_to_download_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getTags"), Box::new(query_get_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroupTags"), Box::new(query_get_group_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getNextMultipartUploadUrls"), Box::new(query_get_next_multipart_upload_urls_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroupUsersAndUsers"), Box::new(query_get_group_users_and_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getTagInfo"), Box::new(query_get_tag_info_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getUsers"), Box::new(query_get_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getMyTags"), Box::new(query_get_my_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFilesCount"), Box::new(query_get_files_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getTagChildren"), Box::new(query_get_tag_children_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getPathToTag"), Box::new(query_get_path_to_tag_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getEvents"), Box::new(query_get_events_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getUsersTotal"), Box::new(query_get_users_total_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFiles"), Box::new(query_get_files_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "retrieveFile"), Box::new(query_retrieve_file_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getPendingUsers"), Box::new(query_get_pending_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getUploadedFiles"), Box::new(query_get_uploaded_files_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getDeals"), Box::new(query_get_deals_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getUsersTags"), Box::new(query_get_users_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFileURL"), Box::new(query_get_file_url_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>)
+    ]),
+       mutations: libgql::executor::mutations::MutationResolversMap::from_iter([
+            ("createPutFileSession", Box::new(mutation_create_put_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("resetPassword", Box::new(mutation_reset_password_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("confirmUser", Box::new(mutation_confirm_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("logout", Box::new(mutation_logout_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("deleteFiles", Box::new(mutation_delete_files_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("updateFilesAutotags", Box::new(mutation_update_files_autotags_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("updateFile", Box::new(mutation_update_file_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("sendOTPCode", Box::new(mutation_send_otp_code_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("deleteFile", Box::new(mutation_delete_file_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("commitPutFileSession", Box::new(mutation_commit_put_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("createMultipartFileSession", Box::new(mutation_create_multipart_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("approveTag", Box::new(mutation_approve_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("editGroup", Box::new(mutation_edit_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("deleteTag", Box::new(mutation_delete_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("createGroup", Box::new(mutation_create_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("deletePendingUser", Box::new(mutation_delete_pending_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("commitMultipartFileSession", Box::new(mutation_commit_multipart_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("deleteUser", Box::new(mutation_delete_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("editTag", Box::new(mutation_edit_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("createUser", Box::new(mutation_create_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("decideOnDownloadRequest", Box::new(mutation_decide_on_download_request_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("login", Box::new(mutation_login_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("setTagIsFavourite", Box::new(mutation_set_tag_is_favourite_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("removeUserFromGroup", Box::new(mutation_remove_user_from_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("confirmOTPCode", Box::new(mutation_confirm_otp_code_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("changePassword", Box::new(mutation_change_password_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("addUserToGroup", Box::new(mutation_add_user_to_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("deleteGroup", Box::new(mutation_delete_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("createTag", Box::new(mutation_create_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("addTagsToFiles", Box::new(mutation_add_tags_to_files_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>)
+    ]),
+       subscriptions: libgql::executor::subscriptions::SubscriptionResolversMap::from_iter([
+
+    ])
     }
 }
