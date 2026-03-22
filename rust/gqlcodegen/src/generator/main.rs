@@ -5,39 +5,48 @@ use super::config::Config;
 pub fn generate_create_resolvers_map(
     config: &Config,
     scope: &mut codegen::Scope,
-    query_resolvers_map: HashMap<(String, String), String>,
+    query_resolvers_map: HashMap<String, String>,
     mutation_resolvers_map: HashMap<String, String>,
     subscription_resolvers_map: HashMap<String, String>,
+    object_field_resolvers_map: HashMap<(String, String), String>,
 ) {
     let f = scope.new_fn("create_resolvers_map").vis("pub").ret(format!(
-        "libgql::executor::Resolvers<{}, {}>",
+        "libgql::executor::Resolvers<'static, {}, {}>",
         config.scalar_type, config.resolvers.context_type
     ));
-    let query_resolvers_str = query_resolvers_map.into_iter().map(|((object_name, field_name), wrapper_fn)| {
+    let query_resolvers_str = query_resolvers_map.into_iter().map(|(field_name, wrapper_fn)| {
         format!(
-            "((\"{}\", \"{}\"), Box::new({}) as libgql::executor::queries::QueryResolver<{}, {}>)",
-            object_name, field_name, wrapper_fn, config.scalar_type,
+            "(\"{}\", &{} as &libgql::executor::queries::QueryResolver<{}, {}>)",
+            field_name, wrapper_fn, config.scalar_type,
             config.resolvers.context_type
         )
     }).map(|s| format!("        {}", s)).collect::<Vec<_>>().join(",\n");
     let mutation_resolvers_str = mutation_resolvers_map.into_iter().map(|(field_name, wrapper_fn)| {
         format!(
-            "(\"{}\", Box::new({}) as libgql::executor::mutations::MutationResolver<{}, {}>)",
+            "(\"{}\", &{} as &libgql::executor::mutations::MutationResolver<{}, {}>)",
             field_name, wrapper_fn, config.scalar_type,
             config.resolvers.context_type
         )
     }).map(|s| format!("        {}", s)).collect::<Vec<_>>().join(",\n");
     let subscription_resolvers_str = subscription_resolvers_map.into_iter().map(|(field_name, wrapper_fn)| {
         format!(
-            "(\"{}\", Box::new({}) as libgql::executor::subscriptions::SubscriptionResolver<{}, {}>)",
+            "(\"{}\", &{} as &libgql::executor::subscriptions::SubscriptionResolver<{}, {}>)",
             field_name, wrapper_fn, config.scalar_type,
+            config.resolvers.context_type
+        )
+    }).map(|s| format!("        {}", s)).collect::<Vec<_>>().join(",\n");
+    let object_field_resolvers_str = object_field_resolvers_map.into_iter().map(|((object_name, field_name), wrapper_fn)| {
+        format!(
+            "((\"{}\", \"{}\"), &{} as &libgql::executor::object::ObjectFieldResolver<{}, {}>)",
+            object_name, field_name, wrapper_fn, config.scalar_type,
             config.resolvers.context_type
         )
     }).map(|s| format!("        {}", s)).collect::<Vec<_>>().join(",\n");
     f.line("libgql::executor::Resolvers {");
     f.line(format!("   queries: libgql::executor::queries::QueryResolversMap::from_iter([\n{}\n]),", query_resolvers_str));
     f.line(format!("   mutations: libgql::executor::mutations::MutationResolversMap::from_iter([\n{}\n]),", mutation_resolvers_str));
-    f.line(format!("   subscriptions: libgql::executor::subscriptions::SubscriptionResolversMap::from_iter([\n{}\n])", subscription_resolvers_str));
+    f.line(format!("   subscriptions: libgql::executor::subscriptions::SubscriptionResolversMap::from_iter([\n{}\n]),", subscription_resolvers_str));
+    f.line(format!("   object_fields: libgql::executor::object::ObjectFieldResolversMap::from_iter([\n{}\n])", object_field_resolvers_str));
     f.line("}");
 }
 
@@ -79,9 +88,10 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
     for input in schema.server.inputs.values() {
         super::input::generate_definition(config, &mut scope, input);
     }
-    let mut query_resolvers_map = HashMap::<(String, String), String>::new();
+    let mut query_resolvers_map = HashMap::<String, String>::new();
     let mut mutation_resolvers_map = HashMap::<String, String>::new();
     let mut subscription_resolvers_map = HashMap::<String, String>::new();
+    let mut object_field_resolvers_map = HashMap::<(String, String), String>::new();
     for object in schema.server.objects.values() {
         if object.name == "Query" {
             query_resolvers_map.extend(
@@ -89,10 +99,7 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
                     config, &mut scope, object,
                 )
                 .into_iter()
-                .map(|(field, wrapper_fn)| {
-                    (("Query".to_string(), field), wrapper_fn)
-                })
-                .collect::<HashMap<(String, String), String>>(),
+                .collect::<HashMap<String, String>>(),
             )
         } else if object.name == "Mutation" {
             mutation_resolvers_map.extend(
@@ -111,9 +118,9 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
                 .collect::<HashMap<String, String>>(),
             )
         } else {
-            query_resolvers_map.extend(super::object::generate_definition(
+            object_field_resolvers_map.extend(super::object::generate_definition(
                 config, &mut scope, object,
-            ))
+            ).into_iter().collect::<HashMap<(String, String), String>>());
         }
     }
     for union in schema.server.unions.values() {
@@ -125,6 +132,7 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
         query_resolvers_map,
         mutation_resolvers_map,
         subscription_resolvers_map,
+        object_field_resolvers_map
     );
     generate_create_parse_registry_function(config, schema, &mut scope);
     return scope.to_string();

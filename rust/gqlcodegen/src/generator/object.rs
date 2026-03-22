@@ -130,7 +130,6 @@ pub fn generate_definition(
                     &object.name,
                     name,
                     field,
-                    true,
                     true
                 ),
             )
@@ -145,7 +144,6 @@ pub fn generate_resolver_nodes(
     field_name: &str,
     field: &ObjectField,
     has_root: bool,
-    resolver_has_root: bool
 ) -> String {
     let rust_name = super::shared::format_field_name(field_name);
     let object_rust_name = super::shared::format_field_name(&object_name);
@@ -164,7 +162,7 @@ pub fn generate_resolver_nodes(
         .line("todo!()")
         .set_async(true);
     let mut call_arguments = Vec::new();
-    if resolver_has_root {
+    if has_root {
         resolver_fn.arg("root", format!("&{}", object_name));
         call_arguments.push(format!("(root as &dyn std::any::Any).downcast_ref::<{}>().unwrap()", object_name));
     };
@@ -249,7 +247,6 @@ pub fn generate_root_object_definitions(
                     &object.name,
                     field_name,
                     field,
-                    object.name == "Query",
                     false
                 ),
             )
