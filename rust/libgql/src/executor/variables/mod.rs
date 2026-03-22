@@ -7,13 +7,13 @@ use indexmap::IndexMap;
 use crate::parsers::schema::shared;
 
 use super::ast::{LiteralValue, NonNullableValue, Value, Values};
-use super::registry::TypeRegistry;
+use super::registry::ParseRegistry;
 use super::scalar::Scalar;
 
 pub type ResolvedVariable = Box<dyn std::any::Any>;
 pub type ResolvedVariables = HashMap<String, ResolvedVariable>;
 
-fn resolve_type_spec<S: Scalar, R: TypeRegistry<S>>(
+fn resolve_type_spec<S: Scalar, R: ParseRegistry<S>>(
     registry: &R,
     spec: &shared::ast::InputTypeSpec,
     variable: LiteralValue<S>,
@@ -56,7 +56,7 @@ fn resolve_type_spec<S: Scalar, R: TypeRegistry<S>>(
     }
 }
 
-fn resolve_literal<S: Scalar, R: TypeRegistry<S>>(
+fn resolve_literal<S: Scalar, R: ParseRegistry<S>>(
     registry: &R,
     spec: &shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>,
     var: LiteralValue<S>,
@@ -64,7 +64,7 @@ fn resolve_literal<S: Scalar, R: TypeRegistry<S>>(
     return resolve_type_spec(registry, &spec.r#type, var);
 }
 
-fn resolve_operation_parameter<S: Scalar, R: TypeRegistry<S>>(
+fn resolve_operation_parameter<S: Scalar, R: ParseRegistry<S>>(
     registry: &R,
     param: &shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     variable: Value<S>,
@@ -123,7 +123,7 @@ fn resolve_operation_parameter<S: Scalar, R: TypeRegistry<S>>(
     }
 }
 
-pub fn resolve_operation_parameters<S: Scalar, R: TypeRegistry<S>>(
+pub fn resolve_operation_parameters<S: Scalar, R: ParseRegistry<S>>(
     registry: &R,
     op_parameters: &IndexMap<
         String,

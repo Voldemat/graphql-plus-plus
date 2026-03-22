@@ -64,7 +64,11 @@ pub type Values<S> = HashMap<String, Value<S>>;
 
 pub enum NonNullableResolverIntrospectionValue<'a, S: Scalar> {
     Scalar(S),
-    Object(&'a ResolverRoot<S>, &'a str, HashMap<&'a str, &'a ResolverRoot<S>>),
+    Object(
+        &'a ResolverRoot<S>,
+        &'a str,
+        HashMap<&'a str, &'a ResolverRoot<S>>,
+    ),
     Array(Vec<ResolverIntrospectionValue<'a, S>>),
 }
 

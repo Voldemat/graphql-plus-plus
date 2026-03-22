@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::parsers::schema::shared;
 
 use super::ast::{LiteralValue, NonNullableValue, Value, Values};
-use super::registry::TypeRegistry;
+use super::registry::ParseRegistry;
 use super::scalar::Scalar;
 
 pub trait GQLScalar<S: Scalar>: Sized
@@ -311,7 +311,7 @@ impl<S: Scalar + 'static> HashMapRegistry<S> {
     }
 }
 
-impl<S: Scalar> TypeRegistry<S> for HashMapRegistry<S> {
+impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
     fn parse_scalar(
         self: &Self,
         scalar_name: &str,

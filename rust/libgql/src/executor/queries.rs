@@ -7,7 +7,6 @@ use super::ast::{
     NonNullableResolverIntrospectionValue, ResolverFuture,
     ResolverIntrospectionValue, ResolverRoot, Value, Values,
 };
-use super::registry::TypeRegistry;
 use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
 use super::{LiteralValue, NonNullableValue};
@@ -22,16 +21,9 @@ pub type QueryResolver<S, C> = Box<
 pub type QueryResolversMap<S, C> =
     HashMap<(&'static str, &'static str), QueryResolver<S, C>>;
 
-pub fn execute_potential_selection_and_serialize<
-    'a,
-    'b,
-    C,
-    S: Scalar,
-    T: TypeRegistry<S>,
->(
+pub fn execute_potential_selection_and_serialize<'a, 'b, C, S: Scalar>(
     context: &'a C,
     query_resolvers: &'a QueryResolversMap<S, C>,
-    type_registry: &'a T,
     resolver_root_introspection_value: ResolverIntrospectionValue<'a, S>,
     selection: Option<&'a Rc<client::ast::FragmentSpec>>,
     variables: &'a ResolvedVariables,
@@ -55,7 +47,6 @@ pub fn execute_potential_selection_and_serialize<
                 execute_fragment(
                     context,
                     query_resolvers,
-                    type_registry,
                     resolver_root,
                     &fields,
                     &object_name,
@@ -76,7 +67,6 @@ pub fn execute_potential_selection_and_serialize<
                             execute_potential_selection_and_serialize(
                                 context,
                                 query_resolvers,
-                                type_registry,
                                 optional_element,
                                 selection,
                                 variables,
@@ -93,10 +83,9 @@ pub fn execute_potential_selection_and_serialize<
     })
 }
 
-fn execute_fragment<'a: 'b, 'b, C, S: Scalar, T: TypeRegistry<S>>(
+fn execute_fragment<'a: 'b, 'b, C, S: Scalar>(
     context: &'a C,
     query_resolvers: &'a QueryResolversMap<S, C>,
-    type_registry: &'a T,
     resolver_root: &'a ResolverRoot<S>,
     fields: &'a HashMap<&'a str, &'a ResolverRoot<S>>,
     object_name: &'a str,
@@ -109,7 +98,6 @@ fn execute_fragment<'a: 'b, 'b, C, S: Scalar, T: TypeRegistry<S>>(
                 execute_object_selection_set(
                     context,
                     query_resolvers,
-                    type_registry,
                     object_name,
                     resolver_root,
                     fields,
@@ -123,7 +111,6 @@ fn execute_fragment<'a: 'b, 'b, C, S: Scalar, T: TypeRegistry<S>>(
                 execute_union_selection_set(
                     context,
                     query_resolvers,
-                    type_registry,
                     object_name,
                     resolver_root,
                     fields,
@@ -136,7 +123,6 @@ fn execute_fragment<'a: 'b, 'b, C, S: Scalar, T: TypeRegistry<S>>(
                 execute_object_selection_set(
                     context,
                     query_resolvers,
-                    type_registry,
                     object_name,
                     resolver_root,
                     fields,
@@ -149,10 +135,9 @@ fn execute_fragment<'a: 'b, 'b, C, S: Scalar, T: TypeRegistry<S>>(
     })
 }
 
-async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_field<C, S: Scalar>(
     context: &C,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     resolver_root: &ResolverRoot<S>,
     object_name: &str,
     field: &client::ast::FieldSelection,
@@ -173,7 +158,6 @@ async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
     execute_potential_selection_and_serialize(
         context,
         query_resolvers,
-        type_registry,
         value.to_value()?,
         field.selection.as_ref(),
         variables,
@@ -181,10 +165,9 @@ async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
     .await
 }
 
-async fn execute_union_selection_set<C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_union_selection_set<C, S: Scalar>(
     context: &C,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     object_name: &str,
     resolver_root: &ResolverRoot<S>,
     existing_fields: &HashMap<&str, &ResolverRoot<S>>,
@@ -210,7 +193,6 @@ async fn execute_union_selection_set<C, S: Scalar, T: TypeRegistry<S>>(
                 execute_object_selection_set(
                     context,
                     query_resolvers,
-                    type_registry,
                     object_name,
                     resolver_root,
                     existing_fields,
@@ -228,7 +210,6 @@ async fn execute_union_selection_set<C, S: Scalar, T: TypeRegistry<S>>(
                 let result = execute_fragment(
                     context,
                     query_resolvers,
-                    type_registry,
                     resolver_root,
                     existing_fields,
                     object_name,
@@ -247,10 +228,9 @@ async fn execute_union_selection_set<C, S: Scalar, T: TypeRegistry<S>>(
     .map(|a| a.into_iter().flatten().collect())
 }
 
-async fn execute_field_selection<C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_field_selection<C, S: Scalar>(
     context: &C,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     resolver_root: &ResolverRoot<S>,
     existing_field_value: Option<&ResolverRoot<S>>,
     object_name: &str,
@@ -260,7 +240,6 @@ async fn execute_field_selection<C, S: Scalar, T: TypeRegistry<S>>(
     let value = execute_field(
         context,
         query_resolvers,
-        type_registry,
         resolver_root,
         &object_name,
         field,
@@ -271,10 +250,9 @@ async fn execute_field_selection<C, S: Scalar, T: TypeRegistry<S>>(
     Ok(Values::from_iter([(field.alias.clone(), value)]))
 }
 
-async fn execute_object_selection<C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_object_selection<C, S: Scalar>(
     context: &C,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     object_name: &str,
     resolver_root: &ResolverRoot<S>,
     existing_fields: &HashMap<&str, &ResolverRoot<S>>,
@@ -291,7 +269,6 @@ async fn execute_object_selection<C, S: Scalar, T: TypeRegistry<S>>(
             execute_field_selection(
                 context,
                 query_resolvers,
-                type_registry,
                 resolver_root,
                 existing_fields.get(field.name.as_str()).copied(),
                 &object_name,
@@ -306,7 +283,6 @@ async fn execute_object_selection<C, S: Scalar, T: TypeRegistry<S>>(
             execute_fragment(
                 context,
                 query_resolvers,
-                type_registry,
                 resolver_root,
                 existing_fields,
                 object_name,
@@ -318,10 +294,9 @@ async fn execute_object_selection<C, S: Scalar, T: TypeRegistry<S>>(
     }
 }
 
-async fn execute_object_selection_set<'a, C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_object_selection_set<'a, C, S: Scalar>(
     context: &C,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     object_name: &str,
     resolver_root: &ResolverRoot<S>,
     existing_fields: &HashMap<&str, &ResolverRoot<S>>,
@@ -333,7 +308,6 @@ async fn execute_object_selection_set<'a, C, S: Scalar, T: TypeRegistry<S>>(
             execute_object_selection(
                 context,
                 query_resolvers,
-                type_registry,
                 object_name,
                 resolver_root,
                 existing_fields,
@@ -349,10 +323,9 @@ async fn execute_object_selection_set<'a, C, S: Scalar, T: TypeRegistry<S>>(
     .map(|a| a.into_iter().flatten().collect())
 }
 
-pub async fn execute_query_operation<C, S: Scalar, T: TypeRegistry<S>>(
+pub async fn execute_query_operation<C, S: Scalar>(
     context: &C,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     operation: client::ast::Operation,
     variables: ResolvedVariables,
 ) -> Result<Values<S>, String> {
@@ -366,7 +339,6 @@ pub async fn execute_query_operation<C, S: Scalar, T: TypeRegistry<S>>(
     execute_object_selection_set(
         context,
         query_resolvers,
-        type_registry,
         operation.r#type.to_object_name(),
         root_value.as_mut(),
         &HashMap::new(),

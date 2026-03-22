@@ -11,7 +11,7 @@ use std::{cell::RefCell, rc::Rc};
 
 pub use ast::{LiteralValue, NonNullableValue, Value, Values};
 pub use hashmap_registry::{GQLEnum, GQLInput, GQLScalar, HashMapRegistry};
-pub use registry::TypeRegistry;
+pub use registry::ParseRegistry;
 pub use scalar::Scalar;
 pub use variables::{ResolvedVariables, resolve_operation_parameters};
 
@@ -51,11 +51,11 @@ async fn execute_operation<
     'operation,
     C,
     S: Scalar,
-    T: TypeRegistry<S>,
+    T: ParseRegistry<S>,
 >(
     context: &'args C,
     resolvers: &'args Resolvers<S, C>,
-    type_registry: &'args T,
+    parse_registry: &'args T,
     operation: client::ast::Operation,
     variables: Values<S>,
 ) -> Result<
@@ -66,7 +66,7 @@ async fn execute_operation<
     String,
 > {
     let resolved_variables = resolve_operation_parameters(
-        type_registry,
+        parse_registry,
         &operation.parameters,
         variables,
     )?;
@@ -75,7 +75,6 @@ async fn execute_operation<
             queries::execute_query_operation(
                 context,
                 &resolvers.queries,
-                type_registry,
                 operation,
                 resolved_variables,
             )
@@ -86,7 +85,6 @@ async fn execute_operation<
                 context,
                 &resolvers.mutations,
                 &resolvers.queries,
-                type_registry,
                 operation,
                 resolved_variables,
             )
@@ -97,7 +95,6 @@ async fn execute_operation<
                 context,
                 &resolvers.subscriptions,
                 &resolvers.queries,
-                type_registry,
                 operation,
                 resolved_variables,
             )
@@ -106,7 +103,13 @@ async fn execute_operation<
     }
 }
 
-pub async fn execute<'args, 'client_query, C, S: Scalar, T: TypeRegistry<S>>(
+pub async fn execute<
+    'args,
+    'client_query,
+    C,
+    S: Scalar,
+    T: ParseRegistry<S>,
+>(
     context: &'args C,
     registry: &'args type_registry::TypeRegistry,
     resolvers: &'args Resolvers<S, C>,

@@ -65,9 +65,7 @@ pub fn parse_variable_from_json<S: InputScalar>(
             }
             Ok(crate::executor::Value::NonNullable(
                 crate::executor::NonNullableValue::Literal(
-                    crate::executor::LiteralValue::Object(
-                        variables,
-                    ),
+                    crate::executor::LiteralValue::Object(variables),
                 ),
             ))
         }

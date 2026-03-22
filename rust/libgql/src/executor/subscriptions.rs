@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use crate::parsers::schema::client;
 
 use super::ast::{ResolverRoot, Values};
-use super::registry::TypeRegistry;
 use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
 
@@ -30,19 +29,17 @@ pub async fn execute_subscription_operation<
     'operation,
     C,
     S: Scalar,
-    T: TypeRegistry<S>,
 >(
     context: &'args C,
     resolvers: &'args SubscriptionResolversMap<S, C>,
     query_resolvers: &'args super::queries::QueryResolversMap<S, C>,
-    type_registry: &'args T,
     operation: client::ast::Operation,
     variables: ResolvedVariables,
 ) -> Result<
     std::pin::Pin<
         Box<
             impl futures::Stream<Item = Result<Values<S>, String>>
-            + use<'args, C, S, T>,
+            + use<'args, C, S>,
         >,
     >,
     String,
@@ -72,7 +69,6 @@ pub async fn execute_subscription_operation<
             let serialized_value = super::queries::execute_potential_selection_and_serialize(
                 context,
                 query_resolvers,
-                type_registry,
                 value.to_value()?,
                 selection.selection.as_ref(),
                 &vars2.as_ref(),

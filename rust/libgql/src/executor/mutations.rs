@@ -4,19 +4,18 @@ use crate::parsers::schema::client;
 
 use super::ast::{ResolverFuture, Value, Values};
 use super::queries::QueryResolversMap;
-use super::registry::TypeRegistry;
 use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
 
 pub type MutationResolver<S, C> =
     Box<dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S>>;
-pub type MutationResolversMap<S, C> = HashMap<&'static str, MutationResolver<S, C>>;
+pub type MutationResolversMap<S, C> =
+    HashMap<&'static str, MutationResolver<S, C>>;
 
-async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_field<C, S: Scalar>(
     context: &C,
     mutation_resolvers: &MutationResolversMap<S, C>,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     field: &client::ast::FieldSelection,
     variables: &ResolvedVariables,
 ) -> Result<Value<S>, String> {
@@ -30,7 +29,6 @@ async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
     super::queries::execute_potential_selection_and_serialize(
         context,
         query_resolvers,
-        type_registry,
         value.to_value()?,
         field.selection.as_ref(),
         variables,
@@ -38,11 +36,10 @@ async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
     .await
 }
 
-async fn execute_fragment<C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_fragment<C, S: Scalar>(
     context: &C,
     mutation_resolvers: &MutationResolversMap<S, C>,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     spec: &client::ast::FragmentSpec,
     variables: &ResolvedVariables,
 ) -> Result<Vec<(String, Value<S>)>, String> {
@@ -52,7 +49,6 @@ async fn execute_fragment<C, S: Scalar, T: TypeRegistry<S>>(
                 context,
                 mutation_resolvers,
                 query_resolvers,
-                type_registry,
                 &obj.selections,
                 variables,
             )
@@ -67,11 +63,10 @@ async fn execute_fragment<C, S: Scalar, T: TypeRegistry<S>>(
     }
 }
 
-async fn execute_field_selection<C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_field_selection<C, S: Scalar>(
     context: &C,
     mutation_resolvers: &MutationResolversMap<S, C>,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     field: &client::ast::FieldSelection,
     variables: &ResolvedVariables,
 ) -> Result<Vec<(String, Value<S>)>, String> {
@@ -79,7 +74,6 @@ async fn execute_field_selection<C, S: Scalar, T: TypeRegistry<S>>(
         context,
         mutation_resolvers,
         query_resolvers,
-        type_registry,
         field,
         variables,
     )
@@ -87,11 +81,10 @@ async fn execute_field_selection<C, S: Scalar, T: TypeRegistry<S>>(
     Ok(vec![(field.alias.clone(), value)])
 }
 
-async fn execute_object_selection<C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_object_selection<C, S: Scalar>(
     context: &C,
     mutation_resolvers: &MutationResolversMap<S, C>,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     variables: &ResolvedVariables,
     selection: &client::ast::ObjectSelection,
 ) -> Result<Vec<(String, Value<S>)>, String> {
@@ -106,7 +99,6 @@ async fn execute_object_selection<C, S: Scalar, T: TypeRegistry<S>>(
                 context,
                 mutation_resolvers,
                 query_resolvers,
-                type_registry,
                 field,
                 variables,
             )
@@ -119,7 +111,6 @@ async fn execute_object_selection<C, S: Scalar, T: TypeRegistry<S>>(
                 context,
                 mutation_resolvers,
                 query_resolvers,
-                type_registry,
                 &fragment.spec,
                 variables,
             )
@@ -128,11 +119,10 @@ async fn execute_object_selection<C, S: Scalar, T: TypeRegistry<S>>(
     }
 }
 
-async fn execute_object_selection_set<C, S: Scalar, T: TypeRegistry<S>>(
+async fn execute_object_selection_set<C, S: Scalar>(
     context: &C,
     mutation_resolvers: &MutationResolversMap<S, C>,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     selections: &[client::ast::ObjectSelection],
     variables: &ResolvedVariables,
 ) -> Result<Vec<(String, Value<S>)>, String> {
@@ -142,7 +132,6 @@ async fn execute_object_selection_set<C, S: Scalar, T: TypeRegistry<S>>(
                 context,
                 mutation_resolvers,
                 query_resolvers,
-                type_registry,
                 variables,
                 selection,
             )
@@ -155,11 +144,10 @@ async fn execute_object_selection_set<C, S: Scalar, T: TypeRegistry<S>>(
     .map(|a| a.into_iter().flatten().collect())
 }
 
-pub async fn execute_mutation_operation<C, S: Scalar, T: TypeRegistry<S>>(
+pub async fn execute_mutation_operation<C, S: Scalar>(
     context: &C,
     mutation_resolvers: &MutationResolversMap<S, C>,
     query_resolvers: &QueryResolversMap<S, C>,
-    type_registry: &T,
     operation: client::ast::Operation,
     variables: ResolvedVariables,
 ) -> Result<Values<S>, String> {
@@ -173,7 +161,6 @@ pub async fn execute_mutation_operation<C, S: Scalar, T: TypeRegistry<S>>(
         context,
         mutation_resolvers,
         query_resolvers,
-        type_registry,
         &fragment_spec.selections,
         &variables,
     )

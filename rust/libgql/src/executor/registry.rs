@@ -3,7 +3,7 @@ use crate::parsers::schema::shared;
 use super::ast::Values;
 use super::scalar::Scalar;
 
-pub trait TypeRegistry<S: Scalar> {
+pub trait ParseRegistry<S: Scalar> {
     fn parse_scalar(
         self: &Self,
         scalar_name: &str,
