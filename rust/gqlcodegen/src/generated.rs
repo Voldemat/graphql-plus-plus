@@ -14,12 +14,18 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EDealColumnType
         }
     }
 
-    fn to_str(self: &Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&str, String> {
         match self {
         Self::List => Ok("LIST"),
         Self::Number => Ok("NUMBER"),
         Self::Date => Ok("DATE"),
         }
+    }
+}
+
+impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EDealColumnType {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
     }
 }
 
@@ -45,7 +51,7 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EFileField {
         }
     }
 
-    fn to_str(self: &Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&str, String> {
         match self {
         Self::Name => Ok("NAME"),
         Self::Mimetype => Ok("MIMETYPE"),
@@ -54,6 +60,12 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EFileField {
         Self::Tags => Ok("TAGS"),
         Self::CreatedAt => Ok("CREATED_AT"),
         }
+    }
+}
+
+impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EFileField {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
     }
 }
 
@@ -73,12 +85,18 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EGroupField {
         }
     }
 
-    fn to_str(self: &Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&str, String> {
         match self {
         Self::Name => Ok("NAME"),
         Self::CreatedAt => Ok("CREATED_AT"),
         Self::LimitOfDownloadsPerDay => Ok("LIMIT_OF_DOWNLOADS_PER_DAY"),
         }
+    }
+}
+
+impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EGroupField {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
     }
 }
 
@@ -96,11 +114,17 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EGroupUsersFiel
         }
     }
 
-    fn to_str(self: &Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&str, String> {
         match self {
         Self::Name => Ok("NAME"),
         Self::Email => Ok("EMAIL"),
         }
+    }
+}
+
+impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EGroupUsersField {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
     }
 }
 
@@ -118,11 +142,17 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for ESortDirection 
         }
     }
 
-    fn to_str(self: &Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&str, String> {
         match self {
         Self::Asc => Ok("ASC"),
         Self::Dsc => Ok("DSC"),
         }
+    }
+}
+
+impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ESortDirection {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
     }
 }
 
@@ -142,12 +172,18 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EUserField {
         }
     }
 
-    fn to_str(self: &Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&str, String> {
         match self {
         Self::Name => Ok("NAME"),
         Self::Email => Ok("EMAIL"),
         Self::CreatedAt => Ok("CREATED_AT"),
         }
+    }
+}
+
+impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EUserField {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
     }
 }
 
@@ -167,12 +203,18 @@ impl libgql::executor::GQLEnum<super::scalar::ExampleScalar> for EUsersTagField 
         }
     }
 
-    fn to_str(self: &Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&str, String> {
         match self {
         Self::Tag => Ok("TAG"),
         Self::UsersCount => Ok("USERS_COUNT"),
         Self::CreatedAt => Ok("CREATED_AT"),
         }
+    }
+}
+
+impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EUsersTagField {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        libgql::executor::GQLEnum::<super::scalar::ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
     }
 }
 
@@ -819,25 +861,8 @@ pub struct BooleanObject {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for BooleanObject {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for BooleanObject {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("BooleanObject".to_string(), libgql::executor::Values::from_iter([("bvalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.bvalue)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "BooleanObject", std::collections::HashMap::from_iter([("bvalue", &self.bvalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -846,25 +871,8 @@ pub struct DatetimeObject {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DatetimeObject {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DatetimeObject {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("DatetimeObject".to_string(), libgql::executor::Values::from_iter([("dvalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.dvalue)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DatetimeObject", std::collections::HashMap::from_iter([("dvalue", &self.dvalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -876,28 +884,11 @@ pub struct DealColumn {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DealColumn {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DealColumn {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("DealColumn".to_string(), libgql::executor::Values::from_iter([("availableValues".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.available_values.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&element)?)))).collect::<Result<Vec<_>, String>>()?))),
-        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.id)?))),
-        ("name".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.name)?))),
-        ("type".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<EDealColumnType as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::to_literal_value(&self.r#type)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DealColumn", std::collections::HashMap::from_iter([("availableValues", &self.available_values as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("name", &self.name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("type", &self.r#type as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -907,26 +898,9 @@ pub struct DealEntry {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DealEntry {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DealEntry {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("DealEntry".to_string(), libgql::executor::Values::from_iter([("columnName".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.column_name)?))),
-        ("value".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.value)?.into()))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DealEntry", std::collections::HashMap::from_iter([("columnName", &self.column_name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("value", &self.value as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -936,26 +910,9 @@ pub struct DealInfo {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DealInfo {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DealInfo {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("DealInfo".to_string(), libgql::executor::Values::from_iter([("stageToWorktypesMap".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.stage_to_worktypes_map.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ("values".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.values.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "DealInfo", std::collections::HashMap::from_iter([("stageToWorktypesMap", &self.stage_to_worktypes_map as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("values", &self.values as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -964,25 +921,8 @@ pub struct ErrorAlreadyApprovedByAdmin {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyApprovedByAdmin {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyApprovedByAdmin {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorAlreadyApprovedByAdmin".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorAlreadyApprovedByAdmin", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -991,25 +931,8 @@ pub struct ErrorAlreadyDone {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyDone {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyDone {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorAlreadyDone".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorAlreadyDone", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1018,25 +941,8 @@ pub struct ErrorAlreadyExists {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyExists {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyExists {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorAlreadyExists".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorAlreadyExists", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1045,25 +951,8 @@ pub struct ErrorAlreadyPending {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyPending {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyPending {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorAlreadyPending".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorAlreadyPending", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1072,25 +961,8 @@ pub struct ErrorCantAddAutotags {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorCantAddAutotags {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorCantAddAutotags {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorCantAddAutotags".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorCantAddAutotags", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1099,25 +971,8 @@ pub struct ErrorChangeForbidden {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorChangeForbidden {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorChangeForbidden {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorChangeForbidden".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorChangeForbidden", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1126,25 +981,8 @@ pub struct ErrorDateRangeIsInvalid {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorDateRangeIsInvalid {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorDateRangeIsInvalid {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorDateRangeIsInvalid".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorDateRangeIsInvalid", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1153,25 +991,8 @@ pub struct ErrorEmailCollision {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorEmailCollision {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorEmailCollision {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorEmailCollision".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorEmailCollision", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1180,25 +1001,8 @@ pub struct ErrorFileNotUploaded {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorFileNotUploaded {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorFileNotUploaded {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorFileNotUploaded".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorFileNotUploaded", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1207,25 +1011,8 @@ pub struct ErrorFilesChangeForbidden {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorFilesChangeForbidden {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorFilesChangeForbidden {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorFilesChangeForbidden".to_string(), libgql::executor::Values::from_iter([("ids".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&element)?)))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorFilesChangeForbidden", std::collections::HashMap::from_iter([("ids", &self.ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1234,25 +1021,8 @@ pub struct ErrorGroupNotFound {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorGroupNotFound {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorGroupNotFound {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorGroupNotFound".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorGroupNotFound", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1261,25 +1031,8 @@ pub struct ErrorInvalidCredentials {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidCredentials {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidCredentials {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorInvalidCredentials".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidCredentials", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1288,25 +1041,8 @@ pub struct ErrorInvalidEmail {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidEmail {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidEmail {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorInvalidEmail".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidEmail", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1315,25 +1051,8 @@ pub struct ErrorInvalidGroupName {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidGroupName {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidGroupName {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorInvalidGroupName".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidGroupName", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1342,25 +1061,8 @@ pub struct ErrorInvalidLimitOfDownloadsPerDay {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidLimitOfDownloadsPerDay {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidLimitOfDownloadsPerDay {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorInvalidLimitOfDownloadsPerDay".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidLimitOfDownloadsPerDay", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1369,25 +1071,8 @@ pub struct ErrorInvalidOTPCode {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidOTPCode {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidOTPCode {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorInvalidOTPCode".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidOTPCode", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1396,25 +1081,8 @@ pub struct ErrorInvalidPassword {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidPassword {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidPassword {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorInvalidPassword".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidPassword", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1423,25 +1091,8 @@ pub struct ErrorInvalidToken {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidToken {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidToken {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorInvalidToken".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidToken", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1450,25 +1101,8 @@ pub struct ErrorInvalidUserName {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorInvalidUserName {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorInvalidUserName {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorInvalidUserName".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorInvalidUserName", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1477,25 +1111,8 @@ pub struct ErrorMultipartUploadFileIsTooBig {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorMultipartUploadFileIsTooBig {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorMultipartUploadFileIsTooBig {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorMultipartUploadFileIsTooBig".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorMultipartUploadFileIsTooBig", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1504,25 +1121,8 @@ pub struct ErrorMultipartUploadFileIsTooLight {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorMultipartUploadFileIsTooLight {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorMultipartUploadFileIsTooLight {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorMultipartUploadFileIsTooLight".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorMultipartUploadFileIsTooLight", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1531,25 +1131,8 @@ pub struct ErrorMultipartUploadFilePartSizeIsTooBig {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorMultipartUploadFilePartSizeIsTooBig {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorMultipartUploadFilePartSizeIsTooBig {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorMultipartUploadFilePartSizeIsTooBig".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorMultipartUploadFilePartSizeIsTooBig", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1558,25 +1141,8 @@ pub struct ErrorMultipartUploadFilePartSizeIsTooSmall {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorMultipartUploadFilePartSizeIsTooSmall {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorMultipartUploadFilePartSizeIsTooSmall {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorMultipartUploadFilePartSizeIsTooSmall".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorMultipartUploadFilePartSizeIsTooSmall", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1585,25 +1151,8 @@ pub struct ErrorNoDealTag {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorNoDealTag {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorNoDealTag {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorNoDealTag".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorNoDealTag", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1612,25 +1161,8 @@ pub struct ErrorNotFound {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorNotFound {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorNotFound {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorNotFound".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorNotFound", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1639,25 +1171,8 @@ pub struct ErrorOTPCodeExpired {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorOTPCodeExpired {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorOTPCodeExpired {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorOTPCodeExpired".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorOTPCodeExpired", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1666,25 +1181,8 @@ pub struct ErrorOTPTokenExpired {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorOTPTokenExpired {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorOTPTokenExpired {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorOTPTokenExpired".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorOTPTokenExpired", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1693,25 +1191,8 @@ pub struct ErrorPutUploadFileIsTooBig {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorPutUploadFileIsTooBig {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorPutUploadFileIsTooBig {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorPutUploadFileIsTooBig".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorPutUploadFileIsTooBig", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1720,25 +1201,8 @@ pub struct ErrorUnknownFile {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownFile {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownFile {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorUnknownFile".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownFile", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1747,25 +1211,8 @@ pub struct ErrorUnknownFiles {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownFiles {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownFiles {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorUnknownFiles".to_string(), libgql::executor::Values::from_iter([("ids".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&element)?)))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownFiles", std::collections::HashMap::from_iter([("ids", &self.ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1774,25 +1221,8 @@ pub struct ErrorUnknownGroupIds {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownGroupIds {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownGroupIds {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorUnknownGroupIds".to_string(), libgql::executor::Values::from_iter([("groupIds".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.group_ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&element)?)))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownGroupIds", std::collections::HashMap::from_iter([("groupIds", &self.group_ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1801,25 +1231,8 @@ pub struct ErrorUnknownGroups {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownGroups {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownGroups {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorUnknownGroups".to_string(), libgql::executor::Values::from_iter([("groupIds".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.group_ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&element)?)))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownGroups", std::collections::HashMap::from_iter([("groupIds", &self.group_ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1828,25 +1241,8 @@ pub struct ErrorUnknownParentId {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownParentId {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownParentId {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorUnknownParentId".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownParentId", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1855,25 +1251,8 @@ pub struct ErrorUnknownSessionId {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownSessionId {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownSessionId {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorUnknownSessionId".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownSessionId", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1882,25 +1261,8 @@ pub struct ErrorUnknownTags {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownTags {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownTags {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorUnknownTags".to_string(), libgql::executor::Values::from_iter([("tagIds".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.tag_ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&element)?)))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownTags", std::collections::HashMap::from_iter([("tagIds", &self.tag_ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1909,25 +1271,8 @@ pub struct ErrorUnknownUser {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownUser {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownUser {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorUnknownUser".to_string(), libgql::executor::Values::from_iter([("a".to_string(), self.a.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownUser", std::collections::HashMap::from_iter([("a", &self.a as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1936,25 +1281,8 @@ pub struct ErrorUnknownUsers {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorUnknownUsers {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorUnknownUsers {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("ErrorUnknownUsers".to_string(), libgql::executor::Values::from_iter([("userIds".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.user_ids.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&element)?)))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "ErrorUnknownUsers", std::collections::HashMap::from_iter([("userIds", &self.user_ids as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1964,26 +1292,9 @@ pub struct EventFileDeleted {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileDeleted {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileDeleted {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("EventFileDeleted".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileDeleted", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -1995,28 +1306,11 @@ pub struct EventFileDownloadRequested {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileDownloadRequested {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileDownloadRequested {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("EventFileDownloadRequested".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("decision".to_string(), self.decision.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
-        ("user".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.user)?.into()))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileDownloadRequested", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("decision", &self.decision as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("user", &self.user as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2026,26 +1320,9 @@ pub struct EventFileDownloaded {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileDownloaded {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileDownloaded {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("EventFileDownloaded".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileDownloaded", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2057,28 +1334,11 @@ pub struct EventFileTagsEdited {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileTagsEdited {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileTagsEdited {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("EventFileTagsEdited".to_string(), libgql::executor::Values::from_iter([("addedTags".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.added_tags.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
-        ("removedTags".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.removed_tags.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileTagsEdited", std::collections::HashMap::from_iter([("addedTags", &self.added_tags as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("removedTags", &self.removed_tags as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2088,26 +1348,9 @@ pub struct EventFileUploaded {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventFileUploaded {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventFileUploaded {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("EventFileUploaded".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventFileUploaded", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2119,28 +1362,11 @@ pub struct EventTagApprovalIsRequested {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventTagApprovalIsRequested {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventTagApprovalIsRequested {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("EventTagApprovalIsRequested".to_string(), libgql::executor::Values::from_iter([("alreadyInCatalog".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.already_in_catalog)?))),
-        ("author".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.author)?.into()))),
-        ("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("tag".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.tag)?.into()))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventTagApprovalIsRequested", std::collections::HashMap::from_iter([("alreadyInCatalog", &self.already_in_catalog as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("author", &self.author as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("tag", &self.tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2149,25 +1375,8 @@ pub struct EventsList {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EventsList {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EventsList {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("EventsList".to_string(), libgql::executor::Values::from_iter([("events".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.events.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "EventsList", std::collections::HashMap::from_iter([("events", &self.events as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2182,31 +1391,14 @@ pub struct File {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for File {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for File {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("File".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("filename".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.filename)?))),
-        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.id)?))),
-        ("mimeType".to_string(), self.mime_type.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ("previewUrl".to_string(), self.preview_url.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<url::Url as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&v)?)))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ("sizeInBytes".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i64 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.size_in_bytes)?))),
-        ("user".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.user)?.into()))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "File", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("filename", &self.filename as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("mimeType", &self.mime_type as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("previewUrl", &self.preview_url as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("sizeInBytes", &self.size_in_bytes as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("user", &self.user as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2217,27 +1409,10 @@ pub struct FilesDealInfo {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for FilesDealInfo {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for FilesDealInfo {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("FilesDealInfo".to_string(), libgql::executor::Values::from_iter([("dealInfo".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.deal_info)?.into()))),
-        ("dealName".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.deal_name)?.into()))),
-        ("unsetColumns".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.unset_columns.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "FilesDealInfo", std::collections::HashMap::from_iter([("dealInfo", &self.deal_info as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("dealName", &self.deal_name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("unsetColumns", &self.unset_columns as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2246,25 +1421,8 @@ pub struct FloatObject {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for FloatObject {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for FloatObject {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("FloatObject".to_string(), libgql::executor::Values::from_iter([("fvalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<f32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.fvalue)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "FloatObject", std::collections::HashMap::from_iter([("fvalue", &self.fvalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2276,28 +1434,11 @@ pub struct Group {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Group {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Group {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("Group".to_string(), libgql::executor::Values::from_iter([("first10Tags".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.first_10_tags.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.id)?))),
-        ("limitOfDownloadsPerDay".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.limit_of_downloads_per_day)?))),
-        ("name".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.name)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "Group", std::collections::HashMap::from_iter([("first10Tags", &self.first_10_tags as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("limitOfDownloadsPerDay", &self.limit_of_downloads_per_day as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("name", &self.name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2307,26 +1448,9 @@ pub struct GroupUser {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GroupUser {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GroupUser {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("GroupUser".to_string(), libgql::executor::Values::from_iter([("inGroup".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.in_group)?))),
-        ("user".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.user)?.into()))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "GroupUser", std::collections::HashMap::from_iter([("inGroup", &self.in_group as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("user", &self.user as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2335,25 +1459,8 @@ pub struct GroupUserList {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GroupUserList {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GroupUserList {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("GroupUserList".to_string(), libgql::executor::Values::from_iter([("users".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.users.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "GroupUserList", std::collections::HashMap::from_iter([("users", &self.users as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2362,25 +1469,8 @@ pub struct IntObject {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for IntObject {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for IntObject {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("IntObject".to_string(), libgql::executor::Values::from_iter([("ivalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.ivalue)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "IntObject", std::collections::HashMap::from_iter([("ivalue", &self.ivalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2390,26 +1480,9 @@ pub struct MultipartUploadSession {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for MultipartUploadSession {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for MultipartUploadSession {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("MultipartUploadSession".to_string(), libgql::executor::Values::from_iter([("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.id)?))),
-        ("initialUploadURLs".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.initial_upload_ur_ls.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "MultipartUploadSession", std::collections::HashMap::from_iter([("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("initialUploadURLs", &self.initial_upload_ur_ls as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2765,25 +1838,8 @@ pub struct OTPToken {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for OTPToken {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for OTPToken {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("OTPToken".to_string(), libgql::executor::Values::from_iter([("token".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.token)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "OTPToken", std::collections::HashMap::from_iter([("token", &self.token as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2796,29 +1852,12 @@ pub struct PendingUser {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for PendingUser {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for PendingUser {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("PendingUser".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("email".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.email)?))),
-        ("groups".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.groups.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ("name".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.name)?))),
-        ("ttl".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<f32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.ttl)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "PendingUser", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("email", &self.email as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("groups", &self.groups as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("name", &self.name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("ttl", &self.ttl as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -2828,26 +1867,9 @@ pub struct PutUploadSession {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for PutUploadSession {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for PutUploadSession {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("PutUploadSession".to_string(), libgql::executor::Values::from_iter([("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.id)?))),
-        ("uploadURL".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.upload_url)?.into()))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "PutUploadSession", std::collections::HashMap::from_iter([("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("uploadURL", &self.upload_url as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3297,26 +2319,9 @@ pub struct SearchFile {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for SearchFile {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for SearchFile {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("SearchFile".to_string(), libgql::executor::Values::from_iter([("file".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.file)?.into()))),
-        ("tags".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.tags.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "SearchFile", std::collections::HashMap::from_iter([("file", &self.file as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("tags", &self.tags as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3325,25 +2330,8 @@ pub struct SearchFileList {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for SearchFileList {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for SearchFileList {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("SearchFileList".to_string(), libgql::executor::Values::from_iter([("files".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.files.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "SearchFileList", std::collections::HashMap::from_iter([("files", &self.files as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3353,26 +2341,9 @@ pub struct StageToWorktypesMapEntry {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for StageToWorktypesMapEntry {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for StageToWorktypesMapEntry {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("StageToWorktypesMapEntry".to_string(), libgql::executor::Values::from_iter([("stage".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.stage)?.into()))),
-        ("worktypes".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.worktypes.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "StageToWorktypesMapEntry", std::collections::HashMap::from_iter([("stage", &self.stage as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("worktypes", &self.worktypes as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3382,26 +2353,9 @@ pub struct StringEntry {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for StringEntry {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for StringEntry {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("StringEntry".to_string(), libgql::executor::Values::from_iter([("key".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.key)?))),
-        ("value".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.value)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "StringEntry", std::collections::HashMap::from_iter([("key", &self.key as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("value", &self.value as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3410,25 +2364,8 @@ pub struct StringList {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for StringList {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for StringList {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("StringList".to_string(), libgql::executor::Values::from_iter([("values".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.values.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&element)?)))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "StringList", std::collections::HashMap::from_iter([("values", &self.values as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3437,25 +2374,8 @@ pub struct StringObject {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for StringObject {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for StringObject {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("StringObject".to_string(), libgql::executor::Values::from_iter([("svalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.svalue)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "StringObject", std::collections::HashMap::from_iter([("svalue", &self.svalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3469,30 +2389,13 @@ pub struct Tag {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Tag {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Tag {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("Tag".to_string(), libgql::executor::Values::from_iter([("hasChildren".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.has_children)?))),
-        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.id)?))),
-        ("isApproved".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.is_approved)?))),
-        ("isFavourite".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.is_favourite)?))),
-        ("tag".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.tag)?))),
-        ("value".to_string(), self.value.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(v)?.into())))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "Tag", std::collections::HashMap::from_iter([("hasChildren", &self.has_children as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("isApproved", &self.is_approved as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("isFavourite", &self.is_favourite as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("tag", &self.tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("value", &self.value as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3502,26 +2405,9 @@ pub struct TagInfo {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for TagInfo {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for TagInfo {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("TagInfo".to_string(), libgql::executor::Values::from_iter([("parentTag".to_string(), self.parent_tag.map(|v| -> Result<libgql::executor::Value<super::scalar::ExampleScalar>, String> {Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(v)?.into())))}).transpose()?.unwrap_or(libgql::executor::Value::Null)),
-        ("tag".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.tag)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "TagInfo", std::collections::HashMap::from_iter([("parentTag", &self.parent_tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("tag", &self.tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3530,25 +2416,8 @@ pub struct TagList {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for TagList {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for TagList {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("TagList".to_string(), libgql::executor::Values::from_iter([("list".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.list.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "TagList", std::collections::HashMap::from_iter([("list", &self.list as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3558,26 +2427,9 @@ pub struct UploadUrl {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UploadUrl {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UploadUrl {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("UploadUrl".to_string(), libgql::executor::Values::from_iter([("headers".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.headers.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ("url".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<url::Url as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.url)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UploadUrl", std::collections::HashMap::from_iter([("headers", &self.headers as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("url", &self.url as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3586,25 +2438,8 @@ pub struct UploadUrlList {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UploadUrlList {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UploadUrlList {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("UploadUrlList".to_string(), libgql::executor::Values::from_iter([("urls".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.urls.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UploadUrlList", std::collections::HashMap::from_iter([("urls", &self.urls as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3613,25 +2448,8 @@ pub struct UrlObject {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UrlObject {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UrlObject {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("UrlObject".to_string(), libgql::executor::Values::from_iter([("uvalue".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<url::Url as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.uvalue)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UrlObject", std::collections::HashMap::from_iter([("uvalue", &self.uvalue as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3644,29 +2462,12 @@ pub struct User {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for User {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for User {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("User".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("email".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.email)?))),
-        ("id".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.id)?))),
-        ("name".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.name)?))),
-        ("tenGroups".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.ten_groups.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "User", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("email", &self.email as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("id", &self.id as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("name", &self.name as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("tenGroups", &self.ten_groups as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3675,25 +2476,8 @@ pub struct UsersList {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UsersList {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UsersList {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("UsersList".to_string(), libgql::executor::Values::from_iter([("users".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Array(self.users.into_iter().map(|element| Ok(libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(element)?.into())))).collect::<Result<Vec<_>, String>>()?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UsersList", std::collections::HashMap::from_iter([("users", &self.users as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3704,27 +2488,10 @@ pub struct UsersTag {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UsersTag {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UsersTag {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
-        Ok(("UsersTag".to_string(), libgql::executor::Values::from_iter([("createdAt".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.created_at)?))),
-        ("tag".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(self.tag)?.into()))),
-        ("usersCount".to_string(), libgql::executor::Value::NonNullable(libgql::executor::NonNullableValue::Literal(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::to_literal_value(&self.users_count)?))),
-        ])))
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, "UsersTag", std::collections::HashMap::from_iter([("createdAt", &self.created_at as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("tag", &self.tag as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>),
+        ("usersCount", &self.users_count as &libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>)]))))
     }
 }
 
@@ -3734,26 +2501,10 @@ pub enum AddTagsToFilesError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for AddTagsToFilesError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for AddTagsToFilesError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorUnknownFiles(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownFiles(item) => item.to_value(),
+        Self::ErrorUnknownTags(item) => item.to_value(),
         }
     }
 }
@@ -3765,27 +2516,11 @@ pub enum ApproveTagError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ApproveTagError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ApproveTagError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownGroupIds(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorAlreadyExists(item) => item.to_value(),
+        Self::ErrorNotFound(item) => item.to_value(),
+        Self::ErrorUnknownGroupIds(item) => item.to_value(),
         }
     }
 }
@@ -3797,27 +2532,11 @@ pub enum CommitMultipartFileSessionResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CommitMultipartFileSessionResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CommitMultipartFileSessionResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorFileNotUploaded(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownSessionId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::File(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorFileNotUploaded(item) => item.to_value(),
+        Self::ErrorUnknownSessionId(item) => item.to_value(),
+        Self::File(item) => item.to_value(),
         }
     }
 }
@@ -3829,27 +2548,11 @@ pub enum CommitPutFileSessionResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CommitPutFileSessionResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CommitPutFileSessionResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorFileNotUploaded(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownSessionId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::File(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorFileNotUploaded(item) => item.to_value(),
+        Self::ErrorUnknownSessionId(item) => item.to_value(),
+        Self::File(item) => item.to_value(),
         }
     }
 }
@@ -3861,27 +2564,11 @@ pub enum ConfirmOTPCodeResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ConfirmOTPCodeResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ConfirmOTPCodeResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorInvalidOTPCode(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorOTPCodeExpired(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::OTPToken(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidOTPCode(item) => item.to_value(),
+        Self::ErrorOTPCodeExpired(item) => item.to_value(),
+        Self::OTPToken(item) => item.to_value(),
         }
     }
 }
@@ -3892,26 +2579,10 @@ pub enum ConfirmUserError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ConfirmUserError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ConfirmUserError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorInvalidPassword(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorInvalidToken(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidPassword(item) => item.to_value(),
+        Self::ErrorInvalidToken(item) => item.to_value(),
         }
     }
 }
@@ -3925,29 +2596,13 @@ pub enum CreateGroupError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreateGroupError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreateGroupError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorInvalidGroupName(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorInvalidLimitOfDownloadsPerDay(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownUsers(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorAlreadyExists(item) => item.to_value(),
+        Self::ErrorInvalidGroupName(item) => item.to_value(),
+        Self::ErrorInvalidLimitOfDownloadsPerDay(item) => item.to_value(),
+        Self::ErrorUnknownTags(item) => item.to_value(),
+        Self::ErrorUnknownUsers(item) => item.to_value(),
         }
     }
 }
@@ -3963,31 +2618,15 @@ pub enum CreateMultipartFileSessionResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreateMultipartFileSessionResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreateMultipartFileSessionResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorMultipartUploadFileIsTooBig(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorMultipartUploadFileIsTooLight(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorMultipartUploadFilePartSizeIsTooBig(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorMultipartUploadFilePartSizeIsTooSmall(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorNoDealTag(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::MultipartUploadSession(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorMultipartUploadFileIsTooBig(item) => item.to_value(),
+        Self::ErrorMultipartUploadFileIsTooLight(item) => item.to_value(),
+        Self::ErrorMultipartUploadFilePartSizeIsTooBig(item) => item.to_value(),
+        Self::ErrorMultipartUploadFilePartSizeIsTooSmall(item) => item.to_value(),
+        Self::ErrorNoDealTag(item) => item.to_value(),
+        Self::ErrorUnknownTags(item) => item.to_value(),
+        Self::MultipartUploadSession(item) => item.to_value(),
         }
     }
 }
@@ -4000,28 +2639,12 @@ pub enum CreatePutFileSessionResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreatePutFileSessionResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreatePutFileSessionResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorNoDealTag(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorPutUploadFileIsTooBig(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::PutUploadSession(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNoDealTag(item) => item.to_value(),
+        Self::ErrorPutUploadFileIsTooBig(item) => item.to_value(),
+        Self::ErrorUnknownTags(item) => item.to_value(),
+        Self::PutUploadSession(item) => item.to_value(),
         }
     }
 }
@@ -4032,26 +2655,10 @@ pub enum CreateTagError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreateTagError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreateTagError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownParentId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorAlreadyExists(item) => item.to_value(),
+        Self::ErrorUnknownParentId(item) => item.to_value(),
         }
     }
 }
@@ -4065,29 +2672,13 @@ pub enum CreateUserError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for CreateUserError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for CreateUserError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorAlreadyPending(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorEmailCollision(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorInvalidEmail(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorInvalidUserName(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownGroups(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorAlreadyPending(item) => item.to_value(),
+        Self::ErrorEmailCollision(item) => item.to_value(),
+        Self::ErrorInvalidEmail(item) => item.to_value(),
+        Self::ErrorInvalidUserName(item) => item.to_value(),
+        Self::ErrorUnknownGroups(item) => item.to_value(),
         }
     }
 }
@@ -4100,28 +2691,12 @@ pub enum DecideOnDownloadRequestError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DecideOnDownloadRequestError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DecideOnDownloadRequestError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorAlreadyDone(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownUser(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorAlreadyDone(item) => item.to_value(),
+        Self::ErrorNotFound(item) => item.to_value(),
+        Self::ErrorUnknownFile(item) => item.to_value(),
+        Self::ErrorUnknownUser(item) => item.to_value(),
         }
     }
 }
@@ -4132,26 +2707,10 @@ pub enum DeleteFileError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DeleteFileError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DeleteFileError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorChangeForbidden(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorChangeForbidden(item) => item.to_value(),
+        Self::ErrorUnknownFile(item) => item.to_value(),
         }
     }
 }
@@ -4162,26 +2721,10 @@ pub enum DeleteFilesError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for DeleteFilesError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for DeleteFilesError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorFilesChangeForbidden(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownFiles(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorFilesChangeForbidden(item) => item.to_value(),
+        Self::ErrorUnknownFiles(item) => item.to_value(),
         }
     }
 }
@@ -4195,29 +2738,13 @@ pub enum EditGroupError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EditGroupError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EditGroupError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorGroupNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorInvalidGroupName(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorInvalidLimitOfDownloadsPerDay(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorAlreadyExists(item) => item.to_value(),
+        Self::ErrorGroupNotFound(item) => item.to_value(),
+        Self::ErrorInvalidGroupName(item) => item.to_value(),
+        Self::ErrorInvalidLimitOfDownloadsPerDay(item) => item.to_value(),
+        Self::ErrorUnknownTags(item) => item.to_value(),
         }
     }
 }
@@ -4230,28 +2757,12 @@ pub enum EditTagError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for EditTagError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for EditTagError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorAlreadyApprovedByAdmin(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorAlreadyExists(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownParentId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorAlreadyApprovedByAdmin(item) => item.to_value(),
+        Self::ErrorAlreadyExists(item) => item.to_value(),
+        Self::ErrorNotFound(item) => item.to_value(),
+        Self::ErrorUnknownParentId(item) => item.to_value(),
         }
     }
 }
@@ -4262,26 +2773,10 @@ pub enum ErrorAlreadyDoneOrUnknownTags {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorAlreadyDoneOrUnknownTags {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorAlreadyDoneOrUnknownTags {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorAlreadyDone(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorAlreadyDone(item) => item.to_value(),
+        Self::ErrorUnknownTags(item) => item.to_value(),
         }
     }
 }
@@ -4292,26 +2787,10 @@ pub enum ErrorGroupNotFoundOrErrorNotFound {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ErrorGroupNotFoundOrErrorNotFound {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ErrorGroupNotFoundOrErrorNotFound {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorGroupNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorGroupNotFound(item) => item.to_value(),
+        Self::ErrorNotFound(item) => item.to_value(),
         }
     }
 }
@@ -4326,30 +2805,14 @@ pub enum Event {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Event {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for Event {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::EventFileDeleted(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::EventFileDownloadRequested(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::EventFileDownloaded(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::EventFileTagsEdited(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::EventFileUploaded(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::EventTagApprovalIsRequested(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::EventFileDeleted(item) => item.to_value(),
+        Self::EventFileDownloadRequested(item) => item.to_value(),
+        Self::EventFileDownloaded(item) => item.to_value(),
+        Self::EventFileTagsEdited(item) => item.to_value(),
+        Self::EventFileUploaded(item) => item.to_value(),
+        Self::EventTagApprovalIsRequested(item) => item.to_value(),
         }
     }
 }
@@ -4360,26 +2823,10 @@ pub enum FilesDealInfoOrError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for FilesDealInfoOrError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for FilesDealInfoOrError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorCantAddAutotags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::FilesDealInfo(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorCantAddAutotags(item) => item.to_value(),
+        Self::FilesDealInfo(item) => item.to_value(),
         }
     }
 }
@@ -4390,26 +2837,10 @@ pub enum GetDealInfoResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetDealInfoResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetDealInfoResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::DealInfo(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::DealInfo(item) => item.to_value(),
+        Self::ErrorNotFound(item) => item.to_value(),
         }
     }
 }
@@ -4420,26 +2851,10 @@ pub enum GetEventsResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetEventsResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetEventsResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorDateRangeIsInvalid(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::EventsList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorDateRangeIsInvalid(item) => item.to_value(),
+        Self::EventsList(item) => item.to_value(),
         }
     }
 }
@@ -4450,26 +2865,10 @@ pub enum GetFileURLResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetFileURLResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetFileURLResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::UrlObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownFile(item) => item.to_value(),
+        Self::UrlObject(item) => item.to_value(),
         }
     }
 }
@@ -4480,26 +2879,10 @@ pub enum GetFilesResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetFilesResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetFilesResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::SearchFileList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => item.to_value(),
+        Self::SearchFileList(item) => item.to_value(),
         }
     }
 }
@@ -4510,26 +2893,10 @@ pub enum GetGroupTagsResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetGroupTagsResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetGroupTagsResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::TagList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => item.to_value(),
+        Self::TagList(item) => item.to_value(),
         }
     }
 }
@@ -4540,26 +2907,10 @@ pub enum GetGroupUsersAndUsersResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetGroupUsersAndUsersResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetGroupUsersAndUsersResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorGroupNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::GroupUserList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorGroupNotFound(item) => item.to_value(),
+        Self::GroupUserList(item) => item.to_value(),
         }
     }
 }
@@ -4570,26 +2921,10 @@ pub enum GetGroupUsersResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetGroupUsersResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetGroupUsersResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::UsersList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => item.to_value(),
+        Self::UsersList(item) => item.to_value(),
         }
     }
 }
@@ -4600,26 +2935,10 @@ pub enum GetGroupUsersTotalResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetGroupUsersTotalResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetGroupUsersTotalResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::IntObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => item.to_value(),
+        Self::IntObject(item) => item.to_value(),
         }
     }
 }
@@ -4630,26 +2949,10 @@ pub enum GetNextMultipartUploadUrlsResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetNextMultipartUploadUrlsResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetNextMultipartUploadUrlsResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorUnknownSessionId(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::UploadUrlList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownSessionId(item) => item.to_value(),
+        Self::UploadUrlList(item) => item.to_value(),
         }
     }
 }
@@ -4660,26 +2963,10 @@ pub enum GetPathToTagResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetPathToTagResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetPathToTagResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::StringList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => item.to_value(),
+        Self::StringList(item) => item.to_value(),
         }
     }
 }
@@ -4690,26 +2977,10 @@ pub enum GetTagInfoResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetTagInfoResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetTagInfoResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::TagInfo(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => item.to_value(),
+        Self::TagInfo(item) => item.to_value(),
         }
     }
 }
@@ -4720,26 +2991,10 @@ pub enum GetTagsResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for GetTagsResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for GetTagsResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::TagList(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => item.to_value(),
+        Self::TagList(item) => item.to_value(),
         }
     }
 }
@@ -4750,26 +3005,10 @@ pub enum IntObjectOrErrorUnknownTags {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for IntObjectOrErrorUnknownTags {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for IntObjectOrErrorUnknownTags {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::IntObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownTags(item) => item.to_value(),
+        Self::IntObject(item) => item.to_value(),
         }
     }
 }
@@ -4780,26 +3019,10 @@ pub enum IsAllowedToDownloadResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for IsAllowedToDownloadResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for IsAllowedToDownloadResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::BooleanObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::BooleanObject(item) => item.to_value(),
+        Self::ErrorUnknownFile(item) => item.to_value(),
         }
     }
 }
@@ -4810,26 +3033,10 @@ pub enum ResetPasswordError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for ResetPasswordError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for ResetPasswordError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorInvalidPassword(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorOTPTokenExpired(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorInvalidPassword(item) => item.to_value(),
+        Self::ErrorOTPTokenExpired(item) => item.to_value(),
         }
     }
 }
@@ -4840,26 +3047,10 @@ pub enum RetrieveFileResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for RetrieveFileResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for RetrieveFileResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::SearchFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorUnknownFile(item) => item.to_value(),
+        Self::SearchFile(item) => item.to_value(),
         }
     }
 }
@@ -4870,26 +3061,10 @@ pub enum RetrieveGroupResponse {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for RetrieveGroupResponse {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for RetrieveGroupResponse {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorNotFound(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::Group(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorNotFound(item) => item.to_value(),
+        Self::Group(item) => item.to_value(),
         }
     }
 }
@@ -4901,27 +3076,11 @@ pub enum TagValue {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for TagValue {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for TagValue {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::DatetimeObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::FloatObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::StringObject(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::DatetimeObject(item) => item.to_value(),
+        Self::FloatObject(item) => item.to_value(),
+        Self::StringObject(item) => item.to_value(),
         }
     }
 }
@@ -4933,27 +3092,11 @@ pub enum UpdateFileError {
 }
 
 impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for UpdateFileError {
-    fn create_introspection_value<'a>(self: &'a Self) -> libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar> {
-        todo!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        todo!()
-    }
-
-    fn to_value(&self, _callable_fields: Vec<(String, libgql::executor::ast::Value<super::scalar::ExampleScalar>)>) -> Result<libgql::executor::ast::Value<super::scalar::ExampleScalar>, String> {
-        todo!()
-    }
-}
-
-impl TryInto<(String, libgql::executor::Values<super::scalar::ExampleScalar>)> for UpdateFileError {
-    type Error = String;
-
-    fn try_into(self) -> Result<(String, libgql::executor::Values<super::scalar::ExampleScalar>), Self::Error> {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, super::scalar::ExampleScalar>, String> {
         match self {
-        Self::ErrorChangeForbidden(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownFile(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
-        Self::ErrorUnknownTags(item) => TryInto::<(String, libgql::executor::Values::<super::scalar::ExampleScalar>)>::try_into(item),
+        Self::ErrorChangeForbidden(item) => item.to_value(),
+        Self::ErrorUnknownFile(item) => item.to_value(),
+        Self::ErrorUnknownTags(item) => item.to_value(),
         }
     }
 }

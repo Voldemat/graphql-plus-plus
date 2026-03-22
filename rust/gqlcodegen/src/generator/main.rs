@@ -8,11 +8,18 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
     for input in schema.server.inputs.values() {
         super::input::generate_definition(config, &mut scope, input);
     }
-    let mut sync_resolvers_map = Vec::<(String, String)>::new();
+    let mut query_resolvers_map = Vec::<(String, String)>::new();
+    let mut mutation_resolvers_map = Vec::<String>::new();
     let mut subscription_resolvers_map = Vec::<String>::new();
     for object in schema.server.objects.values() {
-        if object.name == "Mutation" || object.name == "Query" {
-            sync_resolvers_map.append(
+        if object.name == "Query" {
+            query_resolvers_map.append(
+                &mut super::object::generate_root_object_definitions(
+                    config, &mut scope, object,
+                ).into_iter().map(|v| ("Query".to_string(), v)).collect(),
+            )
+        } else if object.name == "Mutation" {
+            mutation_resolvers_map.append(
                 &mut super::object::generate_root_object_definitions(
                     config, &mut scope, object,
                 ),
@@ -22,12 +29,9 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
                 &mut super::object::generate_root_object_definitions(
                     config, &mut scope, object,
                 )
-                .into_iter()
-                .map(|v| v.1)
-                .collect(),
             )
         } else {
-            sync_resolvers_map.append(&mut super::object::generate_definition(
+            query_resolvers_map.append(&mut super::object::generate_definition(
                 config, &mut scope, object,
             ))
         }

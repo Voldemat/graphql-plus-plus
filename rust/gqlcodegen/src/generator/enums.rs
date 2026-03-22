@@ -2,7 +2,6 @@ use crate::schema;
 
 use super::config::Config;
 
-
 pub fn generate_definition(
     config: &Config,
     scope: &mut codegen::Scope,
@@ -39,7 +38,7 @@ pub fn generate_definition(
     let to_str_fn = impl_block
         .new_fn("to_str")
         .arg("self", "&Self")
-        .ret("Result<&'static str, String>");
+        .ret("Result<&str, String>");
     to_str_fn.line("match self {");
     for value in &gqlenum.values {
         to_str_fn.line(format!(
@@ -49,11 +48,24 @@ pub fn generate_definition(
         ));
     }
     to_str_fn.line("}");
+
+    let resolver_value_impl_block =
+        scope.new_impl(&gqlenum.name).impl_trait(format!(
+            "libgql::executor::ast::ResolverValue<{}>",
+            config.scalar_type
+        ));
+    resolver_value_impl_block.new_fn("to_value").generic("'a")
+        .arg("self", "&'a Self")
+        .ret(format!(
+            "Result<libgql::executor::ast::ResolverIntrospectionValue<'a, {}>, String>",
+            config.scalar_type
+        ))
+        .line(format!("libgql::executor::GQLEnum::<{}>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))", config.scalar_type));
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
 
     use crate::generator::config::ResolversConfig;
 
@@ -77,6 +89,7 @@ mod tests {
                 resolvers: ResolversConfig {
                     context_type: "()".to_string(),
                 },
+                field_to_resolver: HashSet::new(),
             },
             &mut scope,
             &gqlenum,

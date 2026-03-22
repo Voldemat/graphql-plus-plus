@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::read_to_string};
+use std::{collections::{HashMap, HashSet}, fs::read_to_string};
 
 mod generator;
 mod schema;
@@ -34,7 +34,8 @@ fn run_schema() {
             scalar_type: "super::scalar::ExampleScalar".into(),
             resolvers: generator::config::ResolversConfig {
                 context_type: "()".to_string()
-            }
+            },
+            field_to_resolver: HashSet::new()
         },
         &schema::Schema {
             server: server_schema,

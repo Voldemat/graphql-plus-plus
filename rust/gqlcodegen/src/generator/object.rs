@@ -1,7 +1,11 @@
-use crate::schema::{self, server::object::{ObjectFieldSpec, ObjectNonCallableFieldSpec, ObjectType}};
+use crate::schema::{
+    self,
+    server::object::{
+        ObjectField, ObjectFieldSpec, ObjectNonCallableFieldSpec, ObjectType,
+    },
+};
 
 use super::config::Config;
-
 
 fn generate_object_type(
     config: &Config,
@@ -213,7 +217,18 @@ pub fn generate_definition(
     object: &schema::server::object::Object,
 ) -> Vec<(String, String)> {
     let local = scope.new_struct(&object.name).vis("pub");
+    let mut resolver_fields = Vec::<(&String, &ObjectField)>::new();
+    let mut local_fields = Vec::new();
     for (name, field) in &object.fields {
+        if let ObjectFieldSpec::Callable(_) = field.spec {
+            resolver_fields.push((&object.name, field));
+        } else if config
+            .field_to_resolver
+            .contains(&(object.name.clone(), name.clone()))
+        {
+            resolver_fields.push((&object.name, field));
+        }
+        local_fields.push(name);
         let field_name = super::shared::format_field_name(name);
         let mut field = codegen::Field::new(
             &field_name,
@@ -231,54 +246,18 @@ pub fn generate_definition(
         "libgql::executor::ast::ResolverValue<{}>",
         config.scalar_type
     ));
+    let local_fields_str = local_fields.iter().map(|f|
+        format!("(\"{}\", &self.{} as &libgql::executor::ast::ResolverRoot<{}>)", f, super::shared::format_field_name(f), config.scalar_type)).collect::<Vec<_>>().join(",\n");
     resolver_value_impl
-        .new_fn("create_introspection_value")
+        .new_fn("to_value")
         .generic("'a")
         .arg("self", "&'a Self")
         .ret(format!(
-            "libgql::executor::ast::ResolverIntrospectionValue<'a, {}>",
+            "Result<libgql::executor::ast::ResolverIntrospectionValue<'a, {}>, String>",
             config.scalar_type
         ))
-        .line("todo!()");
+        .line(format!("Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(self, \"{}\", std::collections::HashMap::from_iter([{}]))))", object.name, local_fields_str));
 
-    resolver_value_impl
-        .new_fn("get_existing_fields")
-        .arg("self", "&Self")
-        .ret("std::collections::HashSet<String>")
-        .line("todo!()");
-    resolver_value_impl
-        .new_fn("to_value")
-        .arg_ref_self()
-        .arg(
-            "_callable_fields",
-            format!(
-                "Vec<(String, libgql::executor::ast::Value<{}>)>",
-                config.scalar_type
-            ),
-        )
-        .ret(format!(
-            "Result<libgql::executor::ast::Value<{}>, String>",
-            config.scalar_type
-        ))
-        .line("todo!()");
-
-    let impl_block = scope.new_impl(&object.name).impl_trait(format!(
-        "TryInto<(String, libgql::executor::Values<{}>)>",
-        config.scalar_type
-    ));
-    impl_block.associate_type("Error", "String");
-    impl_block
-        .new_fn("try_into")
-        .arg_self()
-        .ret(format!(
-            "Result<(String, libgql::executor::Values<{}>), Self::Error>",
-            config.scalar_type
-        ))
-        .line(format!(
-            "Ok((\"{}\".to_string(), libgql::executor::Values::from_iter({})))",
-            object.name,
-            generate_object_fields_value(config, &object.fields)
-        ));
     return Vec::new();
 }
 
@@ -286,7 +265,7 @@ pub fn generate_root_object_definitions(
     config: &Config,
     scope: &mut codegen::Scope,
     object: &schema::server::object::Object,
-) -> Vec<(String, String)> {
+) -> Vec<String> {
     object.fields.iter().map(|(field_name, field)| {
         let rust_name = super::shared::format_field_name(field_name);
         let object_rust_name = super::shared::format_field_name(&object.name);
@@ -366,6 +345,6 @@ pub fn generate_root_object_definitions(
             resolver_fn_name, call_arguments_str, config.scalar_type
         ));
         wrapper_fn.line("})");
-        (object.name.clone(), field_name.clone())
+        field_name.clone()
     }).collect()
 }

@@ -52,26 +52,17 @@ impl libgql::executor::GQLScalar<ExampleScalar> for i32 {
     fn to_scalar(self: &Self) -> Result<ExampleScalar, String> {
         Ok(ExampleScalar::Int(*self))
     }
-
 }
 
 impl libgql::executor::ast::ResolverValue<ExampleScalar> for i32 {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_value(self)
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        panic!()
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
+            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
     }
 }
 
@@ -89,22 +80,14 @@ impl libgql::executor::GQLScalar<ExampleScalar> for f32 {
 }
 
 impl libgql::executor::ast::ResolverValue<ExampleScalar> for f32 {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_value(self)
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        panic!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
+            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
     }
 }
 
@@ -122,22 +105,14 @@ impl libgql::executor::GQLScalar<ExampleScalar> for String {
 }
 
 impl libgql::executor::ast::ResolverValue<ExampleScalar> for String {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_value(self)
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        panic!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
+            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
     }
 }
 
@@ -155,22 +130,14 @@ impl libgql::executor::GQLScalar<ExampleScalar> for i64 {
 }
 
 impl libgql::executor::ast::ResolverValue<ExampleScalar> for i64 {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_value(self)
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        panic!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
+            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
     }
 }
 
@@ -196,22 +163,15 @@ impl libgql::executor::GQLScalar<ExampleScalar>
 impl libgql::executor::ast::ResolverValue<ExampleScalar>
     for chrono::DateTime<chrono::Utc>
 {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_value(self)
-    }
 
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        panic!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
+            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
     }
 }
 
@@ -231,22 +191,14 @@ impl libgql::executor::GQLScalar<ExampleScalar> for uuid::Uuid {
 }
 
 impl libgql::executor::ast::ResolverValue<ExampleScalar> for uuid::Uuid {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_value(self)
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        panic!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
+            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
     }
 }
 
@@ -264,22 +216,14 @@ impl libgql::executor::GQLScalar<ExampleScalar> for bool {
 }
 
 impl libgql::executor::ast::ResolverValue<ExampleScalar> for bool {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_value(self)
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        panic!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
+            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
     }
 }
 
@@ -299,22 +243,14 @@ impl libgql::executor::GQLScalar<ExampleScalar> for url::Url {
 }
 
 impl libgql::executor::ast::ResolverValue<ExampleScalar> for url::Url {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        libgql::executor::GQLScalar::<ExampleScalar>::to_value(self)
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        panic!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)
+            .map(|scalar| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(scalar)))
     }
 }
 
@@ -329,21 +265,12 @@ impl libgql::executor::GQLScalar<ExampleScalar> for () {
 }
 
 impl libgql::executor::ast::ResolverValue<ExampleScalar> for () {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        Ok(libgql::executor::Value::Null)
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        panic!()
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        Ok(None)
     }
 }
