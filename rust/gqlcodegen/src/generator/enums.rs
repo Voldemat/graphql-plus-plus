@@ -113,12 +113,18 @@ impl libgql::executor::GQLEnum<ExampleScalar> for Check {
         }
     }
 
-    fn to_str(self: &Self) -> Result<&'static str, String> {
+    fn to_str(self: &Self) -> Result<&str, String> {
         match self {
         Self::FirstValue => Ok("FIRST_VALUE"),
         Self::SecondValue => Ok("SECOND_VALUE"),
         Self::ThirdValue => Ok("THIRD_VALUE"),
         }
+    }
+}
+
+impl libgql::executor::ast::ResolverValue<ExampleScalar> for Check {
+    fn to_value<'a>(self: &'a Self) -> Result<libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>, String> {
+        libgql::executor::GQLEnum::<ExampleScalar>::to_scalar(self).map(|s| Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(s)))
     }
 }"#
         )
