@@ -1,4 +1,7 @@
-use std::{collections::HashSet, sync::{atomic::AtomicBool, Arc}};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::{Arc, atomic::AtomicBool},
+};
 
 use chrono::prelude::*;
 use libgql::parsers::schema::type_registry::TypeRegistry;
@@ -49,30 +52,18 @@ impl libgql::executor::GQLScalar<ExampleScalar> for DateTime<Utc> {
 }
 
 impl libgql::executor::ast::ResolverValue<ExampleScalar> for DateTime<Utc> {
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        None
-    }
-
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        Ok(libgql::executor::Value::NonNullable(
-            libgql::executor::NonNullableValue::Literal(
-                libgql::executor::LiteralValue::Scalar(
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        Ok(Some(
+            libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(
                     libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(
-                        self,
-                    )?,
-                ),
-            ),
-        ))
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        panic!()
+                        self
+                    )?
+        )))
     }
 }
 
@@ -271,6 +262,17 @@ impl libgql::executor::GQLEnum<ExampleScalar> for EGroupUsersField {
     }
 }
 
+impl libgql::executor::ast::ResolverValue<ExampleScalar> for bool {
+    fn to_value<'a>(
+        self: &'a Self,
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Scalar(libgql::executor::GQLScalar::<ExampleScalar>::to_scalar(self)?)))
+    }
+}
+
 type Context = ();
 
 struct ErrorInvalidCredentials {
@@ -280,33 +282,19 @@ struct ErrorInvalidCredentials {
 impl libgql::executor::ast::ResolverValue<ExampleScalar>
     for ErrorInvalidCredentials
 {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, libgql::executor::Value<ExampleScalar>)>,
-    ) -> Result<libgql::executor::Value<ExampleScalar>, String> {
-        Ok(libgql::executor::Value::NonNullable(
-            libgql::executor::NonNullableValue::Literal(
-                libgql::executor::LiteralValue::Object(
-                    "ErrorInvalidCredentials".to_string(),
-                    libgql::executor::Values::new(),
-                ),
-            ),
-        ))
-    }
-
-    fn get_existing_fields(self: &Self) -> std::collections::HashSet<String> {
-        HashSet::from_iter(["a".to_string()])
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>
-    {
-        Some(
-        libgql::executor::ast::NonNullableResolverIntrospectionValue::Literal(
-            "ErrorInvalidCredentials".to_string(), self
-        )
-        )
+    ) -> Result<
+        libgql::executor::ast::ResolverIntrospectionValue<'a, ExampleScalar>,
+        String,
+    > {
+        Ok(Some(libgql::executor::ast::NonNullableResolverIntrospectionValue::Object(
+                    self,
+                    "ErrorInvalidCredentials",
+                    HashMap::from_iter([
+                        ("a", &self.a as &libgql::executor::ast::ResolverRoot<ExampleScalar>)
+                    ])
+        )))
     }
 }
 
@@ -387,7 +375,10 @@ impl libgql::json::executor::ast::JSONSerializableScalar for ExampleScalar {
 fn get_events_subscription<'a>(
     context: &'a Context,
     variables: &'a libgql::executor::ResolvedVariables,
-) -> libgql::executor::subscriptions::SubscriptionResolverFuture<'a, ExampleScalar> {
+) -> libgql::executor::subscriptions::SubscriptionResolverFuture<
+    'a,
+    ExampleScalar,
+> {
     let resolver_stream = async_stream::stream! {
         loop {
             yield Utc::now();
@@ -428,19 +419,17 @@ async fn execute(args: ParseArgs) {
     parse_registry.add_scalar::<UUID>("UUID");
     parse_registry.add_enum::<EGroupUsersField>("EGroupUsersField");
     parse_registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
-    let mut mutation_resolvers = libgql::executor::mutations::MutationResolversMap::new();
-    mutation_resolvers.insert(
-        "login".to_string(),
-        Box::new(login_resolver),
-    );
+    let mut mutation_resolvers =
+        libgql::executor::mutations::MutationResolversMap::new();
+    mutation_resolvers.insert("login", Box::new(login_resolver));
     let mut subscription_resolvers =
         libgql::executor::subscriptions::SubscriptionResolversMap::new();
     subscription_resolvers
-        .insert("getEvents".to_string(), Box::new(get_events_subscription));
+        .insert("getEvents", Box::new(get_events_subscription));
     let resolvers = libgql::executor::Resolvers {
         queries: libgql::executor::queries::QueryResolversMap::new(),
         mutations: mutation_resolvers,
-        subscriptions: subscription_resolvers
+        subscriptions: subscription_resolvers,
     };
     let operation_result = libgql::executor::execute(
         &(),
