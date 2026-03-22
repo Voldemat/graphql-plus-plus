@@ -66,7 +66,6 @@ pub fn parse_variable_from_json<S: InputScalar>(
             Ok(crate::executor::Value::NonNullable(
                 crate::executor::NonNullableValue::Literal(
                     crate::executor::LiteralValue::Object(
-                        "".to_string(),
                         variables,
                     ),
                 ),
@@ -109,7 +108,7 @@ pub fn serialize_literal_value_to_json<S: OutputScalar>(
         crate::executor::LiteralValue::Scalar(scalar) => {
             S::to_json_value(scalar)
         }
-        crate::executor::LiteralValue::Object(_, object_value) => {
+        crate::executor::LiteralValue::Object(object_value) => {
             serialize_values_to_json(object_value)
         }
     }

@@ -10,7 +10,7 @@ use super::variables::ResolvedVariables;
 
 pub type MutationResolver<S, C> =
     Box<dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S>>;
-pub type MutationResolversMap<S, C> = HashMap<String, MutationResolver<S, C>>;
+pub type MutationResolversMap<S, C> = HashMap<&'static str, MutationResolver<S, C>>;
 
 async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
     context: &C,
@@ -22,7 +22,7 @@ async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
 ) -> Result<Value<S>, String> {
     let value = {
         let resolver =
-            mutation_resolvers.get(&field.name).ok_or_else(|| {
+            mutation_resolvers.get(field.name.as_str()).ok_or_else(|| {
                 format!("No mutation resolver for {}", field.name)
             })?;
         resolver(context, variables).await?
@@ -31,8 +31,8 @@ async fn execute_field<C, S: Scalar, T: TypeRegistry<S>>(
         context,
         query_resolvers,
         type_registry,
-        value.as_ref(),
-        &field.selection,
+        value.to_value()?,
+        field.selection.as_ref(),
         variables,
     )
     .await

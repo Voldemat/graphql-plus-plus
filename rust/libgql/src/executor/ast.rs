@@ -1,5 +1,5 @@
 use super::scalar::Scalar;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub enum Value<S: Scalar> {
@@ -56,110 +56,56 @@ impl<S: Scalar> NonNullableValue<S> {
 
 #[derive(Debug)]
 pub enum LiteralValue<S: Scalar> {
-    Object(String, Values<S>),
+    Object(Values<S>),
     Scalar(S),
 }
 
-impl<S: Scalar> From<(String, Values<S>)> for LiteralValue<S> {
-    fn from((a, b): (String, Values<S>)) -> Self {
-        Self::Object(a, b)
-    }
-}
 pub type Values<S> = HashMap<String, Value<S>>;
 
-pub enum NonNullableResolverIntrospectionValue<'a, S> {
-    Literal(String, &'a ResolverRoot<S>),
-    Array(Vec<&'a ResolverRoot<S>>),
+pub enum NonNullableResolverIntrospectionValue<'a, S: Scalar> {
+    Scalar(S),
+    Object(&'a ResolverRoot<S>, &'a str, HashMap<&'a str, &'a ResolverRoot<S>>),
+    Array(Vec<ResolverIntrospectionValue<'a, S>>),
 }
 
 pub type ResolverIntrospectionValue<'a, S> =
     Option<NonNullableResolverIntrospectionValue<'a, S>>;
 
 pub trait ResolverValue<S: Scalar> {
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> ResolverIntrospectionValue<'a, S>;
-
-    fn to_value(
-        self: &Self,
-        callable_fields: Vec<(String, Value<S>)>,
-    ) -> Result<Value<S>, String>;
-
-    fn get_existing_fields(self: &Self) -> HashSet<String>;
+    ) -> Result<ResolverIntrospectionValue<'a, S>, String>;
 }
 
 impl<S: Scalar> ResolverValue<S> for &() {
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> ResolverIntrospectionValue<'a, S> {
-        panic!("Unexpected create_introspection_value on root value");
-    }
-
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, Value<S>)>,
-    ) -> Result<Value<S>, String> {
-        Ok(Value::Null)
-    }
-
-    fn get_existing_fields(self: &Self) -> HashSet<String> {
-        HashSet::new()
+    ) -> Result<ResolverIntrospectionValue<'a, S>, String> {
+        Ok(None)
     }
 }
 
 impl<S: Scalar, T: ResolverValue<S>> ResolverValue<S> for Option<T> {
-    fn to_value(
-        self: &Self,
-        callable_fields: Vec<(String, Value<S>)>,
-    ) -> Result<Value<S>, String> {
-        match self {
-            None => Ok(Value::Null),
-            Some(v) => ResolverValue::<S>::to_value(v, callable_fields),
-        }
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> ResolverIntrospectionValue<'a, S> {
+    ) -> Result<ResolverIntrospectionValue<'a, S>, String> {
         match self {
-            None => None,
-            Some(v) => ResolverValue::<S>::create_introspection_value(v),
-        }
-    }
-
-    fn get_existing_fields(self: &Self) -> HashSet<String> {
-        match self {
-            None => HashSet::new(),
-            Some(v) => ResolverValue::<S>::get_existing_fields(v),
+            None => Ok(None),
+            Some(v) => ResolverValue::<S>::to_value(v),
         }
     }
 }
 
 impl<S: Scalar, T: ResolverValue<S> + 'static> ResolverValue<S> for Vec<T> {
-    fn to_value(
-        self: &Self,
-        _: Vec<(String, Value<S>)>,
-    ) -> Result<Value<S>, String> {
-        self.iter()
-            .map(|element| ResolverValue::<S>::to_value(element, Vec::new()))
-            .collect::<Result<Vec<_>, String>>()
-            .map(|v| Value::NonNullable(NonNullableValue::Array(v)))
-    }
-
-    fn create_introspection_value<'a>(
+    fn to_value<'a>(
         self: &'a Self,
-    ) -> ResolverIntrospectionValue<'a, S> {
-        Some(NonNullableResolverIntrospectionValue::Array(
-            self.iter()
-                .map(|element: &'a T| {
-                    element as &'a dyn ResolverValueSuperTrait<S>
-                })
-                .collect(),
-        ))
-    }
-
-    fn get_existing_fields(self: &Self) -> HashSet<String> {
-        panic!("Unexpected get_existing_fields on Vec")
+    ) -> Result<ResolverIntrospectionValue<'a, S>, String> {
+        self.iter()
+            .map(|element| ResolverValue::<S>::to_value(element))
+            .collect::<Result<Vec<_>, String>>()
+            .map(|array| {
+                Some(NonNullableResolverIntrospectionValue::Array(array))
+            })
     }
 }
 

@@ -13,25 +13,10 @@ where
     fn from_scalar(s: S) -> Result<Self, String>;
     fn to_scalar(self: &Self) -> Result<S, String>;
 
-    fn to_value(self: &Self) -> Result<Value<S>, String> {
-        self.to_non_nullable_value().map(|v| Value::NonNullable(v))
-    }
-
-    fn to_non_nullable_value(
-        self: &Self,
-    ) -> Result<NonNullableValue<S>, String> {
-        self.to_literal_value()
-            .map(|v| NonNullableValue::Literal(v))
-    }
-
-    fn to_literal_value(self: &Self) -> Result<LiteralValue<S>, String> {
-        self.to_scalar().map(|scalar| LiteralValue::Scalar(scalar))
-    }
-
     fn from_literal_value(value: LiteralValue<S>) -> Result<Self, String> {
         match value {
             LiteralValue::Scalar(scalar) => Self::from_scalar(scalar),
-            LiteralValue::Object(_, object) => {
+            LiteralValue::Object(object) => {
                 Err(format!("Unexpected object value for scalar: {:?}", object))
             }
         }
@@ -97,24 +82,10 @@ where
     Self: 'static,
 {
     fn from_string(s: String) -> Result<Self, String>;
-    fn to_str(self: &Self) -> Result<&'static str, String>;
+    fn to_str(self: &Self) -> Result<&str, String>;
 
-    fn to_value(self: &Self) -> Result<Value<S>, String> {
-        self.to_non_nullable_value().map(|v| Value::NonNullable(v))
-    }
-
-    fn to_non_nullable_value(
-        self: &Self,
-    ) -> Result<NonNullableValue<S>, String> {
-        self.to_literal_value()
-            .map(|v| NonNullableValue::Literal(v))
-    }
-
-    fn to_literal_value(self: &Self) -> Result<LiteralValue<S>, String> {
-        self.to_str()
-            .map(S::from_str)
-            .flatten()
-            .map(|scalar| LiteralValue::Scalar(scalar))
+    fn to_scalar(self: &Self) -> Result<S, String> {
+        self.to_str().map(|s| S::from_str(s)).flatten()
     }
 
     fn from_literal_value(value: LiteralValue<S>) -> Result<Self, String> {
@@ -126,7 +97,7 @@ where
                 })
                 .map(Self::from_string)
                 .flatten(),
-            LiteralValue::Object(_, object) => {
+            LiteralValue::Object(object) => {
                 Err(format!("Unexpected object value for enum: {:?}", object))
             }
         }
@@ -196,7 +167,7 @@ where
 
     fn from_literal_value(value: LiteralValue<S>) -> Result<Self, String> {
         match value {
-            LiteralValue::Object(_, object) => Self::from_variables(object),
+            LiteralValue::Object(object) => Self::from_variables(object),
             LiteralValue::Scalar(scalar) => {
                 Err(format!("Unexpected scalar value for input: {:?}", scalar))
             }

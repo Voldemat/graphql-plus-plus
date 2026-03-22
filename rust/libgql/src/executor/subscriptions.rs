@@ -22,7 +22,7 @@ pub type SubscriptionResolver<S, C> = Box<
 >;
 
 pub type SubscriptionResolversMap<S, C> =
-    HashMap<String, SubscriptionResolver<S, C>>;
+    HashMap<&'static str, SubscriptionResolver<S, C>>;
 
 pub async fn execute_subscription_operation<
     'args,
@@ -59,7 +59,7 @@ pub async fn execute_subscription_operation<
         return Err("Unexpected selection for subscription".into());
     };
 
-    let resolver = resolvers.get(&selection.name).ok_or_else(|| {
+    let resolver = resolvers.get(selection.name.as_str()).ok_or_else(|| {
         format!("No subscription resolver for {}", selection.name)
     })?;
     let vars = Box::new(variables);
@@ -73,8 +73,8 @@ pub async fn execute_subscription_operation<
                 context,
                 query_resolvers,
                 type_registry,
-                value.as_ref(),
-                &selection.selection,
+                value.to_value()?,
+                selection.selection.as_ref(),
                 &vars2.as_ref(),
             )
             .await?;

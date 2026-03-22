@@ -56,7 +56,7 @@ fn resolve_literal_array<S: Scalar, R: TypeRegistry<S>>(
         shared::ast::InputTypeSpec::InputType(input_type) => {
             R::parse_input_array(registry, &input_type.borrow(), elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
-                    LiteralValue::Object(_, object),
+                    LiteralValue::Object(object),
                 )) = e
                 {
                     Ok(object)
@@ -162,7 +162,7 @@ mod tests {
             }
         }
 
-        fn to_scalar(self: Self) -> Result<TestScalar, String> {
+        fn to_scalar(self: &Self) -> Result<TestScalar, String> {
             Ok(TestScalar::Empty(()))
         }
     }
