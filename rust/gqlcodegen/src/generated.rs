@@ -3112,79 +3112,116 @@ impl libgql::executor::ast::ResolverValue<super::scalar::ExampleScalar> for Upda
 pub fn create_resolvers_map() -> libgql::executor::Resolvers<super::scalar::ExampleScalar, ()> {
     libgql::executor::Resolvers {
        queries: libgql::executor::queries::QueryResolversMap::from_iter([
-            (("Query", "getTagsCount"), Box::new(query_get_tags_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getUsersTagsCount"), Box::new(query_get_users_tags_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getFilesDealInfo"), Box::new(query_get_files_deal_info_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getMyTagsCount"), Box::new(query_get_my_tags_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "isTagExists"), Box::new(query_is_tag_exists_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getDealInfo"), Box::new(query_get_deal_info_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getGroupUsers"), Box::new(query_get_group_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "searchTags"), Box::new(query_search_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getDealColumns"), Box::new(query_get_deal_columns_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getGroupUsersTotal"), Box::new(query_get_group_users_total_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getGroupsTotal"), Box::new(query_get_groups_total_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getFavouriteTags"), Box::new(query_get_favourite_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getGroups"), Box::new(query_get_groups_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getMe"), Box::new(query_get_me_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("DealEntry", "value"), Box::new(deal_entry_value_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "retrieveGroup"), Box::new(query_retrieve_group_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getPopularTags"), Box::new(query_get_popular_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getUploadedFilesCount"), Box::new(query_get_uploaded_files_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "isAllowedToDownload"), Box::new(query_is_allowed_to_download_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getTags"), Box::new(query_get_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getGroupTags"), Box::new(query_get_group_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getNextMultipartUploadUrls"), Box::new(query_get_next_multipart_upload_urls_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
             (("Query", "getGroupUsersAndUsers"), Box::new(query_get_group_users_and_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getTagInfo"), Box::new(query_get_tag_info_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getUsers"), Box::new(query_get_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getMyTags"), Box::new(query_get_my_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getFilesCount"), Box::new(query_get_files_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getTagChildren"), Box::new(query_get_tag_children_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getPathToTag"), Box::new(query_get_path_to_tag_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getEvents"), Box::new(query_get_events_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
             (("Query", "getUsersTotal"), Box::new(query_get_users_total_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getFiles"), Box::new(query_get_files_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "retrieveFile"), Box::new(query_retrieve_file_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getPendingUsers"), Box::new(query_get_pending_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getUploadedFiles"), Box::new(query_get_uploaded_files_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getDeals"), Box::new(query_get_deals_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getEvents"), Box::new(query_get_events_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getPathToTag"), Box::new(query_get_path_to_tag_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getUploadedFilesCount"), Box::new(query_get_uploaded_files_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "isTagExists"), Box::new(query_is_tag_exists_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroupTags"), Box::new(query_get_group_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
             (("Query", "getUsersTags"), Box::new(query_get_users_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            (("Query", "getFileURL"), Box::new(query_get_file_url_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>)
+            (("Query", "getUsers"), Box::new(query_get_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getTagChildren"), Box::new(query_get_tag_children_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "isAllowedToDownload"), Box::new(query_is_allowed_to_download_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getNextMultipartUploadUrls"), Box::new(query_get_next_multipart_upload_urls_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getTagsCount"), Box::new(query_get_tags_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroupsTotal"), Box::new(query_get_groups_total_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getPendingUsers"), Box::new(query_get_pending_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getUsersTagsCount"), Box::new(query_get_users_tags_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFilesCount"), Box::new(query_get_files_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getDealColumns"), Box::new(query_get_deal_columns_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFavouriteTags"), Box::new(query_get_favourite_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "retrieveGroup"), Box::new(query_retrieve_group_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getMyTagsCount"), Box::new(query_get_my_tags_count_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFiles"), Box::new(query_get_files_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "searchTags"), Box::new(query_search_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getDealInfo"), Box::new(query_get_deal_info_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroups"), Box::new(query_get_groups_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroupUsers"), Box::new(query_get_group_users_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getGroupUsersTotal"), Box::new(query_get_group_users_total_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getTagInfo"), Box::new(query_get_tag_info_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getPopularTags"), Box::new(query_get_popular_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFilesDealInfo"), Box::new(query_get_files_deal_info_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "retrieveFile"), Box::new(query_retrieve_file_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getFileURL"), Box::new(query_get_file_url_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getMyTags"), Box::new(query_get_my_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("DealEntry", "value"), Box::new(deal_entry_value_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getUploadedFiles"), Box::new(query_get_uploaded_files_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getMe"), Box::new(query_get_me_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getDeals"), Box::new(query_get_deals_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
+            (("Query", "getTags"), Box::new(query_get_tags_wrapper) as libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>)
     ]),
        mutations: libgql::executor::mutations::MutationResolversMap::from_iter([
-            ("createPutFileSession", Box::new(mutation_create_put_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("resetPassword", Box::new(mutation_reset_password_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("confirmUser", Box::new(mutation_confirm_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("logout", Box::new(mutation_logout_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
             ("deleteFiles", Box::new(mutation_delete_files_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("updateFilesAutotags", Box::new(mutation_update_files_autotags_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("updateFile", Box::new(mutation_update_file_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("sendOTPCode", Box::new(mutation_send_otp_code_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
             ("deleteFile", Box::new(mutation_delete_file_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("commitPutFileSession", Box::new(mutation_commit_put_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("createMultipartFileSession", Box::new(mutation_create_multipart_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("approveTag", Box::new(mutation_approve_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("editGroup", Box::new(mutation_edit_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("deleteTag", Box::new(mutation_delete_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("createGroup", Box::new(mutation_create_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("logout", Box::new(mutation_logout_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
             ("deletePendingUser", Box::new(mutation_delete_pending_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("commitMultipartFileSession", Box::new(mutation_commit_multipart_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("deleteUser", Box::new(mutation_delete_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("editTag", Box::new(mutation_edit_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("createUser", Box::new(mutation_create_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("decideOnDownloadRequest", Box::new(mutation_decide_on_download_request_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("login", Box::new(mutation_login_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
             ("setTagIsFavourite", Box::new(mutation_set_tag_is_favourite_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("removeUserFromGroup", Box::new(mutation_remove_user_from_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("updateFilesAutotags", Box::new(mutation_update_files_autotags_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("deleteTag", Box::new(mutation_delete_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("resetPassword", Box::new(mutation_reset_password_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
             ("confirmOTPCode", Box::new(mutation_confirm_otp_code_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("decideOnDownloadRequest", Box::new(mutation_decide_on_download_request_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("createGroup", Box::new(mutation_create_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("removeUserFromGroup", Box::new(mutation_remove_user_from_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
             ("changePassword", Box::new(mutation_change_password_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("editTag", Box::new(mutation_edit_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
             ("addUserToGroup", Box::new(mutation_add_user_to_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("deleteGroup", Box::new(mutation_delete_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("addTagsToFiles", Box::new(mutation_add_tags_to_files_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("createMultipartFileSession", Box::new(mutation_create_multipart_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("confirmUser", Box::new(mutation_confirm_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("commitPutFileSession", Box::new(mutation_commit_put_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
             ("createTag", Box::new(mutation_create_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("addTagsToFiles", Box::new(mutation_add_tags_to_files_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>)
+            ("sendOTPCode", Box::new(mutation_send_otp_code_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("createUser", Box::new(mutation_create_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("approveTag", Box::new(mutation_approve_tag_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("commitMultipartFileSession", Box::new(mutation_commit_multipart_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("login", Box::new(mutation_login_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("updateFile", Box::new(mutation_update_file_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("editGroup", Box::new(mutation_edit_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("deleteUser", Box::new(mutation_delete_user_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("deleteGroup", Box::new(mutation_delete_group_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
+            ("createPutFileSession", Box::new(mutation_create_put_file_session_wrapper) as libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>)
     ]),
        subscriptions: libgql::executor::subscriptions::SubscriptionResolversMap::from_iter([
 
     ])
     }
+}
+
+pub fn create_parse_registry() -> libgql::executor::HashMapRegistry<super::scalar::ExampleScalar> {
+    let mut registry = libgql::executor::HashMapRegistry::<super::scalar::ExampleScalar>::default();
+    registry.add_input::<DateRange>("DateRange");
+    registry.add_input::<EventFiltersIn>("EventFiltersIn");
+    registry.add_input::<FileSortBy>("FileSortBy");
+    registry.add_input::<Filter>("Filter");
+    registry.add_input::<FilterDateRange>("FilterDateRange");
+    registry.add_input::<GetGroupUsersSortBy>("GetGroupUsersSortBy");
+    registry.add_input::<GetGroupsSortBy>("GetGroupsSortBy");
+    registry.add_input::<GetUsersSortBy>("GetUsersSortBy");
+    registry.add_input::<GroupIn>("GroupIn");
+    registry.add_input::<MultipartUploadFileIn>("MultipartUploadFileIn");
+    registry.add_input::<NumberRange>("NumberRange");
+    registry.add_input::<PutUploadFileIn>("PutUploadFileIn");
+    registry.add_input::<TagIn>("TagIn");
+    registry.add_input::<UserIn>("UserIn");
+    registry.add_input::<UsersTagSortBy>("UsersTagSortBy");
+    registry.add_enum::<EDealColumnType>("EDealColumnType");
+    registry.add_enum::<EFileField>("EFileField");
+    registry.add_enum::<EGroupField>("EGroupField");
+    registry.add_enum::<EGroupUsersField>("EGroupUsersField");
+    registry.add_enum::<ESortDirection>("ESortDirection");
+    registry.add_enum::<EUserField>("EUserField");
+    registry.add_enum::<EUsersTagField>("EUsersTagField");
+    registry.add_scalar::<()>("Void");
+    registry.add_scalar::<bool>("Boolean");
+    registry.add_scalar::<i64>("Int64");
+    registry.add_scalar::<f32>("Float");
+    registry.add_scalar::<uuid::Uuid>("UUID");
+    registry.add_scalar::<url::Url>("Url");
+    registry.add_scalar::<f32>("Duration");
+    registry.add_scalar::<i32>("Int");
+    registry.add_scalar::<chrono::DateTime<chrono::Utc>>("Datetime");
+    registry.add_scalar::<String>("String");
+    return registry;
 }
