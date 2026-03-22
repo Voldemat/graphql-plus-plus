@@ -22,7 +22,8 @@ fn resolve_type_spec<S: Scalar, R: ParseRegistry<S>>(
         (
             shared::ast::InputTypeSpec::Scalar(scalar_name),
             LiteralValue::Scalar(scalar),
-        ) => Ok(R::parse_scalar(registry, scalar_name, scalar)?),
+        ) => Ok(R::parse_scalar(registry, scalar_name, scalar)
+            .map_err(|e| format!("{}: {}", scalar_name, e))?),
         (shared::ast::InputTypeSpec::Scalar(scalar_name), other) => {
             Err(format!(
                 "Received invalid type for scalar({}): {:?}",
