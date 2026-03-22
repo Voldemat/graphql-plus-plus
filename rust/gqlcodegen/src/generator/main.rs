@@ -1,14 +1,14 @@
-use std::collections::HashMap;
+use indexmap::IndexMap;
 
 use super::config::Config;
 
 pub fn generate_create_resolvers_map(
     config: &Config,
     scope: &mut codegen::Scope,
-    query_resolvers_map: HashMap<String, String>,
-    mutation_resolvers_map: HashMap<String, String>,
-    subscription_resolvers_map: HashMap<String, String>,
-    object_field_resolvers_map: HashMap<(String, String), String>,
+    query_resolvers_map: IndexMap<String, String>,
+    mutation_resolvers_map: IndexMap<String, String>,
+    subscription_resolvers_map: IndexMap<String, String>,
+    object_field_resolvers_map: IndexMap<(String, String), String>,
 ) {
     let f = scope.new_fn("create_resolvers_map").vis("pub").ret(format!(
         "libgql::executor::Resolvers<'static, {}, {}>",
@@ -56,9 +56,9 @@ fn generate_create_parse_registry_function(
     scope: &mut codegen::Scope,
 ) {
     let f = scope.new_fn("create_parse_registry").ret(format!(
-        "libgql::executor::HashMapRegistry<{}>",
+        "libgql::executor::IndexMapRegistry<{}>",
         config.scalar_type
-    )).vis("pub").line(format!("let mut registry = libgql::executor::HashMapRegistry::<{}>::default();", config.scalar_type));
+    )).vis("pub").line(format!("let mut registry = libgql::executor::IndexMapRegistry::<{}>::default();", config.scalar_type));
     for input_name in schema.server.inputs.keys() {
         f.line(format!(
             "registry.add_input::<{}>(\"{}\");",
@@ -88,10 +88,11 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
     for input in schema.server.inputs.values() {
         super::input::generate_definition(config, &mut scope, input);
     }
-    let mut query_resolvers_map = HashMap::<String, String>::new();
-    let mut mutation_resolvers_map = HashMap::<String, String>::new();
-    let mut subscription_resolvers_map = HashMap::<String, String>::new();
-    let mut object_field_resolvers_map = HashMap::<(String, String), String>::new();
+    let mut query_resolvers_map = IndexMap::<String, String>::new();
+    let mut mutation_resolvers_map = IndexMap::<String, String>::new();
+    let mut subscription_resolvers_map = IndexMap::<String, String>::new();
+    let mut object_field_resolvers_map =
+        IndexMap::<(String, String), String>::new();
     for object in schema.server.objects.values() {
         if object.name == "Query" {
             query_resolvers_map.extend(
@@ -99,7 +100,7 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
                     config, &mut scope, object,
                 )
                 .into_iter()
-                .collect::<HashMap<String, String>>(),
+                .collect::<IndexMap<String, String>>(),
             )
         } else if object.name == "Mutation" {
             mutation_resolvers_map.extend(
@@ -107,7 +108,7 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
                     config, &mut scope, object,
                 )
                 .into_iter()
-                .collect::<HashMap<String, String>>(),
+                .collect::<IndexMap<String, String>>(),
             )
         } else if object.name == "Subscription" {
             subscription_resolvers_map.extend(
@@ -115,12 +116,12 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
                     config, &mut scope, object,
                 )
                 .into_iter()
-                .collect::<HashMap<String, String>>(),
+                .collect::<IndexMap<String, String>>(),
             )
         } else {
-            object_field_resolvers_map.extend(super::object::generate_definition(
-                config, &mut scope, object,
-            ).into_iter().collect::<HashMap<(String, String), String>>());
+            object_field_resolvers_map.extend(
+                super::object::generate_definition(config, &mut scope, object),
+            );
         }
     }
     for union in schema.server.unions.values() {
@@ -132,7 +133,7 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
         query_resolvers_map,
         mutation_resolvers_map,
         subscription_resolvers_map,
-        object_field_resolvers_map
+        object_field_resolvers_map,
     );
     generate_create_parse_registry_function(config, schema, &mut scope);
     return scope.to_string();

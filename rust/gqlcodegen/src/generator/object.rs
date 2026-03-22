@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::schema::{
     self,
     server::object::{
@@ -74,7 +72,7 @@ pub fn generate_definition(
     config: &Config,
     scope: &mut codegen::Scope,
     object: &schema::server::object::Object,
-) -> HashMap<(String, String), String> {
+) -> indexmap::IndexMap<(String, String), String> {
     let local = scope.new_struct(&object.name).vis("pub");
     let mut resolver_fields = Vec::<(&String, &ObjectField)>::new();
     let mut local_fields = Vec::new();

@@ -259,23 +259,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gqlcodegen"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "codegen",
- "convert_case",
- "indexmap",
- "libgql",
- "pretty_assertions",
- "serde",
- "serde_json",
- "serde_json_path_to_error",
- "url",
- "uuid",
-]
-
-[[package]]
 name = "hashbrown"
 version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -460,6 +443,23 @@ dependencies = [
  "serde_json",
  "serde_json_path_to_error",
  "struson",
+]
+
+[[package]]
+name = "libgqlcodegen"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "codegen",
+ "convert_case",
+ "indexmap",
+ "libgql",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "serde_json_path_to_error",
+ "url",
+ "uuid",
 ]
 
 [[package]]
