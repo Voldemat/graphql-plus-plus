@@ -21,16 +21,17 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GRAPHQL_BASE_IMAGE: vladimirdev635/gql-alpine:${{ github.ref_name }}
+      COMPOSE_FILE: ./e2e-tests/docker-compose.yaml
     steps:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Docker compose up
-      run: docker compose -f ./e2e-tests/docker-compose.yaml up -d
+      run: docker compose up -d
     - name: Run typescript-client tests
       run: docker compose exec typescript-client bun start
       continue-on-error: true
     - name: Docker compose down
       if: always()
-      run: docker-compose -f ./e2e-tests/docker-compose.yaml down
+      run: docker compose down
