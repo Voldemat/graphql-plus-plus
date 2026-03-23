@@ -4,8 +4,8 @@ pub struct Check {
     pub a: i32,
 }
 
-async fn query_get_check(context: &super::context::Context) -> Result<Check, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_check(context: &super::context::Context) -> Result<Check, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_check_wrapper<'args>(context: &'args super::context::Context, variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::Scalar> {

@@ -13,13 +13,26 @@ struct GraphqlRequestBody {
     variables: Option<serde_json_path_to_error::value::Value>,
 }
 
+#[derive(serde::Serialize)]
+struct GraphqlError {
+    message: String,
+    path: Vec<String>,
+}
+
+#[derive(serde::Serialize)]
+struct GraphqlResponseBody {
+    data: serde_json_path_to_error::value::Value,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    errors: Vec<GraphqlError>,
+}
+
 #[actix_web::post("/graphql")]
 pub async fn graphql(
     state: actix_web::web::Data<Arc<state::APIState>>,
     json: actix_web::web::Json<GraphqlRequestBody>,
 ) -> impl actix_web::Responder {
     let data = json.0;
-    let operation_result = libgql::executor::execute(
+    let operation_result = match libgql::executor::execute(
         &(),
         &state.get_ref().graphql_registry,
         &state.get_ref().graphql_resolvers_map,
@@ -31,12 +44,32 @@ pub async fn graphql(
         data.operation_name,
     )
     .await
-    .unwrap();
+    {
+        Ok(result) => result,
+        Err(error) => match error {
+            libgql::executor::Error::ExecutionErrors(errors) => {
+                return actix_web::HttpResponse::Ok().json(GraphqlResponseBody {
+                    data: serde_json_path_to_error::Value::Null,
+                    errors: errors
+                        .into_iter()
+                        .map(|gql_error| GraphqlError {
+                            message: gql_error.message.to_string(),
+                            path: gql_error.path,
+                        })
+                        .collect(),
+                });
+            }
+            _ => return actix_web::HttpResponse::BadRequest().body(format!("{:?}", error)),
+        },
+    };
     match operation_result {
         libgql::executor::OperationResult::Immediate(result) => {
             let json_result =
                 libgql::json::executor::ast::serialize_values_to_json(&result).unwrap();
-            actix_web::HttpResponse::Ok().json(json_result)
+            actix_web::HttpResponse::Ok().json(GraphqlResponseBody {
+                data: json_result,
+                errors: Vec::new()
+            })
         }
         libgql::executor::OperationResult::Stream(_) => {
             actix_web::HttpResponse::BadRequest().body("Unexpected stream response")
