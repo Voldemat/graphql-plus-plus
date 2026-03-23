@@ -1,5 +1,9 @@
 name: "e2e-tests"
 
+concurrency:
+  group: e2e-tests
+  cancel-in-progress: true
+
 on:
   push:
     paths:
