@@ -15,8 +15,8 @@ services:
   typescript-client:
     stop_grace_period: 0s
     depends_on:
-      graphql:
-        condition: service_completed_successfully
+      rust-server:
+        condition: service_started
     image: ${TYPESCRIPT_CLIENT_IMAGE}
     command: ['sleep', 'infinity']
     environment:

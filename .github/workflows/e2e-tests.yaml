@@ -65,4 +65,6 @@ jobs:
       run: docker compose exec typescript-client bun start
     - name: Docker compose down
       if: always()
-      run: docker compose down
+      run: |
+        docker compose logs rust-server
+        docker compose down
