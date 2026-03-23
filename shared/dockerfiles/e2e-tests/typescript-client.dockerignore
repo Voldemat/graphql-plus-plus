@@ -1,0 +1,10 @@
+*
+!e2e-tests/typescript-client
+e2e-tests/typescript-client/node_modules
+!e2e-tests/graphql/server-schema.json
+!typescript/gql-codegen
+typescript/gql-codegen/node_modules
+typescript/gql-codegen/dist
+!typescript/gql-client
+typescript/gql-client/node_modules
+typescript/gql-client/dist

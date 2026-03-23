@@ -1,9 +1,7 @@
 import { RootSchema } from './schema/root.js';
-import { Logger } from 'pino';
 
 export interface ActorContext {
     readonly schema: RootSchema
-    readonly logger: Logger
 }
 export type Actor<T extends ActorContext> = (
     c: T,

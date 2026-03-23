@@ -1,0 +1,8 @@
+server:
+  inputs:
+    graphql:
+      - ./server/**/*.graphql
+    jsonSchema: []
+  outputs:
+    filepath: ./server-schema.json
+    onlyUsedInOperations: false

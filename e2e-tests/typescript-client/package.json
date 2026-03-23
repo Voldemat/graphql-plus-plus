@@ -1,0 +1,29 @@
+{
+    "name": "typescript-client",
+    "module": "index.ts",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "start": "bun test --bail=10 --preload=./setup.ts",
+        "start:ci": "bun run start .",
+        "lint": "eslint '**/*.ts'",
+        "lint:fix": "eslint --fix '**/*.ts'",
+        "lint:ci": "bun run lint && bun run codegen:validate && bun run lint:ts",
+        "lint:ts": "bun run tsc --noEmit",
+        "codegen": "bun run ./gql-codegen.mts",
+        "codegen:validate": "previous_hash=$(bun run --silent codegen:hash) && bun run codegen && if test $previous_hash = $(bun run --silent codegen:hash);then echo 'Types is consistent within current schema'; exit 0; else echo 'Types is not consistent within schema'; exit 1; fi",
+        "codegen:hash": "echo $(find ./shared/graphql/generated -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d \" \" -f 1);"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@vladimirdev635/gql-codegen": "file:../../typescript/gql-codegen/dist",
+        "eslint": "^10.1.0",
+        "typescript-eslint": "^8.57.1"
+    },
+    "dependencies": {
+        "@vladimirdev635/gql-client": "file:../../typescript/gql-client/dist"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    }
+}

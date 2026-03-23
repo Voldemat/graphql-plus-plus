@@ -1,0 +1,8 @@
+*
+!e2e-tests/rust-server
+e2e-tests/rust-server/target
+rust/libgql
+!rust/libgql/target
+rust/gqlcodegen
+!rust/gqlcodegen/target
+!rust/gqlcodegen/macros/target

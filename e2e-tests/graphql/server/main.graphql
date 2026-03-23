@@ -1,0 +1,7 @@
+type Check {
+    a: Int!
+}
+
+type Query {
+    getCheck: Check!
+}

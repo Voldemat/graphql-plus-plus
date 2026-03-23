@@ -1,0 +1,26 @@
+FROM node:25-alpine3.22 as typescript-gql-codegen
+WORKDIR /usr/local/app/
+COPY ./typescript/gql-codegen/package.json ./typescript/gql-codegen/package-lock.json ./
+RUN npm install
+COPY ./typescript/gql-codegen/ ./
+RUN npm run build
+
+FROM node:25-alpine3.22 as typescript-gql-client
+WORKDIR /usr/local/app/
+COPY ./typescript/gql-client/package.json ./typescript/gql-client/package-lock.json ./
+RUN npm install
+COPY ./typescript/gql-client/ ./
+RUN npm run build
+
+FROM oven/bun:1.3.11-alpine
+WORKDIR /usr/local/app/e2e-tests/typescript-client
+COPY --from=typescript-gql-codegen /usr/local/app/dist /usr/local/app/typescript/gql-codegen/dist
+COPY --from=typescript-gql-client /usr/local/app/dist /usr/local/app/typescript/gql-client/dist
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    --mount=type=bind,source=./e2e-tests/typescript-client/package.json,target=/usr/local/app/e2e-tests/typescript-client/package.json \
+    --mount=type=bind,source=./e2e-tests/typescript-client/bun.lock,target=/usr/local/app/e2e-tests/typescript-client/bun.lock \
+    bun install --frozen-lockfile
+COPY e2e-tests/typescript-client/ ./
+RUN --mount=type=bind,source=./e2e-tests/graphql/server-schema.json,target=/usr/local/app/e2e-tests/graphql/server-schema.json \
+    bun run lint:ci
+CMD ["bun", "start"]
