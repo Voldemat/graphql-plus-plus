@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 pub mod context;
 pub mod generated;
 pub mod scalar;
@@ -13,7 +15,7 @@ struct GraphqlRequestBody {
 
 #[actix_web::post("/graphql")]
 pub async fn graphql(
-    state: actix_web::web::Data<state::APIState>,
+    state: actix_web::web::Data<Arc<state::APIState>>,
     json: actix_web::web::Json<GraphqlRequestBody>,
 ) -> impl actix_web::Responder {
     let data = json.0;
