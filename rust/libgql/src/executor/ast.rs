@@ -123,7 +123,40 @@ impl<S: Scalar, T: std::any::Any + ResolverValue<S>> ResolverValueSuperTrait<S>
 }
 
 pub type ResolverRoot<S> = dyn ResolverValueSuperTrait<S>;
+pub enum ResolverError {
+    String(String),
+    Generic(Box<dyn ToString>),
+}
+
+impl std::fmt::Debug for ResolverError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::String(arg0) => f.debug_tuple("String").field(arg0).finish(),
+            Self::Generic(arg0) => {
+                f.debug_tuple("Generic").field(&arg0.to_string()).finish()
+            }
+        }
+    }
+}
+
+impl From<String> for ResolverError {
+    fn from(value: String) -> Self {
+        Self::String(value)
+    }
+}
+
+impl From<Box<dyn ToString>> for ResolverError {
+    fn from(value: Box<dyn ToString>) -> Self {
+        Self::Generic(value)
+    }
+}
 
 pub type ResolverFuture<'a, S> = std::pin::Pin<
-    Box<dyn Future<Output = Result<Box<ResolverRoot<S>>, String>> + 'a>,
+    Box<dyn Future<Output = Result<Box<ResolverRoot<S>>, ResolverError>> + 'a>,
 >;
+
+#[derive(Debug)]
+pub struct GraphqlError {
+    pub message: ResolverError,
+    pub path: Vec<String>,
+}

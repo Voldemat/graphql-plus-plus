@@ -4,7 +4,7 @@ use std::sync::Arc;
 use crate::parsers::schema::client;
 
 use super::ast::{
-    NonNullableResolverIntrospectionValue, ResolverFuture,
+    GraphqlError, NonNullableResolverIntrospectionValue, ResolverFuture,
     ResolverIntrospectionValue, ResolverRoot, Value, Values,
 };
 use super::scalar::Scalar;
@@ -12,20 +12,23 @@ use super::variables::ResolvedVariables;
 use super::{LiteralValue, NonNullableValue};
 
 pub type ObjectFieldResolver<S, C> = dyn for<'a> Fn(
-    &'a ResolverRoot<S>,
-    &'a C,
-    &'a ResolvedVariables,
-) -> ResolverFuture<'a, S> + Sync;
+        &'a ResolverRoot<S>,
+        &'a C,
+        &'a ResolvedVariables,
+    ) -> ResolverFuture<'a, S>
+    + Sync;
 pub type ObjectFieldResolversMap<'a, S, C> =
     HashMap<(&'a str, &'a str), &'a ObjectFieldResolver<S, C>>;
 
-pub fn execute_potential_selection_and_serialize<'a, 'b, C, S: Scalar>(
+pub fn execute_potential_selection_and_serialize<'a, C, S: Scalar>(
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<S, C>,
     resolver_root_introspection_value: ResolverIntrospectionValue<'a, S>,
     selection: Option<&'a Arc<client::ast::FragmentSpec>>,
     variables: &'a ResolvedVariables,
-) -> std::pin::Pin<Box<dyn Future<Output = Result<Value<S>, String>> + 'a>> {
+) -> std::pin::Pin<
+    Box<dyn Future<Output = Result<Value<S>, Vec<GraphqlError>>> + 'a>,
+> {
     Box::pin(async move {
         let Some(non_nullable) = resolver_root_introspection_value else {
             return Ok(Value::Null);
@@ -59,29 +62,36 @@ pub fn execute_potential_selection_and_serialize<'a, 'b, C, S: Scalar>(
                 })
             }
             NonNullableResolverIntrospectionValue::Array(array) => {
-                Ok(Value::NonNullable(NonNullableValue::Array(
-                    futures::future::join_all(array.into_iter().map(
-                        async |optional_element| -> Result<Value<S>, String> {
-                            execute_potential_selection_and_serialize(
-                                context,
-                                object_field_resolvers,
-                                optional_element,
-                                selection,
-                                variables,
-                            )
-                            .await
-                        },
-                    ))
-                    .await
-                    .into_iter()
-                    .collect::<Result<Vec<_>, String>>()?,
-                )))
+                Ok(Value::NonNullable(
+                    NonNullableValue::Array(
+                        futures::future::join_all(
+                            array.into_iter().map(
+                                async |optional_element| -> Result<
+                                    Value<S>,
+                                    Vec<GraphqlError>,
+                                > {
+                                    execute_potential_selection_and_serialize(
+                                        context,
+                                        object_field_resolvers,
+                                        optional_element,
+                                        selection,
+                                        variables,
+                                    )
+                                    .await
+                                },
+                            ),
+                        )
+                        .await
+                        .into_iter()
+                        .collect::<Result<Vec<_>, Vec<_>>>()?,
+                    ),
+                ))
             }
         }
     })
 }
 
-fn execute_fragment<'a: 'b, 'b, C, S: Scalar>(
+fn execute_fragment<'a, C, S: Scalar>(
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<S, C>,
     resolver_root: &'a ResolverRoot<S>,
@@ -89,7 +99,9 @@ fn execute_fragment<'a: 'b, 'b, C, S: Scalar>(
     object_name: &'a str,
     spec: &'a client::ast::FragmentSpec,
     variables: &'a ResolvedVariables,
-) -> std::pin::Pin<Box<dyn Future<Output = Result<Values<S>, String>> + 'a>> {
+) -> std::pin::Pin<
+    Box<dyn Future<Output = Result<Values<S>, Vec<GraphqlError>>> + 'a>,
+> {
     Box::pin(async move {
         match spec {
             client::ast::FragmentSpec::Object(obj) => {
@@ -133,15 +145,15 @@ fn execute_fragment<'a: 'b, 'b, C, S: Scalar>(
     })
 }
 
-async fn execute_field<C, S: Scalar>(
-    context: &C,
-    object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
-    resolver_root: &ResolverRoot<S>,
-    object_name: &str,
-    field: &client::ast::FieldSelection,
-    variables: &ResolvedVariables,
-    existing_value: Option<&ResolverRoot<S>>,
-) -> Result<Value<S>, String> {
+async fn execute_field<'a, 'b, C, S: Scalar>(
+    context: &'a C,
+    object_field_resolvers: &'a ObjectFieldResolversMap<'_, S, C>,
+    resolver_root: &'a ResolverRoot<S>,
+    object_name: &'a str,
+    field: &'b client::ast::FieldSelection,
+    variables: &'a ResolvedVariables,
+    existing_value: Option<&'a ResolverRoot<S>>,
+) -> Result<Value<S>, Vec<GraphqlError>> {
     let resolver_key = (object_name, field.name.as_str());
     let owned: Box<ResolverRoot<S>>;
     let value = if let Some(v) = existing_value {
@@ -149,19 +161,49 @@ async fn execute_field<C, S: Scalar>(
     } else {
         let resolver =
             object_field_resolvers.get(&resolver_key).ok_or_else(|| {
-                format!("No resolver for {}.{}", object_name, field.name)
+                vec![GraphqlError {
+                    message: format!(
+                        "No resolver for {}.{}",
+                        object_name, field.name
+                    )
+                    .into(),
+                    path: vec![field.alias.clone()],
+                }]
             })?;
-        owned = resolver(resolver_root, context, variables).await?;
+        owned =
+            resolver(resolver_root, context, variables)
+                .await
+                .map_err(|e| {
+                    vec![GraphqlError {
+                        message: e,
+                        path: vec![field.alias.clone()],
+                    }]
+                })?;
         owned.as_ref()
     };
+    let introspection_value = value.to_value().map_err(|e| {
+        vec![GraphqlError {
+            message: e.into(),
+            path: vec![field.alias.clone()],
+        }]
+    })?;
     execute_potential_selection_and_serialize(
         context,
         object_field_resolvers,
-        value.to_value()?,
+        introspection_value,
         field.selection.as_ref(),
         variables,
     )
     .await
+    .map_err(|errors| {
+        errors
+            .into_iter()
+            .map(|mut error| {
+                error.path.insert(0, field.alias.clone());
+                error
+            })
+            .collect()
+    })
 }
 
 async fn execute_union_selection_set<C, S: Scalar>(
@@ -172,7 +214,7 @@ async fn execute_union_selection_set<C, S: Scalar>(
     existing_fields: &HashMap<&str, &ResolverRoot<S>>,
     selections: &[client::ast::UnionSelection],
     variables: &ResolvedVariables,
-) -> Result<Values<S>, String> {
+) -> Result<Values<S>, Vec<GraphqlError>> {
     futures::future::join_all(selections.iter().map(async |selection| {
         match selection {
             client::ast::UnionSelection::TypenameField(typename_field) => {
@@ -185,7 +227,8 @@ async fn execute_union_selection_set<C, S: Scalar>(
             client::ast::UnionSelection::ObjectConditionalSpreadSelection(
                 spread,
             ) => {
-                let spread_object_name = &spread.selection.r#type.read().unwrap().name;
+                let spread_object_name =
+                    &spread.selection.r#type.read().unwrap().name;
                 if spread_object_name != object_name {
                     return Ok(Values::new());
                 };
@@ -206,7 +249,7 @@ async fn execute_union_selection_set<C, S: Scalar>(
 
             client::ast::UnionSelection::SpreadSelection(spread) => {
                 let fragment = spread.fragment.read().unwrap();
-                let result = execute_fragment(
+                execute_fragment(
                     context,
                     object_field_resolvers,
                     resolver_root,
@@ -215,15 +258,13 @@ async fn execute_union_selection_set<C, S: Scalar>(
                     &fragment.spec,
                     variables,
                 )
-                .await;
-                println!("fragment: {:?}", fragment);
-                return result;
+                .await
             }
         }
     }))
     .await
     .into_iter()
-    .collect::<Result<Vec<_>, String>>()
+    .collect::<Result<Vec<_>, Vec<_>>>()
     .map(|a| a.into_iter().flatten().collect())
 }
 
@@ -235,7 +276,7 @@ async fn execute_field_selection<C, S: Scalar>(
     object_name: &str,
     field: &client::ast::FieldSelection,
     variables: &ResolvedVariables,
-) -> Result<Values<S>, String> {
+) -> Result<Values<S>, Vec<GraphqlError>> {
     let value = execute_field(
         context,
         object_field_resolvers,
@@ -257,7 +298,7 @@ async fn execute_object_selection<C, S: Scalar>(
     existing_fields: &HashMap<&str, &ResolverRoot<S>>,
     variables: &ResolvedVariables,
     selection: &client::ast::ObjectSelection,
-) -> Result<Values<S>, String> {
+) -> Result<Values<S>, Vec<GraphqlError>> {
     match selection {
         client::ast::ObjectSelection::TypenameField(field) => {
             super::shared::execute_typename_field(object_name, field)
@@ -293,7 +334,7 @@ async fn execute_object_selection<C, S: Scalar>(
     }
 }
 
-async fn execute_object_selection_set<'a, C, S: Scalar>(
+async fn execute_object_selection_set<C, S: Scalar>(
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
     object_name: &str,
@@ -301,9 +342,9 @@ async fn execute_object_selection_set<'a, C, S: Scalar>(
     existing_fields: &HashMap<&str, &ResolverRoot<S>>,
     selections: &[client::ast::ObjectSelection],
     variables: &ResolvedVariables,
-) -> Result<Values<S>, String> {
+) -> Result<Values<S>, Vec<GraphqlError>> {
     futures::future::join_all(selections.iter().map(
-        async |selection| -> Result<Values<S>, String> {
+        async |selection| -> Result<Values<S>, Vec<GraphqlError>> {
             execute_object_selection(
                 context,
                 object_field_resolvers,
@@ -318,6 +359,6 @@ async fn execute_object_selection_set<'a, C, S: Scalar>(
     ))
     .await
     .into_iter()
-    .collect::<Result<Vec<_>, String>>()
+    .collect::<Result<Vec<_>, Vec<_>>>()
     .map(|a| a.into_iter().flatten().collect())
 }

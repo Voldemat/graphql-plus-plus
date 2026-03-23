@@ -24,6 +24,8 @@ use crate::{
     },
 };
 
+use self::ast::GraphqlError;
+
 #[derive(Debug, derive_more::From)]
 pub enum Error {
     Lexer(Vec<lexer::Error>),
@@ -31,11 +33,12 @@ pub enum Error {
     OperationIsNotDefined(String),
     OperationNameIsNotDefined,
     NoOperationsAreDefined,
+    ExecutionErrors(Vec<GraphqlError>),
 }
 
 pub enum OperationResult<
     S: Scalar,
-    TStream: futures::Stream<Item = Result<Values<S>, String>>,
+    TStream: futures::Stream<Item = Result<Values<S>, Vec<GraphqlError>>>,
 > {
     Immediate(Values<S>),
     Stream(std::pin::Pin<Box<TStream>>),
@@ -63,15 +66,22 @@ async fn execute_operation<
 ) -> Result<
     OperationResult<
         S,
-        impl futures::Stream<Item = Result<Values<S>, String>> + use<'args, C, S, T>,
+        impl futures::Stream<Item = Result<Values<S>, Vec<GraphqlError>>>
+        + use<'args, C, S, T>,
     >,
-    String,
+    Vec<GraphqlError>,
 > {
     let resolved_variables = resolve_operation_parameters(
         parse_registry,
         &operation.parameters,
         variables,
-    )?;
+    )
+    .map_err(|e| {
+        vec![GraphqlError {
+            message: e.into(),
+            path: vec![],
+        }]
+    })?;
     match operation.r#type {
         client::ast::OpType::Query => Ok(OperationResult::Immediate(
             queries::execute_query_operation(
@@ -117,7 +127,8 @@ pub async fn execute<'args, C, S: Scalar, T: ParseRegistry<S>>(
 ) -> Result<
     OperationResult<
         S,
-        impl futures::Stream<Item = Result<Values<S>, String>> + use<'args, C, S, T>,
+        impl futures::Stream<Item = Result<Values<S>, Vec<GraphqlError>>>
+        + use<'args, C, S, T>,
     >,
     Error,
 > {
@@ -156,14 +167,7 @@ pub async fn execute<'args, C, S: Scalar, T: ParseRegistry<S>>(
             .unwrap()
             .into_inner()
             .unwrap();
-    let result = execute_operation(
-        context,
-        resolvers,
-        parse_registry,
-        operation,
-        variables,
-    )
-    .await
-    .unwrap();
-    Ok(result)
+    execute_operation(context, resolvers, parse_registry, operation, variables)
+        .await
+        .map_err(|errors| Error::ExecutionErrors(errors))
 }
