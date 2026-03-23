@@ -44,7 +44,15 @@ export function createParser<
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ): Promise<any> => {
             type TResult = OperationResult<T>
-            const json = await options.response.json()
+            const text = await options.response.text()
+            let json;
+            try {
+                json = JSON.parse(text)
+            } catch(error) {
+                throw new Error(
+                    `Failed to parse response as json: ${error}, text: ${text}`
+                )
+            }
             if (json.errors) {
                 await parserOptions.onErrors(options, json.errors)
             }
