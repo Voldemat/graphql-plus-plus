@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use crate::parsers::schema::{client, server, shared};
 
@@ -6,7 +6,7 @@ pub type ASTVisitorHook<'a, T> = Option<Box<dyn FnMut(&T) + 'a>>;
 
 #[derive(Default)]
 pub struct ASTVisitorHooks<'a> {
-    pub visit_fragment: ASTVisitorHook<'a, Rc<RefCell<client::ast::Fragment>>>,
+    pub visit_fragment: ASTVisitorHook<'a, Arc<RefCell<client::ast::Fragment>>>,
     pub visit_fragment_spec: ASTVisitorHook<'a, client::ast::FragmentSpec>,
     pub visit_union_fragment_spec:
         ASTVisitorHook<'a, client::ast::UnionFragmentSpec>,
@@ -17,7 +17,7 @@ pub struct ASTVisitorHooks<'a> {
     pub visit_object_conditional_spread_selection:
         ASTVisitorHook<'a, client::ast::ObjectConditionalSpreadSelection>,
     pub visit_object_type:
-        ASTVisitorHook<'a, Rc<RefCell<server::ast::ObjectType>>>,
+        ASTVisitorHook<'a, Arc<RefCell<server::ast::ObjectType>>>,
     pub visit_object_fragment_spec_object_type: ASTVisitorHook<
         'a,
         client::ast::ObjectFragmentSpec<server::ast::ObjectType>,
@@ -27,7 +27,7 @@ pub struct ASTVisitorHooks<'a> {
         client::ast::ObjectFragmentSpec<server::ast::Interface>,
     >,
     pub visit_interface:
-        ASTVisitorHook<'a, Rc<RefCell<server::ast::Interface>>>,
+        ASTVisitorHook<'a, Arc<RefCell<server::ast::Interface>>>,
     pub visit_object_selection:
         ASTVisitorHook<'a, client::ast::ObjectSelection>,
     pub visit_field_selection: ASTVisitorHook<'a, client::ast::FieldSelection>,
@@ -38,7 +38,7 @@ pub struct ASTVisitorHooks<'a> {
     pub visit_argument_literal_value:
         ASTVisitorHook<'a, shared::ast::ArgumentLiteralValue>,
     pub visit_client_directive:
-        ASTVisitorHook<'a, Rc<client::ast::ClientDirective>>,
+        ASTVisitorHook<'a, Arc<client::ast::ClientDirective>>,
     pub visit_client_directive_location:
         ASTVisitorHook<'a, client::ast::DirectiveLocation>,
     pub visit_field_definition_input_field_spec: ASTVisitorHook<
@@ -80,12 +80,12 @@ pub struct ASTVisitorHooks<'a> {
         ASTVisitorHook<'a, server::ast::CallableFieldSpec>,
     pub visit_object_type_spec: ASTVisitorHook<'a, server::ast::ObjectTypeSpec>,
     pub visit_operation:
-        ASTVisitorHook<'a, Rc<RefCell<client::ast::Operation>>>,
+        ASTVisitorHook<'a, Arc<RefCell<client::ast::Operation>>>,
     pub visit_input_type:
-        ASTVisitorHook<'a, Rc<RefCell<shared::ast::InputType>>>,
+        ASTVisitorHook<'a, Arc<RefCell<shared::ast::InputType>>>,
     pub visit_scalar: ASTVisitorHook<'a, String>,
-    pub visit_enum: ASTVisitorHook<'a, Rc<shared::ast::Enum>>,
-    pub visit_union: ASTVisitorHook<'a, Rc<RefCell<server::ast::Union>>>,
+    pub visit_enum: ASTVisitorHook<'a, Arc<shared::ast::Enum>>,
+    pub visit_union: ASTVisitorHook<'a, Arc<RefCell<server::ast::Union>>>,
 }
 
 fn visit_field_selection(
@@ -137,7 +137,7 @@ fn visit_object_selection(
     selection: &client::ast::ObjectSelection,
     fields: &indexmap::IndexMap<
         String,
-        Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+        Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
     >,
 ) {
     if let Some(hook) = hooks.visit_object_selection.as_mut() {
@@ -306,7 +306,7 @@ fn visit_object_field_spec(
 
 fn visit_union(
     hooks: &mut ASTVisitorHooks,
-    union: &Rc<RefCell<server::ast::Union>>,
+    union: &Arc<RefCell<server::ast::Union>>,
 ) {
     if let Some(hook) = hooks.visit_union.as_mut() {
         hook(union);
@@ -392,7 +392,7 @@ fn visit_fragment_spec(
 
 fn visit_input_type(
     hooks: &mut ASTVisitorHooks,
-    t: &Rc<RefCell<shared::ast::InputType>>,
+    t: &Arc<RefCell<shared::ast::InputType>>,
 ) {
     if let Some(hook) = hooks.visit_input_type.as_mut() {
         hook(t)

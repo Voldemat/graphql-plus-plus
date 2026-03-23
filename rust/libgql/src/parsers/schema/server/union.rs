@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use crate::parsers::{
     file,
@@ -11,7 +11,7 @@ use crate::parsers::{
 pub fn parse_definition(
     node: &file::server::ast::UnionDefinitionNode,
     registry: &TypeRegistry,
-) -> Result<Rc<RefCell<ast::Union>>, errors::Error> {
+) -> Result<Arc<RefCell<ast::Union>>, errors::Error> {
     let obj_rc = registry.unions.get(&node.name.name).unwrap();
     let mut obj = obj_rc.borrow_mut();
     for item in node.values.iter() {

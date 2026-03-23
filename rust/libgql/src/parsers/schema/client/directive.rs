@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::parsers::{
     file,
@@ -12,8 +12,8 @@ use crate::parsers::{
 pub fn parse(
     registry: &TypeRegistry,
     node: &file::client::ast::DirectiveDefinition,
-) -> Result<Rc<ast::ClientDirective>, errors::Error> {
-    Ok(Rc::new(ast::ClientDirective {
+) -> Result<Arc<ast::ClientDirective>, errors::Error> {
+    Ok(Arc::new(ast::ClientDirective {
         name: node.name.name.clone(),
         arguments: shared::input::parse_field_definitions(
             &node.arguments,

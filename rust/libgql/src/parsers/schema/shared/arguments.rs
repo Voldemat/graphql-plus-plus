@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use crate::parsers::{
     file,
@@ -68,7 +68,7 @@ fn parse_argument_value(
 
 pub fn parse_arguments(
     arguments: &Vec<file::shared::ast::Argument>,
-    directive: &Rc<RefCell<shared::ast::ServerDirective>>,
+    directive: &Arc<RefCell<shared::ast::ServerDirective>>,
 ) -> Result<
     indexmap::IndexMap<String, shared::ast::FieldSelectionArgument>,
     errors::Error,

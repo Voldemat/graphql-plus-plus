@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use super::shared;
 use crate::lexer;
@@ -45,7 +45,7 @@ pub trait TokensSource {
         token_type: lexer::token_type::TokenType,
     ) -> Result<&lexer::tokens::Token, ConsumeError>;
     fn get_current_token(self: &Self) -> &lexer::tokens::Token;
-    fn get_source_file(self: &Self) -> Rc<shared::ast::SourceFile>;
+    fn get_source_file(self: &Self) -> Arc<shared::ast::SourceFile>;
 
     fn consume_identifier(
         self: &mut Self,

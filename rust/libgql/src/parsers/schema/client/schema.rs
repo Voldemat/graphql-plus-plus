@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashSet, rc::Rc};
+use std::{cell::RefCell, collections::HashSet, sync::Arc};
 
 use indexmap::IndexMap;
 
@@ -6,9 +6,9 @@ use crate::parsers::schema::{client::ast, visitor};
 
 #[derive(Debug, Default)]
 pub struct ClientSchema {
-    pub fragments: IndexMap<String, Rc<RefCell<ast::Fragment>>>,
-    pub operations: IndexMap<String, Rc<RefCell<ast::Operation>>>,
-    pub directives: IndexMap<String, Rc<ast::ClientDirective>>,
+    pub fragments: IndexMap<String, Arc<RefCell<ast::Fragment>>>,
+    pub operations: IndexMap<String, Arc<RefCell<ast::Operation>>>,
+    pub directives: IndexMap<String, Arc<ast::ClientDirective>>,
 }
 
 #[derive(Default)]

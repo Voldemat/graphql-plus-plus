@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use indexmap::IndexMap;
 
@@ -328,7 +328,7 @@ pub fn get_fragment_spec_hash(
 pub fn get_used_fragments_from_object_fragment_spec<T>(
     registry: &TypeRegistry,
     fragment_spec: &ast::ObjectFragmentSpec<T>,
-) -> Vec<Rc<RefCell<ast::Fragment>>> {
+) -> Vec<Arc<RefCell<ast::Fragment>>> {
     fragment_spec
         .selections
         .iter()
@@ -350,7 +350,7 @@ pub fn get_used_fragments_from_object_fragment_spec<T>(
 pub fn get_used_fragments_from_fragment_spec(
     registry: &TypeRegistry,
     fragment_spec: &ast::FragmentSpec,
-) -> Vec<Rc<RefCell<ast::Fragment>>> {
+) -> Vec<Arc<RefCell<ast::Fragment>>> {
     match fragment_spec {
         ast::FragmentSpec::Object(object) => {
             get_used_fragments_from_object_fragment_spec(registry, object)

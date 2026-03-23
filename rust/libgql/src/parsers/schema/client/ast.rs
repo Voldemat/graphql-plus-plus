@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use crate::parsers::{
     file,
@@ -7,7 +7,7 @@ use crate::parsers::{
 
 #[derive(Debug)]
 pub struct SpreadSelection {
-    pub fragment: Rc<RefCell<Fragment>>,
+    pub fragment: Arc<RefCell<Fragment>>,
 }
 
 #[derive(Debug)]
@@ -32,26 +32,26 @@ pub enum ObjectSelection {
 
 #[derive(Debug)]
 pub struct UnionFragmentSpec {
-    pub r#type: Rc<RefCell<server::ast::Union>>,
+    pub r#type: Arc<RefCell<server::ast::Union>>,
     pub selections: Vec<UnionSelection>,
 }
 
 #[derive(Debug)]
 pub struct ObjectFragmentSpec<T> {
-    pub r#type: Rc<RefCell<T>>,
+    pub r#type: Arc<RefCell<T>>,
     pub selections: Vec<ObjectSelection>,
 }
 
 #[derive(Debug)]
 pub struct ObjectConditionalSpreadSelection {
-    pub r#type: Rc<RefCell<server::ast::ObjectType>>,
-    pub selection: Rc<ObjectFragmentSpec<server::ast::ObjectType>>,
+    pub r#type: Arc<RefCell<server::ast::ObjectType>>,
+    pub selection: Arc<ObjectFragmentSpec<server::ast::ObjectType>>,
 }
 
 #[derive(Debug)]
 pub struct UnionConditionalSpreadSelection {
-    pub r#type: Rc<RefCell<server::ast::Union>>,
-    pub selection: Rc<UnionFragmentSpec>,
+    pub r#type: Arc<RefCell<server::ast::Union>>,
+    pub selection: Arc<UnionFragmentSpec>,
 }
 
 #[derive(Debug, derive_more::From)]
@@ -67,7 +67,7 @@ pub struct FieldSelection {
     pub alias: String,
     pub arguments:
         indexmap::IndexMap<String, shared::ast::FieldSelectionArgument>,
-    pub selection: Option<Rc<FragmentSpec>>,
+    pub selection: Option<Arc<FragmentSpec>>,
 }
 
 #[derive(Debug)]
@@ -89,7 +89,7 @@ pub struct Operation {
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >,
     pub fragment_spec: FragmentSpec,
-    pub used_fragments: Vec<Rc<RefCell<Fragment>>>,
+    pub used_fragments: Vec<Arc<RefCell<Fragment>>>,
     pub source_text: String,
     pub parameters_hash: u64,
     pub fragment_spec_hash: u64,
@@ -109,7 +109,7 @@ pub struct ClientDirective {
 
 #[derive(derive_more::From)]
 pub enum ClientSchemaNode {
-    Fragment(Rc<RefCell<Fragment>>),
-    Operation(Rc<RefCell<Operation>>),
-    ClientDirective(Rc<ClientDirective>),
+    Fragment(Arc<RefCell<Fragment>>),
+    Operation(Arc<RefCell<Operation>>),
+    ClientDirective(Arc<ClientDirective>),
 }

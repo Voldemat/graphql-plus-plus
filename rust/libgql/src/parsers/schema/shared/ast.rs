@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use crate::parsers::file;
 
@@ -10,9 +10,9 @@ pub struct Enum {
 
 #[derive(Clone, derive_more::From)]
 pub enum InputTypeSpec {
-    InputType(Rc<RefCell<InputType>>),
+    InputType(Arc<RefCell<InputType>>),
     Scalar(String),
-    Enum(Rc<Enum>),
+    Enum(Arc<Enum>),
 }
 
 impl std::fmt::Debug for InputTypeSpec {
@@ -154,6 +154,6 @@ pub struct ServerDirective {
 
 #[derive(Debug, Clone)]
 pub struct ServerDirectiveInvocation {
-    pub directive: Rc<RefCell<ServerDirective>>,
+    pub directive: Arc<RefCell<ServerDirective>>,
     pub arguments: indexmap::IndexMap<String, FieldSelectionArgument>,
 }

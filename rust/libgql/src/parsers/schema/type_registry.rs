@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, sync::Arc};
 
 use crate::{
     lexer,
@@ -10,25 +10,25 @@ use crate::{
 
 pub type FieldMapping = indexmap::IndexMap<
     String,
-    Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+    Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
 >;
 
 #[derive(Debug, Clone)]
 pub struct TypeRegistry {
     pub server_directives:
-        HashMap<String, Rc<RefCell<shared::ast::ServerDirective>>>,
-    pub client_directives: HashMap<String, Rc<client::ast::ClientDirective>>,
+        HashMap<String, Arc<RefCell<shared::ast::ServerDirective>>>,
+    pub client_directives: HashMap<String, Arc<client::ast::ClientDirective>>,
     pub queries: FieldMapping,
     pub mutations: FieldMapping,
     pub subscriptions: FieldMapping,
-    pub objects: HashMap<String, Rc<RefCell<server::ast::ObjectType>>>,
-    pub inputs: HashMap<String, Rc<RefCell<shared::ast::InputType>>>,
-    pub interfaces: HashMap<String, Rc<RefCell<server::ast::Interface>>>,
+    pub objects: HashMap<String, Arc<RefCell<server::ast::ObjectType>>>,
+    pub inputs: HashMap<String, Arc<RefCell<shared::ast::InputType>>>,
+    pub interfaces: HashMap<String, Arc<RefCell<server::ast::Interface>>>,
     pub scalars: Vec<String>,
-    pub enums: HashMap<String, Rc<shared::ast::Enum>>,
-    pub unions: HashMap<String, Rc<RefCell<server::ast::Union>>>,
-    pub fragments: HashMap<String, Rc<RefCell<client::ast::Fragment>>>,
-    pub operations: HashMap<String, Rc<RefCell<client::ast::Operation>>>,
+    pub enums: HashMap<String, Arc<shared::ast::Enum>>,
+    pub unions: HashMap<String, Arc<RefCell<server::ast::Union>>>,
+    pub fragments: HashMap<String, Arc<RefCell<client::ast::Fragment>>>,
+    pub operations: HashMap<String, Arc<RefCell<client::ast::Operation>>>,
 }
 
 #[derive(Debug)]
@@ -48,7 +48,7 @@ impl Error {
             }
         }
     }
-    pub fn get_source_file(self: &Self) -> &Rc<file::shared::ast::SourceFile> {
+    pub fn get_source_file(self: &Self) -> &Arc<file::shared::ast::SourceFile> {
         match self {
             Self::UnknownType(name_node) => &name_node.location.source,
             Self::UnknownArgument(name_node) => &name_node.location.source,
@@ -77,19 +77,19 @@ impl TypeRegistry {
 
     pub fn get_query_object(
         self: &Self,
-    ) -> Option<&Rc<RefCell<server::ast::ObjectType>>> {
+    ) -> Option<&Arc<RefCell<server::ast::ObjectType>>> {
         return self.objects.get("Query");
     }
 
     pub fn get_mutation_object(
         self: &Self,
-    ) -> Option<&Rc<RefCell<server::ast::ObjectType>>> {
+    ) -> Option<&Arc<RefCell<server::ast::ObjectType>>> {
         return self.objects.get("Mutation");
     }
 
     pub fn get_subscription_object(
         self: &Self,
-    ) -> Option<&Rc<RefCell<server::ast::ObjectType>>> {
+    ) -> Option<&Arc<RefCell<server::ast::ObjectType>>> {
         return self.objects.get("Subscription");
     }
 
@@ -146,7 +146,7 @@ impl TypeRegistry {
 
     fn add_op_if_not_exists(
         self: &mut Self,
-        field: &Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+        field: &Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
         optype: file::client::ast::OpType,
     ) -> Result<(), ()> {
         let mapping = self.get_mapping_for_op(optype);
@@ -233,7 +233,7 @@ impl TypeRegistry {
 
     pub fn patch_object(
         self: &mut Self,
-        object_type: Rc<RefCell<server::ast::ObjectType>>,
+        object_type: Arc<RefCell<server::ast::ObjectType>>,
         new_fields: &FieldMapping,
     ) {
         for (name, new_field) in new_fields {

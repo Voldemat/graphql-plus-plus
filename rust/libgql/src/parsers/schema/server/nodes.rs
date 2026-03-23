@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use indexmap::IndexMap;
 
@@ -16,7 +16,7 @@ pub fn parse_server_node_first_pass(
 ) -> ast::ServerSchemaNode {
     match ast_node {
         file::server::ast::TypeDefinitionNode::Enum(e) => {
-            Rc::new(shared::ast::Enum {
+            Arc::new(shared::ast::Enum {
                 name: e.name.name.clone(),
                 values: e.values.iter().map(|v| v.value.name.clone()).collect(),
             })
@@ -26,14 +26,14 @@ pub fn parse_server_node_first_pass(
             s.name.name.clone().into()
         }
         file::server::ast::TypeDefinitionNode::Input(i) => {
-            Rc::new(RefCell::new(shared::ast::InputType {
+            Arc::new(RefCell::new(shared::ast::InputType {
                 name: i.name.name.clone(),
                 fields: IndexMap::new(),
             }))
             .into()
         }
         file::server::ast::TypeDefinitionNode::Object(o) => {
-            Rc::new(RefCell::new(ast::ObjectType {
+            Arc::new(RefCell::new(ast::ObjectType {
                 name: o.name.name.clone(),
                 fields: IndexMap::new(),
                 implements: IndexMap::new(),
@@ -42,7 +42,7 @@ pub fn parse_server_node_first_pass(
             .into()
         }
         file::server::ast::TypeDefinitionNode::Interface(i) => {
-            Rc::new(RefCell::new(ast::Interface {
+            Arc::new(RefCell::new(ast::Interface {
                 name: i.name.name.clone(),
                 fields: IndexMap::new(),
                 directives: Vec::new(),
@@ -50,14 +50,14 @@ pub fn parse_server_node_first_pass(
             .into()
         }
         file::server::ast::TypeDefinitionNode::Union(u) => {
-            Rc::new(RefCell::new(ast::Union {
+            Arc::new(RefCell::new(ast::Union {
                 name: u.name.name.clone(),
                 items: IndexMap::new(),
             }))
             .into()
         }
         file::server::ast::TypeDefinitionNode::Directive(d) => {
-            Rc::new(RefCell::new(shared::ast::ServerDirective {
+            Arc::new(RefCell::new(shared::ast::ServerDirective {
                 name: d.name.name.clone(),
                 arguments: IndexMap::new(),
                 locations: Vec::new(),
@@ -101,10 +101,10 @@ pub fn parse_server_extend_node(
     registry: &mut TypeRegistry,
 ) -> Result<
     (
-        Rc<RefCell<ast::ObjectType>>,
+        Arc<RefCell<ast::ObjectType>>,
         IndexMap<
             String,
-            Rc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
+            Arc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
         >,
     ),
     errors::Error,

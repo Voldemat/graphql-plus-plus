@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use crate::parsers::{
     file,
@@ -12,7 +12,7 @@ use crate::parsers::{
 pub fn parse_definition(
     node: &file::server::ast::InterfaceDefinitionNode,
     registry: &TypeRegistry,
-) -> Result<Rc<RefCell<ast::Interface>>, errors::Error> {
+) -> Result<Arc<RefCell<ast::Interface>>, errors::Error> {
     let obj_rc = registry.interfaces.get(&node.name.name).unwrap();
     let mut obj = obj_rc.borrow_mut();
     for field_definition_node in node.fields.iter() {
@@ -20,7 +20,7 @@ pub fn parse_definition(
             object::parse_object_field_spec(&field_definition_node, registry)?;
         obj.fields.insert(
             field_definition_node.name.name.clone(),
-            Rc::new(shared::ast::FieldDefinition {
+            Arc::new(shared::ast::FieldDefinition {
                 name: field_definition_node.name.name.clone(),
                 spec,
                 nullable,

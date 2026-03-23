@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, sync::Arc};
 
 use indexmap::IndexMap;
 
@@ -13,7 +13,7 @@ use crate::parsers::{
 
 fn parse_union_selection_node(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::Union>>,
+    r#type: &Arc<RefCell<server::ast::Union>>,
     node: &file::client::ast::SelectionNode,
 ) -> Result<ast::UnionSelection, errors::Error> {
     match node {
@@ -47,7 +47,7 @@ fn parse_union_selection_node(
                 ConditionalSelectionType::Object(object) => {
                     return Ok(ast::ObjectConditionalSpreadSelection {
                         r#type: object.clone(),
-                        selection: Rc::new(ast::ObjectFragmentSpec {
+                        selection: Arc::new(ast::ObjectFragmentSpec {
                             r#type: object.clone(),
                             selections: parse_object_selections(
                                 registry,
@@ -61,7 +61,7 @@ fn parse_union_selection_node(
                 ConditionalSelectionType::Union(union) => {
                     return Ok(ast::UnionConditionalSpreadSelection {
                         r#type: union.clone(),
-                        selection: Rc::new(ast::UnionFragmentSpec {
+                        selection: Arc::new(ast::UnionFragmentSpec {
                             r#type: union.clone(),
                             selections: parse_union_selections(
                                 registry,
@@ -79,13 +79,13 @@ fn parse_union_selection_node(
 
 #[derive(derive_more::From)]
 pub enum ConditionalSelectionType {
-    Object(Rc<RefCell<server::ast::ObjectType>>),
-    Union(Rc<RefCell<server::ast::Union>>),
+    Object(Arc<RefCell<server::ast::ObjectType>>),
+    Union(Arc<RefCell<server::ast::Union>>),
 }
 
 fn get_type_for_union_conditional_selection(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::Union>>,
+    r#type: &Arc<RefCell<server::ast::Union>>,
     node: &file::client::ast::ConditionalSpreadSelectionNode,
 ) -> Option<ConditionalSelectionType> {
     return r#type
@@ -108,7 +108,7 @@ fn get_type_for_union_conditional_selection(
 
 fn parse_union_selections(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::Union>>,
+    r#type: &Arc<RefCell<server::ast::Union>>,
     selections: &[file::client::ast::SelectionNode],
 ) -> Result<Vec<ast::UnionSelection>, errors::Error> {
     return selections
@@ -121,7 +121,7 @@ fn parse_union_selections(
 
 fn parse_interface_spread_selection_node(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::Interface>>,
+    r#type: &Arc<RefCell<server::ast::Interface>>,
     node: &file::client::ast::SpreadSelectionNode,
 ) -> Result<ast::SpreadSelection, errors::Error> {
     let Some(fragment) = registry.fragments.get(&node.fragment_name.name)
@@ -129,7 +129,7 @@ fn parse_interface_spread_selection_node(
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
     let has_invalid_type = match &fragment.borrow().spec {
-        ast::FragmentSpec::Interface(spec) => !Rc::ptr_eq(&spec.r#type, r#type),
+        ast::FragmentSpec::Interface(spec) => !Arc::ptr_eq(&spec.r#type, r#type),
         _ => true,
     };
     if has_invalid_type {
@@ -146,7 +146,7 @@ fn parse_interface_spread_selection_node(
 
 fn parse_object_spread_selection_node(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::ObjectType>>,
+    r#type: &Arc<RefCell<server::ast::ObjectType>>,
     node: &file::client::ast::SpreadSelectionNode,
 ) -> Result<ast::SpreadSelection, errors::Error> {
     let Some(fragment) = registry.fragments.get(&node.fragment_name.name)
@@ -154,7 +154,7 @@ fn parse_object_spread_selection_node(
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
     let has_invalid_type = match &fragment.borrow().spec {
-        ast::FragmentSpec::Object(spec) => !Rc::ptr_eq(&spec.r#type, r#type),
+        ast::FragmentSpec::Object(spec) => !Arc::ptr_eq(&spec.r#type, r#type),
         ast::FragmentSpec::Interface(spec) => r#type
             .borrow()
             .implements
@@ -175,7 +175,7 @@ fn parse_object_spread_selection_node(
 
 fn parse_union_spread_selection_node(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::Union>>,
+    r#type: &Arc<RefCell<server::ast::Union>>,
     node: &file::client::ast::SpreadSelectionNode,
 ) -> Result<ast::SpreadSelection, errors::Error> {
     let Some(fragment) = registry.fragments.get(&node.fragment_name.name)
@@ -183,7 +183,7 @@ fn parse_union_spread_selection_node(
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
     let has_invalid_type = match &fragment.borrow().spec {
-        ast::FragmentSpec::Union(spec) => !Rc::ptr_eq(&spec.r#type, r#type),
+        ast::FragmentSpec::Union(spec) => !Arc::ptr_eq(&spec.r#type, r#type),
         ast::FragmentSpec::Interface(spec) => {
             r#type.borrow().items.values().any(|t| {
                 !t.borrow()
@@ -218,12 +218,12 @@ fn is_object_field_spec_is_typename_field(
 
 fn fragment_spec_from_field_definition(
     registry: &TypeRegistry,
-    field: &Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+    field: &Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
     spec: &Rc<file::client::ast::FragmentSpec>,
-) -> Result<Rc<ast::FragmentSpec>, errors::Error> {
+) -> Result<Arc<ast::FragmentSpec>, errors::Error> {
     let type_spec = field.spec.get_return_type();
     match type_spec {
-        server::ast::ObjectTypeSpec::ObjectType(object) => Ok(Rc::new(
+        server::ast::ObjectTypeSpec::ObjectType(object) => Ok(Arc::new(
             ast::ObjectFragmentSpec {
                 r#type: object.clone(),
                 selections: parse_object_selections(
@@ -234,7 +234,7 @@ fn fragment_spec_from_field_definition(
             }
             .into(),
         )),
-        server::ast::ObjectTypeSpec::Interface(interface) => Ok(Rc::new(
+        server::ast::ObjectTypeSpec::Interface(interface) => Ok(Arc::new(
             ast::ObjectFragmentSpec {
                 r#type: interface.clone(),
                 selections: parse_interface_selections(
@@ -245,7 +245,7 @@ fn fragment_spec_from_field_definition(
             }
             .into(),
         )),
-        server::ast::ObjectTypeSpec::Union(union) => Ok(Rc::new(
+        server::ast::ObjectTypeSpec::Union(union) => Ok(Arc::new(
             ast::UnionFragmentSpec {
                 r#type: union.clone(),
                 selections: parse_union_selections(
@@ -387,7 +387,7 @@ fn parse_object_field_selection_node<T: Clone + Into<errors::FieldType>>(
     r#type: &T,
     fields: &IndexMap<
         String,
-        Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+        Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
     >,
     node: &file::client::ast::FieldSelectionNode,
 ) -> Result<ast::FieldSelection, errors::Error> {
@@ -432,7 +432,7 @@ fn parse_object_field_selection_node<T: Clone + Into<errors::FieldType>>(
 
 fn parse_object_selection_node(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::ObjectType>>,
+    r#type: &Arc<RefCell<server::ast::ObjectType>>,
     node: &file::client::ast::SelectionNode,
 ) -> Result<ast::ObjectSelection, errors::Error> {
     match node {
@@ -464,7 +464,7 @@ fn parse_object_selection_node(
 
 fn parse_interface_selection_node(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::Interface>>,
+    r#type: &Arc<RefCell<server::ast::Interface>>,
     node: &file::client::ast::SelectionNode,
 ) -> Result<ast::ObjectSelection, errors::Error> {
     match node {
@@ -491,7 +491,7 @@ fn parse_interface_selection_node(
 
 fn parse_object_selections(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::ObjectType>>,
+    r#type: &Arc<RefCell<server::ast::ObjectType>>,
     selections: &[file::client::ast::SelectionNode],
 ) -> Result<Vec<ast::ObjectSelection>, errors::Error> {
     return selections
@@ -502,7 +502,7 @@ fn parse_object_selections(
 
 fn parse_interface_selections(
     registry: &TypeRegistry,
-    r#type: &Rc<RefCell<server::ast::Interface>>,
+    r#type: &Arc<RefCell<server::ast::Interface>>,
     selections: &[file::client::ast::SelectionNode],
 ) -> Result<Vec<ast::ObjectSelection>, errors::Error> {
     return selections

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, sync::Arc};
 
 use crate::{
     lexer,
@@ -10,15 +10,15 @@ use crate::{
 
 #[derive(Debug, derive_more::From)]
 pub enum FragmentType {
-    Object(Rc<RefCell<server::ast::ObjectType>>),
-    Interface(Rc<RefCell<server::ast::Interface>>),
-    Union(Rc<RefCell<server::ast::Union>>),
+    Object(Arc<RefCell<server::ast::ObjectType>>),
+    Interface(Arc<RefCell<server::ast::Interface>>),
+    Union(Arc<RefCell<server::ast::Union>>),
 }
 
 #[derive(Debug, derive_more::From)]
 pub enum FieldType {
-    Object(Rc<RefCell<server::ast::ObjectType>>),
-    Interface(Rc<RefCell<server::ast::Interface>>),
+    Object(Arc<RefCell<server::ast::ObjectType>>),
+    Interface(Arc<RefCell<server::ast::Interface>>),
 }
 
 #[derive(Debug)]
@@ -32,7 +32,7 @@ pub enum Error {
     InvalidFragmentType {
         selection_node: file::client::ast::SpreadSelectionNode,
         expected_type: FragmentType,
-        fragment: Rc<RefCell<ast::Fragment>>,
+        fragment: Arc<RefCell<ast::Fragment>>,
     },
     UnknownField {
         r#type: FieldType,
@@ -40,17 +40,17 @@ pub enum Error {
     },
     UnexpectedCallableField {
         field_type:
-            Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+            Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
         definition: file::client::ast::ObjectCallableFieldSpec,
     },
     UnexpectedFieldSelectionNodeOnUnion(file::client::ast::FieldSelectionNode),
     NoSuitableTypeForConditionalSpreadSelection {
         selection: file::client::ast::ConditionalSpreadSelectionNode,
-        r#type: Rc<RefCell<server::ast::Union>>,
+        r#type: Arc<RefCell<server::ast::Union>>,
     },
     UnexpectedSelectionOnLiteralField {
         spec: Rc<file::client::ast::FragmentSpec>,
-        field: Rc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+        field: Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
     },
     InvalidLiteralForInput {
         type_spec: shared::ast::InputTypeSpec,
@@ -94,7 +94,7 @@ impl Error {
         }
     }
 
-    pub fn get_source_file(self: &Self) -> &Rc<file::shared::ast::SourceFile> {
+    pub fn get_source_file(self: &Self) -> &Arc<file::shared::ast::SourceFile> {
         match self {
             Self::TypeRegistryError(error) => error.get_source_file(),
             Self::UnknownFragmentType(name_node) => &name_node.location.source,

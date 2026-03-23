@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use indexmap::IndexMap;
 
@@ -11,7 +11,7 @@ fn parse_node_first_pass(
     let name = value["name"].as_str().unwrap();
     match kind {
         "SCALAR" => server::ast::ServerSchemaNode::Scalar(name.to_string()),
-        "ENUM" => Rc::new(shared::ast::Enum {
+        "ENUM" => Arc::new(shared::ast::Enum {
             name: name.to_string(),
             values: value["enumValues"]
                 .as_array()
@@ -23,24 +23,24 @@ fn parse_node_first_pass(
                 .collect(),
         })
         .into(),
-        "INPUT_OBJECT" => Rc::new(RefCell::new(shared::ast::InputType {
+        "INPUT_OBJECT" => Arc::new(RefCell::new(shared::ast::InputType {
             name: name.to_string(),
             fields: IndexMap::new(),
         }))
         .into(),
-        "OBJECT" => Rc::new(RefCell::new(server::ast::ObjectType {
+        "OBJECT" => Arc::new(RefCell::new(server::ast::ObjectType {
             name: name.to_string(),
             fields: IndexMap::new(),
             implements: IndexMap::new(),
             directives: Vec::new(),
         }))
         .into(),
-        "UNION" => Rc::new(RefCell::new(server::ast::Union {
+        "UNION" => Arc::new(RefCell::new(server::ast::Union {
             name: name.to_string(),
             items: IndexMap::new(),
         }))
         .into(),
-        "INTERFACE" => Rc::new(RefCell::new(server::ast::Interface {
+        "INTERFACE" => Arc::new(RefCell::new(server::ast::Interface {
             name: name.to_string(),
             fields: IndexMap::new(),
             directives: Vec::new(),
@@ -299,7 +299,7 @@ fn parse_node_second_pass(
                 .map(|field_json| {
                     let field =
                         parse_object_field_definition(registry, field_json);
-                    (field.name.clone(), Rc::new(field))
+                    (field.name.clone(), Arc::new(field))
                 })
                 .collect();
             return object.into();
@@ -329,7 +329,7 @@ fn parse_node_second_pass(
                 .map(|field_json| {
                     let field =
                         parse_object_field_definition(registry, field_json);
-                    (field.name.clone(), Rc::new(field))
+                    (field.name.clone(), Arc::new(field))
                 })
                 .collect();
             return interface.into();

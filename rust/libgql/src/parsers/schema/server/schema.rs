@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use indexmap::IndexMap;
 
@@ -6,13 +6,13 @@ use crate::parsers::schema::{server::ast, shared};
 
 #[derive(Debug, Default)]
 pub struct Schema {
-    pub objects: IndexMap<String, Rc<RefCell<ast::ObjectType>>>,
-    pub inputs: IndexMap<String, Rc<RefCell<shared::ast::InputType>>>,
-    pub interfaces: IndexMap<String, Rc<RefCell<ast::Interface>>>,
+    pub objects: IndexMap<String, Arc<RefCell<ast::ObjectType>>>,
+    pub inputs: IndexMap<String, Arc<RefCell<shared::ast::InputType>>>,
+    pub interfaces: IndexMap<String, Arc<RefCell<ast::Interface>>>,
     pub scalars: Vec<String>,
-    pub enums: IndexMap<String, Rc<shared::ast::Enum>>,
-    pub unions: IndexMap<String, Rc<RefCell<ast::Union>>>,
-    pub directives: IndexMap<String, Rc<RefCell<shared::ast::ServerDirective>>>,
+    pub enums: IndexMap<String, Arc<shared::ast::Enum>>,
+    pub unions: IndexMap<String, Arc<RefCell<ast::Union>>>,
+    pub directives: IndexMap<String, Arc<RefCell<shared::ast::ServerDirective>>>,
 }
 
 impl Schema {

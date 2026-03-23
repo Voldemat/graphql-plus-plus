@@ -1,4 +1,4 @@
-use std::{path::PathBuf, rc::Rc};
+use std::{path::PathBuf, sync::Arc};
 
 use crate::lexer;
 
@@ -20,7 +20,7 @@ pub struct NodeLocation {
     pub start_token: lexer::tokens::Token,
     pub end_token: lexer::tokens::Token,
     #[serde(skip_serializing)]
-    pub source: Rc<SourceFile>,
+    pub source: Arc<SourceFile>,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -78,7 +78,7 @@ impl LiteralNode {
             Self::EnumValue(node) => &node.location.start_token.location,
         }
     }
-    pub fn get_source_file(self: &Self) -> &Rc<SourceFile> {
+    pub fn get_source_file(self: &Self) -> &Arc<SourceFile> {
         match self {
             Self::Int(node) => &node.location.source,
             Self::Float(node) => &node.location.source,

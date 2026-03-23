@@ -1,14 +1,14 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use crate::parsers::schema::shared;
 
 #[derive(derive_more::From)]
 pub enum ObjectTypeSpec {
-    ObjectType(Rc<RefCell<ObjectType>>),
-    Interface(Rc<RefCell<Interface>>),
+    ObjectType(Arc<RefCell<ObjectType>>),
+    Interface(Arc<RefCell<Interface>>),
     Scalar { name: String },
-    Enum(Rc<shared::ast::Enum>),
-    Union(Rc<RefCell<Union>>),
+    Enum(Arc<shared::ast::Enum>),
+    Union(Arc<RefCell<Union>>),
 }
 
 impl std::fmt::Debug for ObjectTypeSpec {
@@ -38,7 +38,7 @@ impl std::fmt::Debug for ObjectTypeSpec {
 #[derive(Debug)]
 pub struct Union {
     pub name: String,
-    pub items: indexmap::IndexMap<String, Rc<RefCell<ObjectType>>>,
+    pub items: indexmap::IndexMap<String, Arc<RefCell<ObjectType>>>,
 }
 
 #[derive(Debug)]
@@ -83,7 +83,7 @@ pub struct Interface {
     pub name: String,
     pub fields: indexmap::IndexMap<
         String,
-        Rc<shared::ast::FieldDefinition<ObjectFieldSpec>>,
+        Arc<shared::ast::FieldDefinition<ObjectFieldSpec>>,
     >,
     pub directives: Vec<shared::ast::ServerDirectiveInvocation>,
 }
@@ -93,9 +93,9 @@ pub struct ObjectType {
     pub name: String,
     pub fields: indexmap::IndexMap<
         String,
-        Rc<shared::ast::FieldDefinition<ObjectFieldSpec>>,
+        Arc<shared::ast::FieldDefinition<ObjectFieldSpec>>,
     >,
-    pub implements: indexmap::IndexMap<String, Rc<RefCell<Interface>>>,
+    pub implements: indexmap::IndexMap<String, Arc<RefCell<Interface>>>,
     pub directives: Vec<shared::ast::ServerDirectiveInvocation>,
 }
 
@@ -105,11 +105,11 @@ pub struct ExtendObjectType {
 
 #[derive(derive_more::From)]
 pub enum ServerSchemaNode {
-    ObjectType(Rc<RefCell<ObjectType>>),
-    Interface(Rc<RefCell<Interface>>),
+    ObjectType(Arc<RefCell<ObjectType>>),
+    Interface(Arc<RefCell<Interface>>),
     Scalar(String),
-    Union(Rc<RefCell<Union>>),
-    Enum(Rc<shared::ast::Enum>),
-    InputType(Rc<RefCell<shared::ast::InputType>>),
-    ServerDirective(Rc<RefCell<shared::ast::ServerDirective>>),
+    Union(Arc<RefCell<Union>>),
+    Enum(Arc<shared::ast::Enum>),
+    InputType(Arc<RefCell<shared::ast::InputType>>),
+    ServerDirective(Arc<RefCell<shared::ast::ServerDirective>>),
 }

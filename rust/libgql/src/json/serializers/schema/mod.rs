@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashSet, rc::Rc};
+use std::{cell::RefCell, collections::HashSet, sync::Arc};
 
 use indexmap::IndexMap;
 use struson::writer::simple::ValueWriter;
@@ -354,7 +354,7 @@ fn write_object<'a, J: struson::writer::JsonWriter>(
 
 fn write_objects<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    objects: &IndexMap<String, Rc<RefCell<server::ast::ObjectType>>>,
+    objects: &IndexMap<String, Arc<RefCell<server::ast::ObjectType>>>,
     server_uses_map: &Option<ServerUsesMap>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_objects = objects.clone();
@@ -399,7 +399,7 @@ fn write_interface<'a, J: struson::writer::JsonWriter>(
 
 fn write_interfaces<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    interfaces: &IndexMap<String, Rc<RefCell<server::ast::Interface>>>,
+    interfaces: &IndexMap<String, Arc<RefCell<server::ast::Interface>>>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_interfaces = interfaces.clone();
@@ -520,7 +520,7 @@ fn write_input<'a, J: struson::writer::JsonWriter>(
 
 fn write_inputs<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    inputs: &IndexMap<String, Rc<RefCell<shared::ast::InputType>>>,
+    inputs: &IndexMap<String, Arc<RefCell<shared::ast::InputType>>>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_inputs = inputs.clone();
@@ -557,7 +557,7 @@ fn write_union<'a, J: struson::writer::JsonWriter>(
 
 fn write_unions<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    unions: &IndexMap<String, Rc<RefCell<server::ast::Union>>>,
+    unions: &IndexMap<String, Arc<RefCell<server::ast::Union>>>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_unions = unions.clone();
@@ -588,7 +588,7 @@ fn write_enum<'a, J: struson::writer::JsonWriter>(
 
 fn write_enums<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    enums: &IndexMap<String, Rc<shared::ast::Enum>>,
+    enums: &IndexMap<String, Arc<shared::ast::Enum>>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_enums = enums.clone();
@@ -629,7 +629,7 @@ fn write_server_directive<'a, J: struson::writer::JsonWriter>(
 
 fn write_server_directives<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    directives: &IndexMap<String, Rc<RefCell<shared::ast::ServerDirective>>>,
+    directives: &IndexMap<String, Arc<RefCell<shared::ast::ServerDirective>>>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_directives = directives.clone();
@@ -907,7 +907,7 @@ fn write_fragment<'a, J: struson::writer::JsonWriter>(
 
 fn write_fragments<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    fragments: &IndexMap<String, Rc<RefCell<client::ast::Fragment>>>,
+    fragments: &IndexMap<String, Arc<RefCell<client::ast::Fragment>>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_fragments = fragments.clone();
     new_fragments.sort_keys();
@@ -959,7 +959,7 @@ fn write_operation<'a, J: struson::writer::JsonWriter>(
 
 fn write_operations<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    operations: &IndexMap<String, Rc<RefCell<client::ast::Operation>>>,
+    operations: &IndexMap<String, Arc<RefCell<client::ast::Operation>>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_operations = operations.clone();
     new_operations.sort_keys();
@@ -997,7 +997,7 @@ fn write_directive<'a, J: struson::writer::JsonWriter>(
 
 fn write_directives<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    directives: &IndexMap<String, Rc<client::ast::ClientDirective>>,
+    directives: &IndexMap<String, Arc<client::ast::ClientDirective>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_directives = directives.clone();
     new_directives.sort_keys();

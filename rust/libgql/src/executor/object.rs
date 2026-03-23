@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::parsers::schema::client;
 
@@ -23,7 +23,7 @@ pub fn execute_potential_selection_and_serialize<'a, 'b, C, S: Scalar>(
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<S, C>,
     resolver_root_introspection_value: ResolverIntrospectionValue<'a, S>,
-    selection: Option<&'a Rc<client::ast::FragmentSpec>>,
+    selection: Option<&'a Arc<client::ast::FragmentSpec>>,
     variables: &'a ResolvedVariables,
 ) -> std::pin::Pin<Box<dyn Future<Output = Result<Value<S>, String>> + 'a>> {
     Box::pin(async move {

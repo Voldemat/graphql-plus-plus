@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::{
     lexer::tokens::Token,
@@ -10,12 +10,12 @@ use crate::{
 
 pub struct VecTokensSource {
     tokens: Vec<Token>,
-    source_file: Rc<SourceFile>,
+    source_file: Arc<SourceFile>,
     current_index: usize,
 }
 
 impl VecTokensSource {
-    pub fn new(tokens: Vec<Token>, source_file: Rc<SourceFile>) -> Self {
+    pub fn new(tokens: Vec<Token>, source_file: Arc<SourceFile>) -> Self {
         assert!(tokens.len() > 0);
         return Self {
             tokens,
@@ -65,7 +65,7 @@ impl TokensSource for VecTokensSource {
         return self.tokens.get(self.current_index).unwrap();
     }
 
-    fn get_source_file(self: &Self) -> Rc<SourceFile> {
+    fn get_source_file(self: &Self) -> Arc<SourceFile> {
         return self.source_file.clone();
     }
 }

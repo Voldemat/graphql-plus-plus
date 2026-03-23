@@ -8,7 +8,7 @@ pub mod scalar;
 pub mod shared;
 pub mod subscriptions;
 pub mod variables;
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 pub use ast::{LiteralValue, NonNullableValue, Value, Values};
 pub use hashmap_registry::{GQLEnum, GQLInput, GQLScalar, HashMapRegistry};
@@ -108,7 +108,6 @@ async fn execute_operation<
 
 pub async fn execute<
     'args,
-    'client_query,
     C,
     S: Scalar,
     T: ParseRegistry<S>,
@@ -117,7 +116,7 @@ pub async fn execute<
     registry: &'args type_registry::TypeRegistry,
     resolvers: &'args Resolvers<'args, S, C>,
     parse_registry: &'args T,
-    client_query: &'client_query str,
+    client_query: String,
     variables: Values<S>,
     operation: Option<String>,
 ) -> Result<
@@ -127,10 +126,10 @@ pub async fn execute<
     >,
     Error,
 > {
-    let tokens = lexer::utils::parse_buffer_into_tokens(client_query)?;
-    let source_file = std::rc::Rc::new(file::shared::ast::SourceFile {
+    let tokens = lexer::utils::parse_buffer_into_tokens(&client_query)?;
+    let source_file = std::sync::Arc::new(file::shared::ast::SourceFile {
         filepath: "<request>".into(),
-        buffer: client_query.into(),
+        buffer: client_query,
     });
     let file_nodes = file::client::Parser::new(
         file::tokens_sources::VecTokensSource::new(tokens, source_file.clone()),
@@ -157,7 +156,7 @@ pub async fn execute<
         .swap_remove(&operation_name)
         .ok_or(Error::OperationIsNotDefined(operation_name))?;
     let operation =
-        Rc::<RefCell<client::ast::Operation>>::try_unwrap(operation_rc)
+        Arc::<RefCell<client::ast::Operation>>::try_unwrap(operation_rc)
             .unwrap()
             .into_inner();
     let result = execute_operation(

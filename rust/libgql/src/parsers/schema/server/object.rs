@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use indexmap::IndexMap;
 
@@ -14,7 +14,7 @@ use crate::parsers::{
 pub fn parse_definition(
     node: &file::server::ast::ObjectDefinitionNode,
     registry: &TypeRegistry,
-) -> Result<Rc<RefCell<ast::ObjectType>>, errors::Error> {
+) -> Result<Arc<RefCell<ast::ObjectType>>, errors::Error> {
     let obj_rc = registry.objects.get(&node.name.name).unwrap();
     let mut obj = obj_rc.borrow_mut();
     obj.fields = parse_fields(&node.fields, registry)?;
@@ -32,19 +32,19 @@ pub fn parse_fields(
     fields: &[file::server::ast::FieldDefinitionNode],
     registry: &TypeRegistry,
 ) -> Result<
-    IndexMap<String, Rc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>>,
+    IndexMap<String, Arc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>>,
     errors::Error,
 > {
     let mut m = IndexMap::<
         String,
-        Rc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
+        Arc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
     >::new();
     for field_definition_node in fields.iter() {
         let (spec, nullable) =
             parse_object_field_spec(&field_definition_node, registry)?;
         m.insert(
             field_definition_node.name.name.clone(),
-            Rc::new(shared::ast::FieldDefinition {
+            Arc::new(shared::ast::FieldDefinition {
                 name: field_definition_node.name.name.clone(),
                 spec,
                 nullable,

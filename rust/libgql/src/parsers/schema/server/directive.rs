@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, sync::Arc};
 
 use crate::parsers::{
     file,
@@ -8,7 +8,7 @@ use crate::parsers::{
 pub fn parse_definition(
     node: &file::server::ast::DirectiveDefinitionNode,
     registry: &mut TypeRegistry,
-) -> Result<Rc<RefCell<shared::ast::ServerDirective>>, errors::Error> {
+) -> Result<Arc<RefCell<shared::ast::ServerDirective>>, errors::Error> {
     let directive = registry.server_directives.get(&node.name.name).unwrap();
     for arg in &node.arguments {
         directive.borrow_mut().arguments.insert(
