@@ -1,9 +1,12 @@
 FROM rust:1.94.0-alpine3.23 AS builder
 WORKDIR /usr/local/app/e2e-tests/rust-server
+COPY rust/libgql/ /usr/local/app/rust/libgql/
+COPY rust/gqlcodegen/ /usr/local/app/rust/gqlcodegen/
 RUN --mount=type=bind,source=./e2e-tests/rust-server/Cargo.toml,target=/usr/local/app/e2e-tests/rust-server/Cargo.toml \
     --mount=type=bind,source=./e2e-tests/rust-server/Cargo.lock,target=/usr/local/app/e2e-tests/rust-server/Cargo.lock \
     mkdir src && echo "fn main() {}" > ./src/main.rs && cargo build
-COPY ./e2e-tests/rust-server/ ./
+COPY e2e-tests/graphql/server-schema.json /usr/local/app/e2e-tests/graphql/server-schema.json
+COPY e2e-tests/rust-server/ ./
 RUN touch ./src/main.rs && cargo build
 
 FROM scratch

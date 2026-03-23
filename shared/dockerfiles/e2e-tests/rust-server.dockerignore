@@ -1,8 +1,9 @@
 *
 !e2e-tests/rust-server
 e2e-tests/rust-server/target
-rust/libgql
-!rust/libgql/target
-rust/gqlcodegen
-!rust/gqlcodegen/target
-!rust/gqlcodegen/macros/target
+!e2e-tests/graphql/server-schema.json
+!rust/libgql
+rust/libgql/target
+!rust/gqlcodegen
+rust/gqlcodegen/target
+rust/gqlcodegen/macros/target
