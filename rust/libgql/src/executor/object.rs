@@ -15,7 +15,7 @@ pub type ObjectFieldResolver<S, C> = dyn for<'a> Fn(
     &'a ResolverRoot<S>,
     &'a C,
     &'a ResolvedVariables,
-) -> ResolverFuture<'a, S>;
+) -> ResolverFuture<'a, S> + Sync;
 pub type ObjectFieldResolversMap<'a, S, C> =
     HashMap<(&'a str, &'a str), &'a ObjectFieldResolver<S, C>>;
 

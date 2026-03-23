@@ -6,7 +6,7 @@ use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
 
 pub type QueryResolver<S, C> =
-    dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S>;
+    dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S> + Sync;
 pub type QueryResolversMap<'a, S, C> =
     HashMap<&'a str, &'a QueryResolver<S, C>>;
 

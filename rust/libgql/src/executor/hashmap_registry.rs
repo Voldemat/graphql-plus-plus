@@ -233,28 +233,49 @@ where
 }
 
 pub struct ScalarHooks<S: Scalar> {
-    literal: Box<dyn Fn(S) -> Result<Box<dyn std::any::Any>, String>>,
-    array: Box<dyn Fn(Vec<S>) -> Result<Box<dyn std::any::Any>, String>>,
-    optional_array:
-        Box<dyn Fn(Vec<Option<S>>) -> Result<Box<dyn std::any::Any>, String>>,
+    literal:
+        Box<dyn Fn(S) -> Result<Box<dyn std::any::Any>, String> + Sync + Send>,
+    array: Box<
+        dyn Fn(Vec<S>) -> Result<Box<dyn std::any::Any>, String> + Sync + Send,
+    >,
+    optional_array: Box<
+        dyn Fn(Vec<Option<S>>) -> Result<Box<dyn std::any::Any>, String>
+            + Sync
+            + Send,
+    >,
 }
 
 pub struct EnumHooks {
-    literal: Box<dyn Fn(String) -> Result<Box<dyn std::any::Any>, String>>,
-    array: Box<dyn Fn(Vec<String>) -> Result<Box<dyn std::any::Any>, String>>,
+    literal: Box<
+        dyn Fn(String) -> Result<Box<dyn std::any::Any>, String> + Sync + Send,
+    >,
+    array: Box<
+        dyn Fn(Vec<String>) -> Result<Box<dyn std::any::Any>, String>
+            + Sync
+            + Send,
+    >,
     optional_array: Box<
-        dyn Fn(Vec<Option<String>>) -> Result<Box<dyn std::any::Any>, String>,
+        dyn Fn(Vec<Option<String>>) -> Result<Box<dyn std::any::Any>, String>
+            + Sync
+            + Send,
     >,
 }
 
 pub struct InputHooks<S: Scalar> {
-    literal: Box<dyn Fn(Values<S>) -> Result<Box<dyn std::any::Any>, String>>,
-    array:
-        Box<dyn Fn(Vec<Values<S>>) -> Result<Box<dyn std::any::Any>, String>>,
+    literal: Box<
+        dyn Fn(Values<S>) -> Result<Box<dyn std::any::Any>, String>
+            + Sync
+            + Send,
+    >,
+    array: Box<
+        dyn Fn(Vec<Values<S>>) -> Result<Box<dyn std::any::Any>, String>
+            + Sync
+            + Send,
+    >,
     optional_array: Box<
-        dyn Fn(
-            Vec<Option<Values<S>>>,
-        ) -> Result<Box<dyn std::any::Any>, String>,
+        dyn Fn(Vec<Option<Values<S>>>) -> Result<Box<dyn std::any::Any>, String>
+            + Sync
+            + Send,
     >,
 }
 

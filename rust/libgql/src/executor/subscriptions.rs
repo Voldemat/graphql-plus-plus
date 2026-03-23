@@ -10,14 +10,14 @@ pub type SubscriptionResolverStream<S> =
     std::pin::Pin<Box<dyn futures_core::Stream<Item = Box<ResolverRoot<S>>>>>;
 pub type SubscriptionResolverFuture<'a, S> = std::pin::Pin<
     Box<
-        dyn Future<Output = Result<SubscriptionResolverStream<S>, String>> + 'a,
+        dyn Future<Output = Result<SubscriptionResolverStream<S>, String>> + 'a ,
     >,
 >;
 pub type SubscriptionResolver<S, C> =
     dyn for<'a> Fn(
         &'a C,
         &'a ResolvedVariables,
-    ) -> SubscriptionResolverFuture<'a, S>;
+    ) -> SubscriptionResolverFuture<'a, S> + Sync;
 
 pub type SubscriptionResolversMap<'a, S, C> =
     HashMap<&'a str, &'a SubscriptionResolver<S, C>>;

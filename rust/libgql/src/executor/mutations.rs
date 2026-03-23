@@ -7,7 +7,7 @@ use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
 
 pub type MutationResolver<S, C> =
-    dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S>;
+    dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S> + Sync;
 pub type MutationResolversMap<'a, S, C> =
     HashMap<&'a str, &'a MutationResolver<S, C>>;
 
