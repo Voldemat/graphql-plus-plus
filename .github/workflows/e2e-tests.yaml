@@ -24,7 +24,6 @@ jobs:
       COMPOSE_FILE: ./e2e-tests/docker-compose.yaml
       RUST_SERVER_IMAGE: vladimirdev635/e2e-tests-rust-server:${{ github.ref_name }}
       TYPESCRIPT_CLIENT_IMAGE: vladimirdev635/e2e-tests-typescript-client:${{ github.ref_name }}
-    continue-on-error: true
     steps:
     - name: Checkout
       uses: actions/checkout@v4
