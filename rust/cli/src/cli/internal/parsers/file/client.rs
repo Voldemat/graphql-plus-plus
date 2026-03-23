@@ -1,4 +1,5 @@
-use std::rc::Rc;
+
+use std::sync::Arc;
 
 use crate::cli::utils;
 
@@ -24,7 +25,7 @@ fn parse(args: &ParseArgs) {
     let buffer = utils::read_buffer_from_filepath(&args.filepath);
     let tokens: Vec<libgql::lexer::tokens::Token> =
         serde_json::from_str(&buffer).unwrap();
-    let source_file = Rc::new(libgql::parsers::file::shared::ast::SourceFile {
+    let source_file = Arc::new(libgql::parsers::file::shared::ast::SourceFile {
         buffer,
         filepath: args.filepath.clone(),
     });

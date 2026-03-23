@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::cli::config;
 
@@ -37,7 +37,7 @@ pub fn format_line(
 pub fn format_error(
     exc: &str,
     location: &libgql::lexer::tokens::Location,
-    source: &Rc<libgql::parsers::file::shared::ast::SourceFile>,
+    source: &Arc<libgql::parsers::file::shared::ast::SourceFile>,
 ) -> String {
     let mut buffer = format!("{}\n", source.filepath.display());
 
@@ -125,7 +125,7 @@ pub fn load_server_schema_from_inputs(
     for graphql_path in resolve_paths(&config_dir_path, &conf.graphql) {
         let buffer = std::fs::read_to_string(&graphql_path).unwrap();
         let source_file =
-            std::rc::Rc::new(libgql::parsers::file::shared::ast::SourceFile {
+            std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
                 filepath: graphql_path.clone(),
                 buffer,
             });
@@ -176,7 +176,7 @@ pub fn load_client_schema_from_inputs(
     for graphql_path in resolve_paths(&config_dir_path, &conf.graphql) {
         let buffer = std::fs::read_to_string(&graphql_path).unwrap();
         let source_file =
-            std::rc::Rc::new(libgql::parsers::file::shared::ast::SourceFile {
+            std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
                 filepath: graphql_path.clone(),
                 buffer,
             });

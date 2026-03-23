@@ -436,7 +436,7 @@ async fn execute(args: ParseArgs) {
         &registry,
         &resolvers,
         &parse_registry,
-        &utils::read_buffer_from_filepath(&args.query_path),
+        utils::read_buffer_from_filepath(&args.query_path),
         args.variables
             .as_ref()
             .map_or(libgql::executor::Values::new(), |v| {

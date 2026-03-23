@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, RwLock};
 
 use indexmap::IndexMap;
 use libgql::parsers::schema::{
@@ -30,17 +30,17 @@ pub fn compare_two_object_type_specs(
 ) -> bool {
     match (spec, spec2) {
         (ObjectTypeSpec::ObjectType(a), ObjectTypeSpec::ObjectType(b)) => {
-            a.borrow().name == b.borrow().name
+            a.read().unwrap().name == b.read().unwrap().name
         }
         (ObjectTypeSpec::Interface(a), ObjectTypeSpec::Interface(b)) => {
-            a.borrow().name == b.borrow().name
+            a.read().unwrap().name == b.read().unwrap().name
         }
         (
             ObjectTypeSpec::Scalar { name },
             ObjectTypeSpec::Scalar { name: name2 },
         ) => name == name2,
         (ObjectTypeSpec::Union(a), ObjectTypeSpec::Union(b)) => {
-            a.borrow().name == b.borrow().name
+            a.read().unwrap().name == b.read().unwrap().name
         }
         (ObjectTypeSpec::Enum(a), ObjectTypeSpec::Enum(b)) => a.name == b.name,
         _ => false,
@@ -55,7 +55,7 @@ pub fn compare_two_input_type_specs(
         (InputTypeSpec::Scalar(a), InputTypeSpec::Scalar(b)) => a == b,
         (InputTypeSpec::Enum(a), InputTypeSpec::Enum(b)) => a.name == b.name,
         (InputTypeSpec::InputType(a), InputTypeSpec::InputType(b)) => {
-            a.borrow().name == b.borrow().name
+            a.read().unwrap().name == b.read().unwrap().name
         }
         _ => false,
     }
@@ -256,8 +256,8 @@ fn compare_two_objects(object: &ObjectType, object2: &ObjectType) -> bool {
 }
 
 fn compare_objects(
-    objects: &IndexMap<String, Rc<RefCell<ObjectType>>>,
-    objects2: &IndexMap<String, Rc<RefCell<ObjectType>>>,
+    objects: &IndexMap<String, Arc<RwLock<ObjectType>>>,
+    objects2: &IndexMap<String, Arc<RwLock<ObjectType>>>,
 ) -> bool {
     let mut is_valid = true;
     for (name, object) in objects {
@@ -267,8 +267,8 @@ fn compare_objects(
             continue;
         };
         if !compare_two_objects(
-            &object.borrow(),
-            &objects2.get(name).unwrap().borrow(),
+            &object.read().unwrap(),
+            &objects2.get(name).unwrap().read().unwrap(),
         ) {
             is_valid = false;
         };
@@ -288,8 +288,8 @@ fn compare_two_unions(union: &Union, union2: &Union) -> bool {
 }
 
 fn compare_unions(
-    unions: &IndexMap<String, Rc<RefCell<Union>>>,
-    unions2: &IndexMap<String, Rc<RefCell<Union>>>,
+    unions: &IndexMap<String, Arc<RwLock<Union>>>,
+    unions2: &IndexMap<String, Arc<RwLock<Union>>>,
 ) -> bool {
     let mut is_valid = true;
     for (name, union) in unions {
@@ -299,8 +299,8 @@ fn compare_unions(
             continue;
         };
         if !compare_two_unions(
-            &union.borrow(),
-            &unions2.get(name).unwrap().borrow(),
+            &union.read().unwrap(),
+            &unions2.get(name).unwrap().read().unwrap(),
         ) {
             is_valid = false;
         };
@@ -328,8 +328,8 @@ fn compare_two_inputs(input: &InputType, input2: &InputType) -> bool {
 }
 
 fn compare_inputs(
-    inputs: &IndexMap<String, Rc<RefCell<InputType>>>,
-    inputs2: &IndexMap<String, Rc<RefCell<InputType>>>,
+    inputs: &IndexMap<String, Arc<RwLock<InputType>>>,
+    inputs2: &IndexMap<String, Arc<RwLock<InputType>>>,
 ) -> bool {
     let mut is_valid = true;
     for (name, input) in inputs {
@@ -339,8 +339,8 @@ fn compare_inputs(
             continue;
         };
         if !compare_two_inputs(
-            &input.borrow(),
-            &inputs2.get(name).unwrap().borrow(),
+            &input.read().unwrap(),
+            &inputs2.get(name).unwrap().read().unwrap(),
         ) {
             is_valid = false;
         };
@@ -371,8 +371,8 @@ fn compare_two_interfaces(
 }
 
 fn compare_interfaces(
-    interfaces: &IndexMap<String, Rc<RefCell<Interface>>>,
-    interfaces2: &IndexMap<String, Rc<RefCell<Interface>>>,
+    interfaces: &IndexMap<String, Arc<RwLock<Interface>>>,
+    interfaces2: &IndexMap<String, Arc<RwLock<Interface>>>,
 ) -> bool {
     let mut is_valid = true;
     for (name, interface) in interfaces {
@@ -382,8 +382,8 @@ fn compare_interfaces(
             continue;
         };
         if !compare_two_interfaces(
-            &interface.borrow(),
-            &interfaces2.get(name).unwrap().borrow(),
+            &interface.read().unwrap(),
+            &interfaces2.get(name).unwrap().read().unwrap(),
         ) {
             is_valid = false;
         };
@@ -414,8 +414,8 @@ fn compare_two_enums(e: &Enum, e2: &Enum) -> bool {
 }
 
 fn compare_enums(
-    enums: &IndexMap<String, Rc<Enum>>,
-    enums2: &IndexMap<String, Rc<Enum>>,
+    enums: &IndexMap<String, Arc<Enum>>,
+    enums2: &IndexMap<String, Arc<Enum>>,
 ) -> bool {
     let mut is_valid = true;
     for (name, e) in enums {
