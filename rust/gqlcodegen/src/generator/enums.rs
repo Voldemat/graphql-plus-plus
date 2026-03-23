@@ -21,7 +21,9 @@ pub fn generate_definition(
 
 #[cfg(test)]
 mod tests {
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashSet;
+
+    use indexmap::IndexMap;
 
     use crate::generator::config::ResolversConfig;
 
@@ -41,7 +43,7 @@ mod tests {
         generate_definition(
             &Config {
                 scalar_type: "ExampleScalar".to_string(),
-                scalars_mapping: HashMap::new(),
+                scalars_mapping: IndexMap::new(),
                 resolvers: ResolversConfig {
                     context_type: "()".to_string(),
                 },
