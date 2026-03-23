@@ -906,9 +906,11 @@ dependencies = [
  "indexmap",
  "libgql",
  "libgqlcodegen_macros",
+ "quote",
  "serde",
  "serde_json",
  "serde_json_path_to_error",
+ "syn",
  "url",
  "uuid",
 ]
@@ -1193,6 +1195,7 @@ name = "rust-server"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "codegen",
  "indexmap",
  "libgql",
  "libgqlcodegen",

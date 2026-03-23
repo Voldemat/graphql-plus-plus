@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use libgqlcodegen::{generator, schema};
+use libgqlcodegen::{format, generator, schema};
 
 fn run_schema() {
     let server_schema: schema::server::schema::Schema = serde_json_path_to_error::from_str(
@@ -14,7 +14,14 @@ fn run_schema() {
         ("Int".into(), "i32".into()),
         ("Float".into(), "f32".into()),
     ]);
-    let s = generator::main::generate_ast(
+    let filepath = "./src/api/generated.rs";
+    let (imports, code_map) =
+        generator::main::extract_resolvers_code(std::fs::read_to_string(filepath).unwrap());
+    let mut scope = codegen::Scope::new();
+    if imports != "" {
+        scope.raw(imports);
+    }
+    generator::main::generate_ast(
         &generator::config::Config {
             scalars_mapping: scalars_mapping,
             scalar_type: "super::scalar::Scalar".into(),
@@ -27,13 +34,15 @@ fn run_schema() {
             server: server_schema,
             client: client_schema,
         },
+        code_map,
+        &mut scope,
     );
-    let filepath = "./src/api/generated.rs";
+    let formatted = format::format_using_rustfmt("./", &scope.to_string()).unwrap();
     if std::env::var("GQL_OVERWRITE").unwrap_or("".to_string()) == "true" {
-        std::fs::write(filepath, s).unwrap();
+        std::fs::write(filepath, formatted).unwrap();
     } else {
         let current_content = std::fs::read_to_string(filepath).unwrap();
-        if current_content != s {
+        if current_content != formatted {
             eprintln!(
                 "./src/api/generated.rs contains stale code, try to build with env GQL_OVERWRITE=true to update code"
             );

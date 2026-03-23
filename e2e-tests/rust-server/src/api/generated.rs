@@ -4,30 +4,39 @@ pub struct Check {
     pub a: i32,
 }
 
-async fn query_get_check(context: &super::context::Context) -> Result<Check, libgql::executor::ast::ResolverError> {
-    Err("Resolver is not implemented yet".to_string().into())
-}
-
-fn query_get_check_wrapper<'args>(context: &'args super::context::Context, variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::Scalar> {
-    Box::pin(async move {
-        query_get_check(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::Scalar>>)
+async fn query_get_check(
+    context: &super::context::Context,
+) -> Result<Check, libgql::executor::ast::ResolverError> {
+    Ok(Check {
+        a: 1
     })
 }
 
-pub fn create_resolvers_map() -> libgql::executor::Resolvers<'static, super::scalar::Scalar, super::context::Context> {
+fn query_get_check_wrapper<'args>(
+    context: &'args super::context::Context,
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::Scalar> {
+    Box::pin(async move {
+        query_get_check(context)
+            .await
+            .map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::Scalar>>)
+    })
+}
+
+pub fn create_resolvers_map()
+-> libgql::executor::Resolvers<'static, super::scalar::Scalar, super::context::Context> {
     libgql::executor::Resolvers {
-       queries: libgql::executor::queries::QueryResolversMap::from_iter([
-            ("getCheck", &query_get_check_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::Scalar, super::context::Context>)
-    ]),
-       mutations: libgql::executor::mutations::MutationResolversMap::from_iter([
-
-    ]),
-       subscriptions: libgql::executor::subscriptions::SubscriptionResolversMap::from_iter([
-
-    ]),
-       object_fields: libgql::executor::object::ObjectFieldResolversMap::from_iter([
-
-    ])
+        queries: libgql::executor::queries::QueryResolversMap::from_iter([(
+            "getCheck",
+            &query_get_check_wrapper
+                as &libgql::executor::queries::QueryResolver<
+                    super::scalar::Scalar,
+                    super::context::Context,
+                >,
+        )]),
+        mutations: libgql::executor::mutations::MutationResolversMap::from_iter([]),
+        subscriptions: libgql::executor::subscriptions::SubscriptionResolversMap::from_iter([]),
+        object_fields: libgql::executor::object::ObjectFieldResolversMap::from_iter([]),
     }
 }
 
