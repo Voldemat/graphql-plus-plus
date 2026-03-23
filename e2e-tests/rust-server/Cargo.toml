@@ -11,5 +11,6 @@ serde_json_path_to_error = "0.1.5"
 libgqlcodegen = { path = "../../rust/gqlcodegen" }
 
 [build-dependencies]
+indexmap = "2.13.0"
 libgqlcodegen = { path = "../../rust/gqlcodegen" }
 serde_json_path_to_error = "0.1.5"

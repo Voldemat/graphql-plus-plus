@@ -5,7 +5,7 @@ pub struct Check {
 }
 
 async fn query_get_check(context: &super::context::Context) -> Result<Check, String> {
-    todo!()
+    Err("Resolver is not implemented yet".to_string())
 }
 
 fn query_get_check_wrapper<'args>(context: &'args super::context::Context, variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::Scalar> {
@@ -33,9 +33,9 @@ pub fn create_resolvers_map() -> libgql::executor::Resolvers<'static, super::sca
 
 pub fn create_parse_registry() -> libgql::executor::HashMapRegistry<super::scalar::Scalar> {
     let mut registry = libgql::executor::HashMapRegistry::<super::scalar::Scalar>::default();
-    registry.add_scalar::<f32>("Float");
     registry.add_scalar::<bool>("Boolean");
-    registry.add_scalar::<i32>("Int");
     registry.add_scalar::<String>("String");
+    registry.add_scalar::<i32>("Int");
+    registry.add_scalar::<f32>("Float");
     return registry;
 }
