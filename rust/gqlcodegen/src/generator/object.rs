@@ -148,7 +148,7 @@ pub fn generate_resolver_nodes(
                 false
             )
         ))
-        .line("todo!()")
+        .line("Err(\"Resolver is not implemented yet\".to_string())")
         .set_async(true);
     let mut call_arguments = Vec::new();
     if has_root {

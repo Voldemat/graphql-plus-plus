@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashSet};
 
 #[derive(Debug)]
 pub struct ResolversConfig {
@@ -7,7 +7,7 @@ pub struct ResolversConfig {
 
 #[derive(Debug)]
 pub struct Config {
-    pub scalars_mapping: HashMap<String, String>,
+    pub scalars_mapping: indexmap::IndexMap<String, String>,
     pub scalar_type: String,
     pub resolvers: ResolversConfig,
     pub field_to_resolver: HashSet<(String, String)>

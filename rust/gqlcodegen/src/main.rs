@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    fs::read_to_string,
-};
+use std::{collections::HashSet, fs::read_to_string};
 
 mod generated;
 mod generator;
@@ -19,7 +16,7 @@ fn run_schema() {
             &read_to_string("./client-schema.json").unwrap(),
         )
         .unwrap();
-    let scalars_mapping = HashMap::<String, String>::from([
+    let scalars_mapping = indexmap::IndexMap::<String, String>::from([
         ("Datetime".into(), "chrono::DateTime<chrono::Utc>".into()),
         ("Boolean".into(), "bool".into()),
         ("String".into(), "String".into()),
