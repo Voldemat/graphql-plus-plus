@@ -146,6 +146,7 @@ pub async fn execute<'args, C, S: Scalar, T: ParseRegistry<S>>(
         },
         Result::Ok,
     )?;
+    local_registry.operations.remove(&operation_name);
     let operation_rc = client_schema
         .operations
         .swap_remove(&operation_name)
