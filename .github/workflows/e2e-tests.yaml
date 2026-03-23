@@ -5,6 +5,7 @@ on:
     paths:
     - e2e-tests/**
     - shared/dockerfiles/e2e-tests/**
+    - .github/workflows/e2e-tests.yaml
   workflow_run:
     workflows:
     - "rust cli build"
