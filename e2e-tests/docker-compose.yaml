@@ -9,7 +9,7 @@ services:
       graphql:
         condition: service_completed_successfully
     build:
-      context: ..
+      context: .
       dockerfile: ../shared/dockerfiles/e2e-tests/rust-server
     environment:
       PORT: '8000'
@@ -18,7 +18,7 @@ services:
       graphql:
         condition: service_completed_successfully
     build:
-      context: ..
+      context: .
       dockerfile: ../shared/dockerfiles/e2e-tests/typescript-client
     command: ['sleep', 'infinity']
     environment:
