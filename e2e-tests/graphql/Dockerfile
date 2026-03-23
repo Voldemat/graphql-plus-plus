@@ -1,5 +1,5 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 WORKDIR /usr/local/app/
-COPY shared/graphql/ ./
+COPY ./graphql/ ./
 RUN /gql validate
