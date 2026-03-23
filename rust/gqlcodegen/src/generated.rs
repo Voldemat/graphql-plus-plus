@@ -723,8 +723,8 @@ pub struct DealEntry {
     pub column_name: String,
 }
 
-async fn deal_entry_value(root: &DealEntry, context: &()) -> Result<Tag, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn deal_entry_value(root: &DealEntry, context: &()) -> Result<Tag, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn deal_entry_value_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1102,8 +1102,8 @@ pub struct MultipartUploadSession {
     pub initial_upload_ur_ls: Vec<UploadUrl>,
 }
 
-async fn mutation_add_tags_to_files(context: &(), file_ids: &Vec<uuid::Uuid>, tag_ids: &Vec<uuid::Uuid>) -> Result<Option<AddTagsToFilesError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_add_tags_to_files(context: &(), file_ids: &Vec<uuid::Uuid>, tag_ids: &Vec<uuid::Uuid>) -> Result<Option<AddTagsToFilesError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_add_tags_to_files_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1114,8 +1114,8 @@ fn mutation_add_tags_to_files_wrapper<'args>(context: &'args (), variables: &'ar
     })
 }
 
-async fn mutation_add_user_to_group(context: &(), group_id: &uuid::Uuid, user_id: &uuid::Uuid) -> Result<Option<ErrorGroupNotFoundOrErrorNotFound>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_add_user_to_group(context: &(), group_id: &uuid::Uuid, user_id: &uuid::Uuid) -> Result<Option<ErrorGroupNotFoundOrErrorNotFound>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_add_user_to_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1126,8 +1126,8 @@ fn mutation_add_user_to_group_wrapper<'args>(context: &'args (), variables: &'ar
     })
 }
 
-async fn mutation_approve_tag(context: &(), group_ids: &Vec<uuid::Uuid>, tag_id: &uuid::Uuid) -> Result<Option<ApproveTagError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_approve_tag(context: &(), group_ids: &Vec<uuid::Uuid>, tag_id: &uuid::Uuid) -> Result<Option<ApproveTagError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_approve_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1138,8 +1138,8 @@ fn mutation_approve_tag_wrapper<'args>(context: &'args (), variables: &'args lib
     })
 }
 
-async fn mutation_change_password(context: &(), new_password: &String, old_password: &String) -> Result<Option<ErrorInvalidCredentials>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_change_password(context: &(), new_password: &String, old_password: &String) -> Result<Option<ErrorInvalidCredentials>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_change_password_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1150,8 +1150,8 @@ fn mutation_change_password_wrapper<'args>(context: &'args (), variables: &'args
     })
 }
 
-async fn mutation_commit_multipart_file_session(context: &(), session_id: &uuid::Uuid) -> Result<Option<CommitMultipartFileSessionResponse>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_commit_multipart_file_session(context: &(), session_id: &uuid::Uuid) -> Result<Option<CommitMultipartFileSessionResponse>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_commit_multipart_file_session_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1161,8 +1161,8 @@ fn mutation_commit_multipart_file_session_wrapper<'args>(context: &'args (), var
     })
 }
 
-async fn mutation_commit_put_file_session(context: &(), session_id: &uuid::Uuid) -> Result<Option<CommitPutFileSessionResponse>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_commit_put_file_session(context: &(), session_id: &uuid::Uuid) -> Result<Option<CommitPutFileSessionResponse>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_commit_put_file_session_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1172,8 +1172,8 @@ fn mutation_commit_put_file_session_wrapper<'args>(context: &'args (), variables
     })
 }
 
-async fn mutation_confirm_otp_code(context: &(), code: &String, email: &String) -> Result<ConfirmOTPCodeResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_confirm_otp_code(context: &(), code: &String, email: &String) -> Result<ConfirmOTPCodeResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_confirm_otp_code_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1184,8 +1184,8 @@ fn mutation_confirm_otp_code_wrapper<'args>(context: &'args (), variables: &'arg
     })
 }
 
-async fn mutation_confirm_user(context: &(), password: &String, token: &String) -> Result<Option<ConfirmUserError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_confirm_user(context: &(), password: &String, token: &String) -> Result<Option<ConfirmUserError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_confirm_user_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1196,8 +1196,8 @@ fn mutation_confirm_user_wrapper<'args>(context: &'args (), variables: &'args li
     })
 }
 
-async fn mutation_create_group(context: &(), group_in: &GroupIn, user_ids: &Vec<uuid::Uuid>) -> Result<Option<CreateGroupError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_create_group(context: &(), group_in: &GroupIn, user_ids: &Vec<uuid::Uuid>) -> Result<Option<CreateGroupError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_create_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1208,8 +1208,8 @@ fn mutation_create_group_wrapper<'args>(context: &'args (), variables: &'args li
     })
 }
 
-async fn mutation_create_multipart_file_session(context: &(), file_in: &MultipartUploadFileIn) -> Result<CreateMultipartFileSessionResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_create_multipart_file_session(context: &(), file_in: &MultipartUploadFileIn) -> Result<CreateMultipartFileSessionResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_create_multipart_file_session_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1219,8 +1219,8 @@ fn mutation_create_multipart_file_session_wrapper<'args>(context: &'args (), var
     })
 }
 
-async fn mutation_create_put_file_session(context: &(), file_in: &PutUploadFileIn) -> Result<CreatePutFileSessionResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_create_put_file_session(context: &(), file_in: &PutUploadFileIn) -> Result<CreatePutFileSessionResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_create_put_file_session_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1230,8 +1230,8 @@ fn mutation_create_put_file_session_wrapper<'args>(context: &'args (), variables
     })
 }
 
-async fn mutation_create_tag(context: &(), tag: &TagIn) -> Result<Option<CreateTagError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_create_tag(context: &(), tag: &TagIn) -> Result<Option<CreateTagError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_create_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1241,8 +1241,8 @@ fn mutation_create_tag_wrapper<'args>(context: &'args (), variables: &'args libg
     })
 }
 
-async fn mutation_create_user(context: &(), user_in: &UserIn) -> Result<Option<CreateUserError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_create_user(context: &(), user_in: &UserIn) -> Result<Option<CreateUserError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_create_user_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1252,8 +1252,8 @@ fn mutation_create_user_wrapper<'args>(context: &'args (), variables: &'args lib
     })
 }
 
-async fn mutation_decide_on_download_request(context: &(), allowed: &bool, file_id: &uuid::Uuid, user_id: &uuid::Uuid) -> Result<Option<DecideOnDownloadRequestError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_decide_on_download_request(context: &(), allowed: &bool, file_id: &uuid::Uuid, user_id: &uuid::Uuid) -> Result<Option<DecideOnDownloadRequestError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_decide_on_download_request_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1265,8 +1265,8 @@ fn mutation_decide_on_download_request_wrapper<'args>(context: &'args (), variab
     })
 }
 
-async fn mutation_delete_file(context: &(), id: &uuid::Uuid) -> Result<Option<DeleteFileError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_delete_file(context: &(), id: &uuid::Uuid) -> Result<Option<DeleteFileError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_delete_file_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1276,8 +1276,8 @@ fn mutation_delete_file_wrapper<'args>(context: &'args (), variables: &'args lib
     })
 }
 
-async fn mutation_delete_files(context: &(), ids: &Vec<uuid::Uuid>) -> Result<Option<DeleteFilesError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_delete_files(context: &(), ids: &Vec<uuid::Uuid>) -> Result<Option<DeleteFilesError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_delete_files_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1287,8 +1287,8 @@ fn mutation_delete_files_wrapper<'args>(context: &'args (), variables: &'args li
     })
 }
 
-async fn mutation_delete_group(context: &(), id: &uuid::Uuid) -> Result<Option<ErrorGroupNotFound>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_delete_group(context: &(), id: &uuid::Uuid) -> Result<Option<ErrorGroupNotFound>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_delete_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1298,8 +1298,8 @@ fn mutation_delete_group_wrapper<'args>(context: &'args (), variables: &'args li
     })
 }
 
-async fn mutation_delete_pending_user(context: &(), email: &String) -> Result<Option<ErrorNotFound>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_delete_pending_user(context: &(), email: &String) -> Result<Option<ErrorNotFound>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_delete_pending_user_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1309,8 +1309,8 @@ fn mutation_delete_pending_user_wrapper<'args>(context: &'args (), variables: &'
     })
 }
 
-async fn mutation_delete_tag(context: &(), id: &uuid::Uuid) -> Result<Option<ErrorNotFound>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_delete_tag(context: &(), id: &uuid::Uuid) -> Result<Option<ErrorNotFound>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_delete_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1320,8 +1320,8 @@ fn mutation_delete_tag_wrapper<'args>(context: &'args (), variables: &'args libg
     })
 }
 
-async fn mutation_delete_user(context: &(), id: &uuid::Uuid) -> Result<Option<ErrorNotFound>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_delete_user(context: &(), id: &uuid::Uuid) -> Result<Option<ErrorNotFound>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_delete_user_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1331,8 +1331,8 @@ fn mutation_delete_user_wrapper<'args>(context: &'args (), variables: &'args lib
     })
 }
 
-async fn mutation_edit_group(context: &(), group_in: &GroupIn, id: &uuid::Uuid) -> Result<Option<EditGroupError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_edit_group(context: &(), group_in: &GroupIn, id: &uuid::Uuid) -> Result<Option<EditGroupError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_edit_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1343,8 +1343,8 @@ fn mutation_edit_group_wrapper<'args>(context: &'args (), variables: &'args libg
     })
 }
 
-async fn mutation_edit_tag(context: &(), id: &uuid::Uuid, tag: &TagIn) -> Result<Option<EditTagError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_edit_tag(context: &(), id: &uuid::Uuid, tag: &TagIn) -> Result<Option<EditTagError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_edit_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1355,8 +1355,8 @@ fn mutation_edit_tag_wrapper<'args>(context: &'args (), variables: &'args libgql
     })
 }
 
-async fn mutation_login(context: &(), email: &String, password: &String) -> Result<Option<ErrorInvalidCredentials>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_login(context: &(), email: &String, password: &String) -> Result<Option<ErrorInvalidCredentials>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_login_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1367,8 +1367,8 @@ fn mutation_login_wrapper<'args>(context: &'args (), variables: &'args libgql::e
     })
 }
 
-async fn mutation_logout(context: &()) -> Result<(), String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_logout(context: &()) -> Result<(), libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_logout_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1377,8 +1377,8 @@ fn mutation_logout_wrapper<'args>(context: &'args (), variables: &'args libgql::
     })
 }
 
-async fn mutation_remove_user_from_group(context: &(), group_id: &uuid::Uuid, user_id: &uuid::Uuid) -> Result<Option<ErrorGroupNotFoundOrErrorNotFound>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_remove_user_from_group(context: &(), group_id: &uuid::Uuid, user_id: &uuid::Uuid) -> Result<Option<ErrorGroupNotFoundOrErrorNotFound>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_remove_user_from_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1389,8 +1389,8 @@ fn mutation_remove_user_from_group_wrapper<'args>(context: &'args (), variables:
     })
 }
 
-async fn mutation_reset_password(context: &(), new_password: &String, token: &String) -> Result<Option<ResetPasswordError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_reset_password(context: &(), new_password: &String, token: &String) -> Result<Option<ResetPasswordError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_reset_password_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1401,8 +1401,8 @@ fn mutation_reset_password_wrapper<'args>(context: &'args (), variables: &'args 
     })
 }
 
-async fn mutation_send_otp_code(context: &(), email: &String) -> Result<Option<ErrorInvalidCredentials>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_send_otp_code(context: &(), email: &String) -> Result<Option<ErrorInvalidCredentials>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_send_otp_code_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1412,8 +1412,8 @@ fn mutation_send_otp_code_wrapper<'args>(context: &'args (), variables: &'args l
     })
 }
 
-async fn mutation_set_tag_is_favourite(context: &(), is_favourite: &bool, tag_id: &uuid::Uuid) -> Result<Option<ErrorAlreadyDoneOrUnknownTags>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_set_tag_is_favourite(context: &(), is_favourite: &bool, tag_id: &uuid::Uuid) -> Result<Option<ErrorAlreadyDoneOrUnknownTags>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_set_tag_is_favourite_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1424,8 +1424,8 @@ fn mutation_set_tag_is_favourite_wrapper<'args>(context: &'args (), variables: &
     })
 }
 
-async fn mutation_update_file(context: &(), id: &uuid::Uuid, name: &String, tag_ids: &Vec<uuid::Uuid>) -> Result<Option<UpdateFileError>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_update_file(context: &(), id: &uuid::Uuid, name: &String, tag_ids: &Vec<uuid::Uuid>) -> Result<Option<UpdateFileError>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_update_file_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1437,8 +1437,8 @@ fn mutation_update_file_wrapper<'args>(context: &'args (), variables: &'args lib
     })
 }
 
-async fn mutation_update_files_autotags(context: &(), autotag_ids: &Vec<uuid::Uuid>, file_ids: &Vec<uuid::Uuid>) -> Result<Option<ErrorCantAddAutotags>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn mutation_update_files_autotags(context: &(), autotag_ids: &Vec<uuid::Uuid>, file_ids: &Vec<uuid::Uuid>) -> Result<Option<ErrorCantAddAutotags>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn mutation_update_files_autotags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1474,8 +1474,8 @@ pub struct PutUploadSession {
     pub upload_url: UploadUrl,
 }
 
-async fn query_get_deal_columns(context: &()) -> Result<Vec<DealColumn>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_deal_columns(context: &()) -> Result<Vec<DealColumn>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_deal_columns_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1484,8 +1484,8 @@ fn query_get_deal_columns_wrapper<'args>(context: &'args (), variables: &'args l
     })
 }
 
-async fn query_get_deal_info(context: &(), deal_name: &String) -> Result<GetDealInfoResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_deal_info(context: &(), deal_name: &String) -> Result<GetDealInfoResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_deal_info_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1495,8 +1495,8 @@ fn query_get_deal_info_wrapper<'args>(context: &'args (), variables: &'args libg
     })
 }
 
-async fn query_get_deals(context: &(), limit: &i32, query: Option<&String>, skip: &i32) -> Result<Vec<String>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_deals(context: &(), limit: &i32, query: Option<&String>, skip: &i32) -> Result<Vec<String>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_deals_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1508,8 +1508,8 @@ fn query_get_deals_wrapper<'args>(context: &'args (), variables: &'args libgql::
     })
 }
 
-async fn query_get_events(context: &(), date_range: &DateRange, filters: &EventFiltersIn, limit: &i32, query: Option<&String>, skip: &i32) -> Result<GetEventsResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_events(context: &(), date_range: &DateRange, filters: &EventFiltersIn, limit: &i32, query: Option<&String>, skip: &i32) -> Result<GetEventsResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_events_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1523,8 +1523,8 @@ fn query_get_events_wrapper<'args>(context: &'args (), variables: &'args libgql:
     })
 }
 
-async fn query_get_favourite_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<Tag>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_favourite_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_favourite_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1535,8 +1535,8 @@ fn query_get_favourite_tags_wrapper<'args>(context: &'args (), variables: &'args
     })
 }
 
-async fn query_get_file_url(context: &(), id: &uuid::Uuid) -> Result<GetFileURLResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_file_url(context: &(), id: &uuid::Uuid) -> Result<GetFileURLResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_file_url_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1546,8 +1546,8 @@ fn query_get_file_url_wrapper<'args>(context: &'args (), variables: &'args libgq
     })
 }
 
-async fn query_get_files(context: &(), filters: &Vec<Filter>, limit: &i32, skip: &i32, sort_by: &FileSortBy, tag_ids: &Vec<uuid::Uuid>) -> Result<GetFilesResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_files(context: &(), filters: &Vec<Filter>, limit: &i32, skip: &i32, sort_by: &FileSortBy, tag_ids: &Vec<uuid::Uuid>) -> Result<GetFilesResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_files_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1561,8 +1561,8 @@ fn query_get_files_wrapper<'args>(context: &'args (), variables: &'args libgql::
     })
 }
 
-async fn query_get_files_count(context: &(), filters: &Vec<Filter>, tag_ids: &Vec<uuid::Uuid>) -> Result<IntObjectOrErrorUnknownTags, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_files_count(context: &(), filters: &Vec<Filter>, tag_ids: &Vec<uuid::Uuid>) -> Result<IntObjectOrErrorUnknownTags, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_files_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1573,8 +1573,8 @@ fn query_get_files_count_wrapper<'args>(context: &'args (), variables: &'args li
     })
 }
 
-async fn query_get_files_deal_info(context: &(), file_ids: &Vec<uuid::Uuid>) -> Result<FilesDealInfoOrError, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_files_deal_info(context: &(), file_ids: &Vec<uuid::Uuid>) -> Result<FilesDealInfoOrError, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_files_deal_info_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1584,8 +1584,8 @@ fn query_get_files_deal_info_wrapper<'args>(context: &'args (), variables: &'arg
     })
 }
 
-async fn query_get_group_tags(context: &(), id: &uuid::Uuid, limit: &i32, skip: &i32) -> Result<GetGroupTagsResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_group_tags(context: &(), id: &uuid::Uuid, limit: &i32, skip: &i32) -> Result<GetGroupTagsResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_group_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1597,8 +1597,8 @@ fn query_get_group_tags_wrapper<'args>(context: &'args (), variables: &'args lib
     })
 }
 
-async fn query_get_group_users(context: &(), group_id: &uuid::Uuid, limit: &i32, skip: &i32, sort_by: &GetGroupUsersSortBy) -> Result<GetGroupUsersResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_group_users(context: &(), group_id: &uuid::Uuid, limit: &i32, skip: &i32, sort_by: &GetGroupUsersSortBy) -> Result<GetGroupUsersResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_group_users_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1611,8 +1611,8 @@ fn query_get_group_users_wrapper<'args>(context: &'args (), variables: &'args li
     })
 }
 
-async fn query_get_group_users_and_users(context: &(), group_id: &uuid::Uuid, limit: &i32, query: Option<&String>, skip: &i32, sort_by: &GetUsersSortBy) -> Result<GetGroupUsersAndUsersResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_group_users_and_users(context: &(), group_id: &uuid::Uuid, limit: &i32, query: Option<&String>, skip: &i32, sort_by: &GetUsersSortBy) -> Result<GetGroupUsersAndUsersResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_group_users_and_users_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1626,8 +1626,8 @@ fn query_get_group_users_and_users_wrapper<'args>(context: &'args (), variables:
     })
 }
 
-async fn query_get_group_users_total(context: &(), group_id: &uuid::Uuid) -> Result<GetGroupUsersTotalResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_group_users_total(context: &(), group_id: &uuid::Uuid) -> Result<GetGroupUsersTotalResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_group_users_total_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1637,8 +1637,8 @@ fn query_get_group_users_total_wrapper<'args>(context: &'args (), variables: &'a
     })
 }
 
-async fn query_get_groups(context: &(), limit: &i32, skip: &i32, sort_by: &GetGroupsSortBy) -> Result<Vec<Group>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_groups(context: &(), limit: &i32, skip: &i32, sort_by: &GetGroupsSortBy) -> Result<Vec<Group>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_groups_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1650,8 +1650,8 @@ fn query_get_groups_wrapper<'args>(context: &'args (), variables: &'args libgql:
     })
 }
 
-async fn query_get_groups_total(context: &()) -> Result<i32, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_groups_total(context: &()) -> Result<i32, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_groups_total_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1660,8 +1660,8 @@ fn query_get_groups_total_wrapper<'args>(context: &'args (), variables: &'args l
     })
 }
 
-async fn query_get_me(context: &()) -> Result<User, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_me(context: &()) -> Result<User, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_me_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1670,8 +1670,8 @@ fn query_get_me_wrapper<'args>(context: &'args (), variables: &'args libgql::exe
     })
 }
 
-async fn query_get_my_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<Tag>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_my_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_my_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1682,8 +1682,8 @@ fn query_get_my_tags_wrapper<'args>(context: &'args (), variables: &'args libgql
     })
 }
 
-async fn query_get_my_tags_count(context: &()) -> Result<i32, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_my_tags_count(context: &()) -> Result<i32, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_my_tags_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1692,8 +1692,8 @@ fn query_get_my_tags_count_wrapper<'args>(context: &'args (), variables: &'args 
     })
 }
 
-async fn query_get_next_multipart_upload_urls(context: &(), last_part: &i32, limit: &i32, session_id: &uuid::Uuid) -> Result<GetNextMultipartUploadUrlsResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_next_multipart_upload_urls(context: &(), last_part: &i32, limit: &i32, session_id: &uuid::Uuid) -> Result<GetNextMultipartUploadUrlsResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_next_multipart_upload_urls_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1705,8 +1705,8 @@ fn query_get_next_multipart_upload_urls_wrapper<'args>(context: &'args (), varia
     })
 }
 
-async fn query_get_path_to_tag(context: &(), tag_id: &uuid::Uuid) -> Result<GetPathToTagResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_path_to_tag(context: &(), tag_id: &uuid::Uuid) -> Result<GetPathToTagResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_path_to_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1716,8 +1716,8 @@ fn query_get_path_to_tag_wrapper<'args>(context: &'args (), variables: &'args li
     })
 }
 
-async fn query_get_pending_users(context: &()) -> Result<Vec<PendingUser>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_pending_users(context: &()) -> Result<Vec<PendingUser>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_pending_users_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1726,8 +1726,8 @@ fn query_get_pending_users_wrapper<'args>(context: &'args (), variables: &'args 
     })
 }
 
-async fn query_get_popular_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<Tag>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_popular_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_popular_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1738,8 +1738,8 @@ fn query_get_popular_tags_wrapper<'args>(context: &'args (), variables: &'args l
     })
 }
 
-async fn query_get_tag_children(context: &(), tag_id: &uuid::Uuid) -> Result<GetTagsResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_tag_children(context: &(), tag_id: &uuid::Uuid) -> Result<GetTagsResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_tag_children_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1749,8 +1749,8 @@ fn query_get_tag_children_wrapper<'args>(context: &'args (), variables: &'args l
     })
 }
 
-async fn query_get_tag_info(context: &(), tag_id: &uuid::Uuid) -> Result<GetTagInfoResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_tag_info(context: &(), tag_id: &uuid::Uuid) -> Result<GetTagInfoResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_tag_info_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1760,8 +1760,8 @@ fn query_get_tag_info_wrapper<'args>(context: &'args (), variables: &'args libgq
     })
 }
 
-async fn query_get_tags(context: &(), limit: &i32, parent_tag_id: Option<&uuid::Uuid>, query: Option<&String>, skip: &i32) -> Result<GetTagsResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_tags(context: &(), limit: &i32, parent_tag_id: Option<&uuid::Uuid>, query: Option<&String>, skip: &i32) -> Result<GetTagsResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1774,8 +1774,8 @@ fn query_get_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::e
     })
 }
 
-async fn query_get_tags_count(context: &(), parent_tag_id: Option<&uuid::Uuid>, query: Option<&String>) -> Result<IntObjectOrErrorUnknownTags, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_tags_count(context: &(), parent_tag_id: Option<&uuid::Uuid>, query: Option<&String>) -> Result<IntObjectOrErrorUnknownTags, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_tags_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1786,8 +1786,8 @@ fn query_get_tags_count_wrapper<'args>(context: &'args (), variables: &'args lib
     })
 }
 
-async fn query_get_uploaded_files(context: &(), limit: &i32, skip: &i32, sort_by: &FileSortBy) -> Result<Vec<SearchFile>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_uploaded_files(context: &(), limit: &i32, skip: &i32, sort_by: &FileSortBy) -> Result<Vec<SearchFile>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_uploaded_files_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1799,8 +1799,8 @@ fn query_get_uploaded_files_wrapper<'args>(context: &'args (), variables: &'args
     })
 }
 
-async fn query_get_uploaded_files_count(context: &()) -> Result<i32, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_uploaded_files_count(context: &()) -> Result<i32, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_uploaded_files_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1809,8 +1809,8 @@ fn query_get_uploaded_files_count_wrapper<'args>(context: &'args (), variables: 
     })
 }
 
-async fn query_get_users(context: &(), limit: &i32, query: Option<&String>, skip: &i32, sort_by: &GetUsersSortBy) -> Result<Vec<User>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_users(context: &(), limit: &i32, query: Option<&String>, skip: &i32, sort_by: &GetUsersSortBy) -> Result<Vec<User>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_users_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1823,8 +1823,8 @@ fn query_get_users_wrapper<'args>(context: &'args (), variables: &'args libgql::
     })
 }
 
-async fn query_get_users_tags(context: &(), limit: &i32, query: Option<&String>, skip: &i32, sort_by: &UsersTagSortBy) -> Result<Vec<UsersTag>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_users_tags(context: &(), limit: &i32, query: Option<&String>, skip: &i32, sort_by: &UsersTagSortBy) -> Result<Vec<UsersTag>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_users_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1837,8 +1837,8 @@ fn query_get_users_tags_wrapper<'args>(context: &'args (), variables: &'args lib
     })
 }
 
-async fn query_get_users_tags_count(context: &(), query: Option<&String>) -> Result<i32, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_users_tags_count(context: &(), query: Option<&String>) -> Result<i32, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_users_tags_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1848,8 +1848,8 @@ fn query_get_users_tags_count_wrapper<'args>(context: &'args (), variables: &'ar
     })
 }
 
-async fn query_get_users_total(context: &(), query: Option<&String>) -> Result<i32, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_get_users_total(context: &(), query: Option<&String>) -> Result<i32, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_get_users_total_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1859,8 +1859,8 @@ fn query_get_users_total_wrapper<'args>(context: &'args (), variables: &'args li
     })
 }
 
-async fn query_is_allowed_to_download(context: &(), id: &uuid::Uuid) -> Result<IsAllowedToDownloadResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_is_allowed_to_download(context: &(), id: &uuid::Uuid) -> Result<IsAllowedToDownloadResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_is_allowed_to_download_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1870,8 +1870,8 @@ fn query_is_allowed_to_download_wrapper<'args>(context: &'args (), variables: &'
     })
 }
 
-async fn query_is_tag_exists(context: &(), tag: &String) -> Result<bool, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_is_tag_exists(context: &(), tag: &String) -> Result<bool, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_is_tag_exists_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1881,8 +1881,8 @@ fn query_is_tag_exists_wrapper<'args>(context: &'args (), variables: &'args libg
     })
 }
 
-async fn query_retrieve_file(context: &(), id: &uuid::Uuid) -> Result<RetrieveFileResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_retrieve_file(context: &(), id: &uuid::Uuid) -> Result<RetrieveFileResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_retrieve_file_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1892,8 +1892,8 @@ fn query_retrieve_file_wrapper<'args>(context: &'args (), variables: &'args libg
     })
 }
 
-async fn query_retrieve_group(context: &(), id: &uuid::Uuid) -> Result<RetrieveGroupResponse, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_retrieve_group(context: &(), id: &uuid::Uuid) -> Result<RetrieveGroupResponse, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_retrieve_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
@@ -1903,8 +1903,8 @@ fn query_retrieve_group_wrapper<'args>(context: &'args (), variables: &'args lib
     })
 }
 
-async fn query_search_tags(context: &(), query: &String) -> Result<Vec<Tag>, String> {
-    Err("Resolver is not implemented yet".to_string())
+async fn query_search_tags(context: &(), query: &String) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
+    Err("Resolver is not implemented yet".to_string().into())
 }
 
 fn query_search_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {

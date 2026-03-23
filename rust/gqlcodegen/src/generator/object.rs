@@ -140,7 +140,7 @@ pub fn generate_resolver_nodes(
     let resolver_fn = scope
         .new_fn(&resolver_fn_name)
         .ret(format!(
-            "Result<{}, String>",
+            "Result<{}, libgql::executor::ast::ResolverError>",
             super::shared::generate_field_type(
                 config,
                 field,
@@ -148,7 +148,7 @@ pub fn generate_resolver_nodes(
                 false
             )
         ))
-        .line("Err(\"Resolver is not implemented yet\".to_string())")
+        .line("Err(\"Resolver is not implemented yet\".to_string().into())")
         .set_async(true);
     let mut call_arguments = Vec::new();
     if has_root {
