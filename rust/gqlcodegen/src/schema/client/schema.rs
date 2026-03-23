@@ -1,10 +1,10 @@
 use super::{directive::Directive, fragment::Fragment, operation::Operation};
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Default, serde::Deserialize)]
 pub struct Schema {
-    fragments: indexmap::IndexMap<String, Fragment>,
-    operations: indexmap::IndexMap<String, Operation>,
-    directives: indexmap::IndexMap<String, Directive>,
+    pub fragments: indexmap::IndexMap<String, Fragment>,
+    pub operations: indexmap::IndexMap<String, Operation>,
+    pub directives: indexmap::IndexMap<String, Directive>,
 }
 
 #[cfg(test)]
