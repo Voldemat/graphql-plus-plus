@@ -4,7 +4,7 @@ RUN --mount=type=bind,source=./e2e-tests/rust-server/Cargo.toml,target=/usr/loca
     --mount=type=bind,source=./e2e-tests/rust-server/Cargo.lock,target=/usr/local/app/e2e-tests/rust-server/Cargo.lock \
     mkdir src && echo "fn main() {}" > ./src/main.rs && cargo build
 COPY ./e2e-tests/rust-server/ ./
-RUN cargo build
+RUN touch ./src/main.rs && cargo build
 
 FROM scratch
 COPY --from=builder /usr/local/app/e2e-tests/rust-server/target/debug/rust-server /main

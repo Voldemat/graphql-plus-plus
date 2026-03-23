@@ -4,22 +4,24 @@ services:
       context: ./graphql
       args:
         BASE_IMAGE: ${GRAPHQL_BASE_IMAGE}
+    command: ['echo', 'something']
   rust-server:
     depends_on:
       graphql:
         condition: service_completed_successfully
     build:
-      context: .
-      dockerfile: ../shared/dockerfiles/e2e-tests/rust-server
+      context: ..
+      dockerfile: ./shared/dockerfiles/e2e-tests/rust-server
     environment:
       PORT: '8000'
   typescript-client:
+    stop_grace_period: 0s
     depends_on:
       graphql:
         condition: service_completed_successfully
     build:
-      context: .
-      dockerfile: ../shared/dockerfiles/e2e-tests/typescript-client
+      context: ..
+      dockerfile: ./shared/dockerfiles/e2e-tests/typescript-client
     command: ['sleep', 'infinity']
     environment:
       ENDPOINT_URL: http://rust-server:8000/graphql
