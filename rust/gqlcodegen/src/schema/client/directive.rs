@@ -24,5 +24,5 @@ pub enum DirectiveLocation {
 pub struct Directive {
     name: String,
     arguments: indexmap::IndexMap<String, InputField>,
-    locations: Vec<DirectiveLocation>
+    locations: Vec<DirectiveLocation>,
 }

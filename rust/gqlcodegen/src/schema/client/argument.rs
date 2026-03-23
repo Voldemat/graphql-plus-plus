@@ -6,13 +6,13 @@ pub enum ArgumentValue {
     #[serde(rename(deserialize = "ref"))]
     Ref { name: String },
     #[serde(rename(deserialize = "literal"))]
-    Literal { value: Literal }
+    Literal { value: Literal },
 }
 
 #[derive(Debug, serde::Deserialize)]
 pub struct Argument {
     name: String,
-    value: ArgumentValue
+    value: ArgumentValue,
 }
 
 #[cfg(test)]

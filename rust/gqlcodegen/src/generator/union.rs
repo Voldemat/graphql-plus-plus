@@ -7,7 +7,9 @@ pub fn generate_definition(
     scope: &mut codegen::Scope,
     union: &schema::server::union::Union,
 ) {
-    let local = scope.new_enum(&union.name).vis("pub")
+    let local = scope
+        .new_enum(&union.name)
+        .vis("pub")
         .derive("libgqlcodegen::macros::GQLUnion")
         .r#macro(format!("#[gql(scalar={})]", config.scalar_type));
     for item in union.items.keys() {

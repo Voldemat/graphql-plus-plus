@@ -79,7 +79,7 @@ pub fn generate_input_field_spec_value(
             );
             if array.nullable {
                 element_func +=
-                    &format!(".map(|v| {}).transpose()", field_spec_value);
+                    &format!(".map(|v|{}).transpose()", field_spec_value);
             } else {
                 element_func += &format!(
                     ".ok_or(\"Unexpected null in non-nullable array\".to_string()).map(|v| {}).flatten()",
@@ -114,7 +114,7 @@ pub fn generate_input_field_value(
     );
     if field.nullable {
         format!(
-            "{}        .map(|v| {}        \n        ).transpose()?",
+            "{}        .map(|v|{}\n        ).transpose()?",
             var,
             generate_input_field_spec_value(
                 config,
@@ -125,7 +125,7 @@ pub fn generate_input_field_value(
         )
     } else {
         format!(
-            "{}        .ok_or(\"{}: Required field {} is missing or null\".to_string())\n        .map(|v| {}\n        )\n        .flatten()?",
+            "{}        .ok_or(\"{}: Required field {} is missing or null\".to_string())\n        .map(|v|{}\n        )\n        .flatten()?",
             var,
             input_name,
             field_name,

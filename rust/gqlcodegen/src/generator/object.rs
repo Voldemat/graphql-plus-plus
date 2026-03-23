@@ -1,3 +1,5 @@
+use indexmap::IndexMap;
+
 use crate::schema::{
     self,
     server::object::{
@@ -71,13 +73,14 @@ fn generate_object_field_spec_type(
 pub fn generate_definition(
     config: &Config,
     scope: &mut codegen::Scope,
+    existing_resolvers_code: &IndexMap<String, String>,
     object: &schema::server::object::Object,
 ) -> indexmap::IndexMap<(String, String), String> {
-    let local = scope.new_struct(&object.name).vis("pub")
+    let local = scope
+        .new_struct(&object.name)
+        .vis("pub")
         .derive("libgqlcodegen::macros::GQLObject")
-        .r#macro(format!(
-            "#[gql(scalar = {})]", config.scalar_type)
-        );
+        .r#macro(format!("#[gql(scalar = {})]", config.scalar_type));
     let mut resolver_fields = Vec::<(&String, &ObjectField)>::new();
     let mut local_fields = Vec::new();
     for (name, field) in &object.fields {
@@ -119,7 +122,8 @@ pub fn generate_definition(
                     &object.name,
                     name,
                     field,
-                    true
+                    true,
+                    existing_resolvers_code,
                 ),
             )
         })
@@ -133,10 +137,12 @@ pub fn generate_resolver_nodes(
     field_name: &str,
     field: &ObjectField,
     has_root: bool,
+    existing_resolvers_code: &IndexMap<String, String>,
 ) -> String {
     let rust_name = super::shared::format_field_name(field_name);
     let object_rust_name = super::shared::format_field_name(&object_name);
     let resolver_fn_name = format!("{}_{}", object_rust_name, rust_name);
+    let existing_code = existing_resolvers_code.get(&resolver_fn_name);
     let resolver_fn = scope
         .new_fn(&resolver_fn_name)
         .ret(format!(
@@ -148,12 +154,20 @@ pub fn generate_resolver_nodes(
                 false
             )
         ))
-        .line("Err(\"Resolver is not implemented yet\".to_string().into())")
+        .line(
+            existing_code.unwrap_or(
+                &"Err(\"Resolver is not implemented yet\".to_string().into())"
+                    .to_string(),
+            ),
+        )
         .set_async(true);
     let mut call_arguments = Vec::new();
     if has_root {
         resolver_fn.arg("root", format!("&{}", object_name));
-        call_arguments.push(format!("(root as &dyn std::any::Any).downcast_ref::<{}>().unwrap()", object_name));
+        call_arguments.push(format!(
+            "(root as &dyn std::any::Any).downcast_ref::<{}>().unwrap()",
+            object_name
+        ));
     };
     resolver_fn.arg("context", format!("&{}", config.resolvers.context_type));
     call_arguments.push("context".to_string());
@@ -222,6 +236,7 @@ pub fn generate_resolver_nodes(
 pub fn generate_root_object_definitions(
     config: &Config,
     scope: &mut codegen::Scope,
+    existing_resolvers_code: &IndexMap<String, String>,
     object: &schema::server::object::Object,
 ) -> Vec<(String, String)> {
     object
@@ -236,7 +251,8 @@ pub fn generate_root_object_definitions(
                     &object.name,
                     field_name,
                     field,
-                    false
+                    false,
+                    existing_resolvers_code,
                 ),
             )
         })

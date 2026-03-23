@@ -61,13 +61,15 @@ pub struct DateRange {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for DateRange {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(DateRange{
             end_at: variables.remove("endAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("DateRange: Required field endAt is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -78,7 +80,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for DateRange {
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("DateRange: Required field startAt is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -98,14 +100,18 @@ pub struct EventFiltersIn {
     pub event_tag_approval_is_requested: bool,
 }
 
-impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+impl libgql::executor::GQLInput<super::scalar::ExampleScalar>
+    for EventFiltersIn
+{
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(EventFiltersIn{
             event_file_deleted: variables.remove("eventFileDeleted")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileDeleted is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -116,7 +122,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileDownloadRequested is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -127,7 +133,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileDownloaded is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -138,7 +144,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileTagsEdited is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -149,7 +155,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventFileUploaded is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -160,7 +166,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for EventFiltersIn
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("EventFiltersIn: Required field eventTagApprovalIsRequested is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<bool as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -177,30 +183,48 @@ pub struct FileSortBy {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for FileSortBy {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
-        Ok(FileSortBy{
-            direction: variables.remove("direction")
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
+        Ok(FileSortBy {
+            direction: variables
+                .remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .ok_or("FileSortBy: Required field direction is missing or null".to_string())
-                .map(|v| 
-                    v.get_literal()
-                    .ok_or("Unexpected array value for literal".to_string())
-                    .map(<ESortDirection as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()
+                .ok_or(
+                    "FileSortBy: Required field direction is missing or null"
+                        .to_string(),
                 )
+                .map(|v| {
+                    v.get_literal()
+                        .ok_or("Unexpected array value for literal".to_string())
+                        .map(
+                            <ESortDirection as libgql::executor::GQLEnum<
+                                super::scalar::ExampleScalar,
+                            >>::from_literal_value,
+                        )
+                        .flatten()
+                })
                 .flatten()?,
-            field: variables.remove("field")
+            field: variables
+                .remove("field")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .ok_or("FileSortBy: Required field field is missing or null".to_string())
-                .map(|v| 
-                    v.get_literal()
-                    .ok_or("Unexpected array value for literal".to_string())
-                    .map(<EFileField as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()
+                .ok_or(
+                    "FileSortBy: Required field field is missing or null"
+                        .to_string(),
                 )
-                .flatten()?
+                .map(|v| {
+                    v.get_literal()
+                        .ok_or("Unexpected array value for literal".to_string())
+                        .map(
+                            <EFileField as libgql::executor::GQLEnum<
+                                super::scalar::ExampleScalar,
+                            >>::from_literal_value,
+                        )
+                        .flatten()
+                })
+                .flatten()?,
         })
     }
 }
@@ -213,13 +237,15 @@ pub struct Filter {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for Filter {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(Filter{
             column_id: variables.remove("columnId")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("Filter: Required field columnId is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -229,29 +255,29 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for Filter {
             date_range: variables.remove("dateRange")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<FilterDateRange as libgql::executor::GQLInput<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()        
+                    .flatten()
                 ).transpose()?,
             list_values: variables.remove("listValues")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v|libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()).flatten())        
+                    .flatten()).flatten())
                 ).transpose()?,
             number_range: variables.remove("numberRange")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<NumberRange as libgql::executor::GQLInput<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()        
+                    .flatten()
                 ).transpose()?
         })
     }
@@ -262,26 +288,30 @@ pub struct FilterDateRange {
     pub start_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
-impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for FilterDateRange {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+impl libgql::executor::GQLInput<super::scalar::ExampleScalar>
+    for FilterDateRange
+{
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(FilterDateRange{
             end_at: variables.remove("endAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()        
+                    .flatten()
                 ).transpose()?,
             start_at: variables.remove("startAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<chrono::DateTime<chrono::Utc> as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()        
+                    .flatten()
                 ).transpose()?
         })
     }
@@ -292,14 +322,18 @@ pub struct GetGroupUsersSortBy {
     pub field: EGroupUsersField,
 }
 
-impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetGroupUsersSortBy {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+impl libgql::executor::GQLInput<super::scalar::ExampleScalar>
+    for GetGroupUsersSortBy
+{
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(GetGroupUsersSortBy{
             direction: variables.remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetGroupUsersSortBy: Required field direction is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<ESortDirection as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
@@ -310,7 +344,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetGroupUsersS
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetGroupUsersSortBy: Required field field is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<EGroupUsersField as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
@@ -326,14 +360,18 @@ pub struct GetGroupsSortBy {
     pub field: EGroupField,
 }
 
-impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetGroupsSortBy {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+impl libgql::executor::GQLInput<super::scalar::ExampleScalar>
+    for GetGroupsSortBy
+{
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(GetGroupsSortBy{
             direction: variables.remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetGroupsSortBy: Required field direction is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<ESortDirection as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
@@ -344,7 +382,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetGroupsSortB
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetGroupsSortBy: Required field field is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<EGroupField as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
@@ -360,14 +398,18 @@ pub struct GetUsersSortBy {
     pub field: EUserField,
 }
 
-impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetUsersSortBy {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+impl libgql::executor::GQLInput<super::scalar::ExampleScalar>
+    for GetUsersSortBy
+{
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(GetUsersSortBy{
             direction: variables.remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetUsersSortBy: Required field direction is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<ESortDirection as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
@@ -378,7 +420,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GetUsersSortBy
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GetUsersSortBy: Required field field is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<EUserField as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
@@ -396,13 +438,15 @@ pub struct GroupIn {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GroupIn {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(GroupIn{
             limit_of_downloads_per_day: variables.remove("limitOfDownloadsPerDay")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GroupIn: Required field limitOfDownloadsPerDay is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -413,7 +457,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GroupIn {
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GroupIn: Required field name is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -424,7 +468,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for GroupIn {
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("GroupIn: Required field tagIds is missing or null".to_string())
-                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v|libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -443,14 +487,18 @@ pub struct MultipartUploadFileIn {
     pub tag_ids: Vec<uuid::Uuid>,
 }
 
-impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploadFileIn {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+impl libgql::executor::GQLInput<super::scalar::ExampleScalar>
+    for MultipartUploadFileIn
+{
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(MultipartUploadFileIn{
             initial_parts_count: variables.remove("initialPartsCount")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field initialPartsCount is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<i32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -461,7 +509,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploa
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field name is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -472,7 +520,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploa
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field partSizeInBytes is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<i64 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -483,7 +531,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploa
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field sizeInBytes is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<i64 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -494,7 +542,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for MultipartUploa
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("MultipartUploadFileIn: Required field tagIds is missing or null".to_string())
-                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v|libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -511,26 +559,40 @@ pub struct NumberRange {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for NumberRange {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
-        Ok(NumberRange{
-            end_at: variables.remove("endAt")
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
+        Ok(NumberRange {
+            end_at: variables
+                .remove("endAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .map(|v| 
+                .map(|v| {
                     v.get_literal()
-                    .ok_or("Unexpected array value for literal".to_string())
-                    .map(<f32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()        
-                ).transpose()?,
-            start_at: variables.remove("startAt")
+                        .ok_or("Unexpected array value for literal".to_string())
+                        .map(
+                            <f32 as libgql::executor::GQLScalar<
+                                super::scalar::ExampleScalar,
+                            >>::from_literal_value,
+                        )
+                        .flatten()
+                })
+                .transpose()?,
+            start_at: variables
+                .remove("startAt")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .map(|v| 
+                .map(|v| {
                     v.get_literal()
-                    .ok_or("Unexpected array value for literal".to_string())
-                    .map(<f32 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()        
-                ).transpose()?
+                        .ok_or("Unexpected array value for literal".to_string())
+                        .map(
+                            <f32 as libgql::executor::GQLScalar<
+                                super::scalar::ExampleScalar,
+                            >>::from_literal_value,
+                        )
+                        .flatten()
+                })
+                .transpose()?,
         })
     }
 }
@@ -541,14 +603,18 @@ pub struct PutUploadFileIn {
     pub tag_ids: Vec<uuid::Uuid>,
 }
 
-impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for PutUploadFileIn {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+impl libgql::executor::GQLInput<super::scalar::ExampleScalar>
+    for PutUploadFileIn
+{
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(PutUploadFileIn{
             name: variables.remove("name")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("PutUploadFileIn: Required field name is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -559,7 +625,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for PutUploadFileI
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("PutUploadFileIn: Required field sizeInBytes is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<i64 as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -570,7 +636,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for PutUploadFileI
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("PutUploadFileIn: Required field tagIds is missing or null".to_string())
-                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v|libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -587,28 +653,43 @@ pub struct TagIn {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for TagIn {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
-        Ok(TagIn{
-            parent_tag_id: variables.remove("parentTagId")
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
+        Ok(TagIn {
+            parent_tag_id: variables
+                .remove("parentTagId")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .map(|v| 
+                .map(|v| {
                     v.get_literal()
-                    .ok_or("Unexpected array value for literal".to_string())
-                    .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()        
-                ).transpose()?,
-            tag: variables.remove("tag")
+                        .ok_or("Unexpected array value for literal".to_string())
+                        .map(
+                            <uuid::Uuid as libgql::executor::GQLScalar<
+                                super::scalar::ExampleScalar,
+                            >>::from_literal_value,
+                        )
+                        .flatten()
+                })
+                .transpose()?,
+            tag: variables
+                .remove("tag")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
-                .ok_or("TagIn: Required field tag is missing or null".to_string())
-                .map(|v| 
-                    v.get_literal()
-                    .ok_or("Unexpected array value for literal".to_string())
-                    .map(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
-                    .flatten()
+                .ok_or(
+                    "TagIn: Required field tag is missing or null".to_string(),
                 )
-                .flatten()?
+                .map(|v| {
+                    v.get_literal()
+                        .ok_or("Unexpected array value for literal".to_string())
+                        .map(
+                            <String as libgql::executor::GQLScalar<
+                                super::scalar::ExampleScalar,
+                            >>::from_literal_value,
+                        )
+                        .flatten()
+                })
+                .flatten()?,
         })
     }
 }
@@ -620,13 +701,15 @@ pub struct UserIn {
 }
 
 impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UserIn {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(UserIn{
             email: variables.remove("email")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UserIn: Required field email is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -637,7 +720,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UserIn {
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UserIn: Required field groupIds is missing or null".to_string())
-                .map(|v| libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
+                .map(|v|libgql::executor::ast::extract_array(v, |element: libgql::executor::Value<super::scalar::ExampleScalar>| element.to_non_nullable_option().ok_or("Unexpected null in non-nullable array".to_string()).map(|v| 
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<uuid::Uuid as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -648,7 +731,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UserIn {
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UserIn: Required field name is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<String as libgql::executor::GQLScalar<super::scalar::ExampleScalar>>::from_literal_value)
@@ -664,14 +747,18 @@ pub struct UsersTagSortBy {
     pub field: EUsersTagField,
 }
 
-impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UsersTagSortBy {
-    fn from_variables(mut variables: libgql::executor::Values<super::scalar::ExampleScalar>) -> Result<Self, String> {
+impl libgql::executor::GQLInput<super::scalar::ExampleScalar>
+    for UsersTagSortBy
+{
+    fn from_variables(
+        mut variables: libgql::executor::Values<super::scalar::ExampleScalar>,
+    ) -> Result<Self, String> {
         Ok(UsersTagSortBy{
             direction: variables.remove("direction")
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UsersTagSortBy: Required field direction is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<ESortDirection as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
@@ -682,7 +769,7 @@ impl libgql::executor::GQLInput<super::scalar::ExampleScalar> for UsersTagSortBy
                 .map(libgql::executor::Value::to_non_nullable_option)
                 .flatten()
                 .ok_or("UsersTagSortBy: Required field field is missing or null".to_string())
-                .map(|v| 
+                .map(|v|
                     v.get_literal()
                     .ok_or("Unexpected array value for literal".to_string())
                     .map(<EUsersTagField as libgql::executor::GQLEnum<super::scalar::ExampleScalar>>::from_literal_value)
@@ -723,13 +810,37 @@ pub struct DealEntry {
     pub column_name: String,
 }
 
-async fn deal_entry_value(root: &DealEntry, context: &()) -> Result<Tag, libgql::executor::ast::ResolverError> {
+async fn deal_entry_value(
+    root: &DealEntry,
+    context: &(),
+) -> Result<Tag, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn deal_entry_value_wrapper<'args>(root: &'args libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>, context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn deal_entry_value_wrapper<'args>(
+    root: &'args libgql::executor::ast::ResolverRoot<
+        super::scalar::ExampleScalar,
+    >,
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
     Box::pin(async move {
-        deal_entry_value((root as &dyn std::any::Any).downcast_ref::<DealEntry>().unwrap(), context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        deal_entry_value(
+            (root as &dyn std::any::Any)
+                .downcast_ref::<DealEntry>()
+                .unwrap(),
+            context,
+        )
+        .await
+        .map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
@@ -1102,350 +1213,1035 @@ pub struct MultipartUploadSession {
     pub initial_upload_ur_ls: Vec<UploadUrl>,
 }
 
-async fn mutation_add_tags_to_files(context: &(), file_ids: &Vec<uuid::Uuid>, tag_ids: &Vec<uuid::Uuid>) -> Result<Option<AddTagsToFilesError>, libgql::executor::ast::ResolverError> {
+async fn mutation_add_tags_to_files(
+    context: &(),
+    file_ids: &Vec<uuid::Uuid>,
+    tag_ids: &Vec<uuid::Uuid>,
+) -> Result<Option<AddTagsToFilesError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_add_tags_to_files_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let file_ids = variables.get("fileIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
-    let tag_ids = variables.get("tagIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
+fn mutation_add_tags_to_files_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let file_ids = variables
+        .get("fileIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
+    let tag_ids = variables
+        .get("tagIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
     Box::pin(async move {
-        mutation_add_tags_to_files(context, file_ids, tag_ids).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_add_tags_to_files(context, file_ids, tag_ids)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_add_user_to_group(context: &(), group_id: &uuid::Uuid, user_id: &uuid::Uuid) -> Result<Option<ErrorGroupNotFoundOrErrorNotFound>, libgql::executor::ast::ResolverError> {
+async fn mutation_add_user_to_group(
+    context: &(),
+    group_id: &uuid::Uuid,
+    user_id: &uuid::Uuid,
+) -> Result<
+    Option<ErrorGroupNotFoundOrErrorNotFound>,
+    libgql::executor::ast::ResolverError,
+> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_add_user_to_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let group_id = variables.get("groupId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
-    let user_id = variables.get("userId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_add_user_to_group_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let group_id = variables
+        .get("groupId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
+    let user_id = variables
+        .get("userId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_add_user_to_group(context, group_id, user_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_add_user_to_group(context, group_id, user_id)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_approve_tag(context: &(), group_ids: &Vec<uuid::Uuid>, tag_id: &uuid::Uuid) -> Result<Option<ApproveTagError>, libgql::executor::ast::ResolverError> {
+async fn mutation_approve_tag(
+    context: &(),
+    group_ids: &Vec<uuid::Uuid>,
+    tag_id: &uuid::Uuid,
+) -> Result<Option<ApproveTagError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_approve_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let group_ids = variables.get("groupIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
-    let tag_id = variables.get("tagId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_approve_tag_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let group_ids = variables
+        .get("groupIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
+    let tag_id = variables
+        .get("tagId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_approve_tag(context, group_ids, tag_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_approve_tag(context, group_ids, tag_id)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_change_password(context: &(), new_password: &String, old_password: &String) -> Result<Option<ErrorInvalidCredentials>, libgql::executor::ast::ResolverError> {
+async fn mutation_change_password(
+    context: &(),
+    new_password: &String,
+    old_password: &String,
+) -> Result<Option<ErrorInvalidCredentials>, libgql::executor::ast::ResolverError>
+{
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_change_password_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let new_password = variables.get("newPassword").unwrap().downcast_ref::<String>().unwrap();
-    let old_password = variables.get("oldPassword").unwrap().downcast_ref::<String>().unwrap();
+fn mutation_change_password_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let new_password = variables
+        .get("newPassword")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
+    let old_password = variables
+        .get("oldPassword")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        mutation_change_password(context, new_password, old_password).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_change_password(context, new_password, old_password)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_commit_multipart_file_session(context: &(), session_id: &uuid::Uuid) -> Result<Option<CommitMultipartFileSessionResponse>, libgql::executor::ast::ResolverError> {
+async fn mutation_commit_multipart_file_session(
+    context: &(),
+    session_id: &uuid::Uuid,
+) -> Result<
+    Option<CommitMultipartFileSessionResponse>,
+    libgql::executor::ast::ResolverError,
+> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_commit_multipart_file_session_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let session_id = variables.get("sessionId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_commit_multipart_file_session_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let session_id = variables
+        .get("sessionId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_commit_multipart_file_session(context, session_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_commit_multipart_file_session(context, session_id)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_commit_put_file_session(context: &(), session_id: &uuid::Uuid) -> Result<Option<CommitPutFileSessionResponse>, libgql::executor::ast::ResolverError> {
+async fn mutation_commit_put_file_session(
+    context: &(),
+    session_id: &uuid::Uuid,
+) -> Result<
+    Option<CommitPutFileSessionResponse>,
+    libgql::executor::ast::ResolverError,
+> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_commit_put_file_session_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let session_id = variables.get("sessionId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_commit_put_file_session_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let session_id = variables
+        .get("sessionId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_commit_put_file_session(context, session_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_commit_put_file_session(context, session_id)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_confirm_otp_code(context: &(), code: &String, email: &String) -> Result<ConfirmOTPCodeResponse, libgql::executor::ast::ResolverError> {
+async fn mutation_confirm_otp_code(
+    context: &(),
+    code: &String,
+    email: &String,
+) -> Result<ConfirmOTPCodeResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_confirm_otp_code_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let code = variables.get("code").unwrap().downcast_ref::<String>().unwrap();
-    let email = variables.get("email").unwrap().downcast_ref::<String>().unwrap();
+fn mutation_confirm_otp_code_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let code = variables
+        .get("code")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
+    let email = variables
+        .get("email")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        mutation_confirm_otp_code(context, code, email).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_confirm_otp_code(context, code, email)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_confirm_user(context: &(), password: &String, token: &String) -> Result<Option<ConfirmUserError>, libgql::executor::ast::ResolverError> {
+async fn mutation_confirm_user(
+    context: &(),
+    password: &String,
+    token: &String,
+) -> Result<Option<ConfirmUserError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_confirm_user_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let password = variables.get("password").unwrap().downcast_ref::<String>().unwrap();
-    let token = variables.get("token").unwrap().downcast_ref::<String>().unwrap();
+fn mutation_confirm_user_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let password = variables
+        .get("password")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
+    let token = variables
+        .get("token")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        mutation_confirm_user(context, password, token).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_confirm_user(context, password, token)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_create_group(context: &(), group_in: &GroupIn, user_ids: &Vec<uuid::Uuid>) -> Result<Option<CreateGroupError>, libgql::executor::ast::ResolverError> {
+async fn mutation_create_group(
+    context: &(),
+    group_in: &GroupIn,
+    user_ids: &Vec<uuid::Uuid>,
+) -> Result<Option<CreateGroupError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_create_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let group_in = variables.get("groupIn").unwrap().downcast_ref::<GroupIn>().unwrap();
-    let user_ids = variables.get("userIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
+fn mutation_create_group_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let group_in = variables
+        .get("groupIn")
+        .unwrap()
+        .downcast_ref::<GroupIn>()
+        .unwrap();
+    let user_ids = variables
+        .get("userIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
     Box::pin(async move {
-        mutation_create_group(context, group_in, user_ids).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_create_group(context, group_in, user_ids)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_create_multipart_file_session(context: &(), file_in: &MultipartUploadFileIn) -> Result<CreateMultipartFileSessionResponse, libgql::executor::ast::ResolverError> {
+async fn mutation_create_multipart_file_session(
+    context: &(),
+    file_in: &MultipartUploadFileIn,
+) -> Result<
+    CreateMultipartFileSessionResponse,
+    libgql::executor::ast::ResolverError,
+> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_create_multipart_file_session_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let file_in = variables.get("fileIn").unwrap().downcast_ref::<MultipartUploadFileIn>().unwrap();
+fn mutation_create_multipart_file_session_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let file_in = variables
+        .get("fileIn")
+        .unwrap()
+        .downcast_ref::<MultipartUploadFileIn>()
+        .unwrap();
     Box::pin(async move {
-        mutation_create_multipart_file_session(context, file_in).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_create_multipart_file_session(context, file_in)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_create_put_file_session(context: &(), file_in: &PutUploadFileIn) -> Result<CreatePutFileSessionResponse, libgql::executor::ast::ResolverError> {
+async fn mutation_create_put_file_session(
+    context: &(),
+    file_in: &PutUploadFileIn,
+) -> Result<CreatePutFileSessionResponse, libgql::executor::ast::ResolverError>
+{
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_create_put_file_session_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let file_in = variables.get("fileIn").unwrap().downcast_ref::<PutUploadFileIn>().unwrap();
+fn mutation_create_put_file_session_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let file_in = variables
+        .get("fileIn")
+        .unwrap()
+        .downcast_ref::<PutUploadFileIn>()
+        .unwrap();
     Box::pin(async move {
-        mutation_create_put_file_session(context, file_in).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_create_put_file_session(context, file_in)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_create_tag(context: &(), tag: &TagIn) -> Result<Option<CreateTagError>, libgql::executor::ast::ResolverError> {
+async fn mutation_create_tag(
+    context: &(),
+    tag: &TagIn,
+) -> Result<Option<CreateTagError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_create_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let tag = variables.get("tag").unwrap().downcast_ref::<TagIn>().unwrap();
+fn mutation_create_tag_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let tag = variables
+        .get("tag")
+        .unwrap()
+        .downcast_ref::<TagIn>()
+        .unwrap();
     Box::pin(async move {
-        mutation_create_tag(context, tag).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_create_tag(context, tag).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_create_user(context: &(), user_in: &UserIn) -> Result<Option<CreateUserError>, libgql::executor::ast::ResolverError> {
+async fn mutation_create_user(
+    context: &(),
+    user_in: &UserIn,
+) -> Result<Option<CreateUserError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_create_user_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let user_in = variables.get("userIn").unwrap().downcast_ref::<UserIn>().unwrap();
+fn mutation_create_user_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let user_in = variables
+        .get("userIn")
+        .unwrap()
+        .downcast_ref::<UserIn>()
+        .unwrap();
     Box::pin(async move {
-        mutation_create_user(context, user_in).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_create_user(context, user_in).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_decide_on_download_request(context: &(), allowed: &bool, file_id: &uuid::Uuid, user_id: &uuid::Uuid) -> Result<Option<DecideOnDownloadRequestError>, libgql::executor::ast::ResolverError> {
+async fn mutation_decide_on_download_request(
+    context: &(),
+    allowed: &bool,
+    file_id: &uuid::Uuid,
+    user_id: &uuid::Uuid,
+) -> Result<
+    Option<DecideOnDownloadRequestError>,
+    libgql::executor::ast::ResolverError,
+> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_decide_on_download_request_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let allowed = variables.get("allowed").unwrap().downcast_ref::<bool>().unwrap();
-    let file_id = variables.get("fileId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
-    let user_id = variables.get("userId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_decide_on_download_request_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let allowed = variables
+        .get("allowed")
+        .unwrap()
+        .downcast_ref::<bool>()
+        .unwrap();
+    let file_id = variables
+        .get("fileId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
+    let user_id = variables
+        .get("userId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_decide_on_download_request(context, allowed, file_id, user_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_decide_on_download_request(context, allowed, file_id, user_id)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_delete_file(context: &(), id: &uuid::Uuid) -> Result<Option<DeleteFileError>, libgql::executor::ast::ResolverError> {
+async fn mutation_delete_file(
+    context: &(),
+    id: &uuid::Uuid,
+) -> Result<Option<DeleteFileError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_delete_file_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_delete_file_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_delete_file(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_delete_file(context, id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_delete_files(context: &(), ids: &Vec<uuid::Uuid>) -> Result<Option<DeleteFilesError>, libgql::executor::ast::ResolverError> {
+async fn mutation_delete_files(
+    context: &(),
+    ids: &Vec<uuid::Uuid>,
+) -> Result<Option<DeleteFilesError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_delete_files_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let ids = variables.get("ids").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
+fn mutation_delete_files_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let ids = variables
+        .get("ids")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
     Box::pin(async move {
-        mutation_delete_files(context, ids).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_delete_files(context, ids).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_delete_group(context: &(), id: &uuid::Uuid) -> Result<Option<ErrorGroupNotFound>, libgql::executor::ast::ResolverError> {
+async fn mutation_delete_group(
+    context: &(),
+    id: &uuid::Uuid,
+) -> Result<Option<ErrorGroupNotFound>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_delete_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_delete_group_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_delete_group(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_delete_group(context, id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_delete_pending_user(context: &(), email: &String) -> Result<Option<ErrorNotFound>, libgql::executor::ast::ResolverError> {
+async fn mutation_delete_pending_user(
+    context: &(),
+    email: &String,
+) -> Result<Option<ErrorNotFound>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_delete_pending_user_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let email = variables.get("email").unwrap().downcast_ref::<String>().unwrap();
+fn mutation_delete_pending_user_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let email = variables
+        .get("email")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        mutation_delete_pending_user(context, email).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_delete_pending_user(context, email).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_delete_tag(context: &(), id: &uuid::Uuid) -> Result<Option<ErrorNotFound>, libgql::executor::ast::ResolverError> {
+async fn mutation_delete_tag(
+    context: &(),
+    id: &uuid::Uuid,
+) -> Result<Option<ErrorNotFound>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_delete_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_delete_tag_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_delete_tag(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_delete_tag(context, id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_delete_user(context: &(), id: &uuid::Uuid) -> Result<Option<ErrorNotFound>, libgql::executor::ast::ResolverError> {
+async fn mutation_delete_user(
+    context: &(),
+    id: &uuid::Uuid,
+) -> Result<Option<ErrorNotFound>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_delete_user_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_delete_user_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_delete_user(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_delete_user(context, id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_edit_group(context: &(), group_in: &GroupIn, id: &uuid::Uuid) -> Result<Option<EditGroupError>, libgql::executor::ast::ResolverError> {
+async fn mutation_edit_group(
+    context: &(),
+    group_in: &GroupIn,
+    id: &uuid::Uuid,
+) -> Result<Option<EditGroupError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_edit_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let group_in = variables.get("groupIn").unwrap().downcast_ref::<GroupIn>().unwrap();
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_edit_group_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let group_in = variables
+        .get("groupIn")
+        .unwrap()
+        .downcast_ref::<GroupIn>()
+        .unwrap();
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_edit_group(context, group_in, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_edit_group(context, group_in, id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_edit_tag(context: &(), id: &uuid::Uuid, tag: &TagIn) -> Result<Option<EditTagError>, libgql::executor::ast::ResolverError> {
+async fn mutation_edit_tag(
+    context: &(),
+    id: &uuid::Uuid,
+    tag: &TagIn,
+) -> Result<Option<EditTagError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_edit_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
-    let tag = variables.get("tag").unwrap().downcast_ref::<TagIn>().unwrap();
+fn mutation_edit_tag_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
+    let tag = variables
+        .get("tag")
+        .unwrap()
+        .downcast_ref::<TagIn>()
+        .unwrap();
     Box::pin(async move {
-        mutation_edit_tag(context, id, tag).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_edit_tag(context, id, tag).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_login(context: &(), email: &String, password: &String) -> Result<Option<ErrorInvalidCredentials>, libgql::executor::ast::ResolverError> {
+async fn mutation_login(
+    context: &(),
+    email: &String,
+    password: &String,
+) -> Result<Option<ErrorInvalidCredentials>, libgql::executor::ast::ResolverError>
+{
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_login_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let email = variables.get("email").unwrap().downcast_ref::<String>().unwrap();
-    let password = variables.get("password").unwrap().downcast_ref::<String>().unwrap();
+fn mutation_login_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let email = variables
+        .get("email")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
+    let password = variables
+        .get("password")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        mutation_login(context, email, password).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_login(context, email, password).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_logout(context: &()) -> Result<(), libgql::executor::ast::ResolverError> {
+async fn mutation_logout(
+    context: &(),
+) -> Result<(), libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_logout_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn mutation_logout_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
     Box::pin(async move {
-        mutation_logout(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_logout(context).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_remove_user_from_group(context: &(), group_id: &uuid::Uuid, user_id: &uuid::Uuid) -> Result<Option<ErrorGroupNotFoundOrErrorNotFound>, libgql::executor::ast::ResolverError> {
+async fn mutation_remove_user_from_group(
+    context: &(),
+    group_id: &uuid::Uuid,
+    user_id: &uuid::Uuid,
+) -> Result<
+    Option<ErrorGroupNotFoundOrErrorNotFound>,
+    libgql::executor::ast::ResolverError,
+> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_remove_user_from_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let group_id = variables.get("groupId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
-    let user_id = variables.get("userId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_remove_user_from_group_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let group_id = variables
+        .get("groupId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
+    let user_id = variables
+        .get("userId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_remove_user_from_group(context, group_id, user_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_remove_user_from_group(context, group_id, user_id)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_reset_password(context: &(), new_password: &String, token: &String) -> Result<Option<ResetPasswordError>, libgql::executor::ast::ResolverError> {
+async fn mutation_reset_password(
+    context: &(),
+    new_password: &String,
+    token: &String,
+) -> Result<Option<ResetPasswordError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_reset_password_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let new_password = variables.get("newPassword").unwrap().downcast_ref::<String>().unwrap();
-    let token = variables.get("token").unwrap().downcast_ref::<String>().unwrap();
+fn mutation_reset_password_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let new_password = variables
+        .get("newPassword")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
+    let token = variables
+        .get("token")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        mutation_reset_password(context, new_password, token).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_reset_password(context, new_password, token)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_send_otp_code(context: &(), email: &String) -> Result<Option<ErrorInvalidCredentials>, libgql::executor::ast::ResolverError> {
+async fn mutation_send_otp_code(
+    context: &(),
+    email: &String,
+) -> Result<Option<ErrorInvalidCredentials>, libgql::executor::ast::ResolverError>
+{
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_send_otp_code_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let email = variables.get("email").unwrap().downcast_ref::<String>().unwrap();
+fn mutation_send_otp_code_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let email = variables
+        .get("email")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        mutation_send_otp_code(context, email).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_send_otp_code(context, email).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn mutation_set_tag_is_favourite(context: &(), is_favourite: &bool, tag_id: &uuid::Uuid) -> Result<Option<ErrorAlreadyDoneOrUnknownTags>, libgql::executor::ast::ResolverError> {
+async fn mutation_set_tag_is_favourite(
+    context: &(),
+    is_favourite: &bool,
+    tag_id: &uuid::Uuid,
+) -> Result<
+    Option<ErrorAlreadyDoneOrUnknownTags>,
+    libgql::executor::ast::ResolverError,
+> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_set_tag_is_favourite_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let is_favourite = variables.get("isFavourite").unwrap().downcast_ref::<bool>().unwrap();
-    let tag_id = variables.get("tagId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn mutation_set_tag_is_favourite_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let is_favourite = variables
+        .get("isFavourite")
+        .unwrap()
+        .downcast_ref::<bool>()
+        .unwrap();
+    let tag_id = variables
+        .get("tagId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        mutation_set_tag_is_favourite(context, is_favourite, tag_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_set_tag_is_favourite(context, is_favourite, tag_id)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_update_file(context: &(), id: &uuid::Uuid, name: &String, tag_ids: &Vec<uuid::Uuid>) -> Result<Option<UpdateFileError>, libgql::executor::ast::ResolverError> {
+async fn mutation_update_file(
+    context: &(),
+    id: &uuid::Uuid,
+    name: &String,
+    tag_ids: &Vec<uuid::Uuid>,
+) -> Result<Option<UpdateFileError>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_update_file_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
-    let name = variables.get("name").unwrap().downcast_ref::<String>().unwrap();
-    let tag_ids = variables.get("tagIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
+fn mutation_update_file_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
+    let name = variables
+        .get("name")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
+    let tag_ids = variables
+        .get("tagIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
     Box::pin(async move {
-        mutation_update_file(context, id, name, tag_ids).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_update_file(context, id, name, tag_ids)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn mutation_update_files_autotags(context: &(), autotag_ids: &Vec<uuid::Uuid>, file_ids: &Vec<uuid::Uuid>) -> Result<Option<ErrorCantAddAutotags>, libgql::executor::ast::ResolverError> {
+async fn mutation_update_files_autotags(
+    context: &(),
+    autotag_ids: &Vec<uuid::Uuid>,
+    file_ids: &Vec<uuid::Uuid>,
+) -> Result<Option<ErrorCantAddAutotags>, libgql::executor::ast::ResolverError>
+{
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn mutation_update_files_autotags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let autotag_ids = variables.get("autotagIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
-    let file_ids = variables.get("fileIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
+fn mutation_update_files_autotags_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let autotag_ids = variables
+        .get("autotagIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
+    let file_ids = variables
+        .get("fileIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
     Box::pin(async move {
-        mutation_update_files_autotags(context, autotag_ids, file_ids).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        mutation_update_files_autotags(context, autotag_ids, file_ids)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
@@ -1474,443 +2270,1290 @@ pub struct PutUploadSession {
     pub upload_url: UploadUrl,
 }
 
-async fn query_get_deal_columns(context: &()) -> Result<Vec<DealColumn>, libgql::executor::ast::ResolverError> {
+async fn query_get_deal_columns(
+    context: &(),
+) -> Result<Vec<DealColumn>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_deal_columns_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_deal_columns_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
     Box::pin(async move {
-        query_get_deal_columns(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_deal_columns(context).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_deal_info(context: &(), deal_name: &String) -> Result<GetDealInfoResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_deal_info(
+    context: &(),
+    deal_name: &String,
+) -> Result<GetDealInfoResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_deal_info_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let deal_name = variables.get("dealName").unwrap().downcast_ref::<String>().unwrap();
+fn query_get_deal_info_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let deal_name = variables
+        .get("dealName")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        query_get_deal_info(context, deal_name).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_deal_info(context, deal_name).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_deals(context: &(), limit: &i32, query: Option<&String>, skip: &i32) -> Result<Vec<String>, libgql::executor::ast::ResolverError> {
+async fn query_get_deals(
+    context: &(),
+    limit: &i32,
+    query: Option<&String>,
+    skip: &i32,
+) -> Result<Vec<String>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_deals_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
+fn query_get_deals_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let query = variables
+        .get("query")
+        .map(|v| v.downcast_ref::<String>().unwrap());
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
     Box::pin(async move {
-        query_get_deals(context, limit, query, skip).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_deals(context, limit, query, skip).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_events(context: &(), date_range: &DateRange, filters: &EventFiltersIn, limit: &i32, query: Option<&String>, skip: &i32) -> Result<GetEventsResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_events(
+    context: &(),
+    date_range: &DateRange,
+    filters: &EventFiltersIn,
+    limit: &i32,
+    query: Option<&String>,
+    skip: &i32,
+) -> Result<GetEventsResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_events_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let date_range = variables.get("dateRange").unwrap().downcast_ref::<DateRange>().unwrap();
-    let filters = variables.get("filters").unwrap().downcast_ref::<EventFiltersIn>().unwrap();
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
+fn query_get_events_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let date_range = variables
+        .get("dateRange")
+        .unwrap()
+        .downcast_ref::<DateRange>()
+        .unwrap();
+    let filters = variables
+        .get("filters")
+        .unwrap()
+        .downcast_ref::<EventFiltersIn>()
+        .unwrap();
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let query = variables
+        .get("query")
+        .map(|v| v.downcast_ref::<String>().unwrap());
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
     Box::pin(async move {
-        query_get_events(context, date_range, filters, limit, query, skip).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_events(context, date_range, filters, limit, query, skip)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_favourite_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
+async fn query_get_favourite_tags(
+    context: &(),
+    limit: &i32,
+    skip: &i32,
+) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_favourite_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
+fn query_get_favourite_tags_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
     Box::pin(async move {
-        query_get_favourite_tags(context, limit, skip).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_favourite_tags(context, limit, skip)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_file_url(context: &(), id: &uuid::Uuid) -> Result<GetFileURLResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_file_url(
+    context: &(),
+    id: &uuid::Uuid,
+) -> Result<GetFileURLResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_file_url_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn query_get_file_url_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        query_get_file_url(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_file_url(context, id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_files(context: &(), filters: &Vec<Filter>, limit: &i32, skip: &i32, sort_by: &FileSortBy, tag_ids: &Vec<uuid::Uuid>) -> Result<GetFilesResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_files(
+    context: &(),
+    filters: &Vec<Filter>,
+    limit: &i32,
+    skip: &i32,
+    sort_by: &FileSortBy,
+    tag_ids: &Vec<uuid::Uuid>,
+) -> Result<GetFilesResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_files_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let filters = variables.get("filters").unwrap().downcast_ref::<Vec<Filter>>().unwrap();
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
-    let sort_by = variables.get("sortBy").unwrap().downcast_ref::<FileSortBy>().unwrap();
-    let tag_ids = variables.get("tagIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
+fn query_get_files_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let filters = variables
+        .get("filters")
+        .unwrap()
+        .downcast_ref::<Vec<Filter>>()
+        .unwrap();
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let sort_by = variables
+        .get("sortBy")
+        .unwrap()
+        .downcast_ref::<FileSortBy>()
+        .unwrap();
+    let tag_ids = variables
+        .get("tagIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
     Box::pin(async move {
-        query_get_files(context, filters, limit, skip, sort_by, tag_ids).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_files(context, filters, limit, skip, sort_by, tag_ids)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_files_count(context: &(), filters: &Vec<Filter>, tag_ids: &Vec<uuid::Uuid>) -> Result<IntObjectOrErrorUnknownTags, libgql::executor::ast::ResolverError> {
+async fn query_get_files_count(
+    context: &(),
+    filters: &Vec<Filter>,
+    tag_ids: &Vec<uuid::Uuid>,
+) -> Result<IntObjectOrErrorUnknownTags, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_files_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let filters = variables.get("filters").unwrap().downcast_ref::<Vec<Filter>>().unwrap();
-    let tag_ids = variables.get("tagIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
+fn query_get_files_count_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let filters = variables
+        .get("filters")
+        .unwrap()
+        .downcast_ref::<Vec<Filter>>()
+        .unwrap();
+    let tag_ids = variables
+        .get("tagIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
     Box::pin(async move {
-        query_get_files_count(context, filters, tag_ids).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_files_count(context, filters, tag_ids)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_files_deal_info(context: &(), file_ids: &Vec<uuid::Uuid>) -> Result<FilesDealInfoOrError, libgql::executor::ast::ResolverError> {
+async fn query_get_files_deal_info(
+    context: &(),
+    file_ids: &Vec<uuid::Uuid>,
+) -> Result<FilesDealInfoOrError, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_files_deal_info_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let file_ids = variables.get("fileIds").unwrap().downcast_ref::<Vec<uuid::Uuid>>().unwrap();
+fn query_get_files_deal_info_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let file_ids = variables
+        .get("fileIds")
+        .unwrap()
+        .downcast_ref::<Vec<uuid::Uuid>>()
+        .unwrap();
     Box::pin(async move {
-        query_get_files_deal_info(context, file_ids).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_files_deal_info(context, file_ids).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_group_tags(context: &(), id: &uuid::Uuid, limit: &i32, skip: &i32) -> Result<GetGroupTagsResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_group_tags(
+    context: &(),
+    id: &uuid::Uuid,
+    limit: &i32,
+    skip: &i32,
+) -> Result<GetGroupTagsResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_group_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
+fn query_get_group_tags_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
     Box::pin(async move {
-        query_get_group_tags(context, id, limit, skip).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_group_tags(context, id, limit, skip)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_group_users(context: &(), group_id: &uuid::Uuid, limit: &i32, skip: &i32, sort_by: &GetGroupUsersSortBy) -> Result<GetGroupUsersResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_group_users(
+    context: &(),
+    group_id: &uuid::Uuid,
+    limit: &i32,
+    skip: &i32,
+    sort_by: &GetGroupUsersSortBy,
+) -> Result<GetGroupUsersResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_group_users_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let group_id = variables.get("groupId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
-    let sort_by = variables.get("sortBy").unwrap().downcast_ref::<GetGroupUsersSortBy>().unwrap();
+fn query_get_group_users_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let group_id = variables
+        .get("groupId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let sort_by = variables
+        .get("sortBy")
+        .unwrap()
+        .downcast_ref::<GetGroupUsersSortBy>()
+        .unwrap();
     Box::pin(async move {
-        query_get_group_users(context, group_id, limit, skip, sort_by).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_group_users(context, group_id, limit, skip, sort_by)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_group_users_and_users(context: &(), group_id: &uuid::Uuid, limit: &i32, query: Option<&String>, skip: &i32, sort_by: &GetUsersSortBy) -> Result<GetGroupUsersAndUsersResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_group_users_and_users(
+    context: &(),
+    group_id: &uuid::Uuid,
+    limit: &i32,
+    query: Option<&String>,
+    skip: &i32,
+    sort_by: &GetUsersSortBy,
+) -> Result<GetGroupUsersAndUsersResponse, libgql::executor::ast::ResolverError>
+{
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_group_users_and_users_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let group_id = variables.get("groupId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
-    let sort_by = variables.get("sortBy").unwrap().downcast_ref::<GetUsersSortBy>().unwrap();
+fn query_get_group_users_and_users_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let group_id = variables
+        .get("groupId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let query = variables
+        .get("query")
+        .map(|v| v.downcast_ref::<String>().unwrap());
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let sort_by = variables
+        .get("sortBy")
+        .unwrap()
+        .downcast_ref::<GetUsersSortBy>()
+        .unwrap();
     Box::pin(async move {
-        query_get_group_users_and_users(context, group_id, limit, query, skip, sort_by).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_group_users_and_users(
+            context, group_id, limit, query, skip, sort_by,
+        )
+        .await
+        .map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_group_users_total(context: &(), group_id: &uuid::Uuid) -> Result<GetGroupUsersTotalResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_group_users_total(
+    context: &(),
+    group_id: &uuid::Uuid,
+) -> Result<GetGroupUsersTotalResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_group_users_total_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let group_id = variables.get("groupId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn query_get_group_users_total_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let group_id = variables
+        .get("groupId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        query_get_group_users_total(context, group_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_group_users_total(context, group_id)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_groups(context: &(), limit: &i32, skip: &i32, sort_by: &GetGroupsSortBy) -> Result<Vec<Group>, libgql::executor::ast::ResolverError> {
+async fn query_get_groups(
+    context: &(),
+    limit: &i32,
+    skip: &i32,
+    sort_by: &GetGroupsSortBy,
+) -> Result<Vec<Group>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_groups_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
-    let sort_by = variables.get("sortBy").unwrap().downcast_ref::<GetGroupsSortBy>().unwrap();
+fn query_get_groups_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let sort_by = variables
+        .get("sortBy")
+        .unwrap()
+        .downcast_ref::<GetGroupsSortBy>()
+        .unwrap();
     Box::pin(async move {
-        query_get_groups(context, limit, skip, sort_by).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_groups(context, limit, skip, sort_by)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_groups_total(context: &()) -> Result<i32, libgql::executor::ast::ResolverError> {
+async fn query_get_groups_total(
+    context: &(),
+) -> Result<i32, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_groups_total_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_groups_total_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
     Box::pin(async move {
-        query_get_groups_total(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_groups_total(context).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_me(context: &()) -> Result<User, libgql::executor::ast::ResolverError> {
+async fn query_get_me(
+    context: &(),
+) -> Result<User, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_me_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_me_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
     Box::pin(async move {
-        query_get_me(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_me(context).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_my_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
+async fn query_get_my_tags(
+    context: &(),
+    limit: &i32,
+    skip: &i32,
+) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_my_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
+fn query_get_my_tags_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
     Box::pin(async move {
-        query_get_my_tags(context, limit, skip).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_my_tags(context, limit, skip).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_my_tags_count(context: &()) -> Result<i32, libgql::executor::ast::ResolverError> {
+async fn query_get_my_tags_count(
+    context: &(),
+) -> Result<i32, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_my_tags_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_my_tags_count_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
     Box::pin(async move {
-        query_get_my_tags_count(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_my_tags_count(context).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_next_multipart_upload_urls(context: &(), last_part: &i32, limit: &i32, session_id: &uuid::Uuid) -> Result<GetNextMultipartUploadUrlsResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_next_multipart_upload_urls(
+    context: &(),
+    last_part: &i32,
+    limit: &i32,
+    session_id: &uuid::Uuid,
+) -> Result<
+    GetNextMultipartUploadUrlsResponse,
+    libgql::executor::ast::ResolverError,
+> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_next_multipart_upload_urls_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let last_part = variables.get("lastPart").unwrap().downcast_ref::<i32>().unwrap();
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let session_id = variables.get("sessionId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn query_get_next_multipart_upload_urls_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let last_part = variables
+        .get("lastPart")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let session_id = variables
+        .get("sessionId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        query_get_next_multipart_upload_urls(context, last_part, limit, session_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_next_multipart_upload_urls(
+            context, last_part, limit, session_id,
+        )
+        .await
+        .map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_path_to_tag(context: &(), tag_id: &uuid::Uuid) -> Result<GetPathToTagResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_path_to_tag(
+    context: &(),
+    tag_id: &uuid::Uuid,
+) -> Result<GetPathToTagResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_path_to_tag_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let tag_id = variables.get("tagId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn query_get_path_to_tag_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let tag_id = variables
+        .get("tagId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        query_get_path_to_tag(context, tag_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_path_to_tag(context, tag_id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_pending_users(context: &()) -> Result<Vec<PendingUser>, libgql::executor::ast::ResolverError> {
+async fn query_get_pending_users(
+    context: &(),
+) -> Result<Vec<PendingUser>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_pending_users_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_pending_users_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
     Box::pin(async move {
-        query_get_pending_users(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_pending_users(context).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_popular_tags(context: &(), limit: &i32, skip: &i32) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
+async fn query_get_popular_tags(
+    context: &(),
+    limit: &i32,
+    skip: &i32,
+) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_popular_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
+fn query_get_popular_tags_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
     Box::pin(async move {
-        query_get_popular_tags(context, limit, skip).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_popular_tags(context, limit, skip).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_tag_children(context: &(), tag_id: &uuid::Uuid) -> Result<GetTagsResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_tag_children(
+    context: &(),
+    tag_id: &uuid::Uuid,
+) -> Result<GetTagsResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_tag_children_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let tag_id = variables.get("tagId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn query_get_tag_children_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let tag_id = variables
+        .get("tagId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        query_get_tag_children(context, tag_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_tag_children(context, tag_id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_tag_info(context: &(), tag_id: &uuid::Uuid) -> Result<GetTagInfoResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_tag_info(
+    context: &(),
+    tag_id: &uuid::Uuid,
+) -> Result<GetTagInfoResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_tag_info_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let tag_id = variables.get("tagId").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn query_get_tag_info_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let tag_id = variables
+        .get("tagId")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        query_get_tag_info(context, tag_id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_tag_info(context, tag_id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_tags(context: &(), limit: &i32, parent_tag_id: Option<&uuid::Uuid>, query: Option<&String>, skip: &i32) -> Result<GetTagsResponse, libgql::executor::ast::ResolverError> {
+async fn query_get_tags(
+    context: &(),
+    limit: &i32,
+    parent_tag_id: Option<&uuid::Uuid>,
+    query: Option<&String>,
+    skip: &i32,
+) -> Result<GetTagsResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let parent_tag_id = variables.get("parentTagId").map(|v| v.downcast_ref::<uuid::Uuid>().unwrap());
-    let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
+fn query_get_tags_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let parent_tag_id = variables
+        .get("parentTagId")
+        .map(|v| v.downcast_ref::<uuid::Uuid>().unwrap());
+    let query = variables
+        .get("query")
+        .map(|v| v.downcast_ref::<String>().unwrap());
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
     Box::pin(async move {
-        query_get_tags(context, limit, parent_tag_id, query, skip).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_tags(context, limit, parent_tag_id, query, skip)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_tags_count(context: &(), parent_tag_id: Option<&uuid::Uuid>, query: Option<&String>) -> Result<IntObjectOrErrorUnknownTags, libgql::executor::ast::ResolverError> {
+async fn query_get_tags_count(
+    context: &(),
+    parent_tag_id: Option<&uuid::Uuid>,
+    query: Option<&String>,
+) -> Result<IntObjectOrErrorUnknownTags, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_tags_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let parent_tag_id = variables.get("parentTagId").map(|v| v.downcast_ref::<uuid::Uuid>().unwrap());
-    let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
+fn query_get_tags_count_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let parent_tag_id = variables
+        .get("parentTagId")
+        .map(|v| v.downcast_ref::<uuid::Uuid>().unwrap());
+    let query = variables
+        .get("query")
+        .map(|v| v.downcast_ref::<String>().unwrap());
     Box::pin(async move {
-        query_get_tags_count(context, parent_tag_id, query).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_tags_count(context, parent_tag_id, query)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_uploaded_files(context: &(), limit: &i32, skip: &i32, sort_by: &FileSortBy) -> Result<Vec<SearchFile>, libgql::executor::ast::ResolverError> {
+async fn query_get_uploaded_files(
+    context: &(),
+    limit: &i32,
+    skip: &i32,
+    sort_by: &FileSortBy,
+) -> Result<Vec<SearchFile>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_uploaded_files_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
-    let sort_by = variables.get("sortBy").unwrap().downcast_ref::<FileSortBy>().unwrap();
+fn query_get_uploaded_files_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let sort_by = variables
+        .get("sortBy")
+        .unwrap()
+        .downcast_ref::<FileSortBy>()
+        .unwrap();
     Box::pin(async move {
-        query_get_uploaded_files(context, limit, skip, sort_by).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_uploaded_files(context, limit, skip, sort_by)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_uploaded_files_count(context: &()) -> Result<i32, libgql::executor::ast::ResolverError> {
+async fn query_get_uploaded_files_count(
+    context: &(),
+) -> Result<i32, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_uploaded_files_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
+fn query_get_uploaded_files_count_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
     Box::pin(async move {
-        query_get_uploaded_files_count(context).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_uploaded_files_count(context).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_users(context: &(), limit: &i32, query: Option<&String>, skip: &i32, sort_by: &GetUsersSortBy) -> Result<Vec<User>, libgql::executor::ast::ResolverError> {
+async fn query_get_users(
+    context: &(),
+    limit: &i32,
+    query: Option<&String>,
+    skip: &i32,
+    sort_by: &GetUsersSortBy,
+) -> Result<Vec<User>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_users_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
-    let sort_by = variables.get("sortBy").unwrap().downcast_ref::<GetUsersSortBy>().unwrap();
+fn query_get_users_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let query = variables
+        .get("query")
+        .map(|v| v.downcast_ref::<String>().unwrap());
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let sort_by = variables
+        .get("sortBy")
+        .unwrap()
+        .downcast_ref::<GetUsersSortBy>()
+        .unwrap();
     Box::pin(async move {
-        query_get_users(context, limit, query, skip, sort_by).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_users(context, limit, query, skip, sort_by)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_users_tags(context: &(), limit: &i32, query: Option<&String>, skip: &i32, sort_by: &UsersTagSortBy) -> Result<Vec<UsersTag>, libgql::executor::ast::ResolverError> {
+async fn query_get_users_tags(
+    context: &(),
+    limit: &i32,
+    query: Option<&String>,
+    skip: &i32,
+    sort_by: &UsersTagSortBy,
+) -> Result<Vec<UsersTag>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_users_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let limit = variables.get("limit").unwrap().downcast_ref::<i32>().unwrap();
-    let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
-    let skip = variables.get("skip").unwrap().downcast_ref::<i32>().unwrap();
-    let sort_by = variables.get("sortBy").unwrap().downcast_ref::<UsersTagSortBy>().unwrap();
+fn query_get_users_tags_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let limit = variables
+        .get("limit")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let query = variables
+        .get("query")
+        .map(|v| v.downcast_ref::<String>().unwrap());
+    let skip = variables
+        .get("skip")
+        .unwrap()
+        .downcast_ref::<i32>()
+        .unwrap();
+    let sort_by = variables
+        .get("sortBy")
+        .unwrap()
+        .downcast_ref::<UsersTagSortBy>()
+        .unwrap();
     Box::pin(async move {
-        query_get_users_tags(context, limit, query, skip, sort_by).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_users_tags(context, limit, query, skip, sort_by)
+            .await
+            .map(|v| {
+                Box::new(v)
+                    as Box<
+                        libgql::executor::ast::ResolverRoot<
+                            super::scalar::ExampleScalar,
+                        >,
+                    >
+            })
     })
 }
 
-async fn query_get_users_tags_count(context: &(), query: Option<&String>) -> Result<i32, libgql::executor::ast::ResolverError> {
+async fn query_get_users_tags_count(
+    context: &(),
+    query: Option<&String>,
+) -> Result<i32, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_users_tags_count_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
+fn query_get_users_tags_count_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let query = variables
+        .get("query")
+        .map(|v| v.downcast_ref::<String>().unwrap());
     Box::pin(async move {
-        query_get_users_tags_count(context, query).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_users_tags_count(context, query).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_get_users_total(context: &(), query: Option<&String>) -> Result<i32, libgql::executor::ast::ResolverError> {
+async fn query_get_users_total(
+    context: &(),
+    query: Option<&String>,
+) -> Result<i32, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_get_users_total_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let query = variables.get("query").map(|v| v.downcast_ref::<String>().unwrap());
+fn query_get_users_total_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let query = variables
+        .get("query")
+        .map(|v| v.downcast_ref::<String>().unwrap());
     Box::pin(async move {
-        query_get_users_total(context, query).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_get_users_total(context, query).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_is_allowed_to_download(context: &(), id: &uuid::Uuid) -> Result<IsAllowedToDownloadResponse, libgql::executor::ast::ResolverError> {
+async fn query_is_allowed_to_download(
+    context: &(),
+    id: &uuid::Uuid,
+) -> Result<IsAllowedToDownloadResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_is_allowed_to_download_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn query_is_allowed_to_download_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        query_is_allowed_to_download(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_is_allowed_to_download(context, id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_is_tag_exists(context: &(), tag: &String) -> Result<bool, libgql::executor::ast::ResolverError> {
+async fn query_is_tag_exists(
+    context: &(),
+    tag: &String,
+) -> Result<bool, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_is_tag_exists_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let tag = variables.get("tag").unwrap().downcast_ref::<String>().unwrap();
+fn query_is_tag_exists_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let tag = variables
+        .get("tag")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        query_is_tag_exists(context, tag).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_is_tag_exists(context, tag).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_retrieve_file(context: &(), id: &uuid::Uuid) -> Result<RetrieveFileResponse, libgql::executor::ast::ResolverError> {
+async fn query_retrieve_file(
+    context: &(),
+    id: &uuid::Uuid,
+) -> Result<RetrieveFileResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_retrieve_file_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn query_retrieve_file_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        query_retrieve_file(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_retrieve_file(context, id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_retrieve_group(context: &(), id: &uuid::Uuid) -> Result<RetrieveGroupResponse, libgql::executor::ast::ResolverError> {
+async fn query_retrieve_group(
+    context: &(),
+    id: &uuid::Uuid,
+) -> Result<RetrieveGroupResponse, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_retrieve_group_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let id = variables.get("id").unwrap().downcast_ref::<uuid::Uuid>().unwrap();
+fn query_retrieve_group_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let id = variables
+        .get("id")
+        .unwrap()
+        .downcast_ref::<uuid::Uuid>()
+        .unwrap();
     Box::pin(async move {
-        query_retrieve_group(context, id).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_retrieve_group(context, id).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
-async fn query_search_tags(context: &(), query: &String) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
+async fn query_search_tags(
+    context: &(),
+    query: &String,
+) -> Result<Vec<Tag>, libgql::executor::ast::ResolverError> {
     Err("Resolver is not implemented yet".to_string().into())
 }
 
-fn query_search_tags_wrapper<'args>(context: &'args (), variables: &'args libgql::executor::ResolvedVariables) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar> {
-    let query = variables.get("query").unwrap().downcast_ref::<String>().unwrap();
+fn query_search_tags_wrapper<'args>(
+    context: &'args (),
+    variables: &'args libgql::executor::ResolvedVariables,
+) -> libgql::executor::ast::ResolverFuture<'args, super::scalar::ExampleScalar>
+{
+    let query = variables
+        .get("query")
+        .unwrap()
+        .downcast_ref::<String>()
+        .unwrap();
     Box::pin(async move {
-        query_search_tags(context, query).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<super::scalar::ExampleScalar>>)
+        query_search_tags(context, query).await.map(|v| {
+            Box::new(v)
+                as Box<
+                    libgql::executor::ast::ResolverRoot<
+                        super::scalar::ExampleScalar,
+                    >,
+                >
+        })
     })
 }
 
@@ -2089,8 +3732,12 @@ pub enum CreateGroupError {
 pub enum CreateMultipartFileSessionResponse {
     ErrorMultipartUploadFileIsTooBig(ErrorMultipartUploadFileIsTooBig),
     ErrorMultipartUploadFileIsTooLight(ErrorMultipartUploadFileIsTooLight),
-    ErrorMultipartUploadFilePartSizeIsTooBig(ErrorMultipartUploadFilePartSizeIsTooBig),
-    ErrorMultipartUploadFilePartSizeIsTooSmall(ErrorMultipartUploadFilePartSizeIsTooSmall),
+    ErrorMultipartUploadFilePartSizeIsTooBig(
+        ErrorMultipartUploadFilePartSizeIsTooBig,
+    ),
+    ErrorMultipartUploadFilePartSizeIsTooSmall(
+        ErrorMultipartUploadFilePartSizeIsTooSmall,
+    ),
     ErrorNoDealTag(ErrorNoDealTag),
     ErrorUnknownTags(ErrorUnknownTags),
     MultipartUploadSession(MultipartUploadSession),
@@ -2331,90 +3978,572 @@ pub enum UpdateFileError {
     ErrorUnknownTags(ErrorUnknownTags),
 }
 
-pub fn create_resolvers_map() -> libgql::executor::Resolvers<'static, super::scalar::ExampleScalar, ()> {
+pub fn create_resolvers_map()
+-> libgql::executor::Resolvers<'static, super::scalar::ExampleScalar, ()> {
     libgql::executor::Resolvers {
-       queries: libgql::executor::queries::QueryResolversMap::from_iter([
-            ("getDealColumns", &query_get_deal_columns_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getDealInfo", &query_get_deal_info_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getDeals", &query_get_deals_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getEvents", &query_get_events_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getFavouriteTags", &query_get_favourite_tags_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getFileURL", &query_get_file_url_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getFiles", &query_get_files_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getFilesCount", &query_get_files_count_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getFilesDealInfo", &query_get_files_deal_info_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getGroupTags", &query_get_group_tags_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getGroupUsers", &query_get_group_users_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getGroupUsersAndUsers", &query_get_group_users_and_users_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getGroupUsersTotal", &query_get_group_users_total_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getGroups", &query_get_groups_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getGroupsTotal", &query_get_groups_total_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getMe", &query_get_me_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getMyTags", &query_get_my_tags_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getMyTagsCount", &query_get_my_tags_count_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getNextMultipartUploadUrls", &query_get_next_multipart_upload_urls_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getPathToTag", &query_get_path_to_tag_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getPendingUsers", &query_get_pending_users_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getPopularTags", &query_get_popular_tags_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getTagChildren", &query_get_tag_children_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getTagInfo", &query_get_tag_info_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getTags", &query_get_tags_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getTagsCount", &query_get_tags_count_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getUploadedFiles", &query_get_uploaded_files_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getUploadedFilesCount", &query_get_uploaded_files_count_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getUsers", &query_get_users_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getUsersTags", &query_get_users_tags_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getUsersTagsCount", &query_get_users_tags_count_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("getUsersTotal", &query_get_users_total_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("isAllowedToDownload", &query_is_allowed_to_download_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("isTagExists", &query_is_tag_exists_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("retrieveFile", &query_retrieve_file_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("retrieveGroup", &query_retrieve_group_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>),
-            ("searchTags", &query_search_tags_wrapper as &libgql::executor::queries::QueryResolver<super::scalar::ExampleScalar, ()>)
-    ]),
-       mutations: libgql::executor::mutations::MutationResolversMap::from_iter([
-            ("addTagsToFiles", &mutation_add_tags_to_files_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("addUserToGroup", &mutation_add_user_to_group_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("approveTag", &mutation_approve_tag_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("changePassword", &mutation_change_password_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("commitMultipartFileSession", &mutation_commit_multipart_file_session_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("commitPutFileSession", &mutation_commit_put_file_session_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("confirmOTPCode", &mutation_confirm_otp_code_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("confirmUser", &mutation_confirm_user_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("createGroup", &mutation_create_group_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("createMultipartFileSession", &mutation_create_multipart_file_session_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("createPutFileSession", &mutation_create_put_file_session_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("createTag", &mutation_create_tag_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("createUser", &mutation_create_user_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("decideOnDownloadRequest", &mutation_decide_on_download_request_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("deleteFile", &mutation_delete_file_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("deleteFiles", &mutation_delete_files_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("deleteGroup", &mutation_delete_group_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("deletePendingUser", &mutation_delete_pending_user_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("deleteTag", &mutation_delete_tag_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("deleteUser", &mutation_delete_user_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("editGroup", &mutation_edit_group_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("editTag", &mutation_edit_tag_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("login", &mutation_login_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("logout", &mutation_logout_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("removeUserFromGroup", &mutation_remove_user_from_group_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("resetPassword", &mutation_reset_password_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("sendOTPCode", &mutation_send_otp_code_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("setTagIsFavourite", &mutation_set_tag_is_favourite_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("updateFile", &mutation_update_file_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>),
-            ("updateFilesAutotags", &mutation_update_files_autotags_wrapper as &libgql::executor::mutations::MutationResolver<super::scalar::ExampleScalar, ()>)
-    ]),
-       subscriptions: libgql::executor::subscriptions::SubscriptionResolversMap::from_iter([
-
-    ]),
-       object_fields: libgql::executor::object::ObjectFieldResolversMap::from_iter([
-            (("DealEntry", "value"), &deal_entry_value_wrapper as &libgql::executor::object::ObjectFieldResolver<super::scalar::ExampleScalar, ()>)
-    ])
+        queries: libgql::executor::queries::QueryResolversMap::from_iter([
+            (
+                "getDealColumns",
+                &query_get_deal_columns_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getDealInfo",
+                &query_get_deal_info_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getDeals",
+                &query_get_deals_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getEvents",
+                &query_get_events_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getFavouriteTags",
+                &query_get_favourite_tags_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getFileURL",
+                &query_get_file_url_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getFiles",
+                &query_get_files_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getFilesCount",
+                &query_get_files_count_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getFilesDealInfo",
+                &query_get_files_deal_info_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getGroupTags",
+                &query_get_group_tags_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getGroupUsers",
+                &query_get_group_users_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getGroupUsersAndUsers",
+                &query_get_group_users_and_users_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getGroupUsersTotal",
+                &query_get_group_users_total_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getGroups",
+                &query_get_groups_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getGroupsTotal",
+                &query_get_groups_total_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getMe",
+                &query_get_me_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getMyTags",
+                &query_get_my_tags_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getMyTagsCount",
+                &query_get_my_tags_count_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getNextMultipartUploadUrls",
+                &query_get_next_multipart_upload_urls_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getPathToTag",
+                &query_get_path_to_tag_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getPendingUsers",
+                &query_get_pending_users_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getPopularTags",
+                &query_get_popular_tags_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getTagChildren",
+                &query_get_tag_children_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getTagInfo",
+                &query_get_tag_info_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getTags",
+                &query_get_tags_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getTagsCount",
+                &query_get_tags_count_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getUploadedFiles",
+                &query_get_uploaded_files_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getUploadedFilesCount",
+                &query_get_uploaded_files_count_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getUsers",
+                &query_get_users_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getUsersTags",
+                &query_get_users_tags_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getUsersTagsCount",
+                &query_get_users_tags_count_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "getUsersTotal",
+                &query_get_users_total_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "isAllowedToDownload",
+                &query_is_allowed_to_download_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "isTagExists",
+                &query_is_tag_exists_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "retrieveFile",
+                &query_retrieve_file_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "retrieveGroup",
+                &query_retrieve_group_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+            (
+                "searchTags",
+                &query_search_tags_wrapper
+                    as &libgql::executor::queries::QueryResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            ),
+        ]),
+        mutations: libgql::executor::mutations::MutationResolversMap::from_iter(
+            [
+                (
+                    "addTagsToFiles",
+                    &mutation_add_tags_to_files_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "addUserToGroup",
+                    &mutation_add_user_to_group_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "approveTag",
+                    &mutation_approve_tag_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "changePassword",
+                    &mutation_change_password_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "commitMultipartFileSession",
+                    &mutation_commit_multipart_file_session_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "commitPutFileSession",
+                    &mutation_commit_put_file_session_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "confirmOTPCode",
+                    &mutation_confirm_otp_code_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "confirmUser",
+                    &mutation_confirm_user_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "createGroup",
+                    &mutation_create_group_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "createMultipartFileSession",
+                    &mutation_create_multipart_file_session_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "createPutFileSession",
+                    &mutation_create_put_file_session_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "createTag",
+                    &mutation_create_tag_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "createUser",
+                    &mutation_create_user_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "decideOnDownloadRequest",
+                    &mutation_decide_on_download_request_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "deleteFile",
+                    &mutation_delete_file_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "deleteFiles",
+                    &mutation_delete_files_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "deleteGroup",
+                    &mutation_delete_group_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "deletePendingUser",
+                    &mutation_delete_pending_user_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "deleteTag",
+                    &mutation_delete_tag_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "deleteUser",
+                    &mutation_delete_user_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "editGroup",
+                    &mutation_edit_group_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "editTag",
+                    &mutation_edit_tag_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "login",
+                    &mutation_login_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "logout",
+                    &mutation_logout_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "removeUserFromGroup",
+                    &mutation_remove_user_from_group_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "resetPassword",
+                    &mutation_reset_password_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "sendOTPCode",
+                    &mutation_send_otp_code_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "setTagIsFavourite",
+                    &mutation_set_tag_is_favourite_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "updateFile",
+                    &mutation_update_file_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+                (
+                    "updateFilesAutotags",
+                    &mutation_update_files_autotags_wrapper
+                        as &libgql::executor::mutations::MutationResolver<
+                            super::scalar::ExampleScalar,
+                            (),
+                        >,
+                ),
+            ],
+        ),
+        subscriptions:
+            libgql::executor::subscriptions::SubscriptionResolversMap::from_iter(
+                [],
+            ),
+        object_fields:
+            libgql::executor::object::ObjectFieldResolversMap::from_iter([(
+                ("DealEntry", "value"),
+                &deal_entry_value_wrapper
+                    as &libgql::executor::object::ObjectFieldResolver<
+                        super::scalar::ExampleScalar,
+                        (),
+                    >,
+            )]),
     }
 }
 
-pub fn create_parse_registry() -> libgql::executor::HashMapRegistry<super::scalar::ExampleScalar> {
-    let mut registry = libgql::executor::HashMapRegistry::<super::scalar::ExampleScalar>::default();
+pub fn create_parse_registry()
+-> libgql::executor::HashMapRegistry<super::scalar::ExampleScalar> {
+    let mut registry = libgql::executor::HashMapRegistry::<
+        super::scalar::ExampleScalar,
+    >::default();
     registry.add_input::<DateRange>("DateRange");
     registry.add_input::<EventFiltersIn>("EventFiltersIn");
     registry.add_input::<FileSortBy>("FileSortBy");

@@ -62,4 +62,3 @@ pub struct Directive {
     name: String,
     locations: Vec<DirectiveLocation>,
 }
-

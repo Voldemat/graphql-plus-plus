@@ -20,5 +20,5 @@ pub struct Operation {
     #[serde(rename(deserialize = "fragmentSpec"))]
     fragment_spec: FragmentSpec,
     #[serde(rename(deserialize = "sourceText"))]
-    source_text: String
+    source_text: String,
 }

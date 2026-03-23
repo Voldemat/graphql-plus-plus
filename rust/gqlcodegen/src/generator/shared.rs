@@ -7,8 +7,8 @@ use super::config::Config;
 pub fn format_field_name(name: &str) -> String {
     let v = name.to_case(convert_case::Case::Snake);
     match v.as_str() {
-    "type" => "r#type".to_string(),
-    _ => v
+        "type" => "r#type".to_string(),
+        _ => v,
     }
 }
 

@@ -1,8 +1,8 @@
-use super::object::Object;
 use super::directive::Directive;
-use super::union::Union;
 use super::gqlenum::Enum;
 use super::input::Input;
+use super::object::Object;
+use super::union::Union;
 
 #[derive(Debug, serde::Deserialize)]
 pub struct Schema {
@@ -11,7 +11,7 @@ pub struct Schema {
     pub unions: indexmap::IndexMap<String, Union>,
     pub enums: indexmap::IndexMap<String, Enum>,
     pub scalars: Vec<String>,
-    pub inputs: indexmap::IndexMap<String, Input>
+    pub inputs: indexmap::IndexMap<String, Input>,
 }
 
 #[cfg(test)]

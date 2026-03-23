@@ -80,8 +80,35 @@ fn generate_create_parse_registry_function(
     f.line("return registry;");
 }
 
-pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
-    let mut scope = codegen::Scope::new();
+pub fn extract_resolvers_code(
+    content: String,
+) -> (String, IndexMap<String, String>) {
+    let file = syn::parse_file(&content).unwrap();
+    let mut imports = String::new();
+    let mut code_map = IndexMap::<String, String>::new();
+    for item in file.items {
+        match item {
+            syn::Item::Fn(f) => {
+                let name = f.sig.ident.to_string();
+                let statements = f.block.stmts;
+                code_map
+                    .insert(name, quote::quote!(#(#statements)*).to_string());
+            }
+            syn::Item::Use(statement) => {
+                imports += &quote::quote!(#statement).to_string();
+            }
+            _ => {}
+        }
+    }
+    return (imports, code_map);
+}
+
+pub fn generate_ast(
+    config: &Config,
+    schema: &crate::schema::Schema,
+    existing_resolvers_code: IndexMap<String, String>,
+    mut scope: &mut codegen::Scope,
+) {
     for gqlenum in schema.server.enums.values() {
         super::enums::generate_definition(config, &mut scope, gqlenum);
     }
@@ -97,7 +124,10 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
         if object.name == "Query" {
             query_resolvers_map.extend(
                 super::object::generate_root_object_definitions(
-                    config, &mut scope, object,
+                    config,
+                    &mut scope,
+                    &existing_resolvers_code,
+                    object,
                 )
                 .into_iter()
                 .collect::<IndexMap<String, String>>(),
@@ -105,7 +135,10 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
         } else if object.name == "Mutation" {
             mutation_resolvers_map.extend(
                 super::object::generate_root_object_definitions(
-                    config, &mut scope, object,
+                    config,
+                    &mut scope,
+                    &existing_resolvers_code,
+                    object,
                 )
                 .into_iter()
                 .collect::<IndexMap<String, String>>(),
@@ -113,14 +146,22 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
         } else if object.name == "Subscription" {
             subscription_resolvers_map.extend(
                 super::object::generate_root_object_definitions(
-                    config, &mut scope, object,
+                    config,
+                    &mut scope,
+                    &existing_resolvers_code,
+                    object,
                 )
                 .into_iter()
                 .collect::<IndexMap<String, String>>(),
             )
         } else {
             object_field_resolvers_map.extend(
-                super::object::generate_definition(config, &mut scope, object),
+                super::object::generate_definition(
+                    config,
+                    &mut scope,
+                    &existing_resolvers_code,
+                    object,
+                ),
             );
         }
     }
@@ -136,5 +177,4 @@ pub fn generate_ast(config: &Config, schema: &crate::schema::Schema) -> String {
         object_field_resolvers_map,
     );
     generate_create_parse_registry_function(config, schema, &mut scope);
-    return scope.to_string();
 }
