@@ -34,7 +34,6 @@ jobs:
       with:
         file: shared/dockerfiles/e2e-tests/rust-server
         push: true
-        target: targets
         tags: vladimirdev635/e2e-tests-rust-server:${{ github.ref_name }}
         cache-from: type=registry,ref=vladimirdev635/e2e-tests-rust-server:buildcache
         cache-to: type=registry,ref=vladimirdev635/e2e-tests-rust-server:buildcache,mode=max
@@ -45,7 +44,6 @@ jobs:
       with:
         file: shared/dockerfiles/e2e-tests/typescript-client
         push: true
-        target: targets
         tags: vladimirdev635/e2e-tests-typescript-client:${{ github.ref_name }}
         cache-from: type=registry,ref=vladimirdev635/e2e-tests-typescript-client:buildcache
         cache-to: type=registry,ref=vladimirdev635/e2e-tests-typescript-client:buildcache,mode=max
