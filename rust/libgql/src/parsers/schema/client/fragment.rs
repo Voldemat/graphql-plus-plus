@@ -1,4 +1,7 @@
-use std::{rc::Rc, sync::{Arc, RwLock}};
+use std::{
+    rc::Rc,
+    sync::{Arc, RwLock},
+};
 
 use indexmap::IndexMap;
 
@@ -130,7 +133,9 @@ fn parse_interface_spread_selection_node(
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
     let has_invalid_type = match &fragment.read().unwrap().spec {
-        ast::FragmentSpec::Interface(spec) => !Arc::ptr_eq(&spec.r#type, r#type),
+        ast::FragmentSpec::Interface(spec) => {
+            !Arc::ptr_eq(&spec.r#type, r#type)
+        }
         _ => true,
     };
     if has_invalid_type {
@@ -188,7 +193,8 @@ fn parse_union_spread_selection_node(
         ast::FragmentSpec::Union(spec) => !Arc::ptr_eq(&spec.r#type, r#type),
         ast::FragmentSpec::Interface(spec) => {
             r#type.read().unwrap().items.values().any(|t| {
-                !t.read().unwrap()
+                !t.read()
+                    .unwrap()
                     .implements
                     .contains_key(&spec.r#type.read().unwrap().name)
             })

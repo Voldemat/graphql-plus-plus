@@ -34,10 +34,12 @@ impl Schema {
                     .insert(node.read().unwrap().name.clone(), node.clone());
             }
             ast::ServerSchemaNode::InputType(node) => {
-                self.inputs.insert(node.read().unwrap().name.clone(), node.clone());
+                self.inputs
+                    .insert(node.read().unwrap().name.clone(), node.clone());
             }
             ast::ServerSchemaNode::Union(node) => {
-                self.unions.insert(node.read().unwrap().name.clone(), node.clone());
+                self.unions
+                    .insert(node.read().unwrap().name.clone(), node.clone());
             }
             ast::ServerSchemaNode::Scalar(node) => {
                 self.scalars.push(node.clone());

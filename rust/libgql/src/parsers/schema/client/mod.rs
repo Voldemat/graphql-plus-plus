@@ -27,8 +27,9 @@ pub fn parse_client_schema(
         ast::ClientSchemaNode::Operation(operation) => Some(operation),
         _ => None,
     }) {
-        let parameters_hash =
-            hash::get_operation_parameters_hash(&operation.read().unwrap().parameters);
+        let parameters_hash = hash::get_operation_parameters_hash(
+            &operation.read().unwrap().parameters,
+        );
         operation.write().unwrap().parameters_hash = parameters_hash;
         let fragment_spec_hash = hash::get_fragment_spec_hash(
             registry,

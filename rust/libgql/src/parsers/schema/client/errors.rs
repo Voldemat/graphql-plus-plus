@@ -1,4 +1,7 @@
-use std::{rc::Rc, sync::{Arc, RwLock}};
+use std::{
+    rc::Rc,
+    sync::{Arc, RwLock},
+};
 
 use crate::{
     lexer,

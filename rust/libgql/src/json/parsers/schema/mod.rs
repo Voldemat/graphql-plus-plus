@@ -459,7 +459,8 @@ fn parse_inputs(
         IndexMap::<String, Arc<RwLock<shared::ast::InputType>>>::new();
     for (key, value) in map.as_object().unwrap() {
         let i = registry.inputs.get(key).unwrap();
-        i.write().unwrap().fields = parse_input_fields(registry, &value["fields"])?;
+        i.write().unwrap().fields =
+            parse_input_fields(registry, &value["fields"])?;
         inputs.insert(key.clone(), i.clone());
     }
     return Ok(inputs);

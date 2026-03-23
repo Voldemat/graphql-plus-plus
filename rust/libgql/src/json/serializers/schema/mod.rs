@@ -1,4 +1,7 @@
-use std::{collections::HashSet, sync::{Arc, RwLock}};
+use std::{
+    collections::HashSet,
+    sync::{Arc, RwLock},
+};
 
 use indexmap::IndexMap;
 use struson::writer::simple::ValueWriter;
@@ -405,8 +408,9 @@ fn write_interfaces<'a, J: struson::writer::JsonWriter>(
     let mut new_interfaces = interfaces.clone();
     new_interfaces.sort_keys();
     for interface in new_interfaces.values().filter(|interface| {
-        uses_hashset
-            .map_or(true, |hashset| hashset.contains(&interface.read().unwrap().name))
+        uses_hashset.map_or(true, |hashset| {
+            hashset.contains(&interface.read().unwrap().name)
+        })
     }) {
         writer.write_object_member(
             &interface.read().unwrap().name,
@@ -526,13 +530,17 @@ fn write_inputs<'a, J: struson::writer::JsonWriter>(
     let mut new_inputs = inputs.clone();
     new_inputs.sort_keys();
     for input in new_inputs.values().filter(|input| {
-        uses_hashset
-            .map_or(true, |hashset| hashset.contains(&input.read().unwrap().name))
+        uses_hashset.map_or(true, |hashset| {
+            hashset.contains(&input.read().unwrap().name)
+        })
     }) {
-        writer.write_object_member(&input.read().unwrap().name, |input_writer| {
-            write_input(input_writer, &input.read().unwrap())?;
-            return Ok(());
-        })?
+        writer.write_object_member(
+            &input.read().unwrap().name,
+            |input_writer| {
+                write_input(input_writer, &input.read().unwrap())?;
+                return Ok(());
+            },
+        )?
     }
     return Ok(());
 }
@@ -563,12 +571,14 @@ fn write_unions<'a, J: struson::writer::JsonWriter>(
     let mut new_unions = unions.clone();
     new_unions.sort_keys();
     for union in new_unions.values().filter(|union| {
-        uses_hashset
-            .map_or(true, |hashset| hashset.contains(&union.read().unwrap().name))
+        uses_hashset.map_or(true, |hashset| {
+            hashset.contains(&union.read().unwrap().name)
+        })
     }) {
-        writer.write_object_member(&union.read().unwrap().name, |union_writer| {
-            write_union(union_writer, &union.read().unwrap())
-        })?
+        writer.write_object_member(
+            &union.read().unwrap().name,
+            |union_writer| write_union(union_writer, &union.read().unwrap()),
+        )?
     }
     return Ok(());
 }
@@ -735,7 +745,10 @@ fn write_spread_selection<'a, J: struson::writer::JsonWriter>(
     field: &client::ast::SpreadSelection,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("_type", "SpreadSelection")?;
-    writer.write_string_member("fragment", &field.fragment.read().unwrap().name)?;
+    writer.write_string_member(
+        "fragment",
+        &field.fragment.read().unwrap().name,
+    )?;
     Ok(())
 }
 
@@ -757,8 +770,10 @@ fn write_union_selection<'a, J: struson::writer::JsonWriter>(
                 "_type",
                 "UnionConditionalSpreadSelection",
             )?;
-            writer
-                .write_string_member("union", &spread.r#type.read().unwrap().name)?;
+            writer.write_string_member(
+                "union",
+                &spread.r#type.read().unwrap().name,
+            )?;
             writer.write_array_member("selections", |selections_writer| {
                 for n_selection in &spread.selection.selections {
                     selections_writer.write_object(|selection_writer| {
@@ -775,8 +790,10 @@ fn write_union_selection<'a, J: struson::writer::JsonWriter>(
                 "_type",
                 "ObjectConditionalSpreadSelection",
             )?;
-            writer
-                .write_string_member("object", &spread.r#type.read().unwrap().name)?;
+            writer.write_string_member(
+                "object",
+                &spread.r#type.read().unwrap().name,
+            )?;
             writer.write_object_member("spec", |spec_writer| {
                 write_object_fragment_spec(spec_writer, &spread.selection)
             })?;

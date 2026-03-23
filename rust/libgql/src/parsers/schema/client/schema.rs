@@ -1,4 +1,7 @@
-use std::{collections::HashSet, sync::{Arc, RwLock}};
+use std::{
+    collections::HashSet,
+    sync::{Arc, RwLock},
+};
 
 use indexmap::IndexMap;
 
@@ -37,10 +40,12 @@ impl ClientSchema {
     fn add_node(self: &mut Self, s_node: &ast::ClientSchemaNode) {
         match s_node {
             ast::ClientSchemaNode::Fragment(f) => {
-                self.fragments.insert(f.read().unwrap().name.clone(), f.clone());
+                self.fragments
+                    .insert(f.read().unwrap().name.clone(), f.clone());
             }
             ast::ClientSchemaNode::Operation(o) => {
-                self.operations.insert(o.read().unwrap().name.clone(), o.clone());
+                self.operations
+                    .insert(o.read().unwrap().name.clone(), o.clone());
             }
             ast::ClientSchemaNode::ClientDirective(d) => {
                 self.directives.insert(d.name.clone(), d.clone());

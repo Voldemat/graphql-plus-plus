@@ -28,9 +28,10 @@ impl std::fmt::Debug for ObjectTypeSpec {
             Self::Enum(arg0) => {
                 f.debug_tuple("Enum").field(&arg0.name).finish()
             }
-            Self::Union(arg0) => {
-                f.debug_tuple("Union").field(&arg0.read().unwrap().name).finish()
-            }
+            Self::Union(arg0) => f
+                .debug_tuple("Union")
+                .field(&arg0.read().unwrap().name)
+                .finish(),
         }
     }
 }

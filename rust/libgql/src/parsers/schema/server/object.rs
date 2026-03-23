@@ -115,7 +115,12 @@ fn parse_noncallable_object_field_spec(
                     default_value: None,
                     directive_invocations: directives
                         .iter()
-                        .map(|d| (d.directive.read().unwrap().name.clone(), d.clone()))
+                        .map(|d| {
+                            (
+                                d.directive.read().unwrap().name.clone(),
+                                d.clone(),
+                            )
+                        })
                         .collect(),
                 }
                 .into(),

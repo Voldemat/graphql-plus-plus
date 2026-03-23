@@ -177,7 +177,11 @@ fn visit_object_fragment_spec_object_type(
         hook(&spec.r#type);
     }
     for selection in spec.selections.iter() {
-        visit_object_selection(hooks, selection, &spec.r#type.read().unwrap().fields)
+        visit_object_selection(
+            hooks,
+            selection,
+            &spec.r#type.read().unwrap().fields,
+        )
     }
 }
 
@@ -225,7 +229,11 @@ fn visit_object_fragment_spec_interface_type(
         hook(spec);
     }
     for selection in spec.selections.iter() {
-        visit_object_selection(hooks, selection, &spec.r#type.read().unwrap().fields)
+        visit_object_selection(
+            hooks,
+            selection,
+            &spec.r#type.read().unwrap().fields,
+        )
     }
 }
 
