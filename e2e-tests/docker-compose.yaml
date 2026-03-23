@@ -9,9 +9,7 @@ services:
     depends_on:
       graphql:
         condition: service_completed_successfully
-    build:
-      context: ..
-      dockerfile: ./shared/dockerfiles/e2e-tests/rust-server
+    image: ${RUST_SERVER_IMAGE_TAG}
     environment:
       PORT: '8000'
   typescript-client:
@@ -19,9 +17,7 @@ services:
     depends_on:
       graphql:
         condition: service_completed_successfully
-    build:
-      context: ..
-      dockerfile: ./shared/dockerfiles/e2e-tests/typescript-client
+    image: ${TYPESCRIPT_CLIENT_IMAGE_TAG}
     command: ['sleep', 'infinity']
     environment:
       ENDPOINT_URL: http://rust-server:8000/graphql
