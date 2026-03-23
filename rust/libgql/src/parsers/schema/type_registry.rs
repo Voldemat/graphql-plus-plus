@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::{Arc, RwLock}};
 
 use crate::{
     lexer,
@@ -16,19 +16,19 @@ pub type FieldMapping = indexmap::IndexMap<
 #[derive(Debug, Clone)]
 pub struct TypeRegistry {
     pub server_directives:
-        HashMap<String, Arc<RefCell<shared::ast::ServerDirective>>>,
+        HashMap<String, Arc<RwLock<shared::ast::ServerDirective>>>,
     pub client_directives: HashMap<String, Arc<client::ast::ClientDirective>>,
     pub queries: FieldMapping,
     pub mutations: FieldMapping,
     pub subscriptions: FieldMapping,
-    pub objects: HashMap<String, Arc<RefCell<server::ast::ObjectType>>>,
-    pub inputs: HashMap<String, Arc<RefCell<shared::ast::InputType>>>,
-    pub interfaces: HashMap<String, Arc<RefCell<server::ast::Interface>>>,
+    pub objects: HashMap<String, Arc<RwLock<server::ast::ObjectType>>>,
+    pub inputs: HashMap<String, Arc<RwLock<shared::ast::InputType>>>,
+    pub interfaces: HashMap<String, Arc<RwLock<server::ast::Interface>>>,
     pub scalars: Vec<String>,
     pub enums: HashMap<String, Arc<shared::ast::Enum>>,
-    pub unions: HashMap<String, Arc<RefCell<server::ast::Union>>>,
-    pub fragments: HashMap<String, Arc<RefCell<client::ast::Fragment>>>,
-    pub operations: HashMap<String, Arc<RefCell<client::ast::Operation>>>,
+    pub unions: HashMap<String, Arc<RwLock<server::ast::Union>>>,
+    pub fragments: HashMap<String, Arc<RwLock<client::ast::Fragment>>>,
+    pub operations: HashMap<String, Arc<RwLock<client::ast::Operation>>>,
 }
 
 #[derive(Debug)]
@@ -77,19 +77,19 @@ impl TypeRegistry {
 
     pub fn get_query_object(
         self: &Self,
-    ) -> Option<&Arc<RefCell<server::ast::ObjectType>>> {
+    ) -> Option<&Arc<RwLock<server::ast::ObjectType>>> {
         return self.objects.get("Query");
     }
 
     pub fn get_mutation_object(
         self: &Self,
-    ) -> Option<&Arc<RefCell<server::ast::ObjectType>>> {
+    ) -> Option<&Arc<RwLock<server::ast::ObjectType>>> {
         return self.objects.get("Mutation");
     }
 
     pub fn get_subscription_object(
         self: &Self,
-    ) -> Option<&Arc<RefCell<server::ast::ObjectType>>> {
+    ) -> Option<&Arc<RwLock<server::ast::ObjectType>>> {
         return self.objects.get("Subscription");
     }
 
@@ -164,22 +164,22 @@ impl TypeRegistry {
         match schema_node {
             server::ast::ServerSchemaNode::ObjectType(object_rc) => {
                 self.append_ops_if_special_object(
-                    &object_rc.borrow().name,
-                    &object_rc.borrow().fields,
+                    &object_rc.read().unwrap().name,
+                    &object_rc.read().unwrap().fields,
                 );
-                let name = object_rc.borrow().name.clone();
+                let name = object_rc.read().unwrap().name.clone();
                 self.objects.insert(name, object_rc);
             }
             server::ast::ServerSchemaNode::Interface(interface) => {
-                let name = interface.borrow().name.clone();
+                let name = interface.read().unwrap().name.clone();
                 self.interfaces.insert(name, interface);
             }
             server::ast::ServerSchemaNode::Union(union) => {
-                let name = union.borrow().name.clone();
+                let name = union.read().unwrap().name.clone();
                 self.unions.insert(name, union);
             }
             server::ast::ServerSchemaNode::InputType(input) => {
-                let name = input.borrow().name.clone();
+                let name = input.read().unwrap().name.clone();
                 self.inputs.insert(name, input);
             }
             server::ast::ServerSchemaNode::Enum(gqlenum) => {
@@ -187,7 +187,7 @@ impl TypeRegistry {
                 self.enums.insert(name, gqlenum);
             }
             server::ast::ServerSchemaNode::ServerDirective(directive) => {
-                let name = directive.borrow().name.clone();
+                let name = directive.read().unwrap().name.clone();
                 self.server_directives.insert(name, directive);
             }
             server::ast::ServerSchemaNode::Scalar(scalar) => {
@@ -202,11 +202,11 @@ impl TypeRegistry {
     ) {
         match client_node {
             client::ast::ClientSchemaNode::Fragment(fragment) => {
-                let name = fragment.borrow().name.clone();
+                let name = fragment.read().unwrap().name.clone();
                 self.fragments.insert(name, fragment.clone());
             }
             client::ast::ClientSchemaNode::Operation(operation) => {
-                let name = operation.borrow().name.clone();
+                let name = operation.read().unwrap().name.clone();
                 self.operations.insert(name, operation.clone());
             }
             client::ast::ClientSchemaNode::ClientDirective(directive) => {
@@ -233,17 +233,18 @@ impl TypeRegistry {
 
     pub fn patch_object(
         self: &mut Self,
-        object_type: Arc<RefCell<server::ast::ObjectType>>,
+        object_type: Arc<RwLock<server::ast::ObjectType>>,
         new_fields: &FieldMapping,
     ) {
         for (name, new_field) in new_fields {
             object_type
-                .borrow_mut()
+                .write()
+                .unwrap()
                 .fields
                 .insert(name.clone(), new_field.clone());
         }
         self.append_ops_if_special_object(
-            &object_type.borrow().name,
+            &object_type.read().unwrap().name,
             new_fields,
         );
     }

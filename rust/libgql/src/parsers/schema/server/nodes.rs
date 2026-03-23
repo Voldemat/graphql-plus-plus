@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use indexmap::IndexMap;
 
@@ -26,14 +26,14 @@ pub fn parse_server_node_first_pass(
             s.name.name.clone().into()
         }
         file::server::ast::TypeDefinitionNode::Input(i) => {
-            Arc::new(RefCell::new(shared::ast::InputType {
+            Arc::new(RwLock::new(shared::ast::InputType {
                 name: i.name.name.clone(),
                 fields: IndexMap::new(),
             }))
             .into()
         }
         file::server::ast::TypeDefinitionNode::Object(o) => {
-            Arc::new(RefCell::new(ast::ObjectType {
+            Arc::new(RwLock::new(ast::ObjectType {
                 name: o.name.name.clone(),
                 fields: IndexMap::new(),
                 implements: IndexMap::new(),
@@ -42,7 +42,7 @@ pub fn parse_server_node_first_pass(
             .into()
         }
         file::server::ast::TypeDefinitionNode::Interface(i) => {
-            Arc::new(RefCell::new(ast::Interface {
+            Arc::new(RwLock::new(ast::Interface {
                 name: i.name.name.clone(),
                 fields: IndexMap::new(),
                 directives: Vec::new(),
@@ -50,14 +50,14 @@ pub fn parse_server_node_first_pass(
             .into()
         }
         file::server::ast::TypeDefinitionNode::Union(u) => {
-            Arc::new(RefCell::new(ast::Union {
+            Arc::new(RwLock::new(ast::Union {
                 name: u.name.name.clone(),
                 items: IndexMap::new(),
             }))
             .into()
         }
         file::server::ast::TypeDefinitionNode::Directive(d) => {
-            Arc::new(RefCell::new(shared::ast::ServerDirective {
+            Arc::new(RwLock::new(shared::ast::ServerDirective {
                 name: d.name.name.clone(),
                 arguments: IndexMap::new(),
                 locations: Vec::new(),
@@ -101,7 +101,7 @@ pub fn parse_server_extend_node(
     registry: &mut TypeRegistry,
 ) -> Result<
     (
-        Arc<RefCell<ast::ObjectType>>,
+        Arc<RwLock<ast::ObjectType>>,
         IndexMap<
             String,
             Arc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,

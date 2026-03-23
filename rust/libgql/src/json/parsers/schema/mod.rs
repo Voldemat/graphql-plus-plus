@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use indexmap::IndexMap;
 
@@ -362,7 +362,7 @@ fn parse_object_fields(
 fn parse_implements_map(
     registry: &TypeRegistry,
     value: &serde_json::Value,
-) -> indexmap::IndexMap<String, Arc<RefCell<server::ast::Interface>>> {
+) -> indexmap::IndexMap<String, Arc<RwLock<server::ast::Interface>>> {
     return value
         .as_object()
         .unwrap()
@@ -386,11 +386,11 @@ fn parse_object(
 fn parse_objects(
     registry: &TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RefCell<ast::ObjectType>>>, String> {
-    let mut objects = IndexMap::<String, Arc<RefCell<ast::ObjectType>>>::new();
+) -> Result<IndexMap<String, Arc<RwLock<ast::ObjectType>>>, String> {
+    let mut objects = IndexMap::<String, Arc<RwLock<ast::ObjectType>>>::new();
     for (key, value) in map.as_object().unwrap() {
         let object_rc = registry.objects.get(key).unwrap();
-        parse_object(registry, &mut object_rc.borrow_mut(), value)?;
+        parse_object(registry, &mut object_rc.write().unwrap(), value)?;
         objects.insert(key.clone(), object_rc.clone());
     }
     return Ok(objects);
@@ -444,22 +444,22 @@ fn parse_input_fields(
 fn parse_inputs(
     registry: &mut TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RefCell<shared::ast::InputType>>>, String> {
+) -> Result<IndexMap<String, Arc<RwLock<shared::ast::InputType>>>, String> {
     let m = map.as_object().unwrap();
     for key in m.keys() {
         registry.inputs.insert(
             key.clone(),
-            Arc::new(RefCell::new(shared::ast::InputType {
+            Arc::new(RwLock::new(shared::ast::InputType {
                 name: key.clone(),
                 fields: IndexMap::new(),
             })),
         );
     }
     let mut inputs =
-        IndexMap::<String, Arc<RefCell<shared::ast::InputType>>>::new();
+        IndexMap::<String, Arc<RwLock<shared::ast::InputType>>>::new();
     for (key, value) in map.as_object().unwrap() {
         let i = registry.inputs.get(key).unwrap();
-        i.borrow_mut().fields = parse_input_fields(registry, &value["fields"])?;
+        i.write().unwrap().fields = parse_input_fields(registry, &value["fields"])?;
         inputs.insert(key.clone(), i.clone());
     }
     return Ok(inputs);
@@ -468,12 +468,12 @@ fn parse_inputs(
 fn parse_interfaces(
     registry: &mut TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RefCell<server::ast::Interface>>>, String> {
+) -> Result<IndexMap<String, Arc<RwLock<server::ast::Interface>>>, String> {
     let m = map.as_object().unwrap();
     for key in m.keys() {
         registry.interfaces.insert(
             key.clone(),
-            Arc::new(RefCell::new(server::ast::Interface {
+            Arc::new(RwLock::new(server::ast::Interface {
                 name: key.clone(),
                 fields: IndexMap::new(),
                 directives: Vec::new(),
@@ -481,10 +481,10 @@ fn parse_interfaces(
         );
     }
     let mut inputs =
-        IndexMap::<String, Arc<RefCell<server::ast::Interface>>>::new();
+        IndexMap::<String, Arc<RwLock<server::ast::Interface>>>::new();
     for (key, value) in map.as_object().unwrap() {
         let i = registry.interfaces.get(key).unwrap();
-        i.borrow_mut().fields =
+        i.write().unwrap().fields =
             parse_object_fields(registry, &value["fields"])?;
         inputs.insert(key.clone(), i.clone());
     }
@@ -494,9 +494,9 @@ fn parse_interfaces(
 fn parse_items(
     registry: &TypeRegistry,
     value: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RefCell<server::ast::ObjectType>>>, String> {
+) -> Result<IndexMap<String, Arc<RwLock<server::ast::ObjectType>>>, String> {
     let mut items =
-        IndexMap::<String, Arc<RefCell<server::ast::ObjectType>>>::new();
+        IndexMap::<String, Arc<RwLock<server::ast::ObjectType>>>::new();
     for key in value.as_object().unwrap().keys() {
         items.insert(key.clone(), registry.objects.get(key).unwrap().clone());
     }
@@ -515,11 +515,11 @@ fn parse_union(
 fn parse_unions(
     registry: &TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RefCell<ast::Union>>>, String> {
-    let mut unions = IndexMap::<String, Arc<RefCell<ast::Union>>>::new();
+) -> Result<IndexMap<String, Arc<RwLock<ast::Union>>>, String> {
+    let mut unions = IndexMap::<String, Arc<RwLock<ast::Union>>>::new();
     for (key, value) in map.as_object().unwrap() {
         let union_rc = registry.unions.get(key).unwrap();
-        parse_union(registry, &mut union_rc.borrow_mut(), value)?;
+        parse_union(registry, &mut union_rc.write().unwrap(), value)?;
         unions.insert(key.clone(), union_rc.clone());
     }
     return Ok(unions);
@@ -532,7 +532,7 @@ pub fn parse_server_schema(
     for key in value["objects"].as_object().unwrap().keys() {
         registry.objects.insert(
             key.clone(),
-            Arc::new(RefCell::new(server::ast::ObjectType {
+            Arc::new(RwLock::new(server::ast::ObjectType {
                 name: key.clone(),
                 fields: IndexMap::new(),
                 directives: Vec::new(),
@@ -543,7 +543,7 @@ pub fn parse_server_schema(
     for key in value["unions"].as_object().unwrap().keys() {
         registry.unions.insert(
             key.clone(),
-            Arc::new(RefCell::new(server::ast::Union {
+            Arc::new(RwLock::new(server::ast::Union {
                 name: key.clone(),
                 items: IndexMap::new(),
             })),

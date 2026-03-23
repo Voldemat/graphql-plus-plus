@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use indexmap::IndexMap;
 
@@ -14,9 +14,9 @@ use crate::parsers::{
 pub fn parse_definition(
     node: &file::server::ast::ObjectDefinitionNode,
     registry: &TypeRegistry,
-) -> Result<Arc<RefCell<ast::ObjectType>>, errors::Error> {
+) -> Result<Arc<RwLock<ast::ObjectType>>, errors::Error> {
     let obj_rc = registry.objects.get(&node.name.name).unwrap();
-    let mut obj = obj_rc.borrow_mut();
+    let mut obj = obj_rc.write().unwrap();
     obj.fields = parse_fields(&node.fields, registry)?;
     for name in node.interfaces.iter() {
         let Some(interface) = registry.interfaces.get(&name.name) else {
@@ -115,7 +115,7 @@ fn parse_noncallable_object_field_spec(
                     default_value: None,
                     directive_invocations: directives
                         .iter()
-                        .map(|d| (d.directive.borrow().name.clone(), d.clone()))
+                        .map(|d| (d.directive.read().unwrap().name.clone(), d.clone()))
                         .collect(),
                 }
                 .into(),

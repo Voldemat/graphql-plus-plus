@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use crate::parsers::{
     file,
@@ -68,7 +68,7 @@ fn parse_argument_value(
 
 pub fn parse_arguments(
     arguments: &Vec<file::shared::ast::Argument>,
-    directive: &Arc<RefCell<shared::ast::ServerDirective>>,
+    directive: &Arc<RwLock<shared::ast::ServerDirective>>,
 ) -> Result<
     indexmap::IndexMap<String, shared::ast::FieldSelectionArgument>,
     errors::Error,
@@ -76,7 +76,7 @@ pub fn parse_arguments(
     let mut final_arguments =
         indexmap::IndexMap::<String, shared::ast::FieldSelectionArgument>::new(
         );
-    let directive_br = directive.borrow();
+    let directive_br = directive.read().unwrap();
     for argument in arguments {
         let Some(arg_type) = directive_br.arguments.get(&argument.name.name)
         else {

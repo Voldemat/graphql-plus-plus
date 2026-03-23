@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashSet, sync::Arc};
+use std::{collections::HashSet, sync::{Arc, RwLock}};
 
 use indexmap::IndexMap;
 
@@ -6,8 +6,8 @@ use crate::parsers::schema::{client::ast, visitor};
 
 #[derive(Debug, Default)]
 pub struct ClientSchema {
-    pub fragments: IndexMap<String, Arc<RefCell<ast::Fragment>>>,
-    pub operations: IndexMap<String, Arc<RefCell<ast::Operation>>>,
+    pub fragments: IndexMap<String, Arc<RwLock<ast::Fragment>>>,
+    pub operations: IndexMap<String, Arc<RwLock<ast::Operation>>>,
     pub directives: IndexMap<String, Arc<ast::ClientDirective>>,
 }
 
@@ -37,10 +37,10 @@ impl ClientSchema {
     fn add_node(self: &mut Self, s_node: &ast::ClientSchemaNode) {
         match s_node {
             ast::ClientSchemaNode::Fragment(f) => {
-                self.fragments.insert(f.borrow().name.clone(), f.clone());
+                self.fragments.insert(f.read().unwrap().name.clone(), f.clone());
             }
             ast::ClientSchemaNode::Operation(o) => {
-                self.operations.insert(o.borrow().name.clone(), o.clone());
+                self.operations.insert(o.read().unwrap().name.clone(), o.clone());
             }
             ast::ClientSchemaNode::ClientDirective(d) => {
                 self.directives.insert(d.name.clone(), d.clone());
@@ -57,11 +57,11 @@ impl ClientSchema {
     fn populate_server_uses_map(self: &Self, m: &mut ServerUsesMap) {
         let mut hooks = visitor::ASTVisitorHooks {
             visit_object_type: Some(Box::new(|object_type| {
-                m.objects.insert(object_type.borrow().name.clone());
+                m.objects.insert(object_type.read().unwrap().name.clone());
             })),
             visit_object_fragment_spec_object_type: Some(Box::new(
                 |fragment_spec| {
-                    let name = &fragment_spec.r#type.borrow().name;
+                    let name = &fragment_spec.r#type.read().unwrap().name;
                     let fields = fragment_spec.selections.iter().filter_map(
                         |s| match s {
                             ast::ObjectSelection::FieldSelection(f) => {
@@ -80,10 +80,10 @@ impl ClientSchema {
                 },
             )),
             visit_interface: Some(Box::new(|interface| {
-                m.interfaces.insert(interface.borrow().name.clone());
+                m.interfaces.insert(interface.read().unwrap().name.clone());
             })),
             visit_input_type: Some(Box::new(|input| {
-                m.inputs.insert(input.borrow().name.clone());
+                m.inputs.insert(input.read().unwrap().name.clone());
             })),
             visit_scalar: Some(Box::new(|scalar| {
                 m.scalars.insert(scalar.clone());
@@ -92,7 +92,7 @@ impl ClientSchema {
                 m.enums.insert(e.name.clone());
             })),
             visit_union: Some(Box::new(|union| {
-                m.unions.insert(union.borrow().name.clone());
+                m.unions.insert(union.read().unwrap().name.clone());
             })),
             ..visitor::ASTVisitorHooks::default()
         };

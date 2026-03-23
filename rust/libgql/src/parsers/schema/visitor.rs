@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use crate::parsers::schema::{client, server, shared};
 
@@ -6,7 +6,7 @@ pub type ASTVisitorHook<'a, T> = Option<Box<dyn FnMut(&T) + 'a>>;
 
 #[derive(Default)]
 pub struct ASTVisitorHooks<'a> {
-    pub visit_fragment: ASTVisitorHook<'a, Arc<RefCell<client::ast::Fragment>>>,
+    pub visit_fragment: ASTVisitorHook<'a, Arc<RwLock<client::ast::Fragment>>>,
     pub visit_fragment_spec: ASTVisitorHook<'a, client::ast::FragmentSpec>,
     pub visit_union_fragment_spec:
         ASTVisitorHook<'a, client::ast::UnionFragmentSpec>,
@@ -17,7 +17,7 @@ pub struct ASTVisitorHooks<'a> {
     pub visit_object_conditional_spread_selection:
         ASTVisitorHook<'a, client::ast::ObjectConditionalSpreadSelection>,
     pub visit_object_type:
-        ASTVisitorHook<'a, Arc<RefCell<server::ast::ObjectType>>>,
+        ASTVisitorHook<'a, Arc<RwLock<server::ast::ObjectType>>>,
     pub visit_object_fragment_spec_object_type: ASTVisitorHook<
         'a,
         client::ast::ObjectFragmentSpec<server::ast::ObjectType>,
@@ -27,7 +27,7 @@ pub struct ASTVisitorHooks<'a> {
         client::ast::ObjectFragmentSpec<server::ast::Interface>,
     >,
     pub visit_interface:
-        ASTVisitorHook<'a, Arc<RefCell<server::ast::Interface>>>,
+        ASTVisitorHook<'a, Arc<RwLock<server::ast::Interface>>>,
     pub visit_object_selection:
         ASTVisitorHook<'a, client::ast::ObjectSelection>,
     pub visit_field_selection: ASTVisitorHook<'a, client::ast::FieldSelection>,
@@ -80,12 +80,12 @@ pub struct ASTVisitorHooks<'a> {
         ASTVisitorHook<'a, server::ast::CallableFieldSpec>,
     pub visit_object_type_spec: ASTVisitorHook<'a, server::ast::ObjectTypeSpec>,
     pub visit_operation:
-        ASTVisitorHook<'a, Arc<RefCell<client::ast::Operation>>>,
+        ASTVisitorHook<'a, Arc<RwLock<client::ast::Operation>>>,
     pub visit_input_type:
-        ASTVisitorHook<'a, Arc<RefCell<shared::ast::InputType>>>,
+        ASTVisitorHook<'a, Arc<RwLock<shared::ast::InputType>>>,
     pub visit_scalar: ASTVisitorHook<'a, String>,
     pub visit_enum: ASTVisitorHook<'a, Arc<shared::ast::Enum>>,
-    pub visit_union: ASTVisitorHook<'a, Arc<RefCell<server::ast::Union>>>,
+    pub visit_union: ASTVisitorHook<'a, Arc<RwLock<server::ast::Union>>>,
 }
 
 fn visit_field_selection(
@@ -161,7 +161,7 @@ fn visit_object_selection(
             if let Some(hook) = hooks.visit_fragment.as_mut() {
                 hook(&spread.fragment)
             }
-            visit_fragment_spec(hooks, &spread.fragment.borrow().spec)
+            visit_fragment_spec(hooks, &spread.fragment.read().unwrap().spec)
         }
     }
 }
@@ -177,7 +177,7 @@ fn visit_object_fragment_spec_object_type(
         hook(&spec.r#type);
     }
     for selection in spec.selections.iter() {
-        visit_object_selection(hooks, selection, &spec.r#type.borrow().fields)
+        visit_object_selection(hooks, selection, &spec.r#type.read().unwrap().fields)
     }
 }
 
@@ -225,7 +225,7 @@ fn visit_object_fragment_spec_interface_type(
         hook(spec);
     }
     for selection in spec.selections.iter() {
-        visit_object_selection(hooks, selection, &spec.r#type.borrow().fields)
+        visit_object_selection(hooks, selection, &spec.r#type.read().unwrap().fields)
     }
 }
 
@@ -306,16 +306,16 @@ fn visit_object_field_spec(
 
 fn visit_union(
     hooks: &mut ASTVisitorHooks,
-    union: &Arc<RefCell<server::ast::Union>>,
+    union: &Arc<RwLock<server::ast::Union>>,
 ) {
     if let Some(hook) = hooks.visit_union.as_mut() {
         hook(union);
     }
-    for object in union.borrow().items.values() {
+    for object in union.read().unwrap().items.values() {
         if let Some(hook) = hooks.visit_object_type.as_mut() {
             hook(object);
         }
-        for field in object.borrow().fields.values() {
+        for field in object.read().unwrap().fields.values() {
             visit_object_field_spec(hooks, &field.spec);
         }
     }
@@ -341,7 +341,7 @@ fn visit_union_selection(
             if let Some(hook) = hooks.visit_fragment.as_mut() {
                 hook(&selection.fragment)
             }
-            visit_fragment_spec(hooks, &selection.fragment.borrow().spec)
+            visit_fragment_spec(hooks, &selection.fragment.read().unwrap().spec)
         }
         client::ast::UnionSelection::UnionConditionalSpreadSelection(_) => {}
         client::ast::UnionSelection::ObjectConditionalSpreadSelection(
@@ -392,12 +392,12 @@ fn visit_fragment_spec(
 
 fn visit_input_type(
     hooks: &mut ASTVisitorHooks,
-    t: &Arc<RefCell<shared::ast::InputType>>,
+    t: &Arc<RwLock<shared::ast::InputType>>,
 ) {
     if let Some(hook) = hooks.visit_input_type.as_mut() {
         hook(t)
     }
-    for field in t.borrow().fields.values() {
+    for field in t.read().unwrap().fields.values() {
         visit_field_definition_input_field_spec(hooks, field);
     }
 }
@@ -483,16 +483,16 @@ pub fn visit_client_schema(
         if let Some(hook) = hooks.visit_fragment.as_mut() {
             hook(fragment);
         }
-        visit_fragment_spec(hooks, &fragment.borrow().spec);
+        visit_fragment_spec(hooks, &fragment.read().unwrap().spec);
     }
 
     for operation in schema.operations.values() {
         if let Some(hook) = hooks.visit_operation.as_mut() {
             hook(operation);
         }
-        for parameter in operation.borrow().parameters.values() {
+        for parameter in operation.read().unwrap().parameters.values() {
             visit_field_definition_input_field_spec(hooks, parameter);
         }
-        visit_fragment_spec(hooks, &operation.borrow().fragment_spec);
+        visit_fragment_spec(hooks, &operation.read().unwrap().fragment_spec);
     }
 }

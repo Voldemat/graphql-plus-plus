@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, sync::Arc};
+use std::{rc::Rc, sync::{Arc, RwLock}};
 
 use crate::{
     lexer,
@@ -10,15 +10,15 @@ use crate::{
 
 #[derive(Debug, derive_more::From)]
 pub enum FragmentType {
-    Object(Arc<RefCell<server::ast::ObjectType>>),
-    Interface(Arc<RefCell<server::ast::Interface>>),
-    Union(Arc<RefCell<server::ast::Union>>),
+    Object(Arc<RwLock<server::ast::ObjectType>>),
+    Interface(Arc<RwLock<server::ast::Interface>>),
+    Union(Arc<RwLock<server::ast::Union>>),
 }
 
 #[derive(Debug, derive_more::From)]
 pub enum FieldType {
-    Object(Arc<RefCell<server::ast::ObjectType>>),
-    Interface(Arc<RefCell<server::ast::Interface>>),
+    Object(Arc<RwLock<server::ast::ObjectType>>),
+    Interface(Arc<RwLock<server::ast::Interface>>),
 }
 
 #[derive(Debug)]
@@ -32,7 +32,7 @@ pub enum Error {
     InvalidFragmentType {
         selection_node: file::client::ast::SpreadSelectionNode,
         expected_type: FragmentType,
-        fragment: Arc<RefCell<ast::Fragment>>,
+        fragment: Arc<RwLock<ast::Fragment>>,
     },
     UnknownField {
         r#type: FieldType,
@@ -46,7 +46,7 @@ pub enum Error {
     UnexpectedFieldSelectionNodeOnUnion(file::client::ast::FieldSelectionNode),
     NoSuitableTypeForConditionalSpreadSelection {
         selection: file::client::ast::ConditionalSpreadSelectionNode,
-        r#type: Arc<RefCell<server::ast::Union>>,
+        r#type: Arc<RwLock<server::ast::Union>>,
     },
     UnexpectedSelectionOnLiteralField {
         spec: Rc<file::client::ast::FragmentSpec>,

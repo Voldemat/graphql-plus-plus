@@ -185,7 +185,7 @@ async fn execute_union_selection_set<C, S: Scalar>(
             client::ast::UnionSelection::ObjectConditionalSpreadSelection(
                 spread,
             ) => {
-                let spread_object_name = &spread.selection.r#type.borrow().name;
+                let spread_object_name = &spread.selection.r#type.read().unwrap().name;
                 if spread_object_name != object_name {
                     return Ok(Values::new());
                 };
@@ -205,7 +205,7 @@ async fn execute_union_selection_set<C, S: Scalar>(
             }
 
             client::ast::UnionSelection::SpreadSelection(spread) => {
-                let fragment = spread.fragment.borrow();
+                let fragment = spread.fragment.read().unwrap();
                 let result = execute_fragment(
                     context,
                     object_field_resolvers,
@@ -278,7 +278,7 @@ async fn execute_object_selection<C, S: Scalar>(
         }
 
         client::ast::ObjectSelection::SpreadSelection(spread) => {
-            let fragment = spread.fragment.borrow();
+            let fragment = spread.fragment.read().unwrap();
             execute_fragment(
                 context,
                 object_field_resolvers,

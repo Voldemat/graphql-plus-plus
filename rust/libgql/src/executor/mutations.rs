@@ -105,7 +105,7 @@ async fn execute_object_selection<C, S: Scalar>(
         }
 
         client::ast::ObjectSelection::SpreadSelection(spread) => {
-            let fragment = spread.fragment.borrow();
+            let fragment = spread.fragment.read().unwrap();
             execute_fragment(
                 context,
                 mutation_resolvers,

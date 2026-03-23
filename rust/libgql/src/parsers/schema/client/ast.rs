@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use crate::parsers::{
     file,
@@ -7,7 +7,7 @@ use crate::parsers::{
 
 #[derive(Debug)]
 pub struct SpreadSelection {
-    pub fragment: Arc<RefCell<Fragment>>,
+    pub fragment: Arc<RwLock<Fragment>>,
 }
 
 #[derive(Debug)]
@@ -32,25 +32,25 @@ pub enum ObjectSelection {
 
 #[derive(Debug)]
 pub struct UnionFragmentSpec {
-    pub r#type: Arc<RefCell<server::ast::Union>>,
+    pub r#type: Arc<RwLock<server::ast::Union>>,
     pub selections: Vec<UnionSelection>,
 }
 
 #[derive(Debug)]
 pub struct ObjectFragmentSpec<T> {
-    pub r#type: Arc<RefCell<T>>,
+    pub r#type: Arc<RwLock<T>>,
     pub selections: Vec<ObjectSelection>,
 }
 
 #[derive(Debug)]
 pub struct ObjectConditionalSpreadSelection {
-    pub r#type: Arc<RefCell<server::ast::ObjectType>>,
+    pub r#type: Arc<RwLock<server::ast::ObjectType>>,
     pub selection: Arc<ObjectFragmentSpec<server::ast::ObjectType>>,
 }
 
 #[derive(Debug)]
 pub struct UnionConditionalSpreadSelection {
-    pub r#type: Arc<RefCell<server::ast::Union>>,
+    pub r#type: Arc<RwLock<server::ast::Union>>,
     pub selection: Arc<UnionFragmentSpec>,
 }
 
@@ -89,7 +89,7 @@ pub struct Operation {
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >,
     pub fragment_spec: FragmentSpec,
-    pub used_fragments: Vec<Arc<RefCell<Fragment>>>,
+    pub used_fragments: Vec<Arc<RwLock<Fragment>>>,
     pub source_text: String,
     pub parameters_hash: u64,
     pub fragment_spec_hash: u64,
@@ -109,7 +109,7 @@ pub struct ClientDirective {
 
 #[derive(derive_more::From)]
 pub enum ClientSchemaNode {
-    Fragment(Arc<RefCell<Fragment>>),
-    Operation(Arc<RefCell<Operation>>),
+    Fragment(Arc<RwLock<Fragment>>),
+    Operation(Arc<RwLock<Operation>>),
     ClientDirective(Arc<ClientDirective>),
 }

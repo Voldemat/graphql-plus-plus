@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use indexmap::IndexMap;
 
@@ -13,7 +13,7 @@ pub fn hash_input_type_spec<T: std::hash::Hasher>(
     let name = match spec {
         shared::ast::InputTypeSpec::Scalar(s) => s,
         shared::ast::InputTypeSpec::Enum(e) => &e.name,
-        shared::ast::InputTypeSpec::InputType(i) => &i.borrow().name,
+        shared::ast::InputTypeSpec::InputType(i) => &i.read().unwrap().name,
     };
     std::hash::Hash::hash(name, hasher);
 }
@@ -195,12 +195,12 @@ fn hash_object_selection_node<T: std::hash::Hasher>(
         }
         ast::ObjectSelection::SpreadSelection(field) => {
             std::hash::Hash::hash(&'s', hasher);
-            std::hash::Hash::hash(&field.fragment.borrow().name, hasher);
+            std::hash::Hash::hash(&field.fragment.read().unwrap().name, hasher);
             if recursive {
                 hash_fragment_spec(
                     hasher,
                     registry,
-                    &field.fragment.borrow().spec,
+                    &field.fragment.read().unwrap().spec,
                     true,
                 );
             }
@@ -259,12 +259,12 @@ fn hash_union_selection_node<T: std::hash::Hasher>(
         }
         ast::UnionSelection::SpreadSelection(field) => {
             std::hash::Hash::hash(&'s', hasher);
-            std::hash::Hash::hash(&field.fragment.borrow().name, hasher);
+            std::hash::Hash::hash(&field.fragment.read().unwrap().name, hasher);
             if recursive {
                 hash_fragment_spec(
                     hasher,
                     registry,
-                    &field.fragment.borrow().spec,
+                    &field.fragment.read().unwrap().spec,
                     true,
                 );
             }
@@ -272,7 +272,7 @@ fn hash_union_selection_node<T: std::hash::Hasher>(
         ast::UnionSelection::UnionConditionalSpreadSelection(_) => {}
         ast::UnionSelection::ObjectConditionalSpreadSelection(s) => {
             std::hash::Hash::hash("oc", hasher);
-            std::hash::Hash::hash(&s.r#type.borrow().name, hasher);
+            std::hash::Hash::hash(&s.r#type.read().unwrap().name, hasher);
             hash_object_fragment_spec(
                 hasher,
                 registry,
@@ -328,7 +328,7 @@ pub fn get_fragment_spec_hash(
 pub fn get_used_fragments_from_object_fragment_spec<T>(
     registry: &TypeRegistry,
     fragment_spec: &ast::ObjectFragmentSpec<T>,
-) -> Vec<Arc<RefCell<ast::Fragment>>> {
+) -> Vec<Arc<RwLock<ast::Fragment>>> {
     fragment_spec
         .selections
         .iter()
@@ -350,7 +350,7 @@ pub fn get_used_fragments_from_object_fragment_spec<T>(
 pub fn get_used_fragments_from_fragment_spec(
     registry: &TypeRegistry,
     fragment_spec: &ast::FragmentSpec,
-) -> Vec<Arc<RefCell<ast::Fragment>>> {
+) -> Vec<Arc<RwLock<ast::Fragment>>> {
     match fragment_spec {
         ast::FragmentSpec::Object(object) => {
             get_used_fragments_from_object_fragment_spec(registry, object)

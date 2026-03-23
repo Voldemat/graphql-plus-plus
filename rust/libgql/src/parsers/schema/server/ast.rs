@@ -1,14 +1,14 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use crate::parsers::schema::shared;
 
 #[derive(derive_more::From)]
 pub enum ObjectTypeSpec {
-    ObjectType(Arc<RefCell<ObjectType>>),
-    Interface(Arc<RefCell<Interface>>),
+    ObjectType(Arc<RwLock<ObjectType>>),
+    Interface(Arc<RwLock<Interface>>),
     Scalar { name: String },
     Enum(Arc<shared::ast::Enum>),
-    Union(Arc<RefCell<Union>>),
+    Union(Arc<RwLock<Union>>),
 }
 
 impl std::fmt::Debug for ObjectTypeSpec {
@@ -16,11 +16,11 @@ impl std::fmt::Debug for ObjectTypeSpec {
         match self {
             Self::ObjectType(arg0) => f
                 .debug_tuple("ObjectType")
-                .field(&arg0.borrow().name)
+                .field(&arg0.read().unwrap().name)
                 .finish(),
             Self::Interface(arg0) => f
                 .debug_tuple("Interface")
-                .field(&arg0.borrow().name)
+                .field(&arg0.read().unwrap().name)
                 .finish(),
             Self::Scalar { name } => {
                 f.debug_struct("Scalar").field("name", name).finish()
@@ -29,7 +29,7 @@ impl std::fmt::Debug for ObjectTypeSpec {
                 f.debug_tuple("Enum").field(&arg0.name).finish()
             }
             Self::Union(arg0) => {
-                f.debug_tuple("Union").field(&arg0.borrow().name).finish()
+                f.debug_tuple("Union").field(&arg0.read().unwrap().name).finish()
             }
         }
     }
@@ -38,7 +38,7 @@ impl std::fmt::Debug for ObjectTypeSpec {
 #[derive(Debug)]
 pub struct Union {
     pub name: String,
-    pub items: indexmap::IndexMap<String, Arc<RefCell<ObjectType>>>,
+    pub items: indexmap::IndexMap<String, Arc<RwLock<ObjectType>>>,
 }
 
 #[derive(Debug)]
@@ -95,7 +95,7 @@ pub struct ObjectType {
         String,
         Arc<shared::ast::FieldDefinition<ObjectFieldSpec>>,
     >,
-    pub implements: indexmap::IndexMap<String, Arc<RefCell<Interface>>>,
+    pub implements: indexmap::IndexMap<String, Arc<RwLock<Interface>>>,
     pub directives: Vec<shared::ast::ServerDirectiveInvocation>,
 }
 
@@ -105,11 +105,11 @@ pub struct ExtendObjectType {
 
 #[derive(derive_more::From)]
 pub enum ServerSchemaNode {
-    ObjectType(Arc<RefCell<ObjectType>>),
-    Interface(Arc<RefCell<Interface>>),
+    ObjectType(Arc<RwLock<ObjectType>>),
+    Interface(Arc<RwLock<Interface>>),
     Scalar(String),
-    Union(Arc<RefCell<Union>>),
+    Union(Arc<RwLock<Union>>),
     Enum(Arc<shared::ast::Enum>),
-    InputType(Arc<RefCell<shared::ast::InputType>>),
-    ServerDirective(Arc<RefCell<shared::ast::ServerDirective>>),
+    InputType(Arc<RwLock<shared::ast::InputType>>),
+    ServerDirective(Arc<RwLock<shared::ast::ServerDirective>>),
 }

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use indexmap::IndexMap;
 
@@ -23,24 +23,24 @@ fn parse_node_first_pass(
                 .collect(),
         })
         .into(),
-        "INPUT_OBJECT" => Arc::new(RefCell::new(shared::ast::InputType {
+        "INPUT_OBJECT" => Arc::new(RwLock::new(shared::ast::InputType {
             name: name.to_string(),
             fields: IndexMap::new(),
         }))
         .into(),
-        "OBJECT" => Arc::new(RefCell::new(server::ast::ObjectType {
+        "OBJECT" => Arc::new(RwLock::new(server::ast::ObjectType {
             name: name.to_string(),
             fields: IndexMap::new(),
             implements: IndexMap::new(),
             directives: Vec::new(),
         }))
         .into(),
-        "UNION" => Arc::new(RefCell::new(server::ast::Union {
+        "UNION" => Arc::new(RwLock::new(server::ast::Union {
             name: name.to_string(),
             items: IndexMap::new(),
         }))
         .into(),
-        "INTERFACE" => Arc::new(RefCell::new(server::ast::Interface {
+        "INTERFACE" => Arc::new(RwLock::new(server::ast::Interface {
             name: name.to_string(),
             fields: IndexMap::new(),
             directives: Vec::new(),
@@ -266,7 +266,7 @@ fn parse_node_second_pass(
         "ENUM" => registry.enums.get(name).unwrap().clone().into(),
         "INPUT_OBJECT" => {
             let input = registry.inputs.get(name).unwrap().clone();
-            input.borrow_mut().fields = value["inputFields"]
+            input.write().unwrap().fields = value["inputFields"]
                 .as_array()
                 .unwrap()
                 .into_iter()
@@ -280,7 +280,7 @@ fn parse_node_second_pass(
         }
         "OBJECT" => {
             let object = registry.objects.get(name).unwrap().clone();
-            object.borrow_mut().implements = value["interfaces"]
+            object.write().unwrap().implements = value["interfaces"]
                 .as_array()
                 .unwrap()
                 .into_iter()
@@ -289,10 +289,10 @@ fn parse_node_second_pass(
                         .interfaces
                         .get(interface_json["name"].as_str().unwrap())
                         .unwrap();
-                    (interface.borrow().name.clone(), interface.clone())
+                    (interface.read().unwrap().name.clone(), interface.clone())
                 })
                 .collect();
-            object.borrow_mut().fields = value["fields"]
+            object.write().unwrap().fields = value["fields"]
                 .as_array()
                 .unwrap()
                 .into_iter()
@@ -306,7 +306,7 @@ fn parse_node_second_pass(
         }
         "UNION" => {
             let union = registry.unions.get(name).unwrap().clone();
-            union.borrow_mut().items = value["possibleTypes"]
+            union.write().unwrap().items = value["possibleTypes"]
                 .as_array()
                 .unwrap()
                 .into_iter()
@@ -315,14 +315,14 @@ fn parse_node_second_pass(
                         .objects
                         .get(object_json["name"].as_str().unwrap())
                         .unwrap();
-                    (object.borrow().name.clone(), object.clone())
+                    (object.read().unwrap().name.clone(), object.clone())
                 })
                 .collect();
             return union.into();
         }
         "INTERFACE" => {
             let interface = registry.interfaces.get(name).unwrap().clone();
-            interface.borrow_mut().fields = value["fields"]
+            interface.write().unwrap().fields = value["fields"]
                 .as_array()
                 .unwrap()
                 .into_iter()

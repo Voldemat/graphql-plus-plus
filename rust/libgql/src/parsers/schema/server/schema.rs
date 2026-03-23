@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use indexmap::IndexMap;
 
@@ -6,13 +6,13 @@ use crate::parsers::schema::{server::ast, shared};
 
 #[derive(Debug, Default)]
 pub struct Schema {
-    pub objects: IndexMap<String, Arc<RefCell<ast::ObjectType>>>,
-    pub inputs: IndexMap<String, Arc<RefCell<shared::ast::InputType>>>,
-    pub interfaces: IndexMap<String, Arc<RefCell<ast::Interface>>>,
+    pub objects: IndexMap<String, Arc<RwLock<ast::ObjectType>>>,
+    pub inputs: IndexMap<String, Arc<RwLock<shared::ast::InputType>>>,
+    pub interfaces: IndexMap<String, Arc<RwLock<ast::Interface>>>,
     pub scalars: Vec<String>,
     pub enums: IndexMap<String, Arc<shared::ast::Enum>>,
-    pub unions: IndexMap<String, Arc<RefCell<ast::Union>>>,
-    pub directives: IndexMap<String, Arc<RefCell<shared::ast::ServerDirective>>>,
+    pub unions: IndexMap<String, Arc<RwLock<ast::Union>>>,
+    pub directives: IndexMap<String, Arc<RwLock<shared::ast::ServerDirective>>>,
 }
 
 impl Schema {
@@ -31,24 +31,24 @@ impl Schema {
             }
             ast::ServerSchemaNode::ObjectType(node) => {
                 self.objects
-                    .insert(node.borrow().name.clone(), node.clone());
+                    .insert(node.read().unwrap().name.clone(), node.clone());
             }
             ast::ServerSchemaNode::InputType(node) => {
-                self.inputs.insert(node.borrow().name.clone(), node.clone());
+                self.inputs.insert(node.read().unwrap().name.clone(), node.clone());
             }
             ast::ServerSchemaNode::Union(node) => {
-                self.unions.insert(node.borrow().name.clone(), node.clone());
+                self.unions.insert(node.read().unwrap().name.clone(), node.clone());
             }
             ast::ServerSchemaNode::Scalar(node) => {
                 self.scalars.push(node.clone());
             }
             ast::ServerSchemaNode::ServerDirective(node) => {
                 self.directives
-                    .insert(node.borrow().name.clone(), node.clone());
+                    .insert(node.read().unwrap().name.clone(), node.clone());
             }
             ast::ServerSchemaNode::Interface(node) => {
                 self.interfaces
-                    .insert(node.borrow().name.clone(), node.clone());
+                    .insert(node.read().unwrap().name.clone(), node.clone());
             }
         }
     }

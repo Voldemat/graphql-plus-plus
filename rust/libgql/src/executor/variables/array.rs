@@ -54,7 +54,7 @@ fn resolve_literal_array<S: Scalar, R: ParseRegistry<S>>(
             }
         }
         shared::ast::InputTypeSpec::InputType(input_type) => {
-            R::parse_input_array(registry, &input_type.borrow(), elements.into_iter().map(|e| {
+            R::parse_input_array(registry, &input_type.read().unwrap(), elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Object(object),
                 )) = e

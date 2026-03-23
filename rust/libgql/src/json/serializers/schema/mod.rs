@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashSet, sync::Arc};
+use std::{collections::HashSet, sync::{Arc, RwLock}};
 
 use indexmap::IndexMap;
 use struson::writer::simple::ValueWriter;
@@ -18,7 +18,7 @@ fn write_object_type_spec<'a, J: struson::writer::JsonWriter>(
             writer.write_string_member("name", &name)?;
         }
         server::ast::ObjectTypeSpec::ObjectType(o) => {
-            let name = &o.borrow().name;
+            let name = &o.read().unwrap().name;
             writer.write_string_member("_type", "ObjectType")?;
             writer.write_string_member("name", name)?;
             writer.write_string_member(
@@ -27,7 +27,7 @@ fn write_object_type_spec<'a, J: struson::writer::JsonWriter>(
             )?;
         }
         server::ast::ObjectTypeSpec::Interface(i) => {
-            let name = &i.borrow().name;
+            let name = &i.read().unwrap().name;
             writer.write_string_member("_type", "InterfaceType")?;
             writer.write_string_member("name", name)?;
             writer.write_string_member(
@@ -36,7 +36,7 @@ fn write_object_type_spec<'a, J: struson::writer::JsonWriter>(
             )?;
         }
         server::ast::ObjectTypeSpec::Union(u) => {
-            let name = &u.borrow().name;
+            let name = &u.read().unwrap().name;
             writer.write_string_member("_type", "Union")?;
             writer.write_string_member("name", name)?;
             writer.write_string_member(
@@ -354,14 +354,14 @@ fn write_object<'a, J: struson::writer::JsonWriter>(
 
 fn write_objects<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    objects: &IndexMap<String, Arc<RefCell<server::ast::ObjectType>>>,
+    objects: &IndexMap<String, Arc<RwLock<server::ast::ObjectType>>>,
     server_uses_map: &Option<ServerUsesMap>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_objects = objects.clone();
     new_objects.sort_keys();
     for obj in new_objects.values() {
         let mut fields_map: Option<HashSet<String>> = None;
-        let name = &obj.borrow().name;
+        let name = &obj.read().unwrap().name;
         if let Some(map) = server_uses_map {
             if name == "Query" && map.queries.len() != 0 {
                 fields_map = Some(map.queries.clone());
@@ -374,7 +374,7 @@ fn write_objects<'a, J: struson::writer::JsonWriter>(
             };
         };
         writer.write_object_member(&name, |object_writer| {
-            write_object(object_writer, &obj.borrow(), fields_map)
+            write_object(object_writer, &obj.read().unwrap(), fields_map)
         })?
     }
     return Ok(());
@@ -399,19 +399,19 @@ fn write_interface<'a, J: struson::writer::JsonWriter>(
 
 fn write_interfaces<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    interfaces: &IndexMap<String, Arc<RefCell<server::ast::Interface>>>,
+    interfaces: &IndexMap<String, Arc<RwLock<server::ast::Interface>>>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_interfaces = interfaces.clone();
     new_interfaces.sort_keys();
     for interface in new_interfaces.values().filter(|interface| {
         uses_hashset
-            .map_or(true, |hashset| hashset.contains(&interface.borrow().name))
+            .map_or(true, |hashset| hashset.contains(&interface.read().unwrap().name))
     }) {
         writer.write_object_member(
-            &interface.borrow().name,
+            &interface.read().unwrap().name,
             |interface_writer| {
-                write_interface(interface_writer, &interface.borrow())
+                write_interface(interface_writer, &interface.read().unwrap())
             },
         )?
     }
@@ -428,7 +428,7 @@ fn write_input_type_spec<'a, J: struson::writer::JsonWriter>(
             writer.write_string_member("name", &name)?;
         }
         shared::ast::InputTypeSpec::InputType(i) => {
-            let name = &i.borrow().name;
+            let name = &i.read().unwrap().name;
             writer.write_string_member("_type", "InputType")?;
             writer.write_string_member("name", name)?;
             writer.write_string_member(
@@ -520,17 +520,17 @@ fn write_input<'a, J: struson::writer::JsonWriter>(
 
 fn write_inputs<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    inputs: &IndexMap<String, Arc<RefCell<shared::ast::InputType>>>,
+    inputs: &IndexMap<String, Arc<RwLock<shared::ast::InputType>>>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_inputs = inputs.clone();
     new_inputs.sort_keys();
     for input in new_inputs.values().filter(|input| {
         uses_hashset
-            .map_or(true, |hashset| hashset.contains(&input.borrow().name))
+            .map_or(true, |hashset| hashset.contains(&input.read().unwrap().name))
     }) {
-        writer.write_object_member(&input.borrow().name, |input_writer| {
-            write_input(input_writer, &input.borrow())?;
+        writer.write_object_member(&input.read().unwrap().name, |input_writer| {
+            write_input(input_writer, &input.read().unwrap())?;
             return Ok(());
         })?
     }
@@ -557,17 +557,17 @@ fn write_union<'a, J: struson::writer::JsonWriter>(
 
 fn write_unions<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    unions: &IndexMap<String, Arc<RefCell<server::ast::Union>>>,
+    unions: &IndexMap<String, Arc<RwLock<server::ast::Union>>>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_unions = unions.clone();
     new_unions.sort_keys();
     for union in new_unions.values().filter(|union| {
         uses_hashset
-            .map_or(true, |hashset| hashset.contains(&union.borrow().name))
+            .map_or(true, |hashset| hashset.contains(&union.read().unwrap().name))
     }) {
-        writer.write_object_member(&union.borrow().name, |union_writer| {
-            write_union(union_writer, &union.borrow())
+        writer.write_object_member(&union.read().unwrap().name, |union_writer| {
+            write_union(union_writer, &union.read().unwrap())
         })?
     }
     return Ok(());
@@ -629,7 +629,7 @@ fn write_server_directive<'a, J: struson::writer::JsonWriter>(
 
 fn write_server_directives<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    directives: &IndexMap<String, Arc<RefCell<shared::ast::ServerDirective>>>,
+    directives: &IndexMap<String, Arc<RwLock<shared::ast::ServerDirective>>>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_directives = directives.clone();
@@ -638,7 +638,7 @@ fn write_server_directives<'a, J: struson::writer::JsonWriter>(
         uses_hashset.map_or(true, |hashset| hashset.contains(*name))
     }) {
         writer.write_object_member(name, |directive_writer| {
-            write_server_directive(directive_writer, &directive.borrow())
+            write_server_directive(directive_writer, &directive.read().unwrap())
         })?
     }
     return Ok(());
@@ -735,7 +735,7 @@ fn write_spread_selection<'a, J: struson::writer::JsonWriter>(
     field: &client::ast::SpreadSelection,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("_type", "SpreadSelection")?;
-    writer.write_string_member("fragment", &field.fragment.borrow().name)?;
+    writer.write_string_member("fragment", &field.fragment.read().unwrap().name)?;
     Ok(())
 }
 
@@ -758,7 +758,7 @@ fn write_union_selection<'a, J: struson::writer::JsonWriter>(
                 "UnionConditionalSpreadSelection",
             )?;
             writer
-                .write_string_member("union", &spread.r#type.borrow().name)?;
+                .write_string_member("union", &spread.r#type.read().unwrap().name)?;
             writer.write_array_member("selections", |selections_writer| {
                 for n_selection in &spread.selection.selections {
                     selections_writer.write_object(|selection_writer| {
@@ -776,7 +776,7 @@ fn write_union_selection<'a, J: struson::writer::JsonWriter>(
                 "ObjectConditionalSpreadSelection",
             )?;
             writer
-                .write_string_member("object", &spread.r#type.borrow().name)?;
+                .write_string_member("object", &spread.r#type.read().unwrap().name)?;
             writer.write_object_member("spec", |spec_writer| {
                 write_object_fragment_spec(spec_writer, &spread.selection)
             })?;
@@ -790,7 +790,7 @@ fn write_union_fragment_spec<'a, J: struson::writer::JsonWriter>(
     spec: &client::ast::UnionFragmentSpec,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("_type", "UnionFragmentSpec")?;
-    writer.write_string_member("name", &spec.r#type.borrow().name)?;
+    writer.write_string_member("name", &spec.r#type.read().unwrap().name)?;
     writer.write_array_member("selections", |selections_writer| {
         for selection in &spec.selections {
             selections_writer.write_object(|selection_writer| {
@@ -849,7 +849,7 @@ fn write_object_fragment_spec<'a, J: struson::writer::JsonWriter>(
     spec: &client::ast::ObjectFragmentSpec<server::ast::ObjectType>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("_type", "ObjectFragmentSpec")?;
-    writer.write_string_member("name", &spec.r#type.borrow().name)?;
+    writer.write_string_member("name", &spec.r#type.read().unwrap().name)?;
     writer.write_array_member("selections", |selections_writer| {
         for selection in &spec.selections {
             selections_writer.write_object(|selection_writer| {
@@ -866,7 +866,7 @@ fn write_interface_fragment_spec<'a, J: struson::writer::JsonWriter>(
     spec: &client::ast::ObjectFragmentSpec<server::ast::Interface>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("_type", "ObjectFragmentSpec")?;
-    writer.write_string_member("name", &spec.r#type.borrow().name)?;
+    writer.write_string_member("name", &spec.r#type.read().unwrap().name)?;
     writer.write_array_member("selections", |selections_writer| {
         for selection in &spec.selections {
             selections_writer.write_object(|selection_writer| {
@@ -907,13 +907,13 @@ fn write_fragment<'a, J: struson::writer::JsonWriter>(
 
 fn write_fragments<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    fragments: &IndexMap<String, Arc<RefCell<client::ast::Fragment>>>,
+    fragments: &IndexMap<String, Arc<RwLock<client::ast::Fragment>>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_fragments = fragments.clone();
     new_fragments.sort_keys();
     for (name, fragment) in &new_fragments {
         writer.write_object_member(name, |fragment_writer| {
-            write_fragment(fragment_writer, &fragment.borrow())
+            write_fragment(fragment_writer, &fragment.read().unwrap())
         })?
     }
     return Ok(());
@@ -959,13 +959,13 @@ fn write_operation<'a, J: struson::writer::JsonWriter>(
 
 fn write_operations<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    operations: &IndexMap<String, Arc<RefCell<client::ast::Operation>>>,
+    operations: &IndexMap<String, Arc<RwLock<client::ast::Operation>>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_operations = operations.clone();
     new_operations.sort_keys();
     for (name, operation) in &new_operations {
         writer.write_object_member(name, |operation_writer| {
-            write_operation(operation_writer, &operation.borrow())
+            write_operation(operation_writer, &operation.read().unwrap())
         })?
     }
     return Ok(());

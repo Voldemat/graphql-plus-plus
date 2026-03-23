@@ -1,4 +1,4 @@
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 use crate::parsers::{
     file,
@@ -72,7 +72,7 @@ pub fn parse_first_pass(
 ) -> Result<ast::ClientSchemaNode, errors::Error> {
     match node {
         file::client::ast::ASTNode::Fragment(fragment) => {
-            Ok(Arc::new(RefCell::new(ast::Fragment {
+            Ok(Arc::new(RwLock::new(ast::Fragment {
                 name: fragment.name.name.clone(),
                 source_text: shared::source_text::extract_from_fragment(
                     fragment,
@@ -87,7 +87,7 @@ pub fn parse_first_pass(
                 &operation.parameters,
                 registry,
             )?;
-            Ok(Arc::new(RefCell::new(ast::Operation {
+            Ok(Arc::new(RwLock::new(ast::Operation {
                 name: operation.name.name.clone(),
                 source_text: shared::source_text::extract_from_operation(
                     operation,

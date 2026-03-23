@@ -8,7 +8,7 @@ pub mod scalar;
 pub mod shared;
 pub mod subscriptions;
 pub mod variables;
-use std::{cell::RefCell, sync::Arc};
+use std::sync::{Arc, RwLock};
 
 pub use ast::{LiteralValue, NonNullableValue, Value, Values};
 pub use hashmap_registry::{GQLEnum, GQLInput, GQLScalar, HashMapRegistry};
@@ -106,12 +106,7 @@ async fn execute_operation<
     }
 }
 
-pub async fn execute<
-    'args,
-    C,
-    S: Scalar,
-    T: ParseRegistry<S>,
->(
+pub async fn execute<'args, C, S: Scalar, T: ParseRegistry<S>>(
     context: &'args C,
     registry: &'args type_registry::TypeRegistry,
     resolvers: &'args Resolvers<'args, S, C>,
@@ -156,9 +151,10 @@ pub async fn execute<
         .swap_remove(&operation_name)
         .ok_or(Error::OperationIsNotDefined(operation_name))?;
     let operation =
-        Arc::<RefCell<client::ast::Operation>>::try_unwrap(operation_rc)
+        Arc::<RwLock<client::ast::Operation>>::try_unwrap(operation_rc)
             .unwrap()
-            .into_inner();
+            .into_inner()
+            .unwrap();
     let result = execute_operation(
         context,
         resolvers,

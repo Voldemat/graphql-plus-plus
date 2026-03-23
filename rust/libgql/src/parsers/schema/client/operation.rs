@@ -11,7 +11,7 @@ pub fn parse(
     node: &file::client::ast::OperationDefinition,
 ) -> Result<(), errors::Error> {
     let operation_rc = registry.operations.get(&node.name.name).unwrap();
-    let mut operation = operation_rc.borrow_mut();
+    let mut operation = operation_rc.write().unwrap();
     fragment::parse_selections(
         registry,
         &mut operation.fragment_spec,
