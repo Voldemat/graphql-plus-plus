@@ -80,7 +80,13 @@ impl<'buffer> Lexer<'buffer> {
             token_type = ComplexTokenType::Boolean;
         }
         let lexeme_start = {
-            let start = self.buffer_head + self.location.get_start() as usize;
+            let current_start: usize = if self.location.get_start() == u32::MAX
+            {
+                0
+            } else {
+                self.location.get_start() as usize
+            };
+            let start = self.buffer_head + current_start;
             if token_type == ComplexTokenType::String {
                 start + 1
             } else {
@@ -88,15 +94,18 @@ impl<'buffer> Lexer<'buffer> {
             }
         };
         let lexeme_end = {
-            let end = self.buffer_head + self.location.get_end() as usize;
+            let current_end: usize = if self.location.get_end() == u32::MAX {
+                0
+            } else {
+                self.location.get_end() as usize
+            };
+            let end = self.buffer_head + current_end;
             if token_type == ComplexTokenType::String {
                 end
             } else {
                 end + 1
             }
         };
-        let lexeme = &self.buffer[lexeme_start..lexeme_end];
-        println!("extract_token: lexeme: \"{}\"", lexeme);
         let token = Token {
             token_type: TokenType::Complex(token_type),
             lexeme: &self.buffer[lexeme_start..lexeme_end],
@@ -143,11 +152,26 @@ impl<'buffer> Lexer<'buffer> {
             self.location.lock_start();
             return Ok(None);
         }
+        let lexeme_start = {
+            let current_start: usize = if self.location.get_start() == u32::MAX
+            {
+                0
+            } else {
+                self.location.get_start() as usize
+            };
+            self.buffer_head + current_start
+        };
+        let lexeme_end = {
+            let current_end: usize = if self.location.get_end() == u32::MAX {
+                0
+            } else {
+                self.location.get_end() as usize
+            };
+            self.buffer_head + current_end + 1
+        };
         return Ok(Some(Token {
             token_type: token_type,
-            lexeme: &self.buffer[(self.buffer_head
-                + self.location.get_start() as usize)
-                ..(self.buffer_head + self.location.get_start() as usize + 1)],
+            lexeme: &self.buffer[lexeme_start..lexeme_end],
             location: self.location.clone(),
         }));
     }
