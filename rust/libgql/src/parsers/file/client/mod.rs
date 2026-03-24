@@ -33,7 +33,7 @@ impl<'buffer> Error<'buffer> {
         }
     }
 
-    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
         match self {
             Self::Base(b) => b.get_location(),
             Self::UnexpectedOpType { token } => &token.location,

@@ -36,7 +36,7 @@ impl<'buffer> Error<'buffer> {
         }
     }
 
-    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
         match self {
             Self::Consume(e) => e.get_location(),
             Self::IdentifierIsKeyword { token } => &token.location,

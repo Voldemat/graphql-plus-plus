@@ -41,7 +41,7 @@ pub enum Error<'buffer> {
 }
 
 impl<'buffer> Error<'buffer> {
-    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
         match self {
             Self::UnknownType(name_node) => {
                 &name_node.location.start_token.location

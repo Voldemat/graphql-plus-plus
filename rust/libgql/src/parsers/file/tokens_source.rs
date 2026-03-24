@@ -26,7 +26,7 @@ impl<'buffer> ConsumeError<'buffer> {
         }
     }
 
-    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
         match self {
             Self::EOF { token } => &token.location,
             Self::WrongType { received_token, .. } => &received_token.location,

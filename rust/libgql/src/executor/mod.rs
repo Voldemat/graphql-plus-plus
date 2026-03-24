@@ -28,7 +28,7 @@ use self::ast::GraphqlError;
 
 #[derive(Debug, derive_more::From)]
 pub enum Error<'buffer> {
-    Lexer(Vec<lexer::Error>),
+    Lexer(Vec<lexer::types::Error>),
     FileParser(file::client::Error<'buffer>),
     OperationIsNotDefined(String),
     OperationNameIsNotDefined,

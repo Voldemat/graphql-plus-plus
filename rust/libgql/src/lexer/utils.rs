@@ -1,4 +1,8 @@
-use crate::lexer::{Error, Lexer, tokens::Token};
+use super::{
+    Lexer,
+    tokens::Token,
+    types::{Error, LexerSuccessTokenResult},
+};
 
 pub fn parse_buffer_into_tokens<'buffer>(
     buffer: &'buffer str,
@@ -13,10 +17,8 @@ pub fn parse_buffer_into_tokens<'buffer>(
                     continue;
                 };
                 match r {
-                    crate::lexer::LexerSuccessTokenResult::One(t) => {
-                        tokens.push(t)
-                    }
-                    crate::lexer::LexerSuccessTokenResult::Two(t1, t2) => {
+                    LexerSuccessTokenResult::One(t) => tokens.push(t),
+                    LexerSuccessTokenResult::Two(t1, t2) => {
                         tokens.push(t1);
                         tokens.push(t2);
                     }

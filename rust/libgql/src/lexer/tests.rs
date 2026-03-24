@@ -1,19 +1,19 @@
 #[cfg(test)]
 mod tests {
-    use std::num::Wrapping;
-
     use crate::lexer::{
         ComplexTokenType, Lexer,
         token_type::SimpleTokenType,
-        tokens::{Location, Token},
+        tokens::{Token, TokenLocation},
+        types::{Error, LexerSuccessTokenResult},
     };
 
     #[test]
     fn test_lexer() {
-        let input = "fragment ProductFragment {\ninternal {\n...ProductInternalFragment\n}\n}";
+        let input = "fragment ProductFragment(\"something\") {\ninternal {\n...ProductInternalFragment\n}\n}";
+
         let mut lexer = Lexer::new(input);
         let mut tokens: Vec<Token> = Vec::new();
-        let mut errors: Vec<crate::lexer::Error> = Vec::new();
+        let mut errors: Vec<Error> = Vec::new();
         for c in input.chars() {
             match lexer.feed(c) {
                 Ok(result) => {
@@ -21,10 +21,15 @@ mod tests {
                         continue;
                     };
                     match r {
-                        crate::lexer::LexerSuccessTokenResult::One(t) => {
+                        LexerSuccessTokenResult::One(t) => {
+                            println!("LexerSuccessTokenResult::One({:?})", t);
                             tokens.push(t)
                         }
-                        crate::lexer::LexerSuccessTokenResult::Two(t1, t2) => {
+                        LexerSuccessTokenResult::Two(t1, t2) => {
+                            println!(
+                                "LexerSuccessTokenResult::Two({:?}, {:?})",
+                                t1, t2
+                            );
                             tokens.push(t1);
                             tokens.push(t2);
                         }
@@ -34,54 +39,72 @@ mod tests {
             }
         }
         println!("{:?}", tokens);
-        pretty_assertions::assert_eq!(errors, Vec::<crate::lexer::Error>::new());
+        pretty_assertions::assert_eq!(
+            errors,
+            Vec::<crate::lexer::Error>::new()
+        );
         pretty_assertions::assert_eq!(
             tokens,
             vec![
                 Token {
                     token_type: ComplexTokenType::Identifier.into(),
-                    lexeme: "fragment".into(),
-                    location: Location::new(1, Wrapping(0), Wrapping(7))
+                    lexeme: "fragment",
+                    location: TokenLocation { start: 0, end: 7 }
                 },
                 Token {
                     token_type: ComplexTokenType::Identifier.into(),
-                    lexeme: "ProductFragment".into(),
-                    location: Location::new(1, Wrapping(9), Wrapping(23))
+                    lexeme: "ProductFragment",
+                    location: TokenLocation { start: 9, end: 23 }
+                },
+                Token {
+                    token_type: SimpleTokenType::LeftParen.into(),
+                    lexeme: "(",
+                    location: TokenLocation { start: 24, end: 24 }
+                },
+                Token {
+                    token_type: ComplexTokenType::String.into(),
+                    lexeme: "something",
+                    location: TokenLocation { start: 25, end: 35 }
+                },
+                Token {
+                    token_type: SimpleTokenType::RightParen.into(),
+                    lexeme: ")",
+                    location: TokenLocation { start: 36, end: 36 }
                 },
                 Token {
                     token_type: SimpleTokenType::LeftBrace.into(),
-                    lexeme: "{".into(),
-                    location: Location::new(1, Wrapping(25), Wrapping(25))
+                    lexeme: "{",
+                    location: TokenLocation { start: 38, end: 38 }
                 },
                 Token {
                     token_type: ComplexTokenType::Identifier.into(),
-                    lexeme: "internal".into(),
-                    location: Location::new(2, Wrapping(0), Wrapping(7))
+                    lexeme: "internal",
+                    location: TokenLocation { start: 40, end: 47 }
                 },
                 Token {
                     token_type: SimpleTokenType::LeftBrace.into(),
-                    lexeme: "{".into(),
-                    location: Location::new(2, Wrapping(9), Wrapping(9))
+                    lexeme: "{",
+                    location: TokenLocation { start: 49, end: 49 }
                 },
                 Token {
                     token_type: ComplexTokenType::Spread.into(),
-                    lexeme: "...".into(),
-                    location: Location::new(3, Wrapping(0), Wrapping(2))
+                    lexeme: "...",
+                    location: TokenLocation { start: 51, end: 53 }
                 },
                 Token {
                     token_type: ComplexTokenType::Identifier.into(),
-                    lexeme: "ProductInternalFragment".into(),
-                    location: Location::new(3, Wrapping(3), Wrapping(25))
+                    lexeme: "ProductInternalFragment",
+                    location: TokenLocation { start: 54, end: 76 }
                 },
                 Token {
                     token_type: SimpleTokenType::RightBrace.into(),
-                    lexeme: "}".into(),
-                    location: Location::new(4, Wrapping(0), Wrapping(0))
+                    lexeme: "}",
+                    location: TokenLocation { start: 78, end: 78 }
                 },
                 Token {
                     token_type: SimpleTokenType::RightBrace.into(),
-                    lexeme: "}".into(),
-                    location: Location::new(5, Wrapping(0), Wrapping(0))
+                    lexeme: "}",
+                    location: TokenLocation { start: 80, end: 80 }
                 },
             ]
         );

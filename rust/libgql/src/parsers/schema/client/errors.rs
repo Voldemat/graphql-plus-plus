@@ -64,7 +64,7 @@ pub enum Error<'buffer> {
 }
 
 impl<'buffer> Error<'buffer> {
-    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
         match self {
             Self::TypeRegistryError(error) => error.get_location(),
             Self::UnknownFragmentType(name_node) => {

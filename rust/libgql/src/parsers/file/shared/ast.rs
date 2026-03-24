@@ -69,7 +69,7 @@ pub enum LiteralNode<'buffer> {
 }
 
 impl<'buffer> LiteralNode<'buffer> {
-    pub fn get_location(self: &Self) -> &lexer::tokens::Location {
+    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
         match self {
             Self::Int(node) => &node.location.start_token.location,
             Self::Float(node) => &node.location.start_token.location,
