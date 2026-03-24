@@ -4,11 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-actix-web = "4"
 libgql = { path = "../../rust/libgql" }
 serde = { version = "1.0.228", features = ["derive", "serde_derive"] }
 serde_json_path_to_error = "0.1.5"
 libgqlcodegen = { path = "../../rust/gqlcodegen" }
+hyper = { version = "1", features = ["server", "http1"] }
+tokio = { version = "1", features = ["net", "macros"] }
+http-body-util = "0.1"
+hyper-util = { version = "0.1", features = ["server", "http1", "tokio"] }
 
 [build-dependencies]
 codegen = "0.3.0"
