@@ -4,7 +4,7 @@ async fn query_get_user(
 ) -> Result<User, libgql::executor::ast::ResolverError> {
     Ok(User {
         id: id.clone(),
-        name: "test-name".to_string()
+        name: "test-name".to_string(),
     })
 }
 
