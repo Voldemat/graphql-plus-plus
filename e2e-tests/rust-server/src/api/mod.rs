@@ -8,7 +8,7 @@ struct GraphqlRequestBody {
     #[serde(rename = "operationName")]
     operation_name: Option<String>,
     query: String,
-    variables: Option<serde_json_path_to_error::value::Value>,
+    variables: Option<serde_json::value::Value>,
 }
 
 #[derive(serde::Serialize)]
@@ -19,7 +19,7 @@ struct GraphqlError {
 
 #[derive(serde::Serialize)]
 struct GraphqlResponseBody {
-    data: serde_json_path_to_error::value::Value,
+    data: serde_json::value::Value,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     errors: Vec<GraphqlError>,
 }
@@ -73,7 +73,7 @@ async fn graphql_handler(
             return Ok(response);
         }
     };
-    let data = match serde_json_path_to_error::from_slice::<GraphqlRequestBody>(&body) {
+    let data = match serde_json::from_slice::<GraphqlRequestBody>(&body) {
         Ok(data) => data,
         Err(error) => {
             let mut response = hyper::Response::new(error.to_string());
@@ -98,8 +98,8 @@ async fn graphql_handler(
         Ok(result) => result,
         Err(error) => match error {
             libgql::executor::Error::ExecutionErrors(errors) => {
-                let body = match serde_json_path_to_error::to_string(&GraphqlResponseBody {
-                    data: serde_json_path_to_error::Value::Null,
+                let body = match serde_json::to_string(&GraphqlResponseBody {
+                    data: serde_json::Value::Null,
                     errors: errors
                         .into_iter()
                         .map(|gql_error| GraphqlError {
@@ -130,7 +130,7 @@ async fn graphql_handler(
         libgql::executor::OperationResult::Immediate(result) => {
             let json_result =
                 libgql::json::executor::ast::serialize_values_to_json(&result).unwrap();
-            let body = match serde_json_path_to_error::to_string(&GraphqlResponseBody {
+            let body = match serde_json::to_string(&GraphqlResponseBody {
                 data: json_result,
                 errors: Vec::new(),
             }) {

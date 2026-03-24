@@ -5,16 +5,16 @@ edition = "2024"
 
 [dependencies]
 libgql = { path = "../../rust/libgql" }
-serde = { version = "1.0.228", features = ["derive", "serde_derive"] }
-serde_json_path_to_error = "0.1.5"
+serde = { version = "1.0.228", features = ["derive", "serde_derive"], default-features = false }
 libgqlcodegen = { path = "../../rust/gqlcodegen" }
-hyper = { version = "1", features = ["server", "http1"] }
-tokio = { version = "1", features = ["net", "macros"] }
+hyper = { version = "1", features = ["server", "http1"], default-features = false }
+tokio = { version = "1", features = ["net", "macros"], default-features = false }
 http-body-util = "0.1"
-hyper-util = { version = "0.1", features = ["server", "http1", "tokio"] }
+hyper-util = { version = "0.1", features = ["server", "http1", "tokio"], default-features = false }
+serde_json = { version = "1.0.149", default-features = false }
 
 [build-dependencies]
 codegen = "0.3.0"
-indexmap = "2.13.0"
+indexmap = { version = "2.13.0", features = ["std"], default-features = false }
 libgqlcodegen = { path = "../../rust/gqlcodegen" }
-serde_json_path_to_error = "0.1.5"
+serde_json = { version = "1.0.149", default-features = false }

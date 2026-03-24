@@ -3,10 +3,9 @@ use std::collections::HashSet;
 use libgqlcodegen::{format, generator, schema};
 
 fn run_schema() {
-    let server_schema: schema::server::schema::Schema = serde_json_path_to_error::from_str(
-        &std::fs::read_to_string("../graphql/server-schema.json").unwrap(),
-    )
-    .unwrap();
+    let server_schema: schema::server::schema::Schema =
+        serde_json::from_str(&std::fs::read_to_string("../graphql/server-schema.json").unwrap())
+            .unwrap();
     let client_schema = schema::client::schema::Schema::default();
     let scalars_mapping = indexmap::IndexMap::<String, String>::from([
         ("Boolean".into(), "bool".into()),
