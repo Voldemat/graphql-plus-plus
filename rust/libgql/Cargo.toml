@@ -8,14 +8,13 @@ repository = "https://github.com/Voldemat/graphql-plus-plus"
 
 [dependencies]
 async-stream = "0.3.6"
-derive_more = { version = "2.1.0", features = ["from", "display"] }
-futures = "0.3.32"
-futures-core = "0.3.32"
-indexmap = { version = "2.12.1", features = ["serde"] }
-serde = { version = "1.0.228", features = ["serde_derive", "rc"] }
-serde_json = { version = "1.0.148", features = ["preserve_order"] }
-serde_json_path_to_error = "0.1.5"
-struson = { version = "0.6.0", features = ["simple-api"] }
+derive_more = { version = "2.1.0", features = ["from", "display"], default-features = false }
+futures = { version = "0.3.32", features = ["alloc"], default-features = false }
+futures-core = { version = "0.3.32", features = [], default-features = false }
+indexmap = { version = "2.12.1", features = ["serde"], default-features = false }
+serde = { version = "1.0.228", features = ["serde_derive", "rc"], default-features = false }
+serde_json = { version = "1.0.148", features = ["preserve_order"], default-features = false }
+struson = { version = "0.6.0", features = ["simple-api"], default-features = false }
 
 [dev-dependencies]
-pretty_assertions = "1.4.1"
+pretty_assertions = { version = "1.4.1", features = ["std"], default-features = false }
