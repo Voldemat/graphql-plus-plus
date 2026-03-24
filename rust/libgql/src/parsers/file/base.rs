@@ -45,30 +45,26 @@ impl<'buffer> From<tokens_source::ConsumeError<'buffer>> for Error<'buffer> {
 }
 
 pub struct BaseParser<
-    'buffer: 'tokens,
-    'tokens,
-    T: tokens_source::TokensSource<'buffer, 'tokens>,
+    'buffer,
+    T: tokens_source::TokensSource<'buffer>,
     TDirectiveLocation: for<'a> TryFrom<&'a str> + serde::Serialize,
 > {
     pub tokens_source: T,
     _v: PhantomData<TDirectiveLocation>,
     _y: PhantomData<&'buffer ()>,
-    _z: PhantomData<&'tokens ()>,
 }
 
 impl<
-    'buffer: 'tokens,
-    'tokens,
-    T: tokens_source::TokensSource<'buffer, 'tokens>,
+    'buffer,
+    T: tokens_source::TokensSource<'buffer>,
     TDirectiveLocation: for<'a> TryFrom<&'a str> + serde::Serialize,
-> BaseParser<'buffer, 'tokens, T, TDirectiveLocation>
+> BaseParser<'buffer, T, TDirectiveLocation>
 {
     pub fn new(tokens_source: T) -> Self {
         return Self {
             tokens_source,
             _v: PhantomData::default(),
             _y: PhantomData::default(),
-            _z: PhantomData::default(),
         };
     }
 
@@ -123,11 +119,12 @@ impl<
     fn parse_list_type_node(
         self: &mut Self,
     ) -> Result<shared::ast::ListTypeNode<'buffer>, Error<'buffer>> {
-        let start_token = T::consume(
+        let start = T::consume(
             &mut self.tokens_source,
             SimpleTokenType::LeftBracket.into(),
         )?
-        .clone();
+        .location
+        .start;
         let type_node = self.parse_type_node()?;
         T::consume(
             &mut self.tokens_source,
@@ -139,7 +136,7 @@ impl<
         );
         return Ok(shared::ast::ListTypeNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: T::get_current_token(&self.tokens_source).location.end,
                 source: T::get_source_file(&self.tokens_source),
             },
@@ -153,13 +150,13 @@ impl<
     ) -> Result<shared::ast::InputFieldDefinitionNode<'buffer>, Error<'buffer>>
     {
         let name_node = self.parse_name_node(false)?;
-        let start_token = T::get_current_token(&self.tokens_source);
+        let start = T::get_current_token(&self.tokens_source).location.start;
         T::consume(&mut self.tokens_source, SimpleTokenType::Colon.into())?;
         let type_node = self.parse_type_node()?;
         let default_value = self.parse_default_value()?;
         return Ok(shared::ast::InputFieldDefinitionNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: T::get_current_token(&self.tokens_source).location.end,
                 source: T::get_source_file(&self.tokens_source),
             },
@@ -212,9 +209,9 @@ impl<
         self: &mut Self,
     ) -> Result<shared::ast::LiteralNode<'buffer>, Error<'buffer>> {
         T::advance(&mut self.tokens_source)?;
-        let current_token = T::get_current_token(&self.tokens_source);
+        let current_token = T::get_current_token(&self.tokens_source).clone();
         let TokenType::Complex(token_type) = current_token.token_type else {
-            return Err(Error::ExpectedComplexType(current_token.clone()));
+            return Err(Error::ExpectedComplexType(current_token));
         };
         let location = shared::ast::NodeLocation {
             start: current_token.location.start,
@@ -229,9 +226,7 @@ impl<
                 if let Some(float_node) = self.parse_literal_float_node() {
                     return Ok(float_node.into());
                 };
-                return Err(Error::CannotParseNumberLiteral(
-                    current_token.clone(),
-                ));
+                return Err(Error::CannotParseNumberLiteral(current_token));
             }
             ComplexTokenType::Boolean => {
                 return Ok(shared::ast::LiteralBooleanNode {
@@ -423,12 +418,12 @@ impl<
         self: &mut Self,
     ) -> Result<shared::ast::DirectiveInvocationNode<'buffer>, Error<'buffer>>
     {
-        let start_token = T::get_current_token(&self.tokens_source);
+        let start = T::get_current_token(&self.tokens_source).location.start;
         let name = self.parse_name_node(false)?;
         let arguments = self.parse_arguments()?;
         return Ok(shared::ast::DirectiveInvocationNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: T::get_current_token(&self.tokens_source).location.end,
                 source: T::get_source_file(&self.tokens_source).clone(),
             },

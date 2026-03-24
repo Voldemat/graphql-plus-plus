@@ -39,20 +39,11 @@ impl<'buffer> Error<'buffer> {
     }
 }
 
-pub struct Parser<
-    'buffer: 'tokens,
-    'tokens,
-    T: tokens_source::TokensSource<'buffer, 'tokens>,
-> {
-    base: BaseParser<'buffer, 'tokens, T, ast::DirectiveLocation>,
+pub struct Parser<'buffer, T: tokens_source::TokensSource<'buffer>> {
+    base: BaseParser<'buffer, T, ast::DirectiveLocation>,
 }
 
-impl<
-    'buffer: 'tokens,
-    'tokens,
-    T: tokens_source::TokensSource<'buffer, 'tokens>,
-> Parser<'buffer, 'tokens, T>
-{
+impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     pub fn new(tokens_source: T) -> Self {
         return Self {
             base: BaseParser::new(tokens_source),
@@ -113,11 +104,13 @@ impl<
     fn parse_scalar_type_definition_node(
         self: &mut Self,
     ) -> Result<ast::ScalarDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start_token = T::get_current_token(&self.base.tokens_source);
+        let start = T::get_current_token(&self.base.tokens_source)
+            .location
+            .start;
         let name = self.base.parse_name_node(false)?;
         return Ok(ast::ScalarDefinitionNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: name.location.end,
                 source: name.location.source.clone(),
             },
@@ -128,7 +121,9 @@ impl<
     fn parse_union_type_definition_node(
         self: &mut Self,
     ) -> Result<ast::UnionDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start_token = T::get_current_token(&self.base.tokens_source);
+        let start = T::get_current_token(&self.base.tokens_source)
+            .location
+            .start;
         let name = self.base.parse_name_node(false)?;
         T::consume(
             &mut self.base.tokens_source,
@@ -147,7 +142,7 @@ impl<
         }
         return Ok(ast::UnionDefinitionNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: values.last().unwrap().location.end,
                 source: name.location.source.clone(),
             },
@@ -160,12 +155,14 @@ impl<
     fn parse_extend_type_node(
         self: &mut Self,
     ) -> Result<ast::ExtendTypeNode<'buffer>, base::Error<'buffer>> {
-        let start_token = T::get_current_token(&self.base.tokens_source);
+        let start = T::get_current_token(&self.base.tokens_source)
+            .location
+            .start;
         T::consume_identifier_by_lexeme(&mut self.base.tokens_source, "type")?;
         let type_node = self.parse_object_type_definition_node()?;
         return Ok(ast::ExtendTypeNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: T::get_current_token(&self.base.tokens_source)
                     .location
                     .end,
@@ -178,7 +175,9 @@ impl<
     fn parse_enum_type_definition_node(
         self: &mut Self,
     ) -> Result<ast::EnumDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start_token = T::get_current_token(&self.base.tokens_source);
+        let start = T::get_current_token(&self.base.tokens_source)
+            .location
+            .start;
         let name = self.base.parse_name_node(false)?;
         T::consume(
             &mut self.base.tokens_source,
@@ -201,7 +200,7 @@ impl<
         )?;
         return Ok(ast::EnumDefinitionNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: T::get_current_token(&self.base.tokens_source)
                     .location
                     .end,
@@ -233,7 +232,9 @@ impl<
         self: &mut Self,
     ) -> Result<ast::InterfaceDefinitionNode<'buffer>, base::Error<'buffer>>
     {
-        let start_token = T::get_current_token(&self.base.tokens_source);
+        let start = T::get_current_token(&self.base.tokens_source)
+            .location
+            .start;
         let name = self.base.parse_name_node(false)?;
         T::consume(
             &mut self.base.tokens_source,
@@ -252,7 +253,7 @@ impl<
         )?;
         return Ok(ast::InterfaceDefinitionNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: T::get_current_token(&self.base.tokens_source)
                     .location
                     .end,
@@ -268,7 +269,9 @@ impl<
         self: &mut Self,
     ) -> Result<ast::InputObjectDefinitionNode<'buffer>, base::Error<'buffer>>
     {
-        let start_token = T::get_current_token(&self.base.tokens_source);
+        let start = T::get_current_token(&self.base.tokens_source)
+            .location
+            .start;
         let name = self.base.parse_name_node(false)?;
         T::consume(
             &mut self.base.tokens_source,
@@ -291,7 +294,7 @@ impl<
         )?;
         return Ok(ast::InputObjectDefinitionNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: T::get_current_token(&self.base.tokens_source)
                     .location
                     .end,
@@ -306,7 +309,9 @@ impl<
     fn parse_field_definition_node(
         self: &mut Self,
     ) -> Result<ast::FieldDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start_token = T::get_current_token(&self.base.tokens_source);
+        let start = T::get_current_token(&self.base.tokens_source)
+            .location
+            .start;
         let name = self.base.parse_name_node(false)?;
         let arguments = self.base.parse_input_field_definition_nodes()?;
         T::consume(
@@ -324,7 +329,7 @@ impl<
         }
         return Ok(ast::FieldDefinitionNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: T::get_current_token(&self.base.tokens_source)
                     .location
                     .end,
@@ -340,7 +345,9 @@ impl<
     fn parse_object_type_definition_node(
         self: &mut Self,
     ) -> Result<ast::ObjectDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start_token = T::get_current_token(&self.base.tokens_source);
+        let start = T::get_current_token(&self.base.tokens_source)
+            .location
+            .start;
         let name = self.base.parse_name_node(false)?;
         let interfaces = self.parse_implements_clause()?;
         let mut fields = Vec::<ast::FieldDefinitionNode>::new();
@@ -361,7 +368,7 @@ impl<
         }
         return Ok(ast::ObjectDefinitionNode {
             location: shared::ast::NodeLocation {
-                start: start_token.location.start,
+                start,
                 end: T::get_current_token(&self.base.tokens_source)
                     .location
                     .end,

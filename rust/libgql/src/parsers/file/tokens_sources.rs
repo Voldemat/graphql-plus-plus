@@ -8,15 +8,15 @@ use crate::{
     },
 };
 
-pub struct VecTokensSource<'buffer, 'tokens> {
-    tokens: &'tokens Vec<Token<'buffer>>,
+pub struct VecTokensSource<'buffer> {
+    tokens: Vec<Token<'buffer>>,
     source_file: Arc<SourceFile<'buffer>>,
     current_index: usize,
 }
 
-impl<'buffer, 'tokens> VecTokensSource<'buffer, 'tokens> {
+impl<'buffer> VecTokensSource<'buffer> {
     pub fn new(
-        tokens: &'tokens Vec<Token<'buffer>>,
+        tokens: Vec<Token<'buffer>>,
         source_file: Arc<SourceFile<'buffer>>,
     ) -> Self {
         assert!(tokens.len() > 0);
@@ -28,12 +28,8 @@ impl<'buffer, 'tokens> VecTokensSource<'buffer, 'tokens> {
     }
 }
 
-impl<'buffer, 'tokens> TokensSource<'buffer, 'tokens>
-    for VecTokensSource<'buffer, 'tokens>
-{
-    fn lookahead(
-        self: &Self,
-    ) -> Option<&'tokens crate::lexer::tokens::Token<'buffer>> {
+impl<'buffer> TokensSource<'buffer> for VecTokensSource<'buffer> {
+    fn lookahead(self: &Self) -> Option<&crate::lexer::tokens::Token<'buffer>> {
         self.tokens.get(self.current_index + 1)
     }
 
@@ -49,7 +45,7 @@ impl<'buffer, 'tokens> TokensSource<'buffer, 'tokens>
         self: &mut Self,
         token_type: crate::lexer::token_type::TokenType,
     ) -> Result<
-        &'tokens crate::lexer::tokens::Token<'buffer>,
+        &crate::lexer::tokens::Token<'buffer>,
         super::tokens_source::ConsumeError<'buffer>,
     > {
         if self.current_index == self.tokens.len() {
@@ -66,9 +62,7 @@ impl<'buffer, 'tokens> TokensSource<'buffer, 'tokens>
         return Ok(token);
     }
 
-    fn get_current_token(
-        self: &Self,
-    ) -> &'tokens crate::lexer::tokens::Token<'buffer> {
+    fn get_current_token(self: &Self) -> &crate::lexer::tokens::Token<'buffer> {
         return self.tokens.get(self.current_index).unwrap();
     }
 
