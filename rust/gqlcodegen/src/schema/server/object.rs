@@ -66,7 +66,7 @@ mod tests {
 
     #[test]
     fn test_parse_object() {
-        let _: Object = serde_json_path_to_error::from_str(
+        let _: Object = serde_json::from_str(
             r##"
 {
   "name": "User",

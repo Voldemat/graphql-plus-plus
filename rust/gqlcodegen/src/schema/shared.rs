@@ -63,7 +63,7 @@ mod tests {
 
     #[test]
     fn test_parse_input_type() {
-        let _: InputType = serde_json_path_to_error::from_str(
+        let _: InputType = serde_json::from_str(
             r#"
         {
             "_type": "Scalar",

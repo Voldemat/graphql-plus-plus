@@ -16,7 +16,7 @@ mod tests {
 
     #[test]
     fn test_parse_input_schema() {
-        let schema: Input = serde_json_path_to_error::from_str(
+        let schema: Input = serde_json::from_str(
             r#"
 {
   "name": "GroupIn",

@@ -13,7 +13,7 @@ mod tests {
 
     #[test]
     fn test_schema() {
-        let _: Schema = serde_json_path_to_error::from_str(
+        let _: Schema = serde_json::from_str(
             r##"
 {
     "fragments": {

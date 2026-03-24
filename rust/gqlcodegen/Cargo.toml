@@ -6,13 +6,13 @@ edition = "2024"
 [dependencies]
 codegen = "0.3.0"
 convert_case = "0.10.0"
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json_path_to_error = "0.1.5"
+serde = { version = "1.0.228", features = ["derive", "alloc"], default-features = false }
 libgql = { path = "../libgql" }
-indexmap = "2.13.0"
+indexmap = { version = "2.13.0", features = ["std"], default-features = false }
 libgqlcodegen_macros = { path = "./macros" }
-syn = { version = "2.0.117", features = ["full"] }
+syn = { version = "2.0.117", features = ["full", "printing", "parsing"], default-features = false }
 quote = "1.0.45"
 
 [dev-dependencies]
-pretty_assertions = "1.4.1"
+pretty_assertions = { version = "1.4.1", features = ["std"], default-features = false }
+serde_json = { version = "1.0.149", features = [], default-features = false }
