@@ -34,8 +34,8 @@ mod tests {
             }
         }
         println!("{:?}", tokens);
-        assert_eq!(errors, Vec::<crate::lexer::Error>::new());
-        assert_eq!(
+        pretty_assertions::assert_eq!(errors, Vec::<crate::lexer::Error>::new());
+        pretty_assertions::assert_eq!(
             tokens,
             vec![
                 Token {

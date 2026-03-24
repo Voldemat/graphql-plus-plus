@@ -16,3 +16,6 @@ serde = { version = "1.0.228", features = ["serde_derive", "rc"] }
 serde_json = { version = "1.0.148", features = ["preserve_order"] }
 serde_json_path_to_error = "0.1.5"
 struson = { version = "0.6.0", features = ["simple-api"] }
+
+[dev-dependencies]
+pretty_assertions = "1.4.1"

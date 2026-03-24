@@ -11,6 +11,7 @@ pub struct Lexer<'buffer> {
     buffer: &'buffer str,
     token_type: Option<ComplexTokenType>,
     location: Location,
+    buffer_head: usize,
 }
 
 impl<'buffer> Lexer<'buffer> {
@@ -19,6 +20,7 @@ impl<'buffer> Lexer<'buffer> {
             buffer,
             token_type: None,
             location: Location::default(),
+            buffer_head: 0,
         };
     }
 }
@@ -77,10 +79,27 @@ impl<'buffer> Lexer<'buffer> {
         if self.buffer == "true" || self.buffer == "false" {
             token_type = ComplexTokenType::Boolean;
         }
+        let lexeme_start = {
+            let start = self.buffer_head + self.location.get_start() as usize;
+            if token_type == ComplexTokenType::String {
+                start + 1
+            } else {
+                start
+            }
+        };
+        let lexeme_end = {
+            let end = self.buffer_head + self.location.get_end() as usize;
+            if token_type == ComplexTokenType::String {
+                end
+            } else {
+                end + 1
+            }
+        };
+        let lexeme = &self.buffer[lexeme_start..lexeme_end];
+        println!("extract_token: lexeme: \"{}\"", lexeme);
         let token = Token {
             token_type: TokenType::Complex(token_type),
-            lexeme: &self.buffer[(self.location.get_start() as usize)
-                ..(self.location.get_end() as usize)],
+            lexeme: &self.buffer[lexeme_start..lexeme_end],
             location: self.location.clone(),
         };
         self.token_type = None;
@@ -126,8 +145,9 @@ impl<'buffer> Lexer<'buffer> {
         }
         return Ok(Some(Token {
             token_type: token_type,
-            lexeme: &self.buffer[(self.location.get_start() as usize)
-                ..(self.location.get_end() as usize)],
+            lexeme: &self.buffer[(self.buffer_head
+                + self.location.get_start() as usize)
+                ..(self.buffer_head + self.location.get_start() as usize + 1)],
             location: self.location.clone(),
         }));
     }
@@ -135,6 +155,7 @@ impl<'buffer> Lexer<'buffer> {
     pub fn feed(self: &mut Self, c: char) -> LexerResult<'buffer> {
         if c == '\n' {
             let maybe_token = self.maybe_extract_token();
+            self.buffer_head += self.location.get_start() as usize + 2;
             self.location.new_line();
             return Ok(maybe_token.map(|t| t.into()).into());
         }
