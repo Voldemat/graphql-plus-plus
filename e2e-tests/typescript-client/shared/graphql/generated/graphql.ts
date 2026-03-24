@@ -1,17 +1,19 @@
 import { z } from "zod/v4";
 
 
-export const checkSchema = z.object({
-    a: z.number()
-});
-export type Check = z.output<typeof checkSchema>;
-
 export const querySchema = z.object({
-    get getCheck() {
-        return checkSchema;
+    get getUser() {
+        return userSchema;
     }
 });
 export type Query = z.output<typeof querySchema>;
+
+export const userSchema = z.object({
+    email: z.string(),
+    id: z.string(),
+    name: z.string()
+});
+export type User = z.output<typeof userSchema>;
 
 export interface Operation<V, R> {
     name: string;
@@ -20,28 +22,32 @@ export interface Operation<V, R> {
     variablesSchema: z.ZodType<unknown, V>;
     resultSchema: z.ZodType<R>;
 }
-export const CheckFragmentDocument = "fragment Check on Check{__typename a}";
-export const checkFragmentSchema = z.object({
-    a: z.number(),
-    __typename: z.literal("Check").nullable().optional()
+export const UserFragmentDocument = "fragment User on User{__typename email id name}";
+export const userFragmentSchema = z.object({
+    email: z.string(),
+    id: z.string(),
+    name: z.string(),
+    __typename: z.literal("User").nullable().optional()
 });
-export type CheckFragment = z.output<typeof checkFragmentSchema>;
-export const getCheckVariablesSchema = z.object({});
-export type GetCheckVariables = z.input<typeof getCheckVariablesSchema>;
+export type UserFragment = z.output<typeof userFragmentSchema>;
+export const getUserVariablesSchema = z.object({
+    id: z.string()
+});
+export type GetUserVariables = z.input<typeof getUserVariablesSchema>;
 
-export const getCheckResultSchema = z.object({
+export const getUserResultSchema = z.object({
     __typename: z.literal("Query").nullable().optional(),
-    getCheck: z.lazy(() => z.object({
-        ...checkFragmentSchema.shape,
-        __typename: z.literal("Check").nullable().optional()
+    getUser: z.lazy(() => z.object({
+        ...userFragmentSchema.shape,
+        __typename: z.literal("User").nullable().optional()
     }))
 });
-export type GetCheckResult = z.output<typeof getCheckResultSchema>;
-export const GetCheckOperation = {
-    name: "GetCheck",
+export type GetUserResult = z.output<typeof getUserResultSchema>;
+export const GetUserOperation = {
+    name: "GetUser",
     type: "QUERY",
-    document: "query GetCheck{getCheck{...Check}} fragment Check on Check{__typename a}",
-    variablesSchema: getCheckVariablesSchema,
-    resultSchema: getCheckResultSchema
-} as const satisfies Operation<GetCheckVariables, GetCheckResult>;
+    document: "query GetUser($id:UUID!){getUser(id:$id){...User}} fragment User on User{__typename email id name}",
+    variablesSchema: getUserVariablesSchema,
+    resultSchema: getUserResultSchema
+} as const satisfies Operation<GetUserVariables, GetUserResult>;
 

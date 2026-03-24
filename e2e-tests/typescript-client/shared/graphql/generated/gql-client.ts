@@ -1,12 +1,12 @@
 // @ts-nocheck
 import type { IExecutor, RequestContext } from "@vladimirdev635/gql-client/types";
-import { GetCheckOperation, GetCheckVariables, GetCheckResult } from "./graphql.ts";
+import { GetUserOperation, GetUserVariables, GetUserResult } from "./graphql.ts";
 
 export function createSdk<TRequestContext extends RequestContext>(executor: IExecutor<TRequestContext>) {
     return {
         queries: {
-            GetCheck: async (variables: GetCheckVariables, requestContext: TRequestContext): Promise<GetCheckResult> => {
-                const executorResult = await executor.executeSync(GetCheckOperation, variables, requestContext);
+            GetUser: async (variables: GetUserVariables, requestContext: TRequestContext): Promise<GetUserResult> => {
+                const executorResult = await executor.executeSync(GetUserOperation, variables, requestContext);
                 return executorResult.result;
             }
         }

@@ -12,6 +12,7 @@ fn run_schema() {
         ("String".into(), "String".into()),
         ("Int".into(), "i32".into()),
         ("Float".into(), "f32".into()),
+        ("UUID".into(), "uuid::Uuid".into())
     ]);
     let filepath = "./src/api/generated.rs";
     let (imports, code_map) =
@@ -27,7 +28,9 @@ fn run_schema() {
             resolvers: generator::config::ResolversConfig {
                 context_type: "super::context::Context".to_string(),
             },
-            field_to_resolver: HashSet::from_iter([]),
+            field_to_resolver: HashSet::from_iter([
+                ("User".to_string(), "email".to_string())
+            ]),
         },
         &schema::Schema {
             server: server_schema,
@@ -45,11 +48,12 @@ fn run_schema() {
             eprintln!(
                 "./src/api/generated.rs contains stale code, try to build with env GQL_OVERWRITE=true to update code"
             );
+            std::process::exit(1);
         }
     };
 }
 
 fn main() {
-    println!("cargo::rerun-if-changed=../graphql/server-schema.json");
+    println!("cargo::rerun-if-changed=./../graphql/server-schema.json");
     run_schema()
 }

@@ -1,7 +1,11 @@
-type Check {
-    a: Int!
+scalar UUID
+
+type User {
+    id: UUID!
+    name: String!
+    email: String!
 }
 
 type Query {
-    getCheck: Check!
+    getUser(id: UUID!): User!
 }

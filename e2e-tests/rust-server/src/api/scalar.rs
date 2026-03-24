@@ -120,6 +120,20 @@ impl libgql::executor::GQLScalar<Scalar> for String {
 }
 
 #[libgqlcodegen::macros::gql_scalar_resolver_value]
+impl libgql::executor::GQLScalar<Scalar> for uuid::Uuid {
+    fn from_scalar(s: Scalar) -> Result<Self, String> {
+        match s {
+            Scalar::String(s) => Self::parse_str(s.as_str()).map_err(|e| e.to_string()),
+            _ => Err(format!("Invalid scalar for String {:?}", s)),
+        }
+    }
+
+    fn to_scalar(self: &Self) -> Result<Scalar, String> {
+        Ok(Scalar::String(self.to_string()))
+    }
+}
+
+#[libgqlcodegen::macros::gql_scalar_resolver_value]
 impl libgql::executor::GQLScalar<Scalar> for bool {
     fn from_scalar(s: Scalar) -> Result<Self, String> {
         match s {
