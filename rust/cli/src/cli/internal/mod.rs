@@ -1,5 +1,4 @@
 pub mod diff;
-pub mod executor;
 pub mod lexer;
 pub mod parsers;
 
@@ -9,8 +8,6 @@ pub enum Commands {
     Lexer(lexer::Commands),
     #[command(subcommand)]
     Parsers(parsers::Commands),
-    #[command(subcommand)]
-    Executor(executor::Commands),
     Diff(diff::DiffArgs),
 }
 
@@ -19,7 +16,6 @@ impl Commands {
         match self {
             Commands::Lexer(lexer) => lexer.execute(),
             Commands::Parsers(parsers) => parsers.execute(),
-            Commands::Executor(e) => e.execute(),
             Commands::Diff(args) => diff::command(args),
         }
     }

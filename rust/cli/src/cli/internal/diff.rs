@@ -458,23 +458,29 @@ fn find_difference_between_schemas(
 pub fn command(args: DiffArgs) {
     let server_schema = libgql::json::parsers::schema::parse_server_schema(
         &mut libgql::parsers::schema::type_registry::TypeRegistry::new(),
-        serde_json_path_to_error::from_str::<serde_json_path_to_error::Value>(
+        serde_json::from_str::<serde_json::Value>(
             &utils::read_buffer_from_filepath(&args.json_schema_path),
         )
         .unwrap(),
     )
     .unwrap();
-    let server_schema_from_introspection = libgql::json::parsers::introspection::parse_server_schema(
-        &mut libgql::parsers::schema::type_registry::TypeRegistry::new(),
-        serde_json_path_to_error::from_str::<serde_json_path_to_error::Value>(
-            &reqwest::blocking::Client::new().post(args.url_to_api.clone())
-                .body(INTROSPECTION_QUERY)
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .send()
-                .unwrap().text().unwrap()
-        ).unwrap()
-    ).unwrap();
+    let server_schema_from_introspection =
+        libgql::json::parsers::introspection::parse_server_schema(
+            &mut libgql::parsers::schema::type_registry::TypeRegistry::new(),
+            serde_json::from_str::<serde_json::Value>(
+                &reqwest::blocking::Client::new()
+                    .post(args.url_to_api.clone())
+                    .body(INTROSPECTION_QUERY)
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .send()
+                    .unwrap()
+                    .text()
+                    .unwrap(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
     find_difference_between_schemas(
         &server_schema,
         &server_schema_from_introspection,

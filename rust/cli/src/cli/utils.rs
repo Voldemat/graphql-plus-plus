@@ -91,15 +91,11 @@ pub fn load_server_schema_from_inputs(
     let mut schema = libgql::parsers::schema::server::schema::Schema::default();
     for jsonpath in resolve_paths(config_dir_path, &conf.json_schema) {
         let buffer = std::fs::read_to_string(jsonpath).unwrap();
-        let new_schema =
-            libgql::json::parsers::schema::parse_server_schema(
-                registry,
-                serde_json_path_to_error::from_str::<
-                    serde_json_path_to_error::Value,
-                >(&buffer)
-                .unwrap(),
-            )
-            .unwrap();
+        let new_schema = libgql::json::parsers::schema::parse_server_schema(
+            registry,
+            serde_json::from_str::<serde_json::Value>(&buffer).unwrap(),
+        )
+        .unwrap();
         schema.append_schema(new_schema);
     }
     let mut buffers = Vec::new();
