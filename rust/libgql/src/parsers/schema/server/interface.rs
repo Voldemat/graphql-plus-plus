@@ -9,19 +9,19 @@ use crate::parsers::{
     },
 };
 
-pub fn parse_definition(
-    node: &file::server::ast::InterfaceDefinitionNode,
+pub fn parse_definition<'buffer>(
+    node: &file::server::ast::InterfaceDefinitionNode<'buffer>,
     registry: &TypeRegistry,
-) -> Result<Arc<RwLock<ast::Interface>>, errors::Error> {
-    let obj_rc = registry.interfaces.get(&node.name.name).unwrap();
+) -> Result<Arc<RwLock<ast::Interface>>, errors::Error<'buffer>> {
+    let obj_rc = registry.interfaces.get(node.name.name).unwrap();
     let mut obj = obj_rc.write().unwrap();
     for field_definition_node in node.fields.iter() {
         let (spec, nullable) =
             object::parse_object_field_spec(&field_definition_node, registry)?;
         obj.fields.insert(
-            field_definition_node.name.name.clone(),
+            field_definition_node.name.name.to_string(),
             Arc::new(shared::ast::FieldDefinition {
-                name: field_definition_node.name.name.clone(),
+                name: field_definition_node.name.name.to_string(),
                 spec,
                 nullable,
             }),

@@ -9,16 +9,26 @@ use super::shared;
 use super::tokens_source;
 
 #[derive(Debug)]
-pub enum Error {
-    Consume(tokens_source::ConsumeError),
-    IdentifierIsKeyword { token: lexer::tokens::Token },
-    ExpectedComplexType { token: lexer::tokens::Token },
-    CannotParseNumberLiteral { token: lexer::tokens::Token },
-    UnexpectedSpreadInLiteral { token: lexer::tokens::Token },
-    UnknownDirectiveLocation { token: lexer::tokens::Token },
+pub enum Error<'buffer> {
+    Consume(tokens_source::ConsumeError<'buffer>),
+    IdentifierIsKeyword {
+        token: lexer::tokens::Token<'buffer>,
+    },
+    ExpectedComplexType {
+        token: lexer::tokens::Token<'buffer>,
+    },
+    CannotParseNumberLiteral {
+        token: lexer::tokens::Token<'buffer>,
+    },
+    UnexpectedSpreadInLiteral {
+        token: lexer::tokens::Token<'buffer>,
+    },
+    UnknownDirectiveLocation {
+        token: lexer::tokens::Token<'buffer>,
+    },
 }
 
-impl Error {
+impl<'buffer> Error<'buffer> {
     pub fn is_eof(self: &Self) -> bool {
         match self {
             Self::Consume(error) => error.is_eof(),
@@ -38,44 +48,48 @@ impl Error {
     }
 }
 
-impl From<tokens_source::ConsumeError> for Error {
-    fn from(value: tokens_source::ConsumeError) -> Self {
+impl<'buffer> From<tokens_source::ConsumeError<'buffer>> for Error<'buffer> {
+    fn from(value: tokens_source::ConsumeError<'buffer>) -> Self {
         return Self::Consume(value);
     }
 }
 
 pub struct BaseParser<
-    T: tokens_source::TokensSource,
+    'buffer,
+    T: tokens_source::TokensSource<'buffer>,
     TDirectiveLocation: for<'a> TryFrom<&'a str> + serde::Serialize,
 > {
     pub tokens_source: T,
     _v: PhantomData<TDirectiveLocation>,
+    _y: PhantomData<&'buffer ()>,
 }
 
 impl<
-    T: tokens_source::TokensSource,
+    'buffer,
+    T: tokens_source::TokensSource<'buffer>,
     TDirectiveLocation: for<'a> TryFrom<&'a str> + serde::Serialize,
-> BaseParser<T, TDirectiveLocation>
+> BaseParser<'buffer, T, TDirectiveLocation>
 {
     pub fn new(tokens_source: T) -> Self {
         return Self {
             tokens_source,
             _v: PhantomData::default(),
+            _y: PhantomData::default(),
         };
     }
 
     pub fn parse_name_node(
         self: &mut Self,
         err_on_keyword: bool,
-    ) -> Result<shared::ast::NameNode, Error> {
+    ) -> Result<shared::ast::NameNode<'buffer>, Error<'buffer>> {
         let token = T::consume_identifier(&mut self.tokens_source)?;
         if err_on_keyword && token.is_keyword() {
             return Err(Error::IdentifierIsKeyword {
                 token: token.clone(),
             });
         }
-        let name = token.lexeme.clone();
-        return Ok(shared::ast::NameNode {
+        let name = token.lexeme;
+        return Ok(shared::ast::NameNode::<'buffer> {
             location: shared::ast::NodeLocation {
                 start_token: token.clone(),
                 end_token: token.clone(),
@@ -87,7 +101,7 @@ impl<
 
     pub fn parse_type_node(
         self: &mut Self,
-    ) -> Result<shared::ast::TypeNode, Error> {
+    ) -> Result<shared::ast::TypeNode<'buffer>, Error<'buffer>> {
         if T::is_ahead(&self.tokens_source, SimpleTokenType::LeftBracket.into())
         {
             return self.parse_list_type_node().map(|v| v.into());
@@ -97,7 +111,7 @@ impl<
 
     fn parse_named_type_node(
         self: &mut Self,
-    ) -> Result<shared::ast::NamedTypeNode, Error> {
+    ) -> Result<shared::ast::NamedTypeNode<'buffer>, Error<'buffer>> {
         let name_node = self.parse_name_node(false)?;
         let nullable = !T::consume_if_is_ahead(
             &mut self.tokens_source,
@@ -116,7 +130,7 @@ impl<
 
     fn parse_list_type_node(
         self: &mut Self,
-    ) -> Result<shared::ast::ListTypeNode, Error> {
+    ) -> Result<shared::ast::ListTypeNode<'buffer>, Error<'buffer>> {
         let start_token = T::consume(
             &mut self.tokens_source,
             SimpleTokenType::LeftBracket.into(),
@@ -144,7 +158,8 @@ impl<
 
     pub fn parse_input_field_definition_node(
         self: &mut Self,
-    ) -> Result<shared::ast::InputFieldDefinitionNode, Error> {
+    ) -> Result<shared::ast::InputFieldDefinitionNode<'buffer>, Error<'buffer>>
+    {
         let name_node = self.parse_name_node(false)?;
         let start_token = T::get_current_token(&self.tokens_source).clone();
         T::consume(&mut self.tokens_source, SimpleTokenType::Colon.into())?;
@@ -165,8 +180,12 @@ impl<
 
     pub fn parse_input_field_definition_nodes(
         self: &mut Self,
-    ) -> Result<Vec<shared::ast::InputFieldDefinitionNode>, Error> {
-        let mut arguments = Vec::<shared::ast::InputFieldDefinitionNode>::new();
+    ) -> Result<
+        Vec<shared::ast::InputFieldDefinitionNode<'buffer>>,
+        Error<'buffer>,
+    > {
+        let mut arguments =
+            Vec::<shared::ast::InputFieldDefinitionNode<'buffer>>::new();
         if T::consume_if_is_ahead(
             &mut self.tokens_source,
             SimpleTokenType::LeftParen.into(),
@@ -199,7 +218,7 @@ impl<
 
     fn parse_literal_node(
         self: &mut Self,
-    ) -> Result<shared::ast::LiteralNode, Error> {
+    ) -> Result<shared::ast::LiteralNode<'buffer>, Error<'buffer>> {
         T::advance(&mut self.tokens_source)?;
         let current_token = T::get_current_token(&self.tokens_source).clone();
         let TokenType::Complex(token_type) = current_token.token_type else {
@@ -235,14 +254,14 @@ impl<
             ComplexTokenType::String => {
                 return Ok(shared::ast::LiteralStringNode {
                     location,
-                    value: current_token.lexeme.clone(),
+                    value: current_token.lexeme.to_string(),
                 }
                 .into());
             }
             ComplexTokenType::Identifier => {
                 return Ok(shared::ast::LiteralEnumValueNode {
                     location,
-                    value: current_token.lexeme.clone(),
+                    value: current_token.lexeme.to_string(),
                 }
                 .into());
             }
@@ -256,7 +275,7 @@ impl<
 
     fn parse_literal_int_node(
         self: &mut Self,
-    ) -> Option<shared::ast::LiteralIntNode> {
+    ) -> Option<shared::ast::LiteralIntNode<'buffer>> {
         let current_token = T::get_current_token(&self.tokens_source);
         let value = current_token.lexeme.parse::<i64>().ok()?;
         return Some(shared::ast::LiteralIntNode {
@@ -271,7 +290,7 @@ impl<
 
     fn parse_literal_float_node(
         self: &Self,
-    ) -> Option<shared::ast::LiteralFloatNode> {
+    ) -> Option<shared::ast::LiteralFloatNode<'buffer>> {
         let current_token = T::get_current_token(&self.tokens_source);
         let value = current_token.lexeme.parse::<f64>().ok()?;
         return Some(shared::ast::LiteralFloatNode {
@@ -286,8 +305,8 @@ impl<
 
     pub fn parse_arguments(
         self: &mut Self,
-    ) -> Result<Vec<shared::ast::Argument>, Error> {
-        let mut arguments = Vec::<shared::ast::Argument>::new();
+    ) -> Result<Vec<shared::ast::Argument<'buffer>>, Error<'buffer>> {
+        let mut arguments = Vec::<shared::ast::Argument<'buffer>>::new();
         if T::consume_if_is_ahead(
             &mut self.tokens_source,
             SimpleTokenType::LeftParen.into(),
@@ -310,7 +329,9 @@ impl<
         return Ok(arguments);
     }
 
-    fn parse_argument(self: &mut Self) -> Result<shared::ast::Argument, Error> {
+    fn parse_argument(
+        self: &mut Self,
+    ) -> Result<shared::ast::Argument<'buffer>, Error<'buffer>> {
         let name = self.parse_name_node(false)?;
         T::consume(&mut self.tokens_source, SimpleTokenType::Colon.into())?;
         let value = self.parse_argument_value()?;
@@ -327,7 +348,7 @@ impl<
 
     fn parse_argument_value(
         self: &mut Self,
-    ) -> Result<shared::ast::ArgumentValue, Error> {
+    ) -> Result<shared::ast::ArgumentValue<'buffer>, Error<'buffer>> {
         let Some(token) = T::lookahead(&self.tokens_source) else {
             return Err(tokens_source::ConsumeError::EOF {
                 token: T::get_current_token(&self.tokens_source).clone(),
@@ -342,7 +363,7 @@ impl<
 
     pub fn parse_default_value(
         self: &mut Self,
-    ) -> Result<Option<shared::ast::LiteralNode>, Error> {
+    ) -> Result<Option<shared::ast::LiteralNode<'buffer>>, Error<'buffer>> {
         if T::consume_if_is_ahead(
             &mut self.tokens_source,
             SimpleTokenType::Equal.into(),
@@ -354,8 +375,10 @@ impl<
 
     fn parse_directive_location_node(
         self: &mut Self,
-    ) -> Result<shared::ast::DirectiveLocationNode<TDirectiveLocation>, Error>
-    {
+    ) -> Result<
+        shared::ast::DirectiveLocationNode<'buffer, TDirectiveLocation>,
+        Error<'buffer>,
+    > {
         let directive_location = self.parse_directive_location()?;
         let current_token = T::get_current_token(&self.tokens_source);
         return Ok(shared::ast::DirectiveLocationNode::<TDirectiveLocation> {
@@ -371,8 +394,8 @@ impl<
     fn parse_directive_locations(
         self: &mut Self,
     ) -> Result<
-        Vec<shared::ast::DirectiveLocationNode<TDirectiveLocation>>,
-        Error,
+        Vec<shared::ast::DirectiveLocationNode<'buffer, TDirectiveLocation>>,
+        Error<'buffer>,
     > {
         let mut locations = vec![self.parse_directive_location_node()?];
         while T::consume_if_is_ahead(
@@ -386,13 +409,16 @@ impl<
 
     pub fn parse_directive_node(
         self: &mut Self,
-    ) -> Result<shared::ast::DirectiveNode<TDirectiveLocation>, Error> {
+    ) -> Result<
+        shared::ast::DirectiveNode<'buffer, TDirectiveLocation>,
+        Error<'buffer>,
+    > {
         T::consume(&mut self.tokens_source, SimpleTokenType::AtSign.into())?;
         let name_node = self.parse_name_node(false)?;
         let arguments = self.parse_input_field_definition_nodes()?;
         T::consume_identifier_by_lexeme(&mut self.tokens_source, "on")?;
         let locations = self.parse_directive_locations()?;
-        return Ok(shared::ast::DirectiveNode::<TDirectiveLocation> {
+        return Ok(shared::ast::DirectiveNode::<'buffer, TDirectiveLocation> {
             location: shared::ast::NodeLocation {
                 start_token: name_node.location.start_token.clone(),
                 end_token: locations.last().unwrap().location.end_token.clone(),
@@ -406,7 +432,8 @@ impl<
 
     pub fn parse_directive_invocation_node(
         self: &mut Self,
-    ) -> Result<shared::ast::DirectiveInvocationNode, Error> {
+    ) -> Result<shared::ast::DirectiveInvocationNode<'buffer>, Error<'buffer>>
+    {
         let start_token = T::get_current_token(&self.tokens_source).clone();
         let name = self.parse_name_node(false)?;
         let arguments = self.parse_arguments()?;
@@ -423,10 +450,9 @@ impl<
 
     pub fn parse_directive_location(
         self: &mut Self,
-    ) -> Result<TDirectiveLocation, Error> {
+    ) -> Result<TDirectiveLocation, Error<'buffer>> {
         let token = T::consume_identifier(&mut self.tokens_source)?;
-        let Ok(value) = TDirectiveLocation::try_from(token.lexeme.as_str())
-        else {
+        let Ok(value) = TDirectiveLocation::try_from(token.lexeme) else {
             return Err(Error::UnknownDirectiveLocation {
                 token: token.clone(),
             });

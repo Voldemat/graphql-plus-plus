@@ -35,12 +35,12 @@ pub struct TypeRegistry {
 }
 
 #[derive(Debug)]
-pub enum Error {
-    UnknownType(file::shared::ast::NameNode),
-    UnknownArgument(file::shared::ast::NameNode),
+pub enum Error<'buffer> {
+    UnknownType(file::shared::ast::NameNode<'buffer>),
+    UnknownArgument(file::shared::ast::NameNode<'buffer>),
 }
 
-impl Error {
+impl<'buffer> Error<'buffer> {
     pub fn get_location(self: &Self) -> &lexer::tokens::Location {
         match self {
             Self::UnknownType(name_node) => {
@@ -51,7 +51,9 @@ impl Error {
             }
         }
     }
-    pub fn get_source_file(self: &Self) -> &Arc<file::shared::ast::SourceFile> {
+    pub fn get_source_file(
+        self: &Self,
+    ) -> &Arc<file::shared::ast::SourceFile<'buffer>> {
         match self {
             Self::UnknownType(name_node) => &name_node.location.source,
             Self::UnknownArgument(name_node) => &name_node.location.source,
@@ -96,16 +98,17 @@ impl TypeRegistry {
         return self.objects.get("Subscription");
     }
 
-    pub fn get_type_for_input(
+    pub fn get_type_for_input<'buffer>(
         self: &Self,
-        node: &file::shared::ast::NameNode,
-    ) -> Result<shared::ast::InputTypeSpec, Error> {
-        let name = &node.name;
+        node: &file::shared::ast::NameNode<'buffer>,
+    ) -> Result<shared::ast::InputTypeSpec, Error<'buffer>> {
+        let name = node.name;
         if let Some(input) = self.inputs.get(name) {
             return Ok(input.clone().into());
         }
-        if self.scalars.contains(name) {
-            return Ok(name.clone().into());
+        let name_string = name.to_string();
+        if self.scalars.contains(&name_string) {
+            return Ok(name_string.into());
         }
         if let Some(gqlenum) = self.enums.get(name) {
             return Ok(gqlenum.clone().into());
@@ -113,11 +116,11 @@ impl TypeRegistry {
         return Err(Error::UnknownType(node.clone()));
     }
 
-    pub fn get_type_for_object(
+    pub fn get_type_for_object<'buffer>(
         self: &Self,
-        node: &file::shared::ast::NameNode,
-    ) -> Result<server::ast::ObjectTypeSpec, Error> {
-        let name = &node.name;
+        node: &file::shared::ast::NameNode<'buffer>,
+    ) -> Result<server::ast::ObjectTypeSpec, Error<'buffer>> {
+        let name = node.name;
         if let Some(object) = self.objects.get(name) {
             return Ok(object.clone().into());
         }
@@ -127,8 +130,9 @@ impl TypeRegistry {
         if let Some(union) = self.unions.get(name) {
             return Ok(union.clone().into());
         }
-        if self.scalars.contains(name) {
-            return Ok(name.clone().into());
+        let name_string = name.to_string();
+        if self.scalars.contains(&name_string) {
+            return Ok(name_string.into());
         }
         if let Some(gqlenum) = self.enums.get(name) {
             return Ok(gqlenum.clone().into());

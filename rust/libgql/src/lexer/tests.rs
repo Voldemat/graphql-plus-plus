@@ -11,7 +11,7 @@ mod tests {
     #[test]
     fn test_lexer() {
         let input = "fragment ProductFragment {\ninternal {\n...ProductInternalFragment\n}\n}";
-        let mut lexer = Lexer::new();
+        let mut lexer = Lexer::new(input);
         let mut tokens: Vec<Token> = Vec::new();
         let mut errors: Vec<crate::lexer::Error> = Vec::new();
         for c in input.chars() {

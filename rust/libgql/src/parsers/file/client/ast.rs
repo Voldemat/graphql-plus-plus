@@ -52,40 +52,41 @@ impl TryFrom<&str> for DirectiveLocation {
     }
 }
 
-pub type DirectiveLocationNode =
-    shared::ast::DirectiveLocationNode<DirectiveLocation>;
-pub type DirectiveDefinition = shared::ast::DirectiveNode<DirectiveLocation>;
+pub type DirectiveLocationNode<'buffer> =
+    shared::ast::DirectiveLocationNode<'buffer, DirectiveLocation>;
+pub type DirectiveDefinition<'buffer> =
+    shared::ast::DirectiveNode<'buffer, DirectiveLocation>;
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct ObjectLiteralFieldSpec {
-    pub location: shared::ast::NodeLocation,
-    pub selection_name: shared::ast::NameNode,
-    pub name: shared::ast::NameNode,
+pub struct ObjectLiteralFieldSpec<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub selection_name: shared::ast::NameNode<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct ObjectCallableFieldSpec {
-    pub location: shared::ast::NodeLocation,
-    pub selection_name: shared::ast::NameNode,
-    pub name: shared::ast::NameNode,
-    pub arguments: Vec<shared::ast::Argument>,
+pub struct ObjectCallableFieldSpec<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub selection_name: shared::ast::NameNode<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
+    pub arguments: Vec<shared::ast::Argument<'buffer>>,
 }
 
 #[derive(Debug, Clone, derive_more::From, serde::Serialize)]
-pub enum ObjectFieldSpec {
-    Literal(ObjectLiteralFieldSpec),
-    Callable(ObjectCallableFieldSpec),
+pub enum ObjectFieldSpec<'buffer> {
+    Literal(ObjectLiteralFieldSpec<'buffer>),
+    Callable(ObjectCallableFieldSpec<'buffer>),
 }
 
-impl ObjectFieldSpec {
-    pub fn get_name(self: &Self) -> &shared::ast::NameNode {
+impl<'buffer> ObjectFieldSpec<'buffer> {
+    pub fn get_name(self: &Self) -> &shared::ast::NameNode<'buffer> {
         match self {
             Self::Literal(literal) => &literal.name,
             Self::Callable(callable) => &callable.name,
         }
     }
 
-    pub fn get_selection_name(self: &Self) -> &shared::ast::NameNode {
+    pub fn get_selection_name(self: &Self) -> &shared::ast::NameNode<'buffer> {
         match self {
             Self::Literal(literal) => &literal.selection_name,
             Self::Callable(callable) => &callable.selection_name,
@@ -98,13 +99,13 @@ impl ObjectFieldSpec {
                 if literal.name.name == literal.selection_name.name {
                     return None;
                 }
-                return Some(literal.selection_name.name.clone());
+                return Some(literal.selection_name.name.to_string());
             }
             Self::Callable(callable) => {
                 if callable.name.name == callable.selection_name.name {
                     return None;
                 }
-                return Some(callable.selection_name.name.clone());
+                return Some(callable.selection_name.name.to_string());
             }
         }
     }
@@ -118,17 +119,17 @@ fn serialize_option_rc_fragment_spec<S: serde::Serializer>(
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct FieldSelectionNode {
-    pub location: shared::ast::NodeLocation,
-    pub field: ObjectFieldSpec,
+pub struct FieldSelectionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub field: ObjectFieldSpec<'buffer>,
     #[serde(serialize_with = "serialize_option_rc_fragment_spec")]
-    pub spec: Option<Rc<FragmentSpec>>,
+    pub spec: Option<Rc<FragmentSpec<'buffer>>>,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct SpreadSelectionNode {
-    pub location: shared::ast::NodeLocation,
-    pub fragment_name: shared::ast::NameNode,
+pub struct SpreadSelectionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub fragment_name: shared::ast::NameNode<'buffer>,
 }
 
 fn serialize_fragment_rc<S: serde::Serializer>(
@@ -139,24 +140,24 @@ fn serialize_fragment_rc<S: serde::Serializer>(
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct ConditionalSpreadSelectionNode {
-    pub location: shared::ast::NodeLocation,
-    pub type_name: shared::ast::NameNode,
+pub struct ConditionalSpreadSelectionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub type_name: shared::ast::NameNode<'buffer>,
     #[serde(serialize_with = "serialize_fragment_rc")]
-    pub fragment: Rc<FragmentSpec>,
+    pub fragment: Rc<FragmentSpec<'buffer>>,
 }
 
 #[derive(Debug, derive_more::From, serde::Serialize)]
-pub enum SelectionNode {
-    FieldSelectionNode(FieldSelectionNode),
-    ConditionalSpreadSelectionNode(ConditionalSpreadSelectionNode),
-    SpreadSelectionNode(SpreadSelectionNode),
+pub enum SelectionNode<'buffer> {
+    FieldSelectionNode(FieldSelectionNode<'buffer>),
+    ConditionalSpreadSelectionNode(ConditionalSpreadSelectionNode<'buffer>),
+    SpreadSelectionNode(SpreadSelectionNode<'buffer>),
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct FragmentSpec {
-    pub location: shared::ast::NodeLocation,
-    pub selections: Vec<SelectionNode>,
+pub struct FragmentSpec<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub selections: Vec<SelectionNode<'buffer>>,
 }
 
 #[derive(Debug, Clone, Copy, serde::Serialize)]
@@ -212,25 +213,25 @@ impl TryFrom<&str> for OpType {
 }
 
 #[derive(serde::Serialize)]
-pub struct OperationDefinition {
-    pub location: shared::ast::NodeLocation,
+pub struct OperationDefinition<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
     pub r#type: OpType,
-    pub name: shared::ast::NameNode,
-    pub parameters: Vec<shared::ast::InputFieldDefinitionNode>,
-    pub fragment: FragmentSpec,
+    pub name: shared::ast::NameNode<'buffer>,
+    pub parameters: Vec<shared::ast::InputFieldDefinitionNode<'buffer>>,
+    pub fragment: FragmentSpec<'buffer>,
 }
 
 #[derive(serde::Serialize)]
-pub struct FragmentDefinition {
-    pub location: shared::ast::NodeLocation,
-    pub name: shared::ast::NameNode,
-    pub type_name: shared::ast::NameNode,
-    pub spec: FragmentSpec,
+pub struct FragmentDefinition<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
+    pub type_name: shared::ast::NameNode<'buffer>,
+    pub spec: FragmentSpec<'buffer>,
 }
 
 #[derive(derive_more::From, serde::Serialize)]
-pub enum ASTNode {
-    Operation(OperationDefinition),
-    Fragment(FragmentDefinition),
-    Directive(DirectiveDefinition),
+pub enum ASTNode<'buffer> {
+    Operation(OperationDefinition<'buffer>),
+    Fragment(FragmentDefinition<'buffer>),
+    Directive(DirectiveDefinition<'buffer>),
 }

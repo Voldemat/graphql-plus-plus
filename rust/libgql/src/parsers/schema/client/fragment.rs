@@ -14,11 +14,11 @@ use crate::parsers::{
     },
 };
 
-fn parse_union_selection_node(
+fn parse_union_selection_node<'buffer>(
     registry: &TypeRegistry,
     r#type: &Arc<RwLock<server::ast::Union>>,
-    node: &file::client::ast::SelectionNode,
-) -> Result<ast::UnionSelection, errors::Error> {
+    node: &file::client::ast::SelectionNode<'buffer>,
+) -> Result<ast::UnionSelection, errors::Error<'buffer>> {
     match node {
         file::client::ast::SelectionNode::FieldSelectionNode(field) => {
             if is_object_field_spec_is_typename_field(&field.field) {
@@ -95,12 +95,12 @@ fn get_type_for_union_conditional_selection(
         .read()
         .unwrap()
         .items
-        .get(&node.type_name.name)
+        .get(node.type_name.name)
         .map(|object| object.clone().into())
         .or_else(|| {
             registry
                 .unions
-                .get(&node.type_name.name)
+                .get(node.type_name.name)
                 .filter(|union| {
                     union.read().unwrap().items.keys().all(|object_name| {
                         r#type.read().unwrap().items.contains_key(object_name)
@@ -110,11 +110,11 @@ fn get_type_for_union_conditional_selection(
         });
 }
 
-fn parse_union_selections(
+fn parse_union_selections<'buffer>(
     registry: &TypeRegistry,
     r#type: &Arc<RwLock<server::ast::Union>>,
-    selections: &[file::client::ast::SelectionNode],
-) -> Result<Vec<ast::UnionSelection>, errors::Error> {
+    selections: &[file::client::ast::SelectionNode<'buffer>],
+) -> Result<Vec<ast::UnionSelection>, errors::Error<'buffer>> {
     return selections
         .iter()
         .map(|selection| {
@@ -123,13 +123,12 @@ fn parse_union_selections(
         .collect();
 }
 
-fn parse_interface_spread_selection_node(
+fn parse_interface_spread_selection_node<'buffer>(
     registry: &TypeRegistry,
     r#type: &Arc<RwLock<server::ast::Interface>>,
-    node: &file::client::ast::SpreadSelectionNode,
-) -> Result<ast::SpreadSelection, errors::Error> {
-    let Some(fragment) = registry.fragments.get(&node.fragment_name.name)
-    else {
+    node: &file::client::ast::SpreadSelectionNode<'buffer>,
+) -> Result<ast::SpreadSelection, errors::Error<'buffer>> {
+    let Some(fragment) = registry.fragments.get(node.fragment_name.name) else {
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
     let has_invalid_type = match &fragment.read().unwrap().spec {
@@ -150,13 +149,12 @@ fn parse_interface_spread_selection_node(
     });
 }
 
-fn parse_object_spread_selection_node(
+fn parse_object_spread_selection_node<'buffer>(
     registry: &TypeRegistry,
     r#type: &Arc<RwLock<server::ast::ObjectType>>,
-    node: &file::client::ast::SpreadSelectionNode,
-) -> Result<ast::SpreadSelection, errors::Error> {
-    let Some(fragment) = registry.fragments.get(&node.fragment_name.name)
-    else {
+    node: &file::client::ast::SpreadSelectionNode<'buffer>,
+) -> Result<ast::SpreadSelection, errors::Error<'buffer>> {
+    let Some(fragment) = registry.fragments.get(node.fragment_name.name) else {
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
     let has_invalid_type = match &fragment.read().unwrap().spec {
@@ -180,13 +178,12 @@ fn parse_object_spread_selection_node(
     });
 }
 
-fn parse_union_spread_selection_node(
+fn parse_union_spread_selection_node<'buffer>(
     registry: &TypeRegistry,
     r#type: &Arc<RwLock<server::ast::Union>>,
-    node: &file::client::ast::SpreadSelectionNode,
-) -> Result<ast::SpreadSelection, errors::Error> {
-    let Some(fragment) = registry.fragments.get(&node.fragment_name.name)
-    else {
+    node: &file::client::ast::SpreadSelectionNode<'buffer>,
+) -> Result<ast::SpreadSelection, errors::Error<'buffer>> {
+    let Some(fragment) = registry.fragments.get(node.fragment_name.name) else {
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
     let has_invalid_type = match &fragment.read().unwrap().spec {
@@ -218,17 +215,17 @@ fn is_object_field_spec_is_typename_field(
 ) -> bool {
     match field {
         file::client::ast::ObjectFieldSpec::Literal(literal) => {
-            &literal.name.name == "__typename"
+            literal.name.name == "__typename"
         }
         _ => false,
     }
 }
 
-fn fragment_spec_from_field_definition(
+fn fragment_spec_from_field_definition<'buffer>(
     registry: &TypeRegistry,
     field: &Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
-    spec: &Rc<file::client::ast::FragmentSpec>,
-) -> Result<Arc<ast::FragmentSpec>, errors::Error> {
+    spec: &Rc<file::client::ast::FragmentSpec<'buffer>>,
+) -> Result<Arc<ast::FragmentSpec>, errors::Error<'buffer>> {
     let type_spec = field.spec.get_return_type();
     match type_spec {
         server::ast::ObjectTypeSpec::ObjectType(object) => Ok(Arc::new(
@@ -271,11 +268,13 @@ fn fragment_spec_from_field_definition(
     }
 }
 
-fn parse_selection_arguments(
+fn parse_selection_arguments<'buffer>(
     spec: &server::ast::CallableFieldSpec,
-    arguments: &[file::shared::ast::Argument],
-) -> Result<IndexMap<String, shared::ast::FieldSelectionArgument>, errors::Error>
-{
+    arguments: &[file::shared::ast::Argument<'buffer>],
+) -> Result<
+    IndexMap<String, shared::ast::FieldSelectionArgument>,
+    errors::Error<'buffer>,
+> {
     Ok(arguments
         .iter()
         .map(|arg| parse_selection_argument(spec, arg))
@@ -285,10 +284,10 @@ fn parse_selection_arguments(
         .collect())
 }
 
-fn parse_argument_literal_value(
+fn parse_argument_literal_value<'buffer>(
     type_spec: &shared::ast::InputTypeSpec,
-    node: &file::shared::ast::LiteralNode,
-) -> Result<shared::ast::ArgumentLiteralValue, errors::Error> {
+    node: &file::shared::ast::LiteralNode<'buffer>,
+) -> Result<shared::ast::ArgumentLiteralValue, errors::Error<'buffer>> {
     match node {
         file::shared::ast::LiteralNode::Int(i) => {
             let is_valid = match type_spec {
@@ -365,11 +364,11 @@ fn parse_argument_literal_value(
     }
 }
 
-fn parse_selection_argument(
+fn parse_selection_argument<'buffer>(
     spec: &server::ast::CallableFieldSpec,
-    argument: &file::shared::ast::Argument,
-) -> Result<shared::ast::FieldSelectionArgument, errors::Error> {
-    let Some(t) = spec.arguments.get(&argument.name.name) else {
+    argument: &file::shared::ast::Argument<'buffer>,
+) -> Result<shared::ast::FieldSelectionArgument, errors::Error<'buffer>> {
+    let Some(t) = spec.arguments.get(argument.name.name) else {
         return Err(type_registry::Error::UnknownArgument(
             argument.name.clone(),
         )
@@ -377,10 +376,10 @@ fn parse_selection_argument(
     };
     let type_spec = t.spec.get_type_spec();
     return Ok(shared::ast::FieldSelectionArgument {
-        name: argument.name.name.clone(),
+        name: argument.name.name.to_string(),
         value: match &argument.value {
             file::shared::ast::ArgumentValue::NameNode(node) => {
-                shared::ast::ArgumentValue::Ref(node.name.clone()).into()
+                shared::ast::ArgumentValue::Ref(node.name.to_string()).into()
             }
             file::shared::ast::ArgumentValue::LiteralNode(node) => {
                 parse_argument_literal_value(type_spec, node)?.into()
@@ -390,26 +389,29 @@ fn parse_selection_argument(
     });
 }
 
-fn parse_object_field_selection_node<T: Clone + Into<errors::FieldType>>(
+fn parse_object_field_selection_node<
+    'buffer,
+    T: Clone + Into<errors::FieldType>,
+>(
     registry: &TypeRegistry,
     r#type: &T,
     fields: &IndexMap<
         String,
         Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
     >,
-    node: &file::client::ast::FieldSelectionNode,
-) -> Result<ast::FieldSelection, errors::Error> {
+    node: &file::client::ast::FieldSelectionNode<'buffer>,
+) -> Result<ast::FieldSelection, errors::Error<'buffer>> {
     let field_name = node.field.get_name();
     let field_type =
         fields
-            .get(&field_name.name)
+            .get(field_name.name)
             .ok_or(errors::Error::UnknownField {
                 r#type: r#type.clone().into(),
                 field: field_name.clone(),
             })?;
     return Ok(ast::FieldSelection {
-        name: node.field.get_name().name.clone(),
-        alias: node.field.get_selection_name().name.clone(),
+        name: node.field.get_name().name.to_string(),
+        alias: node.field.get_selection_name().name.to_string(),
         selection: node
             .spec
             .as_ref()
@@ -438,11 +440,11 @@ fn parse_object_field_selection_node<T: Clone + Into<errors::FieldType>>(
     });
 }
 
-fn parse_object_selection_node(
+fn parse_object_selection_node<'buffer>(
     registry: &TypeRegistry,
     r#type: &Arc<RwLock<server::ast::ObjectType>>,
-    node: &file::client::ast::SelectionNode,
-) -> Result<ast::ObjectSelection, errors::Error> {
+    node: &file::client::ast::SelectionNode<'buffer>,
+) -> Result<ast::ObjectSelection, errors::Error<'buffer>> {
     match node {
         file::client::ast::SelectionNode::SpreadSelectionNode(s) => {
             Ok(parse_object_spread_selection_node(registry, r#type, s)?.into())
@@ -470,11 +472,11 @@ fn parse_object_selection_node(
     }
 }
 
-fn parse_interface_selection_node(
+fn parse_interface_selection_node<'buffer>(
     registry: &TypeRegistry,
     r#type: &Arc<RwLock<server::ast::Interface>>,
-    node: &file::client::ast::SelectionNode,
-) -> Result<ast::ObjectSelection, errors::Error> {
+    node: &file::client::ast::SelectionNode<'buffer>,
+) -> Result<ast::ObjectSelection, errors::Error<'buffer>> {
     match node {
         file::client::ast::SelectionNode::SpreadSelectionNode(s) => {
             Ok(parse_interface_spread_selection_node(registry, r#type, s)?
@@ -497,33 +499,33 @@ fn parse_interface_selection_node(
     }
 }
 
-fn parse_object_selections(
+fn parse_object_selections<'buffer>(
     registry: &TypeRegistry,
     r#type: &Arc<RwLock<server::ast::ObjectType>>,
-    selections: &[file::client::ast::SelectionNode],
-) -> Result<Vec<ast::ObjectSelection>, errors::Error> {
+    selections: &[file::client::ast::SelectionNode<'buffer>],
+) -> Result<Vec<ast::ObjectSelection>, errors::Error<'buffer>> {
     return selections
         .iter()
         .map(|s| parse_object_selection_node(registry, r#type, s))
         .collect();
 }
 
-fn parse_interface_selections(
+fn parse_interface_selections<'buffer>(
     registry: &TypeRegistry,
     r#type: &Arc<RwLock<server::ast::Interface>>,
-    selections: &[file::client::ast::SelectionNode],
-) -> Result<Vec<ast::ObjectSelection>, errors::Error> {
+    selections: &[file::client::ast::SelectionNode<'buffer>],
+) -> Result<Vec<ast::ObjectSelection>, errors::Error<'buffer>> {
     return selections
         .iter()
         .map(|s| parse_interface_selection_node(registry, r#type, s))
         .collect();
 }
 
-pub fn parse_selections(
+pub fn parse_selections<'buffer>(
     registry: &TypeRegistry,
     spec: &mut ast::FragmentSpec,
-    selections: &[file::client::ast::SelectionNode],
-) -> Result<(), errors::Error> {
+    selections: &[file::client::ast::SelectionNode<'buffer>],
+) -> Result<(), errors::Error<'buffer>> {
     match spec {
         ast::FragmentSpec::Union(u) => {
             u.selections =
@@ -543,11 +545,11 @@ pub fn parse_selections(
     }
 }
 
-pub fn parse(
+pub fn parse<'buffer>(
     registry: &mut TypeRegistry,
-    node: &file::client::ast::FragmentDefinition,
-) -> Result<(), errors::Error> {
-    let fragment_rc = registry.fragments.get(&node.name.name).unwrap();
+    node: &file::client::ast::FragmentDefinition<'buffer>,
+) -> Result<(), errors::Error<'buffer>> {
+    let fragment_rc = registry.fragments.get(node.name.name).unwrap();
     let mut fragment = fragment_rc.write().unwrap();
     parse_selections(registry, &mut fragment.spec, &node.spec.selections)?;
     return Ok(());

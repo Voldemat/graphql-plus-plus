@@ -6,11 +6,11 @@ use crate::parsers::{
     },
 };
 
-pub fn parse(
+pub fn parse<'buffer>(
     registry: &mut TypeRegistry,
-    node: &file::client::ast::OperationDefinition,
-) -> Result<(), errors::Error> {
-    let operation_rc = registry.operations.get(&node.name.name).unwrap();
+    node: &file::client::ast::OperationDefinition<'buffer>,
+) -> Result<(), errors::Error<'buffer>> {
+    let operation_rc = registry.operations.get(node.name.name).unwrap();
     let mut operation = operation_rc.write().unwrap();
     fragment::parse_selections(
         registry,

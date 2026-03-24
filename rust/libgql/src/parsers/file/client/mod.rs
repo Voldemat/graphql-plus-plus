@@ -14,18 +14,18 @@ use crate::{
 pub mod ast;
 
 #[derive(Debug, derive_more::From)]
-pub enum Error {
-    Base(base::Error),
+pub enum Error<'buffer> {
+    Base(base::Error<'buffer>),
     UnexpectedOpType {
-        token: lexer::tokens::Token,
+        token: lexer::tokens::Token<'buffer>,
     },
     DuplicateParameter {
-        existing_parameter: shared::ast::InputFieldDefinitionNode,
-        duplicate_parameter: shared::ast::InputFieldDefinitionNode,
+        existing_parameter: shared::ast::InputFieldDefinitionNode<'buffer>,
+        duplicate_parameter: shared::ast::InputFieldDefinitionNode<'buffer>,
     },
 }
 
-impl Error {
+impl<'buffer> Error<'buffer> {
     pub fn is_eof(self: &Self) -> bool {
         match self {
             Error::Base(error) => error.is_eof(),
@@ -45,17 +45,17 @@ impl Error {
     }
 }
 
-impl From<tokens_source::ConsumeError> for Error {
-    fn from(value: tokens_source::ConsumeError) -> Self {
+impl<'buffer> From<tokens_source::ConsumeError<'buffer>> for Error<'buffer> {
+    fn from(value: tokens_source::ConsumeError<'buffer>) -> Self {
         return Self::Base(value.into());
     }
 }
 
-pub struct Parser<T: tokens_source::TokensSource> {
-    base: BaseParser<T, ast::DirectiveLocation>,
+pub struct Parser<'buffer, T: tokens_source::TokensSource<'buffer>> {
+    base: BaseParser<'buffer, T, ast::DirectiveLocation>,
 }
 
-impl<T: tokens_source::TokensSource> Parser<T> {
+impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     pub fn new(tokens_source: T) -> Self {
         Self {
             base: BaseParser::new(tokens_source),
@@ -64,8 +64,8 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     pub fn parse_ast_nodes(
         self: &mut Self,
-    ) -> Result<Vec<ast::ASTNode>, Error> {
-        let mut nodes = Vec::<ast::ASTNode>::new();
+    ) -> Result<Vec<ast::ASTNode<'buffer>>, Error<'buffer>> {
+        let mut nodes = Vec::<ast::ASTNode<'buffer>>::new();
         'l: loop {
             match self.parse_ast_node() {
                 Ok(node) => nodes.push(node),
@@ -86,9 +86,11 @@ impl<T: tokens_source::TokensSource> Parser<T> {
         return Ok(nodes);
     }
 
-    pub fn parse_ast_node(self: &mut Self) -> Result<ast::ASTNode, Error> {
+    pub fn parse_ast_node(
+        self: &mut Self,
+    ) -> Result<ast::ASTNode<'buffer>, Error<'buffer>> {
         let token = T::get_current_token(&self.base.tokens_source);
-        match token.lexeme.as_str() {
+        match token.lexeme {
             "fragment" => Ok(self.parse_fragment_definition()?.into()),
             "directive" => Ok(self.base.parse_directive_node()?.into()),
             _ => Ok(self.parse_operation_definition()?.into()),
@@ -97,7 +99,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_fragment_definition(
         self: &mut Self,
-    ) -> Result<ast::FragmentDefinition, Error> {
+    ) -> Result<ast::FragmentDefinition<'buffer>, Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
@@ -119,11 +121,10 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_operation_definition(
         self: &mut Self,
-    ) -> Result<ast::OperationDefinition, Error> {
+    ) -> Result<ast::OperationDefinition<'buffer>, Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
-        let Ok(optype) = ast::OpType::try_from(start_token.lexeme.as_str())
-        else {
+        let Ok(optype) = ast::OpType::try_from(start_token.lexeme) else {
             return Err(Error::UnexpectedOpType { token: start_token });
         };
         let name = self.base.parse_name_node(false)?;
@@ -145,9 +146,12 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_operation_parameters(
         self: &mut Self,
-    ) -> Result<Vec<shared::ast::InputFieldDefinitionNode>, Error> {
+    ) -> Result<
+        Vec<shared::ast::InputFieldDefinitionNode<'buffer>>,
+        Error<'buffer>,
+    > {
         let mut parameters =
-            Vec::<shared::ast::InputFieldDefinitionNode>::new();
+            Vec::<shared::ast::InputFieldDefinitionNode<'buffer>>::new();
         if T::consume_if_is_ahead(
             &mut self.base.tokens_source,
             SimpleTokenType::LeftParen.into(),
@@ -181,7 +185,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_fragment_spec(
         self: &mut Self,
-    ) -> Result<ast::FragmentSpec, Error> {
+    ) -> Result<ast::FragmentSpec<'buffer>, Error<'buffer>> {
         let start_token = T::consume(
             &mut self.base.tokens_source,
             SimpleTokenType::LeftBrace.into(),
@@ -205,8 +209,8 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_selection_nodes(
         self: &mut Self,
-    ) -> Result<Vec<ast::SelectionNode>, Error> {
-        let mut selections = Vec::<ast::SelectionNode>::new();
+    ) -> Result<Vec<ast::SelectionNode<'buffer>>, Error<'buffer>> {
+        let mut selections = Vec::<ast::SelectionNode<'buffer>>::new();
         while T::is_ahead(
             &self.base.tokens_source,
             ComplexTokenType::Identifier.into(),
@@ -225,7 +229,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_selection_node(
         self: &mut Self,
-    ) -> Result<ast::SelectionNode, Error> {
+    ) -> Result<ast::SelectionNode<'buffer>, Error<'buffer>> {
         if !T::consume_if_is_ahead(
             &mut self.base.tokens_source,
             ComplexTokenType::Spread.into(),
@@ -252,7 +256,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_field_selection_node(
         self: &mut Self,
-    ) -> Result<ast::FieldSelectionNode, Error> {
+    ) -> Result<ast::FieldSelectionNode<'buffer>, Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let field_spec = self.parse_object_field_spec()?;
@@ -277,7 +281,8 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_conditional_spread_selection_node(
         self: &mut Self,
-    ) -> Result<ast::ConditionalSpreadSelectionNode, Error> {
+    ) -> Result<ast::ConditionalSpreadSelectionNode<'buffer>, Error<'buffer>>
+    {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         T::consume_identifier_by_lexeme(&mut self.base.tokens_source, "on")?;
@@ -297,7 +302,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_object_field_spec(
         self: &mut Self,
-    ) -> Result<ast::ObjectFieldSpec, Error> {
+    ) -> Result<ast::ObjectFieldSpec<'buffer>, Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let (name, selection_name) = self.parse_name_and_selection_name()?;
@@ -334,7 +339,13 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_name_and_selection_name(
         self: &mut Self,
-    ) -> Result<(shared::ast::NameNode, shared::ast::NameNode), Error> {
+    ) -> Result<
+        (
+            shared::ast::NameNode<'buffer>,
+            shared::ast::NameNode<'buffer>,
+        ),
+        Error<'buffer>,
+    > {
         let selection_name = self.base.parse_name_node(false)?;
         let field_name = if T::consume_if_is_ahead(
             &mut self.base.tokens_source,

@@ -11,10 +11,10 @@ pub mod union;
 use crate::parsers::{file, schema::type_registry::TypeRegistry};
 pub use errors::Error;
 
-pub fn parse_server_schema(
+pub fn parse_server_schema<'buffer>(
     mut registry: &mut TypeRegistry,
-    ast_nodes: &[file::server::ast::ASTNode],
-) -> Result<schema::Schema, errors::Error> {
+    ast_nodes: &[file::server::ast::ASTNode<'buffer>],
+) -> Result<schema::Schema, errors::Error<'buffer>> {
     let type_definition_nodes = || {
         ast_nodes.iter().filter_map(|node| match node {
             file::server::ast::ASTNode::TypeDefinitionNode(n) => Some(n),

@@ -7,42 +7,50 @@ use conditions::get_condition_for_token_type;
 use token_type::{ComplexTokenType, TokenType};
 use tokens::{Location, Token};
 
-pub struct Lexer {
-    buffer: String,
+pub struct Lexer<'buffer> {
+    buffer: &'buffer str,
     token_type: Option<ComplexTokenType>,
     location: Location,
 }
 
-impl Lexer {
-    pub fn new() -> Self {
+impl<'buffer> Lexer<'buffer> {
+    pub fn new(buffer: &'buffer str) -> Self {
         return Self {
-            buffer: "".into(),
+            buffer,
             token_type: None,
             location: Location::default(),
         };
     }
 }
 
-pub enum LexerSuccessTokenResult {
-    One(Token),
-    Two(Token, Token),
+pub enum LexerSuccessTokenResult<'buffer> {
+    One(Token<'buffer>),
+    Two(Token<'buffer>, Token<'buffer>),
 }
 
-impl From<Token> for LexerSuccessTokenResult {
-    fn from(value: Token) -> Self {
+impl<'buffer> From<Token<'buffer>> for LexerSuccessTokenResult<'buffer> {
+    fn from(value: Token<'buffer>) -> Self {
         return Self::One(value);
     }
 }
 
-pub struct LexerSuccessResult(Option<LexerSuccessTokenResult>);
-impl From<Option<LexerSuccessTokenResult>> for LexerSuccessResult {
-    fn from(value: Option<LexerSuccessTokenResult>) -> Self {
+pub struct LexerSuccessResult<'buffer>(
+    Option<LexerSuccessTokenResult<'buffer>>,
+);
+impl<'buffer> From<Option<LexerSuccessTokenResult<'buffer>>>
+    for LexerSuccessResult<'buffer>
+{
+    fn from(value: Option<LexerSuccessTokenResult<'buffer>>) -> Self {
         return Self(value);
     }
 }
 
-impl From<(Option<Token>, Option<Token>)> for LexerSuccessResult {
-    fn from((first, second): (Option<Token>, Option<Token>)) -> Self {
+impl<'buffer> From<(Option<Token<'buffer>>, Option<Token<'buffer>>)>
+    for LexerSuccessResult<'buffer>
+{
+    fn from(
+        (first, second): (Option<Token<'buffer>>, Option<Token<'buffer>>),
+    ) -> Self {
         match (first, second) {
             (None, None) => None.into(),
             (Some(t1), Some(t2)) => {
@@ -59,28 +67,28 @@ pub enum Error {
     UnexpectedChar { c: char, location: Location },
 }
 
-pub type LexerResult = Result<LexerSuccessResult, Error>;
+pub type LexerResult<'buffer> = Result<LexerSuccessResult<'buffer>, Error>;
 
-impl Lexer {
+impl<'buffer> Lexer<'buffer> {
     fn extract_token(
         self: &mut Self,
         mut token_type: ComplexTokenType,
-    ) -> Token {
+    ) -> Token<'buffer> {
         if self.buffer == "true" || self.buffer == "false" {
             token_type = ComplexTokenType::Boolean;
         }
         let token = Token {
             token_type: TokenType::Complex(token_type),
-            lexeme: self.buffer.clone(),
+            lexeme: &self.buffer[(self.location.get_start() as usize)
+                ..(self.location.get_end() as usize)],
             location: self.location.clone(),
         };
         self.token_type = None;
-        self.buffer.clear();
         self.location.unlock_start();
         return token;
     }
 
-    fn maybe_extract_token(self: &mut Self) -> Option<Token> {
+    fn maybe_extract_token(self: &mut Self) -> Option<Token<'buffer>> {
         self.token_type.map(|t| self.extract_token(t))
     }
 
@@ -88,17 +96,19 @@ impl Lexer {
         self: &mut Self,
         token_type: ComplexTokenType,
         c: char,
-    ) -> Option<Token> {
+    ) -> Option<Token<'buffer>> {
         let condition = get_condition_for_token_type(token_type);
         if !condition(c, &self.buffer) {
             return Some(self.extract_token(token_type));
         }
-        self.buffer.push(c);
         self.location.advance();
         return None;
     }
 
-    fn feed_new(self: &mut Self, c: char) -> Result<Option<Token>, Error> {
+    fn feed_new(
+        self: &mut Self,
+        c: char,
+    ) -> Result<Option<Token<'buffer>>, Error> {
         self.location.advance();
         if c == ' ' || c == '\r' || c == '\t' {
             return Ok(None);
@@ -111,26 +121,24 @@ impl Lexer {
         };
         if let TokenType::Complex(complex_token_type) = token_type {
             self.token_type = Some(complex_token_type);
-            if complex_token_type != ComplexTokenType::String {
-                self.buffer = c.to_string()
-            }
             self.location.lock_start();
             return Ok(None);
         }
         return Ok(Some(Token {
             token_type: token_type,
-            lexeme: c.to_string(),
+            lexeme: &self.buffer[(self.location.get_start() as usize)
+                ..(self.location.get_end() as usize)],
             location: self.location.clone(),
         }));
     }
 
-    pub fn feed(self: &mut Self, c: char) -> LexerResult {
+    pub fn feed(self: &mut Self, c: char) -> LexerResult<'buffer> {
         if c == '\n' {
             let maybe_token = self.maybe_extract_token();
             self.location.new_line();
             return Ok(maybe_token.map(|t| t.into()).into());
         }
-        let mut maybe_token: Option<Token> = None;
+        let mut maybe_token: Option<Token<'buffer>> = None;
         if let Some(token_type) = self.token_type {
             maybe_token = self.feed_with_type(token_type, c);
             if maybe_token.is_none() {

@@ -9,10 +9,10 @@ pub mod nodes;
 pub mod operation;
 pub mod schema;
 
-pub fn parse_client_schema(
+pub fn parse_client_schema<'buffer>(
     registry: &mut TypeRegistry,
-    ast_nodes: &[file::client::ast::ASTNode],
-) -> Result<schema::ClientSchema, errors::Error> {
+    ast_nodes: &[file::client::ast::ASTNode<'buffer>],
+) -> Result<schema::ClientSchema, errors::Error<'buffer>> {
     let client_nodes = ast_nodes
         .iter()
         .map(|node| nodes::parse_first_pass(registry, node))

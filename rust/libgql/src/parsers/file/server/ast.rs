@@ -61,135 +61,135 @@ impl DirectiveLocation {
     }
 }
 
-pub type DirectiveLocationNode =
-    shared::ast::DirectiveLocationNode<DirectiveLocation>;
-pub type DirectiveDefinitionNode =
-    shared::ast::DirectiveNode<DirectiveLocation>;
+pub type DirectiveLocationNode<'buffer> =
+    shared::ast::DirectiveLocationNode<'buffer, DirectiveLocation>;
+pub type DirectiveDefinitionNode<'buffer> =
+    shared::ast::DirectiveNode<'buffer, DirectiveLocation>;
 
 #[derive(Debug, serde::Serialize)]
-pub struct FieldDefinitionNode {
-    pub location: shared::ast::NodeLocation,
-    pub name: shared::ast::NameNode,
-    pub r#type: shared::ast::TypeNode,
-    pub arguments: Vec<shared::ast::InputFieldDefinitionNode>,
-    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
+pub struct FieldDefinitionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
+    pub r#type: shared::ast::TypeNode<'buffer>,
+    pub arguments: Vec<shared::ast::InputFieldDefinitionNode<'buffer>>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct InterfaceDefinitionNode {
-    pub location: shared::ast::NodeLocation,
-    pub name: shared::ast::NameNode,
-    pub fields: Vec<FieldDefinitionNode>,
-    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
+pub struct InterfaceDefinitionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
+    pub fields: Vec<FieldDefinitionNode<'buffer>>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct ObjectDefinitionNode {
-    pub location: shared::ast::NodeLocation,
-    pub name: shared::ast::NameNode,
-    pub interfaces: Vec<shared::ast::NameNode>,
-    pub fields: Vec<FieldDefinitionNode>,
-    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
+pub struct ObjectDefinitionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
+    pub interfaces: Vec<shared::ast::NameNode<'buffer>>,
+    pub fields: Vec<FieldDefinitionNode<'buffer>>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct InputObjectDefinitionNode {
-    pub location: shared::ast::NodeLocation,
-    pub name: shared::ast::NameNode,
-    pub fields: Vec<shared::ast::InputFieldDefinitionNode>,
-    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
+pub struct InputObjectDefinitionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
+    pub fields: Vec<shared::ast::InputFieldDefinitionNode<'buffer>>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct EnumValueDefinitionNode {
-    pub location: shared::ast::NodeLocation,
-    pub value: shared::ast::NameNode,
-    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
+pub struct EnumValueDefinitionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub value: shared::ast::NameNode<'buffer>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct EnumDefinitionNode {
-    pub location: shared::ast::NodeLocation,
-    pub name: shared::ast::NameNode,
-    pub values: Vec<EnumValueDefinitionNode>,
-    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
+pub struct EnumDefinitionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
+    pub values: Vec<EnumValueDefinitionNode<'buffer>>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct UnionDefinitionNode {
-    pub location: shared::ast::NodeLocation,
-    pub name: shared::ast::NameNode,
-    pub values: Vec<shared::ast::NameNode>,
-    pub directives: Vec<shared::ast::DirectiveInvocationNode>,
+pub struct UnionDefinitionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
+    pub values: Vec<shared::ast::NameNode<'buffer>>,
+    pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct ScalarDefinitionNode {
-    pub location: shared::ast::NodeLocation,
-    pub name: shared::ast::NameNode,
+pub struct ScalarDefinitionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub name: shared::ast::NameNode<'buffer>,
 }
 
 #[derive(Debug, derive_more::From, serde::Serialize)]
-pub enum TypeDefinitionNode {
-    Scalar(ScalarDefinitionNode),
-    Union(UnionDefinitionNode),
-    Enum(EnumDefinitionNode),
-    Input(InputObjectDefinitionNode),
-    Object(ObjectDefinitionNode),
-    Interface(InterfaceDefinitionNode),
-    Directive(DirectiveDefinitionNode),
+pub enum TypeDefinitionNode<'buffer> {
+    Scalar(ScalarDefinitionNode<'buffer>),
+    Union(UnionDefinitionNode<'buffer>),
+    Enum(EnumDefinitionNode<'buffer>),
+    Input(InputObjectDefinitionNode<'buffer>),
+    Object(ObjectDefinitionNode<'buffer>),
+    Interface(InterfaceDefinitionNode<'buffer>),
+    Directive(DirectiveDefinitionNode<'buffer>),
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct ExtendTypeNode {
-    pub location: shared::ast::NodeLocation,
-    pub type_node: ObjectDefinitionNode,
+pub struct ExtendTypeNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub type_node: ObjectDefinitionNode<'buffer>,
 }
 
 #[derive(Debug, derive_more::From, serde::Serialize)]
-pub enum ASTNode {
-    TypeDefinitionNode(TypeDefinitionNode),
-    ExtendTypeNode(ExtendTypeNode),
+pub enum ASTNode<'buffer> {
+    TypeDefinitionNode(TypeDefinitionNode<'buffer>),
+    ExtendTypeNode(ExtendTypeNode<'buffer>),
 }
 
-impl From<ScalarDefinitionNode> for ASTNode {
-    fn from(value: ScalarDefinitionNode) -> Self {
+impl<'buffer> From<ScalarDefinitionNode<'buffer>> for ASTNode<'buffer> {
+    fn from(value: ScalarDefinitionNode<'buffer>) -> Self {
         return Self::TypeDefinitionNode(value.into());
     }
 }
 
-impl From<UnionDefinitionNode> for ASTNode {
-    fn from(value: UnionDefinitionNode) -> Self {
+impl<'buffer> From<UnionDefinitionNode<'buffer>> for ASTNode<'buffer> {
+    fn from(value: UnionDefinitionNode<'buffer>) -> Self {
         return Self::TypeDefinitionNode(value.into());
     }
 }
 
-impl From<EnumDefinitionNode> for ASTNode {
-    fn from(value: EnumDefinitionNode) -> Self {
+impl<'buffer> From<EnumDefinitionNode<'buffer>> for ASTNode<'buffer> {
+    fn from(value: EnumDefinitionNode<'buffer>) -> Self {
         return Self::TypeDefinitionNode(value.into());
     }
 }
 
-impl From<InputObjectDefinitionNode> for ASTNode {
-    fn from(value: InputObjectDefinitionNode) -> Self {
+impl<'buffer> From<InputObjectDefinitionNode<'buffer>> for ASTNode<'buffer> {
+    fn from(value: InputObjectDefinitionNode<'buffer>) -> Self {
         return Self::TypeDefinitionNode(value.into());
     }
 }
 
-impl From<ObjectDefinitionNode> for ASTNode {
-    fn from(value: ObjectDefinitionNode) -> Self {
+impl<'buffer> From<ObjectDefinitionNode<'buffer>> for ASTNode<'buffer> {
+    fn from(value: ObjectDefinitionNode<'buffer>) -> Self {
         return Self::TypeDefinitionNode(value.into());
     }
 }
 
-impl From<InterfaceDefinitionNode> for ASTNode {
-    fn from(value: InterfaceDefinitionNode) -> Self {
+impl<'buffer> From<InterfaceDefinitionNode<'buffer>> for ASTNode<'buffer> {
+    fn from(value: InterfaceDefinitionNode<'buffer>) -> Self {
         return Self::TypeDefinitionNode(value.into());
     }
 }
 
-impl From<DirectiveDefinitionNode> for ASTNode {
-    fn from(value: DirectiveDefinitionNode) -> Self {
+impl<'buffer> From<DirectiveDefinitionNode<'buffer>> for ASTNode<'buffer> {
+    fn from(value: DirectiveDefinitionNode<'buffer>) -> Self {
         return Self::TypeDefinitionNode(value.into());
     }
 }

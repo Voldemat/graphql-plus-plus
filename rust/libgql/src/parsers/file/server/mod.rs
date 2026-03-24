@@ -12,18 +12,20 @@ use crate::{
 pub mod ast;
 
 #[derive(Debug, derive_more::From)]
-pub enum Error {
-    Base(base::Error),
-    UnknownStartOfAstNode { token: lexer::tokens::Token },
+pub enum Error<'buffer> {
+    Base(base::Error<'buffer>),
+    UnknownStartOfAstNode {
+        token: lexer::tokens::Token<'buffer>,
+    },
 }
 
-impl From<tokens_source::ConsumeError> for Error {
-    fn from(value: tokens_source::ConsumeError) -> Self {
+impl<'buffer> From<tokens_source::ConsumeError<'buffer>> for Error<'buffer> {
+    fn from(value: tokens_source::ConsumeError<'buffer>) -> Self {
         return Self::Base(value.into());
     }
 }
 
-impl Error {
+impl<'buffer> Error<'buffer> {
     pub fn is_eof(self: &Self) -> bool {
         match self {
             Self::Base(error) => error.is_eof(),
@@ -39,11 +41,11 @@ impl Error {
     }
 }
 
-pub struct Parser<T: tokens_source::TokensSource> {
-    base: BaseParser<T, ast::DirectiveLocation>,
+pub struct Parser<'buffer, T: tokens_source::TokensSource<'buffer>> {
+    base: BaseParser<'buffer, T, ast::DirectiveLocation>,
 }
 
-impl<T: tokens_source::TokensSource> Parser<T> {
+impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     pub fn new(tokens_source: T) -> Self {
         return Self {
             base: BaseParser::new(tokens_source),
@@ -52,8 +54,8 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     pub fn parse_ast_nodes(
         self: &mut Self,
-    ) -> Result<Vec<ast::ASTNode>, Error> {
-        let mut nodes = Vec::<ast::ASTNode>::new();
+    ) -> Result<Vec<ast::ASTNode<'buffer>>, Error<'buffer>> {
+        let mut nodes = Vec::<ast::ASTNode<'buffer>>::new();
         'l: loop {
             if T::get_current_token(&self.base.tokens_source).token_type
                 != ComplexTokenType::String.into()
@@ -78,9 +80,11 @@ impl<T: tokens_source::TokensSource> Parser<T> {
         return Ok(nodes);
     }
 
-    fn parse_ast_node(self: &mut Self) -> Result<ast::ASTNode, Error> {
+    fn parse_ast_node(
+        self: &mut Self,
+    ) -> Result<ast::ASTNode<'buffer>, Error<'buffer>> {
         let current_token = T::get_current_token(&self.base.tokens_source);
-        match current_token.lexeme.as_str() {
+        match current_token.lexeme {
             "scalar" => Ok(self.parse_scalar_type_definition_node()?.into()),
             "union" => Ok(self.parse_union_type_definition_node()?.into()),
             "enum" => Ok(self.parse_enum_type_definition_node()?.into()),
@@ -101,7 +105,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_scalar_type_definition_node(
         self: &mut Self,
-    ) -> Result<ast::ScalarDefinitionNode, base::Error> {
+    ) -> Result<ast::ScalarDefinitionNode<'buffer>, base::Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
@@ -117,7 +121,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_union_type_definition_node(
         self: &mut Self,
-    ) -> Result<ast::UnionDefinitionNode, base::Error> {
+    ) -> Result<ast::UnionDefinitionNode<'buffer>, base::Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
@@ -150,7 +154,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_extend_type_node(
         self: &mut Self,
-    ) -> Result<ast::ExtendTypeNode, base::Error> {
+    ) -> Result<ast::ExtendTypeNode<'buffer>, base::Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         T::consume_identifier_by_lexeme(&mut self.base.tokens_source, "type")?;
@@ -168,7 +172,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_enum_type_definition_node(
         self: &mut Self,
-    ) -> Result<ast::EnumDefinitionNode, base::Error> {
+    ) -> Result<ast::EnumDefinitionNode<'buffer>, base::Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
@@ -206,7 +210,8 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_enum_value_definition_node(
         self: &mut Self,
-    ) -> Result<ast::EnumValueDefinitionNode, base::Error> {
+    ) -> Result<ast::EnumValueDefinitionNode<'buffer>, base::Error<'buffer>>
+    {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
@@ -223,7 +228,8 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_interface_type_definition_node(
         self: &mut Self,
-    ) -> Result<ast::InterfaceDefinitionNode, base::Error> {
+    ) -> Result<ast::InterfaceDefinitionNode<'buffer>, base::Error<'buffer>>
+    {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
@@ -257,7 +263,8 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_input_type_definition_node(
         self: &mut Self,
-    ) -> Result<ast::InputObjectDefinitionNode, base::Error> {
+    ) -> Result<ast::InputObjectDefinitionNode<'buffer>, base::Error<'buffer>>
+    {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
@@ -295,7 +302,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_field_definition_node(
         self: &mut Self,
-    ) -> Result<ast::FieldDefinitionNode, base::Error> {
+    ) -> Result<ast::FieldDefinitionNode<'buffer>, base::Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
@@ -329,7 +336,7 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_object_type_definition_node(
         self: &mut Self,
-    ) -> Result<ast::ObjectDefinitionNode, base::Error> {
+    ) -> Result<ast::ObjectDefinitionNode<'buffer>, base::Error<'buffer>> {
         let start_token =
             T::get_current_token(&self.base.tokens_source).clone();
         let name = self.base.parse_name_node(false)?;
@@ -366,8 +373,8 @@ impl<T: tokens_source::TokensSource> Parser<T> {
 
     fn parse_implements_clause(
         self: &mut Self,
-    ) -> Result<Vec<shared::ast::NameNode>, base::Error> {
-        let mut interfaces = Vec::<shared::ast::NameNode>::new();
+    ) -> Result<Vec<shared::ast::NameNode<'buffer>>, base::Error<'buffer>> {
+        let mut interfaces = Vec::<shared::ast::NameNode<'buffer>>::new();
         if T::consume_identifier_by_lexeme_if_is_ahead(
             &mut self.base.tokens_source,
             "implements",

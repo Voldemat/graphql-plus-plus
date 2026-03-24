@@ -11,29 +11,30 @@ use crate::parsers::{
     },
 };
 
-pub fn parse_definition(
-    node: &file::server::ast::ObjectDefinitionNode,
+pub fn parse_definition<'buffer>(
+    node: &file::server::ast::ObjectDefinitionNode<'buffer>,
     registry: &TypeRegistry,
-) -> Result<Arc<RwLock<ast::ObjectType>>, errors::Error> {
-    let obj_rc = registry.objects.get(&node.name.name).unwrap();
+) -> Result<Arc<RwLock<ast::ObjectType>>, errors::Error<'buffer>> {
+    let obj_rc = registry.objects.get(node.name.name).unwrap();
     let mut obj = obj_rc.write().unwrap();
     obj.fields = parse_fields(&node.fields, registry)?;
     for name in node.interfaces.iter() {
-        let Some(interface) = registry.interfaces.get(&name.name) else {
+        let Some(interface) = registry.interfaces.get(name.name) else {
             return Err(errors::Error::UnknownInterface(name.clone()));
         };
-        obj.implements.insert(name.name.clone(), interface.clone());
+        obj.implements
+            .insert(name.name.to_string(), interface.clone());
     }
     obj.directives = directive::parse_invocations(&node.directives, registry)?;
     return Ok(obj_rc.clone());
 }
 
-pub fn parse_fields(
-    fields: &[file::server::ast::FieldDefinitionNode],
+pub fn parse_fields<'buffer>(
+    fields: &[file::server::ast::FieldDefinitionNode<'buffer>],
     registry: &TypeRegistry,
 ) -> Result<
     IndexMap<String, Arc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>>,
-    errors::Error,
+    errors::Error<'buffer>,
 > {
     let mut m = IndexMap::<
         String,
@@ -43,9 +44,9 @@ pub fn parse_fields(
         let (spec, nullable) =
             parse_object_field_spec(&field_definition_node, registry)?;
         m.insert(
-            field_definition_node.name.name.clone(),
+            field_definition_node.name.name.to_string(),
             Arc::new(shared::ast::FieldDefinition {
-                name: field_definition_node.name.name.clone(),
+                name: field_definition_node.name.name.to_string(),
                 spec,
                 nullable,
             }),
@@ -54,10 +55,10 @@ pub fn parse_fields(
     return Ok(m);
 }
 
-pub fn parse_object_field_spec(
-    node: &file::server::ast::FieldDefinitionNode,
+pub fn parse_object_field_spec<'buffer>(
+    node: &file::server::ast::FieldDefinitionNode<'buffer>,
     registry: &TypeRegistry,
-) -> Result<(ast::ObjectFieldSpec, bool), errors::Error> {
+) -> Result<(ast::ObjectFieldSpec, bool), errors::Error<'buffer>> {
     let directives = directive::parse_invocations(&node.directives, registry)?;
     let (return_type, nullable) = parse_noncallable_object_field_spec(
         &node.r#type,
@@ -80,13 +81,13 @@ pub fn parse_object_field_spec(
     ));
 }
 
-fn parse_noncallable_object_field_spec(
-    node: &file::shared::ast::TypeNode,
+fn parse_noncallable_object_field_spec<'buffer>(
+    node: &file::shared::ast::TypeNode<'buffer>,
     directives: &[shared::ast::ServerDirectiveInvocation],
     registry: &TypeRegistry,
 ) -> Result<
     (shared::ast::NonCallableFieldSpec<ast::ObjectTypeSpec>, bool),
-    errors::Error,
+    errors::Error<'buffer>,
 > {
     match node {
         file::shared::ast::TypeNode::List(l) => {

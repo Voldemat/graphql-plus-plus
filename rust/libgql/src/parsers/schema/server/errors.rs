@@ -10,23 +10,23 @@ pub type ArgType = shared::ast::FieldDefinition<
 >;
 
 #[derive(Debug)]
-pub enum Error {
-    TypeRegistryError(type_registry::Error),
+pub enum Error<'buffer> {
+    TypeRegistryError(type_registry::Error<'buffer>),
     UnexpectedArgumentValue {
-        value: file::shared::ast::LiteralNode,
+        value: file::shared::ast::LiteralNode<'buffer>,
         arg_type: ArgType,
     },
     InvalidEnumValue {
-        value: file::shared::ast::LiteralEnumValueNode,
+        value: file::shared::ast::LiteralEnumValueNode<'buffer>,
         enum_type: Arc<shared::ast::Enum>,
     },
-    UnknownServerDirective(file::shared::ast::NameNode),
-    UnknownInterface(file::shared::ast::NameNode),
-    UnknownObject(file::shared::ast::NameNode),
+    UnknownServerDirective(file::shared::ast::NameNode<'buffer>),
+    UnknownInterface(file::shared::ast::NameNode<'buffer>),
+    UnknownObject(file::shared::ast::NameNode<'buffer>),
 }
 
-impl From<type_registry::Error> for Error {
-    fn from(value: type_registry::Error) -> Self {
+impl<'buffer> From<type_registry::Error<'buffer>> for Error<'buffer> {
+    fn from(value: type_registry::Error<'buffer>) -> Self {
         return Self::TypeRegistryError(value);
     }
 }

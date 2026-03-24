@@ -80,13 +80,13 @@ impl PartialEq for Location {
 impl Eq for Location {}
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct Token {
+pub struct Token<'lexeme> {
     pub token_type: TokenType,
-    pub lexeme: String,
+    pub lexeme: &'lexeme str,
     pub location: Location,
 }
 
-impl Token {
+impl<'lexeme> Token<'lexeme> {
     pub fn is_keyword(self: &Self) -> bool {
         self.lexeme == "type"
             || self.lexeme == "query"

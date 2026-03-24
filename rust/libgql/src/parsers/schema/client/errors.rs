@@ -25,43 +25,45 @@ pub enum FieldType {
 }
 
 #[derive(Debug)]
-pub enum Error {
-    TypeRegistryError(type_registry::Error),
-    UnknownFragmentType(file::shared::ast::NameNode),
+pub enum Error<'buffer> {
+    TypeRegistryError(type_registry::Error<'buffer>),
+    UnknownFragmentType(file::shared::ast::NameNode<'buffer>),
     UnexpectedConditionalSpreadSelectionNode(
-        file::client::ast::ConditionalSpreadSelectionNode,
+        file::client::ast::ConditionalSpreadSelectionNode<'buffer>,
     ),
-    UnknownFragment(file::shared::ast::NameNode),
+    UnknownFragment(file::shared::ast::NameNode<'buffer>),
     InvalidFragmentType {
-        selection_node: file::client::ast::SpreadSelectionNode,
+        selection_node: file::client::ast::SpreadSelectionNode<'buffer>,
         expected_type: FragmentType,
         fragment: Arc<RwLock<ast::Fragment>>,
     },
     UnknownField {
         r#type: FieldType,
-        field: file::shared::ast::NameNode,
+        field: file::shared::ast::NameNode<'buffer>,
     },
     UnexpectedCallableField {
         field_type:
             Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
-        definition: file::client::ast::ObjectCallableFieldSpec,
+        definition: file::client::ast::ObjectCallableFieldSpec<'buffer>,
     },
-    UnexpectedFieldSelectionNodeOnUnion(file::client::ast::FieldSelectionNode),
+    UnexpectedFieldSelectionNodeOnUnion(
+        file::client::ast::FieldSelectionNode<'buffer>,
+    ),
     NoSuitableTypeForConditionalSpreadSelection {
-        selection: file::client::ast::ConditionalSpreadSelectionNode,
+        selection: file::client::ast::ConditionalSpreadSelectionNode<'buffer>,
         r#type: Arc<RwLock<server::ast::Union>>,
     },
     UnexpectedSelectionOnLiteralField {
-        spec: Rc<file::client::ast::FragmentSpec>,
+        spec: Rc<file::client::ast::FragmentSpec<'buffer>>,
         field: Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
     },
     InvalidLiteralForInput {
         type_spec: shared::ast::InputTypeSpec,
-        node: file::shared::ast::LiteralNode,
+        node: file::shared::ast::LiteralNode<'buffer>,
     },
 }
 
-impl Error {
+impl<'buffer> Error<'buffer> {
     pub fn get_location(self: &Self) -> &lexer::tokens::Location {
         match self {
             Self::TypeRegistryError(error) => error.get_location(),
@@ -97,7 +99,9 @@ impl Error {
         }
     }
 
-    pub fn get_source_file(self: &Self) -> &Arc<file::shared::ast::SourceFile> {
+    pub fn get_source_file(
+        self: &Self,
+    ) -> &Arc<file::shared::ast::SourceFile<'buffer>> {
         match self {
             Self::TypeRegistryError(error) => error.get_source_file(),
             Self::UnknownFragmentType(name_node) => &name_node.location.source,
@@ -127,8 +131,8 @@ impl Error {
     }
 }
 
-impl From<type_registry::Error> for Error {
-    fn from(value: type_registry::Error) -> Self {
+impl<'buffer> From<type_registry::Error<'buffer>> for Error<'buffer> {
+    fn from(value: type_registry::Error<'buffer>) -> Self {
         return Self::TypeRegistryError(value);
     }
 }

@@ -2,12 +2,12 @@ use std::{path::PathBuf, sync::Arc};
 
 use crate::lexer;
 
-pub struct SourceFile {
+pub struct SourceFile<'buffer> {
     pub filepath: PathBuf,
-    pub buffer: String,
+    pub buffer: &'buffer str,
 }
 
-impl std::fmt::Debug for SourceFile {
+impl<'buffer> std::fmt::Debug for SourceFile<'buffer> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SourceFile")
             .field("filepath", &self.filepath)
@@ -16,59 +16,59 @@ impl std::fmt::Debug for SourceFile {
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct NodeLocation {
-    pub start_token: lexer::tokens::Token,
-    pub end_token: lexer::tokens::Token,
+pub struct NodeLocation<'buffer> {
+    pub start_token: lexer::tokens::Token<'buffer>,
+    pub end_token: lexer::tokens::Token<'buffer>,
     #[serde(skip_serializing)]
-    pub source: Arc<SourceFile>,
+    pub source: Arc<SourceFile<'buffer>>,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct NameNode {
-    pub location: NodeLocation,
-    pub name: String,
+pub struct NameNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
+    pub name: &'buffer str,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct LiteralIntNode {
-    pub location: NodeLocation,
+pub struct LiteralIntNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
     pub value: i64,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct LiteralFloatNode {
-    pub location: NodeLocation,
+pub struct LiteralFloatNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
     pub value: f64,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct LiteralStringNode {
-    pub location: NodeLocation,
+pub struct LiteralStringNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
     pub value: String,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct LiteralBooleanNode {
-    pub location: NodeLocation,
+pub struct LiteralBooleanNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
     pub value: bool,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct LiteralEnumValueNode {
-    pub location: NodeLocation,
+pub struct LiteralEnumValueNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
     pub value: String,
 }
 
 #[derive(Debug, Clone, derive_more::From, serde::Serialize)]
-pub enum LiteralNode {
-    Int(LiteralIntNode),
-    Float(LiteralFloatNode),
-    String(LiteralStringNode),
-    Boolean(LiteralBooleanNode),
-    EnumValue(LiteralEnumValueNode),
+pub enum LiteralNode<'buffer> {
+    Int(LiteralIntNode<'buffer>),
+    Float(LiteralFloatNode<'buffer>),
+    String(LiteralStringNode<'buffer>),
+    Boolean(LiteralBooleanNode<'buffer>),
+    EnumValue(LiteralEnumValueNode<'buffer>),
 }
 
-impl LiteralNode {
+impl<'buffer> LiteralNode<'buffer> {
     pub fn get_location(self: &Self) -> &lexer::tokens::Location {
         match self {
             Self::Int(node) => &node.location.start_token.location,
@@ -78,7 +78,7 @@ impl LiteralNode {
             Self::EnumValue(node) => &node.location.start_token.location,
         }
     }
-    pub fn get_source_file(self: &Self) -> &Arc<SourceFile> {
+    pub fn get_source_file(self: &Self) -> &Arc<SourceFile<'buffer>> {
         match self {
             Self::Int(node) => &node.location.source,
             Self::Float(node) => &node.location.source,
@@ -90,26 +90,26 @@ impl LiteralNode {
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct NamedTypeNode {
-    pub location: NodeLocation,
-    pub name: NameNode,
+pub struct NamedTypeNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
+    pub name: NameNode<'buffer>,
     pub nullable: bool,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct ListTypeNode {
-    pub location: NodeLocation,
-    pub r#type: Box<TypeNode>,
+pub struct ListTypeNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
+    pub r#type: Box<TypeNode<'buffer>>,
     pub nullable: bool,
 }
 
 #[derive(Debug, Clone, derive_more::From, serde::Serialize)]
-pub enum TypeNode {
-    Named(NamedTypeNode),
-    List(ListTypeNode),
+pub enum TypeNode<'buffer> {
+    Named(NamedTypeNode<'buffer>),
+    List(ListTypeNode<'buffer>),
 }
 
-impl TypeNode {
+impl<'buffer> TypeNode<'buffer> {
     pub fn get_nullable(self: &Self) -> bool {
         match self {
             Self::Named(named) => named.nullable,
@@ -119,44 +119,44 @@ impl TypeNode {
 }
 
 #[derive(Debug, Clone, derive_more::From, serde::Serialize)]
-pub enum ArgumentValue {
-    NameNode(NameNode),
-    LiteralNode(LiteralNode),
+pub enum ArgumentValue<'buffer> {
+    NameNode(NameNode<'buffer>),
+    LiteralNode(LiteralNode<'buffer>),
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct Argument {
-    pub location: NodeLocation,
-    pub name: NameNode,
-    pub value: ArgumentValue,
+pub struct Argument<'buffer> {
+    pub location: NodeLocation<'buffer>,
+    pub name: NameNode<'buffer>,
+    pub value: ArgumentValue<'buffer>,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct DirectiveInvocationNode {
-    pub location: NodeLocation,
-    pub name: NameNode,
-    pub arguments: Vec<Argument>,
+pub struct DirectiveInvocationNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
+    pub name: NameNode<'buffer>,
+    pub arguments: Vec<Argument<'buffer>>,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
-pub struct InputFieldDefinitionNode {
-    pub location: NodeLocation,
-    pub name: NameNode,
-    pub r#type: TypeNode,
-    pub default_value: Option<LiteralNode>,
-    pub directives: Vec<DirectiveInvocationNode>,
+pub struct InputFieldDefinitionNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
+    pub name: NameNode<'buffer>,
+    pub r#type: TypeNode<'buffer>,
+    pub default_value: Option<LiteralNode<'buffer>>,
+    pub directives: Vec<DirectiveInvocationNode<'buffer>>,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct DirectiveLocationNode<T> {
-    pub location: NodeLocation,
+pub struct DirectiveLocationNode<'buffer, T> {
+    pub location: NodeLocation<'buffer>,
     pub directive_location: T,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct DirectiveNode<T: serde::Serialize> {
-    pub location: NodeLocation,
-    pub name: NameNode,
-    pub targets: Vec<DirectiveLocationNode<T>>,
-    pub arguments: Vec<InputFieldDefinitionNode>,
+pub struct DirectiveNode<'buffer, T: serde::Serialize> {
+    pub location: NodeLocation<'buffer>,
+    pub name: NameNode<'buffer>,
+    pub targets: Vec<DirectiveLocationNode<'buffer, T>>,
+    pub arguments: Vec<InputFieldDefinitionNode<'buffer>>,
 }

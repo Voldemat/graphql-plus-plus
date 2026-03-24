@@ -5,10 +5,10 @@ use crate::parsers::{
     schema::{server::errors, shared, type_registry},
 };
 
-fn parse_argument_value_from_literal_node(
-    value: &file::shared::ast::LiteralNode,
+fn parse_argument_value_from_literal_node<'buffer>(
+    value: &file::shared::ast::LiteralNode<'buffer>,
     arg_type: &errors::ArgType,
-) -> Result<shared::ast::ArgumentValue, errors::Error> {
+) -> Result<shared::ast::ArgumentValue, errors::Error<'buffer>> {
     return match value {
         file::shared::ast::LiteralNode::Int(i) => {
             Ok(shared::ast::ArgumentValue::Literal(i.value.into()))
@@ -52,13 +52,13 @@ fn parse_argument_value_from_literal_node(
     };
 }
 
-fn parse_argument_value(
-    value: &file::shared::ast::ArgumentValue,
+fn parse_argument_value<'buffer>(
+    value: &file::shared::ast::ArgumentValue<'buffer>,
     arg_type: &errors::ArgType,
-) -> Result<shared::ast::ArgumentValue, errors::Error> {
+) -> Result<shared::ast::ArgumentValue, errors::Error<'buffer>> {
     match value {
         file::shared::ast::ArgumentValue::NameNode(name) => {
-            Ok(shared::ast::ArgumentValue::Ref(name.name.clone()))
+            Ok(shared::ast::ArgumentValue::Ref(name.name.to_string()))
         }
         file::shared::ast::ArgumentValue::LiteralNode(literal) => {
             parse_argument_value_from_literal_node(&literal, arg_type)
@@ -66,19 +66,19 @@ fn parse_argument_value(
     }
 }
 
-pub fn parse_arguments(
-    arguments: &Vec<file::shared::ast::Argument>,
+pub fn parse_arguments<'buffer>(
+    arguments: &Vec<file::shared::ast::Argument<'buffer>>,
     directive: &Arc<RwLock<shared::ast::ServerDirective>>,
 ) -> Result<
     indexmap::IndexMap<String, shared::ast::FieldSelectionArgument>,
-    errors::Error,
+    errors::Error<'buffer>,
 > {
     let mut final_arguments =
         indexmap::IndexMap::<String, shared::ast::FieldSelectionArgument>::new(
         );
     let directive_br = directive.read().unwrap();
     for argument in arguments {
-        let Some(arg_type) = directive_br.arguments.get(&argument.name.name)
+        let Some(arg_type) = directive_br.arguments.get(argument.name.name)
         else {
             return Err(type_registry::Error::UnknownArgument(
                 argument.name.clone(),
@@ -86,9 +86,9 @@ pub fn parse_arguments(
             .into());
         };
         final_arguments.insert(
-            argument.name.name.clone(),
+            argument.name.name.to_string(),
             shared::ast::FieldSelectionArgument {
-                name: argument.name.name.clone(),
+                name: argument.name.name.to_string(),
                 value: parse_argument_value(&argument.value, arg_type)?,
                 r#type: arg_type.clone(),
             },

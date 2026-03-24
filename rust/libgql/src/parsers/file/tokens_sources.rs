@@ -8,14 +8,17 @@ use crate::{
     },
 };
 
-pub struct VecTokensSource {
-    tokens: Vec<Token>,
-    source_file: Arc<SourceFile>,
+pub struct VecTokensSource<'buffer> {
+    tokens: Vec<Token<'buffer>>,
+    source_file: Arc<SourceFile<'buffer>>,
     current_index: usize,
 }
 
-impl VecTokensSource {
-    pub fn new(tokens: Vec<Token>, source_file: Arc<SourceFile>) -> Self {
+impl<'buffer> VecTokensSource<'buffer> {
+    pub fn new(
+        tokens: Vec<Token<'buffer>>,
+        source_file: Arc<SourceFile<'buffer>>,
+    ) -> Self {
         assert!(tokens.len() > 0);
         return Self {
             tokens,
@@ -25,12 +28,12 @@ impl VecTokensSource {
     }
 }
 
-impl TokensSource for VecTokensSource {
-    fn lookahead(self: &Self) -> Option<&crate::lexer::tokens::Token> {
+impl<'buffer> TokensSource<'buffer> for VecTokensSource<'buffer> {
+    fn lookahead(self: &Self) -> Option<&crate::lexer::tokens::Token<'buffer>> {
         self.tokens.get(self.current_index + 1)
     }
 
-    fn advance(self: &mut Self) -> Result<(), ConsumeError> {
+    fn advance(self: &mut Self) -> Result<(), ConsumeError<'buffer>> {
         if self.current_index + 1 == self.tokens.len() {
             return Err(ConsumeError::EOF {
                 token: self.get_current_token().clone(),
@@ -43,8 +46,10 @@ impl TokensSource for VecTokensSource {
     fn consume(
         self: &mut Self,
         token_type: crate::lexer::token_type::TokenType,
-    ) -> Result<&crate::lexer::tokens::Token, super::tokens_source::ConsumeError>
-    {
+    ) -> Result<
+        &crate::lexer::tokens::Token<'buffer>,
+        super::tokens_source::ConsumeError<'buffer>,
+    > {
         if self.current_index == self.tokens.len() {
             return Err(ConsumeError::EOF {
                 token: self.get_current_token().clone(),
@@ -61,11 +66,11 @@ impl TokensSource for VecTokensSource {
         return Ok(token);
     }
 
-    fn get_current_token(self: &Self) -> &crate::lexer::tokens::Token {
+    fn get_current_token(self: &Self) -> &crate::lexer::tokens::Token<'buffer> {
         return self.tokens.get(self.current_index).unwrap();
     }
 
-    fn get_source_file(self: &Self) -> Arc<SourceFile> {
+    fn get_source_file(self: &Self) -> Arc<SourceFile<'buffer>> {
         return self.source_file.clone();
     }
 }

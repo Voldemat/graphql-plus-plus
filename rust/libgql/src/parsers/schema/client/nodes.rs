@@ -9,25 +9,25 @@ use crate::parsers::{
     },
 };
 
-fn fragment_spec_from_name(
+fn fragment_spec_from_name<'buffer>(
     registry: &TypeRegistry,
-    name: &file::shared::ast::NameNode,
-) -> Result<ast::FragmentSpec, errors::Error> {
-    if let Some(object) = registry.objects.get(&name.name) {
+    name: &file::shared::ast::NameNode<'buffer>,
+) -> Result<ast::FragmentSpec, errors::Error<'buffer>> {
+    if let Some(object) = registry.objects.get(name.name) {
         return Ok(ast::ObjectFragmentSpec::<server::ast::ObjectType> {
             r#type: object.clone(),
             selections: Vec::new(),
         }
         .into());
     };
-    if let Some(union) = registry.unions.get(&name.name) {
+    if let Some(union) = registry.unions.get(name.name) {
         return Ok(ast::UnionFragmentSpec {
             r#type: union.clone(),
             selections: Vec::new(),
         }
         .into());
     };
-    if let Some(interface) = registry.interfaces.get(&name.name) {
+    if let Some(interface) = registry.interfaces.get(name.name) {
         return Ok(ast::ObjectFragmentSpec::<server::ast::Interface> {
             r#type: interface.clone(),
             selections: Vec::new(),
@@ -37,10 +37,10 @@ fn fragment_spec_from_name(
     return Err(errors::Error::UnknownFragmentType(name.clone()));
 }
 
-fn fragment_spec_from_optype(
+fn fragment_spec_from_optype<'buffer>(
     registry: &TypeRegistry,
     optype: &file::client::ast::OpType,
-) -> Result<ast::FragmentSpec, errors::Error> {
+) -> Result<ast::FragmentSpec, errors::Error<'buffer>> {
     match optype {
         file::client::ast::OpType::Query => {
             return Ok(ast::ObjectFragmentSpec::<server::ast::ObjectType> {
@@ -66,14 +66,14 @@ fn fragment_spec_from_optype(
     }
 }
 
-pub fn parse_first_pass(
+pub fn parse_first_pass<'buffer>(
     registry: &TypeRegistry,
-    node: &file::client::ast::ASTNode,
-) -> Result<ast::ClientSchemaNode, errors::Error> {
+    node: &file::client::ast::ASTNode<'buffer>,
+) -> Result<ast::ClientSchemaNode, errors::Error<'buffer>> {
     match node {
         file::client::ast::ASTNode::Fragment(fragment) => {
             Ok(Arc::new(RwLock::new(ast::Fragment {
-                name: fragment.name.name.clone(),
+                name: fragment.name.name.to_string(),
                 source_text: shared::source_text::extract_from_fragment(
                     fragment,
                 ),
@@ -88,7 +88,7 @@ pub fn parse_first_pass(
                 registry,
             )?;
             Ok(Arc::new(RwLock::new(ast::Operation {
-                name: operation.name.name.clone(),
+                name: operation.name.name.to_string(),
                 source_text: shared::source_text::extract_from_operation(
                     operation,
                 ),
@@ -112,10 +112,10 @@ pub fn parse_first_pass(
     }
 }
 
-pub fn parse_second_pass(
+pub fn parse_second_pass<'buffer>(
     registry: &mut TypeRegistry,
-    node: &file::client::ast::ASTNode,
-) -> Result<(), errors::Error> {
+    node: &file::client::ast::ASTNode<'buffer>,
+) -> Result<(), errors::Error<'buffer>> {
     match node {
         file::client::ast::ASTNode::Fragment(fragment) => {
             fragment::parse(registry, fragment)

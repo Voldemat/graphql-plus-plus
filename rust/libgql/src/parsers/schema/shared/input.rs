@@ -26,10 +26,10 @@ fn parse_literal(node: &file::shared::ast::LiteralNode) -> ast::Literal {
     }
 }
 
-fn parse_input_field_spec(
-    node: &file::shared::ast::InputFieldDefinitionNode,
+fn parse_input_field_spec<'buffer>(
+    node: &file::shared::ast::InputFieldDefinitionNode<'buffer>,
     registry: &TypeRegistry,
-) -> Result<(ast::InputFieldSpec, bool), type_registry::Error> {
+) -> Result<(ast::InputFieldSpec, bool), type_registry::Error<'buffer>> {
     return parse_noncallable_input_field_spec(
         &node.r#type,
         node.default_value.as_ref().map(parse_literal),
@@ -38,13 +38,13 @@ fn parse_input_field_spec(
     .map(|(return_type, nullable)| (return_type.into(), nullable));
 }
 
-fn parse_noncallable_input_field_spec(
-    node: &file::shared::ast::TypeNode,
+fn parse_noncallable_input_field_spec<'buffer>(
+    node: &file::shared::ast::TypeNode<'buffer>,
     default_value: Option<ast::Literal>,
     registry: &TypeRegistry,
 ) -> Result<
     (ast::NonCallableFieldSpec<ast::InputTypeSpec>, bool),
-    type_registry::Error,
+    type_registry::Error<'buffer>,
 > {
     match node {
         file::shared::ast::TypeNode::List(l) => {
@@ -78,30 +78,33 @@ fn parse_noncallable_input_field_spec(
     }
 }
 
-pub fn parse_field_definition(
-    node: &file::shared::ast::InputFieldDefinitionNode,
+pub fn parse_field_definition<'buffer>(
+    node: &file::shared::ast::InputFieldDefinitionNode<'buffer>,
     registry: &TypeRegistry,
-) -> Result<ast::FieldDefinition<ast::InputFieldSpec>, type_registry::Error> {
+) -> Result<
+    ast::FieldDefinition<ast::InputFieldSpec>,
+    type_registry::Error<'buffer>,
+> {
     let (spec, nullable) = parse_input_field_spec(node, registry)?;
     return Ok(ast::FieldDefinition {
-        name: node.name.name.clone(),
+        name: node.name.name.to_string(),
         spec,
         nullable,
     });
 }
 
-pub fn parse_field_definitions(
-    nodes: &[file::shared::ast::InputFieldDefinitionNode],
+pub fn parse_field_definitions<'buffer>(
+    nodes: &[file::shared::ast::InputFieldDefinitionNode<'buffer>],
     registry: &TypeRegistry,
 ) -> Result<
     IndexMap<String, ast::FieldDefinition<ast::InputFieldSpec>>,
-    type_registry::Error,
+    type_registry::Error<'buffer>,
 > {
     let mut arguments =
         IndexMap::<String, ast::FieldDefinition<ast::InputFieldSpec>>::new();
     for field_definition_node in nodes {
         arguments.insert(
-            field_definition_node.name.name.clone(),
+            field_definition_node.name.name.to_string(),
             parse_field_definition(field_definition_node, registry)?,
         );
     }

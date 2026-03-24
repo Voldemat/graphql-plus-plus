@@ -27,9 +27,9 @@ use crate::{
 use self::ast::GraphqlError;
 
 #[derive(Debug, derive_more::From)]
-pub enum Error {
+pub enum Error<'buffer> {
     Lexer(Vec<lexer::Error>),
-    FileParser(file::client::Error),
+    FileParser(file::client::Error<'buffer>),
     OperationIsNotDefined(String),
     OperationNameIsNotDefined,
     NoOperationsAreDefined,
@@ -116,12 +116,12 @@ async fn execute_operation<
     }
 }
 
-pub async fn execute<'args, C, S: Scalar, T: ParseRegistry<S>>(
+pub async fn execute<'args, 'buffer, C, S: Scalar, T: ParseRegistry<S>>(
     context: &'args C,
     registry: &'args type_registry::TypeRegistry,
     resolvers: &'args Resolvers<'args, S, C>,
     parse_registry: &'args T,
-    client_query: String,
+    client_query: &'buffer str,
     variables: Values<S>,
     operation: Option<String>,
 ) -> Result<
@@ -130,9 +130,9 @@ pub async fn execute<'args, C, S: Scalar, T: ParseRegistry<S>>(
         impl futures::Stream<Item = Result<Values<S>, Vec<GraphqlError>>>
         + use<'args, C, S, T>,
     >,
-    Error,
+    Error<'buffer>,
 > {
-    let tokens = lexer::utils::parse_buffer_into_tokens(&client_query)?;
+    let tokens = lexer::utils::parse_buffer_into_tokens(client_query)?;
     let source_file = std::sync::Arc::new(file::shared::ast::SourceFile {
         filepath: "<request>".into(),
         buffer: client_query,
