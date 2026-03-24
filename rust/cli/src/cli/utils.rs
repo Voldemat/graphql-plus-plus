@@ -5,43 +5,23 @@ use crate::cli::config;
 pub fn format_line(
     line: &str,
     current_line: u32,
-    location: &libgql::lexer::tokens::Location,
+    location: &libgql::lexer::tokens::TokenLocation,
     exc: &str,
 ) -> String {
     let linestr = current_line.to_string();
-    let mut buffer = format!("{}: {}\n", linestr, line);
-
-    if current_line == location.get_line() {
-        let mut underline = String::new();
-
-        // spaces before the underline
-        let spaces = location.get_start() as usize + 2 + linestr.len();
-        for _ in 0..spaces {
-            underline.push(' ');
-        }
-
-        // underline itself
-        for _ in location.get_start()..=location.get_end() {
-            underline.push('~');
-        }
-
-        // error message
-        underline.push_str(format!(" Error: {}\n", exc).as_str());
-
-        buffer.push_str(&underline);
-    }
+    let buffer = format!("{}: {}\n", linestr, line);
 
     buffer
 }
 
 pub fn format_error(
     exc: &str,
-    location: &libgql::lexer::tokens::Location,
+    location: &libgql::lexer::tokens::TokenLocation,
     source: &Arc<libgql::parsers::file::shared::ast::SourceFile>,
 ) -> String {
     let mut buffer = format!("{}\n", source.filepath.display());
 
-    let line_num = location.get_line() as i32;
+    let line_num = 0 as i32;
 
     let first_line_to_show = std::cmp::max(line_num - 4, 1) as u32;
     let last_line_to_show = (line_num + 4) as u32;
