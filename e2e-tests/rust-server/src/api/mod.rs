@@ -32,12 +32,13 @@ pub async fn graphql(
     json: actix_web::web::Json<GraphqlRequestBody>,
 ) -> impl actix_web::Responder {
     let data = json.0;
+    let query = data.query;
     let operation_result = match libgql::executor::execute(
         &(),
         &state.get_ref().graphql_registry,
         &state.get_ref().graphql_resolvers_map,
         &state.get_ref().graphql_parse_registry,
-        data.query,
+        &query,
         data.variables.map_or(libgql::executor::Values::new(), |v| {
             libgql::json::executor::ast::parse_variables_from_json(&v).unwrap()
         }),
@@ -68,7 +69,7 @@ pub async fn graphql(
                 libgql::json::executor::ast::serialize_values_to_json(&result).unwrap();
             actix_web::HttpResponse::Ok().json(GraphqlResponseBody {
                 data: json_result,
-                errors: Vec::new()
+                errors: Vec::new(),
             })
         }
         libgql::executor::OperationResult::Stream(_) => {

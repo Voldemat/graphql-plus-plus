@@ -7,9 +7,7 @@ pub struct Check {
 async fn query_get_check(
     context: &super::context::Context,
 ) -> Result<Check, libgql::executor::ast::ResolverError> {
-    Ok(Check {
-        a: 1
-    })
+    Ok(Check { a: 1 })
 }
 
 fn query_get_check_wrapper<'args>(

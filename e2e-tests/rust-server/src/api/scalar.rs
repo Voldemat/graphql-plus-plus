@@ -64,14 +64,12 @@ impl libgql::json::executor::ast::JSONSerializableScalar for Scalar {
     fn to_json_value(self: &Self) -> Result<serde_json_path_to_error::Value, String> {
         match self {
             Self::Int(i) => Ok(serde_json_path_to_error::Value::Number(
-                serde_json_path_to_error::Number::from_i128(*i as i128).ok_or(
-                    "Failed to convert Scalar::Int to serde_json::Number",
-                )?,
+                serde_json_path_to_error::Number::from_i128(*i as i128)
+                    .ok_or("Failed to convert Scalar::Int to serde_json::Number")?,
             )),
             Self::Float(f) => Ok(serde_json_path_to_error::Value::Number(
-                serde_json_path_to_error::Number::from_f64(*f as f64).ok_or(
-                    "Failed to convert Scalar::Float to serde_json::Number",
-                )?,
+                serde_json_path_to_error::Number::from_f64(*f as f64)
+                    .ok_or("Failed to convert Scalar::Float to serde_json::Number")?,
             )),
             Self::Boolean(b) => Ok(serde_json_path_to_error::Value::Bool(*b)),
             Self::String(s) => Ok(serde_json_path_to_error::Value::String(s.clone())),
