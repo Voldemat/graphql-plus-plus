@@ -137,10 +137,12 @@ pub async fn execute<'args, 'buffer, C, S: Scalar, T: ParseRegistry<S>>(
         filepath: "<request>".into(),
         buffer: client_query,
     });
-    let file_nodes = file::client::Parser::new(
-        file::tokens_sources::VecTokensSource::new(tokens, source_file.clone()),
-    )
-    .parse_ast_nodes()?;
+    let file_nodes =
+        file::client::Parser::new(file::tokens_sources::VecTokensSource::new(
+            &tokens,
+            source_file.clone(),
+        ))
+        .parse_ast_nodes()?;
     let mut local_registry = registry.clone();
     let mut client_schema =
         client::parse_client_schema(&mut local_registry, &file_nodes).unwrap();

@@ -1,7 +1,5 @@
 use std::{path::PathBuf, sync::Arc};
 
-use crate::lexer;
-
 pub struct SourceFile<'buffer> {
     pub filepath: PathBuf,
     pub buffer: &'buffer str,
@@ -17,8 +15,8 @@ impl<'buffer> std::fmt::Debug for SourceFile<'buffer> {
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct NodeLocation<'buffer> {
-    pub start_token: lexer::tokens::Token<'buffer>,
-    pub end_token: lexer::tokens::Token<'buffer>,
+    pub start: usize,
+    pub end: usize,
     #[serde(skip_serializing)]
     pub source: Arc<SourceFile<'buffer>>,
 }
@@ -69,13 +67,13 @@ pub enum LiteralNode<'buffer> {
 }
 
 impl<'buffer> LiteralNode<'buffer> {
-    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
+    pub fn get_location(self: &Self) -> &NodeLocation<'buffer> {
         match self {
-            Self::Int(node) => &node.location.start_token.location,
-            Self::Float(node) => &node.location.start_token.location,
-            Self::String(node) => &node.location.start_token.location,
-            Self::Boolean(node) => &node.location.start_token.location,
-            Self::EnumValue(node) => &node.location.start_token.location,
+            Self::Int(node) => &node.location,
+            Self::Float(node) => &node.location,
+            Self::String(node) => &node.location,
+            Self::Boolean(node) => &node.location,
+            Self::EnumValue(node) => &node.location,
         }
     }
     pub fn get_source_file(self: &Self) -> &Arc<SourceFile<'buffer>> {

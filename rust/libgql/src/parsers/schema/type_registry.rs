@@ -3,12 +3,9 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use crate::{
-    lexer,
-    parsers::{
-        file,
-        schema::{client, server, shared},
-    },
+use crate::parsers::{
+    file,
+    schema::{client, server, shared},
 };
 
 pub type FieldMapping = indexmap::IndexMap<
@@ -41,14 +38,12 @@ pub enum Error<'buffer> {
 }
 
 impl<'buffer> Error<'buffer> {
-    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
+    pub fn get_location(
+        self: &Self,
+    ) -> &file::shared::ast::NodeLocation<'buffer> {
         match self {
-            Self::UnknownType(name_node) => {
-                &name_node.location.start_token.location
-            }
-            Self::UnknownArgument(name_node) => {
-                &name_node.location.end_token.location
-            }
+            Self::UnknownType(name_node) => &name_node.location,
+            Self::UnknownArgument(name_node) => &name_node.location,
         }
     }
     pub fn get_source_file(

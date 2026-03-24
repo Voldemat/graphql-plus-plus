@@ -8,15 +8,15 @@ use crate::{
     },
 };
 
-pub struct VecTokensSource<'buffer> {
-    tokens: Vec<Token<'buffer>>,
+pub struct VecTokensSource<'buffer, 'tokens> {
+    tokens: &'tokens Vec<Token<'buffer>>,
     source_file: Arc<SourceFile<'buffer>>,
     current_index: usize,
 }
 
-impl<'buffer> VecTokensSource<'buffer> {
+impl<'buffer, 'tokens> VecTokensSource<'buffer, 'tokens> {
     pub fn new(
-        tokens: Vec<Token<'buffer>>,
+        tokens: &'tokens Vec<Token<'buffer>>,
         source_file: Arc<SourceFile<'buffer>>,
     ) -> Self {
         assert!(tokens.len() > 0);
@@ -28,16 +28,18 @@ impl<'buffer> VecTokensSource<'buffer> {
     }
 }
 
-impl<'buffer> TokensSource<'buffer> for VecTokensSource<'buffer> {
-    fn lookahead(self: &Self) -> Option<&crate::lexer::tokens::Token<'buffer>> {
+impl<'buffer, 'tokens> TokensSource<'buffer, 'tokens>
+    for VecTokensSource<'buffer, 'tokens>
+{
+    fn lookahead(
+        self: &Self,
+    ) -> Option<&'tokens crate::lexer::tokens::Token<'buffer>> {
         self.tokens.get(self.current_index + 1)
     }
 
     fn advance(self: &mut Self) -> Result<(), ConsumeError<'buffer>> {
         if self.current_index + 1 == self.tokens.len() {
-            return Err(ConsumeError::EOF {
-                token: self.get_current_token().clone(),
-            });
+            return Err(ConsumeError::EOF(self.get_current_token().clone()));
         }
         self.current_index += 1;
         return Ok(());
@@ -47,13 +49,11 @@ impl<'buffer> TokensSource<'buffer> for VecTokensSource<'buffer> {
         self: &mut Self,
         token_type: crate::lexer::token_type::TokenType,
     ) -> Result<
-        &crate::lexer::tokens::Token<'buffer>,
+        &'tokens crate::lexer::tokens::Token<'buffer>,
         super::tokens_source::ConsumeError<'buffer>,
     > {
         if self.current_index == self.tokens.len() {
-            return Err(ConsumeError::EOF {
-                token: self.get_current_token().clone(),
-            });
+            return Err(ConsumeError::EOF(self.get_current_token().clone()));
         };
         self.advance()?;
         let token = self.get_current_token();
@@ -66,7 +66,9 @@ impl<'buffer> TokensSource<'buffer> for VecTokensSource<'buffer> {
         return Ok(token);
     }
 
-    fn get_current_token(self: &Self) -> &crate::lexer::tokens::Token<'buffer> {
+    fn get_current_token(
+        self: &Self,
+    ) -> &'tokens crate::lexer::tokens::Token<'buffer> {
         return self.tokens.get(self.current_index).unwrap();
     }
 

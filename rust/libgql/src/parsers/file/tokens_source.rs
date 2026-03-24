@@ -5,30 +5,28 @@ use crate::lexer;
 
 #[derive(Debug)]
 pub enum ConsumeError<'buffer> {
-    EOF {
-        token: lexer::tokens::Token<'buffer>,
-    },
+    EOF(lexer::tokens::Token<'buffer>),
     WrongType {
         expected_token_type: lexer::token_type::TokenType,
         received_token: lexer::tokens::Token<'buffer>,
     },
     UnexpectedLexeme {
-        expected_lexeme: String,
+        expected_lexeme: &'static str,
         received_token: lexer::tokens::Token<'buffer>,
     },
 }
 
-impl<'buffer> ConsumeError<'buffer> {
+impl<'buffer, 'tokens> ConsumeError<'buffer> {
     pub fn is_eof(self: &Self) -> bool {
         match self {
-            Self::EOF { token: _ } => true,
+            Self::EOF(_) => true,
             _ => false,
         }
     }
 
     pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
         match self {
-            Self::EOF { token } => &token.location,
+            Self::EOF(token) => &token.location,
             Self::WrongType { received_token, .. } => &received_token.location,
             Self::UnexpectedLexeme { received_token, .. } => {
                 &received_token.location
@@ -37,19 +35,22 @@ impl<'buffer> ConsumeError<'buffer> {
     }
 }
 
-pub trait TokensSource<'buffer> {
-    fn lookahead(self: &Self) -> Option<&lexer::tokens::Token<'buffer>>;
+pub trait TokensSource<'buffer: 'tokens, 'tokens> {
+    fn lookahead(self: &Self)
+    -> Option<&'tokens lexer::tokens::Token<'buffer>>;
     fn advance(self: &mut Self) -> Result<(), ConsumeError<'buffer>>;
     fn consume(
         self: &mut Self,
         token_type: lexer::token_type::TokenType,
-    ) -> Result<&lexer::tokens::Token<'buffer>, ConsumeError<'buffer>>;
-    fn get_current_token(self: &Self) -> &lexer::tokens::Token<'buffer>;
+    ) -> Result<&'tokens lexer::tokens::Token<'buffer>, ConsumeError<'buffer>>;
+    fn get_current_token(self: &Self)
+    -> &'tokens lexer::tokens::Token<'buffer>;
     fn get_source_file(self: &Self) -> Arc<shared::ast::SourceFile<'buffer>>;
 
     fn consume_identifier(
         self: &mut Self,
-    ) -> Result<&lexer::tokens::Token<'buffer>, ConsumeError<'buffer>> {
+    ) -> Result<&'tokens lexer::tokens::Token<'buffer>, ConsumeError<'buffer>>
+    {
         return Self::consume(
             self,
             lexer::token_type::TokenType::Complex(
@@ -72,14 +73,15 @@ pub trait TokensSource<'buffer> {
         return true;
     }
 
-    fn consume_identifier_by_lexeme<'a>(
-        self: &'a mut Self,
-        lexeme: &str,
-    ) -> Result<&'a lexer::tokens::Token<'buffer>, ConsumeError<'buffer>> {
+    fn consume_identifier_by_lexeme(
+        self: &mut Self,
+        lexeme: &'static str,
+    ) -> Result<&'tokens lexer::tokens::Token<'buffer>, ConsumeError<'buffer>>
+    {
         let token = self.consume_identifier()?;
         if token.lexeme != lexeme {
             return Err(ConsumeError::UnexpectedLexeme {
-                expected_lexeme: lexeme.to_string(),
+                expected_lexeme: lexeme,
                 received_token: token.clone(),
             });
         }
@@ -88,7 +90,7 @@ pub trait TokensSource<'buffer> {
 
     fn consume_identifier_by_lexeme_if_is_ahead(
         self: &mut Self,
-        lexeme: &str,
+        lexeme: &'static str,
     ) -> bool {
         let Some(next_token) = Self::lookahead(self) else {
             return false;

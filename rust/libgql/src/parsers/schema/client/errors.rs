@@ -3,12 +3,9 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use crate::{
-    lexer,
-    parsers::{
-        file,
-        schema::{client::ast, server, shared, type_registry},
-    },
+use crate::parsers::{
+    file,
+    schema::{client::ast, server, shared, type_registry},
 };
 
 #[derive(Debug, derive_more::From)]
@@ -64,36 +61,30 @@ pub enum Error<'buffer> {
 }
 
 impl<'buffer> Error<'buffer> {
-    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
+    pub fn get_location(
+        self: &Self,
+    ) -> &file::shared::ast::NodeLocation<'buffer> {
         match self {
             Self::TypeRegistryError(error) => error.get_location(),
-            Self::UnknownFragmentType(name_node) => {
-                &name_node.location.start_token.location
-            }
+            Self::UnknownFragmentType(name_node) => &name_node.location,
             Self::UnexpectedConditionalSpreadSelectionNode(node) => {
-                &node.location.start_token.location
+                &node.location
             }
-            Self::UnknownFragment(name_node) => {
-                &name_node.location.start_token.location
-            }
+            Self::UnknownFragment(name_node) => &name_node.location,
             Self::InvalidFragmentType { selection_node, .. } => {
-                &selection_node.location.start_token.location
+                &selection_node.location
             }
-            Self::UnknownField { field, .. } => {
-                &field.location.start_token.location
-            }
+            Self::UnknownField { field, .. } => &field.location,
             Self::UnexpectedCallableField { definition, .. } => {
-                &definition.location.start_token.location
+                &definition.location
             }
-            Self::UnexpectedFieldSelectionNodeOnUnion(node) => {
-                &node.location.start_token.location
-            }
+            Self::UnexpectedFieldSelectionNodeOnUnion(node) => &node.location,
             Self::NoSuitableTypeForConditionalSpreadSelection {
                 selection,
                 ..
-            } => &selection.location.start_token.location,
+            } => &selection.location,
             Self::UnexpectedSelectionOnLiteralField { spec, .. } => {
-                &spec.location.start_token.location
+                &spec.location
             }
             Self::InvalidLiteralForInput { node, .. } => node.get_location(),
         }
