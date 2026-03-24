@@ -1,4 +1,3 @@
-
 use std::sync::Arc;
 
 use crate::cli::utils;
@@ -25,10 +24,11 @@ fn parse(args: &ParseArgs) {
     let buffer = utils::read_buffer_from_filepath(&args.filepath);
     let tokens: Vec<libgql::lexer::tokens::Token> =
         serde_json::from_str(&buffer).unwrap();
-    let source_file = Arc::new(libgql::parsers::file::shared::ast::SourceFile {
-        buffer,
-        filepath: args.filepath.clone(),
-    });
+    let source_file =
+        Arc::new(libgql::parsers::file::shared::ast::SourceFile {
+            buffer: buffer.as_str(),
+            filepath: args.filepath.clone(),
+        });
     let nodes = libgql::parsers::file::client::Parser::new(
         libgql::parsers::file::tokens_sources::VecTokensSource::new(
             tokens,

@@ -26,7 +26,7 @@ fn parse(args: &ParseArgs) {
         serde_json::from_str(&buffer).unwrap();
     let source_file =
         Arc::new(libgql::parsers::file::shared::ast::SourceFile {
-            buffer,
+            buffer: buffer.as_str(),
             filepath: args.filepath.clone(),
         });
     let nodes = libgql::parsers::file::server::Parser::new(

@@ -122,13 +122,21 @@ pub fn load_server_schema_from_inputs(
             .unwrap();
         schema.append_schema(new_schema);
     }
+    let mut buffers = Vec::new();
     for graphql_path in resolve_paths(&config_dir_path, &conf.graphql) {
         let buffer = std::fs::read_to_string(&graphql_path).unwrap();
-        let source_file =
-            std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
+        buffers.push(buffer);
+    }
+    for (graphql_path, buffer) in resolve_paths(&config_dir_path, &conf.graphql)
+        .iter()
+        .zip(&buffers)
+    {
+        let source_file = std::sync::Arc::new(
+            libgql::parsers::file::shared::ast::SourceFile {
                 filepath: graphql_path.clone(),
-                buffer,
-            });
+                buffer: buffer.as_str(),
+            },
+        );
         let tokens =
             libgql::lexer::utils::parse_buffer_into_tokens(&source_file.buffer)
                 .unwrap();
@@ -173,13 +181,21 @@ pub fn load_client_schema_from_inputs(
     let mut errors = Vec::<String>::new();
     let mut schema =
         libgql::parsers::schema::client::schema::ClientSchema::default();
+    let mut buffers = Vec::new();
     for graphql_path in resolve_paths(&config_dir_path, &conf.graphql) {
         let buffer = std::fs::read_to_string(&graphql_path).unwrap();
-        let source_file =
-            std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
+        buffers.push(buffer);
+    }
+    for (graphql_path, buffer) in resolve_paths(&config_dir_path, &conf.graphql)
+        .iter()
+        .zip(&buffers)
+    {
+        let source_file = std::sync::Arc::new(
+            libgql::parsers::file::shared::ast::SourceFile {
                 filepath: graphql_path.clone(),
-                buffer,
-            });
+                buffer: buffer.as_str(),
+            },
+        );
         let tokens =
             libgql::lexer::utils::parse_buffer_into_tokens(&source_file.buffer)
                 .unwrap();
