@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::sync::Arc;
 
 use crate::parsers::schema::client;
 
@@ -21,10 +20,11 @@ pub type ObjectFieldResolversMap<'a, S, C> =
     HashMap<(&'a str, &'a str), &'a ObjectFieldResolver<S, C>>;
 
 pub fn execute_potential_selection_and_serialize<'a, C, S: Scalar>(
+    client_registry: &'a client::type_registry::TypeRegistry,
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<S, C>,
     resolver_root_introspection_value: ResolverIntrospectionValue<'a, S>,
-    selection: Option<&'a Arc<client::ast::FragmentSpec>>,
+    selection: Option<&'a client::ast::FragmentSpec>,
     variables: &'a ResolvedVariables,
 ) -> std::pin::Pin<
     Box<dyn Future<Output = Result<Value<S>, Vec<GraphqlError>>> + 'a>,
@@ -46,12 +46,13 @@ pub fn execute_potential_selection_and_serialize<'a, C, S: Scalar>(
             ) => {
                 let spec = selection.unwrap();
                 execute_fragment(
+                    client_registry,
                     context,
                     object_field_resolvers,
                     resolver_root,
                     &fields,
                     &object_name,
-                    spec.as_ref(),
+                    spec,
                     variables,
                 )
                 .await
@@ -71,6 +72,7 @@ pub fn execute_potential_selection_and_serialize<'a, C, S: Scalar>(
                                     Vec<GraphqlError>,
                                 > {
                                     execute_potential_selection_and_serialize(
+                                        client_registry,
                                         context,
                                         object_field_resolvers,
                                         optional_element,
@@ -92,6 +94,7 @@ pub fn execute_potential_selection_and_serialize<'a, C, S: Scalar>(
 }
 
 fn execute_fragment<'a, C, S: Scalar>(
+    client_registry: &'a client::type_registry::TypeRegistry,
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<S, C>,
     resolver_root: &'a ResolverRoot<S>,
@@ -106,6 +109,7 @@ fn execute_fragment<'a, C, S: Scalar>(
         match spec {
             client::ast::FragmentSpec::Object(obj) => {
                 execute_object_selection_set(
+                    client_registry,
                     context,
                     object_field_resolvers,
                     object_name,
@@ -119,6 +123,7 @@ fn execute_fragment<'a, C, S: Scalar>(
 
             client::ast::FragmentSpec::Union(union) => {
                 execute_union_selection_set(
+                    client_registry,
                     context,
                     object_field_resolvers,
                     object_name,
@@ -131,6 +136,7 @@ fn execute_fragment<'a, C, S: Scalar>(
             }
             client::ast::FragmentSpec::Interface(interface) => {
                 execute_object_selection_set(
+                    client_registry,
                     context,
                     object_field_resolvers,
                     object_name,
@@ -146,6 +152,7 @@ fn execute_fragment<'a, C, S: Scalar>(
 }
 
 async fn execute_field<'a, 'b, C, S: Scalar>(
+    client_registry: &'a client::type_registry::TypeRegistry,
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<'_, S, C>,
     resolver_root: &'a ResolverRoot<S>,
@@ -188,6 +195,7 @@ async fn execute_field<'a, 'b, C, S: Scalar>(
         }]
     })?;
     execute_potential_selection_and_serialize(
+        client_registry,
         context,
         object_field_resolvers,
         introspection_value,
@@ -207,6 +215,7 @@ async fn execute_field<'a, 'b, C, S: Scalar>(
 }
 
 async fn execute_union_selection_set<C, S: Scalar>(
+    client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
     object_name: &str,
@@ -227,18 +236,17 @@ async fn execute_union_selection_set<C, S: Scalar>(
             client::ast::UnionSelection::ObjectConditionalSpreadSelection(
                 spread,
             ) => {
-                let spread_object_name =
-                    &spread.selection.r#type.read().unwrap().name;
-                if spread_object_name != object_name {
+                if &spread.r#type != object_name {
                     return Ok(Values::new());
                 };
                 execute_object_selection_set(
+                    client_registry,
                     context,
                     object_field_resolvers,
                     object_name,
                     resolver_root,
                     existing_fields,
-                    &spread.selection.selections,
+                    &spread.selections,
                     variables,
                 )
                 .await
@@ -248,14 +256,18 @@ async fn execute_union_selection_set<C, S: Scalar>(
             }
 
             client::ast::UnionSelection::SpreadSelection(spread) => {
-                let fragment = spread.fragment.read().unwrap();
                 execute_fragment(
+                    client_registry,
                     context,
                     object_field_resolvers,
                     resolver_root,
                     existing_fields,
                     object_name,
-                    &fragment.spec,
+                    &client_registry
+                        .fragments
+                        .get(&spread.fragment)
+                        .unwrap()
+                        .spec,
                     variables,
                 )
                 .await
@@ -269,6 +281,7 @@ async fn execute_union_selection_set<C, S: Scalar>(
 }
 
 async fn execute_field_selection<C, S: Scalar>(
+    client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
     resolver_root: &ResolverRoot<S>,
@@ -278,6 +291,7 @@ async fn execute_field_selection<C, S: Scalar>(
     variables: &ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     let value = execute_field(
+        client_registry,
         context,
         object_field_resolvers,
         resolver_root,
@@ -291,6 +305,7 @@ async fn execute_field_selection<C, S: Scalar>(
 }
 
 async fn execute_object_selection<C, S: Scalar>(
+    client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
     object_name: &str,
@@ -307,6 +322,7 @@ async fn execute_object_selection<C, S: Scalar>(
 
         client::ast::ObjectSelection::FieldSelection(field) => {
             execute_field_selection(
+                client_registry,
                 context,
                 object_field_resolvers,
                 resolver_root,
@@ -319,8 +335,10 @@ async fn execute_object_selection<C, S: Scalar>(
         }
 
         client::ast::ObjectSelection::SpreadSelection(spread) => {
-            let fragment = spread.fragment.read().unwrap();
+            let fragment =
+                client_registry.fragments.get(&spread.fragment).unwrap();
             execute_fragment(
+                client_registry,
                 context,
                 object_field_resolvers,
                 resolver_root,
@@ -335,6 +353,7 @@ async fn execute_object_selection<C, S: Scalar>(
 }
 
 async fn execute_object_selection_set<C, S: Scalar>(
+    client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
     object_name: &str,
@@ -346,6 +365,7 @@ async fn execute_object_selection_set<C, S: Scalar>(
     futures::future::join_all(selections.iter().map(
         async |selection| -> Result<Values<S>, Vec<GraphqlError>> {
             execute_object_selection(
+                client_registry,
                 context,
                 object_field_resolvers,
                 object_name,

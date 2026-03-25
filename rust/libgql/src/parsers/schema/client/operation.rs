@@ -2,20 +2,27 @@ use crate::parsers::{
     file,
     schema::{
         client::{errors, fragment},
-        type_registry::TypeRegistry,
+        server,
     },
 };
 
+use super::type_registry::TypeRegistry;
+
 pub fn parse<'buffer>(
+    server_registry: &server::type_registry::TypeRegistry,
     registry: &mut TypeRegistry,
     node: &file::client::ast::OperationDefinition<'buffer>,
 ) -> Result<(), errors::Error<'buffer>> {
-    let operation_rc = registry.operations.get(node.name.name).unwrap();
-    let mut operation = operation_rc.write().unwrap();
+    let mut operation =
+        registry.operations.swap_remove(node.name.name).unwrap();
     fragment::parse_selections(
+        server_registry,
         registry,
         &mut operation.fragment_spec,
         &node.fragment.selections,
     )?;
+    registry
+        .operations
+        .insert(node.name.name.to_string(), operation);
     return Ok(());
 }

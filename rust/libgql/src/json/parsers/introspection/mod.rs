@@ -1,51 +1,116 @@
-use std::sync::{Arc, RwLock};
-
 use indexmap::IndexMap;
 
-use crate::parsers::schema::{server, shared, type_registry::TypeRegistry};
+use crate::parsers::schema::{
+    server::{self, type_registry::TypeRegistry},
+    shared,
+};
 
-fn parse_node_first_pass(
-    value: &serde_json::Value,
-) -> server::ast::ServerSchemaNode {
+fn parse_node(registry: &mut TypeRegistry, value: &serde_json::Value) {
     let kind = value["kind"].as_str().unwrap();
     let name = value["name"].as_str().unwrap();
     match kind {
-        "SCALAR" => server::ast::ServerSchemaNode::Scalar(name.to_string()),
-        "ENUM" => Arc::new(shared::ast::Enum {
-            name: name.to_string(),
-            values: value["enumValues"]
-                .as_array()
-                .unwrap()
-                .into_iter()
-                .map(|enum_value| {
-                    enum_value["name"].as_str().unwrap().to_string()
-                })
-                .collect(),
-        })
-        .into(),
-        "INPUT_OBJECT" => Arc::new(RwLock::new(shared::ast::InputType {
-            name: name.to_string(),
-            fields: IndexMap::new(),
-        }))
-        .into(),
-        "OBJECT" => Arc::new(RwLock::new(server::ast::ObjectType {
-            name: name.to_string(),
-            fields: IndexMap::new(),
-            implements: IndexMap::new(),
-            directives: Vec::new(),
-        }))
-        .into(),
-        "UNION" => Arc::new(RwLock::new(server::ast::Union {
-            name: name.to_string(),
-            items: IndexMap::new(),
-        }))
-        .into(),
-        "INTERFACE" => Arc::new(RwLock::new(server::ast::Interface {
-            name: name.to_string(),
-            fields: IndexMap::new(),
-            directives: Vec::new(),
-        }))
-        .into(),
+        "SCALAR" => {
+            registry.scalars.insert(name.to_string());
+        }
+        "ENUM" => {
+            registry.enums.insert(
+                name.to_string(),
+                shared::ast::Enum {
+                    name: name.to_string(),
+                    values: value["enumValues"]
+                        .as_array()
+                        .unwrap()
+                        .into_iter()
+                        .map(|enum_value| {
+                            enum_value["name"].as_str().unwrap().to_string()
+                        })
+                        .collect(),
+                },
+            );
+        }
+        "INPUT_OBJECT" => {
+            registry.inputs.insert(
+                name.to_string(),
+                shared::ast::InputType {
+                    name: name.to_string(),
+                    fields: value["inputFields"]
+                        .as_array()
+                        .unwrap()
+                        .into_iter()
+                        .map(|field_json| {
+                            let field = parse_input_field_definition(
+                                registry, field_json,
+                            );
+                            (field.name.clone(), field)
+                        })
+                        .collect(),
+                },
+            );
+        }
+        "OBJECT" => {
+            registry.objects.insert(
+                name.to_string(),
+                server::ast::ObjectType {
+                    name: name.to_string(),
+                    fields: value["fields"]
+                        .as_array()
+                        .unwrap()
+                        .into_iter()
+                        .map(|field_json| {
+                            let field = parse_object_field_definition(
+                                registry, field_json,
+                            );
+                            (field.name.clone(), field)
+                        })
+                        .collect(),
+                    implements: value["interfaces"]
+                        .as_array()
+                        .unwrap()
+                        .into_iter()
+                        .map(|interface_json| {
+                            interface_json["name"].as_str().unwrap().to_string()
+                        })
+                        .collect(),
+                    directives: Vec::new(),
+                },
+            );
+        }
+        "UNION" => {
+            registry.unions.insert(
+                name.to_string(),
+                server::ast::Union {
+                    name: name.to_string(),
+                    items: value["possibleTypes"]
+                        .as_array()
+                        .unwrap()
+                        .into_iter()
+                        .map(|object_json| {
+                            object_json["name"].as_str().unwrap().to_string()
+                        })
+                        .collect(),
+                },
+            );
+        }
+        "INTERFACE" => {
+            registry.interfaces.insert(
+                name.to_string(),
+                server::ast::Interface {
+                    name: name.to_string(),
+                    fields: value["fields"]
+                        .as_array()
+                        .unwrap()
+                        .into_iter()
+                        .map(|field_json| {
+                            let field = parse_object_field_definition(
+                                registry, field_json,
+                            );
+                            (field.name.clone(), field)
+                        })
+                        .collect(),
+                    directives: Vec::new(),
+                },
+            );
+        }
         _ => panic!("Unexpected server node kind: {}", kind),
     }
 }
@@ -60,18 +125,12 @@ fn parse_input_type_spec(
         "SCALAR" => shared::ast::InputTypeSpec::Scalar(
             value["name"].as_str().unwrap().to_string(),
         ),
-        "ENUM" => registry
-            .enums
-            .get(value["name"].as_str().unwrap())
-            .unwrap()
-            .clone()
-            .into(),
-        "INPUT_OBJECT" => registry
-            .inputs
-            .get(value["name"].as_str().unwrap())
-            .unwrap()
-            .clone()
-            .into(),
+        "ENUM" => shared::ast::InputTypeSpec::Enum(
+            value["name"].as_str().unwrap().to_string(),
+        ),
+        "INPUT_OBJECT" => shared::ast::InputTypeSpec::InputType(
+            value["name"].as_str().unwrap().to_string(),
+        ),
         _ => panic!("Unknown InputTypeSpec kind type: {}", kind),
     }
 }
@@ -135,33 +194,21 @@ fn parse_object_type_spec(
     let kind = value["kind"].as_str().unwrap();
     match kind {
         "NON_NULL" => parse_object_type_spec(registry, &value["ofType"]),
-        "SCALAR" => server::ast::ObjectTypeSpec::Scalar {
-            name: value["name"].as_str().unwrap().into(),
-        },
-        "ENUM" => registry
-            .enums
-            .get(value["name"].as_str().unwrap())
-            .unwrap()
-            .clone()
-            .into(),
-        "OBJECT" => registry
-            .objects
-            .get(value["name"].as_str().unwrap())
-            .unwrap()
-            .clone()
-            .into(),
-        "UNION" => registry
-            .unions
-            .get(value["name"].as_str().unwrap())
-            .unwrap()
-            .clone()
-            .into(),
-        "INTERFACE" => registry
-            .interfaces
-            .get(value["name"].as_str().unwrap())
-            .unwrap()
-            .clone()
-            .into(),
+        "SCALAR" => server::ast::ObjectTypeSpec::Scalar(
+            value["name"].as_str().unwrap().to_string(),
+        ),
+        "ENUM" => server::ast::ObjectTypeSpec::Enum(
+            value["name"].as_str().unwrap().to_string(),
+        ),
+        "OBJECT" => server::ast::ObjectTypeSpec::ObjectType(
+            value["name"].as_str().unwrap().to_string(),
+        ),
+        "UNION" => server::ast::ObjectTypeSpec::Union(
+            value["name"].as_str().unwrap().to_string(),
+        ),
+        "INTERFACE" => server::ast::ObjectTypeSpec::Interface(
+            value["name"].as_str().unwrap().to_string(),
+        ),
         _ => panic!("Unknown ObjectTypeSpec kind: {}", kind),
     }
 }
@@ -253,95 +300,10 @@ fn parse_object_field_definition(
         nullable: value["type"]["kind"].as_str().unwrap() != "NON_NULL",
     }
 }
-
-fn parse_node_second_pass(
-    registry: &TypeRegistry,
-    value: &serde_json::Value,
-) -> server::ast::ServerSchemaNode {
-    let kind = value["kind"].as_str().unwrap();
-    let name = value["name"].as_str().unwrap();
-
-    match kind {
-        "SCALAR" => name.to_string().into(),
-        "ENUM" => registry.enums.get(name).unwrap().clone().into(),
-        "INPUT_OBJECT" => {
-            let input = registry.inputs.get(name).unwrap().clone();
-            input.write().unwrap().fields = value["inputFields"]
-                .as_array()
-                .unwrap()
-                .into_iter()
-                .map(|field_json| {
-                    let field =
-                        parse_input_field_definition(registry, field_json);
-                    (field.name.clone(), field)
-                })
-                .collect();
-            return input.into();
-        }
-        "OBJECT" => {
-            let object = registry.objects.get(name).unwrap().clone();
-            object.write().unwrap().implements = value["interfaces"]
-                .as_array()
-                .unwrap()
-                .into_iter()
-                .map(|interface_json| {
-                    let interface = registry
-                        .interfaces
-                        .get(interface_json["name"].as_str().unwrap())
-                        .unwrap();
-                    (interface.read().unwrap().name.clone(), interface.clone())
-                })
-                .collect();
-            object.write().unwrap().fields = value["fields"]
-                .as_array()
-                .unwrap()
-                .into_iter()
-                .map(|field_json| {
-                    let field =
-                        parse_object_field_definition(registry, field_json);
-                    (field.name.clone(), Arc::new(field))
-                })
-                .collect();
-            return object.into();
-        }
-        "UNION" => {
-            let union = registry.unions.get(name).unwrap().clone();
-            union.write().unwrap().items = value["possibleTypes"]
-                .as_array()
-                .unwrap()
-                .into_iter()
-                .map(|object_json| {
-                    let object = registry
-                        .objects
-                        .get(object_json["name"].as_str().unwrap())
-                        .unwrap();
-                    (object.read().unwrap().name.clone(), object.clone())
-                })
-                .collect();
-            return union.into();
-        }
-        "INTERFACE" => {
-            let interface = registry.interfaces.get(name).unwrap().clone();
-            interface.write().unwrap().fields = value["fields"]
-                .as_array()
-                .unwrap()
-                .into_iter()
-                .map(|field_json| {
-                    let field =
-                        parse_object_field_definition(registry, field_json);
-                    (field.name.clone(), Arc::new(field))
-                })
-                .collect();
-            return interface.into();
-        }
-        _ => panic!("Unexpected server node kind: {}", kind),
-    }
-}
-
 pub fn parse_server_schema(
     registry: &mut TypeRegistry,
     value: serde_json::Value,
-) -> Result<server::schema::Schema, String> {
+) -> Result<(), String> {
     let types = value["data"]["__schema"]["types"]
         .as_array()
         .unwrap()
@@ -349,12 +311,7 @@ pub fn parse_server_schema(
         .filter(|t| !t["name"].as_str().unwrap().starts_with("__"))
         .collect::<Vec<_>>();
     for t in &types {
-        registry.add_server_node(parse_node_first_pass(t));
+        parse_node(registry, t);
     }
-    return Ok(server::schema::Schema::from_nodes(
-        &types
-            .into_iter()
-            .map(|t| parse_node_second_pass(registry, t))
-            .collect::<Vec<_>>(),
-    ));
+    Ok(())
 }

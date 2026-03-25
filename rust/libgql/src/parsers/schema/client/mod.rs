@@ -1,4 +1,4 @@
-use crate::parsers::{file, schema::type_registry::TypeRegistry};
+use crate::parsers::file;
 
 pub mod ast;
 pub mod directive;
@@ -7,41 +7,49 @@ pub mod fragment;
 pub mod hash;
 pub mod nodes;
 pub mod operation;
-pub mod schema;
+pub mod server_uses_map;
+pub mod type_registry;
+pub mod visitor;
+use type_registry::TypeRegistry;
+
+use super::server;
 
 pub fn parse_client_schema<'buffer>(
+    server_registry: &server::type_registry::TypeRegistry,
     registry: &mut TypeRegistry,
     ast_nodes: &[file::client::ast::ASTNode<'buffer>],
-) -> Result<schema::ClientSchema, errors::Error<'buffer>> {
-    let client_nodes = ast_nodes
-        .iter()
-        .map(|node| nodes::parse_first_pass(registry, node))
-        .collect::<Result<Vec<_>, errors::Error>>()?;
-    client_nodes.iter().for_each(|node| {
-        registry.add_client_node(node);
-    });
-    ast_nodes
-        .iter()
-        .try_for_each(|node| nodes::parse_second_pass(registry, node))?;
-    for operation in client_nodes.iter().filter_map(|node| match node {
-        ast::ClientSchemaNode::Operation(operation) => Some(operation),
-        _ => None,
-    }) {
-        let parameters_hash = hash::get_operation_parameters_hash(
-            &operation.read().unwrap().parameters,
-        );
-        operation.write().unwrap().parameters_hash = parameters_hash;
+) -> Result<(), errors::Error<'buffer>> {
+    ast_nodes.iter().try_for_each(|node| {
+        nodes::parse_first_pass(server_registry, registry, node)
+    })?;
+    ast_nodes.iter().try_for_each(|node| {
+        nodes::parse_second_pass(&server_registry, registry, node)
+    })?;
+    let mut intermediate = Vec::new();
+    for operation in registry.operations.values() {
+        let parameters_hash =
+            hash::get_operation_parameters_hash(&operation.parameters);
         let fragment_spec_hash = hash::get_fragment_spec_hash(
             registry,
-            &operation.read().unwrap().fragment_spec,
+            &operation.fragment_spec,
             true,
         );
-        operation.write().unwrap().fragment_spec_hash = fragment_spec_hash;
         let used_fragments = hash::get_used_fragments_from_fragment_spec(
             registry,
-            &operation.read().unwrap().fragment_spec,
+            &operation.fragment_spec,
         );
-        operation.write().unwrap().used_fragments = used_fragments;
+        intermediate.push((
+            parameters_hash,
+            fragment_spec_hash,
+            used_fragments,
+        ));
     }
-    return Ok(schema::ClientSchema::from_nodes(&client_nodes));
+    for (operation, (parameters_hash, fragment_spec_hash, used_fragments)) in
+        registry.operations.values_mut().zip(intermediate)
+    {
+        operation.used_fragments = used_fragments;
+        operation.parameters_hash = parameters_hash;
+        operation.fragment_spec_hash = fragment_spec_hash;
+    }
+    return Ok(());
 }

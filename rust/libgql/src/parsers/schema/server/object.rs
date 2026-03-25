@@ -1,5 +1,3 @@
-use std::sync::{Arc, RwLock};
-
 use indexmap::IndexMap;
 
 use crate::parsers::{
@@ -7,49 +5,50 @@ use crate::parsers::{
     schema::{
         server::{ast, directive, errors},
         shared,
-        type_registry::TypeRegistry,
     },
 };
 
+use super::type_registry::TypeRegistry;
+
 pub fn parse_definition<'buffer>(
     node: &file::server::ast::ObjectDefinitionNode<'buffer>,
-    registry: &TypeRegistry,
-) -> Result<Arc<RwLock<ast::ObjectType>>, errors::Error<'buffer>> {
-    let obj_rc = registry.objects.get(node.name.name).unwrap();
-    let mut obj = obj_rc.write().unwrap();
-    obj.fields = parse_fields(&node.fields, registry)?;
+    registry: &mut TypeRegistry,
+) -> Result<(), errors::Error<'buffer>> {
+    let fields = parse_fields(&node.fields, registry)?;
+    let directives = directive::parse_invocations(&node.directives, registry)?;
+    let obj = registry.objects.get_mut(node.name.name).unwrap();
+    obj.fields = fields;
     for name in node.interfaces.iter() {
-        let Some(interface) = registry.interfaces.get(name.name) else {
+        if let None = registry.interfaces.get(name.name) {
             return Err(errors::Error::UnknownInterface(name.clone()));
         };
-        obj.implements
-            .insert(name.name.to_string(), interface.clone());
+        obj.implements.insert(name.name.to_string());
     }
-    obj.directives = directive::parse_invocations(&node.directives, registry)?;
-    return Ok(obj_rc.clone());
+    obj.directives = directives;
+    return Ok(());
 }
 
 pub fn parse_fields<'buffer>(
     fields: &[file::server::ast::FieldDefinitionNode<'buffer>],
     registry: &TypeRegistry,
 ) -> Result<
-    IndexMap<String, Arc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>>,
+    IndexMap<String, shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
     errors::Error<'buffer>,
 > {
     let mut m = IndexMap::<
         String,
-        Arc<shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
+        shared::ast::FieldDefinition<ast::ObjectFieldSpec>,
     >::new();
     for field_definition_node in fields.iter() {
         let (spec, nullable) =
             parse_object_field_spec(&field_definition_node, registry)?;
         m.insert(
             field_definition_node.name.name.to_string(),
-            Arc::new(shared::ast::FieldDefinition {
+            shared::ast::FieldDefinition {
                 name: field_definition_node.name.name.to_string(),
                 spec,
                 nullable,
-            }),
+            },
         );
     }
     return Ok(m);
@@ -71,7 +70,7 @@ pub fn parse_object_field_spec<'buffer>(
     return Ok((
         ast::CallableFieldSpec {
             return_type,
-            arguments: shared::input::parse_field_definitions(
+            arguments: super::input::parse_field_definitions(
                 &node.arguments,
                 registry,
             )?,
@@ -116,12 +115,7 @@ fn parse_noncallable_object_field_spec<'buffer>(
                     default_value: None,
                     directive_invocations: directives
                         .iter()
-                        .map(|d| {
-                            (
-                                d.directive.read().unwrap().name.clone(),
-                                d.clone(),
-                            )
-                        })
+                        .map(|d| (d.directive.clone(), d.clone()))
                         .collect(),
                 }
                 .into(),

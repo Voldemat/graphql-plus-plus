@@ -1,33 +1,16 @@
-use std::sync::{Arc, RwLock};
-
 use crate::parsers::file;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Enum {
     pub name: String,
     pub values: Vec<String>,
 }
 
-#[derive(Clone, derive_more::From)]
+#[derive(Debug, Clone)]
 pub enum InputTypeSpec {
-    InputType(Arc<RwLock<InputType>>),
+    InputType(String),
     Scalar(String),
-    Enum(Arc<Enum>),
-}
-
-impl std::fmt::Debug for InputTypeSpec {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::InputType(arg0) => f
-                .debug_tuple("InputType")
-                .field(&arg0.read().unwrap().name)
-                .finish(),
-            Self::Scalar(arg0) => f.debug_tuple("Scalar").field(arg0).finish(),
-            Self::Enum(arg0) => {
-                f.debug_tuple("Enum").field(&arg0.name).finish()
-            }
-        }
-    }
+    Enum(String),
 }
 
 #[derive(Debug, Clone)]
@@ -99,7 +82,7 @@ pub struct FieldDefinition<T> {
     pub nullable: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct InputType {
     pub name: String,
     pub fields: indexmap::IndexMap<String, FieldDefinition<InputFieldSpec>>,
@@ -145,7 +128,7 @@ pub struct FieldSelectionArgument {
     pub r#type: FieldDefinition<InputFieldSpec>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ServerDirective {
     pub name: String,
     pub arguments: indexmap::IndexMap<String, FieldDefinition<InputFieldSpec>>,
@@ -154,6 +137,6 @@ pub struct ServerDirective {
 
 #[derive(Debug, Clone)]
 pub struct ServerDirectiveInvocation {
-    pub directive: Arc<RwLock<ServerDirective>>,
+    pub directive: String,
     pub arguments: indexmap::IndexMap<String, FieldSelectionArgument>,
 }

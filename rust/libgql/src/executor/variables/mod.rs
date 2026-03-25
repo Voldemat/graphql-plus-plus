@@ -39,23 +39,18 @@ fn resolve_type_spec<S: Scalar, R: ParseRegistry<S>>(
             .flatten(),
         (shared::ast::InputTypeSpec::Enum(enum_type), other) => Err(format!(
             "Received invalid type for enum({}): {:?}",
-            enum_type.name, other
+            enum_type, other
         )),
         (
             shared::ast::InputTypeSpec::InputType(input_type),
             LiteralValue::Object(object),
         ) => {
-            return Ok(R::parse_input(
-                registry,
-                &input_type.read().unwrap(),
-                object,
-            )?);
+            return Ok(R::parse_input(registry, &input_type, object)?);
         }
         (shared::ast::InputTypeSpec::InputType(input_type), other) => {
             Err(format!(
                 "Received invalid type for input({}): {:?}",
-                input_type.read().unwrap().name,
-                other
+                input_type, other
             ))
         }
     }

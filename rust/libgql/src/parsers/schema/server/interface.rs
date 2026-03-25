@@ -1,32 +1,38 @@
-use std::sync::{Arc, RwLock};
-
 use crate::parsers::{
     file,
     schema::{
-        server::{ast, directive, errors, object},
+        server::{directive, errors, object},
         shared,
-        type_registry::TypeRegistry,
     },
 };
 
+use super::type_registry::TypeRegistry;
+
 pub fn parse_definition<'buffer>(
     node: &file::server::ast::InterfaceDefinitionNode<'buffer>,
-    registry: &TypeRegistry,
-) -> Result<Arc<RwLock<ast::Interface>>, errors::Error<'buffer>> {
-    let obj_rc = registry.interfaces.get(node.name.name).unwrap();
-    let mut obj = obj_rc.write().unwrap();
+    registry: &mut TypeRegistry,
+) -> Result<(), errors::Error<'buffer>> {
+    let mut intermediate = Vec::new();
     for field_definition_node in node.fields.iter() {
-        let (spec, nullable) =
-            object::parse_object_field_spec(&field_definition_node, registry)?;
+        intermediate.push(object::parse_object_field_spec(
+            &field_definition_node,
+            registry,
+        )?);
+    }
+    let directives = directive::parse_invocations(&node.directives, registry)?;
+    let obj = registry.interfaces.get_mut(node.name.name).unwrap();
+    for (field_definition_node, (spec, nullable)) in
+        node.fields.iter().zip(intermediate)
+    {
         obj.fields.insert(
             field_definition_node.name.name.to_string(),
-            Arc::new(shared::ast::FieldDefinition {
+            shared::ast::FieldDefinition {
                 name: field_definition_node.name.name.to_string(),
                 spec,
                 nullable,
-            }),
+            },
         );
     }
-    obj.directives = directive::parse_invocations(&node.directives, registry)?;
-    return Ok(obj_rc.clone());
+    obj.directives = directives;
+    return Ok(());
 }

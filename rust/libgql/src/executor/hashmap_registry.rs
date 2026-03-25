@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use crate::parsers::schema::shared;
-
 use super::ast::{LiteralValue, NonNullableValue, Value, Values};
 use super::registry::ParseRegistry;
 use super::scalar::Scalar;
@@ -359,49 +357,49 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
 
     fn parse_enum(
         self: &Self,
-        enum_type: &shared::ast::Enum,
+        enum_type_name: &str,
         value: String,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.enum_types[&enum_type.name].literal.as_ref()(value)
+        self.enum_types[enum_type_name].literal.as_ref()(value)
     }
 
     fn parse_enum_array(
         self: &Self,
-        enum_type: &shared::ast::Enum,
+        enum_type_name: &str,
         values: Vec<String>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.enum_types[&enum_type.name].array.as_ref()(values)
+        self.enum_types[enum_type_name].array.as_ref()(values)
     }
 
     fn parse_enum_optional_array(
         self: &Self,
-        enum_type: &shared::ast::Enum,
+        enum_type_name: &str,
         values: Vec<Option<String>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.enum_types[&enum_type.name].optional_array.as_ref()(values)
+        self.enum_types[enum_type_name].optional_array.as_ref()(values)
     }
 
     fn parse_input(
         self: &Self,
-        input_type: &shared::ast::InputType,
+        input_type_name: &str,
         value: Values<S>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.inputs[&input_type.name].literal.as_ref()(value)
+        self.inputs[input_type_name].literal.as_ref()(value)
     }
 
     fn parse_input_array(
         self: &Self,
-        input_type: &shared::ast::InputType,
+        input_type_name: &str,
         values: Vec<Values<S>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.inputs[&input_type.name].array.as_ref()(values)
+        self.inputs[input_type_name].array.as_ref()(values)
     }
 
     fn parse_input_optional_array(
         self: &Self,
-        input_type: &shared::ast::InputType,
+        input_type_name: &str,
         values: Vec<Option<Values<S>>>,
     ) -> Result<Box<dyn std::any::Any>, String> {
-        self.inputs[&input_type.name].optional_array.as_ref()(values)
+        self.inputs[input_type_name].optional_array.as_ref()(values)
     }
 }

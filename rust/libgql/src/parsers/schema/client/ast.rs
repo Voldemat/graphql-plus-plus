@@ -1,21 +1,16 @@
-use std::sync::{Arc, RwLock};
+use crate::parsers::{file, schema::shared};
 
-use crate::parsers::{
-    file,
-    schema::{server, shared},
-};
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SpreadSelection {
-    pub fragment: Arc<RwLock<Fragment>>,
+    pub fragment: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TypenameField {
     pub alias: Option<String>,
 }
 
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, Clone, derive_more::From)]
 pub enum UnionSelection {
     TypenameField(TypenameField),
     SpreadSelection(SpreadSelection),
@@ -23,54 +18,60 @@ pub enum UnionSelection {
     UnionConditionalSpreadSelection(UnionConditionalSpreadSelection),
 }
 
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, Clone, derive_more::From)]
 pub enum ObjectSelection {
     TypenameField(TypenameField),
     SpreadSelection(SpreadSelection),
     FieldSelection(FieldSelection),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnionFragmentSpec {
-    pub r#type: Arc<RwLock<server::ast::Union>>,
+    pub r#type: String,
     pub selections: Vec<UnionSelection>,
 }
 
-#[derive(Debug)]
-pub struct ObjectFragmentSpec<T> {
-    pub r#type: Arc<RwLock<T>>,
+#[derive(Debug, Clone)]
+pub struct ObjectFragmentSpec {
+    pub r#type: String,
     pub selections: Vec<ObjectSelection>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
+pub struct InterfaceFragmentSpec {
+    pub r#type: String,
+    pub selections: Vec<ObjectSelection>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ObjectConditionalSpreadSelection {
-    pub r#type: Arc<RwLock<server::ast::ObjectType>>,
-    pub selection: Arc<ObjectFragmentSpec<server::ast::ObjectType>>,
+    pub r#type: String,
+    pub selections: Vec<ObjectSelection>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnionConditionalSpreadSelection {
-    pub r#type: Arc<RwLock<server::ast::Union>>,
-    pub selection: Arc<UnionFragmentSpec>,
+    pub r#type: String,
+    pub selection: Vec<UnionSelection>,
 }
 
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, Clone, derive_more::From)]
 pub enum FragmentSpec {
     Union(UnionFragmentSpec),
-    Object(ObjectFragmentSpec<server::ast::ObjectType>),
-    Interface(ObjectFragmentSpec<server::ast::Interface>),
+    Object(ObjectFragmentSpec),
+    Interface(InterfaceFragmentSpec),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FieldSelection {
     pub name: String,
     pub alias: String,
     pub arguments:
         indexmap::IndexMap<String, shared::ast::FieldSelectionArgument>,
-    pub selection: Option<Arc<FragmentSpec>>,
+    pub selection: Option<FragmentSpec>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Fragment {
     pub name: String,
     pub spec: FragmentSpec,
@@ -80,7 +81,7 @@ pub struct Fragment {
 
 pub type OpType = file::client::ast::OpType;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Operation {
     pub r#type: OpType,
     pub name: String,
@@ -89,7 +90,7 @@ pub struct Operation {
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >,
     pub fragment_spec: FragmentSpec,
-    pub used_fragments: Vec<Arc<RwLock<Fragment>>>,
+    pub used_fragments: Vec<String>,
     pub source_text: String,
     pub parameters_hash: u64,
     pub fragment_spec_hash: u64,
@@ -97,7 +98,7 @@ pub struct Operation {
 
 pub type DirectiveLocation = file::client::ast::DirectiveLocation;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ClientDirective {
     pub name: String,
     pub arguments: indexmap::IndexMap<
@@ -105,11 +106,4 @@ pub struct ClientDirective {
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >,
     pub locations: Vec<DirectiveLocation>,
-}
-
-#[derive(derive_more::From)]
-pub enum ClientSchemaNode {
-    Fragment(Arc<RwLock<Fragment>>),
-    Operation(Arc<RwLock<Operation>>),
-    ClientDirective(Arc<ClientDirective>),
 }

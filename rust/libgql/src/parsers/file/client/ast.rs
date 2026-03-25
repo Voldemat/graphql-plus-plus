@@ -147,14 +147,14 @@ pub struct ConditionalSpreadSelectionNode<'buffer> {
     pub fragment: Rc<FragmentSpec<'buffer>>,
 }
 
-#[derive(Debug, derive_more::From, serde::Serialize)]
+#[derive(Debug, Clone, derive_more::From, serde::Serialize)]
 pub enum SelectionNode<'buffer> {
     FieldSelectionNode(FieldSelectionNode<'buffer>),
     ConditionalSpreadSelectionNode(ConditionalSpreadSelectionNode<'buffer>),
     SpreadSelectionNode(SpreadSelectionNode<'buffer>),
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct FragmentSpec<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
     pub selections: Vec<SelectionNode<'buffer>>,
@@ -221,7 +221,7 @@ pub struct OperationDefinition<'buffer> {
     pub fragment: FragmentSpec<'buffer>,
 }
 
-#[derive(serde::Serialize)]
+#[derive(Debug, serde::Serialize)]
 pub struct FragmentDefinition<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
     pub name: shared::ast::NameNode<'buffer>,

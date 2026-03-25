@@ -1,21 +1,18 @@
-use std::sync::Arc;
-
 use crate::parsers::{
     file,
     schema::{
         client::{ast, errors},
-        shared,
-        type_registry::TypeRegistry,
+        server,
     },
 };
 
 pub fn parse<'buffer>(
-    registry: &TypeRegistry,
+    registry: &server::type_registry::TypeRegistry,
     node: &file::client::ast::DirectiveDefinition<'buffer>,
-) -> Result<Arc<ast::ClientDirective>, errors::Error<'buffer>> {
-    Ok(Arc::new(ast::ClientDirective {
+) -> Result<ast::ClientDirective, errors::Error<'buffer>> {
+    Ok(ast::ClientDirective {
         name: node.name.name.to_string(),
-        arguments: shared::input::parse_field_definitions(
+        arguments: server::input::parse_field_definitions(
             &node.arguments,
             registry,
         )?,
@@ -24,5 +21,5 @@ pub fn parse<'buffer>(
             .iter()
             .map(|target| target.directive_location)
             .collect(),
-    }))
+    })
 }

@@ -8,7 +8,6 @@ pub mod scalar;
 pub mod shared;
 pub mod subscriptions;
 pub mod variables;
-use std::sync::{Arc, RwLock};
 
 pub use ast::{LiteralValue, NonNullableValue, Value, Values};
 pub use hashmap_registry::{GQLEnum, GQLInput, GQLScalar, HashMapRegistry};
@@ -20,7 +19,7 @@ use crate::{
     lexer,
     parsers::{
         file,
-        schema::{client, type_registry},
+        schema::{client, server},
     },
 };
 
@@ -58,6 +57,7 @@ async fn execute_operation<
     S: Scalar,
     T: ParseRegistry<S>,
 >(
+    client_registry: client::type_registry::TypeRegistry,
     context: &'args C,
     resolvers: &'args Resolvers<'args, S, C>,
     parse_registry: &'args T,
@@ -85,6 +85,7 @@ async fn execute_operation<
     match operation.r#type {
         client::ast::OpType::Query => Ok(OperationResult::Immediate(
             queries::execute_query_operation(
+                client_registry,
                 context,
                 &resolvers.queries,
                 &resolvers.object_fields,
@@ -95,6 +96,7 @@ async fn execute_operation<
         )),
         client::ast::OpType::Mutation => Ok(OperationResult::Immediate(
             mutations::execute_mutation_operation(
+                client_registry,
                 context,
                 &resolvers.mutations,
                 &resolvers.object_fields,
@@ -105,6 +107,7 @@ async fn execute_operation<
         )),
         client::ast::OpType::Subscription => Ok(OperationResult::Stream(
             subscriptions::execute_subscription_operation(
+                client_registry,
                 context,
                 &resolvers.subscriptions,
                 &resolvers.object_fields,
@@ -118,7 +121,7 @@ async fn execute_operation<
 
 pub async fn execute<'args, 'buffer, C, S: Scalar, T: ParseRegistry<S>>(
     context: &'args C,
-    registry: &'args type_registry::TypeRegistry,
+    server_registry: &'args server::type_registry::TypeRegistry,
     resolvers: &'args Resolvers<'args, S, C>,
     parse_registry: &'args T,
     client_query: &'buffer str,
@@ -141,33 +144,38 @@ pub async fn execute<'args, 'buffer, C, S: Scalar, T: ParseRegistry<S>>(
         file::tokens_sources::VecTokensSource::new(tokens, source_file.clone()),
     )
     .parse_ast_nodes()?;
-    let mut local_registry = registry.clone();
-    let mut client_schema =
-        client::parse_client_schema(&mut local_registry, &file_nodes).unwrap();
+    let mut client_registry = client::type_registry::TypeRegistry::new();
+    client::parse_client_schema(
+        server_registry,
+        &mut client_registry,
+        &file_nodes,
+    )
+    .unwrap();
 
     let operation_name = operation.map_or_else(
         || {
-            if client_schema.operations.len() == 0 {
+            if client_registry.operations.len() == 0 {
                 return Err(Error::NoOperationsAreDefined);
             }
-            if client_schema.operations.len() > 1 {
+            if client_registry.operations.len() > 1 {
                 return Err(Error::OperationNameIsNotDefined);
             }
-            Ok(client_schema.operations.first().unwrap().0.to_string())
+            Ok(client_registry.operations.first().unwrap().0.to_string())
         },
         Result::Ok,
     )?;
-    local_registry.operations.remove(&operation_name);
-    let operation_rc = client_schema
+    let operation = client_registry
         .operations
         .swap_remove(&operation_name)
         .ok_or(Error::OperationIsNotDefined(operation_name))?;
-    let operation =
-        Arc::<RwLock<client::ast::Operation>>::try_unwrap(operation_rc)
-            .unwrap()
-            .into_inner()
-            .unwrap();
-    execute_operation(context, resolvers, parse_registry, operation, variables)
-        .await
-        .map_err(|errors| Error::ExecutionErrors(errors))
+    execute_operation(
+        client_registry,
+        context,
+        resolvers,
+        parse_registry,
+        operation,
+        variables,
+    )
+    .await
+    .map_err(|errors| Error::ExecutionErrors(errors))
 }

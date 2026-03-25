@@ -1,13 +1,17 @@
-use std::sync::{Arc, RwLock};
-
 use crate::parsers::{
     file,
-    schema::{server::errors, shared, type_registry},
+    schema::{
+        server::{self, errors},
+        shared,
+    },
 };
+
+use super::type_registry::TypeRegistry;
 
 fn parse_argument_value_from_literal_node<'buffer>(
     value: &file::shared::ast::LiteralNode<'buffer>,
     arg_type: &errors::ArgType,
+    registry: &TypeRegistry,
 ) -> Result<shared::ast::ArgumentValue, errors::Error<'buffer>> {
     return match value {
         file::shared::ast::LiteralNode::Int(i) => {
@@ -38,10 +42,16 @@ fn parse_argument_value_from_literal_node<'buffer>(
                     arg_type: arg_type.clone(),
                 });
             };
-            if !enum_type.values.contains(&e.value) {
+            if !registry
+                .enums
+                .get(enum_type)
+                .unwrap()
+                .values
+                .contains(&e.value)
+            {
                 return Err(errors::Error::InvalidEnumValue {
                     value: e.clone(),
-                    enum_type: enum_type.clone(),
+                    enum_type: enum_type.to_string(),
                 });
             };
             return Ok(shared::ast::ArgumentLiteralValue::EnumValue(
@@ -55,20 +65,22 @@ fn parse_argument_value_from_literal_node<'buffer>(
 fn parse_argument_value<'buffer>(
     value: &file::shared::ast::ArgumentValue<'buffer>,
     arg_type: &errors::ArgType,
+    registry: &TypeRegistry,
 ) -> Result<shared::ast::ArgumentValue, errors::Error<'buffer>> {
     match value {
         file::shared::ast::ArgumentValue::NameNode(name) => {
             Ok(shared::ast::ArgumentValue::Ref(name.name.to_string()))
         }
         file::shared::ast::ArgumentValue::LiteralNode(literal) => {
-            parse_argument_value_from_literal_node(&literal, arg_type)
+            parse_argument_value_from_literal_node(&literal, arg_type, registry)
         }
     }
 }
 
 pub fn parse_arguments<'buffer>(
     arguments: &Vec<file::shared::ast::Argument<'buffer>>,
-    directive: &Arc<RwLock<shared::ast::ServerDirective>>,
+    directive: &shared::ast::ServerDirective,
+    registry: &TypeRegistry,
 ) -> Result<
     indexmap::IndexMap<String, shared::ast::FieldSelectionArgument>,
     errors::Error<'buffer>,
@@ -76,11 +88,9 @@ pub fn parse_arguments<'buffer>(
     let mut final_arguments =
         indexmap::IndexMap::<String, shared::ast::FieldSelectionArgument>::new(
         );
-    let directive_br = directive.read().unwrap();
     for argument in arguments {
-        let Some(arg_type) = directive_br.arguments.get(argument.name.name)
-        else {
-            return Err(type_registry::Error::UnknownArgument(
+        let Some(arg_type) = directive.arguments.get(argument.name.name) else {
+            return Err(server::type_registry::Error::UnknownArgument(
                 argument.name.clone(),
             )
             .into());
@@ -89,7 +99,11 @@ pub fn parse_arguments<'buffer>(
             argument.name.name.to_string(),
             shared::ast::FieldSelectionArgument {
                 name: argument.name.name.to_string(),
-                value: parse_argument_value(&argument.value, arg_type)?,
+                value: parse_argument_value(
+                    &argument.value,
+                    arg_type,
+                    registry,
+                )?,
                 r#type: arg_type.clone(),
             },
         );

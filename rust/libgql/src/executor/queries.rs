@@ -11,6 +11,7 @@ pub type QueryResolversMap<'a, S, C> =
     HashMap<&'a str, &'a QueryResolver<S, C>>;
 
 fn execute_fragment<'a, C, S: Scalar>(
+    client_registry: &'a client::type_registry::TypeRegistry,
     context: &'a C,
     query_resolvers: &'a QueryResolversMap<'a, S, C>,
     object_field_resolvers: &'a super::object::ObjectFieldResolversMap<S, C>,
@@ -23,6 +24,7 @@ fn execute_fragment<'a, C, S: Scalar>(
         match spec {
             client::ast::FragmentSpec::Object(obj) => {
                 execute_object_selection_set(
+                    client_registry,
                     context,
                     query_resolvers,
                     object_field_resolvers,
@@ -43,6 +45,7 @@ fn execute_fragment<'a, C, S: Scalar>(
 }
 
 async fn execute_field<C, S: Scalar>(
+    client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
@@ -66,6 +69,7 @@ async fn execute_field<C, S: Scalar>(
         })?
     };
     super::object::execute_potential_selection_and_serialize(
+        client_registry,
         context,
         object_field_resolvers,
         value.to_value().map_err(|e| {
@@ -81,6 +85,7 @@ async fn execute_field<C, S: Scalar>(
 }
 
 async fn execute_field_selection<C, S: Scalar>(
+    client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
@@ -88,6 +93,7 @@ async fn execute_field_selection<C, S: Scalar>(
     variables: &ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     let value = execute_field(
+        client_registry,
         context,
         query_resolvers,
         object_field_resolvers,
@@ -99,6 +105,7 @@ async fn execute_field_selection<C, S: Scalar>(
 }
 
 async fn execute_object_selection<C, S: Scalar>(
+    client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
@@ -113,6 +120,7 @@ async fn execute_object_selection<C, S: Scalar>(
 
         client::ast::ObjectSelection::FieldSelection(field) => {
             execute_field_selection(
+                client_registry,
                 context,
                 query_resolvers,
                 object_field_resolvers,
@@ -123,8 +131,10 @@ async fn execute_object_selection<C, S: Scalar>(
         }
 
         client::ast::ObjectSelection::SpreadSelection(spread) => {
-            let fragment = spread.fragment.read().unwrap();
+            let fragment =
+                client_registry.fragments.get(&spread.fragment).unwrap();
             execute_fragment(
+                client_registry,
                 context,
                 query_resolvers,
                 object_field_resolvers,
@@ -136,7 +146,8 @@ async fn execute_object_selection<C, S: Scalar>(
     }
 }
 
-async fn execute_object_selection_set<'a, C, S: Scalar>(
+async fn execute_object_selection_set<C, S: Scalar>(
+    client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
@@ -146,6 +157,7 @@ async fn execute_object_selection_set<'a, C, S: Scalar>(
     futures::future::join_all(selections.iter().map(
         async |selection| -> Result<Values<S>, Vec<GraphqlError>> {
             execute_object_selection(
+                client_registry,
                 context,
                 query_resolvers,
                 object_field_resolvers,
@@ -162,6 +174,7 @@ async fn execute_object_selection_set<'a, C, S: Scalar>(
 }
 
 pub async fn execute_query_operation<C, S: Scalar>(
+    client_registry: client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
@@ -180,6 +193,7 @@ pub async fn execute_query_operation<C, S: Scalar>(
     };
 
     execute_object_selection_set(
+        &client_registry,
         context,
         query_resolvers,
         object_field_resolvers,

@@ -35,6 +35,7 @@ pub async fn execute_subscription_operation<
     C,
     S: Scalar,
 >(
+    client_registry: client::type_registry::TypeRegistry,
     context: &'args C,
     resolvers: &'args SubscriptionResolversMap<'args, S, C>,
     object_field_resolvers: &'args super::object::ObjectFieldResolversMap<
@@ -86,6 +87,7 @@ pub async fn execute_subscription_operation<
         while let Some(value) = futures::StreamExt::next(&mut stream.as_mut()).await {
 
             let serialized_value = super::object::execute_potential_selection_and_serialize(
+                &client_registry,
                 context,
                 object_field_resolvers,
                 value.to_value().map_err(|e| vec![GraphqlError {

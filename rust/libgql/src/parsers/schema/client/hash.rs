@@ -1,10 +1,8 @@
-use std::sync::{Arc, RwLock};
-
 use indexmap::IndexMap;
 
-use crate::parsers::schema::{
-    client::ast, server, shared, type_registry::TypeRegistry,
-};
+use crate::parsers::schema::{client::ast, shared};
+
+use super::type_registry::TypeRegistry;
 
 pub fn hash_input_type_spec<T: std::hash::Hasher>(
     hasher: &mut T,
@@ -12,8 +10,8 @@ pub fn hash_input_type_spec<T: std::hash::Hasher>(
 ) {
     let name = match spec {
         shared::ast::InputTypeSpec::Scalar(s) => s,
-        shared::ast::InputTypeSpec::Enum(e) => &e.name,
-        shared::ast::InputTypeSpec::InputType(i) => &i.read().unwrap().name,
+        shared::ast::InputTypeSpec::Enum(e) => e,
+        shared::ast::InputTypeSpec::InputType(i) => i,
     };
     std::hash::Hash::hash(name, hasher);
 }
@@ -195,12 +193,12 @@ fn hash_object_selection_node<T: std::hash::Hasher>(
         }
         ast::ObjectSelection::SpreadSelection(field) => {
             std::hash::Hash::hash(&'s', hasher);
-            std::hash::Hash::hash(&field.fragment.read().unwrap().name, hasher);
+            std::hash::Hash::hash(&field.fragment, hasher);
             if recursive {
                 hash_fragment_spec(
                     hasher,
                     registry,
-                    &field.fragment.read().unwrap().spec,
+                    &registry.fragments.get(&field.fragment).unwrap().spec,
                     true,
                 );
             }
@@ -213,12 +211,7 @@ fn hash_object_selection_node<T: std::hash::Hasher>(
             }
             hash_arguments(hasher, &field.arguments);
             if let Some(selection) = field.selection.as_ref() {
-                hash_fragment_spec(
-                    hasher,
-                    registry,
-                    selection.as_ref(),
-                    recursive,
-                )
+                hash_fragment_spec(hasher, registry, selection, recursive)
             }
         }
     }
@@ -227,7 +220,7 @@ fn hash_object_selection_node<T: std::hash::Hasher>(
 fn hash_object_fragment_spec<T: std::hash::Hasher>(
     hasher: &mut T,
     registry: &TypeRegistry,
-    fragment_spec: &ast::ObjectFragmentSpec<server::ast::ObjectType>,
+    fragment_spec: &ast::ObjectFragmentSpec,
     recursive: bool,
 ) {
     for selection in fragment_spec.selections.iter() {
@@ -238,7 +231,7 @@ fn hash_object_fragment_spec<T: std::hash::Hasher>(
 fn hash_interface_fragment_spec<T: std::hash::Hasher>(
     hasher: &mut T,
     registry: &TypeRegistry,
-    fragment_spec: &ast::ObjectFragmentSpec<server::ast::Interface>,
+    fragment_spec: &ast::InterfaceFragmentSpec,
     recursive: bool,
 ) {
     for selection in fragment_spec.selections.iter() {
@@ -259,12 +252,12 @@ fn hash_union_selection_node<T: std::hash::Hasher>(
         }
         ast::UnionSelection::SpreadSelection(field) => {
             std::hash::Hash::hash(&'s', hasher);
-            std::hash::Hash::hash(&field.fragment.read().unwrap().name, hasher);
+            std::hash::Hash::hash(&field.fragment, hasher);
             if recursive {
                 hash_fragment_spec(
                     hasher,
                     registry,
-                    &field.fragment.read().unwrap().spec,
+                    &registry.fragments.get(&field.fragment).unwrap().spec,
                     true,
                 );
             }
@@ -272,13 +265,12 @@ fn hash_union_selection_node<T: std::hash::Hasher>(
         ast::UnionSelection::UnionConditionalSpreadSelection(_) => {}
         ast::UnionSelection::ObjectConditionalSpreadSelection(s) => {
             std::hash::Hash::hash("oc", hasher);
-            std::hash::Hash::hash(&s.r#type.read().unwrap().name, hasher);
-            hash_object_fragment_spec(
-                hasher,
-                registry,
-                &s.selection,
-                recursive,
-            );
+            std::hash::Hash::hash(&s.r#type, hasher);
+            for selection in s.selections.iter() {
+                hash_object_selection_node(
+                    hasher, registry, selection, recursive,
+                );
+            }
         }
     }
 }
@@ -325,23 +317,46 @@ pub fn get_fragment_spec_hash(
     return std::hash::Hasher::finish(&hasher);
 }
 
-pub fn get_used_fragments_from_object_fragment_spec<T>(
+pub fn get_used_fragments_from_object_fragment_spec(
     registry: &TypeRegistry,
-    fragment_spec: &ast::ObjectFragmentSpec<T>,
-) -> Vec<Arc<RwLock<ast::Fragment>>> {
+    fragment_spec: &ast::ObjectFragmentSpec,
+) -> Vec<String> {
     fragment_spec
         .selections
         .iter()
-        .map(|selection| match selection {
-            ast::ObjectSelection::SpreadSelection(s) => {
-                vec![s.fragment.clone()]
-            }
-            ast::ObjectSelection::FieldSelection(f) => {
-                f.selection.as_ref().map_or(Vec::new(), |s| {
-                    get_used_fragments_from_fragment_spec(registry, &s)
-                })
-            }
-            _ => Vec::new(),
+        .map(|selection| {
+            get_used_fragments_from_object_selection(registry, selection)
+        })
+        .flatten()
+        .collect::<Vec<_>>()
+}
+
+pub fn get_used_fragments_from_object_selection(
+    registry: &TypeRegistry,
+    selection: &ast::ObjectSelection,
+) -> Vec<String> {
+    match selection {
+        ast::ObjectSelection::SpreadSelection(s) => {
+            vec![s.fragment.clone()]
+        }
+        ast::ObjectSelection::FieldSelection(f) => {
+            f.selection.as_ref().map_or(Vec::new(), |s| {
+                get_used_fragments_from_fragment_spec(registry, &s)
+            })
+        }
+        _ => Vec::new(),
+    }
+}
+
+pub fn get_used_fragments_from_interface_fragment_spec(
+    registry: &TypeRegistry,
+    fragment_spec: &ast::InterfaceFragmentSpec,
+) -> Vec<String> {
+    fragment_spec
+        .selections
+        .iter()
+        .map(|selection| {
+            get_used_fragments_from_object_selection(registry, selection)
         })
         .flatten()
         .collect::<Vec<_>>()
@@ -350,13 +365,13 @@ pub fn get_used_fragments_from_object_fragment_spec<T>(
 pub fn get_used_fragments_from_fragment_spec(
     registry: &TypeRegistry,
     fragment_spec: &ast::FragmentSpec,
-) -> Vec<Arc<RwLock<ast::Fragment>>> {
+) -> Vec<String> {
     match fragment_spec {
         ast::FragmentSpec::Object(object) => {
             get_used_fragments_from_object_fragment_spec(registry, object)
         }
         ast::FragmentSpec::Interface(interface) => {
-            get_used_fragments_from_object_fragment_spec(registry, interface)
+            get_used_fragments_from_interface_fragment_spec(registry, interface)
         }
         ast::FragmentSpec::Union(union) => union
             .selections
@@ -365,12 +380,16 @@ pub fn get_used_fragments_from_fragment_spec(
                 ast::UnionSelection::SpreadSelection(s) => {
                     vec![s.fragment.clone()]
                 }
-                ast::UnionSelection::ObjectConditionalSpreadSelection(c) => {
-                    get_used_fragments_from_object_fragment_spec(
-                        registry,
-                        &c.selection,
-                    )
-                }
+                ast::UnionSelection::ObjectConditionalSpreadSelection(c) => c
+                    .selections
+                    .iter()
+                    .map(|selection| {
+                        get_used_fragments_from_object_selection(
+                            registry, selection,
+                        )
+                    })
+                    .flatten()
+                    .collect::<Vec<_>>(),
                 _ => Vec::new(),
             })
             .flatten()

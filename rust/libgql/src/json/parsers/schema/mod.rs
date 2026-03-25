@@ -1,11 +1,8 @@
-use std::sync::{Arc, RwLock};
-
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
 
 use crate::parsers::schema::{
     server::{self, ast},
     shared,
-    type_registry::TypeRegistry,
 };
 
 fn parse_literal(
@@ -77,7 +74,6 @@ fn parse_optional_array_literal(
 }
 
 fn parse_object_type_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<server::ast::ObjectTypeSpec, String> {
     let Some(t) = value["_type"].as_str() else {
@@ -88,75 +84,57 @@ fn parse_object_type_spec(
     };
     match t {
         "ObjectType" => {
-            return Ok(registry
-                .objects
-                .get(value["name"].as_str().unwrap())
-                .unwrap()
-                .clone()
-                .into());
+            return Ok(server::ast::ObjectTypeSpec::ObjectType(
+                value["name"].as_str().unwrap().to_string(),
+            ));
         }
         "Interface" => {
-            return Ok(registry
-                .interfaces
-                .get(value["name"].as_str().unwrap())
-                .unwrap()
-                .clone()
-                .into());
+            return Ok(server::ast::ObjectTypeSpec::Interface(
+                value["name"].as_str().unwrap().to_string(),
+            ));
         }
         "Enum" => {
-            return Ok(registry
-                .enums
-                .get(value["name"].as_str().unwrap())
-                .unwrap()
-                .clone()
-                .into());
+            return Ok(server::ast::ObjectTypeSpec::Enum(
+                value["name"].as_str().unwrap().to_string(),
+            ));
         }
         "Union" => {
-            return Ok(registry
-                .unions
-                .get(value["name"].as_str().unwrap())
-                .unwrap()
-                .clone()
-                .into());
+            return Ok(server::ast::ObjectTypeSpec::Union(
+                value["name"].as_str().unwrap().to_string(),
+            ));
         }
         "Scalar" => {
-            return Ok(server::ast::ObjectTypeSpec::Scalar {
-                name: value["name"].as_str().unwrap().into(),
-            });
+            return Ok(server::ast::ObjectTypeSpec::Scalar(
+                value["name"].as_str().unwrap().to_string(),
+            ));
         }
         _ => return Err(format!("Unknown ObjectTypeSpec _type: {}", t)),
     }
 }
 
 fn parse_object_literal_field_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<shared::ast::LiteralFieldSpec<server::ast::ObjectTypeSpec>, String>
 {
     return Ok(shared::ast::LiteralFieldSpec {
         default_value: None,
         directive_invocations: IndexMap::new(),
-        r#type: parse_object_type_spec(registry, &value["type"])?,
+        r#type: parse_object_type_spec(&value["type"])?,
     });
 }
 
 fn parse_object_array_field_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<shared::ast::ArrayFieldSpec<server::ast::ObjectTypeSpec>, String> {
     return Ok(shared::ast::ArrayFieldSpec {
         default_value: None,
         directive_invocations: Vec::new(),
-        r#type: Box::new(parse_non_callable_object_field_spec(
-            registry,
-            &value["type"],
-        )?),
+        r#type: Box::new(parse_non_callable_object_field_spec(&value["type"])?),
         nullable: value["nullable"].as_bool().unwrap(),
     });
 }
 
 fn parse_non_callable_object_field_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<
     shared::ast::NonCallableFieldSpec<server::ast::ObjectTypeSpec>,
@@ -164,10 +142,8 @@ fn parse_non_callable_object_field_spec(
 > {
     let t = value["_type"].as_str().unwrap();
     match t {
-        "literal" => {
-            Ok(parse_object_literal_field_spec(registry, value)?.into())
-        }
-        "array" => Ok(parse_object_array_field_spec(registry, value)?.into()),
+        "literal" => Ok(parse_object_literal_field_spec(value)?.into()),
+        "array" => Ok(parse_object_array_field_spec(value)?.into()),
         _ => Err(format!(
             "Unknown _type for NonNullableObjectFieldSpec: {}",
             t
@@ -176,7 +152,6 @@ fn parse_non_callable_object_field_spec(
 }
 
 fn parse_input_type_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<shared::ast::InputTypeSpec, String> {
     let Some(t) = value["_type"].as_str() else {
@@ -187,24 +162,18 @@ fn parse_input_type_spec(
     };
     match t {
         "InputType" => {
-            return Ok(registry
-                .inputs
-                .get(value["name"].as_str().unwrap())
-                .unwrap()
-                .clone()
-                .into());
+            return Ok(shared::ast::InputTypeSpec::InputType(
+                value["name"].as_str().unwrap().to_string(),
+            ));
         }
         "Enum" => {
-            return Ok(registry
-                .enums
-                .get(value["name"].as_str().unwrap())
-                .unwrap()
-                .clone()
-                .into());
+            return Ok(shared::ast::InputTypeSpec::Enum(
+                value["name"].as_str().unwrap().to_string(),
+            ));
         }
         "Scalar" => {
             return Ok(shared::ast::InputTypeSpec::Scalar(
-                value["name"].as_str().unwrap().into(),
+                value["name"].as_str().unwrap().to_string(),
             ));
         }
         _ => return Err(format!("Unknown InputTypeSpec _type: {}", t)),
@@ -212,18 +181,16 @@ fn parse_input_type_spec(
 }
 
 fn parse_input_literal_field_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>, String> {
     return Ok(shared::ast::LiteralFieldSpec {
         default_value: Some(parse_optional_literal(&value["default_value"])?),
         directive_invocations: IndexMap::new(),
-        r#type: parse_input_type_spec(registry, &value["type"])?,
+        r#type: parse_input_type_spec(&value["type"])?,
     });
 }
 
 fn parse_input_array_field_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>, String> {
     return Ok(shared::ast::ArrayFieldSpec {
@@ -231,21 +198,18 @@ fn parse_input_array_field_spec(
             &value["default_value"],
         )?),
         directive_invocations: Vec::new(),
-        r#type: Box::new(parse_input_field_spec(registry, &value["type"])?),
+        r#type: Box::new(parse_input_field_spec(&value["type"])?),
         nullable: value["nullable"].as_bool().unwrap(),
     });
 }
 
 fn parse_input_field_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<shared::ast::InputFieldSpec, String> {
     let t = value["_type"].as_str().unwrap();
     match t {
-        "literal" => {
-            Ok(parse_input_literal_field_spec(registry, value)?.into())
-        }
-        "array" => Ok(parse_input_array_field_spec(registry, value)?.into()),
+        "literal" => Ok(parse_input_literal_field_spec(value)?.into()),
+        "array" => Ok(parse_input_array_field_spec(value)?.into()),
         _ => Err(format!(
             "Unknown _type for NonNullableInputFieldSpec: {}",
             t
@@ -254,19 +218,17 @@ fn parse_input_field_spec(
 }
 
 fn parse_input_field_definition(
-    registry: &TypeRegistry,
     name: &str,
     value: &serde_json::Value,
 ) -> Result<shared::ast::FieldDefinition<shared::ast::InputFieldSpec>, String> {
     return Ok(shared::ast::FieldDefinition {
         name: name.into(),
-        spec: parse_input_field_spec(registry, &value["spec"])?,
+        spec: parse_input_field_spec(&value["spec"])?,
         nullable: value["nullable"].as_bool().unwrap(),
     });
 }
 
 fn parse_arguments(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<
     IndexMap<String, shared::ast::FieldDefinition<shared::ast::InputFieldSpec>>,
@@ -277,42 +239,32 @@ fn parse_arguments(
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >::new();
     for (key, v) in value.as_object().unwrap() {
-        args.insert(
-            key.clone(),
-            parse_input_field_definition(registry, key, v)?,
-        );
+        args.insert(key.clone(), parse_input_field_definition(key, v)?);
     }
     return Ok(args);
 }
 
 fn parse_object_callable_field_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<server::ast::CallableFieldSpec, String> {
     return Ok(server::ast::CallableFieldSpec {
         return_type: parse_non_callable_object_field_spec(
-            registry,
             &value["returnType"],
         )?,
-        arguments: parse_arguments(registry, &value["arguments"])?,
+        arguments: parse_arguments(&value["arguments"])?,
     });
 }
 
 fn parse_object_field_spec(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
 ) -> Result<server::ast::ObjectFieldSpec, String> {
     let t = value["_type"].as_str().ok_or(
         "ObjectFieldSpec is expected to have \"_type\" string descriminator",
     )?;
     match t {
-        "literal" => {
-            Ok(parse_object_literal_field_spec(registry, value)?.into())
-        }
-        "callable" => {
-            Ok(parse_object_callable_field_spec(registry, value)?.into())
-        }
-        "array" => Ok(parse_object_array_field_spec(registry, value)?.into()),
+        "literal" => Ok(parse_object_literal_field_spec(value)?.into()),
+        "callable" => Ok(parse_object_callable_field_spec(value)?.into()),
+        "array" => Ok(parse_object_array_field_spec(value)?.into()),
         _ => Err(
             format!("Invalid ObjectFieldSpec _type descriminator: {}", t)
                 .into(),
@@ -321,77 +273,68 @@ fn parse_object_field_spec(
 }
 
 fn parse_object_field(
-    registry: &TypeRegistry,
     name: &str,
     value: &serde_json::Value,
-) -> Result<
-    Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
-    String,
-> {
+) -> Result<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>, String>
+{
     let nullable = value["nullable"]
         .as_bool()
         .ok_or("FieldDefinition is expected to have \"nullable\" bool value")?;
-    return Ok(Arc::new(shared::ast::FieldDefinition {
+    return Ok(shared::ast::FieldDefinition {
         name: name.into(),
         nullable,
-        spec: parse_object_field_spec(registry, &value["spec"])?,
-    }));
+        spec: parse_object_field_spec(&value["spec"])?,
+    });
 }
 
 fn parse_object_fields(
-    registry: &TypeRegistry,
     map: &serde_json::Value,
 ) -> Result<
     IndexMap<
         String,
-        Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+        shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
     >,
     String,
 > {
     let mut fields = IndexMap::<
         String,
-        Arc<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>>,
+        shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
     >::new();
     for (key, value) in map.as_object().unwrap() {
-        fields.insert(key.into(), parse_object_field(registry, key, value)?);
+        fields.insert(key.into(), parse_object_field(key, value)?);
     }
 
     return Ok(fields);
 }
 
 fn parse_implements_map(
-    registry: &TypeRegistry,
     value: &serde_json::Value,
-) -> indexmap::IndexMap<String, Arc<RwLock<server::ast::Interface>>> {
+) -> indexmap::IndexSet<String> {
     return value
-        .as_object()
+        .as_array()
         .unwrap()
         .iter()
-        .map(|(key, _)| {
-            (key.clone(), registry.interfaces.get(key).unwrap().clone())
-        })
+        .map(|item| item.as_str().unwrap().to_string())
         .collect();
 }
 
 fn parse_object(
-    registry: &TypeRegistry,
-    object: &mut server::ast::ObjectType,
     value: &serde_json::Value,
-) -> Result<(), String> {
-    object.fields = parse_object_fields(registry, &value["fields"])?;
-    object.implements = parse_implements_map(registry, &value["implements"]);
-    return Ok(());
+) -> Result<server::ast::ObjectType, String> {
+    Ok(server::ast::ObjectType {
+        name: value["name"].as_str().unwrap().to_string(),
+        fields: parse_object_fields(&value["fields"])?,
+        implements: parse_implements_map(&value["implements"]),
+        directives: Vec::new()
+    })
 }
 
 fn parse_objects(
-    registry: &TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RwLock<ast::ObjectType>>>, String> {
-    let mut objects = IndexMap::<String, Arc<RwLock<ast::ObjectType>>>::new();
+) -> Result<IndexMap<String, ast::ObjectType>, String> {
+    let mut objects = IndexMap::<String, ast::ObjectType>::new();
     for (key, value) in map.as_object().unwrap() {
-        let object_rc = registry.objects.get(key).unwrap();
-        parse_object(registry, &mut object_rc.write().unwrap(), value)?;
-        objects.insert(key.clone(), object_rc.clone());
+        objects.insert(key.clone(), parse_object(value)?);
     }
     return Ok(objects);
 }
@@ -409,20 +352,16 @@ fn parse_enum(value: &serde_json::Value) -> Result<shared::ast::Enum, String> {
 }
 
 fn parse_enums(
-    registry: &mut TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<shared::ast::Enum>>, String> {
-    let mut enums = IndexMap::<String, Arc<shared::ast::Enum>>::new();
+) -> Result<IndexMap<String, shared::ast::Enum>, String> {
+    let mut enums = IndexMap::<String, shared::ast::Enum>::new();
     for (key, value) in map.as_object().unwrap() {
-        let e = Arc::new(parse_enum(value)?);
-        registry.enums.insert(key.clone(), e.clone());
-        enums.insert(key.clone(), e);
+        enums.insert(key.clone(), parse_enum(value)?);
     }
     return Ok(enums);
 }
 
 fn parse_input_fields(
-    registry: &TypeRegistry,
     v: &serde_json::Value,
 ) -> Result<
     IndexMap<String, shared::ast::FieldDefinition<shared::ast::InputFieldSpec>>,
@@ -433,123 +372,76 @@ fn parse_input_fields(
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     >::new();
     for (key, value) in v.as_object().unwrap() {
-        fields.insert(
-            key.clone(),
-            parse_input_field_definition(registry, key, value)?,
-        );
+        fields.insert(key.clone(), parse_input_field_definition(key, value)?);
     }
     return Ok(fields);
 }
 
 fn parse_inputs(
-    registry: &mut TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RwLock<shared::ast::InputType>>>, String> {
-    let m = map.as_object().unwrap();
-    for key in m.keys() {
-        registry.inputs.insert(
-            key.clone(),
-            Arc::new(RwLock::new(shared::ast::InputType {
-                name: key.clone(),
-                fields: IndexMap::new(),
-            })),
-        );
-    }
-    let mut inputs =
-        IndexMap::<String, Arc<RwLock<shared::ast::InputType>>>::new();
+) -> Result<IndexMap<String, shared::ast::InputType>, String> {
+    let mut inputs = IndexMap::<String, shared::ast::InputType>::new();
     for (key, value) in map.as_object().unwrap() {
-        let i = registry.inputs.get(key).unwrap();
-        i.write().unwrap().fields =
-            parse_input_fields(registry, &value["fields"])?;
-        inputs.insert(key.clone(), i.clone());
+        inputs.insert(
+            key.clone(),
+            shared::ast::InputType {
+                name: key.clone(),
+                fields: parse_input_fields(&value["fields"])?,
+            },
+        );
     }
     return Ok(inputs);
 }
 
 fn parse_interfaces(
-    registry: &mut TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RwLock<server::ast::Interface>>>, String> {
-    let m = map.as_object().unwrap();
-    for key in m.keys() {
-        registry.interfaces.insert(
+) -> Result<IndexMap<String, server::ast::Interface>, String> {
+    let mut interfaces = IndexMap::<String, server::ast::Interface>::new();
+    for (key, value) in map.as_object().unwrap() {
+        parse_object_fields(&value["fields"])?;
+        interfaces.insert(
             key.clone(),
-            Arc::new(RwLock::new(server::ast::Interface {
+            server::ast::Interface {
                 name: key.clone(),
-                fields: IndexMap::new(),
+                fields: parse_object_fields(&value["fields"])?,
                 directives: Vec::new(),
-            })),
+            },
         );
     }
-    let mut inputs =
-        IndexMap::<String, Arc<RwLock<server::ast::Interface>>>::new();
-    for (key, value) in map.as_object().unwrap() {
-        let i = registry.interfaces.get(key).unwrap();
-        i.write().unwrap().fields =
-            parse_object_fields(registry, &value["fields"])?;
-        inputs.insert(key.clone(), i.clone());
-    }
-    return Ok(inputs);
+    return Ok(interfaces);
 }
 
-fn parse_items(
-    registry: &TypeRegistry,
-    value: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RwLock<server::ast::ObjectType>>>, String> {
-    let mut items =
-        IndexMap::<String, Arc<RwLock<server::ast::ObjectType>>>::new();
+fn parse_items(value: &serde_json::Value) -> Result<IndexSet<String>, String> {
+    let mut items = IndexSet::<String>::new();
     for key in value.as_object().unwrap().keys() {
-        items.insert(key.clone(), registry.objects.get(key).unwrap().clone());
+        items.insert(key.clone());
     }
     return Ok(items);
 }
 
 fn parse_union(
-    registry: &TypeRegistry,
-    union: &mut server::ast::Union,
     value: &serde_json::Value,
-) -> Result<(), String> {
-    union.items = parse_items(registry, &value["items"])?;
-    return Ok(());
+) -> Result<server::ast::Union, String> {
+    Ok(server::ast::Union {
+        name: value["name"].as_str().unwrap().to_string(),
+        items: parse_items(&value["items"])?,
+    })
 }
 
 fn parse_unions(
-    registry: &TypeRegistry,
     map: &serde_json::Value,
-) -> Result<IndexMap<String, Arc<RwLock<ast::Union>>>, String> {
-    let mut unions = IndexMap::<String, Arc<RwLock<ast::Union>>>::new();
+) -> Result<IndexMap<String, ast::Union>, String> {
+    let mut unions = IndexMap::<String, ast::Union>::new();
     for (key, value) in map.as_object().unwrap() {
-        let union_rc = registry.unions.get(key).unwrap();
-        parse_union(registry, &mut union_rc.write().unwrap(), value)?;
-        unions.insert(key.clone(), union_rc.clone());
+        unions.insert(key.clone(), parse_union(value)?);
     }
     return Ok(unions);
 }
 
 pub fn parse_server_schema(
-    registry: &mut TypeRegistry,
+    registry: &mut server::type_registry::TypeRegistry,
     value: serde_json::Value,
-) -> Result<server::schema::Schema, String> {
-    for key in value["objects"].as_object().unwrap().keys() {
-        registry.objects.insert(
-            key.clone(),
-            Arc::new(RwLock::new(server::ast::ObjectType {
-                name: key.clone(),
-                fields: IndexMap::new(),
-                directives: Vec::new(),
-                implements: IndexMap::new(),
-            })),
-        );
-    }
-    for key in value["unions"].as_object().unwrap().keys() {
-        registry.unions.insert(
-            key.clone(),
-            Arc::new(RwLock::new(server::ast::Union {
-                name: key.clone(),
-                items: IndexMap::new(),
-            })),
-        );
-    }
+) -> Result<(), String> {
     let new_scalars: Vec<String> = value["scalars"]
         .as_array()
         .unwrap()
@@ -557,15 +449,12 @@ pub fn parse_server_schema(
         .map(|v| v.as_str().unwrap().to_string())
         .collect();
     for scalar in &new_scalars {
-        registry.scalars.push(scalar.clone());
+        registry.scalars.insert(scalar.clone());
     }
-    return Ok(server::schema::Schema {
-        scalars: [shared::scalars::get_builtin_scalars(), new_scalars].concat(),
-        enums: parse_enums(registry, &value["enums"])?,
-        inputs: parse_inputs(registry, &value["inputs"])?,
-        interfaces: parse_interfaces(registry, &value["interfaces"])?,
-        objects: parse_objects(registry, &value["objects"])?,
-        unions: parse_unions(registry, &value["unions"])?,
-        directives: IndexMap::new(),
-    });
+    registry.objects = parse_objects(&value["objects"])?;
+    registry.interfaces = parse_interfaces(&value["interfaces"])?;
+    registry.unions = parse_unions(&value["unions"])?;
+    registry.inputs = parse_inputs(&value["inputs"])?;
+    registry.enums = parse_enums(&value["enums"])?;
+    Ok(())
 }
