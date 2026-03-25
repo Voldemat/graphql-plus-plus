@@ -1,6 +1,4 @@
-use std::sync::{Arc, RwLock};
-
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
 use libgql::parsers::schema::{
     server::ast::{
         Interface, ObjectFieldSpec, ObjectType, ObjectTypeSpec, Union,
@@ -30,19 +28,12 @@ pub fn compare_two_object_type_specs(
 ) -> bool {
     match (spec, spec2) {
         (ObjectTypeSpec::ObjectType(a), ObjectTypeSpec::ObjectType(b)) => {
-            a.read().unwrap().name == b.read().unwrap().name
+            a == b
         }
-        (ObjectTypeSpec::Interface(a), ObjectTypeSpec::Interface(b)) => {
-            a.read().unwrap().name == b.read().unwrap().name
-        }
-        (
-            ObjectTypeSpec::Scalar { name },
-            ObjectTypeSpec::Scalar { name: name2 },
-        ) => name == name2,
-        (ObjectTypeSpec::Union(a), ObjectTypeSpec::Union(b)) => {
-            a.read().unwrap().name == b.read().unwrap().name
-        }
-        (ObjectTypeSpec::Enum(a), ObjectTypeSpec::Enum(b)) => a.name == b.name,
+        (ObjectTypeSpec::Interface(a), ObjectTypeSpec::Interface(b)) => a == b,
+        (ObjectTypeSpec::Scalar(a), ObjectTypeSpec::Scalar(b)) => a == b,
+        (ObjectTypeSpec::Union(a), ObjectTypeSpec::Union(b)) => a == b,
+        (ObjectTypeSpec::Enum(a), ObjectTypeSpec::Enum(b)) => a == b,
         _ => false,
     }
 }
@@ -53,10 +44,8 @@ pub fn compare_two_input_type_specs(
 ) -> bool {
     match (spec, spec2) {
         (InputTypeSpec::Scalar(a), InputTypeSpec::Scalar(b)) => a == b,
-        (InputTypeSpec::Enum(a), InputTypeSpec::Enum(b)) => a.name == b.name,
-        (InputTypeSpec::InputType(a), InputTypeSpec::InputType(b)) => {
-            a.read().unwrap().name == b.read().unwrap().name
-        }
+        (InputTypeSpec::Enum(a), InputTypeSpec::Enum(b)) => a == b,
+        (InputTypeSpec::InputType(a), InputTypeSpec::InputType(b)) => a == b,
         _ => false,
     }
 }
@@ -229,8 +218,8 @@ pub fn compare_arguments(
 
 fn compare_two_objects(object: &ObjectType, object2: &ObjectType) -> bool {
     let mut is_valid = true;
-    for name in object.implements.keys() {
-        if !object2.implements.contains_key(name) {
+    for name in &object.implements {
+        if !object2.implements.contains(name) {
             eprintln!(
                 "[{}] Removed interface {} from extends list",
                 object.name, name
@@ -245,7 +234,7 @@ fn compare_two_objects(object: &ObjectType, object2: &ObjectType) -> bool {
             continue;
         }
         if !compare_two_object_field_definitions(
-            field.as_ref(),
+            field,
             object2.fields.get(name).unwrap(),
             &object.name,
         ) {
@@ -256,8 +245,8 @@ fn compare_two_objects(object: &ObjectType, object2: &ObjectType) -> bool {
 }
 
 fn compare_objects(
-    objects: &IndexMap<String, Arc<RwLock<ObjectType>>>,
-    objects2: &IndexMap<String, Arc<RwLock<ObjectType>>>,
+    objects: &IndexMap<String, ObjectType>,
+    objects2: &IndexMap<String, ObjectType>,
 ) -> bool {
     let mut is_valid = true;
     for (name, object) in objects {
@@ -266,10 +255,7 @@ fn compare_objects(
             is_valid = false;
             continue;
         };
-        if !compare_two_objects(
-            &object.read().unwrap(),
-            &objects2.get(name).unwrap().read().unwrap(),
-        ) {
+        if !compare_two_objects(&object, &objects2.get(name).unwrap()) {
             is_valid = false;
         };
     }
@@ -278,8 +264,8 @@ fn compare_objects(
 
 fn compare_two_unions(union: &Union, union2: &Union) -> bool {
     let mut is_valid = true;
-    for item in union.items.keys() {
-        if !union2.items.contains_key(item) {
+    for item in &union.items {
+        if !union2.items.contains(item) {
             eprintln!("[{}] Removed type {}", union.name, item);
             is_valid = false;
         }
@@ -288,8 +274,8 @@ fn compare_two_unions(union: &Union, union2: &Union) -> bool {
 }
 
 fn compare_unions(
-    unions: &IndexMap<String, Arc<RwLock<Union>>>,
-    unions2: &IndexMap<String, Arc<RwLock<Union>>>,
+    unions: &IndexMap<String, Union>,
+    unions2: &IndexMap<String, Union>,
 ) -> bool {
     let mut is_valid = true;
     for (name, union) in unions {
@@ -298,10 +284,7 @@ fn compare_unions(
             is_valid = false;
             continue;
         };
-        if !compare_two_unions(
-            &union.read().unwrap(),
-            &unions2.get(name).unwrap().read().unwrap(),
-        ) {
+        if !compare_two_unions(&union, &unions2.get(name).unwrap()) {
             is_valid = false;
         };
     }
@@ -328,8 +311,8 @@ fn compare_two_inputs(input: &InputType, input2: &InputType) -> bool {
 }
 
 fn compare_inputs(
-    inputs: &IndexMap<String, Arc<RwLock<InputType>>>,
-    inputs2: &IndexMap<String, Arc<RwLock<InputType>>>,
+    inputs: &IndexMap<String, InputType>,
+    inputs2: &IndexMap<String, InputType>,
 ) -> bool {
     let mut is_valid = true;
     for (name, input) in inputs {
@@ -338,10 +321,7 @@ fn compare_inputs(
             is_valid = false;
             continue;
         };
-        if !compare_two_inputs(
-            &input.read().unwrap(),
-            &inputs2.get(name).unwrap().read().unwrap(),
-        ) {
+        if !compare_two_inputs(&input, &inputs2.get(name).unwrap()) {
             is_valid = false;
         };
     }
@@ -360,7 +340,7 @@ fn compare_two_interfaces(
             continue;
         }
         if !compare_two_object_field_definitions(
-            field.as_ref(),
+            field,
             interface2.fields.get(name).unwrap(),
             &interface.name,
         ) {
@@ -371,8 +351,8 @@ fn compare_two_interfaces(
 }
 
 fn compare_interfaces(
-    interfaces: &IndexMap<String, Arc<RwLock<Interface>>>,
-    interfaces2: &IndexMap<String, Arc<RwLock<Interface>>>,
+    interfaces: &IndexMap<String, Interface>,
+    interfaces2: &IndexMap<String, Interface>,
 ) -> bool {
     let mut is_valid = true;
     for (name, interface) in interfaces {
@@ -381,17 +361,18 @@ fn compare_interfaces(
             is_valid = false;
             continue;
         };
-        if !compare_two_interfaces(
-            &interface.read().unwrap(),
-            &interfaces2.get(name).unwrap().read().unwrap(),
-        ) {
+        if !compare_two_interfaces(&interface, &interfaces2.get(name).unwrap())
+        {
             is_valid = false;
         };
     }
     return is_valid;
 }
 
-fn compare_scalars(scalars: &Vec<String>, scalars2: &Vec<String>) -> bool {
+fn compare_scalars(
+    scalars: &IndexSet<String>,
+    scalars2: &IndexSet<String>,
+) -> bool {
     let mut is_valid = true;
     for name in scalars {
         if !scalars2.contains(name) {
@@ -414,8 +395,8 @@ fn compare_two_enums(e: &Enum, e2: &Enum) -> bool {
 }
 
 fn compare_enums(
-    enums: &IndexMap<String, Arc<Enum>>,
-    enums2: &IndexMap<String, Arc<Enum>>,
+    enums: &IndexMap<String, Enum>,
+    enums2: &IndexMap<String, Enum>,
 ) -> bool {
     let mut is_valid = true;
     for (name, e) in enums {
@@ -432,8 +413,8 @@ fn compare_enums(
 }
 
 fn find_difference_between_schemas(
-    schema: &libgql::parsers::schema::server::schema::Schema,
-    schema2: &libgql::parsers::schema::server::schema::Schema,
+    schema: &libgql::parsers::schema::server::type_registry::TypeRegistry,
+    schema2: &libgql::parsers::schema::server::type_registry::TypeRegistry,
 ) {
     let is_objects_valid = compare_objects(&schema.objects, &schema2.objects);
     let is_unions_valid = compare_unions(&schema.unions, &schema2.unions);
@@ -456,33 +437,37 @@ fn find_difference_between_schemas(
 }
 
 pub fn command(args: DiffArgs) {
-    let server_schema = libgql::json::parsers::schema::parse_server_schema(
-        &mut libgql::parsers::schema::type_registry::TypeRegistry::new(),
+    let mut registry =
+        libgql::parsers::schema::server::type_registry::TypeRegistry::new();
+
+    libgql::json::parsers::schema::parse_server_schema(
+        &mut registry,
         serde_json::from_str::<serde_json::Value>(
             &utils::read_buffer_from_filepath(&args.json_schema_path),
         )
         .unwrap(),
     )
     .unwrap();
-    let server_schema_from_introspection =
-        libgql::json::parsers::introspection::parse_server_schema(
-            &mut libgql::parsers::schema::type_registry::TypeRegistry::new(),
-            serde_json::from_str::<serde_json::Value>(
-                &reqwest::blocking::Client::new()
-                    .post(args.url_to_api.clone())
-                    .body(INTROSPECTION_QUERY)
-                    .header("Content-Type", "application/json")
-                    .header("Accept", "application/json")
-                    .send()
-                    .unwrap()
-                    .text()
-                    .unwrap(),
-            )
-            .unwrap(),
+    let mut server_schema_from_introspection =
+        libgql::parsers::schema::server::type_registry::TypeRegistry::new();
+    libgql::json::parsers::introspection::parse_server_schema(
+        &mut server_schema_from_introspection,
+        serde_json::from_str::<serde_json::Value>(
+            &reqwest::blocking::Client::new()
+                .post(args.url_to_api.clone())
+                .body(INTROSPECTION_QUERY)
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .send()
+                .unwrap()
+                .text()
+                .unwrap(),
         )
-        .unwrap();
+        .unwrap(),
+    )
+    .unwrap();
     find_difference_between_schemas(
-        &server_schema,
+        &registry,
         &server_schema_from_introspection,
     );
 }

@@ -2,41 +2,22 @@ use std::sync::Arc;
 
 use crate::cli::config;
 
-pub fn format_line(
-    line: &str,
-    current_line: u32,
-    location: &libgql::lexer::tokens::TokenLocation,
+pub fn format_lexer_error<'buffer>(
     exc: &str,
+    location: (usize, usize),
+    source: &Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
 ) -> String {
-    let linestr = current_line.to_string();
-    let buffer = format!("{}: {}\n", linestr, line);
+    let buffer = format!("{}\n", source.filepath.display());
 
     buffer
 }
 
-pub fn format_error(
+pub fn format_parse_error<'buffer>(
     exc: &str,
     location: &libgql::lexer::tokens::TokenLocation,
-    source: &Arc<libgql::parsers::file::shared::ast::SourceFile>,
+    source: &Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
 ) -> String {
-    let mut buffer = format!("{}\n", source.filepath.display());
-
-    let line_num = 0 as i32;
-
-    let first_line_to_show = std::cmp::max(line_num - 4, 1) as u32;
-    let last_line_to_show = (line_num + 4) as u32;
-
-    let mut current_line: u32 = 1;
-
-    for line in source.buffer.lines() {
-        if first_line_to_show <= current_line
-            && current_line <= last_line_to_show
-        {
-            buffer.push_str(&format_line(line, current_line, &location, exc));
-        }
-
-        current_line += 1;
-    }
+    let buffer = format!("{}\n", source.filepath.display());
 
     buffer
 }
@@ -82,21 +63,19 @@ pub fn resolve_paths(
 }
 
 pub fn load_server_schema_from_inputs(
-    registry: &mut libgql::parsers::schema::type_registry::TypeRegistry,
+    registry: &mut libgql::parsers::schema::server::type_registry::TypeRegistry,
     config_dir_path: &std::path::Path,
     conf: &config::InputsConfig,
-) -> Result<libgql::parsers::schema::server::schema::Schema, Vec<String>> {
+) -> Result<(), Vec<String>> {
     let mut nodes = Vec::<libgql::parsers::file::server::ast::ASTNode>::new();
     let mut errors = Vec::<String>::new();
-    let mut schema = libgql::parsers::schema::server::schema::Schema::default();
     for jsonpath in resolve_paths(config_dir_path, &conf.json_schema) {
         let buffer = std::fs::read_to_string(jsonpath).unwrap();
-        let new_schema = libgql::json::parsers::schema::parse_server_schema(
+        libgql::json::parsers::schema::parse_server_schema(
             registry,
             serde_json::from_str::<serde_json::Value>(&buffer).unwrap(),
         )
         .unwrap();
-        schema.append_schema(new_schema);
     }
     let mut buffers = Vec::new();
     for graphql_path in resolve_paths(&config_dir_path, &conf.graphql) {
@@ -126,7 +105,7 @@ pub fn load_server_schema_from_inputs(
         {
             Ok(n) => n,
             Err(e) => {
-                errors.push(format_error(
+                errors.push(format_parse_error(
                     &format!("{:?}", e),
                     e.get_location(),
                     &source_file,
@@ -140,23 +119,19 @@ pub fn load_server_schema_from_inputs(
     if errors.len() > 0 {
         return Err(errors);
     }
-    let new_schema =
-        libgql::parsers::schema::server::parse_server_schema(registry, &nodes)
-            .unwrap();
-    schema.append_schema(new_schema);
-    return Ok(schema);
+    libgql::parsers::schema::server::parse_server_schema(registry, &nodes)
+        .unwrap();
+    Ok(())
 }
 
 pub fn load_client_schema_from_inputs(
-    registry: &mut libgql::parsers::schema::type_registry::TypeRegistry,
+    server_registry: &libgql::parsers::schema::server::type_registry::TypeRegistry,
+    registry: &mut libgql::parsers::schema::client::type_registry::TypeRegistry,
     config_dir_path: &std::path::Path,
     conf: &config::InputsConfig,
-) -> Result<libgql::parsers::schema::client::schema::ClientSchema, Vec<String>>
-{
+) -> Result<(), Vec<String>> {
     let mut nodes = Vec::<libgql::parsers::file::client::ast::ASTNode>::new();
     let mut errors = Vec::<String>::new();
-    let mut schema =
-        libgql::parsers::schema::client::schema::ClientSchema::default();
     let mut buffers = Vec::new();
     for graphql_path in resolve_paths(&config_dir_path, &conf.graphql) {
         let buffer = std::fs::read_to_string(&graphql_path).unwrap();
@@ -185,7 +160,7 @@ pub fn load_client_schema_from_inputs(
         {
             Ok(n) => n,
             Err(e) => {
-                errors.push(format_error(
+                errors.push(format_lexer_error(
                     &format!("{:?}", e),
                     e.get_location(),
                     &source_file,
@@ -198,21 +173,18 @@ pub fn load_client_schema_from_inputs(
     if errors.len() > 0 {
         return Err(errors);
     }
-    let new_schema = match libgql::parsers::schema::client::parse_client_schema(
-        registry, &nodes,
+    match libgql::parsers::schema::client::parse_client_schema(
+        server_registry,
+        registry,
+        &nodes,
     ) {
-        Ok(schema) => schema,
+        Ok(_) => {}
         Err(error) => {
-            errors.push(format_error(
-                &format!("{:?}", error),
-                error.get_location(),
-                &error.get_source_file(),
-            ));
+            errors.push(format!("{:?}", error));
             return Err(errors);
         }
     };
-    schema.append_schema(new_schema);
-    return Ok(schema);
+    return Ok(());
 }
 
 pub fn run_config_action<'a>(
@@ -220,14 +192,14 @@ pub fn run_config_action<'a>(
     config: &'a config::Config,
     json_callback: Box<dyn Fn(&str, &std::path::Path, &str) + 'a>,
 ) -> Result<(), String> {
-    let mut registry =
-        libgql::parsers::schema::type_registry::TypeRegistry::new();
-    let server_schema = match load_server_schema_from_inputs(
-        &mut registry,
+    let mut server_registry =
+        libgql::parsers::schema::server::type_registry::TypeRegistry::new();
+    match load_server_schema_from_inputs(
+        &mut server_registry,
         config_path.parent().unwrap(),
         &config.server.inputs,
     ) {
-        Ok(schema) => schema,
+        Ok(_) => {}
         Err(errors) => {
             for e in errors {
                 println!("{}", e);
@@ -235,13 +207,16 @@ pub fn run_config_action<'a>(
             return Ok(());
         }
     };
-    let client_schema = match config.client.as_ref().map(|client_config| {
+    let client_registry = match config.client.as_ref().map(|client_config| {
+        let mut client_registry =
+            libgql::parsers::schema::client::type_registry::TypeRegistry::new();
         match load_client_schema_from_inputs(
-            &mut registry,
+            &server_registry,
+            &mut client_registry,
             config_path.parent().unwrap(),
             &client_config.inputs,
         ) {
-            Ok(schema) => Some(schema),
+            Ok(_) => None,
             Err(errors) => {
                 for e in errors {
                     println!("{}", e);
@@ -257,9 +232,9 @@ pub fn run_config_action<'a>(
     if let Some(outputs) = config.server.outputs.as_ref() {
         let json_string =
             libgql::json::serializers::schema::serialize_server_schema(
-                &server_schema,
+                &server_registry,
                 if outputs.only_used_in_operations {
-                    client_schema.as_ref()
+                    client_registry
                 } else {
                     None
                 },
@@ -269,11 +244,11 @@ pub fn run_config_action<'a>(
 
     if let Some(client_config) = &config.client
         && let Some(outputs) = &client_config.outputs
-        && let Some(c_schema) = &client_schema
+        && let Some(c_registry) = client_registry
     {
         let json_string =
             libgql::json::serializers::schema::serialize_client_schema(
-                c_schema,
+                c_registry,
             )?;
         json_callback(&json_string, &outputs.filepath, "Client");
     };
