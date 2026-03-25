@@ -311,10 +311,10 @@ fn parse_implements_map(
     value: &serde_json::Value,
 ) -> indexmap::IndexSet<String> {
     return value
-        .as_array()
+        .as_object()
         .unwrap()
         .iter()
-        .map(|item| item.as_str().unwrap().to_string())
+        .map(|(item, _)| item.clone())
         .collect();
 }
 
