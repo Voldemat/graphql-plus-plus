@@ -663,7 +663,18 @@ pub fn serialize_server_schema(
                 )
             })?;
             schema_writer.write_array_member("scalars", |scalars_writer| {
-                let mut new_scalars = schema.scalars.clone();
+                let mut new_scalars = schema
+                    .scalars
+                    .iter()
+                    .filter(|scalar| {
+                        scalar.as_str() != "String"
+                            && scalar.as_str() != "Int"
+                            && scalar.as_str() != "ID"
+                            && scalar.as_str() != "Float"
+                            && scalar.as_str() != "Boolean"
+                    })
+                    .map(|scalar| scalar.clone())
+                    .collect::<Vec<_>>();
                 new_scalars.sort();
                 for scalar in &new_scalars {
                     if let Some(map) = &server_uses_map
@@ -764,16 +775,25 @@ fn write_union_selection<'a, J: struson::writer::JsonWriter>(
             )?;
             writer.write_string_member("object", &spread.r#type)?;
             writer.write_object_member("spec", |spec_writer| {
-                spec_writer.write_string_member("_type", "ObjectFragmentSpec")?;
+                spec_writer
+                    .write_string_member("_type", "ObjectFragmentSpec")?;
                 spec_writer.write_string_member("name", &spread.r#type)?;
-                spec_writer.write_array_member("selections", |selections_writer| {
-                    for selection in &spread.selections {
-                        selections_writer.write_object(|selection_writer| {
-                            write_object_selection(selection_writer, selection)
-                        })?;
-                    }
-                    Ok(())
-                })?;
+                spec_writer.write_array_member(
+                    "selections",
+                    |selections_writer| {
+                        for selection in &spread.selections {
+                            selections_writer.write_object(
+                                |selection_writer| {
+                                    write_object_selection(
+                                        selection_writer,
+                                        selection,
+                                    )
+                                },
+                            )?;
+                        }
+                        Ok(())
+                    },
+                )?;
                 Ok(())
             })?;
         }

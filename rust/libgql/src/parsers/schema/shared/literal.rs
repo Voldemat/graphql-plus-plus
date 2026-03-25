@@ -1,9 +1,4 @@
-use crate::parsers::{
-    file,
-    schema::{
-        shared::ast,
-    },
-};
+use crate::parsers::{file, schema::shared::ast};
 
 pub fn parse_literal(node: &file::shared::ast::LiteralNode) -> ast::Literal {
     match node {

@@ -29,7 +29,10 @@ fn parse_noncallable_input_field_spec<'buffer>(
     default_value: Option<shared::ast::Literal>,
     registry: &TypeRegistry,
 ) -> Result<
-    (shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>, bool),
+    (
+        shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
+        bool,
+    ),
     type_registry::Error<'buffer>,
 > {
     match node {
@@ -86,8 +89,10 @@ pub fn parse_field_definitions<'buffer>(
     IndexMap<String, shared::ast::FieldDefinition<shared::ast::InputFieldSpec>>,
     type_registry::Error<'buffer>,
 > {
-    let mut arguments =
-        IndexMap::<String, shared::ast::FieldDefinition<shared::ast::InputFieldSpec>>::new();
+    let mut arguments = IndexMap::<
+        String,
+        shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+    >::new();
     for field_definition_node in nodes {
         arguments.insert(
             field_definition_node.name.name.to_string(),
@@ -101,7 +106,8 @@ pub fn parse_definition<'buffer>(
     input: &InputObjectDefinitionNode<'buffer>,
     registry: &mut TypeRegistry,
 ) -> Result<(), errors::Error<'buffer>> {
-    let fields = super::input::parse_field_definitions(&input.fields, registry)?;
+    let fields =
+        super::input::parse_field_definitions(&input.fields, registry)?;
     let obj = registry.inputs.get_mut(input.name.name).unwrap();
     obj.fields = fields;
     return Ok(());

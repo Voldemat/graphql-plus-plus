@@ -291,11 +291,7 @@ fn visit_non_callable_field_spec_object_type_spec(
             {
                 hook(literal);
             }
-            visit_object_type_spec(
-                server_registry,
-                hooks,
-                &literal.r#type,
-            );
+            visit_object_type_spec(server_registry, hooks, &literal.r#type);
         }
         shared::ast::NonCallableFieldSpec::Array(array) => {
             if let Some(hook) =
@@ -329,11 +325,7 @@ fn visit_object_field_spec(
             {
                 hook(literal);
             }
-            visit_object_type_spec(
-                server_registry,
-                hooks,
-                &literal.r#type,
-            );
+            visit_object_type_spec(server_registry, hooks, &literal.r#type);
         }
         server::ast::ObjectFieldSpec::Array(array) => {
             if let Some(hook) =

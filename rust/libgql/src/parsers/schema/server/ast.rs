@@ -2,7 +2,6 @@ use indexmap::IndexSet;
 
 use crate::parsers::schema::shared;
 
-
 #[derive(Debug, Clone)]
 pub enum ObjectTypeSpec {
     ObjectType(String),

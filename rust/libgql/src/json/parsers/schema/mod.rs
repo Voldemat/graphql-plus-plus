@@ -325,7 +325,7 @@ fn parse_object(
         name: value["name"].as_str().unwrap().to_string(),
         fields: parse_object_fields(&value["fields"])?,
         implements: parse_implements_map(&value["implements"]),
-        directives: Vec::new()
+        directives: Vec::new(),
     })
 }
 
