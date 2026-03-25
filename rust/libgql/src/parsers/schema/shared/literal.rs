@@ -10,10 +10,10 @@ pub fn parse_literal(node: &file::shared::ast::LiteralNode) -> ast::Literal {
             ast::Literal::Boolean(i.value)
         }
         file::shared::ast::LiteralNode::String(i) => {
-            ast::Literal::String(i.value.clone())
+            ast::Literal::String(i.value.to_string())
         }
         file::shared::ast::LiteralNode::EnumValue(i) => {
-            ast::Literal::String(i.value.clone())
+            ast::Literal::String(i.value.to_string())
         }
     }
 }

@@ -25,7 +25,7 @@ fn parse_argument_value_from_literal_node<'buffer>(
         }
         file::shared::ast::LiteralNode::String(s) => {
             Ok(shared::ast::ArgumentValue::Literal(
-                shared::ast::ArgumentLiteralValue::String(s.value.clone()),
+                shared::ast::ArgumentLiteralValue::String(s.value.to_string()),
             ))
         }
         file::shared::ast::LiteralNode::EnumValue(e) => {
@@ -47,7 +47,8 @@ fn parse_argument_value_from_literal_node<'buffer>(
                 .get(enum_type)
                 .unwrap()
                 .values
-                .contains(&e.value)
+                .iter()
+                .any(|v| v == e.value)
             {
                 return Err(errors::Error::InvalidEnumValue {
                     value: e.clone(),
@@ -55,7 +56,7 @@ fn parse_argument_value_from_literal_node<'buffer>(
                 });
             };
             return Ok(shared::ast::ArgumentLiteralValue::EnumValue(
-                e.value.clone(),
+                e.value.to_string(),
             )
             .into());
         }

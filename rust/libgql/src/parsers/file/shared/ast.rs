@@ -42,7 +42,7 @@ pub struct LiteralFloatNode<'buffer> {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct LiteralStringNode<'buffer> {
     pub location: NodeLocation<'buffer>,
-    pub value: String,
+    pub value: &'buffer str,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -54,7 +54,7 @@ pub struct LiteralBooleanNode<'buffer> {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct LiteralEnumValueNode<'buffer> {
     pub location: NodeLocation<'buffer>,
-    pub value: String,
+    pub value: &'buffer str,
 }
 
 #[derive(Debug, Clone, derive_more::From, serde::Serialize)]

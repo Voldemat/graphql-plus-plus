@@ -348,7 +348,9 @@ fn parse_argument_literal_value<'buffer>(
                     node: node.clone(),
                 })
             } else {
-                Ok(shared::ast::ArgumentLiteralValue::String(i.value.clone()))
+                Ok(shared::ast::ArgumentLiteralValue::String(
+                    i.value.to_string(),
+                ))
             }
         }
         file::shared::ast::LiteralNode::EnumValue(i) => {
@@ -363,7 +365,7 @@ fn parse_argument_literal_value<'buffer>(
                 })
             } else {
                 Ok(shared::ast::ArgumentLiteralValue::EnumValue(
-                    i.value.clone(),
+                    i.value.to_string(),
                 ))
             }
         }

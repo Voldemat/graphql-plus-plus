@@ -238,14 +238,14 @@ impl<
             ComplexTokenType::String => {
                 return Ok(shared::ast::LiteralStringNode {
                     location,
-                    value: current_token.lexeme.to_string(),
+                    value: current_token.lexeme,
                 }
                 .into());
             }
             ComplexTokenType::Identifier => {
                 return Ok(shared::ast::LiteralEnumValueNode {
                     location,
-                    value: current_token.lexeme.to_string(),
+                    value: current_token.lexeme,
                 }
                 .into());
             }
