@@ -7,10 +7,9 @@ use indexmap::IndexMap;
 use crate::parsers::schema::shared;
 
 use super::ast::{LiteralValue, NonNullableValue, Value, Values};
-use super::registry::ParseRegistry;
+use super::registry::{ParseRegistry, ResolvedVariable};
 use super::scalar::Scalar;
 
-pub type ResolvedVariable = Box<dyn std::any::Any>;
 pub type ResolvedVariables = HashMap<String, ResolvedVariable>;
 
 fn resolve_type_spec<S: Scalar, R: ParseRegistry<S>>(

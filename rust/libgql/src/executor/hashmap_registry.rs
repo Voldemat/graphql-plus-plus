@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use super::ast::{LiteralValue, NonNullableValue, Value, Values};
-use super::registry::ParseRegistry;
+use super::registry::{ParseRegistry, ResolvedVariable};
 use super::scalar::Scalar;
 
-pub trait GQLScalar<S: Scalar>: Sized
+pub trait GQLScalar<S: Scalar>: Sized + Send + Sync
 where
     Self: 'static,
 {
@@ -42,8 +42,8 @@ where
         }
     }
 
-    fn from_scalar_to_any(s: S) -> Result<Box<dyn std::any::Any>, String> {
-        Self::from_scalar(s).map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+    fn from_scalar_to_any(s: S) -> Result<ResolvedVariable, String> {
+        Self::from_scalar(s).map(|v| -> ResolvedVariable { Box::new(v) })
     }
     fn from_scalar_array(scalars: Vec<S>) -> Result<Vec<Self>, String> {
         scalars
@@ -51,11 +51,8 @@ where
             .map(|s| Self::from_scalar(s))
             .collect::<Result<Vec<_>, String>>()
     }
-    fn from_scalar_array_to_any(
-        s: Vec<S>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
-        Self::from_scalar_array(s)
-            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+    fn from_scalar_array_to_any(s: Vec<S>) -> Result<ResolvedVariable, String> {
+        Self::from_scalar_array(s).map(|v| -> ResolvedVariable { Box::new(v) })
     }
 
     fn from_optional_scalar_array(
@@ -69,13 +66,13 @@ where
 
     fn from_optional_scalar_array_to_any(
         s: Vec<Option<S>>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         Self::from_optional_scalar_array(s)
-            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+            .map(|v| -> ResolvedVariable { Box::new(v) })
     }
 }
 
-pub trait GQLEnum<S: Scalar>: Sized
+pub trait GQLEnum<S: Scalar>: Sized + Send + Sync
 where
     Self: 'static,
 {
@@ -123,8 +120,8 @@ where
         }
     }
 
-    fn from_str_to_any(s: String) -> Result<Box<dyn std::any::Any>, String> {
-        Self::from_string(s).map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+    fn from_str_to_any(s: String) -> Result<ResolvedVariable, String> {
+        Self::from_string(s).map(|v| -> ResolvedVariable { Box::new(v) })
     }
 
     fn from_str_array(s: Vec<String>) -> Result<Vec<Self>, String> {
@@ -135,9 +132,8 @@ where
 
     fn from_str_array_to_any(
         s: Vec<String>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
-        Self::from_str_array(s)
-            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+    ) -> Result<ResolvedVariable, String> {
+        Self::from_str_array(s).map(|v| -> ResolvedVariable { Box::new(v) })
     }
 
     fn from_optional_str_array(
@@ -151,13 +147,13 @@ where
 
     fn from_optional_str_array_to_any(
         s: Vec<Option<String>>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         Self::from_optional_str_array(s)
-            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+            .map(|v| -> ResolvedVariable { Box::new(v) })
     }
 }
 
-pub trait GQLInput<S: Scalar>: Sized
+pub trait GQLInput<S: Scalar>: Sized + Send + Sync
 where
     Self: 'static,
 {
@@ -196,9 +192,8 @@ where
 
     fn from_variables_to_any(
         vars: Values<S>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
-        Self::from_variables(vars)
-            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+    ) -> Result<ResolvedVariable, String> {
+        Self::from_variables(vars).map(|v| -> ResolvedVariable { Box::new(v) })
     }
 
     fn from_variables_array(vars: Vec<Values<S>>) -> Result<Vec<Self>, String> {
@@ -209,9 +204,9 @@ where
 
     fn from_variables_array_to_any(
         vars: Vec<Values<S>>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         Self::from_variables_array(vars)
-            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+            .map(|v| -> ResolvedVariable { Box::new(v) })
     }
 
     fn from_variables_optional_array(
@@ -224,36 +219,31 @@ where
 
     fn from_variables_optional_array_to_any(
         vars: Vec<Option<Values<S>>>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         Self::from_variables_optional_array(vars)
-            .map(|v| -> Box<dyn std::any::Any> { Box::new(v) })
+            .map(|v| -> ResolvedVariable { Box::new(v) })
     }
 }
 
 pub struct ScalarHooks<S: Scalar> {
-    literal:
-        Box<dyn Fn(S) -> Result<Box<dyn std::any::Any>, String> + Sync + Send>,
-    array: Box<
-        dyn Fn(Vec<S>) -> Result<Box<dyn std::any::Any>, String> + Sync + Send,
-    >,
+    literal: Box<dyn Fn(S) -> Result<ResolvedVariable, String> + Sync + Send>,
+    array:
+        Box<dyn Fn(Vec<S>) -> Result<ResolvedVariable, String> + Sync + Send>,
     optional_array: Box<
-        dyn Fn(Vec<Option<S>>) -> Result<Box<dyn std::any::Any>, String>
+        dyn Fn(Vec<Option<S>>) -> Result<ResolvedVariable, String>
             + Sync
             + Send,
     >,
 }
 
 pub struct EnumHooks {
-    literal: Box<
-        dyn Fn(String) -> Result<Box<dyn std::any::Any>, String> + Sync + Send,
-    >,
+    literal:
+        Box<dyn Fn(String) -> Result<ResolvedVariable, String> + Sync + Send>,
     array: Box<
-        dyn Fn(Vec<String>) -> Result<Box<dyn std::any::Any>, String>
-            + Sync
-            + Send,
+        dyn Fn(Vec<String>) -> Result<ResolvedVariable, String> + Sync + Send,
     >,
     optional_array: Box<
-        dyn Fn(Vec<Option<String>>) -> Result<Box<dyn std::any::Any>, String>
+        dyn Fn(Vec<Option<String>>) -> Result<ResolvedVariable, String>
             + Sync
             + Send,
     >,
@@ -261,17 +251,15 @@ pub struct EnumHooks {
 
 pub struct InputHooks<S: Scalar> {
     literal: Box<
-        dyn Fn(Values<S>) -> Result<Box<dyn std::any::Any>, String>
-            + Sync
-            + Send,
+        dyn Fn(Values<S>) -> Result<ResolvedVariable, String> + Sync + Send,
     >,
     array: Box<
-        dyn Fn(Vec<Values<S>>) -> Result<Box<dyn std::any::Any>, String>
+        dyn Fn(Vec<Values<S>>) -> Result<ResolvedVariable, String>
             + Sync
             + Send,
     >,
     optional_array: Box<
-        dyn Fn(Vec<Option<Values<S>>>) -> Result<Box<dyn std::any::Any>, String>
+        dyn Fn(Vec<Option<Values<S>>>) -> Result<ResolvedVariable, String>
             + Sync
             + Send,
     >,
@@ -335,7 +323,7 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
         self: &Self,
         scalar_name: &str,
         value: S,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         self.scalars[scalar_name].literal.as_ref()(value)
     }
 
@@ -343,7 +331,7 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
         self: &Self,
         scalar_name: &str,
         values: Vec<S>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         self.scalars[scalar_name].array.as_ref()(values)
     }
 
@@ -351,7 +339,7 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
         self: &Self,
         scalar_name: &str,
         values: Vec<Option<S>>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         self.scalars[scalar_name].optional_array.as_ref()(values)
     }
 
@@ -359,7 +347,7 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
         self: &Self,
         enum_type_name: &str,
         value: String,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         self.enum_types[enum_type_name].literal.as_ref()(value)
     }
 
@@ -367,7 +355,7 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
         self: &Self,
         enum_type_name: &str,
         values: Vec<String>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         self.enum_types[enum_type_name].array.as_ref()(values)
     }
 
@@ -375,7 +363,7 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
         self: &Self,
         enum_type_name: &str,
         values: Vec<Option<String>>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         self.enum_types[enum_type_name].optional_array.as_ref()(values)
     }
 
@@ -383,7 +371,7 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
         self: &Self,
         input_type_name: &str,
         value: Values<S>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         self.inputs[input_type_name].literal.as_ref()(value)
     }
 
@@ -391,7 +379,7 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
         self: &Self,
         input_type_name: &str,
         values: Vec<Values<S>>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         self.inputs[input_type_name].array.as_ref()(values)
     }
 
@@ -399,7 +387,7 @@ impl<S: Scalar> ParseRegistry<S> for HashMapRegistry<S> {
         self: &Self,
         input_type_name: &str,
         values: Vec<Option<Values<S>>>,
-    ) -> Result<Box<dyn std::any::Any>, String> {
+    ) -> Result<ResolvedVariable, String> {
         self.inputs[input_type_name].optional_array.as_ref()(values)
     }
 }

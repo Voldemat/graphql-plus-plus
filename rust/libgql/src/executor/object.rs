@@ -15,11 +15,16 @@ pub type ObjectFieldResolver<S, C> = dyn for<'a> Fn(
         &'a C,
         &'a ResolvedVariables,
     ) -> ResolverFuture<'a, S>
+    + Send
     + Sync;
 pub type ObjectFieldResolversMap<'a, S, C> =
     HashMap<(&'a str, &'a str), &'a ObjectFieldResolver<S, C>>;
 
-pub fn execute_potential_selection_and_serialize<'a, C, S: Scalar>(
+pub fn execute_potential_selection_and_serialize<
+    'a,
+    C: Send + Sync,
+    S: Scalar,
+>(
     client_registry: &'a client::type_registry::TypeRegistry,
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<S, C>,
@@ -27,7 +32,12 @@ pub fn execute_potential_selection_and_serialize<'a, C, S: Scalar>(
     selection: Option<&'a client::ast::FragmentSpec>,
     variables: &'a ResolvedVariables,
 ) -> std::pin::Pin<
-    Box<dyn Future<Output = Result<Value<S>, Vec<GraphqlError>>> + 'a>,
+    Box<
+        dyn Future<Output = Result<Value<S>, Vec<GraphqlError>>>
+            + 'a
+            + Send
+            + Sync,
+    >,
 > {
     Box::pin(async move {
         let Some(non_nullable) = resolver_root_introspection_value else {
@@ -93,7 +103,7 @@ pub fn execute_potential_selection_and_serialize<'a, C, S: Scalar>(
     })
 }
 
-fn execute_fragment<'a, C, S: Scalar>(
+fn execute_fragment<'a, C: Send + Sync, S: Scalar>(
     client_registry: &'a client::type_registry::TypeRegistry,
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<S, C>,
@@ -103,7 +113,12 @@ fn execute_fragment<'a, C, S: Scalar>(
     spec: &'a client::ast::FragmentSpec,
     variables: &'a ResolvedVariables,
 ) -> std::pin::Pin<
-    Box<dyn Future<Output = Result<Values<S>, Vec<GraphqlError>>> + 'a>,
+    Box<
+        dyn Future<Output = Result<Values<S>, Vec<GraphqlError>>>
+            + 'a
+            + Send
+            + Sync,
+    >,
 > {
     Box::pin(async move {
         match spec {
@@ -151,7 +166,7 @@ fn execute_fragment<'a, C, S: Scalar>(
     })
 }
 
-async fn execute_field<'a, 'b, C, S: Scalar>(
+async fn execute_field<'a, 'b, C: Send + Sync, S: Scalar>(
     client_registry: &'a client::type_registry::TypeRegistry,
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<'_, S, C>,
@@ -214,7 +229,7 @@ async fn execute_field<'a, 'b, C, S: Scalar>(
     })
 }
 
-async fn execute_union_selection_set<C, S: Scalar>(
+async fn execute_union_selection_set<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
@@ -280,7 +295,7 @@ async fn execute_union_selection_set<C, S: Scalar>(
     .map(|a| a.into_iter().flatten().collect())
 }
 
-async fn execute_field_selection<C, S: Scalar>(
+async fn execute_field_selection<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
@@ -304,7 +319,7 @@ async fn execute_field_selection<C, S: Scalar>(
     Ok(Values::from_iter([(field.alias.clone(), value)]))
 }
 
-async fn execute_object_selection<C, S: Scalar>(
+async fn execute_object_selection<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
@@ -352,7 +367,7 @@ async fn execute_object_selection<C, S: Scalar>(
     }
 }
 
-async fn execute_object_selection_set<C, S: Scalar>(
+async fn execute_object_selection_set<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,

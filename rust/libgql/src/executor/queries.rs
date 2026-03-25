@@ -6,45 +6,42 @@ use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
 
 pub type QueryResolver<S, C> = dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S>
-    + Sync;
+    + Sync
+    + Send;
 pub type QueryResolversMap<'a, S, C> =
     HashMap<&'a str, &'a QueryResolver<S, C>>;
 
-fn execute_fragment<'a, C, S: Scalar>(
-    client_registry: &'a client::type_registry::TypeRegistry,
-    context: &'a C,
-    query_resolvers: &'a QueryResolversMap<'a, S, C>,
-    object_field_resolvers: &'a super::object::ObjectFieldResolversMap<S, C>,
-    spec: &'a client::ast::FragmentSpec,
-    variables: &'a ResolvedVariables,
-) -> std::pin::Pin<
-    Box<dyn Future<Output = Result<Values<S>, Vec<GraphqlError>>> + 'a>,
-> {
-    Box::pin(async move {
-        match spec {
-            client::ast::FragmentSpec::Object(obj) => {
-                execute_object_selection_set(
-                    client_registry,
-                    context,
-                    query_resolvers,
-                    object_field_resolvers,
-                    &obj.selections,
-                    variables,
-                )
-                .await
-            }
-
-            client::ast::FragmentSpec::Union(_) => {
-                panic!("Unexpected union fragment spec on query object")
-            }
-            client::ast::FragmentSpec::Interface(_) => {
-                panic!("Unexpected interface fragment spec on query object")
-            }
+async fn execute_fragment<C: Send + Sync, S: Scalar>(
+    client_registry: &client::type_registry::TypeRegistry,
+    context: &C,
+    query_resolvers: &QueryResolversMap<'_, S, C>,
+    object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
+    spec: &client::ast::FragmentSpec,
+    variables: &ResolvedVariables,
+) -> Result<Values<S>, Vec<GraphqlError>> {
+    match spec {
+        client::ast::FragmentSpec::Object(obj) => {
+            execute_object_selection_set(
+                client_registry,
+                context,
+                query_resolvers,
+                object_field_resolvers,
+                &obj.selections,
+                variables,
+            )
+            .await
         }
-    })
+
+        client::ast::FragmentSpec::Union(_) => {
+            panic!("Unexpected union fragment spec on query object")
+        }
+        client::ast::FragmentSpec::Interface(_) => {
+            panic!("Unexpected interface fragment spec on query object")
+        }
+    }
 }
 
-async fn execute_field<C, S: Scalar>(
+async fn execute_field<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
@@ -84,7 +81,7 @@ async fn execute_field<C, S: Scalar>(
     .await
 }
 
-async fn execute_field_selection<C, S: Scalar>(
+async fn execute_field_selection<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
@@ -104,7 +101,7 @@ async fn execute_field_selection<C, S: Scalar>(
     Ok(Values::from_iter([(field.alias.clone(), value)]))
 }
 
-async fn execute_object_selection<C, S: Scalar>(
+async fn execute_object_selection<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
@@ -146,7 +143,7 @@ async fn execute_object_selection<C, S: Scalar>(
     }
 }
 
-async fn execute_object_selection_set<C, S: Scalar>(
+async fn execute_object_selection_set<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
@@ -173,7 +170,7 @@ async fn execute_object_selection_set<C, S: Scalar>(
     .map(|a| a.into_iter().flatten().collect())
 }
 
-pub async fn execute_query_operation<C, S: Scalar>(
+pub async fn execute_query_operation<C: Send + Sync, S: Scalar>(
     client_registry: client::type_registry::TypeRegistry,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,

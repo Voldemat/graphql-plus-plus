@@ -7,11 +7,12 @@ use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
 
 pub type MutationResolver<S, C> = dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> ResolverFuture<'a, S>
-    + Sync;
+    + Sync
+    + Send;
 pub type MutationResolversMap<'a, S, C> =
     HashMap<&'a str, &'a MutationResolver<S, C>>;
 
-async fn execute_field<'a, C, S: Scalar>(
+async fn execute_field<'a, C: Send + Sync, S: Scalar>(
     client_registry: &'a client::type_registry::TypeRegistry,
     context: &'a C,
     mutation_resolvers: &'a MutationResolversMap<'_, S, C>,
@@ -55,7 +56,7 @@ async fn execute_field<'a, C, S: Scalar>(
     .await
 }
 
-async fn execute_fragment<C, S: Scalar>(
+async fn execute_fragment<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,
@@ -84,7 +85,7 @@ async fn execute_fragment<C, S: Scalar>(
     }
 }
 
-async fn execute_field_selection<C, S: Scalar>(
+async fn execute_field_selection<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,
@@ -104,7 +105,7 @@ async fn execute_field_selection<C, S: Scalar>(
     Ok(vec![(field.alias.clone(), value)])
 }
 
-async fn execute_object_selection<C, S: Scalar>(
+async fn execute_object_selection<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,
@@ -146,7 +147,7 @@ async fn execute_object_selection<C, S: Scalar>(
     }
 }
 
-async fn execute_object_selection_set<C, S: Scalar>(
+async fn execute_object_selection_set<C: Send + Sync, S: Scalar>(
     client_registry: &client::type_registry::TypeRegistry,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,
@@ -173,7 +174,7 @@ async fn execute_object_selection_set<C, S: Scalar>(
     .map(|a| a.into_iter().flatten().collect())
 }
 
-pub async fn execute_mutation_operation<C, S: Scalar>(
+pub async fn execute_mutation_operation<C: Send + Sync, S: Scalar>(
     client_registry: client::type_registry::TypeRegistry,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,

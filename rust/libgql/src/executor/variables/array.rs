@@ -1,5 +1,8 @@
 use crate::{
-    executor::{LiteralValue, NonNullableValue, ParseRegistry, Scalar, Value},
+    executor::{
+        LiteralValue, NonNullableValue, ParseRegistry, Scalar, Value,
+        registry::ResolvedVariable,
+    },
     parsers::schema::shared,
 };
 
@@ -8,7 +11,7 @@ fn resolve_literal_array<S: Scalar, R: ParseRegistry<S>>(
     literal_type: &shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>,
     nullable: bool,
     elements: Vec<Value<S>>,
-) -> Result<Box<dyn std::any::Any>, String> {
+) -> Result<ResolvedVariable, String> {
     match &literal_type.r#type {
         shared::ast::InputTypeSpec::Enum(e) => {
             R::parse_enum_array(registry, &e, elements.into_iter().map(|e| {
@@ -75,7 +78,7 @@ pub fn resolve_array<S: Scalar, R: ParseRegistry<S>>(
     registry: &R,
     array_type: &shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>,
     elements: Vec<Value<S>>,
-) -> Result<Box<dyn std::any::Any>, String> {
+) -> Result<ResolvedVariable, String> {
     match array_type.r#type.as_ref() {
         shared::ast::NonCallableFieldSpec::Literal(literal) => {
             resolve_literal_array(
@@ -127,7 +130,9 @@ pub fn resolve_array<S: Scalar, R: ParseRegistry<S>>(
 mod tests {
     use indexmap::IndexMap;
 
-    use crate::executor::{GQLScalar, HashMapRegistry};
+    use crate::executor::{
+        GQLScalar, HashMapRegistry, registry::ResolvedVariable,
+    };
 
     use super::*;
 
@@ -239,7 +244,7 @@ mod tests {
         )
         .unwrap();
         let array = result
-            .downcast_ref::<Vec<Option<Box<dyn std::any::Any>>>>()
+            .downcast_ref::<Vec<Option<ResolvedVariable>>>()
             .unwrap();
         assert_eq!(array[0].is_none(), true);
         let nested_array = array[1]

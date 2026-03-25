@@ -43,7 +43,7 @@ pub enum OperationResult<
     Stream(std::pin::Pin<Box<TStream>>),
 }
 
-pub struct Resolvers<'a, S: Scalar, C> {
+pub struct Resolvers<'a, S: Scalar, C: Send + Sync> {
     pub queries: queries::QueryResolversMap<'a, S, C>,
     pub mutations: mutations::MutationResolversMap<'a, S, C>,
     pub subscriptions: subscriptions::SubscriptionResolversMap<'a, S, C>,
@@ -53,7 +53,7 @@ pub struct Resolvers<'a, S: Scalar, C> {
 async fn execute_operation<
     'args,
     'operation,
-    C,
+    C: Send + Sync,
     S: Scalar,
     T: ParseRegistry<S>,
 >(
@@ -119,7 +119,13 @@ async fn execute_operation<
     }
 }
 
-pub async fn execute<'args, 'buffer, C, S: Scalar, T: ParseRegistry<S>>(
+pub async fn execute<
+    'args,
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    T: ParseRegistry<S>,
+>(
     context: &'args C,
     server_registry: &'args server::type_registry::TypeRegistry,
     resolvers: &'args Resolvers<'args, S, C>,

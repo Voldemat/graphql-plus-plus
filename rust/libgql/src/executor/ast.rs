@@ -122,10 +122,10 @@ impl<S: Scalar, T: std::any::Any + ResolverValue<S>> ResolverValueSuperTrait<S>
 {
 }
 
-pub type ResolverRoot<S> = dyn ResolverValueSuperTrait<S>;
+pub type ResolverRoot<S> = dyn ResolverValueSuperTrait<S> + Sync + Send;
 pub enum ResolverError {
     String(String),
-    Generic(Box<dyn ToString>),
+    Generic(Box<dyn ToString + Send + Sync>),
 }
 
 impl ToString for ResolverError {
@@ -154,14 +154,19 @@ impl From<String> for ResolverError {
     }
 }
 
-impl From<Box<dyn ToString>> for ResolverError {
-    fn from(value: Box<dyn ToString>) -> Self {
+impl From<Box<dyn ToString + Send + Sync>> for ResolverError {
+    fn from(value: Box<dyn ToString + Send + Sync>) -> Self {
         Self::Generic(value)
     }
 }
 
 pub type ResolverFuture<'a, S> = std::pin::Pin<
-    Box<dyn Future<Output = Result<Box<ResolverRoot<S>>, ResolverError>> + 'a>,
+    Box<
+        dyn Future<Output = Result<Box<ResolverRoot<S>>, ResolverError>>
+            + 'a
+            + Sync
+            + Send,
+    >,
 >;
 
 #[derive(Debug)]

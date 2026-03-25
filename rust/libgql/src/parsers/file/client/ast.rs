@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::parsers::file::shared;
 
@@ -111,8 +111,8 @@ impl<'buffer> ObjectFieldSpec<'buffer> {
     }
 }
 
-fn serialize_option_rc_fragment_spec<S: serde::Serializer>(
-    v: &Option<Rc<FragmentSpec>>,
+fn serialize_option_arc_fragment_spec<S: serde::Serializer>(
+    v: &Option<Arc<FragmentSpec>>,
     s: S,
 ) -> Result<S::Ok, S::Error> {
     serde::Serialize::serialize(&v.as_ref().map(|a| a.as_ref()), s)
@@ -122,8 +122,8 @@ fn serialize_option_rc_fragment_spec<S: serde::Serializer>(
 pub struct FieldSelectionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
     pub field: ObjectFieldSpec<'buffer>,
-    #[serde(serialize_with = "serialize_option_rc_fragment_spec")]
-    pub spec: Option<Rc<FragmentSpec<'buffer>>>,
+    #[serde(serialize_with = "serialize_option_arc_fragment_spec")]
+    pub spec: Option<Arc<FragmentSpec<'buffer>>>,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -132,8 +132,8 @@ pub struct SpreadSelectionNode<'buffer> {
     pub fragment_name: shared::ast::NameNode<'buffer>,
 }
 
-fn serialize_fragment_rc<S: serde::Serializer>(
-    v: &Rc<FragmentSpec>,
+fn serialize_fragment_arc<S: serde::Serializer>(
+    v: &Arc<FragmentSpec>,
     s: S,
 ) -> Result<S::Ok, S::Error> {
     serde::Serialize::serialize(v.as_ref(), s)
@@ -143,8 +143,8 @@ fn serialize_fragment_rc<S: serde::Serializer>(
 pub struct ConditionalSpreadSelectionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
     pub type_name: shared::ast::NameNode<'buffer>,
-    #[serde(serialize_with = "serialize_fragment_rc")]
-    pub fragment: Rc<FragmentSpec<'buffer>>,
+    #[serde(serialize_with = "serialize_fragment_arc")]
+    pub fragment: Arc<FragmentSpec<'buffer>>,
 }
 
 #[derive(Debug, Clone, derive_more::From, serde::Serialize)]

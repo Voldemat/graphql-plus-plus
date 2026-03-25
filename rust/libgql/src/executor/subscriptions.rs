@@ -6,8 +6,9 @@ use super::ast::{GraphqlError, ResolverRoot, Values};
 use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
 
-pub type SubscriptionResolverStream<S> =
-    std::pin::Pin<Box<dyn futures_core::Stream<Item = Box<ResolverRoot<S>>>>>;
+pub type SubscriptionResolverStream<S> = std::pin::Pin<
+    Box<dyn futures_core::Stream<Item = Box<ResolverRoot<S>>> + Send>,
+>;
 pub type SubscriptionResolverFuture<'a, S> = std::pin::Pin<
     Box<
         dyn Future<
@@ -15,7 +16,8 @@ pub type SubscriptionResolverFuture<'a, S> = std::pin::Pin<
                     SubscriptionResolverStream<S>,
                     Vec<GraphqlError>,
                 >,
-            > + 'a,
+            > + Send
+            + 'a,
     >,
 >;
 pub type SubscriptionResolver<S, C> =
@@ -23,7 +25,8 @@ pub type SubscriptionResolver<S, C> =
             &'a C,
             &'a ResolvedVariables,
         ) -> SubscriptionResolverFuture<'a, S>
-        + Sync;
+        + Sync
+        + Send;
 
 pub type SubscriptionResolversMap<'a, S, C> =
     HashMap<&'a str, &'a SubscriptionResolver<S, C>>;
@@ -32,7 +35,7 @@ pub async fn execute_subscription_operation<
     'args,
     'variables,
     'operation,
-    C,
+    C: Send + Sync,
     S: Scalar,
 >(
     client_registry: client::type_registry::TypeRegistry,
@@ -49,7 +52,8 @@ pub async fn execute_subscription_operation<
     std::pin::Pin<
         Box<
             impl futures::Stream<Item = Result<Values<S>, Vec<GraphqlError>>>
-            + use<'args, C, S>,
+            + use<'args, C, S>
+            + Send,
         >,
     >,
     Vec<GraphqlError>,

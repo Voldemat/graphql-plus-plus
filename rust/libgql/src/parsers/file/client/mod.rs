@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::{
     lexer::{
@@ -272,12 +272,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
             .location
             .start;
         let field_spec = self.parse_object_field_spec()?;
-        let mut spec: Option<Rc<ast::FragmentSpec>> = None;
+        let mut spec: Option<Arc<ast::FragmentSpec>> = None;
         if T::is_ahead(
             &self.base.tokens_source,
             SimpleTokenType::LeftBrace.into(),
         ) {
-            spec = Some(Rc::new(self.parse_fragment_spec()?));
+            spec = Some(Arc::new(self.parse_fragment_spec()?));
         }
         return Ok(ast::FieldSelectionNode {
             location: shared::ast::NodeLocation {
@@ -311,7 +311,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                 source: T::get_source_file(&self.base.tokens_source),
             },
             type_name,
-            fragment: Rc::new(fragment_spec),
+            fragment: Arc::new(fragment_spec),
         });
     }
 
