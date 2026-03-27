@@ -20,7 +20,7 @@ pub struct ServerUsesMap {
 
 impl ServerUsesMap {
     pub fn new(
-        server_registry: &server::type_registry::TypeRegistry,
+        server_registry: &server::type_registry::HashMapTypeRegistry,
         client_registry: &TypeRegistry,
     ) -> ServerUsesMap {
         let mut m = ServerUsesMap::default();

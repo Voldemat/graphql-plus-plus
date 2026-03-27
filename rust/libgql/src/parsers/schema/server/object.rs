@@ -8,11 +8,11 @@ use crate::parsers::{
     },
 };
 
-use super::type_registry::TypeRegistry;
+use super::type_registry::HashMapTypeRegistry;
 
 pub fn parse_definition<'buffer>(
     node: &file::server::ast::ObjectDefinitionNode<'buffer>,
-    registry: &mut TypeRegistry,
+    registry: &mut HashMapTypeRegistry,
 ) -> Result<(), errors::Error<'buffer>> {
     let fields = parse_fields(&node.fields, registry)?;
     let directives = directive::parse_invocations(&node.directives, registry)?;
@@ -30,7 +30,7 @@ pub fn parse_definition<'buffer>(
 
 pub fn parse_fields<'buffer>(
     fields: &[file::server::ast::FieldDefinitionNode<'buffer>],
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
 ) -> Result<
     IndexMap<String, shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
     errors::Error<'buffer>,
@@ -56,7 +56,7 @@ pub fn parse_fields<'buffer>(
 
 pub fn parse_object_field_spec<'buffer>(
     node: &file::server::ast::FieldDefinitionNode<'buffer>,
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
 ) -> Result<(ast::ObjectFieldSpec, bool), errors::Error<'buffer>> {
     let directives = directive::parse_invocations(&node.directives, registry)?;
     let (return_type, nullable) = parse_noncallable_object_field_spec(
@@ -71,8 +71,8 @@ pub fn parse_object_field_spec<'buffer>(
         ast::CallableFieldSpec {
             return_type,
             arguments: super::input::parse_field_definitions(
-                &node.arguments,
                 registry,
+                &node.arguments,
             )?,
         }
         .into(),
@@ -83,7 +83,7 @@ pub fn parse_object_field_spec<'buffer>(
 fn parse_noncallable_object_field_spec<'buffer>(
     node: &file::shared::ast::TypeNode<'buffer>,
     directives: &[shared::ast::ServerDirectiveInvocation],
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
 ) -> Result<
     (shared::ast::NonCallableFieldSpec<ast::ObjectTypeSpec>, bool),
     errors::Error<'buffer>,

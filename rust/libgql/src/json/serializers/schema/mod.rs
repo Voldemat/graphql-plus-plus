@@ -633,7 +633,7 @@ fn write_server_directives<'a, J: struson::writer::JsonWriter>(
 }
 
 pub fn serialize_server_schema(
-    schema: &server::type_registry::TypeRegistry,
+    schema: &server::type_registry::HashMapTypeRegistry,
     client_schema: Option<&client::type_registry::TypeRegistry>,
 ) -> Result<String, String> {
     let server_uses_map =

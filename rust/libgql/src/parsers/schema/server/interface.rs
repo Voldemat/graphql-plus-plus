@@ -6,11 +6,11 @@ use crate::parsers::{
     },
 };
 
-use super::type_registry::TypeRegistry;
+use super::type_registry::HashMapTypeRegistry;
 
 pub fn parse_definition<'buffer>(
     node: &file::server::ast::InterfaceDefinitionNode<'buffer>,
-    registry: &mut TypeRegistry,
+    registry: &mut HashMapTypeRegistry,
 ) -> Result<(), errors::Error<'buffer>> {
     let mut intermediate = Vec::new();
     for field_definition_node in node.fields.iter() {

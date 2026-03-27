@@ -439,7 +439,7 @@ fn parse_unions(
 }
 
 pub fn parse_server_schema(
-    registry: &mut server::type_registry::TypeRegistry,
+    registry: &mut server::type_registry::HashMapTypeRegistry,
     value: serde_json::Value,
 ) -> Result<(), String> {
     let new_scalars: Vec<String> = value["scalars"]

@@ -1,10 +1,10 @@
 use crate::parsers::{file, schema::server::errors};
 
-use super::type_registry::TypeRegistry;
+use super::type_registry::HashMapTypeRegistry;
 
 pub fn parse_definition<'buffer>(
     node: &file::server::ast::UnionDefinitionNode<'buffer>,
-    registry: &mut TypeRegistry,
+    registry: &mut HashMapTypeRegistry,
 ) -> Result<(), errors::Error<'buffer>> {
     let obj = registry.unions.get_mut(node.name.name).unwrap();
     for item in node.values.iter() {

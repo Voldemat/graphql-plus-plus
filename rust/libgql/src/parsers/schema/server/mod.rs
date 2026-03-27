@@ -13,10 +13,10 @@ pub mod union;
 use crate::parsers::file;
 pub use errors::Error;
 
-use self::type_registry::TypeRegistry;
+use self::type_registry::HashMapTypeRegistry;
 
 pub fn parse_server_schema<'buffer>(
-    mut registry: &mut TypeRegistry,
+    mut registry: &mut HashMapTypeRegistry,
     ast_nodes: &[file::server::ast::ASTNode<'buffer>],
 ) -> Result<(), errors::Error<'buffer>> {
     let type_definition_nodes = || {

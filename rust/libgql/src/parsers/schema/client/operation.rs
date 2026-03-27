@@ -8,8 +8,8 @@ use crate::parsers::{
 
 use super::type_registry::TypeRegistry;
 
-pub fn parse<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+pub fn parse<'buffer, T: server::type_registry::TypeRegistry>(
+    server_registry: &T,
     registry: &mut TypeRegistry,
     node: &file::client::ast::OperationDefinition<'buffer>,
 ) -> Result<(), errors::Error<'buffer>> {

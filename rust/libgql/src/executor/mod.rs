@@ -35,12 +35,9 @@ pub enum Error<'buffer> {
     ExecutionErrors(Vec<GraphqlError>),
 }
 
-pub enum OperationResult<
-    S: Scalar,
-    TStream: futures::Stream<Item = Result<Values<S>, Vec<GraphqlError>>>,
-> {
+pub enum OperationResult<'a, S: Scalar> {
     Immediate(Values<S>),
-    Stream(std::pin::Pin<Box<TStream>>),
+    Stream(subscriptions::SubscriptionOperationStream<'a, S>),
 }
 
 pub struct Resolvers<'a, S: Scalar, C: Send + Sync> {
@@ -63,14 +60,7 @@ async fn execute_operation<
     parse_registry: &'args T,
     operation: client::ast::Operation,
     variables: Values<S>,
-) -> Result<
-    OperationResult<
-        S,
-        impl futures::Stream<Item = Result<Values<S>, Vec<GraphqlError>>>
-        + use<'args, C, S, T>,
-    >,
-    Vec<GraphqlError>,
-> {
+) -> Result<OperationResult<'args, S>, Vec<GraphqlError>> {
     let resolved_variables = resolve_operation_parameters(
         parse_registry,
         &operation.parameters,
@@ -125,22 +115,16 @@ pub async fn execute<
     C: Send + Sync,
     S: Scalar,
     T: ParseRegistry<S>,
+    ServerTypeRegistry: server::type_registry::TypeRegistry,
 >(
     context: &'args C,
-    server_registry: &'args server::type_registry::TypeRegistry,
+    server_registry: &'args ServerTypeRegistry,
     resolvers: &'args Resolvers<'args, S, C>,
     parse_registry: &'args T,
     client_query: &'buffer str,
     variables: Values<S>,
     operation: Option<String>,
-) -> Result<
-    OperationResult<
-        S,
-        impl futures::Stream<Item = Result<Values<S>, Vec<GraphqlError>>>
-        + use<'args, C, S, T>,
-    >,
-    Error<'buffer>,
-> {
+) -> Result<OperationResult<'args, S>, Error<'buffer>> {
     let tokens = lexer::utils::parse_buffer_into_tokens(client_query)?;
     let source_file = std::sync::Arc::new(file::shared::ast::SourceFile {
         filepath: "<request>".into(),

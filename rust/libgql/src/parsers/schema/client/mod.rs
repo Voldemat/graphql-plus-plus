@@ -14,8 +14,8 @@ use type_registry::TypeRegistry;
 
 use super::server;
 
-pub fn parse_client_schema<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+pub fn parse_client_schema<'buffer, T: server::type_registry::TypeRegistry>(
+    server_registry: &T,
     registry: &mut TypeRegistry,
     ast_nodes: &[file::client::ast::ASTNode<'buffer>],
 ) -> Result<(), errors::Error<'buffer>> {
@@ -23,7 +23,7 @@ pub fn parse_client_schema<'buffer>(
         nodes::parse_first_pass(server_registry, registry, node)
     })?;
     ast_nodes.iter().try_for_each(|node| {
-        nodes::parse_second_pass(&server_registry, registry, node)
+        nodes::parse_second_pass(server_registry, registry, node)
     })?;
     let mut intermediate = Vec::new();
     for operation in registry.operations.values() {

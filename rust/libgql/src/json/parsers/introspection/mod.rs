@@ -1,11 +1,11 @@
 use indexmap::IndexMap;
 
 use crate::parsers::schema::{
-    server::{self, type_registry::TypeRegistry},
+    server::{self, type_registry::HashMapTypeRegistry},
     shared,
 };
 
-fn parse_node(registry: &mut TypeRegistry, value: &serde_json::Value) {
+fn parse_node(registry: &mut HashMapTypeRegistry, value: &serde_json::Value) {
     let kind = value["kind"].as_str().unwrap();
     let name = value["name"].as_str().unwrap();
     match kind {
@@ -116,7 +116,7 @@ fn parse_node(registry: &mut TypeRegistry, value: &serde_json::Value) {
 }
 
 fn parse_input_type_spec(
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
 ) -> shared::ast::InputTypeSpec {
     let kind = value["kind"].as_str().unwrap();
@@ -136,7 +136,7 @@ fn parse_input_type_spec(
 }
 
 fn parse_input_field_spec(
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
     default_value: &serde_json::Value,
 ) -> shared::ast::InputFieldSpec {
@@ -173,7 +173,7 @@ fn parse_input_field_spec(
 }
 
 fn parse_input_field_definition(
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
 ) -> shared::ast::FieldDefinition<shared::ast::InputFieldSpec> {
     return shared::ast::FieldDefinition::<shared::ast::InputFieldSpec> {
@@ -188,7 +188,7 @@ fn parse_input_field_definition(
 }
 
 fn parse_object_type_spec(
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
 ) -> server::ast::ObjectTypeSpec {
     let kind = value["kind"].as_str().unwrap();
@@ -214,7 +214,7 @@ fn parse_object_type_spec(
 }
 
 fn parse_non_callable_object_field_spec(
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
 ) -> shared::ast::NonCallableFieldSpec<server::ast::ObjectTypeSpec> {
     let kind = value["kind"].as_str().unwrap();
@@ -246,7 +246,7 @@ fn parse_non_callable_object_field_spec(
 }
 
 fn parse_object_field_spec(
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
     args_value: &serde_json::Value,
 ) -> server::ast::ObjectFieldSpec {
@@ -291,7 +291,7 @@ fn parse_object_field_spec(
 }
 
 fn parse_object_field_definition(
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
 ) -> shared::ast::FieldDefinition<server::ast::ObjectFieldSpec> {
     shared::ast::FieldDefinition::<server::ast::ObjectFieldSpec> {
@@ -301,7 +301,7 @@ fn parse_object_field_definition(
     }
 }
 pub fn parse_server_schema(
-    registry: &mut TypeRegistry,
+    registry: &mut HashMapTypeRegistry,
     value: serde_json::Value,
 ) -> Result<(), String> {
     let types = value["data"]["__schema"]["types"]

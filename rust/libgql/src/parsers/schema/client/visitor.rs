@@ -82,7 +82,7 @@ pub struct ASTVisitorHooks<'a> {
 }
 
 fn visit_field_selection(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     selection: &client::ast::FieldSelection,
@@ -117,7 +117,7 @@ fn visit_field_selection(
 }
 
 fn visit_field_definition_object_field_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     field: &shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
@@ -135,7 +135,7 @@ fn visit_field_definition_object_field_spec(
 }
 
 fn visit_object_selection(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     selection: &client::ast::ObjectSelection,
@@ -188,7 +188,7 @@ fn visit_object_selection(
 }
 
 fn visit_object_fragment_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     spec: &client::ast::ObjectFragmentSpec,
@@ -212,7 +212,7 @@ fn visit_object_fragment_spec(
 }
 
 fn visit_object_type_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     hooks: &mut ASTVisitorHooks,
     type_spec: &server::ast::ObjectTypeSpec,
 ) {
@@ -249,7 +249,7 @@ fn visit_object_type_spec(
 }
 
 fn visit_interface_fragment_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     spec: &client::ast::InterfaceFragmentSpec,
@@ -273,7 +273,7 @@ fn visit_interface_fragment_spec(
 }
 
 fn visit_non_callable_field_spec_object_type_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     field: &shared::ast::NonCallableFieldSpec<server::ast::ObjectTypeSpec>,
@@ -310,7 +310,7 @@ fn visit_non_callable_field_spec_object_type_spec(
 }
 
 fn visit_object_field_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     spec: &server::ast::ObjectFieldSpec,
@@ -363,7 +363,7 @@ fn visit_object_field_spec(
 }
 
 fn visit_union(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     union: &server::ast::Union,
@@ -388,7 +388,7 @@ fn visit_union(
 }
 
 fn visit_union_selection(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     selection: &client::ast::UnionSelection,
@@ -443,7 +443,7 @@ fn visit_union_selection(
 }
 
 fn visit_union_fragment_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     spec: &client::ast::UnionFragmentSpec,
@@ -468,7 +468,7 @@ fn visit_union_fragment_spec(
 }
 
 fn visit_fragment_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     fragment_spec: &client::ast::FragmentSpec,
@@ -505,7 +505,7 @@ fn visit_fragment_spec(
 }
 
 fn visit_input_type(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     t: &shared::ast::InputType,
@@ -524,7 +524,7 @@ fn visit_input_type(
 }
 
 fn visit_input_type_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     spec: &shared::ast::InputTypeSpec,
@@ -555,7 +555,7 @@ fn visit_input_type_spec(
 }
 
 fn visit_input_field_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     field_spec: &shared::ast::InputFieldSpec,
@@ -596,7 +596,7 @@ fn visit_input_field_spec(
 }
 
 fn visit_field_definition_input_field_spec(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
     field: &shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
@@ -608,7 +608,7 @@ fn visit_field_definition_input_field_spec(
 }
 
 pub fn visit_client_schema(
-    server_registry: &server::type_registry::TypeRegistry,
+    server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
 ) {

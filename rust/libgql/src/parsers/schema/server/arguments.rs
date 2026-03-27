@@ -6,12 +6,12 @@ use crate::parsers::{
     },
 };
 
-use super::type_registry::TypeRegistry;
+use super::type_registry::HashMapTypeRegistry;
 
 fn parse_argument_value_from_literal_node<'buffer>(
     value: &file::shared::ast::LiteralNode<'buffer>,
     arg_type: &errors::ArgType,
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
 ) -> Result<shared::ast::ArgumentValue, errors::Error<'buffer>> {
     return match value {
         file::shared::ast::LiteralNode::Int(i) => {
@@ -66,7 +66,7 @@ fn parse_argument_value_from_literal_node<'buffer>(
 fn parse_argument_value<'buffer>(
     value: &file::shared::ast::ArgumentValue<'buffer>,
     arg_type: &errors::ArgType,
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
 ) -> Result<shared::ast::ArgumentValue, errors::Error<'buffer>> {
     match value {
         file::shared::ast::ArgumentValue::NameNode(name) => {
@@ -81,7 +81,7 @@ fn parse_argument_value<'buffer>(
 pub fn parse_arguments<'buffer>(
     arguments: &Vec<file::shared::ast::Argument<'buffer>>,
     directive: &shared::ast::ServerDirective,
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
 ) -> Result<
     indexmap::IndexMap<String, shared::ast::FieldSelectionArgument>,
     errors::Error<'buffer>,

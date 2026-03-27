@@ -8,25 +8,25 @@ use crate::parsers::{
 
 use super::type_registry::TypeRegistry;
 
-fn fragment_spec_from_name<'buffer>(
-    registry: &server::type_registry::TypeRegistry,
+fn fragment_spec_from_name<'buffer, T: server::type_registry::TypeRegistry>(
+    registry: &T,
     name: &file::shared::ast::NameNode<'buffer>,
 ) -> Result<ast::FragmentSpec, errors::Error<'buffer>> {
-    if registry.objects.contains_key(name.name) {
+    if registry.has_object_with_name(name.name) {
         return Ok(ast::ObjectFragmentSpec {
             r#type: name.name.to_string(),
             selections: Vec::new(),
         }
         .into());
     };
-    if registry.unions.contains_key(name.name) {
+    if registry.has_union_with_name(name.name) {
         return Ok(ast::UnionFragmentSpec {
             r#type: name.name.to_string(),
             selections: Vec::new(),
         }
         .into());
     };
-    if registry.interfaces.contains_key(name.name) {
+    if registry.has_interface_with_name(name.name) {
         return Ok(ast::ObjectFragmentSpec {
             r#type: name.name.to_string(),
             selections: Vec::new(),
@@ -64,8 +64,8 @@ fn fragment_spec_from_optype<'buffer>(
     }
 }
 
-pub fn parse_first_pass<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+pub fn parse_first_pass<'buffer, T: server::type_registry::TypeRegistry>(
+    server_registry: &T,
     registry: &mut TypeRegistry,
     node: &file::client::ast::ASTNode<'buffer>,
 ) -> Result<(), errors::Error<'buffer>> {
@@ -99,8 +99,8 @@ pub fn parse_first_pass<'buffer>(
                 ));
             };
             let parameters = server::input::parse_field_definitions(
-                &operation.parameters,
                 server_registry,
+                &operation.parameters,
             )?;
             registry.operations.insert(
                 operation.name.name.to_string(),
@@ -138,8 +138,8 @@ pub fn parse_first_pass<'buffer>(
     }
 }
 
-pub fn parse_second_pass<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+pub fn parse_second_pass<'buffer, T: server::type_registry::TypeRegistry>(
+    server_registry: &T,
     registry: &mut TypeRegistry,
     node: &file::client::ast::ASTNode<'buffer>,
 ) -> Result<(), errors::Error<'buffer>> {

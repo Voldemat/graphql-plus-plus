@@ -8,10 +8,10 @@ use crate::parsers::{
     },
 };
 
-use super::type_registry::{self, TypeRegistry};
+use super::type_registry::{self, HashMapTypeRegistry};
 
 pub fn parse_server_node_first_pass<'buffer>(
-    registry: &mut TypeRegistry,
+    registry: &mut HashMapTypeRegistry,
     ast_node: &file::server::ast::TypeDefinitionNode<'buffer>,
 ) -> Result<(), type_registry::Error<'buffer>> {
     match ast_node {
@@ -127,7 +127,7 @@ pub fn parse_server_node_first_pass<'buffer>(
 
 pub fn parse_server_node_second_pass<'buffer>(
     ast_node: &file::server::ast::TypeDefinitionNode<'buffer>,
-    registry: &mut TypeRegistry,
+    registry: &mut HashMapTypeRegistry,
 ) -> Result<(), errors::Error<'buffer>> {
     match ast_node {
         file::server::ast::TypeDefinitionNode::Enum(_) => Ok(()),
@@ -152,7 +152,7 @@ pub fn parse_server_node_second_pass<'buffer>(
 
 pub fn parse_server_extend_node<'buffer>(
     ast_node: &file::server::ast::ExtendTypeNode<'buffer>,
-    registry: &mut TypeRegistry,
+    registry: &mut HashMapTypeRegistry,
 ) -> Result<
     (
         &'buffer str,

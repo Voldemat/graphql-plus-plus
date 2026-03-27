@@ -7,8 +7,32 @@ use crate::parsers::{
     schema::{server, shared},
 };
 
+pub trait TypeRegistry {
+    fn has_object_with_name(self: &Self, name: &str) -> bool;
+    fn has_union_with_name(self: &Self, name: &str) -> bool;
+    fn has_interface_with_name(self: &Self, name: &str) -> bool;
+    fn set_input_fields(
+        self: &mut Self,
+        name: &str,
+        fields: indexmap::IndexMap<
+            String,
+            shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+        >,
+    );
+    fn get_input_type_spec_by_name(
+        self: &Self,
+        name: &str,
+    ) -> Option<shared::ast::InputTypeSpec>;
+    fn get_union(self: &Self, name: &str) -> Option<&server::ast::Union>;
+    fn get_object(self: &Self, name: &str) -> Option<&server::ast::ObjectType>;
+    fn get_interface(
+        self: &Self,
+        name: &str,
+    ) -> Option<&server::ast::Interface>;
+}
+
 #[derive(Debug)]
-pub struct TypeRegistry {
+pub struct HashMapTypeRegistry {
     pub directives: IndexMap<String, shared::ast::ServerDirective>,
     pub queries: HashSet<String>,
     pub mutations: HashSet<String>,
@@ -19,6 +43,61 @@ pub struct TypeRegistry {
     pub scalars: IndexSet<String>,
     pub enums: IndexMap<String, shared::ast::Enum>,
     pub unions: IndexMap<String, server::ast::Union>,
+}
+
+impl TypeRegistry for HashMapTypeRegistry {
+    fn has_object_with_name(self: &Self, name: &str) -> bool {
+        self.objects.contains_key(name)
+    }
+
+    fn has_union_with_name(self: &Self, name: &str) -> bool {
+        self.unions.contains_key(name)
+    }
+
+    fn has_interface_with_name(self: &Self, name: &str) -> bool {
+        self.interfaces.contains_key(name)
+    }
+
+    fn set_input_fields(
+        self: &mut Self,
+        name: &str,
+        fields: indexmap::IndexMap<
+            String,
+            shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+        >,
+    ) {
+        self.inputs.get_mut(name).unwrap().fields = fields;
+    }
+
+    fn get_input_type_spec_by_name(
+        self: &Self,
+        name: &str,
+    ) -> Option<shared::ast::InputTypeSpec> {
+        if self.inputs.contains_key(name) {
+            Some(shared::ast::InputTypeSpec::InputType(name.to_string()))
+        } else if self.scalars.contains(name) {
+            Some(shared::ast::InputTypeSpec::Scalar(name.to_string()))
+        } else if self.enums.contains_key(name) {
+            Some(shared::ast::InputTypeSpec::Enum(name.to_string()))
+        } else {
+            None
+        }
+    }
+
+    fn get_union(self: &Self, name: &str) -> Option<&server::ast::Union> {
+        self.unions.get(name)
+    }
+
+    fn get_object(self: &Self, name: &str) -> Option<&server::ast::ObjectType> {
+        self.objects.get(name)
+    }
+
+    fn get_interface(
+        self: &Self,
+        name: &str,
+    ) -> Option<&server::ast::Interface> {
+        self.interfaces.get(name)
+    }
 }
 
 #[derive(Debug)]
@@ -52,7 +131,7 @@ impl<'buffer> Error<'buffer> {
     }
 }
 
-impl TypeRegistry {
+impl HashMapTypeRegistry {
     pub fn new() -> Self {
         Self {
             directives: Default::default(),

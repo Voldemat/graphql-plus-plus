@@ -9,25 +9,25 @@ use crate::parsers::{
     schema::shared,
 };
 
-fn parse_input_field_spec<'buffer>(
+fn parse_input_field_spec<'buffer, T: TypeRegistry>(
+    registry: &T,
     node: &file::shared::ast::InputFieldDefinitionNode<'buffer>,
-    registry: &TypeRegistry,
 ) -> Result<(shared::ast::InputFieldSpec, bool), type_registry::Error<'buffer>>
 {
     return parse_noncallable_input_field_spec(
+        registry,
         &node.r#type,
         node.default_value
             .as_ref()
             .map(shared::literal::parse_literal),
-        registry,
     )
     .map(|(return_type, nullable)| (return_type.into(), nullable));
 }
 
-fn parse_noncallable_input_field_spec<'buffer>(
+fn parse_noncallable_input_field_spec<'buffer, T: TypeRegistry>(
+    registry: &T,
     node: &file::shared::ast::TypeNode<'buffer>,
     default_value: Option<shared::ast::Literal>,
-    registry: &TypeRegistry,
 ) -> Result<
     (
         shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
@@ -41,7 +41,7 @@ fn parse_noncallable_input_field_spec<'buffer>(
                 shared::ast::ArrayFieldSpec::<shared::ast::InputTypeSpec> {
                     r#type: Box::new(
                         parse_noncallable_input_field_spec(
-                            &l.r#type, None, registry,
+                            registry, &l.r#type, None,
                         )?
                         .0,
                     ),
@@ -56,7 +56,11 @@ fn parse_noncallable_input_field_spec<'buffer>(
         file::shared::ast::TypeNode::Named(n) => {
             return Ok((
                 shared::ast::LiteralFieldSpec::<shared::ast::InputTypeSpec> {
-                    r#type: registry.get_type_for_input(&n.name)?,
+                    r#type: registry
+                        .get_input_type_spec_by_name(n.name.name)
+                        .ok_or(type_registry::Error::UnknownType(
+                        n.name.clone(),
+                    ))?,
                     default_value: Some(default_value),
                     directive_invocations: IndexMap::new(),
                 }
@@ -67,14 +71,14 @@ fn parse_noncallable_input_field_spec<'buffer>(
     }
 }
 
-pub fn parse_field_definition<'buffer>(
+pub fn parse_field_definition<'buffer, T: TypeRegistry>(
+    registry: &T,
     node: &file::shared::ast::InputFieldDefinitionNode<'buffer>,
-    registry: &TypeRegistry,
 ) -> Result<
     shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
     type_registry::Error<'buffer>,
 > {
-    let (spec, nullable) = parse_input_field_spec(node, registry)?;
+    let (spec, nullable) = parse_input_field_spec(registry, node)?;
     return Ok(shared::ast::FieldDefinition {
         name: node.name.name.to_string(),
         spec,
@@ -82,9 +86,9 @@ pub fn parse_field_definition<'buffer>(
     });
 }
 
-pub fn parse_field_definitions<'buffer>(
+pub fn parse_field_definitions<'buffer, T: TypeRegistry>(
+    registry: &T,
     nodes: &[file::shared::ast::InputFieldDefinitionNode<'buffer>],
-    registry: &TypeRegistry,
 ) -> Result<
     IndexMap<String, shared::ast::FieldDefinition<shared::ast::InputFieldSpec>>,
     type_registry::Error<'buffer>,
@@ -96,19 +100,18 @@ pub fn parse_field_definitions<'buffer>(
     for field_definition_node in nodes {
         arguments.insert(
             field_definition_node.name.name.to_string(),
-            parse_field_definition(field_definition_node, registry)?,
+            parse_field_definition(registry, field_definition_node)?,
         );
     }
     return Ok(arguments);
 }
 
-pub fn parse_definition<'buffer>(
+pub fn parse_definition<'buffer, T: TypeRegistry>(
     input: &InputObjectDefinitionNode<'buffer>,
-    registry: &mut TypeRegistry,
+    registry: &mut T,
 ) -> Result<(), errors::Error<'buffer>> {
     let fields =
-        super::input::parse_field_definitions(&input.fields, registry)?;
-    let obj = registry.inputs.get_mut(input.name.name).unwrap();
-    obj.fields = fields;
+        super::input::parse_field_definitions(registry, &input.fields)?;
+    registry.set_input_fields(input.name.name, fields);
     return Ok(());
 }

@@ -10,8 +10,11 @@ use crate::parsers::{
 
 use super::type_registry::{self, TypeRegistry};
 
-fn parse_union_selection_node<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+fn parse_union_selection_node<
+    'buffer,
+    T: server::type_registry::TypeRegistry,
+>(
+    server_registry: &T,
     registry: &TypeRegistry,
     r#type: &server::ast::Union,
     node: &file::client::ast::SelectionNode<'buffer>,
@@ -56,7 +59,7 @@ fn parse_union_selection_node<'buffer>(
                         selections: parse_object_selections(
                             server_registry,
                             registry,
-                            server_registry.objects.get(&object).unwrap(),
+                            server_registry.get_object(&object).unwrap(),
                             &c.fragment.selections,
                         )?,
                     }
@@ -68,7 +71,7 @@ fn parse_union_selection_node<'buffer>(
                         selection: parse_union_selections(
                             server_registry,
                             registry,
-                            server_registry.unions.get(&union).unwrap(),
+                            server_registry.get_union(&union).unwrap(),
                             &c.fragment.selections,
                         )?,
                     }
@@ -84,8 +87,10 @@ pub enum ConditionalSelectionType {
     Union(String),
 }
 
-fn get_type_for_union_conditional_selection(
-    registry: &server::type_registry::TypeRegistry,
+fn get_type_for_union_conditional_selection<
+    T: server::type_registry::TypeRegistry,
+>(
+    registry: &T,
     r#type: &server::ast::Union,
     node: &file::client::ast::ConditionalSpreadSelectionNode,
 ) -> Option<ConditionalSelectionType> {
@@ -95,8 +100,7 @@ fn get_type_for_union_conditional_selection(
         .map(|object| ConditionalSelectionType::Object(object.clone()))
         .or_else(|| {
             registry
-                .unions
-                .get(node.type_name.name)
+                .get_union(node.type_name.name)
                 .filter(|union| {
                     union
                         .items
@@ -109,8 +113,8 @@ fn get_type_for_union_conditional_selection(
         });
 }
 
-fn parse_union_selections<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+fn parse_union_selections<'buffer, T: server::type_registry::TypeRegistry>(
+    server_registry: &T,
     registry: &TypeRegistry,
     r#type: &server::ast::Union,
     selections: &[file::client::ast::SelectionNode<'buffer>],
@@ -179,8 +183,11 @@ fn parse_object_spread_selection_node<'buffer>(
     });
 }
 
-fn parse_union_spread_selection_node<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+fn parse_union_spread_selection_node<
+    'buffer,
+    T: server::type_registry::TypeRegistry,
+>(
+    server_registry: &T,
     registry: &TypeRegistry,
     r#type: &server::ast::Union,
     node: &file::client::ast::SpreadSelectionNode<'buffer>,
@@ -192,8 +199,7 @@ fn parse_union_spread_selection_node<'buffer>(
         ast::FragmentSpec::Union(spec) => spec.r#type != r#type.name,
         ast::FragmentSpec::Interface(spec) => r#type.items.iter().any(|t| {
             !server_registry
-                .objects
-                .get(t)
+                .get_object(t)
                 .unwrap()
                 .implements
                 .contains(&spec.r#type)
@@ -223,8 +229,11 @@ fn is_object_field_spec_is_typename_field(
     }
 }
 
-fn fragment_spec_from_field_definition<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+fn fragment_spec_from_field_definition<
+    'buffer,
+    T: server::type_registry::TypeRegistry,
+>(
+    server_registry: &T,
     registry: &TypeRegistry,
     field: &shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
     spec: &file::client::ast::FragmentSpec<'buffer>,
@@ -237,7 +246,7 @@ fn fragment_spec_from_field_definition<'buffer>(
                 selections: parse_object_selections(
                     server_registry,
                     registry,
-                    server_registry.objects.get(object).unwrap(),
+                    server_registry.get_object(object).unwrap(),
                     &spec.selections,
                 )?,
             }
@@ -249,7 +258,7 @@ fn fragment_spec_from_field_definition<'buffer>(
                 selections: parse_interface_selections(
                     server_registry,
                     registry,
-                    server_registry.interfaces.get(interface).unwrap(),
+                    server_registry.get_interface(interface).unwrap(),
                     &spec.selections,
                 )?,
             }
@@ -261,7 +270,7 @@ fn fragment_spec_from_field_definition<'buffer>(
                 selections: parse_union_selections(
                     server_registry,
                     registry,
-                    server_registry.unions.get(union).unwrap(),
+                    server_registry.get_union(union).unwrap(),
                     &spec.selections,
                 )?,
             }
@@ -397,8 +406,11 @@ fn parse_selection_argument<'buffer>(
     });
 }
 
-fn parse_object_field_selection_node<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+fn parse_object_field_selection_node<
+    'buffer,
+    T: server::type_registry::TypeRegistry,
+>(
+    server_registry: &T,
     registry: &TypeRegistry,
     r#type: errors::FieldType,
     fields: &IndexMap<
@@ -451,8 +463,11 @@ fn parse_object_field_selection_node<'buffer>(
     });
 }
 
-fn parse_object_selection_node<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+fn parse_object_selection_node<
+    'buffer,
+    T: server::type_registry::TypeRegistry,
+>(
+    server_registry: &T,
     registry: &TypeRegistry,
     r#type: &server::ast::ObjectType,
     node: &file::client::ast::SelectionNode<'buffer>,
@@ -485,8 +500,11 @@ fn parse_object_selection_node<'buffer>(
     }
 }
 
-fn parse_interface_selection_node<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+fn parse_interface_selection_node<
+    'buffer,
+    T: server::type_registry::TypeRegistry,
+>(
+    server_registry: &T,
     registry: &TypeRegistry,
     r#type: &server::ast::Interface,
     node: &file::client::ast::SelectionNode<'buffer>,
@@ -514,8 +532,8 @@ fn parse_interface_selection_node<'buffer>(
     }
 }
 
-fn parse_object_selections<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+fn parse_object_selections<'buffer, T: server::type_registry::TypeRegistry>(
+    server_registry: &T,
     registry: &TypeRegistry,
     r#type: &server::ast::ObjectType,
     selections: &[file::client::ast::SelectionNode<'buffer>],
@@ -528,8 +546,11 @@ fn parse_object_selections<'buffer>(
         .collect();
 }
 
-fn parse_interface_selections<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+fn parse_interface_selections<
+    'buffer,
+    T: server::type_registry::TypeRegistry,
+>(
+    server_registry: &T,
     registry: &TypeRegistry,
     r#type: &server::ast::Interface,
     selections: &[file::client::ast::SelectionNode<'buffer>],
@@ -542,8 +563,8 @@ fn parse_interface_selections<'buffer>(
         .collect();
 }
 
-pub fn parse_selections<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+pub fn parse_selections<'buffer, T: server::type_registry::TypeRegistry>(
+    server_registry: &T,
     registry: &TypeRegistry,
     spec: &mut ast::FragmentSpec,
     selections: &[file::client::ast::SelectionNode<'buffer>],
@@ -553,7 +574,7 @@ pub fn parse_selections<'buffer>(
             u.selections = parse_union_selections(
                 server_registry,
                 registry,
-                server_registry.unions.get(&u.r#type).unwrap(),
+                server_registry.get_union(&u.r#type).unwrap(),
                 selections,
             )?;
             return Ok(());
@@ -562,7 +583,7 @@ pub fn parse_selections<'buffer>(
             o.selections = parse_object_selections(
                 server_registry,
                 registry,
-                server_registry.objects.get(&o.r#type).unwrap(),
+                server_registry.get_object(&o.r#type).unwrap(),
                 selections,
             )?;
             return Ok(());
@@ -571,7 +592,7 @@ pub fn parse_selections<'buffer>(
             i.selections = parse_interface_selections(
                 server_registry,
                 registry,
-                server_registry.interfaces.get(&i.r#type).unwrap(),
+                server_registry.get_interface(&i.r#type).unwrap(),
                 selections,
             )?;
             return Ok(());
@@ -579,8 +600,8 @@ pub fn parse_selections<'buffer>(
     }
 }
 
-pub fn parse<'buffer>(
-    server_registry: &server::type_registry::TypeRegistry,
+pub fn parse<'buffer, T: server::type_registry::TypeRegistry>(
+    server_registry: &T,
     registry: &mut TypeRegistry,
     node: &file::client::ast::FragmentDefinition<'buffer>,
 ) -> Result<(), errors::Error<'buffer>> {

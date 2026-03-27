@@ -5,17 +5,17 @@ use crate::parsers::{
     schema::{server::errors, shared},
 };
 
-use super::type_registry::TypeRegistry;
+use super::type_registry::HashMapTypeRegistry;
 
 pub fn parse_definition<'buffer>(
     node: &file::server::ast::DirectiveDefinitionNode<'buffer>,
-    registry: &mut TypeRegistry,
+    registry: &mut HashMapTypeRegistry,
 ) -> Result<(), errors::Error<'buffer>> {
     let mut arguments = IndexMap::new();
     for arg in &node.arguments {
         arguments.insert(
             arg.name.name.to_string(),
-            super::input::parse_field_definition(&arg, registry)?,
+            super::input::parse_field_definition(registry, &arg)?,
         );
     }
     let directive = registry.directives.get_mut(node.name.name).unwrap();
@@ -30,7 +30,7 @@ pub fn parse_definition<'buffer>(
 
 pub fn parse_invocation<'buffer>(
     node: &file::shared::ast::DirectiveInvocationNode<'buffer>,
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
 ) -> Result<shared::ast::ServerDirectiveInvocation, errors::Error<'buffer>> {
     let Some(directive) = registry.directives.get(node.name.name) else {
         return Err(errors::Error::UnknownServerDirective(node.name.clone()));
@@ -48,7 +48,7 @@ pub fn parse_invocation<'buffer>(
 
 pub fn parse_invocations<'buffer>(
     nodes: &[file::shared::ast::DirectiveInvocationNode<'buffer>],
-    registry: &TypeRegistry,
+    registry: &HashMapTypeRegistry,
 ) -> Result<Vec<shared::ast::ServerDirectiveInvocation>, errors::Error<'buffer>>
 {
     return nodes
