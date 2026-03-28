@@ -116,7 +116,7 @@ pub fn parse_server_node_first_pass<'buffer>(
                 d.name.name.to_string(),
                 shared::ast::ServerDirective {
                     name: d.name.name.to_string(),
-                    arguments: IndexMap::new(),
+                    arguments: Default::default(),
                     locations: Vec::new(),
                 },
             );
@@ -133,7 +133,7 @@ pub fn parse_server_node_second_pass<'buffer>(
         file::server::ast::TypeDefinitionNode::Enum(_) => Ok(()),
         file::server::ast::TypeDefinitionNode::Scalar(_) => Ok(()),
         file::server::ast::TypeDefinitionNode::Input(i) => {
-            input::parse_definition(i, registry)
+            input::parse_definition(registry, i)
         }
         file::server::ast::TypeDefinitionNode::Object(o) => {
             object::parse_definition(o, registry)

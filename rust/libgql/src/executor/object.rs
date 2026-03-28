@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::parsers::schema::client;
+use crate::parsers::schema::{self, client};
 
 use super::ast::{
     GraphqlError, NonNullableResolverIntrospectionValue, ResolverFuture,
@@ -22,14 +22,16 @@ pub type ObjectFieldResolversMap<'a, S, C> =
 
 pub fn execute_potential_selection_and_serialize<
     'a,
+    'buffer,
     C: Send + Sync,
     S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
 >(
-    client_registry: &'a client::type_registry::TypeRegistry,
+    client_registry: &'a client::type_registry::TypeRegistry<StringType>,
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<S, C>,
     resolver_root_introspection_value: ResolverIntrospectionValue<'a, S>,
-    selection: Option<&'a client::ast::FragmentSpec>,
+    selection: Option<&'a client::ast::FragmentSpec<StringType>>,
     variables: &'a ResolvedVariables,
 ) -> std::pin::Pin<
     Box<
@@ -103,19 +105,25 @@ pub fn execute_potential_selection_and_serialize<
     })
 }
 
-fn execute_fragment<'a, C: Send + Sync, S: Scalar>(
-    client_registry: &'a client::type_registry::TypeRegistry,
-    context: &'a C,
-    object_field_resolvers: &'a ObjectFieldResolversMap<S, C>,
-    resolver_root: &'a ResolverRoot<S>,
-    fields: &'a HashMap<&'a str, &'a ResolverRoot<S>>,
-    object_name: &'a str,
-    spec: &'a client::ast::FragmentSpec,
-    variables: &'a ResolvedVariables,
+fn execute_fragment<
+    'args,
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &'args client::type_registry::TypeRegistry<StringType>,
+    context: &'args C,
+    object_field_resolvers: &'args ObjectFieldResolversMap<S, C>,
+    resolver_root: &'args ResolverRoot<S>,
+    fields: &'args HashMap<&'args str, &'args ResolverRoot<S>>,
+    object_name: &'args str,
+    spec: &'args client::ast::FragmentSpec<StringType>,
+    variables: &'args ResolvedVariables,
 ) -> std::pin::Pin<
     Box<
         dyn Future<Output = Result<Values<S>, Vec<GraphqlError>>>
-            + 'a
+            + 'args
             + Send
             + Sync,
     >,
@@ -166,17 +174,24 @@ fn execute_fragment<'a, C: Send + Sync, S: Scalar>(
     })
 }
 
-async fn execute_field<'a, 'b, C: Send + Sync, S: Scalar>(
-    client_registry: &'a client::type_registry::TypeRegistry,
+async fn execute_field<
+    'buffer,
+    'a,
+    'b,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &'a client::type_registry::TypeRegistry<StringType>,
     context: &'a C,
     object_field_resolvers: &'a ObjectFieldResolversMap<'_, S, C>,
     resolver_root: &'a ResolverRoot<S>,
     object_name: &'a str,
-    field: &'b client::ast::FieldSelection,
+    field: &'b client::ast::FieldSelection<StringType>,
     variables: &'a ResolvedVariables,
     existing_value: Option<&'a ResolverRoot<S>>,
 ) -> Result<Value<S>, Vec<GraphqlError>> {
-    let resolver_key = (object_name, field.name.as_str());
+    let resolver_key = (object_name, field.name.to_str());
     let owned: Box<ResolverRoot<S>>;
     let value = if let Some(v) = existing_value {
         v
@@ -186,10 +201,11 @@ async fn execute_field<'a, 'b, C: Send + Sync, S: Scalar>(
                 vec![GraphqlError {
                     message: format!(
                         "No resolver for {}.{}",
-                        object_name, field.name
+                        object_name,
+                        field.name.to_str()
                     )
                     .into(),
-                    path: vec![field.alias.clone()],
+                    path: vec![field.alias.to_str().to_string()],
                 }]
             })?;
         owned =
@@ -198,7 +214,7 @@ async fn execute_field<'a, 'b, C: Send + Sync, S: Scalar>(
                 .map_err(|e| {
                     vec![GraphqlError {
                         message: e,
-                        path: vec![field.alias.clone()],
+                        path: vec![field.alias.to_str().to_string()],
                     }]
                 })?;
         owned.as_ref()
@@ -206,7 +222,7 @@ async fn execute_field<'a, 'b, C: Send + Sync, S: Scalar>(
     let introspection_value = value.to_value().map_err(|e| {
         vec![GraphqlError {
             message: e.into(),
-            path: vec![field.alias.clone()],
+            path: vec![field.alias.to_str().to_string()],
         }]
     })?;
     execute_potential_selection_and_serialize(
@@ -222,21 +238,26 @@ async fn execute_field<'a, 'b, C: Send + Sync, S: Scalar>(
         errors
             .into_iter()
             .map(|mut error| {
-                error.path.insert(0, field.alias.clone());
+                error.path.insert(0, field.alias.to_str().to_string());
                 error
             })
             .collect()
     })
 }
 
-async fn execute_union_selection_set<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_union_selection_set<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
     object_name: &str,
     resolver_root: &ResolverRoot<S>,
     existing_fields: &HashMap<&str, &ResolverRoot<S>>,
-    selections: &[client::ast::UnionSelection],
+    selections: &[client::ast::UnionSelection<StringType>],
     variables: &ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     futures::future::join_all(selections.iter().map(async |selection| {
@@ -251,7 +272,7 @@ async fn execute_union_selection_set<C: Send + Sync, S: Scalar>(
             client::ast::UnionSelection::ObjectConditionalSpreadSelection(
                 spread,
             ) => {
-                if &spread.r#type != object_name {
+                if spread.r#type.to_str() != object_name {
                     return Ok(Values::new());
                 };
                 execute_object_selection_set(
@@ -295,14 +316,19 @@ async fn execute_union_selection_set<C: Send + Sync, S: Scalar>(
     .map(|a| a.into_iter().flatten().collect())
 }
 
-async fn execute_field_selection<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_field_selection<
+    'string_type,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'string_type>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
     resolver_root: &ResolverRoot<S>,
     existing_field_value: Option<&ResolverRoot<S>>,
     object_name: &str,
-    field: &client::ast::FieldSelection,
+    field: &client::ast::FieldSelection<StringType>,
     variables: &ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     let value = execute_field(
@@ -316,18 +342,26 @@ async fn execute_field_selection<C: Send + Sync, S: Scalar>(
         existing_field_value,
     )
     .await?;
-    Ok(Values::from_iter([(field.alias.clone(), value)]))
+    Ok(Values::from_iter([(
+        field.alias.to_str().to_string(),
+        value,
+    )]))
 }
 
-async fn execute_object_selection<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_object_selection<
+    'string_type,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'string_type>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
     object_name: &str,
     resolver_root: &ResolverRoot<S>,
     existing_fields: &HashMap<&str, &ResolverRoot<S>>,
     variables: &ResolvedVariables,
-    selection: &client::ast::ObjectSelection,
+    selection: &client::ast::ObjectSelection<StringType>,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     match selection {
         client::ast::ObjectSelection::TypenameField(field) => {
@@ -341,7 +375,7 @@ async fn execute_object_selection<C: Send + Sync, S: Scalar>(
                 context,
                 object_field_resolvers,
                 resolver_root,
-                existing_fields.get(field.name.as_str()).copied(),
+                existing_fields.get(field.name.to_str()).copied(),
                 &object_name,
                 field,
                 variables,
@@ -367,14 +401,19 @@ async fn execute_object_selection<C: Send + Sync, S: Scalar>(
     }
 }
 
-async fn execute_object_selection_set<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_object_selection_set<
+    'string_type,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'string_type>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     object_field_resolvers: &ObjectFieldResolversMap<'_, S, C>,
     object_name: &str,
     resolver_root: &ResolverRoot<S>,
     existing_fields: &HashMap<&str, &ResolverRoot<S>>,
-    selections: &[client::ast::ObjectSelection],
+    selections: &[client::ast::ObjectSelection<StringType>],
     variables: &ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     futures::future::join_all(selections.iter().map(

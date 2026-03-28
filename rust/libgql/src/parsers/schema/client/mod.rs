@@ -13,12 +13,17 @@ pub mod visitor;
 use type_registry::TypeRegistry;
 
 use super::server;
+use super::shared;
 
-pub fn parse_client_schema<'buffer, T: server::type_registry::TypeRegistry>(
+pub fn parse_client_schema<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
+>(
     server_registry: &T,
-    registry: &mut TypeRegistry,
+    registry: &mut TypeRegistry<S>,
     ast_nodes: &[file::client::ast::ASTNode<'buffer>],
-) -> Result<(), errors::Error<'buffer>> {
+) -> Result<(), errors::Error<'buffer, S>> {
     ast_nodes.iter().try_for_each(|node| {
         nodes::parse_first_pass(server_registry, registry, node)
     })?;

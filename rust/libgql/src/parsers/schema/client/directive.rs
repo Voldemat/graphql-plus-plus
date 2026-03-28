@@ -2,16 +2,20 @@ use crate::parsers::{
     file,
     schema::{
         client::{ast, errors},
-        server,
+        server, shared,
     },
 };
 
-pub fn parse<'buffer, T: server::type_registry::TypeRegistry>(
+pub fn parse<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
+>(
     registry: &T,
     node: &file::client::ast::DirectiveDefinition<'buffer>,
-) -> Result<ast::ClientDirective, errors::Error<'buffer>> {
+) -> Result<ast::ClientDirective<S>, errors::Error<'buffer, S>> {
     Ok(ast::ClientDirective {
-        name: node.name.name.to_string(),
+        name: S::from_str(node.name.name),
         arguments: server::input::parse_field_definitions(
             registry,
             &node.arguments,

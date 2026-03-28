@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::parsers::schema::client;
+use crate::parsers::schema::{self, client};
 
 use super::ast::{GraphqlError, ResolverFuture, Value, Values};
 use super::scalar::Scalar;
@@ -12,31 +12,35 @@ pub type MutationResolver<S, C> = dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -
 pub type MutationResolversMap<'a, S, C> =
     HashMap<&'a str, &'a MutationResolver<S, C>>;
 
-async fn execute_field<'a, C: Send + Sync, S: Scalar>(
-    client_registry: &'a client::type_registry::TypeRegistry,
-    context: &'a C,
-    mutation_resolvers: &'a MutationResolversMap<'_, S, C>,
-    object_field_resolvers: &'a super::object::ObjectFieldResolversMap<
-        '_,
-        S,
-        C,
-    >,
-    field: &'a client::ast::FieldSelection,
-    variables: &'a ResolvedVariables,
+async fn execute_field<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
+    context: &C,
+    mutation_resolvers: &MutationResolversMap<'_, S, C>,
+    object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
+    field: &client::ast::FieldSelection<StringType>,
+    variables: &ResolvedVariables,
 ) -> Result<Value<S>, Vec<GraphqlError>> {
     let value = {
         let resolver =
-            mutation_resolvers.get(field.name.as_str()).ok_or_else(|| {
+            mutation_resolvers.get(field.name.to_str()).ok_or_else(|| {
                 vec![GraphqlError {
-                    message: format!("No mutation resolver for {}", field.name)
-                        .into(),
-                    path: vec![field.alias.clone()],
+                    message: format!(
+                        "No mutation resolver for {}",
+                        field.name.to_str()
+                    )
+                    .into(),
+                    path: vec![field.alias.to_str().to_string()],
                 }]
             })?;
         resolver(context, variables).await.map_err(|e| {
             vec![GraphqlError {
                 message: e,
-                path: vec![field.alias.clone()],
+                path: vec![field.alias.to_str().to_string()],
             }]
         })?
     };
@@ -47,7 +51,7 @@ async fn execute_field<'a, C: Send + Sync, S: Scalar>(
         value.to_value().map_err(|e| {
             vec![GraphqlError {
                 message: e.into(),
-                path: vec![field.alias.clone()],
+                path: vec![field.alias.to_str().to_string()],
             }]
         })?,
         field.selection.as_ref(),
@@ -56,12 +60,17 @@ async fn execute_field<'a, C: Send + Sync, S: Scalar>(
     .await
 }
 
-async fn execute_fragment<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_fragment<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    spec: &client::ast::FragmentSpec,
+    spec: &client::ast::FragmentSpec<StringType>,
     variables: &ResolvedVariables,
 ) -> Result<Vec<(String, Value<S>)>, Vec<GraphqlError>> {
     match spec {
@@ -85,33 +94,45 @@ async fn execute_fragment<C: Send + Sync, S: Scalar>(
     }
 }
 
-async fn execute_field_selection<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_field_selection<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    field: &client::ast::FieldSelection,
+    field: &client::ast::FieldSelection<StringType>,
     variables: &ResolvedVariables,
 ) -> Result<Vec<(String, Value<S>)>, Vec<GraphqlError>> {
-    let value = execute_field(
-        client_registry,
-        context,
-        mutation_resolvers,
-        object_field_resolvers,
-        field,
-        variables,
-    )
-    .await?;
-    Ok(vec![(field.alias.clone(), value)])
+    Ok(vec![(
+        field.alias.to_str().to_string(),
+        execute_field(
+            client_registry,
+            context,
+            mutation_resolvers,
+            object_field_resolvers,
+            field,
+            variables,
+        )
+        .await?,
+    )])
 }
 
-async fn execute_object_selection<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_object_selection<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
     variables: &ResolvedVariables,
-    selection: &client::ast::ObjectSelection,
+    selection: &client::ast::ObjectSelection<StringType>,
 ) -> Result<Vec<(String, Value<S>)>, Vec<GraphqlError>> {
     match selection {
         client::ast::ObjectSelection::TypenameField(field) => {
@@ -147,18 +168,23 @@ async fn execute_object_selection<C: Send + Sync, S: Scalar>(
     }
 }
 
-async fn execute_object_selection_set<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_object_selection_set<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    selections: &[client::ast::ObjectSelection],
+    selections: &[client::ast::ObjectSelection<StringType>],
     variables: &ResolvedVariables,
 ) -> Result<Vec<(String, Value<S>)>, Vec<GraphqlError>> {
     futures::future::join_all(selections.iter().map(
         async |selection| -> Result<Vec<(String, Value<S>)>, Vec<GraphqlError>> {
             execute_object_selection(
-                client_registry,
+                &client_registry,
                 context,
                 mutation_resolvers,
                 object_field_resolvers,
@@ -174,16 +200,21 @@ async fn execute_object_selection_set<C: Send + Sync, S: Scalar>(
     .map(|a| a.into_iter().flatten().collect())
 }
 
-pub async fn execute_mutation_operation<C: Send + Sync, S: Scalar>(
-    client_registry: client::type_registry::TypeRegistry,
+pub async fn execute_mutation_operation<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: client::type_registry::TypeRegistry<StringType>,
     context: &C,
     mutation_resolvers: &MutationResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    operation: client::ast::Operation,
+    operation: client::ast::Operation<StringType>,
     variables: ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     let client::ast::FragmentSpec::Object(fragment_spec) =
-        &operation.fragment_spec
+        operation.fragment_spec
     else {
         return Err(vec![GraphqlError {
             message: "Root mutation operation must select an object"

@@ -4,15 +4,20 @@ use crate::parsers::schema::{client::ast, shared};
 
 use super::type_registry::TypeRegistry;
 
-pub fn hash_input_type_spec<T: std::hash::Hasher>(
+pub fn hash_input_type_spec<
+    's,
+    T: std::hash::Hasher,
+    S: shared::ast::AsStr<'s>,
+>(
     hasher: &mut T,
-    spec: &shared::ast::InputTypeSpec,
+    spec: &shared::ast::InputTypeSpec<S>,
 ) {
     let name = match spec {
         shared::ast::InputTypeSpec::Scalar(s) => s,
         shared::ast::InputTypeSpec::Enum(e) => e,
         shared::ast::InputTypeSpec::InputType(i) => i,
-    };
+    }
+    .to_str();
     std::hash::Hash::hash(name, hasher);
 }
 
@@ -71,9 +76,13 @@ pub fn hash_array_default_value<T: std::hash::Hasher>(
     }
 }
 
-pub fn hash_input_field_spec<T: std::hash::Hasher>(
+pub fn hash_input_field_spec<
+    's,
+    T: std::hash::Hasher,
+    S: shared::ast::AsStr<'s>,
+>(
     hasher: &mut T,
-    spec: &shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
+    spec: &shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec<S>, S>,
 ) {
     match spec {
         shared::ast::NonCallableFieldSpec::Literal(literal) => {
@@ -94,10 +103,15 @@ pub fn hash_input_field_spec<T: std::hash::Hasher>(
     }
 }
 
-pub fn hash_input_field_definition<T: std::hash::Hasher>(
+pub fn hash_input_field_definition<
+    's,
+    T: std::hash::Hasher,
+    S: shared::ast::AsStr<'s>,
+>(
     hasher: &mut T,
     field: &shared::ast::FieldDefinition<
-        shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
+        shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec<S>, S>,
+        S,
     >,
 ) {
     std::hash::Hash::hash(&field.name, hasher);
@@ -105,11 +119,12 @@ pub fn hash_input_field_definition<T: std::hash::Hasher>(
     hash_input_field_spec(hasher, &field.spec)
 }
 
-pub fn get_operation_parameters_hash(
+pub fn get_operation_parameters_hash<'s, S: shared::ast::AsStr<'s>>(
     parameters: &IndexMap<
-        String,
+        S,
         shared::ast::FieldDefinition<
-            shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
+            shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec<S>, S>,
+            S,
         >,
     >,
 ) -> u64 {
@@ -122,9 +137,13 @@ pub fn get_operation_parameters_hash(
     return std::hash::Hasher::finish(&hasher);
 }
 
-fn hash_argument_literal_value<T: std::hash::Hasher>(
+fn hash_argument_literal_value<
+    's,
+    T: std::hash::Hasher,
+    S: shared::ast::AsStr<'s>,
+>(
     hasher: &mut T,
-    value: &shared::ast::ArgumentLiteralValue,
+    value: &shared::ast::ArgumentLiteralValue<S>,
 ) {
     match value {
         shared::ast::ArgumentLiteralValue::Int(i) => {
@@ -145,9 +164,9 @@ fn hash_argument_literal_value<T: std::hash::Hasher>(
     }
 }
 
-fn hash_argument_value<T: std::hash::Hasher>(
+fn hash_argument_value<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
     hasher: &mut T,
-    value: &shared::ast::ArgumentValue,
+    value: &shared::ast::ArgumentValue<S>,
 ) {
     match value {
         shared::ast::ArgumentValue::Ref(r) => {
@@ -161,17 +180,17 @@ fn hash_argument_value<T: std::hash::Hasher>(
     }
 }
 
-fn hash_argument<T: std::hash::Hasher>(
+fn hash_argument<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
     hasher: &mut T,
-    argument: &shared::ast::FieldSelectionArgument,
+    argument: &shared::ast::FieldSelectionArgument<S>,
 ) {
     std::hash::Hash::hash(&argument.name, hasher);
     hash_argument_value(hasher, &argument.value);
 }
 
-fn hash_arguments<T: std::hash::Hasher>(
+fn hash_arguments<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
     hasher: &mut T,
-    arguments: &IndexMap<String, shared::ast::FieldSelectionArgument>,
+    arguments: &IndexMap<S, shared::ast::FieldSelectionArgument<S>>,
 ) {
     let mut keys = arguments.keys().collect::<Vec<_>>();
     keys.sort();
@@ -180,10 +199,14 @@ fn hash_arguments<T: std::hash::Hasher>(
     }
 }
 
-fn hash_object_selection_node<T: std::hash::Hasher>(
+fn hash_object_selection_node<
+    's,
+    T: std::hash::Hasher,
+    S: shared::ast::AsStr<'s>,
+>(
     hasher: &mut T,
-    registry: &TypeRegistry,
-    selection: &ast::ObjectSelection,
+    registry: &TypeRegistry<S>,
+    selection: &ast::ObjectSelection<S>,
     recursive: bool,
 ) {
     match selection {
@@ -217,10 +240,14 @@ fn hash_object_selection_node<T: std::hash::Hasher>(
     }
 }
 
-fn hash_object_fragment_spec<T: std::hash::Hasher>(
+fn hash_object_fragment_spec<
+    's,
+    T: std::hash::Hasher,
+    S: shared::ast::AsStr<'s>,
+>(
     hasher: &mut T,
-    registry: &TypeRegistry,
-    fragment_spec: &ast::ObjectFragmentSpec,
+    registry: &TypeRegistry<S>,
+    fragment_spec: &ast::ObjectFragmentSpec<S>,
     recursive: bool,
 ) {
     for selection in fragment_spec.selections.iter() {
@@ -228,10 +255,14 @@ fn hash_object_fragment_spec<T: std::hash::Hasher>(
     }
 }
 
-fn hash_interface_fragment_spec<T: std::hash::Hasher>(
+fn hash_interface_fragment_spec<
+    's,
+    T: std::hash::Hasher,
+    S: shared::ast::AsStr<'s>,
+>(
     hasher: &mut T,
-    registry: &TypeRegistry,
-    fragment_spec: &ast::InterfaceFragmentSpec,
+    registry: &TypeRegistry<S>,
+    fragment_spec: &ast::InterfaceFragmentSpec<S>,
     recursive: bool,
 ) {
     for selection in fragment_spec.selections.iter() {
@@ -239,10 +270,14 @@ fn hash_interface_fragment_spec<T: std::hash::Hasher>(
     }
 }
 
-fn hash_union_selection_node<T: std::hash::Hasher>(
+fn hash_union_selection_node<
+    's,
+    T: std::hash::Hasher,
+    S: shared::ast::AsStr<'s>,
+>(
     hasher: &mut T,
-    registry: &TypeRegistry,
-    selection: &ast::UnionSelection,
+    registry: &TypeRegistry<S>,
+    selection: &ast::UnionSelection<S>,
     recursive: bool,
 ) {
     match selection {
@@ -275,10 +310,14 @@ fn hash_union_selection_node<T: std::hash::Hasher>(
     }
 }
 
-fn hash_union_fragment_spec<T: std::hash::Hasher>(
+fn hash_union_fragment_spec<
+    's,
+    T: std::hash::Hasher,
+    S: shared::ast::AsStr<'s>,
+>(
     hasher: &mut T,
-    registry: &TypeRegistry,
-    fragment_spec: &ast::UnionFragmentSpec,
+    registry: &TypeRegistry<S>,
+    fragment_spec: &ast::UnionFragmentSpec<S>,
     recursive: bool,
 ) {
     for selection in fragment_spec.selections.iter() {
@@ -286,10 +325,10 @@ fn hash_union_fragment_spec<T: std::hash::Hasher>(
     }
 }
 
-fn hash_fragment_spec<T: std::hash::Hasher>(
+fn hash_fragment_spec<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
     hasher: &mut T,
-    registry: &TypeRegistry,
-    fragment_spec: &ast::FragmentSpec,
+    registry: &TypeRegistry<S>,
+    fragment_spec: &ast::FragmentSpec<S>,
     recursive: bool,
 ) {
     match fragment_spec {
@@ -307,9 +346,9 @@ fn hash_fragment_spec<T: std::hash::Hasher>(
     }
 }
 
-pub fn get_fragment_spec_hash(
-    registry: &TypeRegistry,
-    fragment_spec: &ast::FragmentSpec,
+pub fn get_fragment_spec_hash<'s, S: shared::ast::AsStr<'s>>(
+    registry: &TypeRegistry<S>,
+    fragment_spec: &ast::FragmentSpec<S>,
     recursive: bool,
 ) -> u64 {
     let mut hasher = std::hash::DefaultHasher::new();
@@ -317,10 +356,13 @@ pub fn get_fragment_spec_hash(
     return std::hash::Hasher::finish(&hasher);
 }
 
-pub fn get_used_fragments_from_object_fragment_spec(
-    registry: &TypeRegistry,
-    fragment_spec: &ast::ObjectFragmentSpec,
-) -> Vec<String> {
+pub fn get_used_fragments_from_object_fragment_spec<
+    's,
+    S: shared::ast::AsStr<'s>,
+>(
+    registry: &TypeRegistry<S>,
+    fragment_spec: &ast::ObjectFragmentSpec<S>,
+) -> Vec<S> {
     fragment_spec
         .selections
         .iter()
@@ -331,10 +373,13 @@ pub fn get_used_fragments_from_object_fragment_spec(
         .collect::<Vec<_>>()
 }
 
-pub fn get_used_fragments_from_object_selection(
-    registry: &TypeRegistry,
-    selection: &ast::ObjectSelection,
-) -> Vec<String> {
+pub fn get_used_fragments_from_object_selection<
+    's,
+    S: shared::ast::AsStr<'s>,
+>(
+    registry: &TypeRegistry<S>,
+    selection: &ast::ObjectSelection<S>,
+) -> Vec<S> {
     match selection {
         ast::ObjectSelection::SpreadSelection(s) => {
             vec![s.fragment.clone()]
@@ -348,10 +393,13 @@ pub fn get_used_fragments_from_object_selection(
     }
 }
 
-pub fn get_used_fragments_from_interface_fragment_spec(
-    registry: &TypeRegistry,
-    fragment_spec: &ast::InterfaceFragmentSpec,
-) -> Vec<String> {
+pub fn get_used_fragments_from_interface_fragment_spec<
+    's,
+    S: shared::ast::AsStr<'s>,
+>(
+    registry: &TypeRegistry<S>,
+    fragment_spec: &ast::InterfaceFragmentSpec<S>,
+) -> Vec<S> {
     fragment_spec
         .selections
         .iter()
@@ -362,10 +410,10 @@ pub fn get_used_fragments_from_interface_fragment_spec(
         .collect::<Vec<_>>()
 }
 
-pub fn get_used_fragments_from_fragment_spec(
-    registry: &TypeRegistry,
-    fragment_spec: &ast::FragmentSpec,
-) -> Vec<String> {
+pub fn get_used_fragments_from_fragment_spec<'s, S: shared::ast::AsStr<'s>>(
+    registry: &TypeRegistry<S>,
+    fragment_spec: &ast::FragmentSpec<S>,
+) -> Vec<S> {
     match fragment_spec {
         ast::FragmentSpec::Object(object) => {
             get_used_fragments_from_object_fragment_spec(registry, object)

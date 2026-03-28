@@ -6,20 +6,20 @@ use crate::parsers::{
 use super::type_registry;
 
 #[derive(Debug)]
-pub enum FragmentType {
-    Object(String),
-    Interface(String),
-    Union(String),
+pub enum FragmentType<S = String> {
+    Object(S),
+    Interface(S),
+    Union(S),
 }
 
 #[derive(Debug)]
-pub enum FieldType {
-    Object(String),
-    Interface(String),
+pub enum FieldType<S = String> {
+    Object(S),
+    Interface(S),
 }
 
 #[derive(Debug)]
-pub enum Error<'buffer> {
+pub enum Error<'buffer, S: shared::ast::AsStr<'buffer>> {
     TypeRegistryError(type_registry::Error<'buffer>),
     ServerTypeRegistryError(server::type_registry::Error<'buffer>),
     UnknownFragmentType(file::shared::ast::NameNode<'buffer>),
@@ -29,15 +29,16 @@ pub enum Error<'buffer> {
     UnknownFragment(file::shared::ast::NameNode<'buffer>),
     InvalidFragmentType {
         selection_node: file::client::ast::SpreadSelectionNode<'buffer>,
-        expected_type: FragmentType,
-        fragment: String,
+        expected_type: FragmentType<S>,
+        fragment: S,
     },
     UnknownField {
-        r#type: FieldType,
+        r#type: FieldType<S>,
         field: file::shared::ast::NameNode<'buffer>,
     },
     UnexpectedCallableField {
-        field_type: shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+        field_type:
+            shared::ast::FieldDefinition<server::ast::ObjectFieldSpec<S>, S>,
         definition: file::client::ast::ObjectCallableFieldSpec<'buffer>,
     },
     UnexpectedFieldSelectionNodeOnUnion(
@@ -45,14 +46,14 @@ pub enum Error<'buffer> {
     ),
     NoSuitableTypeForConditionalSpreadSelection {
         selection: file::client::ast::ConditionalSpreadSelectionNode<'buffer>,
-        union_type: String,
+        union_type: S,
     },
     UnexpectedSelectionOnLiteralField {
         spec: file::client::ast::FragmentSpec<'buffer>,
-        field: shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+        field: shared::ast::FieldDefinition<server::ast::ObjectFieldSpec<S>, S>,
     },
     InvalidLiteralForInput {
-        type_spec: shared::ast::InputTypeSpec,
+        type_spec: shared::ast::InputTypeSpec<S>,
         node: file::shared::ast::LiteralNode<'buffer>,
     },
     FragmentNameCollision(file::shared::ast::NameNode<'buffer>),
@@ -60,7 +61,7 @@ pub enum Error<'buffer> {
     DirectiveNameCollision(file::shared::ast::NameNode<'buffer>),
 }
 
-impl<'buffer> Error<'buffer> {
+impl<'buffer, S: shared::ast::AsStr<'buffer>> Error<'buffer, S> {
     pub fn get_location(
         self: &Self,
     ) -> &file::shared::ast::NodeLocation<'buffer> {
@@ -95,13 +96,17 @@ impl<'buffer> Error<'buffer> {
     }
 }
 
-impl<'buffer> From<type_registry::Error<'buffer>> for Error<'buffer> {
+impl<'buffer, S: shared::ast::AsStr<'buffer>>
+    From<type_registry::Error<'buffer>> for Error<'buffer, S>
+{
     fn from(value: type_registry::Error<'buffer>) -> Self {
         return Self::TypeRegistryError(value);
     }
 }
 
-impl<'buffer> From<server::type_registry::Error<'buffer>> for Error<'buffer> {
+impl<'buffer, S: shared::ast::AsStr<'buffer>>
+    From<server::type_registry::Error<'buffer>> for Error<'buffer, S>
+{
     fn from(value: server::type_registry::Error<'buffer>) -> Self {
         return Self::ServerTypeRegistryError(value);
     }

@@ -12,7 +12,7 @@ fn parse_argument_value_from_literal_node<'buffer>(
     value: &file::shared::ast::LiteralNode<'buffer>,
     arg_type: &errors::ArgType,
     registry: &HashMapTypeRegistry,
-) -> Result<shared::ast::ArgumentValue, errors::Error<'buffer>> {
+) -> Result<shared::ast::ArgumentValue<String>, errors::Error<'buffer>> {
     return match value {
         file::shared::ast::LiteralNode::Int(i) => {
             Ok(shared::ast::ArgumentValue::Literal(i.value.into()))
@@ -36,7 +36,9 @@ fn parse_argument_value_from_literal_node<'buffer>(
                     arg_type: arg_type.clone(),
                 });
             };
-            let shared::ast::InputTypeSpec::Enum(enum_type) = &s.r#type else {
+            let shared::ast::InputTypeSpec::<String>::Enum(enum_type) =
+                &s.r#type
+            else {
                 return Err(errors::Error::UnexpectedArgumentValue {
                     value: value.clone(),
                     arg_type: arg_type.clone(),

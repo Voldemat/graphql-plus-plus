@@ -1,97 +1,97 @@
 use crate::parsers::{file, schema::shared};
 
 #[derive(Debug, Clone)]
-pub struct SpreadSelection {
-    pub fragment: String,
+pub struct SpreadSelection<S = String> {
+    pub fragment: S,
 }
 
 #[derive(Debug, Clone)]
-pub struct TypenameField {
-    pub alias: Option<String>,
+pub struct TypenameField<S = String> {
+    pub alias: Option<S>,
 }
 
 #[derive(Debug, Clone, derive_more::From)]
-pub enum UnionSelection {
-    TypenameField(TypenameField),
-    SpreadSelection(SpreadSelection),
-    ObjectConditionalSpreadSelection(ObjectConditionalSpreadSelection),
-    UnionConditionalSpreadSelection(UnionConditionalSpreadSelection),
+pub enum UnionSelection<S = String> {
+    TypenameField(TypenameField<S>),
+    SpreadSelection(SpreadSelection<S>),
+    ObjectConditionalSpreadSelection(ObjectConditionalSpreadSelection<S>),
+    UnionConditionalSpreadSelection(UnionConditionalSpreadSelection<S>),
 }
 
 #[derive(Debug, Clone, derive_more::From)]
-pub enum ObjectSelection {
-    TypenameField(TypenameField),
-    SpreadSelection(SpreadSelection),
-    FieldSelection(FieldSelection),
+pub enum ObjectSelection<S = String> {
+    TypenameField(TypenameField<S>),
+    SpreadSelection(SpreadSelection<S>),
+    FieldSelection(FieldSelection<S>),
 }
 
 #[derive(Debug, Clone)]
-pub struct UnionFragmentSpec {
-    pub r#type: String,
-    pub selections: Vec<UnionSelection>,
+pub struct UnionFragmentSpec<S = String> {
+    pub r#type: S,
+    pub selections: Vec<UnionSelection<S>>,
 }
 
 #[derive(Debug, Clone)]
-pub struct ObjectFragmentSpec {
-    pub r#type: String,
-    pub selections: Vec<ObjectSelection>,
+pub struct ObjectFragmentSpec<S = String> {
+    pub r#type: S,
+    pub selections: Vec<ObjectSelection<S>>,
 }
 
 #[derive(Debug, Clone)]
-pub struct InterfaceFragmentSpec {
-    pub r#type: String,
-    pub selections: Vec<ObjectSelection>,
+pub struct InterfaceFragmentSpec<S = String> {
+    pub r#type: S,
+    pub selections: Vec<ObjectSelection<S>>,
 }
 
 #[derive(Debug, Clone)]
-pub struct ObjectConditionalSpreadSelection {
-    pub r#type: String,
-    pub selections: Vec<ObjectSelection>,
+pub struct ObjectConditionalSpreadSelection<S = String> {
+    pub r#type: S,
+    pub selections: Vec<ObjectSelection<S>>,
 }
 
 #[derive(Debug, Clone)]
-pub struct UnionConditionalSpreadSelection {
-    pub r#type: String,
-    pub selection: Vec<UnionSelection>,
+pub struct UnionConditionalSpreadSelection<S = String> {
+    pub r#type: S,
+    pub selection: Vec<UnionSelection<S>>,
 }
 
 #[derive(Debug, Clone, derive_more::From)]
-pub enum FragmentSpec {
-    Union(UnionFragmentSpec),
-    Object(ObjectFragmentSpec),
-    Interface(InterfaceFragmentSpec),
+pub enum FragmentSpec<S = String> {
+    Union(UnionFragmentSpec<S>),
+    Object(ObjectFragmentSpec<S>),
+    Interface(InterfaceFragmentSpec<S>),
 }
 
 #[derive(Debug, Clone)]
-pub struct FieldSelection {
-    pub name: String,
-    pub alias: String,
+pub struct FieldSelection<S = String> {
+    pub name: S,
+    pub alias: S,
     pub arguments:
-        indexmap::IndexMap<String, shared::ast::FieldSelectionArgument>,
-    pub selection: Option<FragmentSpec>,
+        indexmap::IndexMap<S, shared::ast::FieldSelectionArgument<S>>,
+    pub selection: Option<FragmentSpec<S>>,
 }
 
 #[derive(Debug, Clone)]
-pub struct Fragment {
-    pub name: String,
-    pub spec: FragmentSpec,
-    pub source_text: String,
+pub struct Fragment<S = String> {
+    pub name: S,
+    pub spec: FragmentSpec<S>,
+    pub source_text: S,
     pub hash: u64,
 }
 
 pub type OpType = file::client::ast::OpType;
 
 #[derive(Debug, Clone)]
-pub struct Operation {
+pub struct Operation<S = String> {
     pub r#type: OpType,
-    pub name: String,
+    pub name: S,
     pub parameters: indexmap::IndexMap<
-        String,
-        shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+        S,
+        shared::ast::FieldDefinition<shared::ast::InputFieldSpec<S>, S>,
     >,
-    pub fragment_spec: FragmentSpec,
-    pub used_fragments: Vec<String>,
-    pub source_text: String,
+    pub fragment_spec: FragmentSpec<S>,
+    pub used_fragments: Vec<S>,
+    pub source_text: S,
     pub parameters_hash: u64,
     pub fragment_spec_hash: u64,
 }
@@ -99,11 +99,11 @@ pub struct Operation {
 pub type DirectiveLocation = file::client::ast::DirectiveLocation;
 
 #[derive(Debug, Clone)]
-pub struct ClientDirective {
-    pub name: String,
+pub struct ClientDirective<S = String> {
+    pub name: S,
     pub arguments: indexmap::IndexMap<
-        String,
-        shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+        S,
+        shared::ast::FieldDefinition<shared::ast::InputFieldSpec<S>, S>,
     >,
     pub locations: Vec<DirectiveLocation>,
 }

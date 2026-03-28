@@ -3,38 +3,38 @@ use indexmap::IndexSet;
 use crate::parsers::schema::shared;
 
 #[derive(Debug, Clone)]
-pub enum ObjectTypeSpec {
-    ObjectType(String),
-    Interface(String),
-    Scalar(String),
-    Enum(String),
-    Union(String),
+pub enum ObjectTypeSpec<S = String> {
+    ObjectType(S),
+    Interface(S),
+    Scalar(S),
+    Enum(S),
+    Union(S),
 }
 
 #[derive(Debug, Clone)]
-pub struct Union {
-    pub name: String,
-    pub items: IndexSet<String>,
+pub struct Union<S = String> {
+    pub name: S,
+    pub items: IndexSet<S>,
 }
 
 #[derive(Debug, Clone)]
-pub struct CallableFieldSpec {
-    pub return_type: shared::ast::NonCallableFieldSpec<ObjectTypeSpec>,
+pub struct CallableFieldSpec<S = String> {
+    pub return_type: shared::ast::NonCallableFieldSpec<ObjectTypeSpec<S>>,
     pub arguments: indexmap::IndexMap<
-        String,
-        shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+        S,
+        shared::ast::FieldDefinition<shared::ast::InputFieldSpec<S>, S>,
     >,
 }
 
 #[derive(Debug, Clone, derive_more::From)]
-pub enum ObjectFieldSpec {
-    Literal(shared::ast::LiteralFieldSpec<ObjectTypeSpec>),
-    Array(shared::ast::ArrayFieldSpec<ObjectTypeSpec>),
-    Callable(CallableFieldSpec),
+pub enum ObjectFieldSpec<S = String> {
+    Literal(shared::ast::LiteralFieldSpec<ObjectTypeSpec<S>>),
+    Array(shared::ast::ArrayFieldSpec<ObjectTypeSpec<S>>),
+    Callable(CallableFieldSpec<S>),
 }
 
-impl ObjectFieldSpec {
-    pub fn get_return_type(self: &Self) -> &ObjectTypeSpec {
+impl<S> ObjectFieldSpec<S> {
+    pub fn get_return_type(self: &Self) -> &ObjectTypeSpec<S> {
         match self {
             Self::Literal(literal) => &literal.r#type,
             Self::Array(array) => &array.r#type.get_type_spec(),
@@ -43,10 +43,12 @@ impl ObjectFieldSpec {
     }
 }
 
-impl From<shared::ast::NonCallableFieldSpec<ObjectTypeSpec>>
+impl From<shared::ast::NonCallableFieldSpec<ObjectTypeSpec<String>>>
     for ObjectFieldSpec
 {
-    fn from(value: shared::ast::NonCallableFieldSpec<ObjectTypeSpec>) -> Self {
+    fn from(
+        value: shared::ast::NonCallableFieldSpec<ObjectTypeSpec<String>>,
+    ) -> Self {
         match value {
             shared::ast::NonCallableFieldSpec::Array(a) => a.into(),
             shared::ast::NonCallableFieldSpec::Literal(b) => b.into(),
@@ -55,26 +57,26 @@ impl From<shared::ast::NonCallableFieldSpec<ObjectTypeSpec>>
 }
 
 #[derive(Debug, Clone)]
-pub struct Interface {
-    pub name: String,
+pub struct Interface<S = String> {
+    pub name: S,
     pub fields: indexmap::IndexMap<
-        String,
-        shared::ast::FieldDefinition<ObjectFieldSpec>,
+        S,
+        shared::ast::FieldDefinition<ObjectFieldSpec<S>, S>,
     >,
-    pub directives: Vec<shared::ast::ServerDirectiveInvocation>,
+    pub directives: Vec<shared::ast::ServerDirectiveInvocation<S>>,
 }
 
 #[derive(Debug, Clone)]
-pub struct ObjectType {
-    pub name: String,
+pub struct ObjectType<S = String> {
+    pub name: S,
     pub fields: indexmap::IndexMap<
-        String,
-        shared::ast::FieldDefinition<ObjectFieldSpec>,
+        S,
+        shared::ast::FieldDefinition<ObjectFieldSpec<S>, S>,
     >,
-    pub implements: IndexSet<String>,
-    pub directives: Vec<shared::ast::ServerDirectiveInvocation>,
+    pub implements: IndexSet<S>,
+    pub directives: Vec<shared::ast::ServerDirectiveInvocation<S>>,
 }
 
-pub struct ExtendObjectType {
-    pub r#type: ObjectType,
+pub struct ExtendObjectType<S = String> {
+    pub r#type: ObjectType<S>,
 }

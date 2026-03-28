@@ -93,19 +93,19 @@ impl<'buffer> ObjectFieldSpec<'buffer> {
         }
     }
 
-    pub fn get_alias(self: &Self) -> Option<String> {
+    pub fn get_alias(self: &Self) -> Option<&'buffer str> {
         match self {
             Self::Literal(literal) => {
                 if literal.name.name == literal.selection_name.name {
                     return None;
                 }
-                return Some(literal.selection_name.name.to_string());
+                return Some(literal.selection_name.name);
             }
             Self::Callable(callable) => {
                 if callable.name.name == callable.selection_name.name {
                     return None;
                 }
-                return Some(callable.selection_name.name.to_string());
+                return Some(callable.selection_name.name);
             }
         }
     }

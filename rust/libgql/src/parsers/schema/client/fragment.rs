@@ -12,18 +12,19 @@ use super::type_registry::{self, TypeRegistry};
 
 fn parse_union_selection_node<
     'buffer,
-    T: server::type_registry::TypeRegistry,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
 >(
     server_registry: &T,
-    registry: &TypeRegistry,
-    r#type: &server::ast::Union,
+    registry: &TypeRegistry<S>,
+    r#type: &server::ast::Union<S>,
     node: &file::client::ast::SelectionNode<'buffer>,
-) -> Result<ast::UnionSelection, errors::Error<'buffer>> {
+) -> Result<ast::UnionSelection<S>, errors::Error<'buffer, S>> {
     match node {
         file::client::ast::SelectionNode::FieldSelectionNode(field) => {
             if is_object_field_spec_is_typename_field(&field.field) {
                 return Ok(ast::TypenameField {
-                    alias: field.field.get_alias(),
+                    alias: field.field.get_alias().map(S::from_str),
                 }
                 .into());
             }
@@ -59,7 +60,9 @@ fn parse_union_selection_node<
                         selections: parse_object_selections(
                             server_registry,
                             registry,
-                            server_registry.get_object(&object).unwrap(),
+                            server_registry
+                                .get_object(object.to_str())
+                                .unwrap(),
                             &c.fragment.selections,
                         )?,
                     }
@@ -71,7 +74,7 @@ fn parse_union_selection_node<
                         selection: parse_union_selections(
                             server_registry,
                             registry,
-                            server_registry.get_union(&union).unwrap(),
+                            server_registry.get_union(union.to_str()).unwrap(),
                             &c.fragment.selections,
                         )?,
                     }
@@ -82,18 +85,20 @@ fn parse_union_selection_node<
     }
 }
 
-pub enum ConditionalSelectionType {
-    Object(String),
-    Union(String),
+pub enum ConditionalSelectionType<S = String> {
+    Object(S),
+    Union(S),
 }
 
 fn get_type_for_union_conditional_selection<
-    T: server::type_registry::TypeRegistry,
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
 >(
     registry: &T,
-    r#type: &server::ast::Union,
+    r#type: &server::ast::Union<S>,
     node: &file::client::ast::ConditionalSpreadSelectionNode,
-) -> Option<ConditionalSelectionType> {
+) -> Option<ConditionalSelectionType<S>> {
     return r#type
         .items
         .get(node.type_name.name)
@@ -113,12 +118,16 @@ fn get_type_for_union_conditional_selection<
         });
 }
 
-fn parse_union_selections<'buffer, T: server::type_registry::TypeRegistry>(
+fn parse_union_selections<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
+>(
     server_registry: &T,
-    registry: &TypeRegistry,
-    r#type: &server::ast::Union,
+    registry: &TypeRegistry<S>,
+    r#type: &server::ast::Union<S>,
     selections: &[file::client::ast::SelectionNode<'buffer>],
-) -> Result<Vec<ast::UnionSelection>, errors::Error<'buffer>> {
+) -> Result<Vec<ast::UnionSelection<S>>, errors::Error<'buffer, S>> {
     return selections
         .iter()
         .map(|selection| {
@@ -132,11 +141,14 @@ fn parse_union_selections<'buffer, T: server::type_registry::TypeRegistry>(
         .collect();
 }
 
-fn parse_interface_spread_selection_node<'buffer>(
-    registry: &TypeRegistry,
-    r#type: &server::ast::Interface,
+fn parse_interface_spread_selection_node<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+>(
+    registry: &TypeRegistry<S>,
+    r#type: &server::ast::Interface<S>,
     node: &file::client::ast::SpreadSelectionNode<'buffer>,
-) -> Result<ast::SpreadSelection, errors::Error<'buffer>> {
+) -> Result<ast::SpreadSelection<S>, errors::Error<'buffer, S>> {
     let Some(fragment) = registry.fragments.get(node.fragment_name.name) else {
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
@@ -156,11 +168,14 @@ fn parse_interface_spread_selection_node<'buffer>(
     });
 }
 
-fn parse_object_spread_selection_node<'buffer>(
-    registry: &TypeRegistry,
-    r#type: &server::ast::ObjectType,
+fn parse_object_spread_selection_node<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+>(
+    registry: &TypeRegistry<S>,
+    r#type: &server::ast::ObjectType<S>,
     node: &file::client::ast::SpreadSelectionNode<'buffer>,
-) -> Result<ast::SpreadSelection, errors::Error<'buffer>> {
+) -> Result<ast::SpreadSelection<S>, errors::Error<'buffer, S>> {
     let Some(fragment) = registry.fragments.get(node.fragment_name.name) else {
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
@@ -185,13 +200,14 @@ fn parse_object_spread_selection_node<'buffer>(
 
 fn parse_union_spread_selection_node<
     'buffer,
-    T: server::type_registry::TypeRegistry,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
 >(
     server_registry: &T,
-    registry: &TypeRegistry,
-    r#type: &server::ast::Union,
+    registry: &TypeRegistry<S>,
+    r#type: &server::ast::Union<S>,
     node: &file::client::ast::SpreadSelectionNode<'buffer>,
-) -> Result<ast::SpreadSelection, errors::Error<'buffer>> {
+) -> Result<ast::SpreadSelection<S>, errors::Error<'buffer, S>> {
     let Some(fragment) = registry.fragments.get(node.fragment_name.name) else {
         return Err(errors::Error::UnknownFragment(node.fragment_name.clone()));
     };
@@ -199,7 +215,7 @@ fn parse_union_spread_selection_node<
         ast::FragmentSpec::Union(spec) => spec.r#type != r#type.name,
         ast::FragmentSpec::Interface(spec) => r#type.items.iter().any(|t| {
             !server_registry
-                .get_object(t)
+                .get_object(t.to_str())
                 .unwrap()
                 .implements
                 .contains(&spec.r#type)
@@ -231,13 +247,14 @@ fn is_object_field_spec_is_typename_field(
 
 fn fragment_spec_from_field_definition<
     'buffer,
-    T: server::type_registry::TypeRegistry,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
 >(
     server_registry: &T,
-    registry: &TypeRegistry,
-    field: &shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+    registry: &TypeRegistry<S>,
+    field: &shared::ast::FieldDefinition<server::ast::ObjectFieldSpec<S>, S>,
     spec: &file::client::ast::FragmentSpec<'buffer>,
-) -> Result<ast::FragmentSpec, errors::Error<'buffer>> {
+) -> Result<ast::FragmentSpec<S>, errors::Error<'buffer, S>> {
     let type_spec = field.spec.get_return_type();
     match type_spec {
         server::ast::ObjectTypeSpec::ObjectType(object) => {
@@ -246,7 +263,7 @@ fn fragment_spec_from_field_definition<
                 selections: parse_object_selections(
                     server_registry,
                     registry,
-                    server_registry.get_object(object).unwrap(),
+                    server_registry.get_object(object.to_str()).unwrap(),
                     &spec.selections,
                 )?,
             }
@@ -258,7 +275,7 @@ fn fragment_spec_from_field_definition<
                 selections: parse_interface_selections(
                     server_registry,
                     registry,
-                    server_registry.get_interface(interface).unwrap(),
+                    server_registry.get_interface(interface.to_str()).unwrap(),
                     &spec.selections,
                 )?,
             }
@@ -270,7 +287,7 @@ fn fragment_spec_from_field_definition<
                 selections: parse_union_selections(
                     server_registry,
                     registry,
-                    server_registry.get_union(union).unwrap(),
+                    server_registry.get_union(union.to_str()).unwrap(),
                     &spec.selections,
                 )?,
             }
@@ -283,30 +300,30 @@ fn fragment_spec_from_field_definition<
     }
 }
 
-fn parse_selection_arguments<'buffer>(
-    spec: &server::ast::CallableFieldSpec,
+fn parse_selection_arguments<'buffer, S: shared::ast::AsStr<'buffer>>(
+    spec: &server::ast::CallableFieldSpec<S>,
     arguments: &[file::shared::ast::Argument<'buffer>],
 ) -> Result<
-    IndexMap<String, shared::ast::FieldSelectionArgument>,
-    errors::Error<'buffer>,
+    IndexMap<S, shared::ast::FieldSelectionArgument<S>>,
+    errors::Error<'buffer, S>,
 > {
     Ok(arguments
         .iter()
         .map(|arg| parse_selection_argument(spec, arg))
-        .collect::<Result<Vec<_>, errors::Error>>()?
+        .collect::<Result<Vec<_>, errors::Error<'buffer, S>>>()?
         .into_iter()
         .map(|arg| (arg.name.clone(), arg))
         .collect())
 }
 
-fn parse_argument_literal_value<'buffer>(
-    type_spec: &shared::ast::InputTypeSpec,
+fn parse_argument_literal_value<'buffer, S: shared::ast::AsStr<'buffer>>(
+    type_spec: &shared::ast::InputTypeSpec<S>,
     node: &file::shared::ast::LiteralNode<'buffer>,
-) -> Result<shared::ast::ArgumentLiteralValue, errors::Error<'buffer>> {
+) -> Result<shared::ast::ArgumentLiteralValue<S>, errors::Error<'buffer, S>> {
     match node {
         file::shared::ast::LiteralNode::Int(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => s == "Int",
+                shared::ast::InputTypeSpec::Scalar(s) => s.to_str() == "Int",
                 _ => false,
             };
             if !is_valid {
@@ -320,7 +337,7 @@ fn parse_argument_literal_value<'buffer>(
         }
         file::shared::ast::LiteralNode::Float(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => s == "Float",
+                shared::ast::InputTypeSpec::Scalar(s) => s.to_str() == "Float",
                 _ => false,
             };
             if !is_valid {
@@ -334,7 +351,9 @@ fn parse_argument_literal_value<'buffer>(
         }
         file::shared::ast::LiteralNode::Boolean(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => s == "Boolean",
+                shared::ast::InputTypeSpec::Scalar(s) => {
+                    s.to_str() == "Boolean"
+                }
                 _ => false,
             };
             if !is_valid {
@@ -348,7 +367,7 @@ fn parse_argument_literal_value<'buffer>(
         }
         file::shared::ast::LiteralNode::String(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => s == "String",
+                shared::ast::InputTypeSpec::Scalar(s) => s.to_str() == "String",
                 _ => false,
             };
             if !is_valid {
@@ -357,14 +376,14 @@ fn parse_argument_literal_value<'buffer>(
                     node: node.clone(),
                 })
             } else {
-                Ok(shared::ast::ArgumentLiteralValue::String(
-                    i.value.to_string(),
-                ))
+                Ok(shared::ast::ArgumentLiteralValue::String(S::from_str(
+                    i.value,
+                )))
             }
         }
         file::shared::ast::LiteralNode::EnumValue(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => s == "String",
+                shared::ast::InputTypeSpec::Scalar(s) => s.to_str() == "String",
                 _ => false,
             };
             if !is_valid {
@@ -373,18 +392,18 @@ fn parse_argument_literal_value<'buffer>(
                     node: node.clone(),
                 })
             } else {
-                Ok(shared::ast::ArgumentLiteralValue::EnumValue(
-                    i.value.to_string(),
-                ))
+                Ok(shared::ast::ArgumentLiteralValue::EnumValue(S::from_str(
+                    i.value,
+                )))
             }
         }
     }
 }
 
-fn parse_selection_argument<'buffer>(
-    spec: &server::ast::CallableFieldSpec,
+fn parse_selection_argument<'buffer, S: shared::ast::AsStr<'buffer>>(
+    spec: &server::ast::CallableFieldSpec<S>,
     argument: &file::shared::ast::Argument<'buffer>,
-) -> Result<shared::ast::FieldSelectionArgument, errors::Error<'buffer>> {
+) -> Result<shared::ast::FieldSelectionArgument<S>, errors::Error<'buffer, S>> {
     let Some(t) = spec.arguments.get(argument.name.name) else {
         return Err(type_registry::Error::UnknownArgument(
             argument.name.clone(),
@@ -393,10 +412,10 @@ fn parse_selection_argument<'buffer>(
     };
     let type_spec = t.spec.get_type_spec();
     return Ok(shared::ast::FieldSelectionArgument {
-        name: argument.name.name.to_string(),
+        name: S::from_str(argument.name.name),
         value: match &argument.value {
             file::shared::ast::ArgumentValue::NameNode(node) => {
-                shared::ast::ArgumentValue::Ref(node.name.to_string()).into()
+                shared::ast::ArgumentValue::Ref(S::from_str(node.name)).into()
             }
             file::shared::ast::ArgumentValue::LiteralNode(node) => {
                 parse_argument_literal_value(type_spec, node)?.into()
@@ -408,17 +427,18 @@ fn parse_selection_argument<'buffer>(
 
 fn parse_object_field_selection_node<
     'buffer,
-    T: server::type_registry::TypeRegistry,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
 >(
     server_registry: &T,
-    registry: &TypeRegistry,
-    r#type: errors::FieldType,
+    registry: &TypeRegistry<S>,
+    r#type: errors::FieldType<S>,
     fields: &IndexMap<
-        String,
-        shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+        S,
+        shared::ast::FieldDefinition<server::ast::ObjectFieldSpec<S>, S>,
     >,
     node: &file::client::ast::FieldSelectionNode<'buffer>,
-) -> Result<ast::FieldSelection, errors::Error<'buffer>> {
+) -> Result<ast::FieldSelection<S>, errors::Error<'buffer, S>> {
     let field_name = node.field.get_name();
     let field_type =
         fields
@@ -428,8 +448,8 @@ fn parse_object_field_selection_node<
                 field: field_name.clone(),
             })?;
     return Ok(ast::FieldSelection {
-        name: node.field.get_name().name.to_string(),
-        alias: node.field.get_selection_name().name.to_string(),
+        name: S::from_str(node.field.get_name().name),
+        alias: S::from_str(node.field.get_selection_name().name),
         selection: node
             .spec
             .as_ref()
@@ -465,13 +485,14 @@ fn parse_object_field_selection_node<
 
 fn parse_object_selection_node<
     'buffer,
-    T: server::type_registry::TypeRegistry,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
 >(
     server_registry: &T,
-    registry: &TypeRegistry,
-    r#type: &server::ast::ObjectType,
+    registry: &TypeRegistry<S>,
+    r#type: &server::ast::ObjectType<S>,
     node: &file::client::ast::SelectionNode<'buffer>,
-) -> Result<ast::ObjectSelection, errors::Error<'buffer>> {
+) -> Result<ast::ObjectSelection<S>, errors::Error<'buffer, S>> {
     match node {
         file::client::ast::SelectionNode::SpreadSelectionNode(s) => {
             Ok(parse_object_spread_selection_node(registry, r#type, s)?.into())
@@ -479,7 +500,7 @@ fn parse_object_selection_node<
         file::client::ast::SelectionNode::FieldSelectionNode(f) => {
             if is_object_field_spec_is_typename_field(&f.field) {
                 return Ok(ast::TypenameField {
-                    alias: f.field.get_alias(),
+                    alias: f.field.get_alias().map(S::from_str),
                 }
                 .into());
             }
@@ -502,13 +523,14 @@ fn parse_object_selection_node<
 
 fn parse_interface_selection_node<
     'buffer,
-    T: server::type_registry::TypeRegistry,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
 >(
     server_registry: &T,
-    registry: &TypeRegistry,
-    r#type: &server::ast::Interface,
+    registry: &TypeRegistry<S>,
+    r#type: &server::ast::Interface<S>,
     node: &file::client::ast::SelectionNode<'buffer>,
-) -> Result<ast::ObjectSelection, errors::Error<'buffer>> {
+) -> Result<ast::ObjectSelection<S>, errors::Error<'buffer, S>> {
     match node {
         file::client::ast::SelectionNode::SpreadSelectionNode(s) => {
             Ok(parse_interface_spread_selection_node(registry, r#type, s)?
@@ -532,12 +554,16 @@ fn parse_interface_selection_node<
     }
 }
 
-fn parse_object_selections<'buffer, T: server::type_registry::TypeRegistry>(
+fn parse_object_selections<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
+>(
     server_registry: &T,
-    registry: &TypeRegistry,
-    r#type: &server::ast::ObjectType,
+    registry: &TypeRegistry<S>,
+    r#type: &server::ast::ObjectType<S>,
     selections: &[file::client::ast::SelectionNode<'buffer>],
-) -> Result<Vec<ast::ObjectSelection>, errors::Error<'buffer>> {
+) -> Result<Vec<ast::ObjectSelection<S>>, errors::Error<'buffer, S>> {
     return selections
         .iter()
         .map(|s| {
@@ -548,13 +574,14 @@ fn parse_object_selections<'buffer, T: server::type_registry::TypeRegistry>(
 
 fn parse_interface_selections<
     'buffer,
-    T: server::type_registry::TypeRegistry,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
 >(
     server_registry: &T,
-    registry: &TypeRegistry,
-    r#type: &server::ast::Interface,
+    registry: &TypeRegistry<S>,
+    r#type: &server::ast::Interface<S>,
     selections: &[file::client::ast::SelectionNode<'buffer>],
-) -> Result<Vec<ast::ObjectSelection>, errors::Error<'buffer>> {
+) -> Result<Vec<ast::ObjectSelection<S>>, errors::Error<'buffer, S>> {
     return selections
         .iter()
         .map(|s| {
@@ -563,18 +590,22 @@ fn parse_interface_selections<
         .collect();
 }
 
-pub fn parse_selections<'buffer, T: server::type_registry::TypeRegistry>(
+pub fn parse_selections<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
+>(
     server_registry: &T,
-    registry: &TypeRegistry,
-    spec: &mut ast::FragmentSpec,
+    registry: &TypeRegistry<S>,
+    spec: &mut ast::FragmentSpec<S>,
     selections: &[file::client::ast::SelectionNode<'buffer>],
-) -> Result<(), errors::Error<'buffer>> {
+) -> Result<(), errors::Error<'buffer, S>> {
     match spec {
         ast::FragmentSpec::Union(u) => {
             u.selections = parse_union_selections(
                 server_registry,
                 registry,
-                server_registry.get_union(&u.r#type).unwrap(),
+                server_registry.get_union(u.r#type.to_str()).unwrap(),
                 selections,
             )?;
             return Ok(());
@@ -583,7 +614,7 @@ pub fn parse_selections<'buffer, T: server::type_registry::TypeRegistry>(
             o.selections = parse_object_selections(
                 server_registry,
                 registry,
-                server_registry.get_object(&o.r#type).unwrap(),
+                server_registry.get_object(o.r#type.to_str()).unwrap(),
                 selections,
             )?;
             return Ok(());
@@ -592,7 +623,7 @@ pub fn parse_selections<'buffer, T: server::type_registry::TypeRegistry>(
             i.selections = parse_interface_selections(
                 server_registry,
                 registry,
-                server_registry.get_interface(&i.r#type).unwrap(),
+                server_registry.get_interface(i.r#type.to_str()).unwrap(),
                 selections,
             )?;
             return Ok(());
@@ -600,11 +631,15 @@ pub fn parse_selections<'buffer, T: server::type_registry::TypeRegistry>(
     }
 }
 
-pub fn parse<'buffer, T: server::type_registry::TypeRegistry>(
+pub fn parse<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
+>(
     server_registry: &T,
-    registry: &mut TypeRegistry,
+    registry: &mut TypeRegistry<S>,
     node: &file::client::ast::FragmentDefinition<'buffer>,
-) -> Result<(), errors::Error<'buffer>> {
+) -> Result<(), errors::Error<'buffer, S>> {
     let mut fragment = registry.fragments.swap_remove(node.name.name).unwrap();
     parse_selections(
         server_registry,
@@ -614,6 +649,6 @@ pub fn parse<'buffer, T: server::type_registry::TypeRegistry>(
     )?;
     registry
         .fragments
-        .insert(node.name.name.to_string(), fragment);
+        .insert(S::from_str(node.name.name), fragment);
     return Ok(());
 }

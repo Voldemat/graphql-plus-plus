@@ -19,7 +19,7 @@ use crate::{
     lexer,
     parsers::{
         file,
-        schema::{client, server},
+        schema::{self, client, server},
     },
 };
 
@@ -29,7 +29,7 @@ use self::ast::GraphqlError;
 pub enum Error<'buffer> {
     Lexer(Vec<lexer::types::Error>),
     FileParser(file::client::Error<'buffer>),
-    OperationIsNotDefined(String),
+    OperationIsNotDefined(&'buffer str),
     OperationNameIsNotDefined,
     NoOperationsAreDefined,
     ExecutionErrors(Vec<GraphqlError>),
@@ -48,17 +48,19 @@ pub struct Resolvers<'a, S: Scalar, C: Send + Sync> {
 }
 
 async fn execute_operation<
+    'buffer,
     'args,
     'operation,
     C: Send + Sync,
     S: Scalar,
     T: ParseRegistry<S>,
+    StringType: schema::shared::ast::AsStr<'buffer> + 'args,
 >(
-    client_registry: client::type_registry::TypeRegistry,
+    client_registry: client::type_registry::TypeRegistry<StringType>,
     context: &'args C,
     resolvers: &'args Resolvers<'args, S, C>,
     parse_registry: &'args T,
-    operation: client::ast::Operation,
+    operation: client::ast::Operation<StringType>,
     variables: Values<S>,
 ) -> Result<OperationResult<'args, S>, Vec<GraphqlError>> {
     let resolved_variables = resolve_operation_parameters(
@@ -115,7 +117,8 @@ pub async fn execute<
     C: Send + Sync,
     S: Scalar,
     T: ParseRegistry<S>,
-    ServerTypeRegistry: server::type_registry::TypeRegistry,
+    StringType: schema::shared::ast::AsStr<'buffer> + 'args,
+    ServerTypeRegistry: server::type_registry::TypeRegistry<'buffer, StringType>,
 >(
     context: &'args C,
     server_registry: &'args ServerTypeRegistry,
@@ -123,7 +126,7 @@ pub async fn execute<
     parse_registry: &'args T,
     client_query: &'buffer str,
     variables: Values<S>,
-    operation: Option<String>,
+    operation: Option<&'buffer str>,
 ) -> Result<OperationResult<'args, S>, Error<'buffer>> {
     let tokens = lexer::utils::parse_buffer_into_tokens(client_query)?;
     let source_file = std::sync::Arc::new(file::shared::ast::SourceFile {
@@ -134,7 +137,8 @@ pub async fn execute<
         file::tokens_sources::VecTokensSource::new(tokens, source_file.clone()),
     )
     .parse_ast_nodes()?;
-    let mut client_registry = client::type_registry::TypeRegistry::new();
+    let mut client_registry =
+        client::type_registry::TypeRegistry::<StringType>::new();
     client::parse_client_schema(
         server_registry,
         &mut client_registry,
@@ -142,22 +146,26 @@ pub async fn execute<
     )
     .unwrap();
 
-    let operation_name = operation.map_or_else(
-        || {
+    let operation_index = match operation {
+        None => {
             if client_registry.operations.len() == 0 {
                 return Err(Error::NoOperationsAreDefined);
             }
             if client_registry.operations.len() > 1 {
                 return Err(Error::OperationNameIsNotDefined);
             }
-            Ok(client_registry.operations.first().unwrap().0.to_string())
-        },
-        Result::Ok,
-    )?;
+            Ok::<usize, Error<'buffer>>(0)
+        }
+        Some(name) => client_registry
+            .operations
+            .get_index_of(name)
+            .ok_or(Error::OperationIsNotDefined(name)),
+    }?;
     let operation = client_registry
         .operations
-        .swap_remove(&operation_name)
-        .ok_or(Error::OperationIsNotDefined(operation_name))?;
+        .swap_remove_index(operation_index)
+        .unwrap()
+        .1;
     execute_operation(
         client_registry,
         context,

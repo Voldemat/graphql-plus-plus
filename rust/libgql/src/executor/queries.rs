@@ -1,4 +1,4 @@
-use crate::parsers::schema::client;
+use crate::parsers::schema::{self, client};
 use std::collections::HashMap;
 
 use super::ast::{GraphqlError, ResolverFuture, Value, Values};
@@ -11,12 +11,17 @@ pub type QueryResolver<S, C> = dyn for<'a> Fn(&'a C, &'a ResolvedVariables) -> R
 pub type QueryResolversMap<'a, S, C> =
     HashMap<&'a str, &'a QueryResolver<S, C>>;
 
-async fn execute_fragment<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_fragment<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    spec: &client::ast::FragmentSpec,
+    spec: &client::ast::FragmentSpec<StringType>,
     variables: &ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     match spec {
@@ -41,27 +46,35 @@ async fn execute_fragment<C: Send + Sync, S: Scalar>(
     }
 }
 
-async fn execute_field<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_field<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    field: &client::ast::FieldSelection,
+    field: &client::ast::FieldSelection<StringType>,
     variables: &ResolvedVariables,
 ) -> Result<Value<S>, Vec<GraphqlError>> {
     let value = {
         let resolver =
-            query_resolvers.get(field.name.as_str()).ok_or_else(|| {
+            query_resolvers.get(field.name.to_str()).ok_or_else(|| {
                 vec![GraphqlError {
-                    message: format!("No query resolver for {}", field.name)
-                        .into(),
-                    path: vec![field.alias.clone()],
+                    message: format!(
+                        "No query resolver for {}",
+                        field.name.to_str()
+                    )
+                    .into(),
+                    path: vec![field.alias.to_str().to_string()],
                 }]
             })?;
         resolver(context, variables).await.map_err(|e| {
             vec![GraphqlError {
                 message: e,
-                path: vec![field.alias.clone()],
+                path: vec![field.alias.to_str().to_string()],
             }]
         })?
     };
@@ -72,7 +85,7 @@ async fn execute_field<C: Send + Sync, S: Scalar>(
         value.to_value().map_err(|e| {
             vec![GraphqlError {
                 message: e.into(),
-                path: vec![field.alias.clone()],
+                path: vec![field.alias.to_str().to_string()],
             }]
         })?,
         field.selection.as_ref(),
@@ -81,12 +94,17 @@ async fn execute_field<C: Send + Sync, S: Scalar>(
     .await
 }
 
-async fn execute_field_selection<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_field_selection<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    field: &client::ast::FieldSelection,
+    field: &client::ast::FieldSelection<StringType>,
     variables: &ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     let value = execute_field(
@@ -98,16 +116,24 @@ async fn execute_field_selection<C: Send + Sync, S: Scalar>(
         variables,
     )
     .await?;
-    Ok(Values::from_iter([(field.alias.clone(), value)]))
+    Ok(Values::from_iter([(
+        field.alias.to_str().to_string(),
+        value,
+    )]))
 }
 
-async fn execute_object_selection<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_object_selection<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
     variables: &ResolvedVariables,
-    selection: &client::ast::ObjectSelection,
+    selection: &client::ast::ObjectSelection<StringType>,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     match selection {
         client::ast::ObjectSelection::TypenameField(field) => {
@@ -143,12 +169,17 @@ async fn execute_object_selection<C: Send + Sync, S: Scalar>(
     }
 }
 
-async fn execute_object_selection_set<C: Send + Sync, S: Scalar>(
-    client_registry: &client::type_registry::TypeRegistry,
+async fn execute_object_selection_set<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: &client::type_registry::TypeRegistry<StringType>,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    selections: &[client::ast::ObjectSelection],
+    selections: &[client::ast::ObjectSelection<StringType>],
     variables: &ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     futures::future::join_all(selections.iter().map(
@@ -170,16 +201,21 @@ async fn execute_object_selection_set<C: Send + Sync, S: Scalar>(
     .map(|a| a.into_iter().flatten().collect())
 }
 
-pub async fn execute_query_operation<C: Send + Sync, S: Scalar>(
-    client_registry: client::type_registry::TypeRegistry,
+pub async fn execute_query_operation<
+    'buffer,
+    C: Send + Sync,
+    S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer>,
+>(
+    client_registry: client::type_registry::TypeRegistry<StringType>,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    operation: client::ast::Operation,
+    operation: client::ast::Operation<StringType>,
     variables: ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     let client::ast::FragmentSpec::Object(fragment_spec) =
-        &operation.fragment_spec
+        operation.fragment_spec
     else {
         return Err(vec![GraphqlError {
             message: "Root query operation must select an object"

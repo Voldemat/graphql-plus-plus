@@ -6,15 +6,23 @@ use crate::{
     parsers::schema::shared,
 };
 
-fn resolve_literal_array<S: Scalar, R: ParseRegistry<S>>(
+fn resolve_literal_array<
+    'buffer,
+    S: Scalar,
+    R: ParseRegistry<S>,
+    StringType: shared::ast::AsStr<'buffer>,
+>(
     registry: &R,
-    literal_type: &shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>,
+    literal_type: &shared::ast::LiteralFieldSpec<
+        shared::ast::InputTypeSpec<StringType>,
+        StringType,
+    >,
     nullable: bool,
     elements: Vec<Value<S>>,
 ) -> Result<ResolvedVariable, String> {
     match &literal_type.r#type {
         shared::ast::InputTypeSpec::Enum(e) => {
-            R::parse_enum_array(registry, &e, elements.into_iter().map(|e| {
+            R::parse_enum_array(registry, e.to_str(), elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Scalar(scalar),
                 )) = e && let Ok(s) = scalar.try_to_string()
@@ -29,7 +37,7 @@ fn resolve_literal_array<S: Scalar, R: ParseRegistry<S>>(
         }
         shared::ast::InputTypeSpec::Scalar(scalar_name) => {
             match nullable {
-            false => R::parse_scalar_array(registry, &scalar_name, elements.into_iter().map(|e| {
+            false => R::parse_scalar_array(registry, scalar_name.to_str(), elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Scalar(scalar),
                 )) = e
@@ -42,7 +50,7 @@ fn resolve_literal_array<S: Scalar, R: ParseRegistry<S>>(
                     ))
                 }
             }).collect::<Result<Vec<_>, String>>()?),
-            true => R::parse_scalar_optional_array(registry, &scalar_name, elements.into_iter().map(|e| {
+            true => R::parse_scalar_optional_array(registry, scalar_name.to_str(), elements.into_iter().map(|e| {
                 match e {
                 Value::Null => Ok(None),
                 Value::NonNullable(NonNullableValue::Literal(
@@ -57,7 +65,7 @@ fn resolve_literal_array<S: Scalar, R: ParseRegistry<S>>(
             }
         }
         shared::ast::InputTypeSpec::InputType(input_type) => {
-            R::parse_input_array(registry, &input_type, elements.into_iter().map(|e| {
+            R::parse_input_array(registry, input_type.to_str(), elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Object(object),
                 )) = e
@@ -74,9 +82,17 @@ fn resolve_literal_array<S: Scalar, R: ParseRegistry<S>>(
     }
 }
 
-pub fn resolve_array<S: Scalar, R: ParseRegistry<S>>(
+pub fn resolve_array<
+    'buffer,
+    S: Scalar,
+    R: ParseRegistry<S>,
+    StringType: shared::ast::AsStr<'buffer>,
+>(
     registry: &R,
-    array_type: &shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>,
+    array_type: &shared::ast::ArrayFieldSpec<
+        shared::ast::InputTypeSpec<StringType>,
+        StringType,
+    >,
     elements: Vec<Value<S>>,
 ) -> Result<ResolvedVariable, String> {
     match array_type.r#type.as_ref() {
@@ -174,30 +190,33 @@ mod tests {
     fn test_resolve_array() {
         let mut registry = HashMapRegistry::<TestScalar>::default();
         registry.add_scalar::<EmptyScalar>("Empty");
-        let result = resolve_array::<TestScalar, HashMapRegistry<TestScalar>>(
-            &registry,
-            &shared::ast::ArrayFieldSpec::<shared::ast::InputTypeSpec> {
-                nullable: true,
-                default_value: Some(None),
-                r#type: Box::new(shared::ast::NonCallableFieldSpec::Literal(
-                    shared::ast::LiteralFieldSpec {
-                        default_value: Some(None),
-                        r#type: shared::ast::InputTypeSpec::Scalar(
-                            "Empty".to_string(),
+        let result =
+            resolve_array::<TestScalar, HashMapRegistry<TestScalar>, String>(
+                &registry,
+                &shared::ast::ArrayFieldSpec::<shared::ast::InputTypeSpec> {
+                    nullable: true,
+                    default_value: Some(None),
+                    r#type: Box::new(
+                        shared::ast::NonCallableFieldSpec::Literal(
+                            shared::ast::LiteralFieldSpec {
+                                default_value: Some(None),
+                                r#type: shared::ast::InputTypeSpec::Scalar(
+                                    "Empty".to_string(),
+                                ),
+                                directive_invocations: IndexMap::new(),
+                            },
                         ),
-                        directive_invocations: IndexMap::new(),
-                    },
-                )),
-                directive_invocations: Vec::new(),
-            },
-            vec![
-                Value::NonNullable(NonNullableValue::Literal(
-                    LiteralValue::Scalar(TestScalar::Empty(())),
-                )),
-                Value::Null,
-            ],
-        )
-        .unwrap();
+                    ),
+                    directive_invocations: Vec::new(),
+                },
+                vec![
+                    Value::NonNullable(NonNullableValue::Literal(
+                        LiteralValue::Scalar(TestScalar::Empty(())),
+                    )),
+                    Value::Null,
+                ],
+            )
+            .unwrap();
         let array = result.downcast_ref::<Vec<Option<EmptyScalar>>>().unwrap();
         assert_eq!(array[0], Some(EmptyScalar(())));
         assert_eq!(array[1], None);
@@ -207,7 +226,11 @@ mod tests {
     fn test_resolve_nested_array() {
         let mut registry = HashMapRegistry::<TestScalar>::default();
         registry.add_scalar::<EmptyScalar>("Empty");
-        let result = resolve_array::<TestScalar, HashMapRegistry<TestScalar>>(
+        let result = resolve_array::<
+            TestScalar,
+            HashMapRegistry<TestScalar>,
+            String,
+        >(
             &registry,
             &shared::ast::ArrayFieldSpec {
                 r#type: Box::new(shared::ast::NonCallableFieldSpec::Array(

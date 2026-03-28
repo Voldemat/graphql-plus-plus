@@ -1,5 +1,38 @@
 use crate::parsers::file;
 
+pub trait AsStr<'s>:
+    Ord
+    + std::hash::Hash
+    + std::borrow::Borrow<str>
+    + Clone
+    + Send
+    + Sync
+    + std::fmt::Debug
+{
+    fn to_str(self: &Self) -> &str;
+    fn from_str(s: &'s str) -> Self;
+}
+
+impl<'s> AsStr<'s> for &'s str {
+    fn to_str(self: &Self) -> &str {
+        *self
+    }
+
+    fn from_str(s: &'s str) -> Self {
+        s
+    }
+}
+
+impl<'s> AsStr<'s> for String {
+    fn to_str(self: &Self) -> &str {
+        self.as_str()
+    }
+
+    fn from_str(s: &'s str) -> Self {
+        s.to_string()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Enum {
     pub name: String,
@@ -7,10 +40,10 @@ pub struct Enum {
 }
 
 #[derive(Debug, Clone)]
-pub enum InputTypeSpec {
-    InputType(String),
-    Scalar(String),
-    Enum(String),
+pub enum InputTypeSpec<S = String> {
+    InputType(S),
+    Scalar(S),
+    Enum(S),
 }
 
 #[derive(Debug, Clone)]
@@ -30,28 +63,28 @@ pub enum ArrayLiteral {
 }
 
 #[derive(Debug, Clone)]
-pub struct LiteralFieldSpec<T> {
+pub struct LiteralFieldSpec<T, S = String> {
     pub r#type: T,
     pub default_value: Option<Option<Literal>>,
     pub directive_invocations:
-        indexmap::IndexMap<String, ServerDirectiveInvocation>,
+        indexmap::IndexMap<S, ServerDirectiveInvocation<S>>,
 }
 
 #[derive(Debug, Clone)]
-pub struct ArrayFieldSpec<T> {
-    pub r#type: Box<NonCallableFieldSpec<T>>,
+pub struct ArrayFieldSpec<T, S = String> {
+    pub r#type: Box<NonCallableFieldSpec<T, S>>,
     pub nullable: bool,
     pub default_value: Option<Option<ArrayLiteral>>,
-    pub directive_invocations: Vec<ServerDirectiveInvocation>,
+    pub directive_invocations: Vec<ServerDirectiveInvocation<S>>,
 }
 
 #[derive(Debug, Clone, derive_more::From)]
-pub enum NonCallableFieldSpec<T> {
-    Literal(LiteralFieldSpec<T>),
-    Array(ArrayFieldSpec<T>),
+pub enum NonCallableFieldSpec<T, S = String> {
+    Literal(LiteralFieldSpec<T, S>),
+    Array(ArrayFieldSpec<T, S>),
 }
 
-impl<T> NonCallableFieldSpec<T> {
+impl<T, S> NonCallableFieldSpec<T, S> {
     pub fn has_default_value(self: &Self) -> bool {
         match self {
             Self::Literal(literal) => {
@@ -73,28 +106,28 @@ impl<T> NonCallableFieldSpec<T> {
     }
 }
 
-pub type InputFieldSpec = NonCallableFieldSpec<InputTypeSpec>;
+pub type InputFieldSpec<S = String> = NonCallableFieldSpec<InputTypeSpec<S>, S>;
 
 #[derive(Debug, Clone)]
-pub struct FieldDefinition<T> {
-    pub name: String,
+pub struct FieldDefinition<T, S = String> {
+    pub name: S,
     pub spec: T,
     pub nullable: bool,
 }
 
 #[derive(Debug, Clone)]
-pub struct InputType {
-    pub name: String,
-    pub fields: indexmap::IndexMap<String, FieldDefinition<InputFieldSpec>>,
+pub struct InputType<S = String> {
+    pub name: S,
+    pub fields: indexmap::IndexMap<S, FieldDefinition<InputFieldSpec<S>, S>>,
 }
 
 #[derive(Debug, Clone)]
-pub enum ArgumentLiteralValue {
-    String(String),
+pub enum ArgumentLiteralValue<S = String> {
+    String(S),
     Int(i64),
     Float(f64),
     Boolean(bool),
-    EnumValue(String),
+    EnumValue(S),
 }
 
 impl From<i64> for ArgumentLiteralValue {
@@ -116,27 +149,27 @@ impl From<bool> for ArgumentLiteralValue {
 }
 
 #[derive(Debug, Clone, derive_more::From)]
-pub enum ArgumentValue {
-    Ref(String),
-    Literal(ArgumentLiteralValue),
+pub enum ArgumentValue<S = String> {
+    Ref(S),
+    Literal(ArgumentLiteralValue<S>),
 }
 
 #[derive(Debug, Clone)]
-pub struct FieldSelectionArgument {
-    pub name: String,
-    pub value: ArgumentValue,
-    pub r#type: FieldDefinition<InputFieldSpec>,
+pub struct FieldSelectionArgument<S = String> {
+    pub name: S,
+    pub value: ArgumentValue<S>,
+    pub r#type: FieldDefinition<InputFieldSpec<S>, S>,
 }
 
 #[derive(Debug, Clone)]
-pub struct ServerDirective {
-    pub name: String,
-    pub arguments: indexmap::IndexMap<String, FieldDefinition<InputFieldSpec>>,
+pub struct ServerDirective<S = String> {
+    pub name: S,
+    pub arguments: indexmap::IndexMap<S, FieldDefinition<InputFieldSpec<S>, S>>,
     pub locations: Vec<file::server::ast::DirectiveLocation>,
 }
 
 #[derive(Debug, Clone)]
-pub struct ServerDirectiveInvocation {
-    pub directive: String,
-    pub arguments: indexmap::IndexMap<String, FieldSelectionArgument>,
+pub struct ServerDirectiveInvocation<S = String> {
+    pub directive: S,
+    pub arguments: indexmap::IndexMap<S, FieldSelectionArgument<S>>,
 }

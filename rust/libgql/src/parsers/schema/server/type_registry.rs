@@ -7,28 +7,38 @@ use crate::parsers::{
     schema::{server, shared},
 };
 
-pub trait TypeRegistry {
+pub trait TypeRegistry<'s, S: shared::ast::AsStr<'s>> {
     fn has_object_with_name(self: &Self, name: &str) -> bool;
     fn has_union_with_name(self: &Self, name: &str) -> bool;
     fn has_interface_with_name(self: &Self, name: &str) -> bool;
-    fn set_input_fields(
-        self: &mut Self,
-        name: &str,
-        fields: indexmap::IndexMap<
-            String,
-            shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
-        >,
-    );
     fn get_input_type_spec_by_name(
         self: &Self,
         name: &str,
-    ) -> Option<shared::ast::InputTypeSpec>;
-    fn get_union(self: &Self, name: &str) -> Option<&server::ast::Union>;
-    fn get_object(self: &Self, name: &str) -> Option<&server::ast::ObjectType>;
+    ) -> Option<shared::ast::InputTypeSpec<S>>;
+    fn get_union(self: &Self, name: &str) -> Option<&server::ast::Union<S>>;
+    fn get_object(
+        self: &Self,
+        name: &str,
+    ) -> Option<&server::ast::ObjectType<S>>;
     fn get_interface(
         self: &Self,
         name: &str,
-    ) -> Option<&server::ast::Interface>;
+    ) -> Option<&server::ast::Interface<S>>;
+}
+
+#[derive(Debug)]
+pub struct StaticTypeRegistry {
+    pub directives:
+        IndexMap<&'static str, shared::ast::ServerDirective<&'static str>>,
+    pub queries: HashSet<&'static str>,
+    pub mutations: HashSet<&'static str>,
+    pub subscriptions: HashSet<&'static str>,
+    pub objects: IndexMap<&'static str, server::ast::ObjectType>,
+    pub inputs: IndexMap<&'static str, shared::ast::InputType>,
+    pub interfaces: IndexMap<&'static str, server::ast::Interface>,
+    pub scalars: IndexSet<&'static str>,
+    pub enums: IndexMap<&'static str, shared::ast::Enum>,
+    pub unions: IndexMap<&'static str, server::ast::Union<&'static str>>,
 }
 
 #[derive(Debug)]
@@ -42,10 +52,10 @@ pub struct HashMapTypeRegistry {
     pub interfaces: IndexMap<String, server::ast::Interface>,
     pub scalars: IndexSet<String>,
     pub enums: IndexMap<String, shared::ast::Enum>,
-    pub unions: IndexMap<String, server::ast::Union>,
+    pub unions: IndexMap<String, server::ast::Union<String>>,
 }
 
-impl TypeRegistry for HashMapTypeRegistry {
+impl<'s> TypeRegistry<'s, String> for HashMapTypeRegistry {
     fn has_object_with_name(self: &Self, name: &str) -> bool {
         self.objects.contains_key(name)
     }
@@ -58,21 +68,10 @@ impl TypeRegistry for HashMapTypeRegistry {
         self.interfaces.contains_key(name)
     }
 
-    fn set_input_fields(
-        self: &mut Self,
-        name: &str,
-        fields: indexmap::IndexMap<
-            String,
-            shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
-        >,
-    ) {
-        self.inputs.get_mut(name).unwrap().fields = fields;
-    }
-
     fn get_input_type_spec_by_name(
         self: &Self,
         name: &str,
-    ) -> Option<shared::ast::InputTypeSpec> {
+    ) -> Option<shared::ast::InputTypeSpec<String>> {
         if self.inputs.contains_key(name) {
             Some(shared::ast::InputTypeSpec::InputType(name.to_string()))
         } else if self.scalars.contains(name) {
@@ -84,7 +83,10 @@ impl TypeRegistry for HashMapTypeRegistry {
         }
     }
 
-    fn get_union(self: &Self, name: &str) -> Option<&server::ast::Union> {
+    fn get_union(
+        self: &Self,
+        name: &str,
+    ) -> Option<&server::ast::Union<String>> {
         self.unions.get(name)
     }
 
@@ -166,7 +168,7 @@ impl HashMapTypeRegistry {
     pub fn get_type_for_input<'buffer>(
         self: &Self,
         node: &file::shared::ast::NameNode<'buffer>,
-    ) -> Result<shared::ast::InputTypeSpec, Error<'buffer>> {
+    ) -> Result<shared::ast::InputTypeSpec<String>, Error<'buffer>> {
         let name = node.name.to_string();
         if self.inputs.contains_key(&name) {
             return Ok(shared::ast::InputTypeSpec::InputType(name));
@@ -183,7 +185,7 @@ impl HashMapTypeRegistry {
     pub fn get_type_for_object<'buffer>(
         self: &Self,
         node: &file::shared::ast::NameNode<'buffer>,
-    ) -> Result<server::ast::ObjectTypeSpec, Error<'buffer>> {
+    ) -> Result<server::ast::ObjectTypeSpec<String>, Error<'buffer>> {
         let name = node.name.to_string();
         if self.objects.contains_key(&name) {
             return Ok(server::ast::ObjectTypeSpec::ObjectType(name));

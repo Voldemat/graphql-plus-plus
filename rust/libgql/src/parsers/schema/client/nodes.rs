@@ -8,27 +8,31 @@ use crate::parsers::{
 
 use super::type_registry::TypeRegistry;
 
-fn fragment_spec_from_name<'buffer, T: server::type_registry::TypeRegistry>(
+fn fragment_spec_from_name<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
+>(
     registry: &T,
     name: &file::shared::ast::NameNode<'buffer>,
-) -> Result<ast::FragmentSpec, errors::Error<'buffer>> {
+) -> Result<ast::FragmentSpec<S>, errors::Error<'buffer, S>> {
     if registry.has_object_with_name(name.name) {
         return Ok(ast::ObjectFragmentSpec {
-            r#type: name.name.to_string(),
+            r#type: S::from_str(name.name),
             selections: Vec::new(),
         }
         .into());
     };
     if registry.has_union_with_name(name.name) {
         return Ok(ast::UnionFragmentSpec {
-            r#type: name.name.to_string(),
+            r#type: S::from_str(name.name),
             selections: Vec::new(),
         }
         .into());
     };
     if registry.has_interface_with_name(name.name) {
         return Ok(ast::ObjectFragmentSpec {
-            r#type: name.name.to_string(),
+            r#type: S::from_str(name.name),
             selections: Vec::new(),
         }
         .into());
@@ -36,27 +40,27 @@ fn fragment_spec_from_name<'buffer, T: server::type_registry::TypeRegistry>(
     return Err(errors::Error::UnknownFragmentType(name.clone()));
 }
 
-fn fragment_spec_from_optype<'buffer>(
+fn fragment_spec_from_optype<'buffer, S: shared::ast::AsStr<'buffer>>(
     optype: &file::client::ast::OpType,
-) -> Result<ast::FragmentSpec, errors::Error<'buffer>> {
+) -> Result<ast::FragmentSpec<S>, errors::Error<'buffer, S>> {
     match optype {
         file::client::ast::OpType::Query => {
             return Ok(ast::ObjectFragmentSpec {
-                r#type: "Query".to_string(),
+                r#type: S::from_str("Query"),
                 selections: Vec::new(),
             }
             .into());
         }
         file::client::ast::OpType::Mutation => {
             return Ok(ast::ObjectFragmentSpec {
-                r#type: "Mutation".to_string(),
+                r#type: S::from_str("Mutation"),
                 selections: Vec::new(),
             }
             .into());
         }
         file::client::ast::OpType::Subscription => {
             return Ok(ast::ObjectFragmentSpec {
-                r#type: "Subscription".to_string(),
+                r#type: S::from_str("Subscription"),
                 selections: Vec::new(),
             }
             .into());
@@ -64,11 +68,15 @@ fn fragment_spec_from_optype<'buffer>(
     }
 }
 
-pub fn parse_first_pass<'buffer, T: server::type_registry::TypeRegistry>(
+pub fn parse_first_pass<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
+>(
     server_registry: &T,
-    registry: &mut TypeRegistry,
+    registry: &mut TypeRegistry<S>,
     node: &file::client::ast::ASTNode<'buffer>,
-) -> Result<(), errors::Error<'buffer>> {
+) -> Result<(), errors::Error<'buffer, S>> {
     match node {
         file::client::ast::ASTNode::Fragment(fragment) => {
             if registry.fragments.contains_key(fragment.name.name) {
@@ -77,11 +85,11 @@ pub fn parse_first_pass<'buffer, T: server::type_registry::TypeRegistry>(
                 ));
             };
             registry.fragments.insert(
-                fragment.name.name.to_string(),
+                S::from_str(fragment.name.name),
                 ast::Fragment {
-                    name: fragment.name.name.to_string(),
-                    source_text: shared::source_text::extract_from_fragment(
-                        fragment,
+                    name: S::from_str(fragment.name.name),
+                    source_text: S::from_str(
+                        shared::source_text::extract_from_fragment(fragment),
                     ),
                     spec: fragment_spec_from_name(
                         server_registry,
@@ -103,11 +111,11 @@ pub fn parse_first_pass<'buffer, T: server::type_registry::TypeRegistry>(
                 &operation.parameters,
             )?;
             registry.operations.insert(
-                operation.name.name.to_string(),
+                S::from_str(operation.name.name),
                 ast::Operation {
-                    name: operation.name.name.to_string(),
-                    source_text: shared::source_text::extract_from_operation(
-                        operation,
+                    name: S::from_str(operation.name.name),
+                    source_text: S::from_str(
+                        shared::source_text::extract_from_operation(operation),
                     ),
                     r#type: operation.r#type,
                     parameters_hash: hash::get_operation_parameters_hash(
@@ -130,7 +138,7 @@ pub fn parse_first_pass<'buffer, T: server::type_registry::TypeRegistry>(
                 ));
             }
             registry.directives.insert(
-                node.name.name.to_string(),
+                S::from_str(node.name.name),
                 directive::parse(server_registry, node)?,
             );
             Ok(())
@@ -138,11 +146,15 @@ pub fn parse_first_pass<'buffer, T: server::type_registry::TypeRegistry>(
     }
 }
 
-pub fn parse_second_pass<'buffer, T: server::type_registry::TypeRegistry>(
+pub fn parse_second_pass<
+    'buffer,
+    S: shared::ast::AsStr<'buffer>,
+    T: server::type_registry::TypeRegistry<'buffer, S>,
+>(
     server_registry: &T,
-    registry: &mut TypeRegistry,
+    registry: &mut TypeRegistry<S>,
     node: &file::client::ast::ASTNode<'buffer>,
-) -> Result<(), errors::Error<'buffer>> {
+) -> Result<(), errors::Error<'buffer, S>> {
     match node {
         file::client::ast::ASTNode::Fragment(fragment) => {
             fragment::parse(server_registry, registry, fragment)

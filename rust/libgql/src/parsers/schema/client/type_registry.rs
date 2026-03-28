@@ -6,10 +6,10 @@ use super::ast;
 use crate::parsers::file;
 
 #[derive(Debug)]
-pub struct TypeRegistry {
-    pub fragments: IndexMap<String, ast::Fragment>,
-    pub operations: IndexMap<String, ast::Operation>,
-    pub directives: IndexMap<String, ast::ClientDirective>,
+pub struct TypeRegistry<S = String> {
+    pub fragments: IndexMap<S, ast::Fragment<S>>,
+    pub operations: IndexMap<S, ast::Operation<S>>,
+    pub directives: IndexMap<S, ast::ClientDirective<S>>,
 }
 
 #[derive(Debug)]
@@ -37,7 +37,7 @@ impl<'buffer> Error<'buffer> {
     }
 }
 
-impl TypeRegistry {
+impl<S> TypeRegistry<S> {
     pub fn new() -> Self {
         Self {
             fragments: IndexMap::new(),

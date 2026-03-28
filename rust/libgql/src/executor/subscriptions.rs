@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::parsers::schema::client;
+use crate::parsers::schema::{self, client};
 
 use super::ast::{GraphqlError, ResolverRoot, Values};
 use super::scalar::Scalar;
@@ -41,12 +41,12 @@ pub type SubscriptionOperationStream<'a, S> = std::pin::Pin<
 
 pub async fn execute_subscription_operation<
     'args,
-    'variables,
-    'operation,
+    'buffer,
     C: Send + Sync,
     S: Scalar,
+    StringType: schema::shared::ast::AsStr<'buffer> + 'args,
 >(
-    client_registry: client::type_registry::TypeRegistry,
+    client_registry: client::type_registry::TypeRegistry<StringType>,
     context: &'args C,
     resolvers: &'args SubscriptionResolversMap<'args, S, C>,
     object_field_resolvers: &'args super::object::ObjectFieldResolversMap<
@@ -54,7 +54,7 @@ pub async fn execute_subscription_operation<
         S,
         C,
     >,
-    operation: client::ast::Operation,
+    operation: client::ast::Operation<StringType>,
     variables: ResolvedVariables,
 ) -> Result<SubscriptionOperationStream<'args, S>, Vec<GraphqlError>> {
     let client::ast::FragmentSpec::Object(mut fragment_spec) =
@@ -75,11 +75,14 @@ pub async fn execute_subscription_operation<
         }]);
     };
 
-    let resolver = resolvers.get(selection.name.as_str()).ok_or_else(|| {
+    let resolver = resolvers.get(selection.name.to_str()).ok_or_else(|| {
         vec![GraphqlError {
-            message: format!("No subscription resolver for {}", selection.name)
-                .into(),
-            path: vec![selection.alias.clone()],
+            message: format!(
+                "No subscription resolver for {}",
+                selection.name.to_str()
+            )
+            .into(),
+            path: vec![selection.alias.to_str().to_string()],
         }]
     })?;
     let vars = Box::new(variables);
@@ -95,14 +98,14 @@ pub async fn execute_subscription_operation<
                 object_field_resolvers,
                 value.to_value().map_err(|e| vec![GraphqlError {
                     message: e.into(),
-                    path: vec![selection.alias.clone()]
+                    path: vec![selection.alias.to_str().to_string()]
                 }])?,
                 selection.selection.as_ref(),
                 &vars2.as_ref(),
             )
             .await?;
             yield
-                Ok(Values::from_iter([(selection.alias.clone(), serialized_value)]))
+                Ok(Values::from_iter([(selection.alias.to_str().to_string(), serialized_value)]))
         }
     }))
 }
