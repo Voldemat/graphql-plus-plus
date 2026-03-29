@@ -7,12 +7,14 @@ edition = "2024"
 libgql = { path = "../../rust/libgql" }
 serde = { version = "1.0.228", features = ["derive", "serde_derive"], default-features = false }
 libgqlcodegen = { path = "../../rust/gqlcodegen" }
-hyper = { version = "1", features = ["server", "http1"], default-features = false }
+hyper = { path = "../../../hyper", features = ["server", "http1"], default-features = false }
 tokio = { version = "1", features = ["net", "macros", "rt-multi-thread"], default-features = false }
 http-body-util = "0.1"
-hyper-util = { version = "0.1", features = ["server", "http1", "tokio"], default-features = false }
+hyper-util = { path = "../../../hyper-util", features = ["server", "http1", "tokio"], default-features = false }
 serde_json = { version = "1.0.149", default-features = false }
 uuid = { version = "1.22.0", default-features = false }
+futures-util = "0.3.32"
+async-stream = "0.3.6"
 
 [build-dependencies]
 codegen = "0.3.0"
