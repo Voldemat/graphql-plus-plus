@@ -9,3 +9,7 @@ type User {
 type Query {
     getUser(id: UUID!): User!
 }
+
+type Subscription {
+    streamUsers: User!
+}
