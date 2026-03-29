@@ -63,7 +63,7 @@ pub fn resolve_paths(
 }
 
 pub fn load_server_schema_from_inputs(
-    registry: &mut libgql::parsers::schema::server::type_registry::TypeRegistry,
+    registry: &mut libgql::parsers::schema::server::type_registry::HashMapTypeRegistry,
     config_dir_path: &std::path::Path,
     conf: &config::InputsConfig,
 ) -> Result<(), Vec<String>> {
@@ -125,7 +125,7 @@ pub fn load_server_schema_from_inputs(
 }
 
 pub fn load_client_schema_from_inputs(
-    server_registry: &libgql::parsers::schema::server::type_registry::TypeRegistry,
+    server_registry: &libgql::parsers::schema::server::type_registry::HashMapTypeRegistry,
     registry: &mut libgql::parsers::schema::client::type_registry::TypeRegistry,
     config_dir_path: &std::path::Path,
     conf: &config::InputsConfig,
@@ -193,7 +193,7 @@ pub fn run_config_action<'a>(
     json_callback: Box<dyn Fn(&str, &std::path::Path, &str) + 'a>,
 ) -> Result<(), String> {
     let mut server_registry =
-        libgql::parsers::schema::server::type_registry::TypeRegistry::new();
+        libgql::parsers::schema::server::type_registry::HashMapTypeRegistry::new();
     match load_server_schema_from_inputs(
         &mut server_registry,
         config_path.parent().unwrap(),

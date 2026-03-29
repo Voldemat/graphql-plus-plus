@@ -413,8 +413,8 @@ fn compare_enums(
 }
 
 fn find_difference_between_schemas(
-    schema: &libgql::parsers::schema::server::type_registry::TypeRegistry,
-    schema2: &libgql::parsers::schema::server::type_registry::TypeRegistry,
+    schema: &libgql::parsers::schema::server::type_registry::HashMapTypeRegistry,
+    schema2: &libgql::parsers::schema::server::type_registry::HashMapTypeRegistry,
 ) {
     let is_objects_valid = compare_objects(&schema.objects, &schema2.objects);
     let is_unions_valid = compare_unions(&schema.unions, &schema2.unions);
@@ -438,7 +438,7 @@ fn find_difference_between_schemas(
 
 pub fn command(args: DiffArgs) {
     let mut registry =
-        libgql::parsers::schema::server::type_registry::TypeRegistry::new();
+        libgql::parsers::schema::server::type_registry::HashMapTypeRegistry::new();
 
     libgql::json::parsers::schema::parse_server_schema(
         &mut registry,
@@ -449,7 +449,7 @@ pub fn command(args: DiffArgs) {
     )
     .unwrap();
     let mut server_schema_from_introspection =
-        libgql::parsers::schema::server::type_registry::TypeRegistry::new();
+        libgql::parsers::schema::server::type_registry::HashMapTypeRegistry::new();
     libgql::json::parsers::introspection::parse_server_schema(
         &mut server_schema_from_introspection,
         serde_json::from_str::<serde_json::Value>(
