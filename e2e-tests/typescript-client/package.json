@@ -20,6 +20,9 @@
         "eslint": "^10.1.0",
         "typescript-eslint": "^8.57.1"
     },
+    "types": {
+        "@vladimirdev635/gql-client": "file:../../typescript/gql-client/dist/index.d.ts"
+    },
     "dependencies": {
         "@vladimirdev635/gql-client": "file:../../typescript/gql-client/dist"
     },
