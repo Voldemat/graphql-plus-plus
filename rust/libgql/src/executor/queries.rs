@@ -1,6 +1,7 @@
 use crate::parsers::schema::{self, client};
 use std::collections::HashMap;
 
+use super::OwningTypeRegistry;
 use super::ast::{GraphqlError, ResolverFuture, Value, Values};
 use super::scalar::Scalar;
 use super::variables::ResolvedVariables;
@@ -201,21 +202,15 @@ async fn execute_object_selection_set<
     .map(|a| a.into_iter().flatten().collect())
 }
 
-pub async fn execute_query_operation<
-    'buffer,
-    C: Send + Sync,
-    S: Scalar,
-    StringType: schema::shared::ast::AsStr<'buffer>,
->(
-    client_registry: client::type_registry::TypeRegistry<StringType>,
+pub async fn execute_query_operation<'buffer, C: Send + Sync, S: Scalar>(
+    client_registry: std::pin::Pin<Box<OwningTypeRegistry<'buffer>>>,
     context: &C,
     query_resolvers: &QueryResolversMap<'_, S, C>,
     object_field_resolvers: &super::object::ObjectFieldResolversMap<'_, S, C>,
-    operation: client::ast::Operation<StringType>,
     variables: ResolvedVariables,
 ) -> Result<Values<S>, Vec<GraphqlError>> {
     let client::ast::FragmentSpec::Object(fragment_spec) =
-        operation.fragment_spec
+        &client_registry.borrow_operation().fragment_spec
     else {
         return Err(vec![GraphqlError {
             message: "Root query operation must select an object"
@@ -226,7 +221,7 @@ pub async fn execute_query_operation<
     };
 
     execute_object_selection_set(
-        &client_registry,
+        client_registry.borrow_registry(),
         context,
         query_resolvers,
         object_field_resolvers,

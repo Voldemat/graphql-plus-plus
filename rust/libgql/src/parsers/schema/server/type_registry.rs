@@ -11,10 +11,13 @@ pub trait TypeRegistry<'s, S: shared::ast::AsStr<'s>> {
     fn has_object_with_name(self: &Self, name: &str) -> bool;
     fn has_union_with_name(self: &Self, name: &str) -> bool;
     fn has_interface_with_name(self: &Self, name: &str) -> bool;
-    fn get_input_type_spec_by_name(
+    fn get_input_type_spec_by_name<
+        'client_buffer,
+        ClientStringType: shared::ast::AsStr<'client_buffer>,
+    >(
         self: &Self,
-        name: &str,
-    ) -> Option<shared::ast::InputTypeSpec<S>>;
+        name: &file::shared::ast::NameNode<'client_buffer>,
+    ) -> Option<shared::ast::InputTypeSpec<ClientStringType>>;
     fn get_union(self: &Self, name: &str) -> Option<&server::ast::Union<S>>;
     fn get_object(
         self: &Self,
@@ -68,16 +71,25 @@ impl<'s> TypeRegistry<'s, String> for HashMapTypeRegistry {
         self.interfaces.contains_key(name)
     }
 
-    fn get_input_type_spec_by_name(
+    fn get_input_type_spec_by_name<
+        'client_buffer,
+        ClientStringType: shared::ast::AsStr<'client_buffer>,
+    >(
         self: &Self,
-        name: &str,
-    ) -> Option<shared::ast::InputTypeSpec<String>> {
-        if self.inputs.contains_key(name) {
-            Some(shared::ast::InputTypeSpec::InputType(name.to_string()))
-        } else if self.scalars.contains(name) {
-            Some(shared::ast::InputTypeSpec::Scalar(name.to_string()))
-        } else if self.enums.contains_key(name) {
-            Some(shared::ast::InputTypeSpec::Enum(name.to_string()))
+        name: &file::shared::ast::NameNode<'client_buffer>,
+    ) -> Option<shared::ast::InputTypeSpec<ClientStringType>> {
+        if self.inputs.contains_key(name.name) {
+            Some(shared::ast::InputTypeSpec::InputType(
+                ClientStringType::from_str(name.name),
+            ))
+        } else if self.scalars.contains(name.name) {
+            Some(shared::ast::InputTypeSpec::Scalar(
+                ClientStringType::from_str(name.name),
+            ))
+        } else if self.enums.contains_key(name.name) {
+            Some(shared::ast::InputTypeSpec::Enum(
+                ClientStringType::from_str(name.name),
+            ))
         } else {
             None
         }

@@ -11,6 +11,27 @@ pub enum ObjectTypeSpec<S = String> {
     Union(S),
 }
 
+impl<'s1, S: shared::ast::AsStr<'s1>> ObjectTypeSpec<S> {
+    pub fn clone_with_string_type<'s2, NS: shared::ast::AsStr<'s2>>(
+        self: &'s1 Self,
+    ) -> ObjectTypeSpec<NS>
+    where
+        's1: 's2,
+    {
+        match self {
+            Self::ObjectType(s) => {
+                ObjectTypeSpec::ObjectType(NS::from_str(s.to_str()))
+            }
+            Self::Scalar(s) => ObjectTypeSpec::Scalar(NS::from_str(s.to_str())),
+            Self::Enum(s) => ObjectTypeSpec::Enum(NS::from_str(s.to_str())),
+            Self::Union(u) => ObjectTypeSpec::Union(NS::from_str(u.to_str())),
+            Self::Interface(i) => {
+                ObjectTypeSpec::Interface(NS::from_str(i.to_str()))
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Union<S = String> {
     pub name: S,
@@ -25,6 +46,23 @@ pub struct CallableFieldSpec<S = String> {
         shared::ast::FieldDefinition<shared::ast::InputFieldSpec<S>, S>,
     >,
 }
+impl<'s1, S: shared::ast::AsStr<'s1>> CallableFieldSpec<S> {
+    pub fn clone_with_string_type<'s2, NS: shared::ast::AsStr<'s2>>(
+        self: &'s1 Self,
+    ) -> CallableFieldSpec<NS>
+    where
+        's1: 's2,
+    {
+        CallableFieldSpec {
+            return_type: self.return_type.clone_with_string_type(ObjectTypeSpec::clone_with_string_type),
+            arguments: self.arguments.iter().map(|(key, argument)| {
+                (NS::from_str(key.to_str()), argument.clone_with_string_type(
+                    |s| s.clone_with_string_type(shared::ast::InputTypeSpec::clone_with_string_type)
+                ))
+            }).collect()
+        }
+    }
+}
 
 #[derive(Debug, Clone, derive_more::From)]
 pub enum ObjectFieldSpec<S = String> {
@@ -33,7 +71,28 @@ pub enum ObjectFieldSpec<S = String> {
     Callable(CallableFieldSpec<S>),
 }
 
-impl<S> ObjectFieldSpec<S> {
+impl<'s1, S: shared::ast::AsStr<'s1>> ObjectFieldSpec<S> {
+    pub fn clone_with_string_type<'s2, NS: shared::ast::AsStr<'s2>>(
+        self: &'s1 Self,
+    ) -> ObjectFieldSpec<NS>
+    where
+        's1: 's2,
+    {
+        match self {
+            Self::Literal(l) => {
+                ObjectFieldSpec::Literal(l.clone_with_string_type(
+                    ObjectTypeSpec::clone_with_string_type,
+                ))
+            }
+            Self::Array(a) => ObjectFieldSpec::Array(a.clone_with_string_type(
+                ObjectTypeSpec::clone_with_string_type,
+            )),
+            Self::Callable(c) => {
+                ObjectFieldSpec::Callable(c.clone_with_string_type())
+            }
+        }
+    }
+
     pub fn get_return_type(self: &Self) -> &ObjectTypeSpec<S> {
         match self {
             Self::Literal(literal) => &literal.r#type,

@@ -10,14 +10,18 @@ use crate::parsers::{
 };
 
 fn parse_input_field_spec<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: TypeRegistry<'buffer, S>,
+    'input_buffer,
+    'server_buffer,
+    InputStringType: shared::ast::AsStr<'input_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: TypeRegistry<'server_buffer, ServerStringType>,
 >(
     registry: &T,
-    node: &file::shared::ast::InputFieldDefinitionNode<'buffer>,
-) -> Result<(shared::ast::InputFieldSpec<S>, bool), type_registry::Error<'buffer>>
-{
+    node: &file::shared::ast::InputFieldDefinitionNode<'input_buffer>,
+) -> Result<
+    (shared::ast::InputFieldSpec<InputStringType>, bool),
+    type_registry::Error<'input_buffer>,
+> {
     return parse_noncallable_input_field_spec(
         registry,
         &node.r#type,
@@ -29,54 +33,57 @@ fn parse_input_field_spec<
 }
 
 fn parse_noncallable_input_field_spec<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: TypeRegistry<'buffer, S>,
+    'input_buffer,
+    'server_buffer,
+    InputStringType: shared::ast::AsStr<'input_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: TypeRegistry<'server_buffer, ServerStringType>,
 >(
     registry: &T,
-    node: &file::shared::ast::TypeNode<'buffer>,
+    node: &file::shared::ast::TypeNode<'input_buffer>,
     default_value: Option<shared::ast::Literal>,
 ) -> Result<
     (
-        shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec<S>, S>,
+        shared::ast::NonCallableFieldSpec<
+            shared::ast::InputTypeSpec<InputStringType>,
+            InputStringType,
+        >,
         bool,
     ),
-    type_registry::Error<'buffer>,
+    type_registry::Error<'input_buffer>,
 > {
     match node {
         file::shared::ast::TypeNode::List(l) => {
-            return Ok(
-                (
-                    shared::ast::ArrayFieldSpec::<
-                        shared::ast::InputTypeSpec<S>,
-                        S,
-                    > {
-                        r#type: Box::new(
-                            parse_noncallable_input_field_spec(
-                                registry, &l.r#type, None,
-                            )?
-                            .0,
-                        ),
-                        default_value: None,
-                        directive_invocations: Vec::new(),
-                        nullable: l.r#type.get_nullable(),
-                    }
-                    .into(),
-                    l.nullable,
-                ),
-            );
+            return Ok((
+                shared::ast::ArrayFieldSpec::<
+                    shared::ast::InputTypeSpec<InputStringType>,
+                    InputStringType,
+                > {
+                    r#type: Box::new(
+                        parse_noncallable_input_field_spec(
+                            registry, &l.r#type, None,
+                        )?
+                        .0,
+                    ),
+                    default_value: None,
+                    directive_invocations: Vec::new(),
+                    nullable: l.r#type.get_nullable(),
+                }
+                .into(),
+                l.nullable,
+            ));
         }
         file::shared::ast::TypeNode::Named(n) => {
             return Ok((
                 shared::ast::LiteralFieldSpec::<
-                    shared::ast::InputTypeSpec<S>,
-                    S,
+                    shared::ast::InputTypeSpec<InputStringType>,
+                    InputStringType,
                 > {
                     r#type: registry
-                        .get_input_type_spec_by_name(n.name.name)
+                        .get_input_type_spec_by_name(&n.name)
                         .ok_or(type_registry::Error::UnknownType(
-                        n.name.clone(),
-                    ))?,
+                            n.name.clone(),
+                        ))?,
                     default_value: Some(default_value),
                     directive_invocations: IndexMap::new(),
                 }
@@ -88,45 +95,58 @@ fn parse_noncallable_input_field_spec<
 }
 
 pub fn parse_field_definition<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: TypeRegistry<'buffer, S>,
+    'input_buffer,
+    'server_buffer,
+    InputStringType: shared::ast::AsStr<'input_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: TypeRegistry<'server_buffer, ServerStringType>,
 >(
     registry: &T,
-    node: &file::shared::ast::InputFieldDefinitionNode<'buffer>,
+    node: &file::shared::ast::InputFieldDefinitionNode<'input_buffer>,
 ) -> Result<
-    shared::ast::FieldDefinition<shared::ast::InputFieldSpec<S>, S>,
-    type_registry::Error<'buffer>,
+    shared::ast::FieldDefinition<
+        shared::ast::InputFieldSpec<InputStringType>,
+        InputStringType,
+    >,
+    type_registry::Error<'input_buffer>,
 > {
     let (spec, nullable) = parse_input_field_spec(registry, node)?;
     return Ok(shared::ast::FieldDefinition {
-        name: S::from_str(node.name.name),
+        name: InputStringType::from_str(node.name.name),
         spec,
         nullable,
     });
 }
 
 pub fn parse_field_definitions<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: TypeRegistry<'buffer, S>,
+    'input_buffer,
+    'server_buffer,
+    InputStringType: shared::ast::AsStr<'input_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: TypeRegistry<'server_buffer, ServerStringType>,
 >(
     registry: &T,
-    nodes: &[file::shared::ast::InputFieldDefinitionNode<'buffer>],
+    nodes: &[file::shared::ast::InputFieldDefinitionNode<'input_buffer>],
 ) -> Result<
     IndexMap<
-        S,
-        shared::ast::FieldDefinition<shared::ast::InputFieldSpec<S>, S>,
+        InputStringType,
+        shared::ast::FieldDefinition<
+            shared::ast::InputFieldSpec<InputStringType>,
+            InputStringType,
+        >,
     >,
-    type_registry::Error<'buffer>,
+    type_registry::Error<'input_buffer>,
 > {
     let mut arguments = IndexMap::<
-        S,
-        shared::ast::FieldDefinition<shared::ast::InputFieldSpec<S>, S>,
+        InputStringType,
+        shared::ast::FieldDefinition<
+            shared::ast::InputFieldSpec<InputStringType>,
+            InputStringType,
+        >,
     >::new();
     for field_definition_node in nodes {
         arguments.insert(
-            S::from_str(field_definition_node.name.name),
+            InputStringType::from_str(field_definition_node.name.name),
             parse_field_definition(registry, field_definition_node)?,
         );
     }

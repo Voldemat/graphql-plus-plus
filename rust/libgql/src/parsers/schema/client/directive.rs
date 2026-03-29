@@ -7,15 +7,20 @@ use crate::parsers::{
 };
 
 pub fn parse<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: server::type_registry::TypeRegistry<'buffer, S>,
+    'client_buffer,
+    'server_buffer,
+    ClientStringType: shared::ast::AsStr<'client_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
 >(
     registry: &T,
-    node: &file::client::ast::DirectiveDefinition<'buffer>,
-) -> Result<ast::ClientDirective<S>, errors::Error<'buffer, S>> {
+    node: &file::client::ast::DirectiveDefinition<'client_buffer>,
+) -> Result<
+    ast::ClientDirective<ClientStringType>,
+    errors::Error<'client_buffer, ClientStringType>,
+> {
     Ok(ast::ClientDirective {
-        name: S::from_str(node.name.name),
+        name: ClientStringType::from_str(node.name.name),
         arguments: server::input::parse_field_definitions(
             registry,
             &node.arguments,

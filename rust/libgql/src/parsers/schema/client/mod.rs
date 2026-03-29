@@ -16,14 +16,16 @@ use super::server;
 use super::shared;
 
 pub fn parse_client_schema<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: server::type_registry::TypeRegistry<'buffer, S>,
+    'client_buffer,
+    'server_buffer: 'client_buffer,
+    ClientStringType: shared::ast::AsStr<'client_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer> + 'server_buffer,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
 >(
-    server_registry: &T,
-    registry: &mut TypeRegistry<S>,
-    ast_nodes: &[file::client::ast::ASTNode<'buffer>],
-) -> Result<(), errors::Error<'buffer, S>> {
+    server_registry: &'server_buffer T,
+    registry: &mut TypeRegistry<ClientStringType>,
+    ast_nodes: &[file::client::ast::ASTNode<'client_buffer>],
+) -> Result<(), errors::Error<'client_buffer, ClientStringType>> {
     ast_nodes.iter().try_for_each(|node| {
         nodes::parse_first_pass(server_registry, registry, node)
     })?;

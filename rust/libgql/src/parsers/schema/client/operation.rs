@@ -9,14 +9,16 @@ use crate::parsers::{
 use super::type_registry::TypeRegistry;
 
 pub fn parse<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: server::type_registry::TypeRegistry<'buffer, S>,
+    'client_buffer,
+    'server_buffer: 'client_buffer,
+    ClientStringType: shared::ast::AsStr<'client_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer> + 'server_buffer,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
 >(
-    server_registry: &T,
-    registry: &mut TypeRegistry<S>,
-    node: &file::client::ast::OperationDefinition<'buffer>,
-) -> Result<(), errors::Error<'buffer, S>> {
+    server_registry: &'server_buffer T,
+    registry: &mut TypeRegistry<ClientStringType>,
+    node: &file::client::ast::OperationDefinition<'client_buffer>,
+) -> Result<(), errors::Error<'client_buffer, ClientStringType>> {
     let mut operation =
         registry.operations.swap_remove(node.name.name).unwrap();
     fragment::parse_selections(
@@ -27,6 +29,6 @@ pub fn parse<
     )?;
     registry
         .operations
-        .insert(S::from_str(node.name.name), operation);
+        .insert(ClientStringType::from_str(node.name.name), operation);
     return Ok(());
 }

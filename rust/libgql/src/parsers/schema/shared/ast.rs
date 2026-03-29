@@ -46,6 +46,23 @@ pub enum InputTypeSpec<S = String> {
     Enum(S),
 }
 
+impl<'s1, S: AsStr<'s1>> InputTypeSpec<S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>>(
+        self: &'s1 Self,
+    ) -> InputTypeSpec<NS>
+    where
+        's1: 's2,
+    {
+        match self {
+            Self::InputType(s) => {
+                InputTypeSpec::InputType(NS::from_str(s.to_str()))
+            }
+            Self::Scalar(s) => InputTypeSpec::Scalar(NS::from_str(s.to_str())),
+            Self::Enum(s) => InputTypeSpec::Enum(NS::from_str(s.to_str())),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Literal {
     Int(i64),
@@ -70,6 +87,31 @@ pub struct LiteralFieldSpec<T, S = String> {
         indexmap::IndexMap<S, ServerDirectiveInvocation<S>>,
 }
 
+impl<'s1, T, S: AsStr<'s1>> LiteralFieldSpec<T, S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>, T2>(
+        self: &'s1 Self,
+        clone_t: impl Fn(&'s1 T) -> T2,
+    ) -> LiteralFieldSpec<T2, NS>
+    where
+        's1: 's2,
+    {
+        LiteralFieldSpec {
+            r#type: clone_t(&self.r#type),
+            default_value: self.default_value.clone(),
+            directive_invocations: self
+                .directive_invocations
+                .iter()
+                .map(|(key, invocation)| {
+                    (
+                        NS::from_str(key.to_str()),
+                        invocation.clone_with_string_type::<NS>(),
+                    )
+                })
+                .collect(),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct ArrayFieldSpec<T, S = String> {
     pub r#type: Box<NonCallableFieldSpec<T, S>>,
@@ -78,10 +120,50 @@ pub struct ArrayFieldSpec<T, S = String> {
     pub directive_invocations: Vec<ServerDirectiveInvocation<S>>,
 }
 
+impl<'s1, T, S: AsStr<'s1>> ArrayFieldSpec<T, S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>, T2>(
+        self: &'s1 Self,
+        clone_t: impl Fn(&'s1 T) -> T2,
+    ) -> ArrayFieldSpec<T2, NS>
+    where
+        's1: 's2,
+    {
+        ArrayFieldSpec {
+            r#type: Box::new(self.r#type.clone_with_string_type(clone_t)),
+            nullable: self.nullable,
+            default_value: self.default_value.clone(),
+            directive_invocations: self
+                .directive_invocations
+                .iter()
+                .map(ServerDirectiveInvocation::clone_with_string_type::<NS>)
+                .collect(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, derive_more::From)]
 pub enum NonCallableFieldSpec<T, S = String> {
     Literal(LiteralFieldSpec<T, S>),
     Array(ArrayFieldSpec<T, S>),
+}
+
+impl<'s1, T, S: AsStr<'s1>> NonCallableFieldSpec<T, S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>, T2>(
+        self: &'s1 Self,
+        clone_t: impl Fn(&'s1 T) -> T2,
+    ) -> NonCallableFieldSpec<T2, NS>
+    where
+        's1: 's2,
+    {
+        match self {
+            Self::Literal(l) => {
+                NonCallableFieldSpec::Literal(l.clone_with_string_type(clone_t))
+            }
+            Self::Array(a) => {
+                NonCallableFieldSpec::Array(a.clone_with_string_type(clone_t))
+            }
+        }
+    }
 }
 
 impl<T, S> NonCallableFieldSpec<T, S> {
@@ -115,6 +197,22 @@ pub struct FieldDefinition<T, S = String> {
     pub nullable: bool,
 }
 
+impl<'s1, T, S: AsStr<'s1>> FieldDefinition<T, S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>, T2>(
+        self: &'s1 Self,
+        clone_spec: impl Fn(&'s1 T) -> T2,
+    ) -> FieldDefinition<T2, NS>
+    where
+        's1: 's2,
+    {
+        FieldDefinition {
+            name: NS::from_str(self.name.to_str()),
+            spec: clone_spec(&self.spec),
+            nullable: self.nullable,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct InputType<S = String> {
     pub name: S,
@@ -128,6 +226,27 @@ pub enum ArgumentLiteralValue<S = String> {
     Float(f64),
     Boolean(bool),
     EnumValue(S),
+}
+
+impl<'s1, S: AsStr<'s1>> ArgumentLiteralValue<S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>>(
+        self: &'s1 Self,
+    ) -> ArgumentLiteralValue<NS>
+    where
+        's1: 's2,
+    {
+        match self {
+            Self::String(s) => {
+                ArgumentLiteralValue::String(NS::from_str(s.to_str()))
+            }
+            Self::Int(i) => ArgumentLiteralValue::Int(*i),
+            Self::Float(f) => ArgumentLiteralValue::Float(*f),
+            Self::Boolean(b) => ArgumentLiteralValue::Boolean(*b),
+            Self::EnumValue(s) => {
+                ArgumentLiteralValue::EnumValue(NS::from_str(s.to_str()))
+            }
+        }
+    }
 }
 
 impl From<i64> for ArgumentLiteralValue {
@@ -154,11 +273,47 @@ pub enum ArgumentValue<S = String> {
     Literal(ArgumentLiteralValue<S>),
 }
 
+impl<'s1, S: AsStr<'s1>> ArgumentValue<S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>>(
+        self: &'s1 Self,
+    ) -> ArgumentValue<NS>
+    where
+        's1: 's2,
+    {
+        match self {
+            Self::Ref(r) => ArgumentValue::Ref(NS::from_str(r.to_str())),
+            Self::Literal(value) => {
+                ArgumentValue::Literal(value.clone_with_string_type())
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct FieldSelectionArgument<S = String> {
     pub name: S,
     pub value: ArgumentValue<S>,
     pub r#type: FieldDefinition<InputFieldSpec<S>, S>,
+}
+
+impl<'s1, S: AsStr<'s1>> FieldSelectionArgument<S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>>(
+        self: &'s1 Self,
+    ) -> FieldSelectionArgument<NS>
+    where
+        's1: 's2,
+    {
+        FieldSelectionArgument {
+            name: NS::from_str(self.name.to_str()),
+            value: self.value.clone_with_string_type::<NS>(),
+            r#type: self.r#type.clone_with_string_type(|s| {
+                InputFieldSpec::clone_with_string_type(
+                    s,
+                    InputTypeSpec::clone_with_string_type::<NS>,
+                )
+            }),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -172,4 +327,27 @@ pub struct ServerDirective<S = String> {
 pub struct ServerDirectiveInvocation<S = String> {
     pub directive: S,
     pub arguments: indexmap::IndexMap<S, FieldSelectionArgument<S>>,
+}
+
+impl<'s1, S: AsStr<'s1>> ServerDirectiveInvocation<S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>>(
+        self: &'s1 Self,
+    ) -> ServerDirectiveInvocation<NS>
+    where
+        's1: 's2,
+    {
+        ServerDirectiveInvocation {
+            directive: NS::from_str(self.directive.to_str()),
+            arguments: self
+                .arguments
+                .iter()
+                .map(|(key, argument)| {
+                    (
+                        NS::from_str(key.to_str()),
+                        argument.clone_with_string_type::<NS>(),
+                    )
+                })
+                .collect(),
+        }
+    }
 }

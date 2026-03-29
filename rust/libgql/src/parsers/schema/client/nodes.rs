@@ -9,30 +9,35 @@ use crate::parsers::{
 use super::type_registry::TypeRegistry;
 
 fn fragment_spec_from_name<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: server::type_registry::TypeRegistry<'buffer, S>,
+    'client_buffer,
+    'server_buffer,
+    ClientStringType: shared::ast::AsStr<'client_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
 >(
     registry: &T,
-    name: &file::shared::ast::NameNode<'buffer>,
-) -> Result<ast::FragmentSpec<S>, errors::Error<'buffer, S>> {
+    name: &file::shared::ast::NameNode<'client_buffer>,
+) -> Result<
+    ast::FragmentSpec<ClientStringType>,
+    errors::Error<'client_buffer, ClientStringType>,
+> {
     if registry.has_object_with_name(name.name) {
         return Ok(ast::ObjectFragmentSpec {
-            r#type: S::from_str(name.name),
+            r#type: ClientStringType::from_str(name.name),
             selections: Vec::new(),
         }
         .into());
     };
     if registry.has_union_with_name(name.name) {
         return Ok(ast::UnionFragmentSpec {
-            r#type: S::from_str(name.name),
+            r#type: ClientStringType::from_str(name.name),
             selections: Vec::new(),
         }
         .into());
     };
     if registry.has_interface_with_name(name.name) {
         return Ok(ast::ObjectFragmentSpec {
-            r#type: S::from_str(name.name),
+            r#type: ClientStringType::from_str(name.name),
             selections: Vec::new(),
         }
         .into());
@@ -69,14 +74,16 @@ fn fragment_spec_from_optype<'buffer, S: shared::ast::AsStr<'buffer>>(
 }
 
 pub fn parse_first_pass<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: server::type_registry::TypeRegistry<'buffer, S>,
+    'client_buffer,
+    'server_buffer,
+    ClientStringType: shared::ast::AsStr<'client_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
 >(
     server_registry: &T,
-    registry: &mut TypeRegistry<S>,
-    node: &file::client::ast::ASTNode<'buffer>,
-) -> Result<(), errors::Error<'buffer, S>> {
+    registry: &mut TypeRegistry<ClientStringType>,
+    node: &file::client::ast::ASTNode<'client_buffer>,
+) -> Result<(), errors::Error<'client_buffer, ClientStringType>> {
     match node {
         file::client::ast::ASTNode::Fragment(fragment) => {
             if registry.fragments.contains_key(fragment.name.name) {
@@ -85,10 +92,10 @@ pub fn parse_first_pass<
                 ));
             };
             registry.fragments.insert(
-                S::from_str(fragment.name.name),
+                ClientStringType::from_str(fragment.name.name),
                 ast::Fragment {
-                    name: S::from_str(fragment.name.name),
-                    source_text: S::from_str(
+                    name: ClientStringType::from_str(fragment.name.name),
+                    source_text: ClientStringType::from_str(
                         shared::source_text::extract_from_fragment(fragment),
                     ),
                     spec: fragment_spec_from_name(
@@ -111,10 +118,10 @@ pub fn parse_first_pass<
                 &operation.parameters,
             )?;
             registry.operations.insert(
-                S::from_str(operation.name.name),
+                ClientStringType::from_str(operation.name.name),
                 ast::Operation {
-                    name: S::from_str(operation.name.name),
-                    source_text: S::from_str(
+                    name: ClientStringType::from_str(operation.name.name),
+                    source_text: ClientStringType::from_str(
                         shared::source_text::extract_from_operation(operation),
                     ),
                     r#type: operation.r#type,
@@ -138,7 +145,7 @@ pub fn parse_first_pass<
                 ));
             }
             registry.directives.insert(
-                S::from_str(node.name.name),
+                ClientStringType::from_str(node.name.name),
                 directive::parse(server_registry, node)?,
             );
             Ok(())
@@ -147,14 +154,16 @@ pub fn parse_first_pass<
 }
 
 pub fn parse_second_pass<
-    'buffer,
-    S: shared::ast::AsStr<'buffer>,
-    T: server::type_registry::TypeRegistry<'buffer, S>,
+    'client_buffer,
+    'server_buffer: 'client_buffer,
+    ClientStringType: shared::ast::AsStr<'client_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer> + 'server_buffer,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
 >(
-    server_registry: &T,
-    registry: &mut TypeRegistry<S>,
-    node: &file::client::ast::ASTNode<'buffer>,
-) -> Result<(), errors::Error<'buffer, S>> {
+    server_registry: &'server_buffer T,
+    registry: &mut TypeRegistry<ClientStringType>,
+    node: &file::client::ast::ASTNode<'client_buffer>,
+) -> Result<(), errors::Error<'client_buffer, ClientStringType>> {
     match node {
         file::client::ast::ASTNode::Fragment(fragment) => {
             fragment::parse(server_registry, registry, fragment)
