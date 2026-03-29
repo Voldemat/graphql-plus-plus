@@ -143,16 +143,21 @@ pub fn generate_resolver_nodes(
     let object_rust_name = super::shared::format_field_name(&object_name);
     let resolver_fn_name = format!("{}_{}", object_rust_name, rust_name);
     let existing_code = existing_resolvers_code.get(&resolver_fn_name);
+    let return_type = super::shared::generate_field_type(
+        config,
+        field,
+        generate_object_field_spec_type,
+        false,
+    );
     let resolver_fn = scope
         .new_fn(&resolver_fn_name)
         .ret(format!(
             "Result<{}, libgql::executor::ast::ResolverError>",
-            super::shared::generate_field_type(
-                config,
-                field,
-                generate_object_field_spec_type,
-                false
-            )
+            if object_name == "Subscription" {
+                format!("impl futures_util::Stream<Item={}>", return_type)
+            } else {
+                return_type
+            }
         ))
         .line(
             existing_code.unwrap_or(
@@ -218,17 +223,29 @@ pub fn generate_resolver_nodes(
         )
         .arg("variables", "&'args libgql::executor::ResolvedVariables")
         .ret(format!(
-            "libgql::executor::ast::ResolverFuture<'args, {}>",
+            "{}<'args, {}>",
+            if object_name == "Subscription" {
+                "libgql::executor::subscriptions::SubscriptionResolverFuture"
+            } else {
+                "libgql::executor::ast::ResolverFuture"
+            },
             config.scalar_type
         ));
     for line in arg_lines {
         wrapper_fn.line(line);
     }
     wrapper_fn.line("Box::pin(async move {");
-    wrapper_fn.line(format!(
-        "    {}({}).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<{}>>)",
-        resolver_fn_name, call_arguments_str, config.scalar_type
-    ));
+    if object_name == "Subscription" {
+        wrapper_fn.line(format!(
+            "    {}({}).await.map(|s| Box::pin(s.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<{}>>)) as libgql::executor::subscriptions::SubscriptionResolverStream<{}>)",
+            resolver_fn_name, call_arguments_str, config.scalar_type, config.scalar_type
+        ));
+    } else {
+        wrapper_fn.line(format!(
+            "    {}({}).await.map(|v| Box::new(v) as Box<libgql::executor::ast::ResolverRoot<{}>>)",
+            resolver_fn_name, call_arguments_str, config.scalar_type
+        ));
+    }
     wrapper_fn.line("})");
     wrapper_fn_name
 }
