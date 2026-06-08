@@ -1,7 +1,7 @@
 use crate::parsers::{file, schema::shared};
 
-pub type ArgType = shared::ast::FieldDefinition<
-    shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
+pub type ArgType = shared::ast::runtime::FieldDefinition<
+    shared::ast::runtime::NonCallableFieldSpec<shared::ast::runtime::InputTypeSpec>,
 >;
 
 #[derive(Debug)]

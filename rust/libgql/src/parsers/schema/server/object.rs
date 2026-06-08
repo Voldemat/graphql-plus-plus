@@ -32,19 +32,19 @@ pub fn parse_fields<'buffer>(
     fields: &[file::server::ast::FieldDefinitionNode<'buffer>],
     registry: &HashMapTypeRegistry,
 ) -> Result<
-    IndexMap<String, shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
+    IndexMap<String, shared::ast::runtime::FieldDefinition<ast::ObjectFieldSpec>>,
     errors::Error<'buffer>,
 > {
     let mut m = IndexMap::<
         String,
-        shared::ast::FieldDefinition<ast::ObjectFieldSpec>,
+        shared::ast::runtime::FieldDefinition<ast::ObjectFieldSpec>,
     >::new();
     for field_definition_node in fields.iter() {
         let (spec, nullable) =
             parse_object_field_spec(&field_definition_node, registry)?;
         m.insert(
             field_definition_node.name.name.to_string(),
-            shared::ast::FieldDefinition {
+            shared::ast::runtime::FieldDefinition {
                 name: field_definition_node.name.name.to_string(),
                 spec,
                 nullable,
@@ -82,16 +82,16 @@ pub fn parse_object_field_spec<'buffer>(
 
 fn parse_noncallable_object_field_spec<'buffer>(
     node: &file::shared::ast::TypeNode<'buffer>,
-    directives: &[shared::ast::ServerDirectiveInvocation],
+    directives: &[shared::ast::runtime::ServerDirectiveInvocation],
     registry: &HashMapTypeRegistry,
 ) -> Result<
-    (shared::ast::NonCallableFieldSpec<ast::ObjectTypeSpec>, bool),
+    (shared::ast::runtime::NonCallableFieldSpec<ast::ObjectTypeSpec>, bool),
     errors::Error<'buffer>,
 > {
     match node {
         file::shared::ast::TypeNode::List(l) => {
             return Ok((
-                shared::ast::ArrayFieldSpec::<ast::ObjectTypeSpec> {
+                shared::ast::runtime::ArrayFieldSpec::<ast::ObjectTypeSpec> {
                     r#type: Box::new(
                         parse_noncallable_object_field_spec(
                             &l.r#type,
@@ -110,7 +110,7 @@ fn parse_noncallable_object_field_spec<'buffer>(
         }
         file::shared::ast::TypeNode::Named(n) => {
             return Ok((
-                shared::ast::LiteralFieldSpec::<ast::ObjectTypeSpec> {
+                shared::ast::runtime::LiteralFieldSpec::<ast::ObjectTypeSpec> {
                     r#type: registry.get_type_for_object(&n.name)?,
                     default_value: None,
                     directive_invocations: directives

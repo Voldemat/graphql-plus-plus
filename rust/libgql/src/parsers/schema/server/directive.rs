@@ -31,7 +31,10 @@ pub fn parse_definition<'buffer>(
 pub fn parse_invocation<'buffer>(
     node: &file::shared::ast::DirectiveInvocationNode<'buffer>,
     registry: &HashMapTypeRegistry,
-) -> Result<shared::ast::ServerDirectiveInvocation, errors::Error<'buffer>> {
+) -> Result<
+    shared::ast::runtime::ServerDirectiveInvocation,
+    errors::Error<'buffer>,
+> {
     let Some(directive) = registry.directives.get(node.name.name) else {
         return Err(errors::Error::UnknownServerDirective(node.name.clone()));
     };
@@ -40,7 +43,7 @@ pub fn parse_invocation<'buffer>(
         directive,
         registry,
     )?;
-    return Ok(shared::ast::ServerDirectiveInvocation {
+    return Ok(shared::ast::runtime::ServerDirectiveInvocation {
         directive: node.name.name.to_string(),
         arguments,
     });
@@ -49,8 +52,10 @@ pub fn parse_invocation<'buffer>(
 pub fn parse_invocations<'buffer>(
     nodes: &[file::shared::ast::DirectiveInvocationNode<'buffer>],
     registry: &HashMapTypeRegistry,
-) -> Result<Vec<shared::ast::ServerDirectiveInvocation>, errors::Error<'buffer>>
-{
+) -> Result<
+    Vec<shared::ast::runtime::ServerDirectiveInvocation>,
+    errors::Error<'buffer>,
+> {
     return nodes
         .iter()
         .map(|v| parse_invocation(v, registry))

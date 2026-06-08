@@ -13,15 +13,15 @@ fn resolve_literal_array<
     StringType: shared::ast::AsStr<'buffer>,
 >(
     registry: &R,
-    literal_type: &shared::ast::LiteralFieldSpec<
-        shared::ast::InputTypeSpec<StringType>,
+    literal_type: &shared::ast::runtime::LiteralFieldSpec<
+        shared::ast::runtime::InputTypeSpec<StringType>,
         StringType,
     >,
     nullable: bool,
     elements: Vec<Value<S>>,
 ) -> Result<ResolvedVariable, String> {
     match &literal_type.r#type {
-        shared::ast::InputTypeSpec::Enum(e) => {
+        shared::ast::runtime::InputTypeSpec::Enum(e) => {
             R::parse_enum_array(registry, e.to_str(), elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Scalar(scalar),
@@ -35,7 +35,7 @@ fn resolve_literal_array<
                 }
             }).collect::<Result<Vec<String>, String>>()?)
         }
-        shared::ast::InputTypeSpec::Scalar(scalar_name) => {
+        shared::ast::runtime::InputTypeSpec::Scalar(scalar_name) => {
             match nullable {
             false => R::parse_scalar_array(registry, scalar_name.to_str(), elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
@@ -64,7 +64,7 @@ fn resolve_literal_array<
             }).collect::<Result<Vec<_>, String>>()?)
             }
         }
-        shared::ast::InputTypeSpec::InputType(input_type) => {
+        shared::ast::runtime::InputTypeSpec::InputType(input_type) => {
             R::parse_input_array(registry, input_type.to_str(), elements.into_iter().map(|e| {
                 if let Value::NonNullable(NonNullableValue::Literal(
                     LiteralValue::Object(object),
@@ -89,14 +89,14 @@ pub fn resolve_array<
     StringType: shared::ast::AsStr<'buffer>,
 >(
     registry: &R,
-    array_type: &shared::ast::ArrayFieldSpec<
-        shared::ast::InputTypeSpec<StringType>,
+    array_type: &shared::ast::runtime::ArrayFieldSpec<
+        shared::ast::runtime::InputTypeSpec<StringType>,
         StringType,
     >,
     elements: Vec<Value<S>>,
 ) -> Result<ResolvedVariable, String> {
     match array_type.r#type.as_ref() {
-        shared::ast::NonCallableFieldSpec::Literal(literal) => {
+        shared::ast::runtime::NonCallableFieldSpec::Literal(literal) => {
             resolve_literal_array(
                 registry,
                 literal,
@@ -104,7 +104,7 @@ pub fn resolve_array<
                 elements,
             )
         }
-        shared::ast::NonCallableFieldSpec::Array(array) => {
+        shared::ast::runtime::NonCallableFieldSpec::Array(array) => {
             if !array_type.nullable {
                 let mut a = Vec::new();
                 for element in elements {
@@ -166,7 +166,9 @@ mod tests {
             todo!()
         }
 
-        fn from_literal(_: &shared::ast::Literal) -> Result<Self, String> {
+        fn from_literal(
+            _: &shared::ast::runtime::Literal,
+        ) -> Result<Self, String> {
             todo!()
         }
     }
@@ -193,16 +195,19 @@ mod tests {
         let result =
             resolve_array::<TestScalar, HashMapRegistry<TestScalar>, String>(
                 &registry,
-                &shared::ast::ArrayFieldSpec::<shared::ast::InputTypeSpec> {
+                &shared::ast::runtime::ArrayFieldSpec::<
+                    shared::ast::runtime::InputTypeSpec,
+                > {
                     nullable: true,
                     default_value: Some(None),
                     r#type: Box::new(
-                        shared::ast::NonCallableFieldSpec::Literal(
-                            shared::ast::LiteralFieldSpec {
+                        shared::ast::runtime::NonCallableFieldSpec::Literal(
+                            shared::ast::runtime::LiteralFieldSpec {
                                 default_value: Some(None),
-                                r#type: shared::ast::InputTypeSpec::Scalar(
-                                    "Empty".to_string(),
-                                ),
+                                r#type:
+                                    shared::ast::runtime::InputTypeSpec::Scalar(
+                                        "Empty".to_string(),
+                                    ),
                                 directive_invocations: IndexMap::new(),
                             },
                         ),
@@ -232,16 +237,16 @@ mod tests {
             String,
         >(
             &registry,
-            &shared::ast::ArrayFieldSpec {
-                r#type: Box::new(shared::ast::NonCallableFieldSpec::Array(
-                    shared::ast::ArrayFieldSpec::<shared::ast::InputTypeSpec> {
+            &shared::ast::runtime::ArrayFieldSpec {
+                r#type: Box::new(shared::ast::runtime::NonCallableFieldSpec::Array(
+                    shared::ast::runtime::ArrayFieldSpec::<shared::ast::runtime::InputTypeSpec> {
                         nullable: true,
                         default_value: Some(None),
                         r#type: Box::new(
-                            shared::ast::NonCallableFieldSpec::Literal(
-                                shared::ast::LiteralFieldSpec {
+                            shared::ast::runtime::NonCallableFieldSpec::Literal(
+                                shared::ast::runtime::LiteralFieldSpec {
                                     default_value: Some(None),
-                                    r#type: shared::ast::InputTypeSpec::Scalar(
+                                    r#type: shared::ast::runtime::InputTypeSpec::Scalar(
                                         "Empty".to_string(),
                                     ),
                                     directive_invocations: IndexMap::new(),

@@ -19,16 +19,16 @@ fn resolve_type_spec<
     StringType: shared::ast::AsStr<'buffer>,
 >(
     registry: &R,
-    spec: &shared::ast::InputTypeSpec<StringType>,
+    spec: &shared::ast::runtime::InputTypeSpec<StringType>,
     variable: LiteralValue<S>,
 ) -> Result<ResolvedVariable, String> {
     match (spec, variable) {
         (
-            shared::ast::InputTypeSpec::Scalar(scalar_name),
+            shared::ast::runtime::InputTypeSpec::Scalar(scalar_name),
             LiteralValue::Scalar(scalar),
         ) => Ok(R::parse_scalar(registry, scalar_name.to_str(), scalar)
             .map_err(|e| format!("{}: {}", scalar_name.to_str(), e))?),
-        (shared::ast::InputTypeSpec::Scalar(scalar_name), other) => {
+        (shared::ast::runtime::InputTypeSpec::Scalar(scalar_name), other) => {
             Err(format!(
                 "Received invalid type for scalar({}): {:?}",
                 scalar_name.to_str(),
@@ -36,24 +36,26 @@ fn resolve_type_spec<
             ))
         }
         (
-            shared::ast::InputTypeSpec::Enum(enum_type),
+            shared::ast::runtime::InputTypeSpec::Enum(enum_type),
             LiteralValue::Scalar(scalar),
         ) => scalar
             .try_to_string()
             .map(|s| R::parse_enum(registry, enum_type.to_str(), s))
             .flatten(),
-        (shared::ast::InputTypeSpec::Enum(enum_type), other) => Err(format!(
-            "Received invalid type for enum({}): {:?}",
-            enum_type.to_str(),
-            other
-        )),
+        (shared::ast::runtime::InputTypeSpec::Enum(enum_type), other) => {
+            Err(format!(
+                "Received invalid type for enum({}): {:?}",
+                enum_type.to_str(),
+                other
+            ))
+        }
         (
-            shared::ast::InputTypeSpec::InputType(input_type),
+            shared::ast::runtime::InputTypeSpec::InputType(input_type),
             LiteralValue::Object(object),
         ) => {
             return Ok(R::parse_input(registry, input_type.to_str(), object)?);
         }
-        (shared::ast::InputTypeSpec::InputType(input_type), other) => {
+        (shared::ast::runtime::InputTypeSpec::InputType(input_type), other) => {
             Err(format!(
                 "Received invalid type for input({}): {:?}",
                 input_type.to_str(),
@@ -70,13 +72,13 @@ fn resolve_literal<
     StringType: shared::ast::AsStr<'buffer>,
 >(
     registry: &R,
-    spec: &shared::ast::LiteralFieldSpec<
-        shared::ast::InputTypeSpec<StringType>,
+    spec: &shared::ast::runtime::LiteralFieldSpec<
+        shared::ast::runtime::InputTypeSpec<StringType>,
         StringType,
     >,
     var: LiteralValue<S>,
 ) -> Result<ResolvedVariable, String> {
-    return resolve_type_spec(registry, &spec.r#type, var);
+    return resolve_type_spec::<S, R, StringType>(registry, &spec.r#type, var);
 }
 
 fn resolve_operation_parameter<
@@ -86,8 +88,8 @@ fn resolve_operation_parameter<
     StringType: shared::ast::AsStr<'buffer>,
 >(
     registry: &R,
-    param: &shared::ast::FieldDefinition<
-        shared::ast::InputFieldSpec<StringType>,
+    param: &shared::ast::runtime::FieldDefinition<
+        shared::ast::runtime::InputFieldSpec<StringType>,
         StringType,
     >,
     variable: Value<S>,
@@ -97,20 +99,21 @@ fn resolve_operation_parameter<
             return Ok(None);
         } else if param.spec.has_default_value() {
             match &param.spec {
-                shared::ast::NonCallableFieldSpec::Array(_) => {
+                shared::ast::runtime::NonCallableFieldSpec::Array(_) => {
                     return Ok(None);
                 }
-                shared::ast::NonCallableFieldSpec::Literal(spec) => {
+                shared::ast::runtime::NonCallableFieldSpec::Literal(spec) => {
                     return Ok(Some(resolve_literal(
                         registry,
-                        spec,
+                        &spec,
                         LiteralValue::Scalar(S::from_literal(
-                            &spec
-                                .default_value
-                                .as_ref()
-                                .unwrap()
-                                .as_ref()
-                                .unwrap(),
+                            shared::ast::traits::Literal::get_ref(
+                                spec.default_value
+                                    .as_ref()
+                                    .unwrap()
+                                    .as_ref()
+                                    .unwrap(),
+                            ),
                         )?),
                     )?));
                 }
@@ -123,9 +126,9 @@ fn resolve_operation_parameter<
         }
     };
     match &param.spec {
-        shared::ast::NonCallableFieldSpec::Array(spec) => {
+        shared::ast::runtime::NonCallableFieldSpec::Array(spec) => {
             if let NonNullableValue::Array(array) = nonnullable_variable {
-                Ok(Some(array::resolve_array(registry, spec, array)?))
+                Ok(Some(array::resolve_array(registry, &spec, array)?))
             } else {
                 Err(format!(
                     "Expected array for parameter: {}, received: {:?}",
@@ -134,9 +137,9 @@ fn resolve_operation_parameter<
                 ))
             }
         }
-        shared::ast::NonCallableFieldSpec::Literal(spec) => {
+        shared::ast::runtime::NonCallableFieldSpec::Literal(spec) => {
             if let NonNullableValue::Literal(l) = nonnullable_variable {
-                Ok(Some(resolve_literal(registry, spec, l)?))
+                Ok(Some(resolve_literal(registry, &spec, l)?))
             } else {
                 Err(format!(
                     "Expected literal variable for parameter: {}, received: {:?}",
@@ -157,8 +160,8 @@ pub fn resolve_operation_parameters<
     registry: &R,
     op_parameters: &IndexMap<
         StringType,
-        shared::ast::FieldDefinition<
-            shared::ast::InputFieldSpec<StringType>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec<StringType>,
             StringType,
         >,
     >,

@@ -304,7 +304,7 @@ fn fragment_spec_from_field_definition<
 >(
     server_registry: &'server_buffer T,
     registry: &TypeRegistry<ClientStringType>,
-    field: &'server_buffer shared::ast::FieldDefinition<
+    field: &'server_buffer shared::ast::runtime::FieldDefinition<
         server::ast::ObjectFieldSpec<ServerStringType>,
         ServerStringType,
     >,
@@ -371,7 +371,7 @@ fn parse_selection_arguments<
 ) -> Result<
     IndexMap<
         ClientStringType,
-        shared::ast::FieldSelectionArgument<ClientStringType>,
+        shared::ast::runtime::FieldSelectionArgument<ClientStringType>,
     >,
     errors::Error<'client_buffer, ClientStringType>,
 > {
@@ -390,16 +390,16 @@ fn parse_argument_literal_value<
     ClientStringType: shared::ast::AsStr<'client_buffer>,
     ServerStringType: shared::ast::AsStr<'server_buffer>,
 >(
-    type_spec: &'server_buffer shared::ast::InputTypeSpec<ServerStringType>,
+    type_spec: &'server_buffer shared::ast::runtime::InputTypeSpec<ServerStringType>,
     node: &file::shared::ast::LiteralNode<'client_buffer>,
 ) -> Result<
-    shared::ast::ArgumentLiteralValue<ClientStringType>,
+    shared::ast::runtime::ArgumentLiteralValue<ClientStringType>,
     errors::Error<'client_buffer, ClientStringType>,
 > {
     match node {
         file::shared::ast::LiteralNode::Int(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => s.to_str() == "Int",
+                shared::ast::runtime::InputTypeSpec::Scalar(s) => s.to_str() == "Int",
                 _ => false,
             };
             if !is_valid {
@@ -408,12 +408,12 @@ fn parse_argument_literal_value<
                     node: node.clone(),
                 })
             } else {
-                Ok(shared::ast::ArgumentLiteralValue::Int(i.value))
+                Ok(shared::ast::runtime::ArgumentLiteralValue::Int(i.value))
             }
         }
         file::shared::ast::LiteralNode::Float(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => s.to_str() == "Float",
+                shared::ast::runtime::InputTypeSpec::Scalar(s) => s.to_str() == "Float",
                 _ => false,
             };
             if !is_valid {
@@ -422,12 +422,12 @@ fn parse_argument_literal_value<
                     node: node.clone(),
                 })
             } else {
-                Ok(shared::ast::ArgumentLiteralValue::Float(i.value))
+                Ok(shared::ast::runtime::ArgumentLiteralValue::Float(i.value))
             }
         }
         file::shared::ast::LiteralNode::Boolean(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => {
+                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
                     s.to_str() == "Boolean"
                 }
                 _ => false,
@@ -438,12 +438,12 @@ fn parse_argument_literal_value<
                     node: node.clone(),
                 })
             } else {
-                Ok(shared::ast::ArgumentLiteralValue::Boolean(i.value))
+                Ok(shared::ast::runtime::ArgumentLiteralValue::Boolean(i.value))
             }
         }
         file::shared::ast::LiteralNode::String(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => s.to_str() == "String",
+                shared::ast::runtime::InputTypeSpec::Scalar(s) => s.to_str() == "String",
                 _ => false,
             };
             if !is_valid {
@@ -452,14 +452,14 @@ fn parse_argument_literal_value<
                     node: node.clone(),
                 })
             } else {
-                Ok(shared::ast::ArgumentLiteralValue::String(
+                Ok(shared::ast::runtime::ArgumentLiteralValue::String(
                     ClientStringType::from_str(i.value),
                 ))
             }
         }
         file::shared::ast::LiteralNode::EnumValue(i) => {
             let is_valid = match type_spec {
-                shared::ast::InputTypeSpec::Scalar(s) => s.to_str() == "String",
+                shared::ast::runtime::InputTypeSpec::Scalar(s) => s.to_str() == "String",
                 _ => false,
             };
             if !is_valid {
@@ -468,7 +468,7 @@ fn parse_argument_literal_value<
                     node: node.clone(),
                 })
             } else {
-                Ok(shared::ast::ArgumentLiteralValue::EnumValue(
+                Ok(shared::ast::runtime::ArgumentLiteralValue::EnumValue(
                     ClientStringType::from_str(i.value),
                 ))
             }
@@ -485,7 +485,7 @@ fn parse_selection_argument<
     spec: &'server_buffer server::ast::CallableFieldSpec<ServerStringType>,
     argument: &file::shared::ast::Argument<'client_buffer>,
 ) -> Result<
-    shared::ast::FieldSelectionArgument<ClientStringType>,
+    shared::ast::runtime::FieldSelectionArgument<ClientStringType>,
     errors::Error<'client_buffer, ClientStringType>,
 > {
     let Some(t) = spec.arguments.get(argument.name.name) else {
@@ -495,11 +495,11 @@ fn parse_selection_argument<
         .into());
     };
     let type_spec = t.spec.get_type_spec();
-    return Ok(shared::ast::FieldSelectionArgument {
+    return Ok(shared::ast::runtime::FieldSelectionArgument {
         name: ClientStringType::from_str(argument.name.name),
         value: match &argument.value {
             file::shared::ast::ArgumentValue::NameNode(node) => {
-                shared::ast::ArgumentValue::Ref(ClientStringType::from_str(
+                shared::ast::runtime::ArgumentValue::Ref(ClientStringType::from_str(
                     node.name,
                 ))
                 .into()
@@ -510,7 +510,7 @@ fn parse_selection_argument<
         },
         r#type: t.clone_with_string_type(|s| {
             s.clone_with_string_type(
-                shared::ast::InputTypeSpec::clone_with_string_type,
+                shared::ast::runtime::InputTypeSpec::clone_with_string_type,
             )
         }),
     });
@@ -528,7 +528,7 @@ fn parse_object_field_selection_node<
     r#type: errors::FieldType<ClientStringType>,
     fields: &'server_buffer IndexMap<
         ServerStringType,
-        shared::ast::FieldDefinition<
+        shared::ast::runtime::FieldDefinition<
             server::ast::ObjectFieldSpec<ServerStringType>,
             ServerStringType,
         >,

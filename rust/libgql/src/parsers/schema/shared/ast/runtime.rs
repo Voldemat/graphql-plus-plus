@@ -1,42 +1,21 @@
 use crate::parsers::file;
 
-pub trait AsStr<'s>:
-    Ord
-    + std::hash::Hash
-    + std::borrow::Borrow<str>
-    + Clone
-    + Send
-    + Sync
-    + std::fmt::Debug
-{
-    fn to_str(self: &Self) -> &str;
-    fn from_str(s: &'s str) -> Self;
-}
-
-impl<'s> AsStr<'s> for &'s str {
-    fn to_str(self: &Self) -> &str {
-        *self
-    }
-
-    fn from_str(s: &'s str) -> Self {
-        s
-    }
-}
-
-impl<'s> AsStr<'s> for String {
-    fn to_str(self: &Self) -> &str {
-        self.as_str()
-    }
-
-    fn from_str(s: &'s str) -> Self {
-        s.to_string()
-    }
-}
+use super::AsStr;
 
 #[derive(Debug, Clone)]
 pub struct Enum {
     pub name: String,
     pub values: Vec<String>,
+}
+
+impl super::traits::Enum for Enum {
+    fn get_name(self: &Self) -> &str {
+        &self.name
+    }
+
+    fn has_value(self: &Self, value: &str) -> bool {
+        self.values.iter().any(|v| v == value)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -63,6 +42,20 @@ impl<'s1, S: AsStr<'s1>> InputTypeSpec<S> {
     }
 }
 
+impl super::traits::InputTypeSpec for InputTypeSpec {
+    fn get_ref(self: &Self) -> super::traits::InputTypeSpecRef<'_> {
+        match self {
+            Self::InputType(i) => {
+                super::traits::InputTypeSpecRef::InputType(i.as_str())
+            }
+            Self::Scalar(s) => {
+                super::traits::InputTypeSpecRef::Scalar(s.as_str())
+            }
+            Self::Enum(e) => super::traits::InputTypeSpecRef::Enum(e.as_str()),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Literal {
     Int(i64),
@@ -71,12 +64,56 @@ pub enum Literal {
     Boolean(bool),
 }
 
+impl super::traits::Literal for Literal {
+    fn get_ref(self: &Self) -> super::traits::LiteralRef<'_> {
+        match self {
+            Self::Int(i) => super::traits::LiteralRef::Int(i),
+            Self::Float(f) => super::traits::LiteralRef::Float(f),
+            Self::Boolean(b) => super::traits::LiteralRef::Boolean(b),
+            Self::String(s) => super::traits::LiteralRef::String(s.as_str()),
+        }
+    }
+}
+
+impl Literal {
+    pub fn parse(node: &file::shared::ast::LiteralNode) -> Self {
+        match node {
+            file::shared::ast::LiteralNode::Int(i) => Self::Int(i.value),
+            file::shared::ast::LiteralNode::Float(i) => Self::Float(i.value),
+            file::shared::ast::LiteralNode::Boolean(i) => {
+                Self::Boolean(i.value)
+            }
+            file::shared::ast::LiteralNode::String(i) => {
+                Self::String(i.value.to_string())
+            }
+            file::shared::ast::LiteralNode::EnumValue(i) => {
+                Self::String(i.value.to_string())
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum ArrayLiteral {
     Int(Vec<i64>),
     Float(Vec<f64>),
     String(Vec<String>),
     Boolean(Vec<bool>),
+}
+
+impl super::traits::ArrayLiteral for ArrayLiteral {
+    fn get_ref(
+        self: &Self,
+    ) -> super::traits::ArrayLiteralRef<'_, impl AsStr<'_>> {
+        match self {
+            Self::Int(i) => super::traits::ArrayLiteralRef::Int(&i),
+            Self::Float(f) => super::traits::ArrayLiteralRef::Float(&f),
+            Self::Boolean(b) => super::traits::ArrayLiteralRef::Boolean(&b),
+            Self::String(s) => {
+                super::traits::ArrayLiteralRef::String(&s.as_ref())
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -148,25 +185,6 @@ pub enum NonCallableFieldSpec<T, S = String> {
 }
 
 impl<'s1, T, S: AsStr<'s1>> NonCallableFieldSpec<T, S> {
-    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>, T2>(
-        self: &'s1 Self,
-        clone_t: impl Fn(&'s1 T) -> T2,
-    ) -> NonCallableFieldSpec<T2, NS>
-    where
-        's1: 's2,
-    {
-        match self {
-            Self::Literal(l) => {
-                NonCallableFieldSpec::Literal(l.clone_with_string_type(clone_t))
-            }
-            Self::Array(a) => {
-                NonCallableFieldSpec::Array(a.clone_with_string_type(clone_t))
-            }
-        }
-    }
-}
-
-impl<T, S> NonCallableFieldSpec<T, S> {
     pub fn has_default_value(self: &Self) -> bool {
         match self {
             Self::Literal(literal) => {
@@ -184,6 +202,23 @@ impl<T, S> NonCallableFieldSpec<T, S> {
         match self {
             Self::Literal(literal) => &literal.r#type,
             Self::Array(array) => &array.r#type.get_type_spec(),
+        }
+    }
+
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>, T2>(
+        self: &'s1 Self,
+        clone_t: impl Fn(&'s1 T) -> T2,
+    ) -> NonCallableFieldSpec<T2, NS>
+    where
+        's1: 's2,
+    {
+        match self {
+            Self::Literal(l) => {
+                NonCallableFieldSpec::Literal(l.clone_with_string_type(clone_t))
+            }
+            Self::Array(a) => {
+                NonCallableFieldSpec::Array(a.clone_with_string_type(clone_t))
+            }
         }
     }
 }

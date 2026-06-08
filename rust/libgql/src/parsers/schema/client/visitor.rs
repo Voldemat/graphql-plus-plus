@@ -27,47 +27,57 @@ pub struct ASTVisitorHooks<'a> {
         ASTVisitorHook<'a, client::ast::ObjectSelection>,
     pub visit_field_selection: ASTVisitorHook<'a, client::ast::FieldSelection>,
     pub visit_field_selection_argument:
-        ASTVisitorHook<'a, shared::ast::FieldSelectionArgument>,
-    pub visit_argument_value: ASTVisitorHook<'a, shared::ast::ArgumentValue>,
+        ASTVisitorHook<'a, shared::ast::runtime::FieldSelectionArgument>,
+    pub visit_argument_value:
+        ASTVisitorHook<'a, shared::ast::runtime::ArgumentValue>,
     pub visit_argument_ref_value: ASTVisitorHook<'a, String>,
     pub visit_argument_literal_value:
-        ASTVisitorHook<'a, shared::ast::ArgumentLiteralValue>,
+        ASTVisitorHook<'a, shared::ast::runtime::ArgumentLiteralValue>,
     pub visit_client_directive:
         ASTVisitorHook<'a, client::ast::ClientDirective>,
     pub visit_client_directive_location:
         ASTVisitorHook<'a, client::ast::DirectiveLocation>,
     pub visit_field_definition_input_field_spec: ASTVisitorHook<
         'a,
-        shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec,
+        >,
     >,
     pub visit_field_definition_object_field_spec: ASTVisitorHook<
         'a,
-        shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+        shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec>,
     >,
     pub visit_non_callable_field_spec_input_type_spec: ASTVisitorHook<
         'a,
-        shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
+        shared::ast::runtime::NonCallableFieldSpec<
+            shared::ast::runtime::InputTypeSpec,
+        >,
     >,
     pub visit_literal_field_spec_input_type_spec: ASTVisitorHook<
         'a,
-        shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>,
+        shared::ast::runtime::LiteralFieldSpec<
+            shared::ast::runtime::InputTypeSpec,
+        >,
     >,
     pub visit_array_field_spec_input_type_spec: ASTVisitorHook<
         'a,
-        shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>,
+        shared::ast::runtime::ArrayFieldSpec<
+            shared::ast::runtime::InputTypeSpec,
+        >,
     >,
-    pub visit_input_type_spec: ASTVisitorHook<'a, shared::ast::InputTypeSpec>,
+    pub visit_input_type_spec:
+        ASTVisitorHook<'a, shared::ast::runtime::InputTypeSpec>,
     pub visit_non_callable_field_spec_object_type_spec: ASTVisitorHook<
         'a,
-        shared::ast::NonCallableFieldSpec<server::ast::ObjectTypeSpec>,
+        shared::ast::runtime::NonCallableFieldSpec<server::ast::ObjectTypeSpec>,
     >,
     pub visit_literal_field_spec_object_type_spec: ASTVisitorHook<
         'a,
-        shared::ast::LiteralFieldSpec<server::ast::ObjectTypeSpec>,
+        shared::ast::runtime::LiteralFieldSpec<server::ast::ObjectTypeSpec>,
     >,
     pub visit_array_field_spec_object_type_spec: ASTVisitorHook<
         'a,
-        shared::ast::ArrayFieldSpec<server::ast::ObjectTypeSpec>,
+        shared::ast::runtime::ArrayFieldSpec<server::ast::ObjectTypeSpec>,
     >,
     pub visit_object_field_spec:
         ASTVisitorHook<'a, server::ast::ObjectFieldSpec>,
@@ -75,9 +85,9 @@ pub struct ASTVisitorHooks<'a> {
         ASTVisitorHook<'a, server::ast::CallableFieldSpec>,
     pub visit_object_type_spec: ASTVisitorHook<'a, server::ast::ObjectTypeSpec>,
     pub visit_operation: ASTVisitorHook<'a, client::ast::Operation>,
-    pub visit_input_type: ASTVisitorHook<'a, shared::ast::InputType>,
+    pub visit_input_type: ASTVisitorHook<'a, shared::ast::runtime::InputType>,
     pub visit_scalar: ASTVisitorHook<'a, String>,
-    pub visit_enum: ASTVisitorHook<'a, shared::ast::Enum>,
+    pub visit_enum: ASTVisitorHook<'a, shared::ast::runtime::Enum>,
     pub visit_union: ASTVisitorHook<'a, server::ast::Union>,
 }
 
@@ -98,12 +108,12 @@ fn visit_field_selection(
             hook(&argument.value);
         }
         match &argument.value {
-            shared::ast::ArgumentValue::Ref(r) => {
+            shared::ast::runtime::ArgumentValue::Ref(r) => {
                 if let Some(hook) = hooks.visit_argument_ref_value.as_mut() {
                     hook(r);
                 }
             }
-            shared::ast::ArgumentValue::Literal(literal) => {
+            shared::ast::runtime::ArgumentValue::Literal(literal) => {
                 if let Some(hook) = hooks.visit_argument_literal_value.as_mut()
                 {
                     hook(literal);
@@ -120,7 +130,7 @@ fn visit_field_definition_object_field_spec(
     server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
-    field: &shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+    field: &shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec>,
 ) {
     if let Some(hook) = hooks.visit_field_definition_object_field_spec.as_mut()
     {
@@ -141,7 +151,7 @@ fn visit_object_selection(
     selection: &client::ast::ObjectSelection,
     fields: &indexmap::IndexMap<
         String,
-        shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+        shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec>,
     >,
 ) {
     if let Some(hook) = hooks.visit_object_selection.as_mut() {
@@ -276,7 +286,9 @@ fn visit_non_callable_field_spec_object_type_spec(
     server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
-    field: &shared::ast::NonCallableFieldSpec<server::ast::ObjectTypeSpec>,
+    field: &shared::ast::runtime::NonCallableFieldSpec<
+        server::ast::ObjectTypeSpec,
+    >,
 ) {
     if let Some(hook) = hooks
         .visit_non_callable_field_spec_object_type_spec
@@ -285,7 +297,7 @@ fn visit_non_callable_field_spec_object_type_spec(
         hook(field);
     }
     match field {
-        shared::ast::NonCallableFieldSpec::Literal(literal) => {
+        shared::ast::runtime::NonCallableFieldSpec::Literal(literal) => {
             if let Some(hook) =
                 hooks.visit_literal_field_spec_object_type_spec.as_mut()
             {
@@ -293,7 +305,7 @@ fn visit_non_callable_field_spec_object_type_spec(
             }
             visit_object_type_spec(server_registry, hooks, &literal.r#type);
         }
-        shared::ast::NonCallableFieldSpec::Array(array) => {
+        shared::ast::runtime::NonCallableFieldSpec::Array(array) => {
             if let Some(hook) =
                 hooks.visit_array_field_spec_object_type_spec.as_mut()
             {
@@ -508,7 +520,7 @@ fn visit_input_type(
     server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
-    t: &shared::ast::InputType,
+    t: &shared::ast::runtime::InputType,
 ) {
     if let Some(hook) = hooks.visit_input_type.as_mut() {
         hook(t)
@@ -527,23 +539,23 @@ fn visit_input_type_spec(
     server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
-    spec: &shared::ast::InputTypeSpec,
+    spec: &shared::ast::runtime::InputTypeSpec,
 ) {
     if let Some(hook) = hooks.visit_input_type_spec.as_mut() {
         hook(spec)
     }
     match spec {
-        shared::ast::InputTypeSpec::Enum(e) => {
+        shared::ast::runtime::InputTypeSpec::Enum(e) => {
             if let Some(hook) = hooks.visit_enum.as_mut() {
                 hook(server_registry.enums.get(e).unwrap())
             }
         }
-        shared::ast::InputTypeSpec::Scalar(s) => {
+        shared::ast::runtime::InputTypeSpec::Scalar(s) => {
             if let Some(hook) = hooks.visit_scalar.as_mut() {
                 hook(s)
             }
         }
-        shared::ast::InputTypeSpec::InputType(input) => {
+        shared::ast::runtime::InputTypeSpec::InputType(input) => {
             visit_input_type(
                 server_registry,
                 client_registry,
@@ -558,7 +570,7 @@ fn visit_input_field_spec(
     server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
-    field_spec: &shared::ast::InputFieldSpec,
+    field_spec: &shared::ast::runtime::InputFieldSpec,
 ) {
     if let Some(hook) =
         hooks.visit_non_callable_field_spec_input_type_spec.as_mut()
@@ -566,7 +578,7 @@ fn visit_input_field_spec(
         hook(field_spec);
     }
     match field_spec {
-        shared::ast::InputFieldSpec::Literal(literal) => {
+        shared::ast::runtime::InputFieldSpec::Literal(literal) => {
             if let Some(hook) =
                 hooks.visit_literal_field_spec_input_type_spec.as_mut()
             {
@@ -579,7 +591,7 @@ fn visit_input_field_spec(
                 &literal.r#type,
             )
         }
-        shared::ast::InputFieldSpec::Array(array) => {
+        shared::ast::runtime::InputFieldSpec::Array(array) => {
             if let Some(hook) =
                 hooks.visit_array_field_spec_input_type_spec.as_mut()
             {
@@ -599,7 +611,9 @@ fn visit_field_definition_input_field_spec(
     server_registry: &server::type_registry::HashMapTypeRegistry,
     client_registry: &TypeRegistry,
     hooks: &mut ASTVisitorHooks,
-    field: &shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+    field: &shared::ast::runtime::FieldDefinition<
+        shared::ast::runtime::InputFieldSpec,
+    >,
 ) {
     if let Some(hook) = hooks.visit_field_definition_input_field_spec.as_mut() {
         hook(field);

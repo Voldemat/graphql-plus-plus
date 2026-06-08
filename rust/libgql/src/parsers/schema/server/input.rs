@@ -19,7 +19,7 @@ fn parse_input_field_spec<
     registry: &T,
     node: &file::shared::ast::InputFieldDefinitionNode<'input_buffer>,
 ) -> Result<
-    (shared::ast::InputFieldSpec<InputStringType>, bool),
+    (shared::ast::runtime::InputFieldSpec<InputStringType>, bool),
     type_registry::Error<'input_buffer>,
 > {
     return parse_noncallable_input_field_spec(
@@ -27,7 +27,7 @@ fn parse_input_field_spec<
         &node.r#type,
         node.default_value
             .as_ref()
-            .map(shared::literal::parse_literal),
+            .map(shared::ast::runtime::Literal::parse),
     )
     .map(|(return_type, nullable)| (return_type.into(), nullable));
 }
@@ -41,11 +41,11 @@ fn parse_noncallable_input_field_spec<
 >(
     registry: &T,
     node: &file::shared::ast::TypeNode<'input_buffer>,
-    default_value: Option<shared::ast::Literal>,
+    default_value: Option<shared::ast::runtime::Literal>,
 ) -> Result<
     (
-        shared::ast::NonCallableFieldSpec<
-            shared::ast::InputTypeSpec<InputStringType>,
+        shared::ast::runtime::NonCallableFieldSpec<
+            shared::ast::runtime::InputTypeSpec<InputStringType>,
             InputStringType,
         >,
         bool,
@@ -55,8 +55,8 @@ fn parse_noncallable_input_field_spec<
     match node {
         file::shared::ast::TypeNode::List(l) => {
             return Ok((
-                shared::ast::ArrayFieldSpec::<
-                    shared::ast::InputTypeSpec<InputStringType>,
+                shared::ast::runtime::ArrayFieldSpec::<
+                    shared::ast::runtime::InputTypeSpec<InputStringType>,
                     InputStringType,
                 > {
                     r#type: Box::new(
@@ -75,8 +75,8 @@ fn parse_noncallable_input_field_spec<
         }
         file::shared::ast::TypeNode::Named(n) => {
             return Ok((
-                shared::ast::LiteralFieldSpec::<
-                    shared::ast::InputTypeSpec<InputStringType>,
+                shared::ast::runtime::LiteralFieldSpec::<
+                    shared::ast::runtime::InputTypeSpec<InputStringType>,
                     InputStringType,
                 > {
                     r#type: registry
@@ -104,14 +104,14 @@ pub fn parse_field_definition<
     registry: &T,
     node: &file::shared::ast::InputFieldDefinitionNode<'input_buffer>,
 ) -> Result<
-    shared::ast::FieldDefinition<
-        shared::ast::InputFieldSpec<InputStringType>,
+    shared::ast::runtime::FieldDefinition<
+        shared::ast::runtime::InputFieldSpec<InputStringType>,
         InputStringType,
     >,
     type_registry::Error<'input_buffer>,
 > {
     let (spec, nullable) = parse_input_field_spec(registry, node)?;
-    return Ok(shared::ast::FieldDefinition {
+    return Ok(shared::ast::runtime::FieldDefinition {
         name: InputStringType::from_str(node.name.name),
         spec,
         nullable,
@@ -130,8 +130,8 @@ pub fn parse_field_definitions<
 ) -> Result<
     IndexMap<
         InputStringType,
-        shared::ast::FieldDefinition<
-            shared::ast::InputFieldSpec<InputStringType>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec<InputStringType>,
             InputStringType,
         >,
     >,
@@ -139,8 +139,8 @@ pub fn parse_field_definitions<
 > {
     let mut arguments = IndexMap::<
         InputStringType,
-        shared::ast::FieldDefinition<
-            shared::ast::InputFieldSpec<InputStringType>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec<InputStringType>,
             InputStringType,
         >,
     >::new();

@@ -15,7 +15,7 @@ fn parse_node(registry: &mut HashMapTypeRegistry, value: &serde_json::Value) {
         "ENUM" => {
             registry.enums.insert(
                 name.to_string(),
-                shared::ast::Enum {
+                shared::ast::runtime::Enum {
                     name: name.to_string(),
                     values: value["enumValues"]
                         .as_array()
@@ -31,7 +31,7 @@ fn parse_node(registry: &mut HashMapTypeRegistry, value: &serde_json::Value) {
         "INPUT_OBJECT" => {
             registry.inputs.insert(
                 name.to_string(),
-                shared::ast::InputType {
+                shared::ast::runtime::InputType {
                     name: name.to_string(),
                     fields: value["inputFields"]
                         .as_array()
@@ -118,17 +118,17 @@ fn parse_node(registry: &mut HashMapTypeRegistry, value: &serde_json::Value) {
 fn parse_input_type_spec(
     registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
-) -> shared::ast::InputTypeSpec {
+) -> shared::ast::runtime::InputTypeSpec {
     let kind = value["kind"].as_str().unwrap();
     match kind {
         "NON_NULL" => parse_input_type_spec(registry, &value["ofType"]),
-        "SCALAR" => shared::ast::InputTypeSpec::Scalar(
+        "SCALAR" => shared::ast::runtime::InputTypeSpec::Scalar(
             value["name"].as_str().unwrap().to_string(),
         ),
-        "ENUM" => shared::ast::InputTypeSpec::Enum(
+        "ENUM" => shared::ast::runtime::InputTypeSpec::Enum(
             value["name"].as_str().unwrap().to_string(),
         ),
-        "INPUT_OBJECT" => shared::ast::InputTypeSpec::InputType(
+        "INPUT_OBJECT" => shared::ast::runtime::InputTypeSpec::InputType(
             value["name"].as_str().unwrap().to_string(),
         ),
         _ => panic!("Unknown InputTypeSpec kind type: {}", kind),
@@ -139,7 +139,7 @@ fn parse_input_field_spec(
     registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
     default_value: &serde_json::Value,
-) -> shared::ast::InputFieldSpec {
+) -> shared::ast::runtime::InputFieldSpec {
     let kind = value["kind"].as_str().unwrap();
     match kind {
         "NON_NULL" => {
@@ -151,7 +151,9 @@ fn parse_input_field_spec(
                 &value["ofType"],
                 default_value,
             );
-            shared::ast::ArrayFieldSpec::<shared::ast::InputTypeSpec> {
+            shared::ast::runtime::ArrayFieldSpec::<
+                shared::ast::runtime::InputTypeSpec,
+            > {
                 r#type: Box::new(t),
                 default_value: Some(None),
                 directive_invocations: Vec::new(),
@@ -162,7 +164,9 @@ fn parse_input_field_spec(
         }
         _ => {
             let t = parse_input_type_spec(registry, value);
-            shared::ast::LiteralFieldSpec::<shared::ast::InputTypeSpec> {
+            shared::ast::runtime::LiteralFieldSpec::<
+                shared::ast::runtime::InputTypeSpec,
+            > {
                 r#type: t,
                 default_value: Some(None),
                 directive_invocations: IndexMap::new(),
@@ -175,8 +179,11 @@ fn parse_input_field_spec(
 fn parse_input_field_definition(
     registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
-) -> shared::ast::FieldDefinition<shared::ast::InputFieldSpec> {
-    return shared::ast::FieldDefinition::<shared::ast::InputFieldSpec> {
+) -> shared::ast::runtime::FieldDefinition<shared::ast::runtime::InputFieldSpec>
+{
+    return shared::ast::runtime::FieldDefinition::<
+        shared::ast::runtime::InputFieldSpec,
+    > {
         name: value["name"].as_str().unwrap().to_string(),
         spec: parse_input_field_spec(
             registry,
@@ -216,7 +223,7 @@ fn parse_object_type_spec(
 fn parse_non_callable_object_field_spec(
     registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
-) -> shared::ast::NonCallableFieldSpec<server::ast::ObjectTypeSpec> {
+) -> shared::ast::runtime::NonCallableFieldSpec<server::ast::ObjectTypeSpec> {
     let kind = value["kind"].as_str().unwrap();
     match kind {
         "NON_NULL" => {
@@ -227,7 +234,7 @@ fn parse_non_callable_object_field_spec(
                 registry,
                 &value["ofType"],
             );
-            shared::ast::ArrayFieldSpec::<server::ast::ObjectTypeSpec> {
+            shared::ast::runtime::ArrayFieldSpec::<server::ast::ObjectTypeSpec> {
                 r#type: Box::new(t),
                 nullable: value["ofType"]["kind"].as_str().unwrap()
                     != "NON_NULL",
@@ -236,7 +243,9 @@ fn parse_non_callable_object_field_spec(
             }
             .into()
         }
-        _ => shared::ast::LiteralFieldSpec::<server::ast::ObjectTypeSpec> {
+        _ => shared::ast::runtime::LiteralFieldSpec::<
+            server::ast::ObjectTypeSpec,
+        > {
             r#type: parse_object_type_spec(registry, value),
             default_value: None,
             directive_invocations: IndexMap::new(),
@@ -272,7 +281,9 @@ fn parse_object_field_spec(
     if kind == "LIST" {
         let t =
             parse_non_callable_object_field_spec(registry, &value["ofType"]);
-        return shared::ast::ArrayFieldSpec::<server::ast::ObjectTypeSpec> {
+        return shared::ast::runtime::ArrayFieldSpec::<
+            server::ast::ObjectTypeSpec,
+        > {
             r#type: Box::new(t),
             nullable: value["ofType"]["kind"].as_str().unwrap() != "NON_NULL",
             default_value: None,
@@ -282,7 +293,9 @@ fn parse_object_field_spec(
     };
 
     let t = parse_object_type_spec(registry, value);
-    return shared::ast::LiteralFieldSpec::<server::ast::ObjectTypeSpec> {
+    return shared::ast::runtime::LiteralFieldSpec::<
+        server::ast::ObjectTypeSpec,
+    > {
         r#type: t,
         default_value: None,
         directive_invocations: IndexMap::new(),
@@ -293,8 +306,8 @@ fn parse_object_field_spec(
 fn parse_object_field_definition(
     registry: &HashMapTypeRegistry,
     value: &serde_json::Value,
-) -> shared::ast::FieldDefinition<server::ast::ObjectFieldSpec> {
-    shared::ast::FieldDefinition::<server::ast::ObjectFieldSpec> {
+) -> shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec> {
+    shared::ast::runtime::FieldDefinition::<server::ast::ObjectFieldSpec> {
         name: value["name"].as_str().unwrap().to_string(),
         spec: parse_object_field_spec(registry, &value["type"], &value["args"]),
         nullable: value["type"]["kind"].as_str().unwrap() != "NON_NULL",

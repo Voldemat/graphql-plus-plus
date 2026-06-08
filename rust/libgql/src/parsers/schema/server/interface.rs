@@ -26,7 +26,7 @@ pub fn parse_definition<'buffer>(
     {
         obj.fields.insert(
             field_definition_node.name.name.to_string(),
-            shared::ast::FieldDefinition {
+            shared::ast::runtime::FieldDefinition {
                 name: field_definition_node.name.name.to_string(),
                 spec,
                 nullable,

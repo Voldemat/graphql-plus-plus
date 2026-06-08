@@ -17,7 +17,7 @@ pub trait TypeRegistry<'s, S: shared::ast::AsStr<'s>> {
     >(
         self: &Self,
         name: &file::shared::ast::NameNode<'client_buffer>,
-    ) -> Option<shared::ast::InputTypeSpec<ClientStringType>>;
+    ) -> Option<shared::ast::runtime::InputTypeSpec<ClientStringType>>;
     fn get_union(self: &Self, name: &str) -> Option<&server::ast::Union<S>>;
     fn get_object(
         self: &Self,
@@ -32,29 +32,29 @@ pub trait TypeRegistry<'s, S: shared::ast::AsStr<'s>> {
 #[derive(Debug)]
 pub struct StaticTypeRegistry {
     pub directives:
-        IndexMap<&'static str, shared::ast::ServerDirective<&'static str>>,
+        IndexMap<&'static str, shared::ast::statictime::ServerDirective>,
     pub queries: HashSet<&'static str>,
     pub mutations: HashSet<&'static str>,
     pub subscriptions: HashSet<&'static str>,
     pub objects: IndexMap<&'static str, server::ast::ObjectType>,
-    pub inputs: IndexMap<&'static str, shared::ast::InputType>,
+    pub inputs: IndexMap<&'static str, shared::ast::statictime::InputType>,
     pub interfaces: IndexMap<&'static str, server::ast::Interface>,
     pub scalars: IndexSet<&'static str>,
-    pub enums: IndexMap<&'static str, shared::ast::Enum>,
+    pub enums: IndexMap<&'static str, shared::ast::statictime::Enum>,
     pub unions: IndexMap<&'static str, server::ast::Union<&'static str>>,
 }
 
 #[derive(Debug)]
 pub struct HashMapTypeRegistry {
-    pub directives: IndexMap<String, shared::ast::ServerDirective>,
+    pub directives: IndexMap<String, shared::ast::runtime::ServerDirective>,
     pub queries: HashSet<String>,
     pub mutations: HashSet<String>,
     pub subscriptions: HashSet<String>,
     pub objects: IndexMap<String, server::ast::ObjectType>,
-    pub inputs: IndexMap<String, shared::ast::InputType>,
+    pub inputs: IndexMap<String, shared::ast::runtime::InputType>,
     pub interfaces: IndexMap<String, server::ast::Interface>,
     pub scalars: IndexSet<String>,
-    pub enums: IndexMap<String, shared::ast::Enum>,
+    pub enums: IndexMap<String, shared::ast::runtime::Enum>,
     pub unions: IndexMap<String, server::ast::Union<String>>,
 }
 
@@ -77,17 +77,17 @@ impl<'s> TypeRegistry<'s, String> for HashMapTypeRegistry {
     >(
         self: &Self,
         name: &file::shared::ast::NameNode<'client_buffer>,
-    ) -> Option<shared::ast::InputTypeSpec<ClientStringType>> {
+    ) -> Option<shared::ast::runtime::InputTypeSpec<ClientStringType>> {
         if self.inputs.contains_key(name.name) {
-            Some(shared::ast::InputTypeSpec::InputType(
+            Some(shared::ast::runtime::InputTypeSpec::InputType(
                 ClientStringType::from_str(name.name),
             ))
         } else if self.scalars.contains(name.name) {
-            Some(shared::ast::InputTypeSpec::Scalar(
+            Some(shared::ast::runtime::InputTypeSpec::Scalar(
                 ClientStringType::from_str(name.name),
             ))
         } else if self.enums.contains_key(name.name) {
-            Some(shared::ast::InputTypeSpec::Enum(
+            Some(shared::ast::runtime::InputTypeSpec::Enum(
                 ClientStringType::from_str(name.name),
             ))
         } else {
@@ -180,16 +180,17 @@ impl HashMapTypeRegistry {
     pub fn get_type_for_input<'buffer>(
         self: &Self,
         node: &file::shared::ast::NameNode<'buffer>,
-    ) -> Result<shared::ast::InputTypeSpec<String>, Error<'buffer>> {
+    ) -> Result<shared::ast::runtime::InputTypeSpec<String>, Error<'buffer>>
+    {
         let name = node.name.to_string();
         if self.inputs.contains_key(&name) {
-            return Ok(shared::ast::InputTypeSpec::InputType(name));
+            return Ok(shared::ast::runtime::InputTypeSpec::InputType(name));
         }
         if self.scalars.contains(&name) {
-            return Ok(shared::ast::InputTypeSpec::Scalar(name));
+            return Ok(shared::ast::runtime::InputTypeSpec::Scalar(name));
         }
         if self.enums.contains_key(&name) {
-            return Ok(shared::ast::InputTypeSpec::Enum(name));
+            return Ok(shared::ast::runtime::InputTypeSpec::Enum(name));
         }
         return Err(Error::UnknownType(node.clone()));
     }
@@ -246,7 +247,7 @@ impl HashMapTypeRegistry {
         object_name: &str,
         new_fields: IndexMap<
             String,
-            shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+            shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec>,
         >,
     ) {
         let optype_option =

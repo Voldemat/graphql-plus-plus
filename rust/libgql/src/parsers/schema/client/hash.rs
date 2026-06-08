@@ -10,12 +10,12 @@ pub fn hash_input_type_spec<
     S: shared::ast::AsStr<'s>,
 >(
     hasher: &mut T,
-    spec: &shared::ast::InputTypeSpec<S>,
+    spec: &shared::ast::runtime::InputTypeSpec<S>,
 ) {
     let name = match spec {
-        shared::ast::InputTypeSpec::Scalar(s) => s,
-        shared::ast::InputTypeSpec::Enum(e) => e,
-        shared::ast::InputTypeSpec::InputType(i) => i,
+        shared::ast::runtime::InputTypeSpec::Scalar(s) => s,
+        shared::ast::runtime::InputTypeSpec::Enum(e) => e,
+        shared::ast::runtime::InputTypeSpec::InputType(i) => i,
     }
     .to_str();
     std::hash::Hash::hash(name, hasher);
@@ -23,21 +23,27 @@ pub fn hash_input_type_spec<
 
 pub fn hash_literal<T: std::hash::Hasher>(
     hasher: &mut T,
-    value: &shared::ast::Literal,
+    value: &shared::ast::runtime::Literal,
 ) {
     match value {
-        shared::ast::Literal::Int(i) => std::hash::Hash::hash(i, hasher),
-        shared::ast::Literal::Float(f) => {
+        shared::ast::runtime::Literal::Int(i) => {
+            std::hash::Hash::hash(i, hasher)
+        }
+        shared::ast::runtime::Literal::Float(f) => {
             std::hash::Hash::hash(&f.to_string(), hasher)
         }
-        shared::ast::Literal::String(s) => std::hash::Hash::hash(s, hasher),
-        shared::ast::Literal::Boolean(b) => std::hash::Hash::hash(b, hasher),
+        shared::ast::runtime::Literal::String(s) => {
+            std::hash::Hash::hash(s, hasher)
+        }
+        shared::ast::runtime::Literal::Boolean(b) => {
+            std::hash::Hash::hash(b, hasher)
+        }
     }
 }
 
 pub fn hash_literal_default_value<T: std::hash::Hasher>(
     hasher: &mut T,
-    value: &Option<shared::ast::Literal>,
+    value: &Option<shared::ast::runtime::Literal>,
 ) {
     match value {
         Some(literal) => hash_literal(hasher, literal),
@@ -47,20 +53,22 @@ pub fn hash_literal_default_value<T: std::hash::Hasher>(
 
 pub fn hash_array_literal<T: std::hash::Hasher>(
     hasher: &mut T,
-    value: &shared::ast::ArrayLiteral,
+    value: &shared::ast::runtime::ArrayLiteral,
 ) {
     match value {
-        shared::ast::ArrayLiteral::Int(ivec) => {
+        shared::ast::runtime::ArrayLiteral::Int(ivec) => {
             std::hash::Hash::hash(ivec, hasher)
         }
-        shared::ast::ArrayLiteral::Float(fvec) => std::hash::Hash::hash(
-            &fvec.iter().map(|f| f.to_string()).collect::<Vec<_>>(),
-            hasher,
-        ),
-        shared::ast::ArrayLiteral::String(svec) => {
+        shared::ast::runtime::ArrayLiteral::Float(fvec) => {
+            std::hash::Hash::hash(
+                &fvec.iter().map(|f| f.to_string()).collect::<Vec<_>>(),
+                hasher,
+            )
+        }
+        shared::ast::runtime::ArrayLiteral::String(svec) => {
             std::hash::Hash::hash(svec, hasher)
         }
-        shared::ast::ArrayLiteral::Boolean(bvec) => {
+        shared::ast::runtime::ArrayLiteral::Boolean(bvec) => {
             std::hash::Hash::hash(bvec, hasher)
         }
     }
@@ -68,7 +76,7 @@ pub fn hash_array_literal<T: std::hash::Hasher>(
 
 pub fn hash_array_default_value<T: std::hash::Hasher>(
     hasher: &mut T,
-    value: &Option<shared::ast::ArrayLiteral>,
+    value: &Option<shared::ast::runtime::ArrayLiteral>,
 ) {
     match value {
         Some(literal) => hash_array_literal(hasher, literal),
@@ -82,17 +90,20 @@ pub fn hash_input_field_spec<
     S: shared::ast::AsStr<'s>,
 >(
     hasher: &mut T,
-    spec: &shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec<S>, S>,
+    spec: &shared::ast::runtime::NonCallableFieldSpec<
+        shared::ast::runtime::InputTypeSpec<S>,
+        S,
+    >,
 ) {
     match spec {
-        shared::ast::NonCallableFieldSpec::Literal(literal) => {
+        shared::ast::runtime::NonCallableFieldSpec::Literal(literal) => {
             hasher.write_u8(b'l');
             hash_input_type_spec(hasher, &literal.r#type);
             if let Some(default_value) = &literal.default_value {
                 hash_literal_default_value(hasher, &default_value);
             }
         }
-        shared::ast::NonCallableFieldSpec::Array(array) => {
+        shared::ast::runtime::NonCallableFieldSpec::Array(array) => {
             hasher.write_u8(b'a');
             std::hash::Hash::hash(&array.nullable, hasher);
             hash_input_field_spec(hasher, &array.r#type);
@@ -109,8 +120,11 @@ pub fn hash_input_field_definition<
     S: shared::ast::AsStr<'s>,
 >(
     hasher: &mut T,
-    field: &shared::ast::FieldDefinition<
-        shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec<S>, S>,
+    field: &shared::ast::runtime::FieldDefinition<
+        shared::ast::runtime::NonCallableFieldSpec<
+            shared::ast::runtime::InputTypeSpec<S>,
+            S,
+        >,
         S,
     >,
 ) {
@@ -122,8 +136,11 @@ pub fn hash_input_field_definition<
 pub fn get_operation_parameters_hash<'s, S: shared::ast::AsStr<'s>>(
     parameters: &IndexMap<
         S,
-        shared::ast::FieldDefinition<
-            shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec<S>, S>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::NonCallableFieldSpec<
+                shared::ast::runtime::InputTypeSpec<S>,
+                S,
+            >,
             S,
         >,
     >,
@@ -143,22 +160,22 @@ fn hash_argument_literal_value<
     S: shared::ast::AsStr<'s>,
 >(
     hasher: &mut T,
-    value: &shared::ast::ArgumentLiteralValue<S>,
+    value: &shared::ast::runtime::ArgumentLiteralValue<S>,
 ) {
     match value {
-        shared::ast::ArgumentLiteralValue::Int(i) => {
+        shared::ast::runtime::ArgumentLiteralValue::Int(i) => {
             std::hash::Hash::hash(i, hasher);
         }
-        shared::ast::ArgumentLiteralValue::Float(f) => {
+        shared::ast::runtime::ArgumentLiteralValue::Float(f) => {
             std::hash::Hash::hash(&f.to_string(), hasher);
         }
-        shared::ast::ArgumentLiteralValue::String(s) => {
+        shared::ast::runtime::ArgumentLiteralValue::String(s) => {
             std::hash::Hash::hash(s, hasher);
         }
-        shared::ast::ArgumentLiteralValue::Boolean(b) => {
+        shared::ast::runtime::ArgumentLiteralValue::Boolean(b) => {
             std::hash::Hash::hash(b, hasher);
         }
-        shared::ast::ArgumentLiteralValue::EnumValue(e) => {
+        shared::ast::runtime::ArgumentLiteralValue::EnumValue(e) => {
             std::hash::Hash::hash(e, hasher);
         }
     }
@@ -166,14 +183,14 @@ fn hash_argument_literal_value<
 
 fn hash_argument_value<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
     hasher: &mut T,
-    value: &shared::ast::ArgumentValue<S>,
+    value: &shared::ast::runtime::ArgumentValue<S>,
 ) {
     match value {
-        shared::ast::ArgumentValue::Ref(r) => {
+        shared::ast::runtime::ArgumentValue::Ref(r) => {
             std::hash::Hash::hash(&'r', hasher);
             std::hash::Hash::hash(r, hasher);
         }
-        shared::ast::ArgumentValue::Literal(literal) => {
+        shared::ast::runtime::ArgumentValue::Literal(literal) => {
             std::hash::Hash::hash(&'l', hasher);
             hash_argument_literal_value(hasher, literal);
         }
@@ -182,7 +199,7 @@ fn hash_argument_value<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
 
 fn hash_argument<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
     hasher: &mut T,
-    argument: &shared::ast::FieldSelectionArgument<S>,
+    argument: &shared::ast::runtime::FieldSelectionArgument<S>,
 ) {
     std::hash::Hash::hash(&argument.name, hasher);
     hash_argument_value(hasher, &argument.value);
@@ -190,7 +207,7 @@ fn hash_argument<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
 
 fn hash_arguments<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
     hasher: &mut T,
-    arguments: &IndexMap<S, shared::ast::FieldSelectionArgument<S>>,
+    arguments: &IndexMap<S, shared::ast::runtime::FieldSelectionArgument<S>>,
 ) {
     let mut keys = arguments.keys().collect::<Vec<_>>();
     keys.sort();

@@ -23,7 +23,7 @@ pub fn parse_server_node_first_pass<'buffer>(
             };
             registry.enums.insert(
                 e.name.name.to_string(),
-                shared::ast::Enum {
+                shared::ast::runtime::Enum {
                     name: e.name.name.to_string(),
                     values: e
                         .values
@@ -51,7 +51,7 @@ pub fn parse_server_node_first_pass<'buffer>(
             }
             registry.inputs.insert(
                 i.name.name.to_string(),
-                shared::ast::InputType {
+                shared::ast::runtime::InputType {
                     name: i.name.name.to_string(),
                     fields: IndexMap::new(),
                 },
@@ -114,7 +114,7 @@ pub fn parse_server_node_first_pass<'buffer>(
             }
             registry.directives.insert(
                 d.name.name.to_string(),
-                shared::ast::ServerDirective {
+                shared::ast::runtime::ServerDirective {
                     name: d.name.name.to_string(),
                     arguments: Default::default(),
                     locations: Vec::new(),
@@ -156,7 +156,7 @@ pub fn parse_server_extend_node<'buffer>(
 ) -> Result<
     (
         &'buffer str,
-        IndexMap<String, shared::ast::FieldDefinition<ast::ObjectFieldSpec>>,
+        IndexMap<String, shared::ast::runtime::FieldDefinition<ast::ObjectFieldSpec>>,
     ),
     errors::Error<'buffer>,
 > {

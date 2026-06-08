@@ -55,22 +55,22 @@ fn write_object_type_spec<'a, J: struson::writer::JsonWriter>(
 
 fn write_argument_literal_value<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    value: &shared::ast::ArgumentLiteralValue,
+    value: &shared::ast::runtime::ArgumentLiteralValue,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match value {
-        shared::ast::ArgumentLiteralValue::Int(i) => {
+        shared::ast::runtime::ArgumentLiteralValue::Int(i) => {
             writer.write_number_member("value", *i)?;
         }
-        shared::ast::ArgumentLiteralValue::Boolean(b) => {
+        shared::ast::runtime::ArgumentLiteralValue::Boolean(b) => {
             writer.write_bool_member("value", *b)?;
         }
-        shared::ast::ArgumentLiteralValue::Float(f) => {
+        shared::ast::runtime::ArgumentLiteralValue::Float(f) => {
             writer.write_fp_number_member("value", *f)?;
         }
-        shared::ast::ArgumentLiteralValue::String(s) => {
+        shared::ast::runtime::ArgumentLiteralValue::String(s) => {
             writer.write_string_member("value", s)?;
         }
-        shared::ast::ArgumentLiteralValue::EnumValue(e) => {
+        shared::ast::runtime::ArgumentLiteralValue::EnumValue(e) => {
             writer.write_string_member("value", e)?;
         }
     }
@@ -79,14 +79,14 @@ fn write_argument_literal_value<'a, J: struson::writer::JsonWriter>(
 
 fn write_argument_value<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    value: &shared::ast::ArgumentValue,
+    value: &shared::ast::runtime::ArgumentValue,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match value {
-        shared::ast::ArgumentValue::Ref(r) => {
+        shared::ast::runtime::ArgumentValue::Ref(r) => {
             writer.write_string_member("_type", "ref")?;
             writer.write_string_member("name", r)?;
         }
-        shared::ast::ArgumentValue::Literal(literal) => {
+        shared::ast::runtime::ArgumentValue::Literal(literal) => {
             writer.write_string_member("_type", "literal")?;
             write_argument_literal_value(writer, literal)?;
         }
@@ -96,7 +96,7 @@ fn write_argument_value<'a, J: struson::writer::JsonWriter>(
 
 fn write_field_selection_arguments<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    arguments: &IndexMap<String, shared::ast::FieldSelectionArgument>,
+    arguments: &IndexMap<String, shared::ast::runtime::FieldSelectionArgument>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_arguments = arguments.clone();
     new_arguments.sort_keys();
@@ -113,19 +113,19 @@ fn write_field_selection_arguments<'a, J: struson::writer::JsonWriter>(
 
 fn write_literal<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    value: &Option<shared::ast::Literal>,
+    value: &Option<shared::ast::runtime::Literal>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match value {
-        Some(shared::ast::Literal::Int(i)) => {
+        Some(shared::ast::runtime::Literal::Int(i)) => {
             writer.write_number_member("defaultValue", *i)?
         }
-        Some(shared::ast::Literal::Float(f)) => {
+        Some(shared::ast::runtime::Literal::Float(f)) => {
             writer.write_fp_number_member("defaultValue", *f)?
         }
-        Some(shared::ast::Literal::Boolean(b)) => {
+        Some(shared::ast::runtime::Literal::Boolean(b)) => {
             writer.write_bool_member("defaultValue", *b)?
         }
-        Some(shared::ast::Literal::String(s)) => {
+        Some(shared::ast::runtime::Literal::String(s)) => {
             writer.write_string_member("defaultValue", s)?
         }
         None => writer.write_null_member("defaultValue")?,
@@ -135,7 +135,7 @@ fn write_literal<'a, J: struson::writer::JsonWriter>(
 
 fn write_literal_object_field_spec<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    spec: &shared::ast::LiteralFieldSpec<server::ast::ObjectTypeSpec>,
+    spec: &shared::ast::runtime::LiteralFieldSpec<server::ast::ObjectTypeSpec>,
     skip_invocations: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("_type", "literal")?;
@@ -178,7 +178,7 @@ fn write_literal_object_field_spec<'a, J: struson::writer::JsonWriter>(
 
 fn write_array_literal<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    value: &Option<shared::ast::ArrayLiteral>,
+    value: &Option<shared::ast::runtime::ArrayLiteral>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match value {
         Some(arr_value) => {
@@ -186,21 +186,19 @@ fn write_array_literal<'a, J: struson::writer::JsonWriter>(
                 "defaultValue",
                 |array_writer| -> Result<(), Box<dyn std::error::Error>> {
                     match arr_value {
-                        shared::ast::ArrayLiteral::Int(i) => Ok(i
+                        shared::ast::runtime::ArrayLiteral::Int(i) => Ok(i
                             .iter()
                             .try_for_each(|v| array_writer.write_number(*v))?),
 
-                        shared::ast::ArrayLiteral::Float(f) => {
+                        shared::ast::runtime::ArrayLiteral::Float(f) => {
                             Ok(f.iter().try_for_each(|v| {
                                 array_writer.write_fp_number(*v)
                             })?)
                         }
-                        shared::ast::ArrayLiteral::Boolean(b) => {
-                            Ok(b.iter().try_for_each(|v| {
-                                array_writer.write_bool(*v)
-                            })?)
-                        }
-                        shared::ast::ArrayLiteral::String(s) => Ok(s
+                        shared::ast::runtime::ArrayLiteral::Boolean(b) => Ok(b
+                            .iter()
+                            .try_for_each(|v| array_writer.write_bool(*v))?),
+                        shared::ast::runtime::ArrayLiteral::String(s) => Ok(s
                             .iter()
                             .try_for_each(|v| array_writer.write_string(v))?),
                     }
@@ -214,7 +212,7 @@ fn write_array_literal<'a, J: struson::writer::JsonWriter>(
 
 fn write_array_object_field_spec<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    spec: &shared::ast::ArrayFieldSpec<server::ast::ObjectTypeSpec>,
+    spec: &shared::ast::runtime::ArrayFieldSpec<server::ast::ObjectTypeSpec>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("_type", "array")?;
     writer.write_bool_member("nullable", spec.nullable)?;
@@ -229,13 +227,15 @@ fn write_array_object_field_spec<'a, J: struson::writer::JsonWriter>(
 
 fn write_non_callable_object_field_spec<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    spec: &shared::ast::NonCallableFieldSpec<server::ast::ObjectTypeSpec>,
+    spec: &shared::ast::runtime::NonCallableFieldSpec<
+        server::ast::ObjectTypeSpec,
+    >,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match spec {
-        shared::ast::NonCallableFieldSpec::Literal(literal) => {
+        shared::ast::runtime::NonCallableFieldSpec::Literal(literal) => {
             write_literal_object_field_spec(writer, literal, true)
         }
-        shared::ast::NonCallableFieldSpec::Array(array) => {
+        shared::ast::runtime::NonCallableFieldSpec::Array(array) => {
             write_array_object_field_spec(writer, array)
         }
     }
@@ -243,13 +243,15 @@ fn write_non_callable_object_field_spec<'a, J: struson::writer::JsonWriter>(
 
 fn write_non_callable_input_field_spec<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    spec: &shared::ast::NonCallableFieldSpec<shared::ast::InputTypeSpec>,
+    spec: &shared::ast::runtime::NonCallableFieldSpec<
+        shared::ast::runtime::InputTypeSpec,
+    >,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match spec {
-        shared::ast::NonCallableFieldSpec::Literal(literal) => {
+        shared::ast::runtime::NonCallableFieldSpec::Literal(literal) => {
             write_literal_input_field_spec(writer, literal)
         }
-        shared::ast::NonCallableFieldSpec::Array(array) => {
+        shared::ast::runtime::NonCallableFieldSpec::Array(array) => {
             write_array_input_field_spec(writer, array)
         }
     }
@@ -294,7 +296,7 @@ fn write_object_field_spec<'a, J: struson::writer::JsonWriter>(
 
 fn write_object_field_definition<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    field_definition: &shared::ast::FieldDefinition<
+    field_definition: &shared::ast::runtime::FieldDefinition<
         server::ast::ObjectFieldSpec,
     >,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -412,14 +414,14 @@ fn write_interfaces<'a, J: struson::writer::JsonWriter>(
 
 fn write_input_type_spec<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    t: &shared::ast::InputTypeSpec,
+    t: &shared::ast::runtime::InputTypeSpec,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match t {
-        shared::ast::InputTypeSpec::Scalar(name) => {
+        shared::ast::runtime::InputTypeSpec::Scalar(name) => {
             writer.write_string_member("_type", "Scalar")?;
             writer.write_string_member("name", &name)?;
         }
-        shared::ast::InputTypeSpec::InputType(name) => {
+        shared::ast::runtime::InputTypeSpec::InputType(name) => {
             writer.write_string_member("_type", "InputType")?;
             writer.write_string_member("name", name)?;
             writer.write_string_member(
@@ -427,7 +429,7 @@ fn write_input_type_spec<'a, J: struson::writer::JsonWriter>(
                 &format!("#/server/inputs/{}", name),
             )?;
         }
-        shared::ast::InputTypeSpec::Enum(name) => {
+        shared::ast::runtime::InputTypeSpec::Enum(name) => {
             writer.write_string_member("_type", "Enum")?;
             writer.write_string_member("name", name)?;
             writer.write_string_member(
@@ -441,7 +443,9 @@ fn write_input_type_spec<'a, J: struson::writer::JsonWriter>(
 
 fn write_literal_input_field_spec<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    spec: &shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>,
+    spec: &shared::ast::runtime::LiteralFieldSpec<
+        shared::ast::runtime::InputTypeSpec,
+    >,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("_type", "literal")?;
     writer.write_object_member("type", |type_writer| {
@@ -453,7 +457,9 @@ fn write_literal_input_field_spec<'a, J: struson::writer::JsonWriter>(
 
 fn write_array_input_field_spec<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    spec: &shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>,
+    spec: &shared::ast::runtime::ArrayFieldSpec<
+        shared::ast::runtime::InputTypeSpec,
+    >,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("_type", "array")?;
     writer.write_bool_member("nullable", spec.nullable)?;
@@ -466,13 +472,13 @@ fn write_array_input_field_spec<'a, J: struson::writer::JsonWriter>(
 
 fn write_input_field_spec<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    spec: &shared::ast::InputFieldSpec,
+    spec: &shared::ast::runtime::InputFieldSpec,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match spec {
-        shared::ast::InputFieldSpec::Literal(literal) => {
+        shared::ast::runtime::InputFieldSpec::Literal(literal) => {
             write_literal_input_field_spec(writer, literal)
         }
-        shared::ast::InputFieldSpec::Array(array) => {
+        shared::ast::runtime::InputFieldSpec::Array(array) => {
             write_array_input_field_spec(writer, array)
         }
     }
@@ -480,8 +486,8 @@ fn write_input_field_spec<'a, J: struson::writer::JsonWriter>(
 
 fn write_input_field_definition<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    field_definition: &shared::ast::FieldDefinition<
-        shared::ast::InputFieldSpec,
+    field_definition: &shared::ast::runtime::FieldDefinition<
+        shared::ast::runtime::InputFieldSpec,
     >,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_bool_member("nullable", field_definition.nullable)?;
@@ -493,7 +499,7 @@ fn write_input_field_definition<'a, J: struson::writer::JsonWriter>(
 
 fn write_input<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    input: &shared::ast::InputType,
+    input: &shared::ast::runtime::InputType,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("name", &input.name)?;
     writer.write_object_member("fields", |fields_writer| {
@@ -510,7 +516,7 @@ fn write_input<'a, J: struson::writer::JsonWriter>(
 
 fn write_inputs<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    inputs: &IndexMap<String, shared::ast::InputType>,
+    inputs: &IndexMap<String, shared::ast::runtime::InputType>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_inputs = inputs.clone();
@@ -563,7 +569,7 @@ fn write_unions<'a, J: struson::writer::JsonWriter>(
 
 fn write_enum<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    enum_type: &shared::ast::Enum,
+    enum_type: &shared::ast::runtime::Enum,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("name", &enum_type.name)?;
     writer.write_array_member("values", |values_writer| {
@@ -576,7 +582,7 @@ fn write_enum<'a, J: struson::writer::JsonWriter>(
 
 fn write_enums<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    enums: &IndexMap<String, shared::ast::Enum>,
+    enums: &IndexMap<String, shared::ast::runtime::Enum>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_enums = enums.clone();
@@ -593,7 +599,7 @@ fn write_enums<'a, J: struson::writer::JsonWriter>(
 
 fn write_server_directive<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    directive: &shared::ast::ServerDirective,
+    directive: &shared::ast::runtime::ServerDirective,
 ) -> Result<(), Box<dyn std::error::Error>> {
     writer.write_string_member("name", &directive.name)?;
     writer.write_array_member("locations", |locations_writer| {
@@ -617,7 +623,7 @@ fn write_server_directive<'a, J: struson::writer::JsonWriter>(
 
 fn write_server_directives<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    directives: &IndexMap<String, shared::ast::ServerDirective>,
+    directives: &IndexMap<String, shared::ast::runtime::ServerDirective>,
     uses_hashset: &Option<&HashSet<String>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_directives = directives.clone();
@@ -939,7 +945,9 @@ fn write_operation_parameters<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
     parameters: &IndexMap<
         String,
-        shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec,
+        >,
     >,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut new_parameters = parameters.clone();

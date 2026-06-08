@@ -7,25 +7,25 @@ use crate::parsers::schema::{
 
 fn parse_literal(
     value: &serde_json::Value,
-) -> Result<shared::ast::Literal, String> {
+) -> Result<shared::ast::runtime::Literal, String> {
     if let Some(v) = value.as_i64() {
-        return Ok(shared::ast::Literal::Int(v));
+        return Ok(shared::ast::runtime::Literal::Int(v));
     };
     if let Some(v) = value.as_f64() {
-        return Ok(shared::ast::Literal::Float(v));
+        return Ok(shared::ast::runtime::Literal::Float(v));
     };
     if let Some(v) = value.as_bool() {
-        return Ok(shared::ast::Literal::Boolean(v));
+        return Ok(shared::ast::runtime::Literal::Boolean(v));
     };
     if let Some(v) = value.as_str() {
-        return Ok(shared::ast::Literal::String(v.into()));
+        return Ok(shared::ast::runtime::Literal::String(v.into()));
     };
     return Err(format!("Unexpected literal value: {}", value));
 }
 
 fn parse_optional_literal(
     value: &serde_json::Value,
-) -> Result<Option<shared::ast::Literal>, String> {
+) -> Result<Option<shared::ast::runtime::Literal>, String> {
     if value.is_null() {
         Ok(None)
     } else {
@@ -35,28 +35,28 @@ fn parse_optional_literal(
 
 fn parse_array_literal(
     value: &serde_json::Value,
-) -> Result<shared::ast::ArrayLiteral, String> {
+) -> Result<shared::ast::runtime::ArrayLiteral, String> {
     let Some(arr) = value.as_array() else {
         return Err("Expected an array for array literal".into());
     };
     let first_v = arr.get(0).unwrap();
     if first_v.is_i64() {
-        return Ok(shared::ast::ArrayLiteral::Int(
+        return Ok(shared::ast::runtime::ArrayLiteral::Int(
             arr.iter().map(|a| a.as_i64().unwrap()).collect(),
         ));
     };
     if first_v.is_f64() {
-        return Ok(shared::ast::ArrayLiteral::Float(
+        return Ok(shared::ast::runtime::ArrayLiteral::Float(
             arr.iter().map(|a| a.as_f64().unwrap()).collect(),
         ));
     };
     if first_v.is_boolean() {
-        return Ok(shared::ast::ArrayLiteral::Boolean(
+        return Ok(shared::ast::runtime::ArrayLiteral::Boolean(
             arr.iter().map(|a| a.as_bool().unwrap()).collect(),
         ));
     };
     if first_v.is_string() {
-        return Ok(shared::ast::ArrayLiteral::String(
+        return Ok(shared::ast::runtime::ArrayLiteral::String(
             arr.iter().map(|a| a.as_str().unwrap().into()).collect(),
         ));
     };
@@ -65,7 +65,7 @@ fn parse_array_literal(
 
 fn parse_optional_array_literal(
     value: &serde_json::Value,
-) -> Result<Option<shared::ast::ArrayLiteral>, String> {
+) -> Result<Option<shared::ast::runtime::ArrayLiteral>, String> {
     if value.is_null() {
         Ok(None)
     } else {
@@ -114,9 +114,11 @@ fn parse_object_type_spec(
 
 fn parse_object_literal_field_spec(
     value: &serde_json::Value,
-) -> Result<shared::ast::LiteralFieldSpec<server::ast::ObjectTypeSpec>, String>
-{
-    return Ok(shared::ast::LiteralFieldSpec {
+) -> Result<
+    shared::ast::runtime::LiteralFieldSpec<server::ast::ObjectTypeSpec>,
+    String,
+> {
+    return Ok(shared::ast::runtime::LiteralFieldSpec {
         default_value: None,
         directive_invocations: IndexMap::new(),
         r#type: parse_object_type_spec(&value["type"])?,
@@ -125,8 +127,11 @@ fn parse_object_literal_field_spec(
 
 fn parse_object_array_field_spec(
     value: &serde_json::Value,
-) -> Result<shared::ast::ArrayFieldSpec<server::ast::ObjectTypeSpec>, String> {
-    return Ok(shared::ast::ArrayFieldSpec {
+) -> Result<
+    shared::ast::runtime::ArrayFieldSpec<server::ast::ObjectTypeSpec>,
+    String,
+> {
+    return Ok(shared::ast::runtime::ArrayFieldSpec {
         default_value: None,
         directive_invocations: Vec::new(),
         r#type: Box::new(parse_non_callable_object_field_spec(&value["type"])?),
@@ -137,7 +142,7 @@ fn parse_object_array_field_spec(
 fn parse_non_callable_object_field_spec(
     value: &serde_json::Value,
 ) -> Result<
-    shared::ast::NonCallableFieldSpec<server::ast::ObjectTypeSpec>,
+    shared::ast::runtime::NonCallableFieldSpec<server::ast::ObjectTypeSpec>,
     String,
 > {
     let t = value["_type"].as_str().unwrap();
@@ -153,7 +158,7 @@ fn parse_non_callable_object_field_spec(
 
 fn parse_input_type_spec(
     value: &serde_json::Value,
-) -> Result<shared::ast::InputTypeSpec, String> {
+) -> Result<shared::ast::runtime::InputTypeSpec, String> {
     let Some(t) = value["_type"].as_str() else {
         return Err(
             "Expected to have _type string descriminator in input type spec"
@@ -162,17 +167,17 @@ fn parse_input_type_spec(
     };
     match t {
         "InputType" => {
-            return Ok(shared::ast::InputTypeSpec::InputType(
+            return Ok(shared::ast::runtime::InputTypeSpec::InputType(
                 value["name"].as_str().unwrap().to_string(),
             ));
         }
         "Enum" => {
-            return Ok(shared::ast::InputTypeSpec::Enum(
+            return Ok(shared::ast::runtime::InputTypeSpec::Enum(
                 value["name"].as_str().unwrap().to_string(),
             ));
         }
         "Scalar" => {
-            return Ok(shared::ast::InputTypeSpec::Scalar(
+            return Ok(shared::ast::runtime::InputTypeSpec::Scalar(
                 value["name"].as_str().unwrap().to_string(),
             ));
         }
@@ -182,8 +187,11 @@ fn parse_input_type_spec(
 
 fn parse_input_literal_field_spec(
     value: &serde_json::Value,
-) -> Result<shared::ast::LiteralFieldSpec<shared::ast::InputTypeSpec>, String> {
-    return Ok(shared::ast::LiteralFieldSpec {
+) -> Result<
+    shared::ast::runtime::LiteralFieldSpec<shared::ast::runtime::InputTypeSpec>,
+    String,
+> {
+    return Ok(shared::ast::runtime::LiteralFieldSpec {
         default_value: Some(parse_optional_literal(&value["default_value"])?),
         directive_invocations: IndexMap::new(),
         r#type: parse_input_type_spec(&value["type"])?,
@@ -192,8 +200,11 @@ fn parse_input_literal_field_spec(
 
 fn parse_input_array_field_spec(
     value: &serde_json::Value,
-) -> Result<shared::ast::ArrayFieldSpec<shared::ast::InputTypeSpec>, String> {
-    return Ok(shared::ast::ArrayFieldSpec {
+) -> Result<
+    shared::ast::runtime::ArrayFieldSpec<shared::ast::runtime::InputTypeSpec>,
+    String,
+> {
+    return Ok(shared::ast::runtime::ArrayFieldSpec {
         default_value: Some(parse_optional_array_literal(
             &value["default_value"],
         )?),
@@ -205,7 +216,7 @@ fn parse_input_array_field_spec(
 
 fn parse_input_field_spec(
     value: &serde_json::Value,
-) -> Result<shared::ast::InputFieldSpec, String> {
+) -> Result<shared::ast::runtime::InputFieldSpec, String> {
     let t = value["_type"].as_str().unwrap();
     match t {
         "literal" => Ok(parse_input_literal_field_spec(value)?.into()),
@@ -220,8 +231,11 @@ fn parse_input_field_spec(
 fn parse_input_field_definition(
     name: &str,
     value: &serde_json::Value,
-) -> Result<shared::ast::FieldDefinition<shared::ast::InputFieldSpec>, String> {
-    return Ok(shared::ast::FieldDefinition {
+) -> Result<
+    shared::ast::runtime::FieldDefinition<shared::ast::runtime::InputFieldSpec>,
+    String,
+> {
+    return Ok(shared::ast::runtime::FieldDefinition {
         name: name.into(),
         spec: parse_input_field_spec(&value["spec"])?,
         nullable: value["nullable"].as_bool().unwrap(),
@@ -231,12 +245,19 @@ fn parse_input_field_definition(
 fn parse_arguments(
     value: &serde_json::Value,
 ) -> Result<
-    IndexMap<String, shared::ast::FieldDefinition<shared::ast::InputFieldSpec>>,
+    IndexMap<
+        String,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec,
+        >,
+    >,
     String,
 > {
     let mut args = IndexMap::<
         String,
-        shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec,
+        >,
     >::new();
     for (key, v) in value.as_object().unwrap() {
         args.insert(key.clone(), parse_input_field_definition(key, v)?);
@@ -275,12 +296,14 @@ fn parse_object_field_spec(
 fn parse_object_field(
     name: &str,
     value: &serde_json::Value,
-) -> Result<shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>, String>
-{
+) -> Result<
+    shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec>,
+    String,
+> {
     let nullable = value["nullable"]
         .as_bool()
         .ok_or("FieldDefinition is expected to have \"nullable\" bool value")?;
-    return Ok(shared::ast::FieldDefinition {
+    return Ok(shared::ast::runtime::FieldDefinition {
         name: name.into(),
         nullable,
         spec: parse_object_field_spec(&value["spec"])?,
@@ -292,13 +315,13 @@ fn parse_object_fields(
 ) -> Result<
     IndexMap<
         String,
-        shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+        shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec>,
     >,
     String,
 > {
     let mut fields = IndexMap::<
         String,
-        shared::ast::FieldDefinition<server::ast::ObjectFieldSpec>,
+        shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec>,
     >::new();
     for (key, value) in map.as_object().unwrap() {
         fields.insert(key.into(), parse_object_field(key, value)?);
@@ -339,8 +362,10 @@ fn parse_objects(
     return Ok(objects);
 }
 
-fn parse_enum(value: &serde_json::Value) -> Result<shared::ast::Enum, String> {
-    return Ok(shared::ast::Enum {
+fn parse_enum(
+    value: &serde_json::Value,
+) -> Result<shared::ast::runtime::Enum, String> {
+    return Ok(shared::ast::runtime::Enum {
         name: value["name"].as_str().unwrap().to_string(),
         values: value["values"]
             .as_array()
@@ -353,8 +378,8 @@ fn parse_enum(value: &serde_json::Value) -> Result<shared::ast::Enum, String> {
 
 fn parse_enums(
     map: &serde_json::Value,
-) -> Result<IndexMap<String, shared::ast::Enum>, String> {
-    let mut enums = IndexMap::<String, shared::ast::Enum>::new();
+) -> Result<IndexMap<String, shared::ast::runtime::Enum>, String> {
+    let mut enums = IndexMap::<String, shared::ast::runtime::Enum>::new();
     for (key, value) in map.as_object().unwrap() {
         enums.insert(key.clone(), parse_enum(value)?);
     }
@@ -364,12 +389,19 @@ fn parse_enums(
 fn parse_input_fields(
     v: &serde_json::Value,
 ) -> Result<
-    IndexMap<String, shared::ast::FieldDefinition<shared::ast::InputFieldSpec>>,
+    IndexMap<
+        String,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec,
+        >,
+    >,
     String,
 > {
     let mut fields = IndexMap::<
         String,
-        shared::ast::FieldDefinition<shared::ast::InputFieldSpec>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec,
+        >,
     >::new();
     for (key, value) in v.as_object().unwrap() {
         fields.insert(key.clone(), parse_input_field_definition(key, value)?);
@@ -379,12 +411,12 @@ fn parse_input_fields(
 
 fn parse_inputs(
     map: &serde_json::Value,
-) -> Result<IndexMap<String, shared::ast::InputType>, String> {
-    let mut inputs = IndexMap::<String, shared::ast::InputType>::new();
+) -> Result<IndexMap<String, shared::ast::runtime::InputType>, String> {
+    let mut inputs = IndexMap::<String, shared::ast::runtime::InputType>::new();
     for (key, value) in map.as_object().unwrap() {
         inputs.insert(
             key.clone(),
-            shared::ast::InputType {
+            shared::ast::runtime::InputType {
                 name: key.clone(),
                 fields: parse_input_fields(&value["fields"])?,
             },
