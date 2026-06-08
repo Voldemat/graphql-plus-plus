@@ -35,8 +35,9 @@ async fn subscription_stream_users(
     impl futures_util::Stream<Item = User>,
     libgql::executor::ast::ResolverError,
 > {
-    Ok(async_stream::stream! {
-    yield User {id: uuid::Uuid :: parse_str ("fcf14d39-da7d-48f1-9034-c40b11453d1d") . unwrap () , name : "test-name" . to_string () , } ; tokio :: time :: sleep (std :: time :: Duration :: from_millis (100)) . await ; yield User { id : uuid :: Uuid :: parse_str ("fcf14d39-da7d-48f1-9034-c40b11453d1d") . unwrap () , name : "test-name" . to_string () , } ; })
+    Ok(
+        async_stream::stream! { yield User { id : uuid :: Uuid :: parse_str ("fcf14d39-da7d-48f1-9034-c40b11453d1d") . unwrap () , name : "test-name" . to_string () , } ; tokio :: time :: sleep (std :: time :: Duration :: from_millis (100)) . await ; yield User { id : uuid :: Uuid :: parse_str ("fcf14d39-da7d-48f1-9034-c40b11453d1d") . unwrap () , name : "test-name" . to_string () , } ; },
+    )
 }
 
 fn subscription_stream_users_wrapper<'args>(
