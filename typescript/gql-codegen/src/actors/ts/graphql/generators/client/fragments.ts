@@ -179,9 +179,9 @@ function resolveSelections(
         { ensurePresent: boolean, optional: boolean } | { ignore: true }
 ) {
     const ignoreTypename = 'ignore' in typenameConfig
-    const selections = [...specSelections.filter(
+    const selections = specSelections.filter(
         s => s._type !== 'TypenameField' || !ignoreTypename
-    ).toSorted((s1, s2) => s1._type.localeCompare(s2._type))]
+    ).toSorted((s1, s2) => s1._type.localeCompare(s2._type))
     if (ignoreTypename) return selections
     const hasTypename = specSelections.some(
         s => s._type === 'TypenameField'
