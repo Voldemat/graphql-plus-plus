@@ -37,8 +37,10 @@ pub enum Error<'buffer, S: shared::ast::AsStr<'buffer>> {
         field: file::shared::ast::NameNode<'buffer>,
     },
     UnexpectedCallableField {
-        field_type:
-            shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec<S>, S>,
+        field_type: shared::ast::runtime::FieldDefinition<
+            server::ast::ObjectFieldSpec<S>,
+            S,
+        >,
         definition: file::client::ast::ObjectCallableFieldSpec<'buffer>,
     },
     UnexpectedFieldSelectionNodeOnUnion(
@@ -50,7 +52,10 @@ pub enum Error<'buffer, S: shared::ast::AsStr<'buffer>> {
     },
     UnexpectedSelectionOnLiteralField {
         spec: file::client::ast::FragmentSpec<'buffer>,
-        field: shared::ast::runtime::FieldDefinition<server::ast::ObjectFieldSpec<S>, S>,
+        field: shared::ast::runtime::FieldDefinition<
+            server::ast::ObjectFieldSpec<S>,
+            S,
+        >,
     },
     InvalidLiteralForInput {
         type_spec: shared::ast::runtime::InputTypeSpec<S>,

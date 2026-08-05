@@ -156,7 +156,10 @@ pub fn parse_server_extend_node<'buffer>(
 ) -> Result<
     (
         &'buffer str,
-        IndexMap<String, shared::ast::runtime::FieldDefinition<ast::ObjectFieldSpec>>,
+        IndexMap<
+            String,
+            shared::ast::runtime::FieldDefinition<ast::ObjectFieldSpec>,
+        >,
     ),
     errors::Error<'buffer>,
 > {

@@ -47,7 +47,8 @@ pub trait LiteralFieldSpec<
     FD: FieldDefinition<N>,
     FSA: FieldSelectionArgument<T, L, AL, AV, S, Self, AFS, N, FD>,
     N: NonCallableFieldSpec<T, L, AL, AV, S, Self, AFS, FD, FSA>,
->: Sized {
+>: Sized
+{
     fn get_type(self: &Self) -> &T;
     fn get_default_value(self: &Self) -> &Option<Option<L>>;
     fn get_directive_invocations(self: &Self) -> &[(&str, &S)];
@@ -60,17 +61,7 @@ pub trait ArrayFieldSpec<
     AL: ArrayLiteral,
     AV: ArgumentValue,
     S: ServerDirectiveInvocation<T, L, AL, AV, LFS, Self, N, FD, FSA>,
-    LFS: LiteralFieldSpec<
-        T,
-        L,
-        AL,
-        AV,
-        S,
-        Self,
-        FD,
-        FSA,
-        N
-    >,
+    LFS: LiteralFieldSpec<T, L, AL, AV, S, Self, FD, FSA, N>,
     FD: FieldDefinition<N>,
     FSA: FieldSelectionArgument<T, L, AL, AV, S, LFS, Self, N, FD>,
     N: NonCallableFieldSpec<T, L, AL, AV, S, LFS, Self, FD, FSA>,
@@ -93,17 +84,7 @@ pub trait NonCallableFieldSpec<
     AL: ArrayLiteral,
     AV: ArgumentValue,
     S: ServerDirectiveInvocation<T, L, AL, AV, LFS, AFS, Self, FD, FSA>,
-    LFS: LiteralFieldSpec<
-        T,
-        L,
-        AL,
-        AV,
-        S,
-        AFS,
-        FD,
-        FSA,
-        Self
-    >,
+    LFS: LiteralFieldSpec<T, L, AL, AV, S, AFS, FD, FSA, Self>,
     AFS: ArrayFieldSpec<T, L, AL, AV, S, LFS, FD, FSA, Self>,
     FD: FieldDefinition<Self>,
     FSA: FieldSelectionArgument<T, L, AL, AV, S, LFS, AFS, Self, FD>,
@@ -146,17 +127,7 @@ pub trait FieldSelectionArgument<
     AL: ArrayLiteral,
     AV: ArgumentValue,
     S: ServerDirectiveInvocation<T, L, AL, AV, LFS, AFS, NCFS, FD, Self>,
-    LFS: LiteralFieldSpec<
-        T,
-        L,
-        AL,
-        AV,
-        S,
-        AFS,
-        FD,
-        Self,
-        NCFS
-    >,
+    LFS: LiteralFieldSpec<T, L, AL, AV, S, AFS, FD, Self, NCFS>,
     AFS: ArrayFieldSpec<T, L, AL, AV, S, LFS, FD, Self, NCFS>,
     NCFS: NonCallableFieldSpec<T, L, AL, AV, S, LFS, AFS, FD, Self>,
     FD: FieldDefinition<NCFS>,
@@ -172,28 +143,8 @@ pub trait ServerDirectiveInvocation<
     L: Literal,
     AL: ArrayLiteral,
     AV: ArgumentValue,
-    LFS: LiteralFieldSpec<
-        T,
-        L,
-        AL,
-        AV,
-        Self,
-        AFS,
-        FD,
-        FSA,
-        NCFS
-    >,
-    AFS: ArrayFieldSpec<
-        T,
-        L,
-        AL,
-        AV,
-        Self,
-        LFS,
-        FD,
-        FSA,
-        NCFS
-    >,
+    LFS: LiteralFieldSpec<T, L, AL, AV, Self, AFS, FD, FSA, NCFS>,
+    AFS: ArrayFieldSpec<T, L, AL, AV, Self, LFS, FD, FSA, NCFS>,
     NCFS: NonCallableFieldSpec<T, L, AL, AV, Self, LFS, AFS, FD, FSA>,
     FD: FieldDefinition<NCFS>,
     FSA: FieldSelectionArgument<T, L, AL, AV, Self, LFS, AFS, NCFS, FD>,

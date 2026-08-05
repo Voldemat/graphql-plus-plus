@@ -390,7 +390,9 @@ fn parse_argument_literal_value<
     ClientStringType: shared::ast::AsStr<'client_buffer>,
     ServerStringType: shared::ast::AsStr<'server_buffer>,
 >(
-    type_spec: &'server_buffer shared::ast::runtime::InputTypeSpec<ServerStringType>,
+    type_spec: &'server_buffer shared::ast::runtime::InputTypeSpec<
+        ServerStringType,
+    >,
     node: &file::shared::ast::LiteralNode<'client_buffer>,
 ) -> Result<
     shared::ast::runtime::ArgumentLiteralValue<ClientStringType>,
@@ -399,7 +401,9 @@ fn parse_argument_literal_value<
     match node {
         file::shared::ast::LiteralNode::Int(i) => {
             let is_valid = match type_spec {
-                shared::ast::runtime::InputTypeSpec::Scalar(s) => s.to_str() == "Int",
+                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
+                    s.to_str() == "Int"
+                }
                 _ => false,
             };
             if !is_valid {
@@ -413,7 +417,9 @@ fn parse_argument_literal_value<
         }
         file::shared::ast::LiteralNode::Float(i) => {
             let is_valid = match type_spec {
-                shared::ast::runtime::InputTypeSpec::Scalar(s) => s.to_str() == "Float",
+                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
+                    s.to_str() == "Float"
+                }
                 _ => false,
             };
             if !is_valid {
@@ -443,7 +449,9 @@ fn parse_argument_literal_value<
         }
         file::shared::ast::LiteralNode::String(i) => {
             let is_valid = match type_spec {
-                shared::ast::runtime::InputTypeSpec::Scalar(s) => s.to_str() == "String",
+                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
+                    s.to_str() == "String"
+                }
                 _ => false,
             };
             if !is_valid {
@@ -459,7 +467,9 @@ fn parse_argument_literal_value<
         }
         file::shared::ast::LiteralNode::EnumValue(i) => {
             let is_valid = match type_spec {
-                shared::ast::runtime::InputTypeSpec::Scalar(s) => s.to_str() == "String",
+                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
+                    s.to_str() == "String"
+                }
                 _ => false,
             };
             if !is_valid {
@@ -499,9 +509,9 @@ fn parse_selection_argument<
         name: ClientStringType::from_str(argument.name.name),
         value: match &argument.value {
             file::shared::ast::ArgumentValue::NameNode(node) => {
-                shared::ast::runtime::ArgumentValue::Ref(ClientStringType::from_str(
-                    node.name,
-                ))
+                shared::ast::runtime::ArgumentValue::Ref(
+                    ClientStringType::from_str(node.name),
+                )
                 .into()
             }
             file::shared::ast::ArgumentValue::LiteralNode(node) => {

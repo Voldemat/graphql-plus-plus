@@ -87,7 +87,10 @@ pub struct Operation<S = String> {
     pub name: S,
     pub parameters: indexmap::IndexMap<
         S,
-        shared::ast::runtime::FieldDefinition<shared::ast::runtime::InputFieldSpec<S>, S>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec<S>,
+            S,
+        >,
     >,
     pub fragment_spec: FragmentSpec<S>,
     pub used_fragments: Vec<S>,
@@ -103,7 +106,10 @@ pub struct ClientDirective<S = String> {
     pub name: S,
     pub arguments: indexmap::IndexMap<
         S,
-        shared::ast::runtime::FieldDefinition<shared::ast::runtime::InputFieldSpec<S>, S>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec<S>,
+            S,
+        >,
     >,
     pub locations: Vec<DirectiveLocation>,
 }

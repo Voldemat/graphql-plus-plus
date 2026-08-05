@@ -641,12 +641,24 @@ fn write_server_directives<'a, J: struson::writer::JsonWriter>(
 pub fn serialize_server_schema(
     schema: &server::type_registry::HashMapTypeRegistry,
     client_schema: Option<&client::type_registry::TypeRegistry>,
+    pretty: bool,
 ) -> Result<String, String> {
     let server_uses_map =
         client_schema.map(|c_schema| ServerUsesMap::new(schema, c_schema));
     let mut io_writer = Vec::<u8>::new();
+    let json_writer = struson::writer::JsonStreamWriter::new_custom(
+        &mut io_writer,
+        struson::writer::WriterSettings {
+            pretty_print: pretty,
+            escape_all_control_chars: false,
+            escape_all_non_ascii: false,
+            multi_top_level_value_separator: None,
+        },
+    );
     struson::writer::simple::ValueWriter::write_object(
-        struson::writer::simple::SimpleJsonWriter::new(&mut io_writer),
+        struson::writer::simple::SimpleJsonWriter::from_json_writer(
+            json_writer,
+        ),
         |schema_writer| {
             schema_writer.write_object_member("objects", |objects_writer| {
                 write_objects(objects_writer, &schema.objects, &server_uses_map)

@@ -32,7 +32,10 @@ pub fn parse_fields<'buffer>(
     fields: &[file::server::ast::FieldDefinitionNode<'buffer>],
     registry: &HashMapTypeRegistry,
 ) -> Result<
-    IndexMap<String, shared::ast::runtime::FieldDefinition<ast::ObjectFieldSpec>>,
+    IndexMap<
+        String,
+        shared::ast::runtime::FieldDefinition<ast::ObjectFieldSpec>,
+    >,
     errors::Error<'buffer>,
 > {
     let mut m = IndexMap::<
@@ -85,7 +88,10 @@ fn parse_noncallable_object_field_spec<'buffer>(
     directives: &[shared::ast::runtime::ServerDirectiveInvocation],
     registry: &HashMapTypeRegistry,
 ) -> Result<
-    (shared::ast::runtime::NonCallableFieldSpec<ast::ObjectTypeSpec>, bool),
+    (
+        shared::ast::runtime::NonCallableFieldSpec<ast::ObjectTypeSpec>,
+        bool,
+    ),
     errors::Error<'buffer>,
 > {
     match node {

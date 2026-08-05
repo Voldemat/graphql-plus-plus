@@ -40,10 +40,14 @@ pub struct Union<S = String> {
 
 #[derive(Debug, Clone)]
 pub struct CallableFieldSpec<S = String> {
-    pub return_type: shared::ast::runtime::NonCallableFieldSpec<ObjectTypeSpec<S>>,
+    pub return_type:
+        shared::ast::runtime::NonCallableFieldSpec<ObjectTypeSpec<S>>,
     pub arguments: indexmap::IndexMap<
         S,
-        shared::ast::runtime::FieldDefinition<shared::ast::runtime::InputFieldSpec<S>, S>,
+        shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec<S>,
+            S,
+        >,
     >,
 }
 impl<'s1, S: shared::ast::AsStr<'s1>> CallableFieldSpec<S> {
@@ -106,7 +110,9 @@ impl From<shared::ast::runtime::NonCallableFieldSpec<ObjectTypeSpec<String>>>
     for ObjectFieldSpec
 {
     fn from(
-        value: shared::ast::runtime::NonCallableFieldSpec<ObjectTypeSpec<String>>,
+        value: shared::ast::runtime::NonCallableFieldSpec<
+            ObjectTypeSpec<String>,
+        >,
     ) -> Self {
         match value {
             shared::ast::runtime::NonCallableFieldSpec::Array(a) => a.into(),
