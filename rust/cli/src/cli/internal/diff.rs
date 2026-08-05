@@ -3,7 +3,7 @@ use libgql::parsers::schema::{
     server::ast::{
         Interface, ObjectFieldSpec, ObjectType, ObjectTypeSpec, Union,
     },
-    shared::ast::{
+    shared::ast::runtime::{
         Enum, FieldDefinition, InputFieldSpec, InputType, InputTypeSpec,
         NonCallableFieldSpec,
     },
