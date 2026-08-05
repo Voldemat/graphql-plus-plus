@@ -238,6 +238,7 @@ pub fn run_config_action<'a>(
                 } else {
                     None
                 },
+                outputs.pretty,
             )?;
         json_callback(&json_string, &outputs.filepath, "Server");
     };
