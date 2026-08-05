@@ -1035,10 +1035,22 @@ fn write_directives<'a, J: struson::writer::JsonWriter>(
 
 pub fn serialize_client_schema(
     schema: &client::type_registry::TypeRegistry,
+    pretty: bool,
 ) -> Result<String, String> {
     let mut io_writer = Vec::<u8>::new();
+    let json_writer = struson::writer::JsonStreamWriter::new_custom(
+        &mut io_writer,
+        struson::writer::WriterSettings {
+            pretty_print: pretty,
+            escape_all_control_chars: false,
+            escape_all_non_ascii: false,
+            multi_top_level_value_separator: None,
+        },
+    );
     struson::writer::simple::ValueWriter::write_object(
-        struson::writer::simple::SimpleJsonWriter::new(&mut io_writer),
+        struson::writer::simple::SimpleJsonWriter::from_json_writer(
+            json_writer,
+        ),
         |schema_writer| {
             schema_writer.write_object_member(
                 "fragments",
