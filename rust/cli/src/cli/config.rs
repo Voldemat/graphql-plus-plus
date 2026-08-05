@@ -12,6 +12,8 @@ pub struct OutputsConfig {
     pub filepath: std::path::PathBuf,
     #[serde(alias = "onlyUsedInOperations")]
     pub only_used_in_operations: bool,
+
+    pub pretty: bool
 }
 
 #[derive(serde::Deserialize)]
