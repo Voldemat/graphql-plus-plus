@@ -219,6 +219,8 @@ function generateObjectFragmentSpecText(
                             fieldText,
                         ].join('');
                     }
+                    default:
+                        throw new Error('Unreachable');
                 }
             })
             .join(' ') +
