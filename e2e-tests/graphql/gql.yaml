@@ -6,3 +6,4 @@ server:
   outputs:
     filepath: ./server-schema.json
     onlyUsedInOperations: false
+    pretty: true
