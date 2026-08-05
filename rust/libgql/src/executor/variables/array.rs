@@ -167,7 +167,7 @@ mod tests {
         }
 
         fn from_literal(
-            _: &shared::ast::runtime::Literal,
+            _: shared::ast::traits::LiteralRef<'_>,
         ) -> Result<Self, String> {
             todo!()
         }
