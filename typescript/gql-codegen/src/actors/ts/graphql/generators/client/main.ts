@@ -9,7 +9,7 @@ const operationTypeNode = ts.factory.createInterfaceDeclaration(
     'Operation',
     [
         ts.factory.createTypeParameterDeclaration(undefined, 'V'),
-        ts.factory.createTypeParameterDeclaration(undefined, 'R')
+        ts.factory.createTypeParameterDeclaration(undefined, 'R'),
     ],
     [],
     [
@@ -24,11 +24,12 @@ const operationTypeNode = ts.factory.createInterfaceDeclaration(
             'type',
             undefined,
             ts.factory.createUnionTypeNode(
-                ['QUERY', 'MUTATION', 'SUBSCRIPTION'].map(v =>
+                ['QUERY', 'MUTATION', 'SUBSCRIPTION'].map((v) =>
                     ts.factory.createLiteralTypeNode(
-                        ts.factory.createStringLiteral(v)
-                    ))
-            )
+                        ts.factory.createStringLiteral(v),
+                    ),
+                ),
+            ),
         ),
         ts.factory.createPropertySignature(
             undefined,
@@ -42,7 +43,7 @@ const operationTypeNode = ts.factory.createInterfaceDeclaration(
             undefined,
             ts.factory.createTypeReferenceNode('z.ZodType', [
                 ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
-                ts.factory.createTypeReferenceNode('V')
+                ts.factory.createTypeReferenceNode('V'),
             ]),
         ),
         ts.factory.createPropertySignature(
@@ -50,24 +51,18 @@ const operationTypeNode = ts.factory.createInterfaceDeclaration(
             'resultSchema',
             undefined,
             ts.factory.createTypeReferenceNode('z.ZodType', [
-                ts.factory.createTypeReferenceNode('R')
+                ts.factory.createTypeReferenceNode('R'),
             ]),
         ),
-    ]
-)
+    ],
+);
 export function generateClientNodes(
     config: GraphqlActorConfig,
     context: ActorContext,
 ): ts.Node[] {
     return [
         operationTypeNode,
-        ...generateFragmentTypes(
-            config.scalarsMapping,
-            context.schema
-        ),
-        ...generateOperationsNodes(
-            config.scalarsMapping,
-            context.schema,
-        )
-    ]
+        ...generateFragmentTypes(config.scalarsMapping, context.schema),
+        ...generateOperationsNodes(config.scalarsMapping, context.schema),
+    ];
 }

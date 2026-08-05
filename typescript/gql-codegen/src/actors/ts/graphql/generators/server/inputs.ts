@@ -5,7 +5,7 @@ import { inputSchema } from '@/schema/server.js';
 import {
     inputFieldSchema,
     inputFieldSpecSchema,
-    inputTypeSchema
+    inputTypeSchema,
 } from '@/schema/shared.js';
 import { getScalarSpecFromMapping, ScalarsMapping } from './scalars/index.js';
 import { invokeMethod } from '../../../shared.js';
@@ -13,139 +13,147 @@ import { generateSchemaName, generateZodInferTypeAlias } from './shared.js';
 
 function generateZodInputTypeSpec(
     scalarsMapping: ScalarsMapping,
-    type: z.infer<typeof inputTypeSchema>
+    type: z.infer<typeof inputTypeSchema>,
 ) {
     switch (type._type) {
-    case 'Enum': {
-        return ts.factory.createCallExpression(
-            ts.factory.createPropertyAccessExpression(
-                ts.factory.createIdentifier('z'),
-                'enum'
-            ),
-            undefined,
-            [ts.factory.createIdentifier(type.name)]
-        )
-    }
-    case 'Scalar': {
-        return getScalarSpecFromMapping(scalarsMapping, type.name).inputSchema
-    }
-    case 'InputType': {
-        return ts.factory.createIdentifier(generateSchemaName(type.name))
-    }
+        case 'Enum': {
+            return ts.factory.createCallExpression(
+                ts.factory.createPropertyAccessExpression(
+                    ts.factory.createIdentifier('z'),
+                    'enum',
+                ),
+                undefined,
+                [ts.factory.createIdentifier(type.name)],
+            );
+        }
+        case 'Scalar': {
+            return getScalarSpecFromMapping(scalarsMapping, type.name)
+                .inputSchema;
+        }
+        case 'InputType': {
+            return ts.factory.createIdentifier(generateSchemaName(type.name));
+        }
     }
 }
 
 function generateZodInputFieldSpec(
     scalarsMapping: ScalarsMapping,
-    spec: z.infer<typeof inputFieldSpecSchema>
+    spec: z.infer<typeof inputFieldSpecSchema>,
 ): ts.Expression {
     switch (spec._type) {
-    case 'array': {
-        return ts.factory.createCallExpression(
-            ts.factory.createPropertyAccessExpression(
-                ts.factory.createIdentifier('z'),
-                'array'
-            ),
-            undefined,
-            [generateZodInputFieldSpec(scalarsMapping, spec.type)]
-        )
-    }
-    case 'literal': {
-        return generateZodInputTypeSpec(scalarsMapping, spec.type)
-    }
+        case 'array': {
+            return ts.factory.createCallExpression(
+                ts.factory.createPropertyAccessExpression(
+                    ts.factory.createIdentifier('z'),
+                    'array',
+                ),
+                undefined,
+                [generateZodInputFieldSpec(scalarsMapping, spec.type)],
+            );
+        }
+        case 'literal': {
+            return generateZodInputTypeSpec(scalarsMapping, spec.type);
+        }
     }
 }
 
 function generateZodInputField(
     scalarsMapping: ScalarsMapping,
-    field: z.infer<typeof inputFieldSchema>
+    field: z.infer<typeof inputFieldSchema>,
 ) {
-    const expression = generateZodInputFieldSpec(scalarsMapping, field.spec)
+    const expression = generateZodInputFieldSpec(scalarsMapping, field.spec);
     if (!field.nullable) {
-        return expression
+        return expression;
     }
     return invokeMethod(
         invokeMethod(expression, 'nullable', []),
         'optional',
-        []
-    )
+        [],
+    );
 }
 
 function isFieldLazy(spec: z.infer<typeof inputFieldSpecSchema>): boolean {
     switch (spec._type) {
-    case 'literal': return spec.type._type === 'InputType'
-    case 'array': return isFieldLazy(spec.type)
+        case 'literal':
+            return spec.type._type === 'InputType';
+        case 'array':
+            return isFieldLazy(spec.type);
     }
 }
 
 export function generateInputTypeDefinitionFields(
     scalarsMapping: ScalarsMapping,
-    fields: Record<string, z.infer<typeof inputFieldSchema>>
+    fields: Record<string, z.infer<typeof inputFieldSchema>>,
 ): (ts.PropertyAssignment | ts.GetAccessorDeclaration)[] {
     return Object.entries(fields).map(([name, field]) => {
-        const fieldSpec = generateZodInputField(scalarsMapping, field)
+        const fieldSpec = generateZodInputField(scalarsMapping, field);
         if (isFieldLazy(field.spec)) {
             return ts.factory.createGetAccessorDeclaration(
                 [],
                 name,
                 [],
                 undefined,
-                ts.factory.createBlock([
-                    ts.factory.createReturnStatement(fieldSpec)
-                ], true)
-            )
+                ts.factory.createBlock(
+                    [ts.factory.createReturnStatement(fieldSpec)],
+                    true,
+                ),
+            );
         }
-        return ts.factory.createPropertyAssignment(name, fieldSpec)
-    })
+        return ts.factory.createPropertyAssignment(name, fieldSpec);
+    });
 }
 
 function generateZodInputTypeDefinition(
     scalarsMapping: ScalarsMapping,
     name: string,
-    fields: Record<string, z.infer<typeof inputFieldSchema>>
+    fields: Record<string, z.infer<typeof inputFieldSchema>>,
 ): ts.Node {
     return ts.factory.createVariableStatement(
         [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-        ts.factory.createVariableDeclarationList([
-            ts.factory.createVariableDeclaration(
-                generateSchemaName(name),
-                undefined,
-                undefined,
-                ts.factory.createCallExpression(
-                    ts.factory.createPropertyAccessExpression(
-                        ts.factory.createIdentifier('z'),
-                        ts.factory.createIdentifier('object')
-                    ),
+        ts.factory.createVariableDeclarationList(
+            [
+                ts.factory.createVariableDeclaration(
+                    generateSchemaName(name),
                     undefined,
-                    [ts.factory.createObjectLiteralExpression(
-                        generateInputTypeDefinitionFields(
-                            scalarsMapping,
-                            fields
+                    undefined,
+                    ts.factory.createCallExpression(
+                        ts.factory.createPropertyAccessExpression(
+                            ts.factory.createIdentifier('z'),
+                            ts.factory.createIdentifier('object'),
                         ),
-                        true
-                    )]
-                )
-            )
-        ],
-        ts.NodeFlags.Const),
-    )
+                        undefined,
+                        [
+                            ts.factory.createObjectLiteralExpression(
+                                generateInputTypeDefinitionFields(
+                                    scalarsMapping,
+                                    fields,
+                                ),
+                                true,
+                            ),
+                        ],
+                    ),
+                ),
+            ],
+            ts.NodeFlags.Const,
+        ),
+    );
 }
 
 export function generateInputTypeDefinitions(
     scalarsMapping: ScalarsMapping,
-    input: z.infer<typeof inputSchema>
+    input: z.infer<typeof inputSchema>,
 ): ts.Node[] {
     return [
         generateZodInputTypeDefinition(
             scalarsMapping,
             input.name,
-            input.fields
+            input.fields,
         ),
         generateZodInferTypeAlias(
             'input',
             input.name,
-            generateSchemaName(input.name)
+            generateSchemaName(input.name),
         ),
-        ts.factory.createIdentifier('\n')
-    ]
+        ts.factory.createIdentifier('\n'),
+    ];
 }

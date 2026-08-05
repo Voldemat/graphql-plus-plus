@@ -6,50 +6,50 @@ export const builtinScalarsMapping: ScalarsMapping = {
         ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
                 ts.factory.createIdentifier('z'),
-                'string'
+                'string',
             ),
             undefined,
-            []
-        )
+            [],
+        ),
     ),
     String: buildSymmetricScalarSpec(
         ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
                 ts.factory.createIdentifier('z'),
-                'string'
+                'string',
             ),
             undefined,
-            []
-        )
+            [],
+        ),
     ),
     Int: buildSymmetricScalarSpec(
         ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
                 ts.factory.createIdentifier('z'),
-                'number'
+                'number',
             ),
             undefined,
-            []
-        )
+            [],
+        ),
     ),
     Float: buildSymmetricScalarSpec(
         ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
                 ts.factory.createIdentifier('z'),
-                'number'
+                'number',
             ),
             undefined,
-            []
-        )
+            [],
+        ),
     ),
     Boolean: buildSymmetricScalarSpec(
         ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
                 ts.factory.createIdentifier('z'),
-                'boolean'
+                'boolean',
             ),
             undefined,
-            []
-        )
+            [],
+        ),
     ),
-}
+};

@@ -1,4 +1,4 @@
 export {
     type GQLClientReactActorConfig,
-    buildGQLClientReactActor
-} from './actor.js'
+    buildGQLClientReactActor,
+} from './actor.js';

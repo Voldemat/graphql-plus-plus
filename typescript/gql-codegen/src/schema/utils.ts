@@ -8,17 +8,17 @@ import {
     objectSchema,
     ServerSchema,
     serverSchema,
-    unionSchema
+    unionSchema,
 } from './server.js';
 import { ClientSchema, clientSchema } from './client/root.js';
 import { z } from 'zod/v4';
 import { RootSchema } from './root.js';
-import { exec } from 'node:child_process'
+import { exec } from 'node:child_process';
 import {
     fieldSelection,
     fragmentSchema,
     fragmentSpecSchema,
-    objectConditionalSpreadSelection
+    objectConditionalSpreadSelection,
 } from './client/fragment.js';
 import { inputFieldSchema, inputFieldSpecSchema } from './shared.js';
 import { argument } from './client/argument.js';
@@ -26,55 +26,55 @@ import { operationSchema } from './client/operation.js';
 
 export function loadSchemaFromFile<T extends z.ZodType>(
     p: PathOrFileDescriptor,
-    schema: T
+    schema: T,
 ): z.infer<T> {
-    return schema.parse(JSON.parse(readFileSync(p).toString()))
+    return schema.parse(JSON.parse(readFileSync(p).toString()));
 }
 
 export function loadServerSchemaFromFile(
-    p: PathOrFileDescriptor
+    p: PathOrFileDescriptor,
 ): ServerSchema {
     return loadSchemaFromFile(p, serverSchema);
 }
 
 export function loadClientSchemaFromFile(
-    p: PathOrFileDescriptor
+    p: PathOrFileDescriptor,
 ): ClientSchema {
     return loadSchemaFromFile(p, clientSchema);
 }
 
 export async function loadServerSchemaFromGQLSubprocess(
     gqlPath: string = 'gql',
-    gqlArgs: string[] = ['generate']
+    gqlArgs: string[] = ['generate'],
 ): Promise<ServerSchema> {
     const output = await new Promise<string>((resolve, reject) => {
         exec([gqlPath, ...gqlArgs].join(' '), (err, stdout, stderr) => {
             if (err !== null) {
                 reject(err);
-            };
+            }
             if (stderr !== '') {
                 reject(err);
-            };
-            resolve(stdout.split('\n').filter(s => s !== '')[0]);
-        })
+            }
+            resolve(stdout.split('\n').filter((s) => s !== '')[0]);
+        });
     });
-    return serverSchema.parse(JSON.parse(output))
+    return serverSchema.parse(JSON.parse(output));
 }
 
 export async function loadRootSchemaFromGQLSubprocess(
     gqlPath: string = 'gql',
-    gqlArgs: string[] = ['generate']
+    gqlArgs: string[] = ['generate'],
 ): Promise<RootSchema> {
     const output = await new Promise<string[]>((resolve, reject) => {
         exec([gqlPath, ...gqlArgs].join(' '), (err, stdout, stderr) => {
             if (err !== null) {
                 reject(err);
-            };
+            }
             if (stderr !== '') {
                 reject(err);
-            };
-            resolve(stdout.split('\n').filter(s => s !== ''));
-        })
+            }
+            resolve(stdout.split('\n').filter((s) => s !== ''));
+        });
     });
     return {
         server: serverSchema.parse(JSON.parse(output[0])),
@@ -83,7 +83,7 @@ export async function loadRootSchemaFromGQLSubprocess(
 }
 
 function buildFragmentSpecFromUnion(
-    union: z.infer<typeof unionSchema>
+    union: z.infer<typeof unionSchema>,
 ): z.infer<typeof fragmentSpecSchema> {
     return {
         _type: 'UnionFragmentSpec',
@@ -91,238 +91,250 @@ function buildFragmentSpecFromUnion(
         selections: [
             { _type: 'TypenameField', alias: null },
             ...Object.keys(union.items).map(
-                (item): z.infer<typeof objectConditionalSpreadSelection> =>
-                    ({
-                        _type: 'ObjectConditionalSpreadSelection',
-                        object: item,
-                        spec: {
-                            _type: 'ObjectFragmentSpec',
-                            name: item,
-                            selections: [
-                                { _type: 'SpreadSelection', fragment: item }
-                            ]
-                        }
-                    })
-            )
-        ]
-    }
+                (item): z.infer<typeof objectConditionalSpreadSelection> => ({
+                    _type: 'ObjectConditionalSpreadSelection',
+                    object: item,
+                    spec: {
+                        _type: 'ObjectFragmentSpec',
+                        name: item,
+                        selections: [
+                            { _type: 'SpreadSelection', fragment: item },
+                        ],
+                    },
+                }),
+            ),
+        ],
+    };
 }
 
 function generateFragmentText(name: string, specText: string) {
-    return `fragment ${name} on ${name}` + specText
+    return `fragment ${name} on ${name}` + specText;
 }
 
 export function buildFragmentFromUnion(
-    union: z.infer<typeof unionSchema>
+    union: z.infer<typeof unionSchema>,
 ): z.infer<typeof fragmentSchema> {
     return {
         spec: buildFragmentSpecFromUnion(union),
         sourceText: generateFragmentText(
             union.name,
             // eslint-disable-next-line no-use-before-define
-            generateUnionFragmentSpecText(union)
-        )
+            generateUnionFragmentSpecText(union),
+        ),
     };
-};
+}
 
 function extractFieldFromObjectLiteralFieldSpec(
-    spec: z.infer<typeof objectLiteralSpecSchema>
+    spec: z.infer<typeof objectLiteralSpecSchema>,
 ): string {
     switch (spec.type._type) {
-    case 'Enum': return ''
-    case 'Scalar': return ''
-    case 'Union':
-    case 'ObjectType':
-    case 'InterfaceType':
-        return '{...' + spec.type.name + '}'
-    };
-};
-
+        case 'Enum':
+            return '';
+        case 'Scalar':
+            return '';
+        case 'Union':
+        case 'ObjectType':
+        case 'InterfaceType':
+            return '{...' + spec.type.name + '}';
+    }
+}
 
 function extractFieldFromNonCallableFieldSpec(
-    spec: z.infer<typeof objectNonCallableFieldSpecSchema>
+    spec: z.infer<typeof objectNonCallableFieldSpecSchema>,
 ): string {
     switch (spec._type) {
-    case 'literal': return extractFieldFromObjectLiteralFieldSpec(spec)
-    case 'array': return extractFieldFromNonCallableFieldSpec(spec.type)
+        case 'literal':
+            return extractFieldFromObjectLiteralFieldSpec(spec);
+        case 'array':
+            return extractFieldFromNonCallableFieldSpec(spec.type);
     }
-};
+}
 
 function buildInputFieldSpec(
-    spec: z.infer<typeof inputFieldSpecSchema>
+    spec: z.infer<typeof inputFieldSpecSchema>,
 ): string {
     switch (spec._type) {
-    case 'literal': return spec.type.name
-    case 'array':
-        return '[' + buildInputFieldSpec(spec.type) +
-                (spec.nullable ? '' : '!') + ']'
+        case 'literal':
+            return spec.type.name;
+        case 'array':
+            return (
+                '[' +
+                buildInputFieldSpec(spec.type) +
+                (spec.nullable ? '' : '!') +
+                ']'
+            );
     }
 }
 
 function buildInputField(field: z.infer<typeof inputFieldSchema>): string {
-    let str = buildInputFieldSpec(field.spec)
+    let str = buildInputFieldSpec(field.spec);
     if (!field.nullable) {
         str += '!';
-    };
+    }
     return str;
-};
+}
 
 function extractTypeFromObjectFieldSpec(
-    spec: z.infer<typeof objectFieldSpecSchema>
+    spec: z.infer<typeof objectFieldSpecSchema>,
 ) {
     switch (spec._type) {
-    case 'literal': return spec.type
-    case 'array':
-        return extractTypeFromObjectFieldSpec(spec.type)
-    case 'callable':
-        return extractTypeFromObjectFieldSpec(spec.returnType)
+        case 'literal':
+            return spec.type;
+        case 'array':
+            return extractTypeFromObjectFieldSpec(spec.type);
+        case 'callable':
+            return extractTypeFromObjectFieldSpec(spec.returnType);
     }
 }
 
 function generateObjectFragmentSpecText(
     object: z.infer<typeof objectSchema>,
-    onlyField: string | null = null
+    onlyField: string | null = null,
 ): string {
-    return '{' + (onlyField !== null ? '' : '__typename ') +
+    return (
+        '{' +
+        (onlyField !== null ? '' : '__typename ') +
         Object.entries(object.fields)
             .filter(([name]) => onlyField === null || onlyField === name)
             // eslint-disable-next-line array-callback-return
             .map(([name, field]) => {
                 switch (field.spec._type) {
-                case 'array':
-                case 'literal': {
-                    const fieldText = extractFieldFromNonCallableFieldSpec(
-                        field.spec
-                    )
-                    return name + '' + fieldText
-
+                    case 'array':
+                    case 'literal': {
+                        const fieldText = extractFieldFromNonCallableFieldSpec(
+                            field.spec,
+                        );
+                        return name + '' + fieldText;
+                    }
+                    case 'callable': {
+                        const fieldText = extractFieldFromNonCallableFieldSpec(
+                            field.spec.returnType,
+                        );
+                        return [
+                            `${name}(` +
+                                Object.keys(field.spec.arguments)
+                                    .map((aName) => `${aName}:$${aName}`)
+                                    .join(',') +
+                                ')',
+                            fieldText,
+                        ].join('');
+                    }
                 }
-                case 'callable': {
-                    const fieldText =
-                            extractFieldFromNonCallableFieldSpec(
-                                field.spec.returnType
-                            )
-                    return [
-                        `${name}(` +
-                            Object.keys(
-                                field.spec.arguments
-                            ).map(aName => `${aName}:$${aName}`).join(',') +
-                            ')',
-                        fieldText
-                    ].join('')
-                }
-                };
-            }).join(' ') +
+            })
+            .join(' ') +
         '}'
+    );
 }
 
 function generateUnionFragmentSpecText(
-    union: z.infer<typeof unionSchema>
+    union: z.infer<typeof unionSchema>,
 ): string {
     return (
         '{__typename' +
-        Object.keys(union.items).map(item =>
-            `... on ${item}{...${item}}`).join(' ') +
+        Object.keys(union.items)
+            .map((item) => `... on ${item}{...${item}}`)
+            .join(' ') +
         '}'
-    )
+    );
 }
 
 export function buildSelectionFromFieldSpec(
-    spec: z.infer<typeof objectFieldSpecSchema>
+    spec: z.infer<typeof objectFieldSpecSchema>,
 ): z.infer<typeof fragmentSpecSchema> | null {
-    const type = extractTypeFromObjectFieldSpec(spec)
+    const type = extractTypeFromObjectFieldSpec(spec);
     switch (type._type) {
-    case 'Enum':
-    case 'Scalar': return null
-    case 'ObjectType':
-    case 'InterfaceType':
-        return {
-            _type: 'ObjectFragmentSpec',
-            name: type.name,
-            selections: [
-                { _type: 'SpreadSelection', fragment: type.name }
-            ]
-        }
-    case 'Union':
-        return {
-            _type: 'UnionFragmentSpec',
-            name: type.name,
-            selections: [
-                { _type: 'SpreadSelection', fragment: type.name }
-            ]
-        }
+        case 'Enum':
+        case 'Scalar':
+            return null;
+        case 'ObjectType':
+        case 'InterfaceType':
+            return {
+                _type: 'ObjectFragmentSpec',
+                name: type.name,
+                selections: [{ _type: 'SpreadSelection', fragment: type.name }],
+            };
+        case 'Union':
+            return {
+                _type: 'UnionFragmentSpec',
+                name: type.name,
+                selections: [{ _type: 'SpreadSelection', fragment: type.name }],
+            };
     }
 }
 
 export function buildArgumentFromFieldSpec(
-    spec: z.infer<typeof objectFieldSpecSchema>
+    spec: z.infer<typeof objectFieldSpecSchema>,
 ): Record<string, z.infer<typeof argument>> {
     switch (spec._type) {
-    case 'array':
-    case 'literal': return {}
-    case 'callable':
-        return Object.fromEntries(
-            Object.keys(spec.arguments).map(name => {
-                return [name, {
-                    name,
-                    value: {
-                        _type: 'ref',
-                        name: '$' + name
-                    }
-                }]
-            })
-        )
+        case 'array':
+        case 'literal':
+            return {};
+        case 'callable':
+            return Object.fromEntries(
+                Object.keys(spec.arguments).map((name) => {
+                    return [
+                        name,
+                        {
+                            name,
+                            value: {
+                                _type: 'ref',
+                                name: '$' + name,
+                            },
+                        },
+                    ];
+                }),
+            );
     }
 }
 
 export function buildFieldSelection(
     name: string,
-    field: z.infer<typeof objectFieldSchema>
+    field: z.infer<typeof objectFieldSchema>,
 ): z.infer<typeof fieldSelection> {
     return {
         _type: 'FieldSelection',
         name,
         alias: name,
         arguments: buildArgumentFromFieldSpec(field.spec),
-        selection: buildSelectionFromFieldSpec(field.spec)
-    }
-};
+        selection: buildSelectionFromFieldSpec(field.spec),
+    };
+}
 
 function buildFragmentSpecFromObject(
-    object: z.infer<typeof objectSchema>
+    object: z.infer<typeof objectSchema>,
 ): z.infer<typeof fragmentSpecSchema> {
     return {
         _type: 'ObjectFragmentSpec',
         name: object.name,
         selections: [
             { _type: 'TypenameField', alias: null },
-            ...Object.entries(object.fields).map(
-                ([name, field]) => buildFieldSelection(name, field)
-            )
-        ]
-    }
+            ...Object.entries(object.fields).map(([name, field]) =>
+                buildFieldSelection(name, field),
+            ),
+        ],
+    };
 }
 
 export function buildFragmentFromObject(
-    object: z.infer<typeof objectSchema>
+    object: z.infer<typeof objectSchema>,
 ): z.infer<typeof fragmentSchema> {
     return {
         spec: buildFragmentSpecFromObject(object),
         sourceText: generateFragmentText(
             object.name,
-            generateObjectFragmentSpecText(object)
-        )
+            generateObjectFragmentSpecText(object),
+        ),
     };
-};
+}
 
 function buildParameters(field: z.infer<typeof objectFieldSpecSchema>) {
-    const parameters: Record<string, z.infer<typeof inputFieldSchema>> = {}
+    const parameters: Record<string, z.infer<typeof inputFieldSchema>> = {};
     if (field._type === 'callable') {
         for (const [name, arg] of Object.entries(field.arguments)) {
-            parameters['$' + name] = arg
+            parameters['$' + name] = arg;
         }
     }
-    return parameters
+    return parameters;
 }
 
 function buildOperationSourceText(
@@ -330,24 +342,31 @@ function buildOperationSourceText(
     object: z.infer<typeof objectSchema>,
     name: string,
     fieldName: string,
-    spec: z.infer<typeof objectFieldSpecSchema>
+    spec: z.infer<typeof objectFieldSpecSchema>,
 ): string {
-    let argumentsText = ''
+    let argumentsText = '';
     if (spec._type === 'callable') {
-        argumentsText += '('
-        argumentsText += Object.entries(spec.arguments).map(([aName, arg]) => {
-            return `$${aName}:${buildInputField(arg)}`
-        }).join(',')
-        argumentsText += ')'
+        argumentsText += '(';
+        argumentsText += Object.entries(spec.arguments)
+            .map(([aName, arg]) => {
+                return `$${aName}:${buildInputField(arg)}`;
+            })
+            .join(',');
+        argumentsText += ')';
     }
-    return opType.toLowerCase() + ' ' + name + argumentsText +
+    return (
+        opType.toLowerCase() +
+        ' ' +
+        name +
+        argumentsText +
         generateObjectFragmentSpecText(object, fieldName)
+    );
 }
 
 function buildFragmentSpecFromField(
     opType: 'QUERY' | 'MUTATION' | 'SUBSCRIPTION',
     name: string,
-    field: z.infer<typeof objectFieldSchema>
+    field: z.infer<typeof objectFieldSchema>,
 ): z.infer<typeof fragmentSpecSchema> {
     return {
         _type: 'ObjectFragmentSpec',
@@ -358,75 +377,91 @@ function buildFragmentSpecFromField(
                 name,
                 alias: name,
                 arguments: buildArgumentFromFieldSpec(field.spec),
-                selection: buildSelectionFromFieldSpec(field.spec)
-            }
-        ]
-    }
+                selection: buildSelectionFromFieldSpec(field.spec),
+            },
+        ],
+    };
 }
 
 function buildOperation(
     type: 'QUERY' | 'MUTATION' | 'SUBSCRIPTION',
     object: z.infer<typeof objectSchema>,
     fieldName: string,
-    field: z.infer<typeof objectFieldSchema>
+    field: z.infer<typeof objectFieldSchema>,
 ): z.infer<typeof operationSchema> {
-    const name = fieldName[0].toUpperCase() + fieldName.slice(1)
+    const name = fieldName[0].toUpperCase() + fieldName.slice(1);
     return {
         type,
         name,
         parameters: buildParameters(field.spec),
         sourceText: buildOperationSourceText(
-            type, object, name, fieldName, field.spec
+            type,
+            object,
+            name,
+            fieldName,
+            field.spec,
         ),
         fragmentSpec: buildFragmentSpecFromField(type, fieldName, field),
-    }
+    };
 }
 
 function buildOperations(
-    server: ServerSchema
+    server: ServerSchema,
 ): Record<string, z.infer<typeof operationSchema>> {
-    const operations: Record<string, z.infer<typeof operationSchema>> = {}
+    const operations: Record<string, z.infer<typeof operationSchema>> = {};
     if ('Query' in server.objects) {
-        const query = server.objects['Query']
+        const query = server.objects['Query'];
         for (const [name, field] of Object.entries(query.fields)) {
-            operations[name] = buildOperation('QUERY', query, name, field)
+            operations[name] = buildOperation('QUERY', query, name, field);
         }
     }
     if ('Mutation' in server.objects) {
-        const mutation = server.objects['Mutation']
+        const mutation = server.objects['Mutation'];
         for (const [name, field] of Object.entries(mutation.fields)) {
-            operations[name] = buildOperation('MUTATION', mutation, name, field)
+            operations[name] = buildOperation(
+                'MUTATION',
+                mutation,
+                name,
+                field,
+            );
         }
     }
     if ('Subscription' in server.objects) {
-        const subscription = server.objects['Subscription']
+        const subscription = server.objects['Subscription'];
         for (const [name, field] of Object.entries(subscription.fields)) {
             operations[name] = buildOperation(
-                'SUBSCRIPTION', subscription, name, field
-            )
+                'SUBSCRIPTION',
+                subscription,
+                name,
+                field,
+            );
         }
     }
-    return operations
+    return operations;
 }
 
 export function buildClientSchemaFromServerSchema(
-    server: ServerSchema
+    server: ServerSchema,
 ): ClientSchema {
     return {
         fragments: Object.fromEntries([
-            ...Object.values(server.unions)
-                .map(union => [
-                    union.name,
-                    buildFragmentFromUnion(union)
-                ]),
+            ...Object.values(server.unions).map((union) => [
+                union.name,
+                buildFragmentFromUnion(union),
+            ]),
             ...Object.values(server.objects)
-                .filter(object =>
-                    object.name !== 'Query' &&
-                    object.name !== 'Mutation' &&
-                    object.name !== 'Subscription').map(object =>
-                    [object.name, buildFragmentFromObject(object)]),
+                .filter(
+                    (object) =>
+                        object.name !== 'Query' &&
+                        object.name !== 'Mutation' &&
+                        object.name !== 'Subscription',
+                )
+                .map((object) => [
+                    object.name,
+                    buildFragmentFromObject(object),
+                ]),
         ]),
         operations: buildOperations(server),
-        directives: {}
+        directives: {},
     };
-};
+}

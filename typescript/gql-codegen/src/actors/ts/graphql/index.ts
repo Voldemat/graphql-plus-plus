@@ -1,4 +1,4 @@
-export { buildGraphqlActor, GraphqlActorConfig } from './actor.js'
+export { buildGraphqlActor, GraphqlActorConfig } from './actor.js';
 export {
     builtinScalarsMapping,
     additionalScalarsMapping,
@@ -6,5 +6,5 @@ export {
     type ScalarSpec,
     type ScalarsMapping,
     buildSymmetricScalarSpec,
-    getScalarSpecFromMapping
-} from './generators/server/scalars/index.js'
+    getScalarSpecFromMapping,
+} from './generators/server/scalars/index.js';

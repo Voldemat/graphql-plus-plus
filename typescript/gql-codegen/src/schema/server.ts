@@ -6,74 +6,74 @@ export const objectTypeSchema = z.discriminatedUnion('_type', [
     z.object({
         _type: z.literal('ObjectType'),
         name: z.string(),
-        $ref: z.string()
+        $ref: z.string(),
     }),
     z.object({
         _type: z.literal('InterfaceType'),
         name: z.string(),
-        $ref: z.string()
+        $ref: z.string(),
     }),
     z.object({
         _type: z.literal('Scalar'),
-        name: z.string()
+        name: z.string(),
     }),
     z.object({
         _type: z.literal('Union'),
         name: z.string(),
-        $ref: z.string()
+        $ref: z.string(),
     }),
     z.object({
         _type: z.literal('Enum'),
         name: z.string(),
-        $ref: z.string()
+        $ref: z.string(),
     }),
-])
+]);
 
 export const objectLiteralSpecSchema = z.object({
     _type: z.literal('literal'),
-    type: objectTypeSchema
-})
+    type: objectTypeSchema,
+});
 
 export const objectArraySpecSchema = z.object({
     _type: z.literal('array'),
     nullable: z.boolean(),
-    get type(): z.ZodDiscriminatedUnion<[
-        typeof objectLiteralSpecSchema, typeof objectArraySpecSchema
-    ]> {
+    get type(): z.ZodDiscriminatedUnion<
+        [typeof objectLiteralSpecSchema, typeof objectArraySpecSchema]
+    > {
         // eslint-disable-next-line no-use-before-define
-        return objectNonCallableFieldSpecSchema
-    }
-})
+        return objectNonCallableFieldSpecSchema;
+    },
+});
 
 export const objectNonCallableFieldSpecSchema = z.discriminatedUnion('_type', [
     objectLiteralSpecSchema,
     objectArraySpecSchema,
-])
+]);
 
 export const callableSpecSchema = z.object({
     _type: z.literal('callable'),
     returnType: objectNonCallableFieldSpecSchema,
-    arguments: z.record(z.string(), inputFieldSchema)
-})
+    arguments: z.record(z.string(), inputFieldSchema),
+});
 export const objectFieldSpecSchema = z.discriminatedUnion('_type', [
     objectLiteralSpecSchema,
     objectArraySpecSchema,
-    callableSpecSchema
-])
+    callableSpecSchema,
+]);
 export const objectFieldSchema = z.object({
     nullable: z.boolean(),
-    spec: objectFieldSpecSchema
-})
+    spec: objectFieldSpecSchema,
+});
 export const objectSchema = z.object({
     name: z.string(),
     implements: z.record(z.string(), z.any()),
     fields: z.record(z.string(), objectFieldSchema),
-})
+});
 
 export const inputSchema = z.object({
     name: z.string(),
     fields: z.record(z.string(), inputFieldSchema),
-})
+});
 
 export const directiveLocationEnum = z.enum([
     'SCHEMA',
@@ -87,22 +87,22 @@ export const directiveLocationEnum = z.enum([
     'ENUM_VALUE',
     'INPUT_OBJECT',
     'INPUT_FIELD_DEFINITION',
-])
+]);
 
 export const directiveSchema = z.object({
     name: z.string(),
-    locations: z.array(directiveLocationEnum)
-})
+    locations: z.array(directiveLocationEnum),
+});
 
 export const unionSchema = z.object({
     name: z.string(),
     items: z.record(z.string(), z.string()),
-})
+});
 
 export const enumSchema = z.object({
     name: z.string(),
-    values: z.array(z.string())
-})
+    values: z.array(z.string()),
+});
 
 export const serverSchema = z.object({
     objects: z.record(z.string(), objectSchema),
@@ -110,6 +110,6 @@ export const serverSchema = z.object({
     unions: z.record(z.string(), unionSchema),
     enums: z.record(z.string(), enumSchema),
     scalars: z.array(z.string()),
-    inputs: z.record(z.string(), inputSchema)
-})
+    inputs: z.record(z.string(), inputSchema),
+});
 export type ServerSchema = z.infer<typeof serverSchema>;

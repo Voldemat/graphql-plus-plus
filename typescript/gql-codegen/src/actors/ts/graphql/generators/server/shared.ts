@@ -1,56 +1,49 @@
-import ts from 'typescript'
-import { z } from 'zod/v4'
-import { objectNonCallableFieldSpecSchema } from '@/schema/server.js'
-import { inputFieldSpecSchema } from '@/schema/shared.js'
-import { generateTypeReferenceNode } from '../shared.js'
+import ts from 'typescript';
+import { z } from 'zod/v4';
+import { objectNonCallableFieldSpecSchema } from '@/schema/server.js';
+import { inputFieldSpecSchema } from '@/schema/shared.js';
+import { generateTypeReferenceNode } from '../shared.js';
 
 export function generateNonCallableFieldSpec(
     scalars: string[],
-    spec: z.infer<typeof objectNonCallableFieldSpecSchema> |
-        z.infer<typeof inputFieldSpecSchema>,
+    spec:
+        | z.infer<typeof objectNonCallableFieldSpecSchema>
+        | z.infer<typeof inputFieldSpecSchema>,
 ): ts.TypeNode {
     switch (spec._type) {
-    case 'array':
-        return ts.factory.createArrayTypeNode(
-            generateNonCallableFieldSpec(scalars, spec.type)
-        )
-    case 'literal':
-        return generateTypeReferenceNode(scalars, spec.type.name)
+        case 'array':
+            return ts.factory.createArrayTypeNode(
+                generateNonCallableFieldSpec(scalars, spec.type),
+            );
+        case 'literal':
+            return generateTypeReferenceNode(scalars, spec.type.name);
     }
 }
 
-
 export function wrapInMaybeIfNullable(spec: ts.TypeNode, nullable: boolean) {
-    return nullable ?
-        ts.factory.createTypeReferenceNode(
-            'Maybe',
-            [spec]
-        ) :
-        spec
+    return nullable
+        ? ts.factory.createTypeReferenceNode('Maybe', [spec])
+        : spec;
 }
 
 export function generateZodInferTypeAlias(
     inferType: 'input' | 'output',
     name: string,
-    typeName: string
+    typeName: string,
 ) {
     return ts.factory.createTypeAliasDeclaration(
-        ts.factory.createModifiersFromModifierFlags(
-            ts.ModifierFlags.Export
-        ),
+        ts.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Export),
         name,
         undefined,
-        ts.factory.createTypeReferenceNode(
-            'z.' + inferType,
-            [ts.factory.createTypeQueryNode(
+        ts.factory.createTypeReferenceNode('z.' + inferType, [
+            ts.factory.createTypeQueryNode(
                 ts.factory.createIdentifier(typeName),
-                undefined
-            )]
-        )
-    )
+                undefined,
+            ),
+        ]),
+    );
 }
 
 export function generateSchemaName(name: string) {
-    return name[0].toLowerCase() + name.slice(1) + 'Schema'
+    return name[0].toLowerCase() + name.slice(1) + 'Schema';
 }
-

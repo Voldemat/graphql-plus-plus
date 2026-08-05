@@ -6,7 +6,7 @@ import { generateClientNodes } from './client/main.js';
 
 export function generateNodes(
     config: GraphqlActorConfig,
-    context: ActorContext
+    context: ActorContext,
 ) {
     return [
         ts.factory.createImportDeclaration(
@@ -18,15 +18,15 @@ export function generateNodes(
                     ts.factory.createImportSpecifier(
                         false,
                         undefined,
-                        ts.factory.createIdentifier('z')
-                    )
-                ])
+                        ts.factory.createIdentifier('z'),
+                    ),
+                ]),
             ),
-            ts.factory.createStringLiteral('zod/v4')
+            ts.factory.createStringLiteral('zod/v4'),
         ),
         ...config.importDeclarations,
         ts.factory.createIdentifier('\n'),
         ...generateServerNodes(config, context),
-        ...generateClientNodes(config, context)
-    ]
+        ...generateClientNodes(config, context),
+    ];
 }

@@ -1,1 +1,1 @@
-export * as ts from './ts/index.js'
+export * as ts from './ts/index.js';
