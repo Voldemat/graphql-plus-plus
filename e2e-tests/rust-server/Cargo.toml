@@ -6,15 +6,15 @@ edition = "2024"
 [dependencies]
 libgql = { path = "../../rust/libgql" }
 serde = { version = "1.0.228", features = ["derive", "serde_derive"], default-features = false }
-libgqlcodegen = { path = "../../rust/gqlcodegen" }
-hyper = { path = "../../../hyper", features = ["server", "http1"], default-features = false }
+hyper = { git = "https://github.com/Voldemat/hyper.git", features = ["server", "http1"], default-features = false, rev = "b0262393" }
 tokio = { version = "1", features = ["net", "macros", "rt-multi-thread"], default-features = false }
 http-body-util = "0.1"
-hyper-util = { path = "../../../hyper-util", features = ["server", "http1", "tokio"], default-features = false }
+hyper-util = { git = "https://github.com/Voldemat/hyper-util.git", features = ["server", "http1", "tokio"], default-features = false, rev = "9872b1a" }
 serde_json = { version = "1.0.149", default-features = false }
 uuid = { version = "1.22.0", default-features = false }
 futures-util = "0.3.32"
 async-stream = "0.3.6"
+libgqlcodegen = { path = "../../rust/gqlcodegen" }
 
 [build-dependencies]
 codegen = "0.3.0"

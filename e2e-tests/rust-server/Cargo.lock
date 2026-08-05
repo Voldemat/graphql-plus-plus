@@ -238,7 +238,8 @@ checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
 
 [[package]]
 name = "hyper"
-version = "1.8.1"
+version = "1.11.0"
+source = "git+https://github.com/Voldemat/hyper.git?rev=b0262393#b02623931bbb50ef22025653a250410c94abff49"
 dependencies = [
  "atomic-waker",
  "bytes",
@@ -257,6 +258,7 @@ dependencies = [
 [[package]]
 name = "hyper-util"
 version = "0.1.20"
+source = "git+https://github.com/Voldemat/hyper-util.git?rev=9872b1a#9872b1a76e86b5ba2ecc659c1a52151883d1bf74"
 dependencies = [
  "bytes",
  "http",
