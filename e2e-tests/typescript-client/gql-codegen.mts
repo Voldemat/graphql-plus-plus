@@ -1,31 +1,37 @@
 /* eslint-disable max-lines */
-import { loadESLint } from "eslint";
 import { join } from "path";
 import {
     type ActorContext,
     actors,
     type Config,
-    run
-} from '@vladimirdev635/gql-codegen'
+    run,
+} from "@vladimirdev635/gql-codegen";
 import {
     buildClientSchemaFromServerSchema,
     loadServerSchemaFromFile,
-} from '@vladimirdev635/gql-codegen/schema/utils'
+} from "@vladimirdev635/gql-codegen/schema/utils";
+import { format } from "oxfmt";
+import oxfmtConfig from "./oxfmt.config.mts";
 
+const oxfmtFormatter = await actors.ts.formatters.oxfmt.buildOxfmtFormatter(
+    format,
+    oxfmtConfig,
+);
 const baseTsConfig: actors.ts.TSActorConfig = {
     tsconfigCompilerOptions: actors.ts.loadTsConfigCompilerOptions(),
     formatters: [
-        await actors.ts.formatters.eslint.buildESLintFormatter(loadESLint)
-    ]
-}
+        async (code) => "/* oxlint-disable no-use-before-define */\n" + code,
+        oxfmtFormatter,
+    ],
+};
 const server = loadServerSchemaFromFile(
-    join(import.meta.dirname, '../graphql/server-schema.json')
-)
+    join(import.meta.dirname, "../graphql/server-schema.json"),
+);
 const config: Config<ActorContext> = {
     context: {
         schema: {
             server,
-            client: buildClientSchemaFromServerSchema(server)
+            client: buildClientSchemaFromServerSchema(server),
         },
     },
     actors: [
@@ -33,7 +39,7 @@ const config: Config<ActorContext> = {
             ...baseTsConfig,
             outPath: join(
                 import.meta.dirname,
-                './shared/graphql/generated/graphql.ts'
+                "./shared/graphql/generated/graphql.ts",
             ),
             onlyRequiredForOperations: false,
             scalarsMapping: {
@@ -46,18 +52,18 @@ const config: Config<ActorContext> = {
             ...baseTsConfig,
             outPath: join(
                 import.meta.dirname,
-                './shared/graphql/generated/gql-client.ts'
+                "./shared/graphql/generated/gql-client.ts",
             ),
             sdk: {
-                defaultOperationReturnType: 'ExecuteResult.result',
+                defaultOperationReturnType: "ExecuteResult.result",
                 operationReturnTypeMapping: {},
-                queriesKey: 'queries',
-                mutationsKey: 'mutations',
-                subscriptionsKey: 'subscriptions'
+                queriesKey: "queries",
+                mutationsKey: "mutations",
+                subscriptionsKey: "subscriptions",
             },
-            graphqlModulePath: './graphql.ts',
-            importDeclarations: []
-        })
+            graphqlModulePath: "./graphql.ts",
+            importDeclarations: [],
+        }),
     ],
-}
-await run(config)
+};
+await run(config);

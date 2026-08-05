@@ -1,49 +1,49 @@
 import {
     createSerializer,
     createJSONSerializer,
-    createMultipartSerializer
-} from '@vladimirdev635/gql-client/serializers'
-import { Executor } from '@vladimirdev635/gql-client'
+    createMultipartSerializer,
+} from "@vladimirdev635/gql-client/serializers";
+import { Executor } from "@vladimirdev635/gql-client";
 import {
     type IExecutor,
-    type RequestContext
-} from '@vladimirdev635/gql-client/types/index'
-import { createParser } from '@vladimirdev635/gql-client/parsers'
+    type RequestContext,
+} from "@vladimirdev635/gql-client/types/index";
+import { createParser } from "@vladimirdev635/gql-client/parsers";
 
 export interface Context {
-    accessToken: string | null
-    refreshToken: string | null
+    accessToken: string | null;
+    refreshToken: string | null;
 }
 
 export function createExecutor(
-    initContext: Context
+    initContext: Context,
 ): IExecutor<RequestContext> {
     return new Executor<Context, RequestContext>({
         context: initContext,
         retryConfig: {
             shouldSyncRetry: () => false,
-            shouldSubscriptionRetry: () => false
+            shouldSubscriptionRetry: () => false,
         },
         middlewares: {
             beforeSerialization: [],
             afterSerialization: {
                 sync: [],
-                subscription: []
+                subscription: [],
             },
             beforeParsing: {
                 sync: [],
-                subscription: []
+                subscription: [],
             },
             afterParsing: {
                 sync: [],
-                subscription: []
-            }
+                subscription: [],
+            },
         },
-        fetcher: init => fetch(import.meta.env.ENDPOINT_URL!, init),
+        fetcher: (init) => fetch(import.meta.env.ENDPOINT_URL!, init),
         serializer: createSerializer(
             createJSONSerializer(),
-            createMultipartSerializer()
+            createMultipartSerializer(),
         ),
-        parser: createParser()
-    })
+        parser: createParser(),
+    });
 }

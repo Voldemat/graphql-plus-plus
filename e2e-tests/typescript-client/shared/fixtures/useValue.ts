@@ -1,14 +1,14 @@
-import { beforeAll } from 'bun:test'
-import { createObjectProxy } from './proxy'
+import { beforeAll } from "bun:test";
+import { createObjectProxy } from "./proxy";
 
-export function useObject<T extends Exclude<object, unknown[]>> (
-    callback: () => T
+export function useObject<T extends Exclude<object, unknown[]>>(
+    callback: () => T,
 ): T {
-    let value: T
+    let value: T;
 
     beforeAll(() => {
-        value = callback()
-    })
+        value = callback();
+    });
 
-    return createObjectProxy(() => value)
+    return createObjectProxy(() => value);
 }

@@ -1,14 +1,14 @@
-import { beforeAll } from 'bun:test'
-import { createObjectProxy } from "./proxy"
+import { beforeAll } from "bun:test";
+import { createObjectProxy } from "./proxy";
 
 export function useObjectFixture<T extends object>(
-    callback: () => Promise<T>
+    callback: () => Promise<T>,
 ): T {
-    let obj: T
+    let obj: T;
 
     beforeAll(async () => {
-        obj = await callback()
-    })
-    
-    return createObjectProxy<T>(() => obj)
+        obj = await callback();
+    });
+
+    return createObjectProxy<T>(() => obj);
 }
