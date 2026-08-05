@@ -1,4 +1,1 @@
-export {
-    createParser,
-    type CreateParserOptions
-} from './parser.js'
+export { createParser, type CreateParserOptions } from './parser.js';

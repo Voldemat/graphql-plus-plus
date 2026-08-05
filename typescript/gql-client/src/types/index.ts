@@ -4,16 +4,16 @@ export type {
     SubscriptionOperation,
     RequestContext,
     OperationVariables,
-    OperationResult
-} from './base.js'
-export * as middlewares from './middlewares/index.js'
+    OperationResult,
+} from './base.js';
+export * as middlewares from './middlewares/index.js';
 export type {
     ClientParser,
     ClientParserParseBodySyncOptions,
     ClientParserParseBodySubscriptionOptions,
-    SubOpAsyncIterable
-} from './parser.js'
-export type { ClientSerializer } from './serializer.js'
-export type { ClientConfig } from './config.js'
-export type { OpResultBasedOnOp } from './utils.js'
-export type { IExecutor, ExecuteResult } from './iexecutor.js'
+    SubOpAsyncIterable,
+} from './parser.js';
+export type { ClientSerializer } from './serializer.js';
+export type { ClientConfig } from './config.js';
+export type { OpResultBasedOnOp } from './utils.js';
+export type { IExecutor, ExecuteResult } from './iexecutor.js';

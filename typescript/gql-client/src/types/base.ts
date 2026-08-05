@@ -1,31 +1,31 @@
-import { z } from 'zod/v4'
+import { z } from 'zod/v4';
 
 export type SchemaForInput<T> = z.ZodType<unknown, T>;
 export type SchemaForOutput<T> = z.ZodType<T>;
 
 interface BaseOperation<V, R> {
-    name: string
-    document: string
-    variablesSchema: SchemaForInput<V>
-    resultSchema: SchemaForOutput<R>
+    name: string;
+    document: string;
+    variablesSchema: SchemaForInput<V>;
+    resultSchema: SchemaForOutput<R>;
 }
 
 export interface SyncOperation<V, R> extends BaseOperation<V, R> {
-    type: 'QUERY' | 'MUTATION'
+    type: 'QUERY' | 'MUTATION';
 }
 
 export interface SubscriptionOperation<V, R> extends BaseOperation<V, R> {
-    type: 'SUBSCRIPTION'
+    type: 'SUBSCRIPTION';
 }
 
-export type Operation<V, R> = SyncOperation<V, R> | SubscriptionOperation<V, R>
+export type Operation<V, R> = SyncOperation<V, R> | SubscriptionOperation<V, R>;
 
 export interface RequestContext {
-    fetchOptions?: RequestInit
+    fetchOptions?: RequestInit;
 }
 
 export type OperationVariables<T extends Operation<unknown, unknown>> =
-    T extends Operation<infer V, unknown> ? V : never
+    T extends Operation<infer V, unknown> ? V : never;
 
 export type OperationResult<T extends Operation<unknown, unknown>> =
-    T extends Operation<unknown, infer R> ? R : never
+    T extends Operation<unknown, infer R> ? R : never;

@@ -9,89 +9,88 @@ import {
     SubOpAsyncIterable,
     SubscriptionOperation,
     SyncOperation,
-} from './types/index.js'
+} from './types/index.js';
 import {
     AfterParsingSubscriptionMiddlewareOptions,
-    AfterParsingSyncMiddlewareOptions
-} from './types/middlewares/parsing.js'
+    AfterParsingSyncMiddlewareOptions,
+} from './types/middlewares/parsing.js';
 
 export class Executor<
     TClientContext,
-    TRequestContext extends RequestContext
+    TRequestContext extends RequestContext,
 > implements IExecutor<TRequestContext> {
     constructor(
-        private readonly config: ClientConfig<TClientContext, TRequestContext>
-    ) { }
+        private readonly config: ClientConfig<TClientContext, TRequestContext>,
+    ) {}
 
     async withRetry<T>(
         shouldRetry: (iteration: number, error: unknown) => boolean,
-        execute: () => Promise<T>
+        execute: () => Promise<T>,
     ): Promise<T> {
-        let iteration = 0
-        let error: unknown
+        let iteration = 0;
+        let error: unknown;
         do {
             try {
-                return await execute()
+                return await execute();
             } catch (e: unknown) {
-                error = e
-                iteration++
+                error = e;
+                iteration++;
             }
-        } while (shouldRetry(iteration, error))
-        throw error
+        } while (shouldRetry(iteration, error));
+        throw error;
     }
 
     async executeSync<T extends SyncOperation<unknown, unknown>>(
         operation: T,
         variables: OperationVariables<T>,
-        requestContext: TRequestContext
+        requestContext: TRequestContext,
     ): Promise<ExecuteResult<OperationResult<T>>> {
         const retryOptions = {
             context: this.config.context,
             operation,
             variables,
             requestContext,
-        }
+        };
         return await this.withRetry(
-            (iteration, error) => this.config.retryConfig.shouldSyncRetry(
-                error, iteration, retryOptions
-            ),
-            () => this._executeSync<T>(
-                operation, variables, requestContext
-            )
-        )
+            (iteration, error) =>
+                this.config.retryConfig.shouldSyncRetry(
+                    error,
+                    iteration,
+                    retryOptions,
+                ),
+            () => this._executeSync<T>(operation, variables, requestContext),
+        );
     }
     async _executeSync<T extends SyncOperation<unknown, unknown>>(
         operation: T,
         variables: OperationVariables<T>,
-        requestContext: TRequestContext
+        requestContext: TRequestContext,
     ): Promise<ExecuteResult<OperationResult<T>>> {
         for (const middleware of this.config.middlewares.beforeSerialization) {
             [operation, variables] = await middleware({
                 clientContext: this.config.context,
                 requestContext,
                 operation,
-                variables
-            })
+                variables,
+            });
         }
         let init = await this.config.serializer.serializeRequest({
             clientContext: this.config.context,
             requestContext,
             operation,
-            variables
-        })
-        for (
-            const middleware of
-            this.config.middlewares.afterSerialization.sync
-        ) {
+            variables,
+        });
+        for (const middleware of this.config.middlewares.afterSerialization
+            .sync) {
             init = await middleware({
                 clientContext: this.config.context,
                 requestContext,
                 operation,
                 variables,
-                init
-            })
+                init,
+            });
         }
-        let response = await this.config.fetcher(init)
+        let response = await this.config.fetcher(init);
         for (const middleware of this.config.middlewares.beforeParsing.sync) {
             response = await middleware({
                 clientContext: this.config.context,
@@ -99,15 +98,15 @@ export class Executor<
                 operation,
                 variables,
                 init,
-                response
-            })
+                response,
+            });
         }
         let result = await this.config.parser.parseBodySync({
             clientContext: this.config.context,
             requestContext,
             operation,
-            response
-        })
+            response,
+        });
         for (const middleware of this.config.middlewares.afterParsing.sync) {
             result = await middleware({
                 clientContext: this.config.context,
@@ -116,82 +115,84 @@ export class Executor<
                 variables,
                 init,
                 response,
-                result
+                result,
             } as AfterParsingSyncMiddlewareOptions<
                 TClientContext,
                 TRequestContext,
                 T
-            >)
+            >);
         }
-        return { result, response }
+        return { result, response };
     }
 
     async executeSubscription<
-        T extends SubscriptionOperation<unknown, unknown>
+        T extends SubscriptionOperation<unknown, unknown>,
     >(
         operation: T,
         variables: OperationVariables<T>,
         requestContext: TRequestContext,
-        controller: AbortController
+        controller: AbortController,
     ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<T>>>> {
         const retryOptions = {
             context: this.config.context,
             operation,
             variables,
             requestContext,
-        }
+        };
         return await this.withRetry(
             (iteration, error) =>
                 this.config.retryConfig.shouldSubscriptionRetry(
-                    error, iteration, retryOptions
+                    error,
+                    iteration,
+                    retryOptions,
                 ),
-            () => this._executeSubscription<T>(
-                operation, variables, requestContext, controller
-            )
-        )
+            () =>
+                this._executeSubscription<T>(
+                    operation,
+                    variables,
+                    requestContext,
+                    controller,
+                ),
+        );
     }
 
     async _executeSubscription<
-        T extends SubscriptionOperation<unknown, unknown>
+        T extends SubscriptionOperation<unknown, unknown>,
     >(
         operation: T,
         variables: OperationVariables<T>,
         requestContext: TRequestContext,
-        controller: AbortController
+        controller: AbortController,
     ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<T>>>> {
         for (const middleware of this.config.middlewares.beforeSerialization) {
             [operation, variables] = await middleware({
                 clientContext: this.config.context,
                 requestContext,
                 operation,
-                variables
-            })
+                variables,
+            });
         }
         let init = await this.config.serializer.serializeRequest({
             clientContext: this.config.context,
             requestContext,
             operation,
-            variables
-        })
-        for (
-            const middleware of
-            this.config.middlewares.afterSerialization.subscription
-        ) {
+            variables,
+        });
+        for (const middleware of this.config.middlewares.afterSerialization
+            .subscription) {
             init = await middleware({
                 clientContext: this.config.context,
                 requestContext,
                 operation,
                 variables,
                 init,
-                controller
-            })
+                controller,
+            });
         }
-        init.signal = controller.signal
-        let response = await this.config.fetcher(init)
-        for (
-            const middleware of
-            this.config.middlewares.beforeParsing.subscription
-        ) {
+        init.signal = controller.signal;
+        let response = await this.config.fetcher(init);
+        for (const middleware of this.config.middlewares.beforeParsing
+            .subscription) {
             response = await middleware({
                 clientContext: this.config.context,
                 requestContext,
@@ -199,20 +200,18 @@ export class Executor<
                 variables,
                 init,
                 response,
-                controller
-            })
+                controller,
+            });
         }
         let result = await this.config.parser.parseBodySubscription({
             clientContext: this.config.context,
             requestContext,
             operation,
             response,
-            controller
-        })
-        for (
-            const middleware of
-            this.config.middlewares.afterParsing.subscription
-        ) {
+            controller,
+        });
+        for (const middleware of this.config.middlewares.afterParsing
+            .subscription) {
             result = await middleware({
                 clientContext: this.config.context,
                 requestContext,
@@ -221,13 +220,13 @@ export class Executor<
                 init,
                 response,
                 result,
-                controller
+                controller,
             } as AfterParsingSubscriptionMiddlewareOptions<
                 TClientContext,
                 TRequestContext,
                 T
-            >)
+            >);
         }
-        return { result, response }
+        return { result, response };
     }
 }

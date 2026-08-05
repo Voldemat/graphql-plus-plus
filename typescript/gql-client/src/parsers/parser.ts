@@ -3,36 +3,39 @@ import {
     Operation,
     RequestContext,
     OperationResult,
-    ClientParserParseBodySyncOptions
+    ClientParserParseBodySyncOptions,
 } from '../types/index.js';
 import { buildParseBodySubscriptionFunc } from './parseBodySubscription.js';
 
 export interface CreateParserOptions<
     TClientContext,
-    TRequestContext extends RequestContext
+    TRequestContext extends RequestContext,
 > {
     onErrors: <T extends Operation<unknown, unknown>>(
         options: ClientParserParseBodySyncOptions<
-            TClientContext, TRequestContext, T
+            TClientContext,
+            TRequestContext,
+            T
         >,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        errors: any[]
-    ) => Promise<void> | void
+        errors: any[],
+    ) => Promise<void> | void;
 }
 
 const defaultParserOptions: CreateParserOptions<unknown, RequestContext> = {
     onErrors(_, errors) {
-        throw new Error(JSON.stringify(errors))
+        throw new Error(JSON.stringify(errors));
     },
-}
+};
 
 export function createParser<
     TClientContext,
-    TRequestContext extends RequestContext
+    TRequestContext extends RequestContext,
 >(
     parserOptions: CreateParserOptions<
-        TClientContext, TRequestContext
-    > = defaultParserOptions
+        TClientContext,
+        TRequestContext
+    > = defaultParserOptions,
 ): ClientParser<TClientContext, TRequestContext> {
     return {
         parseBodySync: async <T extends Operation<unknown, unknown>>(
@@ -40,27 +43,27 @@ export function createParser<
                 TClientContext,
                 TRequestContext,
                 T
-            >
+            >,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ): Promise<any> => {
-            type TResult = OperationResult<T>
-            const text = await options.response.text()
+            type TResult = OperationResult<T>;
+            const text = await options.response.text();
             let json;
             try {
-                json = JSON.parse(text)
-            } catch(error) {
+                json = JSON.parse(text);
+            } catch (error) {
                 throw new Error(
-                    `Failed to parse response as json: ${error}, text: ${text}`
-                )
+                    `Failed to parse response as json: ${error}, text: ${text}`,
+                );
             }
             if (json.errors) {
-                await parserOptions.onErrors(options, json.errors)
+                await parserOptions.onErrors(options, json.errors);
             }
-            return options.operation.resultSchema.parse(json.data) as TResult
+            return options.operation.resultSchema.parse(json.data) as TResult;
         },
         parseBodySubscription: buildParseBodySubscriptionFunc<
             TClientContext,
             TRequestContext
-        >()
-    }
+        >(),
+    };
 }
