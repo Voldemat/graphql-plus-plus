@@ -249,7 +249,7 @@ pub fn run_config_action<'a>(
         let json_string =
             libgql::json::serializers::schema::serialize_client_schema(
                 c_registry,
-                outputs.pretty
+                outputs.pretty,
             )?;
         json_callback(&json_string, &outputs.filepath, "Client");
     };

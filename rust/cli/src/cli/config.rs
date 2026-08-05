@@ -13,7 +13,8 @@ pub struct OutputsConfig {
     #[serde(alias = "onlyUsedInOperations")]
     pub only_used_in_operations: bool,
 
-    pub pretty: bool
+    #[serde(default)]
+    pub pretty: bool,
 }
 
 #[derive(serde::Deserialize)]
