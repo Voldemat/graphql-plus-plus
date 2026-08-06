@@ -166,7 +166,7 @@ mod tests {
                 },
                 Token {
                     token_type: ComplexTokenType::Identifier.into(),
-                    lexeme: "check",
+                    lexeme: "test",
                     location: TokenLocation { start: 13, end: 16 }
                 },
                 Token {
