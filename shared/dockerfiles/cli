@@ -37,6 +37,7 @@ linker = "/usr/local/bin/linker-aarch64"
 EOF
 COPY rust/libgql/ /usr/local/app/rust/libgql/
 COPY rust/cli/ ./
+ARG CLI_VERSION
 RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
     LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH" PATH="/osxcross/bin/:$PATH" cargo build --release \
         --target=aarch64-apple-darwin \
