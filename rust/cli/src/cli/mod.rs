@@ -2,8 +2,13 @@ pub mod config;
 pub mod internal;
 pub mod utils;
 
+const CLI_VERSION: &str = match option_env!("CLI_VERSION") {
+    Some(v) => v,
+    None => "unspecified"
+};
+
 #[derive(clap::Parser)]
-#[command(version, about)]
+#[command(version = CLI_VERSION, about)]
 pub struct CLI {
     #[command(subcommand)]
     pub command: Commands,
