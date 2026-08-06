@@ -7,9 +7,7 @@ pub fn format_lexer_error<'buffer>(
     location: (usize, usize),
     source: &Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
 ) -> String {
-    let buffer = format!("{}\n", source.filepath.display());
-
-    buffer
+    format_error_with_range(exc, location.0, location.1, source)
 }
 
 pub fn format_parse_error<'buffer>(
@@ -17,9 +15,57 @@ pub fn format_parse_error<'buffer>(
     location: &libgql::lexer::tokens::TokenLocation,
     source: &Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
 ) -> String {
-    let buffer = format!("{}\n", source.filepath.display());
+    format_error_with_range(exc, location.start, location.end, source)
+}
 
-    buffer
+fn format_error_with_range<'buffer>(
+    exc: &str,
+    start: usize,
+    end: usize,
+    source: &Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
+) -> String {
+    let buffer = source.buffer;
+
+    // Bounds checking to prevent slicing panics
+    let start = start.min(buffer.len());
+    let end = end.min(buffer.len()).max(start);
+
+    // Calculate line number (1-indexed) and line start index
+    let line_number = buffer[..start].lines().count().max(1);
+    let line_start_offset = buffer[..start].rfind('\n').map(|i| i + 1).unwrap_or(0);
+    
+    // Locate end of the current line
+    let line_end_offset = buffer[start..]
+        .find('\n')
+        .map(|i| start + i)
+        .unwrap_or(buffer.len());
+
+    // Extract line contents
+    let line_content = &buffer[line_start_offset..line_end_offset];
+
+    // Compute column offsets (1-indexed character position)
+    let start_col = buffer[line_start_offset..start].chars().count();
+    let length = buffer[start..end].chars().count().max(1);
+
+    // Format output
+    let line_num_str = line_number.to_string();
+    let padding = " ".repeat(line_num_str.len());
+    let carets = "^".repeat(length);
+    let spaces = " ".repeat(start_col);
+
+    format!(
+        "error: {}\n --> {}:{}:{}\n{} |\n{} | {}\n{} | {}{}\n",
+        exc,
+        source.filepath.display(),
+        line_number,
+        start_col + 1,
+        padding,
+        line_num_str,
+        line_content,
+        padding,
+        spaces,
+        carets
+    )
 }
 
 pub fn read_buffer_from_filepath(filepath: &std::path::Path) -> String {
