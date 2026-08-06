@@ -37,6 +37,8 @@ jobs:
             cache-to: type=registry,ref=vladimirdev635/gql-targets:buildcache,mode=max
             provenance: false
             sbom: false
+            build-args: |
+              CLI_VERSION=${{ case(github.ref_type == 'tag', github.ref_name, format('{0}-{1}', github.ref_name, github.sha)) }}
         - name: Build gql linux x86_64
           uses: docker/build-push-action@v6
           with:
@@ -48,6 +50,8 @@ jobs:
             cache-to: type=registry,ref=vladimirdev635/gql-linux-x86_64:buildcache,mode=max
             provenance: false
             sbom: false
+            build-args: |
+              CLI_VERSION=${{ case(github.ref_type == 'tag', github.ref_name, format('{0}-{1}', github.ref_name, github.sha)) }}
         - name: Build gql linux arm64
           uses: docker/build-push-action@v6
           with:
@@ -59,6 +63,8 @@ jobs:
             cache-to: type=registry,ref=vladimirdev635/gql-linux-arm64:buildcache,mode=max
             provenance: false
             sbom: false
+            build-args: |
+              CLI_VERSION=${{ case(github.ref_type == 'tag', github.ref_name, format('{0}-{1}', github.ref_name, github.sha)) }}
         - name: Build gql linux x86_64 alpine
           uses: docker/build-push-action@v6
           with:
@@ -70,6 +76,8 @@ jobs:
             cache-to: type=registry,ref=vladimirdev635/gql-alpine-linux-x86_64:buildcache,mode=max
             provenance: false
             sbom: false
+            build-args: |
+              CLI_VERSION=${{ case(github.ref_type == 'tag', github.ref_name, format('{0}-{1}', github.ref_name, github.sha)) }}
         - name: Build gql linux arm64 alpine
           uses: docker/build-push-action@v6
           with:
@@ -81,6 +89,8 @@ jobs:
             cache-to: type=registry,ref=vladimirdev635/gql-alpine-linux-arm64:buildcache,mode=max
             provenance: false
             sbom: false
+            build-args: |
+              CLI_VERSION=${{ case(github.ref_type == 'tag', github.ref_name, format('{0}-{1}', github.ref_name, github.sha)) }}
         - name: Build gql darwin x86_64
           uses: docker/build-push-action@v6
           with:
@@ -92,6 +102,8 @@ jobs:
             cache-to: type=registry,ref=vladimirdev635/gql-darwin-x86_64:buildcache,mode=max
             provenance: false
             sbom: false
+            build-args: |
+              CLI_VERSION=${{ case(github.ref_type == 'tag', github.ref_name, format('{0}-{1}', github.ref_name, github.sha)) }}
         - name: Build gql darwin arm64
           uses: docker/build-push-action@v6
           with:
@@ -103,6 +115,8 @@ jobs:
             cache-to: type=registry,ref=vladimirdev635/gql-darwin-arm64:buildcache,mode=max
             provenance: false
             sbom: false
+            build-args: |
+              CLI_VERSION=${{ case(github.ref_type == 'tag', github.ref_name, format('{0}-{1}', github.ref_name, github.sha)) }}
         - name: Push gql
           run: |
             docker manifest create vladimirdev635/gql:${{ github.ref_name }} \
