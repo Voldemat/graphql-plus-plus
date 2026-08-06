@@ -22,6 +22,17 @@ fn number_condition(c: char, buffer: &str) -> bool {
     return is_digit || (last_char_is_digit && is_char);
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_number_condition() {
+        assert_eq!(number_condition('.', "0"), true);
+        assert_eq!(number_condition('0', "0."), true);
+    }
+}
+
 fn spread_condition(c: char, _: &str) -> bool {
     return c == '.';
 }

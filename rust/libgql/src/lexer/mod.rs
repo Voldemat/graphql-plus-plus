@@ -87,7 +87,11 @@ impl<'buffer> Lexer<'buffer> {
         c: char,
     ) -> Option<Token<'buffer>> {
         let condition = get_condition_for_token_type(token_type);
-        if !condition(c, &self.buffer) {
+        let result = condition(
+            c,
+            &self.buffer[self.location.start..self.location.end + 1],
+        );
+        if !result {
             return Some(self.extract_token(token_type));
         }
         self.location.advance();
