@@ -8,7 +8,7 @@ const CLI_VERSION: &str = match option_env!("CLI_VERSION") {
 };
 
 #[derive(clap::Parser)]
-#[command(version = CLI_VERSION, about)]
+#[command(version = CLI_VERSION, about, disable_help_subcommand = true)]
 pub struct CLI {
     #[command(subcommand)]
     pub command: Commands,
@@ -26,6 +26,7 @@ pub struct MainArgs {
 }
 
 #[derive(clap::Subcommand)]
+#[command(about)]
 pub enum Commands {
     #[command(subcommand)]
     Internal(internal::Commands),
