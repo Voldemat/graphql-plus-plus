@@ -27,6 +27,7 @@ jobs:
       run: cargo test --profile ${{ matrix.BUILD_TARGET }}
     - name: Publish crate
       if: github.ref_type == 'tag'
+      working-directory: rust/libgql
       run: |
         cargo install cargo-edit
         cargo set-version ${{ github.ref_name }}
