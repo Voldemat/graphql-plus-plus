@@ -66,6 +66,10 @@ pub fn compare_two_non_callable_object_field_spec(
                 eprintln!("[{}] Became nullable", path);
                 return false;
             }
+            if a.nullable && !b.nullable {
+                eprintln!("[{}] Became non-nullable", path);
+                return false;
+            }
             compare_two_non_callable_object_field_spec(
                 &a.r#type, &b.r#type, path,
             )
@@ -95,13 +99,18 @@ fn compare_two_object_field_specs(
             compare_two_object_type_specs(&a.r#type, &b.r#type, path)
         }
         (ObjectFieldSpec::Array(a), ObjectFieldSpec::Array(b)) => {
+            let mut is_valid = true;
             if !a.nullable && b.nullable {
-                false
-            } else {
-                compare_two_non_callable_object_field_spec(
+                eprintln!("[{}] Array elements became nullable", path);
+                is_valid = false;
+            } else if a.nullable && !b.nullable {
+                eprintln!("[{}] Array elements became non-nullable", path);
+                is_valid = false;
+            }
+            is_valid
+                && compare_two_non_callable_object_field_spec(
                     &a.r#type, &b.r#type, path,
                 )
-            }
         }
         (ObjectFieldSpec::Callable(a), ObjectFieldSpec::Callable(b)) => {
             compare_two_non_callable_object_field_spec(
@@ -138,6 +147,10 @@ pub fn compare_two_input_field_specs(
                 eprintln!("[{}] Became nullable", path);
                 return false;
             }
+            if a.nullable && !b.nullable {
+                eprintln!("[{}] Became non-nullable", path);
+                return false;
+            }
             compare_two_input_field_specs(&a.r#type, &b.r#type, path)
         }
 
@@ -156,6 +169,10 @@ fn compare_two_object_field_definitions(
     let mut is_valid = true;
     if !field.nullable && field2.nullable {
         eprintln!("[{}.{}] Became nullable", type_name, field.name);
+        is_valid = false;
+    };
+    if field.nullable && !field2.nullable {
+        eprintln!("[{}.{}] Became non-nullable", type_name, field.name);
         is_valid = false;
     };
     if !compare_two_object_field_specs(
@@ -177,6 +194,10 @@ fn compare_two_input_field_definitions(
     let mut is_valid = true;
     if !field.nullable && field2.nullable {
         eprintln!("[{}.{}] Became nullable", type_name, field.name);
+        is_valid = false;
+    };
+    if field.nullable && !field2.nullable {
+        eprintln!("[{}.{}] Became non-nullable", type_name, field.name);
         is_valid = false;
     };
     if !compare_two_input_field_specs(
@@ -213,6 +234,22 @@ pub fn compare_arguments(
         }
     }
 
+    for (name, field) in arguments2 {
+        if !arguments.contains_key(name) {
+            eprintln!("[{}] Added argument {}", path, name);
+            is_valid = false;
+            continue;
+        }
+
+        if !compare_two_input_field_definitions(
+            field,
+            arguments.get(name).unwrap(),
+            &format!("{}:args", path),
+        ) {
+            is_valid = false;
+        }
+    }
+
     is_valid
 }
 
@@ -227,6 +264,15 @@ fn compare_two_objects(object: &ObjectType, object2: &ObjectType) -> bool {
             is_valid = false;
         }
     }
+    for name in &object2.implements {
+        if !object.implements.contains(name) {
+            eprintln!(
+                "[{}] Added interface {} to extends list",
+                object2.name, name
+            );
+            is_valid = false;
+        }
+    }
     for (name, field) in &object.fields {
         if !object2.fields.contains_key(name) {
             eprintln!("[{}] Deleted field {}", object.name, name);
@@ -237,6 +283,20 @@ fn compare_two_objects(object: &ObjectType, object2: &ObjectType) -> bool {
             field,
             object2.fields.get(name).unwrap(),
             &object.name,
+        ) {
+            is_valid = false;
+        }
+    }
+    for (name, field) in &object2.fields {
+        if !object.fields.contains_key(name) {
+            eprintln!("[{}] Added field {}", object.name, name);
+            is_valid = false;
+            continue;
+        }
+        if !compare_two_object_field_definitions(
+            field,
+            object.fields.get(name).unwrap(),
+            &object2.name,
         ) {
             is_valid = false;
         }
@@ -267,6 +327,12 @@ fn compare_two_unions(union: &Union, union2: &Union) -> bool {
     for item in &union.items {
         if !union2.items.contains(item) {
             eprintln!("[{}] Removed type {}", union.name, item);
+            is_valid = false;
+        }
+    }
+    for item in &union2.items {
+        if !union.items.contains(item) {
+            eprintln!("[{}] Added type {}", union2.name, item);
             is_valid = false;
         }
     }
@@ -307,6 +373,20 @@ fn compare_two_inputs(input: &InputType, input2: &InputType) -> bool {
             is_valid = false;
         }
     }
+    for (name, field) in &input2.fields {
+        if !input.fields.contains_key(name) {
+            eprintln!("[{}] Added field {}", input.name, name);
+            is_valid = false;
+            continue;
+        }
+        if !compare_two_input_field_definitions(
+            field,
+            input.fields.get(name).unwrap(),
+            &input2.name,
+        ) {
+            is_valid = false;
+        }
+    }
     return is_valid;
 }
 
@@ -343,6 +423,20 @@ fn compare_two_interfaces(
             field,
             interface2.fields.get(name).unwrap(),
             &interface.name,
+        ) {
+            is_valid = false;
+        }
+    }
+    for (name, field) in &interface2.fields {
+        if !interface.fields.contains_key(name) {
+            eprintln!("[{}] Added field {}", interface2.name, name);
+            is_valid = false;
+            continue;
+        }
+        if !compare_two_object_field_definitions(
+            field,
+            interface.fields.get(name).unwrap(),
+            &interface2.name,
         ) {
             is_valid = false;
         }
@@ -388,6 +482,12 @@ fn compare_two_enums(e: &Enum, e2: &Enum) -> bool {
     for value in &e.values {
         if !e2.values.contains(value) {
             eprintln!("Removed {} value from enum {}", value, e.name);
+            is_valid = false;
+        }
+    }
+    for value in &e2.values {
+        if !e.values.contains(value) {
+            eprintln!("Added {} value to enum {}", value, e.name);
             is_valid = false;
         }
     }
