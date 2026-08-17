@@ -21,6 +21,12 @@ pub struct NodeLocation<'buffer> {
     pub source: Arc<SourceFile<'buffer>>,
 }
 
+impl<'buffer> NodeLocation<'buffer> {
+    pub fn get_source_slice(self: &Self) -> &'buffer str {
+        &self.source.buffer[self.start..self.end + 1]
+    }
+}
+
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct NameNode<'buffer> {
     pub location: NodeLocation<'buffer>,
