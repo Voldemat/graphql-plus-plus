@@ -55,17 +55,13 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     ) -> Result<Vec<ast::ASTNode<'buffer>>, Error<'buffer>> {
         let mut nodes = Vec::<ast::ASTNode<'buffer>>::new();
         'l: loop {
-            if T::get_current_token(&self.base.tokens_source).token_type
-                != ComplexTokenType::String.into()
-            {
-                match self.parse_ast_node() {
-                    Ok(node) => nodes.push(node),
-                    Err(error) => {
-                        if error.is_eof() {
-                            break 'l;
-                        }
-                        return Err(error);
+            match self.parse_ast_node() {
+                Ok(node) => nodes.push(node),
+                Err(error) => {
+                    if error.is_eof() {
+                        break 'l;
                     }
+                    return Err(error);
                 }
             }
             if let Some(e) = self.base.tokens_source.advance().err() {
@@ -81,6 +77,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     fn parse_ast_node(
         self: &mut Self,
     ) -> Result<ast::ASTNode<'buffer>, Error<'buffer>> {
+        self.base.process_potential_documentation_string(true)?;
         let current_token = T::get_current_token(&self.base.tokens_source);
         match current_token.lexeme {
             "scalar" => Ok(self.parse_scalar_type_definition_node()?.into()),
@@ -104,9 +101,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     fn parse_scalar_type_definition_node(
         self: &mut Self,
     ) -> Result<ast::ScalarDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start = T::get_current_token(&self.base.tokens_source)
-            .location
-            .start;
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         let name = self.base.parse_name_node(false)?;
         return Ok(ast::ScalarDefinitionNode {
             location: shared::ast::NodeLocation {
@@ -114,6 +117,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                 end: name.location.end,
                 source: name.location.source.clone(),
             },
+            documentation,
             name,
         });
     }
@@ -121,9 +125,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     fn parse_union_type_definition_node(
         self: &mut Self,
     ) -> Result<ast::UnionDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start = T::get_current_token(&self.base.tokens_source)
-            .location
-            .start;
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         let name = self.base.parse_name_node(false)?;
         T::consume(
             &mut self.base.tokens_source,
@@ -146,6 +156,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                 end: values.last().unwrap().location.end,
                 source: name.location.source.clone(),
             },
+            documentation,
             name,
             values,
             directives: Vec::new(),
@@ -155,9 +166,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     fn parse_extend_type_node(
         self: &mut Self,
     ) -> Result<ast::ExtendTypeNode<'buffer>, base::Error<'buffer>> {
-        let start = T::get_current_token(&self.base.tokens_source)
-            .location
-            .start;
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         T::consume_identifier_by_lexeme(&mut self.base.tokens_source, "type")?;
         let type_node = self.parse_object_type_definition_node()?;
         return Ok(ast::ExtendTypeNode {
@@ -168,6 +185,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                     .end,
                 source: T::get_source_file(&self.base.tokens_source),
             },
+            documentation,
             type_node,
         });
     }
@@ -175,18 +193,27 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     fn parse_enum_type_definition_node(
         self: &mut Self,
     ) -> Result<ast::EnumDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start = T::get_current_token(&self.base.tokens_source)
-            .location
-            .start;
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         let name = self.base.parse_name_node(false)?;
         T::consume(
             &mut self.base.tokens_source,
             SimpleTokenType::LeftBrace.into(),
         )?;
         let mut values = Vec::<ast::EnumValueDefinitionNode>::new();
-        while T::is_ahead(
+        while T::is_ahead_one_of(
             &self.base.tokens_source,
-            ComplexTokenType::Identifier.into(),
+            &[
+                ComplexTokenType::String.into(),
+                ComplexTokenType::Identifier.into(),
+            ],
         ) {
             values.push(self.parse_enum_value_definition_node()?);
             T::consume_if_is_ahead(
@@ -206,6 +233,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                     .end,
                 source: name.location.source.clone(),
             },
+            documentation,
             name,
             values,
             directives: Vec::new(),
@@ -216,13 +244,28 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         self: &mut Self,
     ) -> Result<ast::EnumValueDefinitionNode<'buffer>, base::Error<'buffer>>
     {
+        if T::lookahead(&self.base.tokens_source)
+            .map(|next_token| {
+                next_token.token_type == ComplexTokenType::String.into()
+            })
+            .unwrap_or(false)
+        {
+            self.base.tokens_source.advance()?;
+            self.base.process_potential_documentation_string(false)?;
+        }
+        let documentation = self.base.documentation_node.take();
         let name = self.base.parse_name_node(false)?;
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => name.location.start,
+        };
         return Ok(ast::EnumValueDefinitionNode {
             location: shared::ast::NodeLocation {
-                start: name.location.start,
+                start,
                 end: name.location.end,
                 source: name.location.source.clone(),
             },
+            documentation,
             value: name,
             directives: Vec::new(),
         });
@@ -232,9 +275,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         self: &mut Self,
     ) -> Result<ast::InterfaceDefinitionNode<'buffer>, base::Error<'buffer>>
     {
-        let start = T::get_current_token(&self.base.tokens_source)
-            .location
-            .start;
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         let name = self.base.parse_name_node(false)?;
         T::consume(
             &mut self.base.tokens_source,
@@ -259,6 +308,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                     .end,
                 source: name.location.source.clone(),
             },
+            documentation,
             name,
             fields,
             directives: Vec::new(),
@@ -269,9 +319,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         self: &mut Self,
     ) -> Result<ast::InputObjectDefinitionNode<'buffer>, base::Error<'buffer>>
     {
-        let start = T::get_current_token(&self.base.tokens_source)
-            .location
-            .start;
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         let name = self.base.parse_name_node(false)?;
         T::consume(
             &mut self.base.tokens_source,
@@ -300,6 +356,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                     .end,
                 source: name.location.source.clone(),
             },
+            documentation,
             name,
             fields,
             directives: Vec::new(),
@@ -309,9 +366,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     fn parse_field_definition_node(
         self: &mut Self,
     ) -> Result<ast::FieldDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start = T::get_current_token(&self.base.tokens_source)
-            .location
-            .start;
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         let name = self.base.parse_name_node(false)?;
         let arguments = self.base.parse_input_field_definition_nodes()?;
         T::consume(
@@ -335,6 +398,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                     .end,
                 source: T::get_source_file(&self.base.tokens_source),
             },
+            documentation,
             name,
             r#type: type_node,
             arguments,
@@ -345,9 +409,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     fn parse_object_type_definition_node(
         self: &mut Self,
     ) -> Result<ast::ObjectDefinitionNode<'buffer>, base::Error<'buffer>> {
-        let start = T::get_current_token(&self.base.tokens_source)
-            .location
-            .start;
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         let name = self.base.parse_name_node(false)?;
         let interfaces = self.parse_implements_clause()?;
         let mut fields = Vec::<ast::FieldDefinitionNode>::new();
@@ -374,6 +444,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                     .end,
                 source: name.location.source.clone(),
             },
+            documentation,
             name,
             interfaces,
             fields,

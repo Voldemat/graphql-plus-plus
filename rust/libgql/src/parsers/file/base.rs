@@ -16,6 +16,10 @@ pub enum Error<'buffer> {
     CannotParseNumberLiteral(lexer::tokens::Token<'buffer>),
     UnexpectedSpreadInLiteral(lexer::tokens::Token<'buffer>),
     UnknownDirectiveLocation(lexer::tokens::Token<'buffer>),
+    DuplicateDocumentationString {
+        first: shared::ast::DocumentationNode<'buffer>,
+        second: lexer::tokens::Token<'buffer>,
+    },
 }
 
 impl<'buffer> Error<'buffer> {
@@ -34,6 +38,9 @@ impl<'buffer> Error<'buffer> {
             Self::CannotParseNumberLiteral(token) => &token.location,
             Self::UnexpectedSpreadInLiteral(token) => &token.location,
             Self::UnknownDirectiveLocation(token) => &token.location,
+            Self::DuplicateDocumentationString { second, .. } => {
+                &second.location
+            }
         }
     }
 }
@@ -50,6 +57,7 @@ pub struct BaseParser<
     TDirectiveLocation: for<'a> TryFrom<&'a str> + serde::Serialize,
 > {
     pub tokens_source: T,
+    pub documentation_node: Option<shared::ast::DocumentationNode<'buffer>>,
     _v: PhantomData<TDirectiveLocation>,
     _y: PhantomData<&'buffer ()>,
 }
@@ -63,9 +71,44 @@ impl<
     pub fn new(tokens_source: T) -> Self {
         return Self {
             tokens_source,
+            documentation_node: None,
             _v: PhantomData::default(),
             _y: PhantomData::default(),
         };
+    }
+
+    pub fn process_potential_documentation_string(
+        self: &mut Self,
+        consume: bool,
+    ) -> Result<(), Error<'buffer>> {
+        let current_token = T::get_current_token(&self.tokens_source);
+        if current_token.token_type
+            == TokenType::Complex(ComplexTokenType::String)
+            && T::lookback(&self.tokens_source)
+                .map(|prev_token| {
+                    prev_token.token_type != SimpleTokenType::Equal.into()
+                })
+                .unwrap_or(true)
+        {
+            if let Some(current) = self.documentation_node.as_ref() {
+                return Err(Error::DuplicateDocumentationString {
+                    first: current.clone(),
+                    second: current_token.clone(),
+                });
+            };
+            self.documentation_node = Some(shared::ast::DocumentationNode {
+                location: shared::ast::NodeLocation {
+                    start: current_token.location.start,
+                    end: current_token.location.end,
+                    source: T::get_source_file(&self.tokens_source),
+                },
+                string: current_token.lexeme,
+            });
+            if consume {
+                self.tokens_source.advance()?;
+            }
+        }
+        Ok(())
     }
 
     pub fn parse_name_node(
@@ -149,8 +192,13 @@ impl<
         self: &mut Self,
     ) -> Result<shared::ast::InputFieldDefinitionNode<'buffer>, Error<'buffer>>
     {
+        self.process_potential_documentation_string(false)?;
+        let documentation = self.documentation_node.take();
         let name_node = self.parse_name_node(false)?;
-        let start = T::get_current_token(&self.tokens_source).location.start;
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => name_node.location.start,
+        };
         T::consume(&mut self.tokens_source, SimpleTokenType::Colon.into())?;
         let type_node = self.parse_type_node()?;
         let default_value = self.parse_default_value()?;
@@ -160,6 +208,7 @@ impl<
                 end: T::get_current_token(&self.tokens_source).location.end,
                 source: T::get_source_file(&self.tokens_source),
             },
+            documentation,
             name: name_node,
             r#type: type_node,
             default_value,
@@ -397,17 +446,23 @@ impl<
         shared::ast::DirectiveNode<'buffer, TDirectiveLocation>,
         Error<'buffer>,
     > {
+        let documentation = self.documentation_node.take();
         T::consume(&mut self.tokens_source, SimpleTokenType::AtSign.into())?;
         let name_node = self.parse_name_node(false)?;
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => name_node.location.start,
+        };
         let arguments = self.parse_input_field_definition_nodes()?;
         T::consume_identifier_by_lexeme(&mut self.tokens_source, "on")?;
         let locations = self.parse_directive_locations()?;
         return Ok(shared::ast::DirectiveNode::<'buffer, TDirectiveLocation> {
             location: shared::ast::NodeLocation {
-                start: name_node.location.start,
+                start,
                 end: locations.last().unwrap().location.end,
                 source: name_node.location.source.clone(),
             },
+            documentation,
             name: name_node,
             targets: locations,
             arguments,

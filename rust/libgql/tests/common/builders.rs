@@ -23,6 +23,7 @@ pub fn build_enum_value<'s>(
 ) -> server::ast::EnumValueDefinitionNode<'s> {
     server::ast::EnumValueDefinitionNode {
         location: build_location(),
+        documentation: None,
         value: build_name(name),
         directives: Vec::new(),
     }
@@ -34,6 +35,7 @@ pub fn build_enum<'s>(
 ) -> server::ast::EnumDefinitionNode<'s> {
     server::ast::EnumDefinitionNode {
         location: build_location(),
+        documentation: None,
         name: build_name(name),
         directives: Vec::new(),
         values: values.iter().map(|value| build_enum_value(value)).collect(),

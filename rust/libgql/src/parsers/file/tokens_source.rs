@@ -37,6 +37,7 @@ impl<'buffer, 'tokens> ConsumeError<'buffer> {
 
 pub trait TokensSource<'buffer> {
     fn lookahead(self: &Self) -> Option<&lexer::tokens::Token<'buffer>>;
+    fn lookback(self: &Self) -> Option<&lexer::tokens::Token<'buffer>>;
     fn advance(self: &mut Self) -> Result<(), ConsumeError<'buffer>>;
     fn consume(
         self: &mut Self,
@@ -103,6 +104,16 @@ pub trait TokensSource<'buffer> {
             return false;
         };
         return next_token.token_type == token_type;
+    }
+
+    fn is_ahead_one_of(
+        self: &Self,
+        token_types: &[lexer::token_type::TokenType],
+    ) -> bool {
+        let Some(next_token) = Self::lookahead(self) else {
+            return false;
+        };
+        return token_types.contains(&next_token.token_type);
     }
 
     fn is_ahead_by_lexeme(self: &Self, lexeme: &str) -> bool {

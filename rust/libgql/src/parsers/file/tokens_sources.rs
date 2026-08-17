@@ -33,6 +33,14 @@ impl<'buffer> TokensSource<'buffer> for VecTokensSource<'buffer> {
         self.tokens.get(self.current_index + 1)
     }
 
+    fn lookback(self: &Self) -> Option<&crate::lexer::tokens::Token<'buffer>> {
+        if self.current_index == 0 {
+            None
+        } else {
+            self.tokens.get(self.current_index - 1)
+        }
+    }
+
     fn advance(self: &mut Self) -> Result<(), ConsumeError<'buffer>> {
         if self.current_index + 1 == self.tokens.len() {
             return Err(ConsumeError::EOF(self.get_current_token().clone()));

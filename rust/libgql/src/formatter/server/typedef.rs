@@ -21,7 +21,7 @@ pub fn format_node<'s>(
             super::input::format_node(config, node)
         }
         ast::TypeDefinitionNode::Scalar(node) => {
-            super::scalar::format_node(node)
+            super::scalar::format_node(config, node)
         }
         ast::TypeDefinitionNode::Directive(node) => {
             super::directive::format_node(config, node)

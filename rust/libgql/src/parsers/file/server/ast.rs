@@ -69,6 +69,7 @@ pub type DirectiveDefinitionNode<'buffer> =
 #[derive(Debug, serde::Serialize)]
 pub struct FieldDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub name: shared::ast::NameNode<'buffer>,
     pub r#type: shared::ast::TypeNode<'buffer>,
     pub arguments: Vec<shared::ast::InputFieldDefinitionNode<'buffer>>,
@@ -78,6 +79,7 @@ pub struct FieldDefinitionNode<'buffer> {
 #[derive(Debug, serde::Serialize)]
 pub struct InterfaceDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub name: shared::ast::NameNode<'buffer>,
     pub fields: Vec<FieldDefinitionNode<'buffer>>,
     pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
@@ -86,6 +88,7 @@ pub struct InterfaceDefinitionNode<'buffer> {
 #[derive(Debug, serde::Serialize)]
 pub struct ObjectDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub name: shared::ast::NameNode<'buffer>,
     pub interfaces: Vec<shared::ast::NameNode<'buffer>>,
     pub fields: Vec<FieldDefinitionNode<'buffer>>,
@@ -95,6 +98,7 @@ pub struct ObjectDefinitionNode<'buffer> {
 #[derive(Debug, serde::Serialize)]
 pub struct InputObjectDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub name: shared::ast::NameNode<'buffer>,
     pub fields: Vec<shared::ast::InputFieldDefinitionNode<'buffer>>,
     pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
@@ -103,6 +107,7 @@ pub struct InputObjectDefinitionNode<'buffer> {
 #[derive(Debug, serde::Serialize)]
 pub struct EnumValueDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub value: shared::ast::NameNode<'buffer>,
     pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
 }
@@ -110,6 +115,7 @@ pub struct EnumValueDefinitionNode<'buffer> {
 #[derive(Debug, serde::Serialize)]
 pub struct EnumDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub name: shared::ast::NameNode<'buffer>,
     pub values: Vec<EnumValueDefinitionNode<'buffer>>,
     pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
@@ -118,6 +124,7 @@ pub struct EnumDefinitionNode<'buffer> {
 #[derive(Debug, serde::Serialize)]
 pub struct UnionDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub name: shared::ast::NameNode<'buffer>,
     pub values: Vec<shared::ast::NameNode<'buffer>>,
     pub directives: Vec<shared::ast::DirectiveInvocationNode<'buffer>>,
@@ -126,6 +133,7 @@ pub struct UnionDefinitionNode<'buffer> {
 #[derive(Debug, serde::Serialize)]
 pub struct ScalarDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub name: shared::ast::NameNode<'buffer>,
 }
 
@@ -143,6 +151,7 @@ pub enum TypeDefinitionNode<'buffer> {
 #[derive(Debug, serde::Serialize)]
 pub struct ExtendTypeNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub type_node: ObjectDefinitionNode<'buffer>,
 }
 

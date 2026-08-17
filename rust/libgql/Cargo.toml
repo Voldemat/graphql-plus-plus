@@ -8,7 +8,7 @@ repository = "https://github.com/Voldemat/graphql-plus-plus"
 
 [dependencies]
 async-stream = "0.3.6"
-codeform = { version = "0.0.5" }
+codeform = { version = "0.0.6" }
 derive_more = { version = "2.1.0", features = ["from", "display"], default-features = false }
 futures = { version = "0.3.32", features = ["alloc"], default-features = false }
 futures-core = { version = "0.3.32", features = [], default-features = false }

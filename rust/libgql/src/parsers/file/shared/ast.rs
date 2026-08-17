@@ -28,6 +28,12 @@ impl<'buffer> NodeLocation<'buffer> {
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
+pub struct DocumentationNode<'buffer> {
+    pub location: NodeLocation<'buffer>,
+    pub string: &'buffer str,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct NameNode<'buffer> {
     pub location: NodeLocation<'buffer>,
     pub name: &'buffer str,
@@ -145,6 +151,7 @@ pub struct DirectiveInvocationNode<'buffer> {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct InputFieldDefinitionNode<'buffer> {
     pub location: NodeLocation<'buffer>,
+    pub documentation: Option<DocumentationNode<'buffer>>,
     pub name: NameNode<'buffer>,
     pub r#type: TypeNode<'buffer>,
     pub default_value: Option<LiteralNode<'buffer>>,
@@ -160,6 +167,7 @@ pub struct DirectiveLocationNode<'buffer, T> {
 #[derive(Debug, serde::Serialize)]
 pub struct DirectiveNode<'buffer, T: serde::Serialize> {
     pub location: NodeLocation<'buffer>,
+    pub documentation: Option<DocumentationNode<'buffer>>,
     pub name: NameNode<'buffer>,
     pub targets: Vec<DirectiveLocationNode<'buffer, T>>,
     pub arguments: Vec<InputFieldDefinitionNode<'buffer>>,

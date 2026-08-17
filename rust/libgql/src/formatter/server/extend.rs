@@ -6,13 +6,27 @@ pub fn format_node<'s>(
     config: &crate::formatter::config::Config,
     ast_node: &ast::ExtendTypeNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
-    ir::hir::builders::NodesVec::from_iterator([
-        ir::hir::builders::ascii_oneline_text("extend"),
-        ir::hir::builders::byte(b' '),
-    ])
-    .extend(super::object::format_node(
-        config,
-        true,
-        &ast_node.type_node,
-    ))
+    ir::hir::builders::NodesVec::empty()
+        .extend_if_some(ast_node.documentation.as_ref(), |documentation| {
+            [
+                ir::hir::builders::unicode_text(
+                    documentation.location.get_source_slice(),
+                    config.indent_width,
+                    |c| {
+                        unicode_width::UnicodeWidthChar::width(c)
+                            .unwrap_or_default()
+                    },
+                ),
+                ir::hir::builders::hard_line(),
+            ]
+        })
+        .extend([
+            ir::hir::builders::ascii_oneline_text("extend"),
+            ir::hir::builders::byte(b' '),
+        ])
+        .extend(super::object::format_node(
+            config,
+            true,
+            &ast_node.type_node,
+        ))
 }

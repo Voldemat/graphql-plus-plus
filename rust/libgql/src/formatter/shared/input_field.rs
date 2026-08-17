@@ -14,8 +14,22 @@ pub fn format_node<'s>(
     is_last_node: bool,
     delimeter_mode: DelimeterMode,
 ) -> ir::hir::builders::NodesVec<'s> {
-    ir::hir::builders::NodesVec::from_iterator(
-        ir::hir::builders::wrap_in_group(
+    ir::hir::builders::NodesVec::empty()
+        .extend_if_some(ast_node.documentation.as_ref(), |documentation| {
+            [
+                ir::hir::builders::expand_parent(),
+                ir::hir::builders::unicode_text(
+                    documentation.location.get_source_slice(),
+                    config.indent_width,
+                    |c| {
+                        unicode_width::UnicodeWidthChar::width(c)
+                            .unwrap_or_default()
+                    },
+                ),
+                ir::hir::builders::hard_line(),
+            ]
+        })
+        .extend(ir::hir::builders::wrap_in_group(
             ir::hir::builders::unanonymous_default_flat_group(),
             ir::hir::builders::wrap_in_soft_indent(
                 ir::hir::builders::NodesVec::from_iterator([
@@ -36,20 +50,19 @@ pub fn format_node<'s>(
                     },
                 ),
             ),
-        ),
-    )
-    .push_if(
-        !is_last_node && delimeter_mode == DelimeterMode::HardLine,
-        ir::hir::builders::hard_line(),
-    )
-    .extend_if(
-        !is_last_node
-            && delimeter_mode == DelimeterMode::CommaAndSoftLineOrSpace,
-        [
-            ir::hir::builders::byte(b','),
-            ir::hir::builders::soft_line_or_space(),
-        ],
-    )
+        ))
+        .push_if(
+            !is_last_node && delimeter_mode == DelimeterMode::HardLine,
+            ir::hir::builders::hard_line(),
+        )
+        .extend_if(
+            !is_last_node
+                && delimeter_mode == DelimeterMode::CommaAndSoftLineOrSpace,
+            [
+                ir::hir::builders::byte(b','),
+                ir::hir::builders::soft_line_or_space(),
+            ],
+        )
 }
 
 pub fn format_nodes<'s>(
