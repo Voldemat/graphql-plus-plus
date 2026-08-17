@@ -28,8 +28,12 @@ pub fn format_node<'s>(
                     ir::hir::builders::ascii_oneline_text("type"),
                     ir::hir::builders::byte(b' '),
                     ir::hir::builders::ascii_oneline_text(ast_node.name.name),
-                    ir::hir::builders::byte(b' '),
                 ])
+                .push_if(
+                    ast_node.interfaces.len() != 0
+                        || ast_node.fields.len() != 0,
+                    ir::hir::builders::byte(b' '),
+                )
                 .extend_if(
                     ast_node.interfaces.len() != 0 && !is_in_extend_context,
                     ir::hir::builders::NodesVec::from_iterator([
@@ -58,9 +62,15 @@ pub fn format_node<'s>(
                             })
                             .flatten(),
                     ))
-                    .push(ir::hir::builders::soft_line_or_space()),
+                    .push_if(
+                        ast_node.fields.len() != 0,
+                        ir::hir::builders::soft_line_or_space(),
+                    ),
                 )
-                .push(ir::hir::builders::byte(b'{')),
+                .push_if(
+                    ast_node.fields.len() != 0,
+                    ir::hir::builders::byte(b'{'),
+                ),
             )
             .push_if(ast_node.fields.len() != 0, ir::hir::builders::hard_line())
             .extend(ir::hir::builders::wrap_in_hard_indent(
@@ -77,7 +87,12 @@ pub fn format_node<'s>(
                     })
                     .flatten(),
             ))
-            .push_if(ast_node.fields.len() != 0, ir::hir::builders::hard_line())
-            .push(ir::hir::builders::byte(b'}')),
+            .extend_if(
+                ast_node.fields.len() != 0,
+                [
+                    ir::hir::builders::hard_line(),
+                    ir::hir::builders::byte(b'}'),
+                ],
+            ),
         )
 }
