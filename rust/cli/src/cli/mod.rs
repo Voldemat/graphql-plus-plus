@@ -25,6 +25,23 @@ pub struct MainArgs {
     pub config: std::path::PathBuf,
 }
 
+#[derive(clap::Args)]
+pub struct FormatArgs {
+    #[arg(
+        short,
+        long,
+        help = "path to yaml config file",
+        default_value = "./gql.yaml"
+    )]
+    pub config: std::path::PathBuf,
+    #[arg(
+        long,
+        help = "check formatting and print the diff",
+        default_value = "false"
+    )]
+    pub check: bool,
+}
+
 #[derive(clap::Subcommand)]
 #[command(about)]
 pub enum Commands {
@@ -32,7 +49,7 @@ pub enum Commands {
     Internal(internal::Commands),
     Generate(MainArgs),
     Validate(MainArgs),
-    Format(MainArgs),
+    Format(FormatArgs),
 }
 
 impl CLI {
@@ -41,13 +58,13 @@ impl CLI {
     }
 }
 
-fn parse_config(args: &MainArgs) -> config::Config {
-    let buffer = std::fs::read_to_string(&args.config).unwrap();
+fn parse_config(config_path: &std::path::Path) -> config::Config {
+    let buffer = std::fs::read_to_string(config_path).unwrap();
     return serde_yaml::from_str(&buffer).unwrap();
 }
 
 fn generate(args: MainArgs) {
-    let config = parse_config(&args);
+    let config = parse_config(&args.config);
     utils::run_config_action(
         &args.config,
         &config,
@@ -67,7 +84,7 @@ fn generate(args: MainArgs) {
 }
 
 fn validate(args: MainArgs) {
-    let config = parse_config(&args);
+    let config = parse_config(&args.config);
     utils::run_config_action(
         &args.config,
         &config,
@@ -88,8 +105,8 @@ fn validate(args: MainArgs) {
     .unwrap();
 }
 
-fn format_command(args: MainArgs) {
-    let config = parse_config(&args);
+fn format_command(args: FormatArgs) {
+    let config = parse_config(&args.config);
     let mut errors = Vec::<String>::new();
     let Some(formatting_config) = config.server.formatting else {
         eprintln!("No server.formatting config is defined");
@@ -109,6 +126,7 @@ fn format_command(args: MainArgs) {
         indent_width: formatter_config.indent_width,
         new_line_control_sequence: b"\n",
     };
+    let mut is_success = true;
     for graphql_path in utils::resolve_paths(
         &args.config.parent().unwrap(),
         &config.server.inputs.graphql,
@@ -152,17 +170,88 @@ fn format_command(args: MainArgs) {
             &mut hir_to_lir_state,
             hir_nodes,
         );
-        let mut writer = std::io::BufWriter::new(
-            std::fs::File::create(graphql_path).unwrap(),
-        );
         let mut printer_state = codeform::lir_printer::State::default();
-        codeform::lir_printer::print_nodes(
-            &mut writer,
-            &lir_printer_config,
-            &mut printer_state,
-            &lir_nodes,
-        )
-        .unwrap();
+        if args.check {
+            let mut writer = std::io::BufWriter::new(Vec::<u8>::new());
+            codeform::lir_printer::print_nodes(
+                &mut writer,
+                &lir_printer_config,
+                &mut printer_state,
+                &lir_nodes,
+            )
+            .unwrap();
+            let formatted_string =
+                String::from_utf8(writer.into_inner().unwrap()).unwrap();
+            let text_diff =
+                similar::TextDiff::from_lines(&buffer, &formatted_string);
+            if text_diff.ratio() != 1.0 {
+                is_success = false;
+                println!(
+                    "{}",
+                    console::style(
+                        format!("{}:", graphql_path.to_string_lossy())
+                    ).blue()
+                );
+
+                // 3. Iterate over grouped hunks and print changes with line numbers
+                for hunk in text_diff.grouped_ops(3) {
+                    for op in hunk {
+                        for change in text_diff.iter_changes(&op) {
+                            // Format line numbers based on change type
+                            let old_ln = change
+                                .old_index()
+                                .map(|idx| (idx + 1).to_string())
+                                .unwrap_or_default();
+                            let new_ln = change
+                                .new_index()
+                                .map(|idx| (idx + 1).to_string())
+                                .unwrap_or_default();
+
+                            match change.tag() {
+                                similar::ChangeTag::Delete => {
+                                    print!(
+                                        "{:3} {:3} | {}",
+                                        console::style(&old_ln).red(),
+                                        console::style(&new_ln).dim(),
+                                        console::style(format!("- {}", change)).red()
+                                    );
+                                }
+                                similar::ChangeTag::Insert => {
+                                    print!(
+                                        "{:3} {:3} | {}",
+                                        console::style(&old_ln).dim(),
+                                        console::style(&new_ln).green(),
+                                        console::style(format!("+ {}", change)).green()
+                                    );
+                                }
+                                similar::ChangeTag::Equal => {
+                                    print!(
+                                        "{:3} {:3} |  {}",
+                                        console::style(&old_ln).dim(),
+                                        console::style(&new_ln).dim(),
+                                        change
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            let mut writer = std::io::BufWriter::new(
+                std::fs::File::create(graphql_path).unwrap(),
+            );
+            codeform::lir_printer::print_nodes(
+                &mut writer,
+                &lir_printer_config,
+                &mut printer_state,
+                &lir_nodes,
+            )
+            .unwrap();
+        }
+    }
+    if !is_success {
+        std::process::exit(1);
     }
 }
 

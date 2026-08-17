@@ -32,9 +32,8 @@ fn format_error_with_range<'buffer>(
 
     // Calculate line number (1-indexed) and line start index
     let line_number = buffer[..start].lines().count().max(1);
-    let line_start_offset =
-        buffer[..start].rfind('\n').map(|i| i + 1).unwrap_or(0);
-
+    let line_start_offset = buffer[..start].rfind('\n').map(|i| i + 1).unwrap_or(0);
+    
     // Locate end of the current line
     let line_end_offset = buffer[start..]
         .find('\n')
@@ -320,3 +319,5 @@ pub fn does_file_have_changes(
     }
     return Ok(());
 }
+
+
