@@ -108,19 +108,19 @@ fn validate(args: MainArgs) {
 fn format_command(args: FormatArgs) {
     let config = parse_config(&args.config);
     let mut errors = Vec::<String>::new();
-    let Some(formatting_config) = config.server.formatting else {
-        eprintln!("No server.formatting config is defined");
+    let Some(formatting_config) = config.formatting else {
+        eprintln!("No formatting config is defined");
         return;
     };
     let formatter_config = libgql::formatter::config::Config {
         indent_width: codeform::ir::shared::IndentWidth::from_u8(
-            formatting_config.indent_width.into(),
+            formatting_config.shared.indent_width.into(),
         )
         .unwrap(),
     };
     let hir_to_lir_config = codeform::hir_to_lir::config::Config {
         indent_width: formatter_config.indent_width,
-        max_width: formatting_config.max_line_width,
+        max_width: formatting_config.shared.max_line_width,
     };
     let lir_printer_config = codeform::lir_printer::Config {
         indent_width: formatter_config.indent_width,
@@ -188,9 +188,11 @@ fn format_command(args: FormatArgs) {
                 is_success = false;
                 println!(
                     "{}",
-                    console::style(
-                        format!("{}:", graphql_path.to_string_lossy())
-                    ).blue()
+                    console::style(format!(
+                        "{}:",
+                        graphql_path.to_string_lossy()
+                    ))
+                    .blue()
                 );
 
                 // 3. Iterate over grouped hunks and print changes with line numbers
@@ -213,7 +215,8 @@ fn format_command(args: FormatArgs) {
                                         "{:3} {:3} | {}",
                                         console::style(&old_ln).red(),
                                         console::style(&new_ln).dim(),
-                                        console::style(format!("- {}", change)).red()
+                                        console::style(format!("- {}", change))
+                                            .red()
                                     );
                                 }
                                 similar::ChangeTag::Insert => {
@@ -221,7 +224,8 @@ fn format_command(args: FormatArgs) {
                                         "{:3} {:3} | {}",
                                         console::style(&old_ln).dim(),
                                         console::style(&new_ln).green(),
-                                        console::style(format!("+ {}", change)).green()
+                                        console::style(format!("+ {}", change))
+                                            .green()
                                     );
                                 }
                                 similar::ChangeTag::Equal => {
@@ -249,6 +253,12 @@ fn format_command(args: FormatArgs) {
             )
             .unwrap();
         }
+    }
+    if errors.len() != 0 {
+        for e in errors {
+            eprintln!("{}", e);
+        }
+        std::process::exit(1);
     }
     if !is_success {
         std::process::exit(1);

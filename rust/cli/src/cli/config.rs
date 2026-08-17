@@ -1,9 +1,22 @@
 use std::collections::HashMap;
 
 #[derive(serde::Deserialize)]
-pub struct GraphqlFormattingConfig {
+pub struct GraphqlFormattingServerConfig {}
+
+#[derive(serde::Deserialize)]
+pub struct GraphqlFormattingClientConfig {}
+
+#[derive(serde::Deserialize)]
+pub struct GraphqlFormattingSharedConfig {
     pub max_line_width: codeform::ir::shared::LineWidth,
     pub indent_width: std::num::NonZeroU8,
+}
+
+#[derive(serde::Deserialize)]
+pub struct GraphqlFormattingConfig {
+    pub shared: GraphqlFormattingSharedConfig,
+    pub server: GraphqlFormattingServerConfig,
+    pub client: Option<GraphqlFormattingClientConfig>,
 }
 
 #[derive(serde::Deserialize)]
@@ -25,7 +38,6 @@ pub struct OutputsConfig {
 
 #[derive(serde::Deserialize)]
 pub struct ServerConfig {
-    pub formatting: Option<GraphqlFormattingConfig>,
     pub inputs: InputsConfig,
     pub outputs: Option<OutputsConfig>,
 }
@@ -46,6 +58,7 @@ pub struct OperationsMapConfig {
 
 #[derive(serde::Deserialize)]
 pub struct Config {
+    pub formatting: Option<GraphqlFormattingConfig>,
     pub server: ServerConfig,
     pub client: Option<ClientConfig>,
     #[serde(alias = "operationsMap")]

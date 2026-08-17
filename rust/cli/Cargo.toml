@@ -7,7 +7,7 @@ edition = "2024"
 async-stream = "0.3.6"
 chrono = { version = "0.4.44", default-features = false }
 clap = { version = "4.6.5", features = ["derive", "std", "help"], default-features = false }
-codeform = { version = "0.0.5" }
+codeform = { version = "0.0.6" }
 console = "0.16.4"
 futures-core = { version = "0.3.32", default-features = false }
 futures-util = { version = "0.3.32", default-features = false }
