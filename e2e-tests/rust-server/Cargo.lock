@@ -43,6 +43,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 
 [[package]]
+name = "codeform"
+version = "0.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5793014c256bce940e743898eaba0fc5ebbc840349c79889f1d0f71835612a96"
+
+[[package]]
 name = "codegen"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -297,6 +303,7 @@ name = "libgql"
 version = "0.0.1"
 dependencies = [
  "async-stream",
+ "codeform",
  "derive_more",
  "futures",
  "futures-core",
@@ -306,6 +313,7 @@ dependencies = [
  "serde",
  "serde_json",
  "struson",
+ "unicode-width",
 ]
 
 [[package]]
@@ -645,6 +653,12 @@ name = "unicode-segmentation"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f6ccf251212114b54433ec949fd6a7841275f9ada20dddd2f29e9ceea4501493"
+
+[[package]]
+name = "unicode-width"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254"
 
 [[package]]
 name = "unicode-xid"
