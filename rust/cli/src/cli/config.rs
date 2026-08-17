@@ -1,6 +1,12 @@
 use std::collections::HashMap;
 
 #[derive(serde::Deserialize)]
+pub struct GraphqlFormattingConfig {
+    pub max_line_width: codeform::ir::shared::LineWidth,
+    pub indent_width: std::num::NonZeroU8,
+}
+
+#[derive(serde::Deserialize)]
 pub struct InputsConfig {
     pub graphql: Vec<std::path::PathBuf>,
     #[serde(alias = "jsonSchema", default)]
@@ -19,6 +25,7 @@ pub struct OutputsConfig {
 
 #[derive(serde::Deserialize)]
 pub struct ServerConfig {
+    pub formatting: Option<GraphqlFormattingConfig>,
     pub inputs: InputsConfig,
     pub outputs: Option<OutputsConfig>,
 }
