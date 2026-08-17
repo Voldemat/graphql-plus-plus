@@ -44,9 +44,9 @@ checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 
 [[package]]
 name = "codeform"
-version = "0.0.5"
+version = "0.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5793014c256bce940e743898eaba0fc5ebbc840349c79889f1d0f71835612a96"
+checksum = "153e6a4db89f94703e6112b372254851660fa66aa769d86cfbd8ebb840e2faf1"
 
 [[package]]
 name = "codegen"
