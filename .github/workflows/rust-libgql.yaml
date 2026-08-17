@@ -28,10 +28,14 @@ jobs:
     - name: Get crates.io token
       if: github.ref_type == 'tag'
       uses: rust-lang/crates-io-auth-action@v1
+      id: auth
     - name: Publish crate
       if: github.ref_type == 'tag'
       working-directory: rust/libgql
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
       run: |
-        cargo install cargo-edit
-        cargo set-version ${{ github.ref_name }}
-        cargo publish
+        sed -i.bak 's/^version = "0.0.1"/version = "${{ github.ref_name }}"/' Cargo.toml
+        rm Cargo.toml.bak
+        cargo check
+        cargo publish --allow-dirty
