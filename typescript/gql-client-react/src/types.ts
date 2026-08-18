@@ -1,6 +1,6 @@
 import { z } from 'zod/v4'
 
-export type SchemaFor<T> = z.ZodType<T>;
+export type SchemaFor<T> = z.ZodType<T>
 
 interface BaseOperation<V, R> {
     name: string
@@ -43,12 +43,12 @@ export interface IExecutor<TRequestContext extends RequestContext> {
     executeSync<T extends SyncOperation<unknown, unknown>>(
         operation: T,
         variables: OperationVariables<T>,
-        requestContext: TRequestContext
+        requestContext: TRequestContext,
     ): Promise<ExecuteResult<OperationResult<T>>>
     executeSubscription<T extends SubscriptionOperation<unknown, unknown>>(
         operation: T,
         variables: OperationVariables<T>,
         requestContext: TRequestContext,
-        controller: AbortController
+        controller: AbortController,
     ): Promise<ExecuteResult<SubOpAsyncIterable<OperationResult<T>>>>
 }

@@ -1,9 +1,9 @@
-import { useSubscription } from '../useSubscription.jsx';
+import { useSubscription } from '../useSubscription.jsx'
 import { describe, expect, it } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import assert from 'assert';
-import { testSubscription } from './utils.js';
-import { IExecutor, RequestContext } from '@/types.js';
+import assert from 'assert'
+import { testSubscription } from './utils.js'
+import { IExecutor, RequestContext } from '@/types.js'
 
 describe('useSubscription', () => {
     it('Should return loading state and then success state', async () => {
@@ -13,23 +13,23 @@ describe('useSubscription', () => {
                 const response = new Response(readableStream)
                 return {
                     result: {
-                        stream: (async function*() {
+                        stream: (async function* () {
                             yield { number: 1 }
                             yield { number: 2 }
                             yield { number: 3 }
                         })(),
-                        close: () => { }
+                        close: () => {},
                     },
-                    response
+                    response,
                 }
             },
         } as unknown as IExecutor<RequestContext>
         const { result } = renderHook((props) => useSubscription(...props), {
-            initialProps: [executor, testSubscription, {}, {}] as const
+            initialProps: [executor, testSubscription, {}, {}] as const,
         })
         expect(result.current.state).toBe('loading')
-        act(() => { })
-        await act(async () => { })
+        act(() => {})
+        await act(async () => {})
         expect(result.current.state).toBe('success')
         assert(result.current.state === 'success')
         let number = 1
@@ -42,14 +42,16 @@ describe('useSubscription', () => {
     it('Should return loading state and then failure state', async () => {
         const error = new Error('Network error')
         const executor = {
-            executeSubscription: async () => { throw error }
+            executeSubscription: async () => {
+                throw error
+            },
         } as unknown as IExecutor<RequestContext>
         const { result } = renderHook((props) => useSubscription(...props), {
-            initialProps: [executor, testSubscription, {}, {}] as const
+            initialProps: [executor, testSubscription, {}, {}] as const,
         })
         expect(result.current.state).toBe('loading')
-        act(() => { })
-        await act(async () => { })
+        act(() => {})
+        await act(async () => {})
         expect(result.current.state).toBe('failure')
         assert(result.current.state === 'failure')
         expect(result.current.error).toBe(error)

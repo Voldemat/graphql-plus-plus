@@ -1,5 +1,5 @@
-import { OperationLoadingState } from './useOperation.jsx';
+import { OperationLoadingState } from './useOperation.jsx'
 
-export const loadingState =
-    Object.freeze({ state: 'loading' } as const) satisfies OperationLoadingState
-
+export const loadingState = Object.freeze({
+    state: 'loading',
+} as const) satisfies OperationLoadingState

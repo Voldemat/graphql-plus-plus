@@ -1,9 +1,7 @@
-export {
-    useLazyOperation,
-} from './hook.js'
+export { useLazyOperation } from './hook.js'
 export type {
     LazyOperationInitialState,
     LazyOperationState,
     LazyOperationExecuteReturnType,
-    UseLazyOperationReturnType
+    UseLazyOperationReturnType,
 } from './types.js'

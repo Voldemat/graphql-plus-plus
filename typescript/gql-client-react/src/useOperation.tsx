@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import hash, { type NotUndefined } from 'object-hash'
+import { useEffect, useMemo, useState } from 'react'
+import { loadingState } from './loading-state.js'
 import type {
     ExecuteResult,
     IExecutor,
     OperationResult,
     OperationVariables,
     RequestContext,
-    SyncOperation
-} from './types.js';
-import hash, { type NotUndefined } from 'object-hash'
-import { loadingState } from './loading-state.js';
+    SyncOperation,
+} from './types.js'
 
 export interface OperationLoadingState {
     state: 'loading'
@@ -24,42 +24,43 @@ export interface OperationFailureState {
 }
 
 export type OperationState<TResult> =
-    OperationLoadingState |
-    OperationSuccessState<TResult> |
-    OperationFailureState
+    | OperationLoadingState
+    | OperationSuccessState<TResult>
+    | OperationFailureState
 
 export function useOperation<
     T extends SyncOperation<unknown, unknown>,
-    TRequestContext extends RequestContext
+    TRequestContext extends RequestContext,
 >(
     executor: IExecutor<TRequestContext>,
     operation: T,
     variables: OperationVariables<T>,
-    requestContext: TRequestContext
+    requestContext: TRequestContext,
 ): OperationState<OperationResult<T>> {
-    const [state, setState] = useState<OperationState<OperationResult<T>>>(
-        loadingState
-    )
+    const [state, setState] =
+        useState<OperationState<OperationResult<T>>>(loadingState)
     const memoizedVariables = useMemo(
-        () => variables, [hash(variables as NotUndefined)]
+        () => variables,
+        // oxlint-disable-next-line exhaustive-deps,use-memo
+        [hash(variables as NotUndefined)],
     )
     const memoizedRequestContext = useMemo(
-        () => requestContext, [hash(requestContext)]
+        () => requestContext,
+        // oxlint-disable-next-line exhaustive-deps,use-memo
+        [hash(requestContext)],
     )
-    useEffect(
-        () => {
-            executor.executeSync(operation, variables, requestContext)
-                .then(result => setState({ state: 'success', ...result }))
-                .catch(error => setState({ state: 'failure', error }))
-            return () => setState(loadingState)
-        },
-        [
-            setState,
-            executor,
-            operation,
-            memoizedVariables,
-            memoizedRequestContext
-        ]
-    )
+    useEffect(() => {
+        executor
+            .executeSync(operation, memoizedVariables, memoizedRequestContext)
+            .then((result) => setState({ state: 'success', ...result }))
+            .catch((error) => setState({ state: 'failure', error }))
+        return () => setState(loadingState)
+    }, [
+        setState,
+        executor,
+        operation,
+        memoizedVariables,
+        memoizedRequestContext,
+    ])
     return state
 }
