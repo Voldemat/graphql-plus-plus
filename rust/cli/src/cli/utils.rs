@@ -4,10 +4,10 @@ use crate::cli::config;
 
 pub fn format_lexer_error<'buffer>(
     exc: &str,
-    location: (usize, usize),
+    location: libgql::lexer::tokens::TokenLocation,
     source: &Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
 ) -> String {
-    format_error_with_range(exc, location.0, location.1, source)
+    format_error_with_range(exc, location.start, location.end, source)
 }
 
 pub fn format_parse_error<'buffer>(
@@ -241,10 +241,13 @@ pub fn run_config_action<'a>(
 ) -> Result<(), String> {
     let mut server_registry =
         libgql::parsers::schema::server::type_registry::HashMapTypeRegistry::new();
+    let Some(config_server) = config.server.as_ref() else {
+        return Err("config.server is not defined".to_string());
+    };
     match load_server_schema_from_inputs(
         &mut server_registry,
         config_path.parent().unwrap(),
-        &config.server.inputs,
+        &config_server.inputs,
     ) {
         Ok(_) => {}
         Err(errors) => {
@@ -276,7 +279,7 @@ pub fn run_config_action<'a>(
         Some(None) => return Ok(()),
         Some(s) => s,
     };
-    if let Some(outputs) = config.server.outputs.as_ref() {
+    if let Some(outputs) = config_server.outputs.as_ref() {
         let json_string =
             libgql::json::serializers::schema::serialize_server_schema(
                 &server_registry,

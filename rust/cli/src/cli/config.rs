@@ -15,7 +15,7 @@ pub struct GraphqlFormattingSharedConfig {
 #[derive(serde::Deserialize)]
 pub struct GraphqlFormattingConfig {
     pub shared: GraphqlFormattingSharedConfig,
-    pub server: GraphqlFormattingServerConfig,
+    pub server: Option<GraphqlFormattingServerConfig>,
     pub client: Option<GraphqlFormattingClientConfig>,
 }
 
@@ -59,7 +59,7 @@ pub struct OperationsMapConfig {
 #[derive(serde::Deserialize)]
 pub struct Config {
     pub formatting: Option<GraphqlFormattingConfig>,
-    pub server: ServerConfig,
+    pub server: Option<ServerConfig>,
     pub client: Option<ClientConfig>,
     #[serde(alias = "operationsMap")]
     pub operations_map: Option<OperationsMapConfig>,
