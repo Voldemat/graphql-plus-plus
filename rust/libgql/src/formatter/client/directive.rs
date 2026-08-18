@@ -1,7 +1,7 @@
 use codeform::ir;
 
 use crate::{
-    formatter::shared::input_field::DelimeterMode, parsers::file::server::ast,
+    formatter::shared::input_field::DelimeterMode, parsers::file::client::ast,
 };
 
 pub fn format_node<'s>(

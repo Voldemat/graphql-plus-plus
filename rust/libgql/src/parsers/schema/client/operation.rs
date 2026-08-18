@@ -17,7 +17,7 @@ pub fn parse<
 >(
     server_registry: &'server_buffer T,
     registry: &mut TypeRegistry<ClientStringType>,
-    node: &file::client::ast::OperationDefinition<'client_buffer>,
+    node: &file::client::ast::OperationDefinitionNode<'client_buffer>,
 ) -> Result<(), errors::Error<'client_buffer, ClientStringType>> {
     let mut operation =
         registry.operations.swap_remove(node.name.name).unwrap();

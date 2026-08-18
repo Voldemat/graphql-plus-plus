@@ -14,7 +14,7 @@ pub fn parse<
     T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
 >(
     registry: &T,
-    node: &file::client::ast::DirectiveDefinition<'client_buffer>,
+    node: &file::client::ast::DirectiveDefinitionNode<'client_buffer>,
 ) -> Result<
     ast::ClientDirective<ClientStringType>,
     errors::Error<'client_buffer, ClientStringType>,

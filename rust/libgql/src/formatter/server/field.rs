@@ -3,7 +3,7 @@ use codeform::ir;
 use crate::parsers::file::server::ast;
 
 pub fn format_node<'s>(
-    config: &crate::formatter::config::Config,
+    config: &super::config::Config,
     ast_node: &ast::FieldDefinitionNode<'s>,
     is_last_node: bool,
 ) -> ir::hir::builders::NodesVec<'s> {
@@ -18,7 +18,7 @@ pub fn format_node<'s>(
             ])
                 .extend(
                     crate::formatter::shared::input_field::format_nodes(
-                        config,
+                        config.shared,
                         &ast_node.arguments,
                         crate::formatter::shared::input_field::DelimeterMode::CommaAndSoftLineOrSpace
                     )
@@ -33,7 +33,7 @@ pub fn format_node<'s>(
             ir::hir::builders::byte(b' ')
         ])
         .extend(crate::formatter::shared::type_node::format_node(
-            config,
+            config.shared,
             &ast_node.r#type,
         ))
     )

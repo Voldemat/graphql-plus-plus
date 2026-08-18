@@ -2,10 +2,12 @@ pub mod common;
 
 #[test]
 fn test_format() {
+    let shared_config = libgql::formatter::shared::config::Config {
+        indent_width: codeform::ir::shared::IndentWidth::from_u8(4).unwrap(),
+    };
     let hir_nodes = libgql::formatter::server::enum_type::format_node(
-        &libgql::formatter::config::Config {
-            indent_width: codeform::ir::shared::IndentWidth::from_u8(4)
-                .unwrap(),
+        &libgql::formatter::server::config::Config {
+            shared: &shared_config,
         },
         &common::builders::build_enum(
             "CheckEnum",

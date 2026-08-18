@@ -31,22 +31,17 @@ impl<'buffer> Error<'buffer> {
         }
     }
 
-    pub fn get_location(self: &Self) -> (usize, usize) {
+    pub fn get_location(self: &Self) -> lexer::tokens::TokenLocation {
         match self {
-            Self::Base(b) => {
-                let location = b.get_location();
-                (location.start, location.end)
-            }
-            Self::UnexpectedOpType(token) => {
-                (token.location.start, token.location.end)
-            }
+            Self::Base(b) => b.get_location().clone(),
+            Self::UnexpectedOpType(token) => token.location.clone(),
             Self::DuplicateParameter {
                 duplicate_parameter,
                 ..
-            } => (
-                duplicate_parameter.location.start,
-                duplicate_parameter.location.end,
-            ),
+            } => lexer::tokens::TokenLocation {
+                start: duplicate_parameter.location.start,
+                end: duplicate_parameter.location.end,
+            },
         }
     }
 }
@@ -105,7 +100,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
 
     fn parse_fragment_definition(
         self: &mut Self,
-    ) -> Result<ast::FragmentDefinition<'buffer>, Error<'buffer>> {
+    ) -> Result<ast::FragmentDefinitionNode<'buffer>, Error<'buffer>> {
         let start = T::get_current_token(&self.base.tokens_source)
             .location
             .start;
@@ -113,7 +108,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         T::consume_identifier_by_lexeme(&mut self.base.tokens_source, "on")?;
         let type_name = self.base.parse_name_node(false)?;
         let spec = self.parse_fragment_spec()?;
-        return Ok(ast::FragmentDefinition {
+        return Ok(ast::FragmentDefinitionNode {
             location: shared::ast::NodeLocation {
                 start,
                 end: T::get_current_token(&self.base.tokens_source)
@@ -129,16 +124,21 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
 
     fn parse_operation_definition(
         self: &mut Self,
-    ) -> Result<ast::OperationDefinition<'buffer>, Error<'buffer>> {
+    ) -> Result<ast::OperationDefinitionNode<'buffer>, Error<'buffer>> {
         let start_token = T::get_current_token(&self.base.tokens_source);
         let Ok(optype) = ast::OpType::try_from(start_token.lexeme) else {
             return Err(Error::UnexpectedOpType(start_token.clone()));
+        };
+        let optype_location = shared::ast::NodeLocation {
+            start: start_token.location.start,
+            end: start_token.location.end,
+            source: T::get_source_file(&self.base.tokens_source),
         };
         let start = start_token.location.start;
         let name = self.base.parse_name_node(false)?;
         let parameters = self.parse_operation_parameters()?;
         let fragment = self.parse_fragment_spec()?;
-        return Ok(ast::OperationDefinition {
+        return Ok(ast::OperationDefinitionNode {
             location: shared::ast::NodeLocation {
                 start,
                 end: T::get_current_token(&self.base.tokens_source)
@@ -146,7 +146,10 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                     .end,
                 source: T::get_source_file(&self.base.tokens_source),
             },
-            r#type: optype,
+            r#type: ast::OperationTypeNode {
+                location: optype_location,
+                r#type: optype,
+            },
             name,
             parameters,
             fragment,

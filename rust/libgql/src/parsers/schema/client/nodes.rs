@@ -124,13 +124,13 @@ pub fn parse_first_pass<
                     source_text: ClientStringType::from_str(
                         shared::source_text::extract_from_operation(operation),
                     ),
-                    r#type: operation.r#type,
+                    r#type: operation.r#type.r#type,
                     parameters_hash: hash::get_operation_parameters_hash(
                         &parameters,
                     ),
                     parameters,
                     fragment_spec: fragment_spec_from_optype(
-                        &operation.r#type,
+                        &operation.r#type.r#type,
                     )?,
                     fragment_spec_hash: 0,
                     used_fragments: Vec::new(),

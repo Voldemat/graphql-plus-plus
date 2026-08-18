@@ -9,7 +9,7 @@ pub enum DelimeterMode {
 }
 
 pub fn format_node<'s>(
-    config: &crate::formatter::config::Config,
+    config: &super::config::Config,
     ast_node: &ast::InputFieldDefinitionNode<'s>,
     is_last_node: bool,
     delimeter_mode: DelimeterMode,
@@ -66,7 +66,7 @@ pub fn format_node<'s>(
 }
 
 pub fn format_nodes<'s>(
-    config: &crate::formatter::config::Config,
+    config: &super::config::Config,
     ast_nodes: &[ast::InputFieldDefinitionNode<'s>],
     delimeter_mode: DelimeterMode,
 ) -> ir::hir::builders::NodesVec<'s> {

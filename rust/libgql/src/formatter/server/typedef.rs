@@ -1,7 +1,7 @@
 use crate::parsers::file::server::ast;
 
 pub fn format_node<'s>(
-    config: &crate::formatter::config::Config,
+    config: &super::config::Config,
     ast_node: &ast::TypeDefinitionNode<'s>,
 ) -> codeform::ir::hir::builders::NodesVec<'s> {
     match ast_node {

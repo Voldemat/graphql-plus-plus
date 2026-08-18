@@ -3,7 +3,7 @@ use codeform::ir;
 use crate::parsers::file::server::ast;
 
 pub fn format_node<'s>(
-    config: &crate::formatter::config::Config,
+    config: &super::config::Config,
     ast_node: &ast::InterfaceDefinitionNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     ir::hir::builders::NodesVec::empty()
@@ -11,7 +11,7 @@ pub fn format_node<'s>(
             [
                 ir::hir::builders::unicode_text(
                     documentation.location.get_source_slice(),
-                    config.indent_width,
+                    config.shared.indent_width,
                     |c| {
                         unicode_width::UnicodeWidthChar::width(c)
                             .unwrap_or_default()

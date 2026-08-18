@@ -777,7 +777,7 @@ pub fn parse<
 >(
     server_registry: &'server_buffer T,
     registry: &mut TypeRegistry<ClientStringType>,
-    node: &file::client::ast::FragmentDefinition<'client_buffer>,
+    node: &file::client::ast::FragmentDefinitionNode<'client_buffer>,
 ) -> Result<(), errors::Error<'client_buffer, ClientStringType>> {
     let mut fragment = registry.fragments.swap_remove(node.name.name).unwrap();
     parse_selections(

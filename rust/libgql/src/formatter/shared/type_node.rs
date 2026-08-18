@@ -12,7 +12,7 @@ pub fn format_named_node<'s>(
 }
 
 pub fn format_list_node<'s>(
-    config: &crate::formatter::config::Config,
+    config: &super::config::Config,
     ast_node: &ast::ListTypeNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     ir::hir::builders::wrap_in_group(
@@ -30,7 +30,7 @@ pub fn format_list_node<'s>(
 }
 
 pub fn format_node<'s>(
-    config: &crate::formatter::config::Config,
+    config: &super::config::Config,
     ast_node: &ast::TypeNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     match ast_node {

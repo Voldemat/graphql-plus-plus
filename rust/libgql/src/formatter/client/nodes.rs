@@ -1,4 +1,4 @@
-use crate::parsers::file::server::ast;
+use crate::parsers::file::client::ast;
 
 pub fn format_nodes<'s>(
     config: &super::config::Config,

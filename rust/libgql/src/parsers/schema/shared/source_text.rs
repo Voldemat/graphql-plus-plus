@@ -8,13 +8,13 @@ fn get_source_text<'buffer>(
 }
 
 pub fn extract_from_fragment<'buffer>(
-    node: &file::client::ast::FragmentDefinition<'buffer>,
+    node: &file::client::ast::FragmentDefinitionNode<'buffer>,
 ) -> &'buffer str {
     get_source_text(&node.location.source.buffer, &node.location)
 }
 
 pub fn extract_from_operation<'buffer>(
-    node: &file::client::ast::OperationDefinition<'buffer>,
+    node: &file::client::ast::OperationDefinitionNode<'buffer>,
 ) -> &'buffer str {
     get_source_text(&node.location.source.buffer, &node.location)
 }

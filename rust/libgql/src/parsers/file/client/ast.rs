@@ -54,7 +54,7 @@ impl TryFrom<&str> for DirectiveLocation {
 
 pub type DirectiveLocationNode<'buffer> =
     shared::ast::DirectiveLocationNode<'buffer, DirectiveLocation>;
-pub type DirectiveDefinition<'buffer> =
+pub type DirectiveDefinitionNode<'buffer> =
     shared::ast::DirectiveNode<'buffer, DirectiveLocation>;
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -213,16 +213,22 @@ impl TryFrom<&str> for OpType {
 }
 
 #[derive(serde::Serialize)]
-pub struct OperationDefinition<'buffer> {
+pub struct OperationTypeNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
     pub r#type: OpType,
+}
+
+#[derive(serde::Serialize)]
+pub struct OperationDefinitionNode<'buffer> {
+    pub location: shared::ast::NodeLocation<'buffer>,
+    pub r#type: OperationTypeNode<'buffer>,
     pub name: shared::ast::NameNode<'buffer>,
     pub parameters: Vec<shared::ast::InputFieldDefinitionNode<'buffer>>,
     pub fragment: FragmentSpec<'buffer>,
 }
 
 #[derive(Debug, serde::Serialize)]
-pub struct FragmentDefinition<'buffer> {
+pub struct FragmentDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
     pub name: shared::ast::NameNode<'buffer>,
     pub type_name: shared::ast::NameNode<'buffer>,
@@ -231,7 +237,7 @@ pub struct FragmentDefinition<'buffer> {
 
 #[derive(derive_more::From, serde::Serialize)]
 pub enum ASTNode<'buffer> {
-    Operation(OperationDefinition<'buffer>),
-    Fragment(FragmentDefinition<'buffer>),
-    Directive(DirectiveDefinition<'buffer>),
+    Operation(OperationDefinitionNode<'buffer>),
+    Fragment(FragmentDefinitionNode<'buffer>),
+    Directive(DirectiveDefinitionNode<'buffer>),
 }
