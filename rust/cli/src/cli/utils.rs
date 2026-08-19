@@ -258,15 +258,15 @@ pub fn run_config_action<'a>(
         }
     };
     let client_registry = match config.client.as_ref().map(|client_config| {
-        let mut client_registry =
+        let mut c_registry =
             libgql::parsers::schema::client::type_registry::TypeRegistry::new();
         match load_client_schema_from_inputs(
             &server_registry,
-            &mut client_registry,
+            &mut c_registry,
             config_path.parent().unwrap(),
             &client_config.inputs,
         ) {
-            Ok(_) => None,
+            Ok(_) => Some(c_registry),
             Err(errors) => {
                 for e in errors {
                     println!("{}", e);
@@ -279,12 +279,16 @@ pub fn run_config_action<'a>(
         Some(None) => return Ok(()),
         Some(s) => s,
     };
+    println!(
+        "config_server.outputs.is_some(): {}",
+        config_server.outputs.is_some()
+    );
     if let Some(outputs) = config_server.outputs.as_ref() {
         let json_string =
             libgql::json::serializers::schema::serialize_server_schema(
                 &server_registry,
                 if outputs.only_used_in_operations {
-                    client_registry
+                    client_registry.as_ref()
                 } else {
                     None
                 },
@@ -299,7 +303,7 @@ pub fn run_config_action<'a>(
     {
         let json_string =
             libgql::json::serializers::schema::serialize_client_schema(
-                c_registry,
+                &c_registry,
                 outputs.pretty,
             )?;
         json_callback(&json_string, &outputs.filepath, "Client");
