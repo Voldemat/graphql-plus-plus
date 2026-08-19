@@ -13,7 +13,7 @@ import {
 import { format } from "oxfmt";
 import oxfmtConfig from "./oxfmt.config.mts";
 
-const oxfmtFormatter = await actors.ts.formatters.oxfmt.buildOxfmtFormatter(
+const oxfmtFormatter = await actors.ts.formatters.oxfmt.build(
     format,
     oxfmtConfig,
 );
@@ -48,7 +48,7 @@ const config: Config<ActorContext> = {
             },
             importDeclarations: [],
         }),
-        actors.ts.gqlClient.buildGQLClientActor({
+        actors.ts.gqlClient.build({
             ...baseTsConfig,
             outPath: join(
                 import.meta.dirname,
