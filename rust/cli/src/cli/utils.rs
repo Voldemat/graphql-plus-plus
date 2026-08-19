@@ -279,10 +279,6 @@ pub fn run_config_action<'a>(
         Some(None) => return Ok(()),
         Some(s) => s,
     };
-    println!(
-        "config_server.outputs.is_some(): {}",
-        config_server.outputs.is_some()
-    );
     if let Some(outputs) = config_server.outputs.as_ref() {
         let json_string =
             libgql::json::serializers::schema::serialize_server_schema(
