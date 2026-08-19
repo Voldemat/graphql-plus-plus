@@ -1,5 +1,17 @@
 /* eslint-disable max-lines */
 import { PathOrFileDescriptor, readFileSync } from 'fs';
+import { exec } from 'node:child_process';
+import { z } from 'zod/v4';
+import { argument } from './client/argument.js';
+import {
+    fieldSelection,
+    fragmentSchema,
+    fragmentSpecSchema,
+    objectConditionalSpreadSelection,
+} from './client/fragment.js';
+import { operationSchema } from './client/operation.js';
+import { ClientSchema, clientSchema } from './client/root.js';
+import { RootSchema } from './root.js';
 import {
     objectFieldSchema,
     objectFieldSpecSchema,
@@ -10,19 +22,7 @@ import {
     serverSchema,
     unionSchema,
 } from './server.js';
-import { ClientSchema, clientSchema } from './client/root.js';
-import { z } from 'zod/v4';
-import { RootSchema } from './root.js';
-import { exec } from 'node:child_process';
-import {
-    fieldSelection,
-    fragmentSchema,
-    fragmentSpecSchema,
-    objectConditionalSpreadSelection,
-} from './client/fragment.js';
 import { inputFieldSchema, inputFieldSpecSchema } from './shared.js';
-import { argument } from './client/argument.js';
-import { operationSchema } from './client/operation.js';
 
 export function loadSchemaFromFile<T extends z.ZodType>(
     p: PathOrFileDescriptor,
@@ -46,17 +46,24 @@ export function loadClientSchemaFromFile(
 export async function loadServerSchemaFromGQLSubprocess(
     gqlPath: string = 'gql',
     gqlArgs: string[] = ['generate'],
+    maxBuffer: number | undefined = undefined,
 ): Promise<ServerSchema> {
     const output = await new Promise<string>((resolve, reject) => {
-        exec([gqlPath, ...gqlArgs].join(' '), (err, stdout, stderr) => {
-            if (err !== null) {
-                reject(err);
-            }
-            if (stderr !== '') {
-                reject(err);
-            }
-            resolve(stdout.split('\n').filter((s) => s !== '')[0]);
-        });
+        exec(
+            [gqlPath, ...gqlArgs].join(' '),
+            {
+                maxBuffer,
+            },
+            (err, stdout, stderr) => {
+                if (err !== null) {
+                    reject(err);
+                }
+                if (stderr !== '') {
+                    reject(err);
+                }
+                resolve(stdout.split('\n').filter((s) => s !== '')[0]);
+            },
+        );
     });
     return serverSchema.parse(JSON.parse(output));
 }
@@ -64,17 +71,22 @@ export async function loadServerSchemaFromGQLSubprocess(
 export async function loadRootSchemaFromGQLSubprocess(
     gqlPath: string = 'gql',
     gqlArgs: string[] = ['generate'],
+    maxBuffer: number | undefined = undefined,
 ): Promise<RootSchema> {
     const output = await new Promise<string[]>((resolve, reject) => {
-        exec([gqlPath, ...gqlArgs].join(' '), (err, stdout, stderr) => {
-            if (err !== null) {
-                reject(err);
-            }
-            if (stderr !== '') {
-                reject(err);
-            }
-            resolve(stdout.split('\n').filter((s) => s !== ''));
-        });
+        exec(
+            [gqlPath, ...gqlArgs].join(' '),
+            { maxBuffer },
+            (err, stdout, stderr) => {
+                if (err !== null) {
+                    reject(err);
+                }
+                if (stderr !== '') {
+                    reject(err);
+                }
+                resolve(stdout.split('\n').filter((s) => s !== ''));
+            },
+        );
     });
     return {
         server: serverSchema.parse(JSON.parse(output[0])),
