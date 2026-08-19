@@ -1,0 +1,53 @@
+{
+    "name": "@vladimirdev635/gql-client-vue",
+    "version": "0.0.1",
+    "type": "module",
+    "main": "./index.js",
+    "types": "./index.d.ts",
+    "files": [
+        "./"
+    ],
+    "homepage": "https://github.com/Voldemat/graphql-plus-plus#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Voldemat/graphql-plus-plus.git"
+    },
+    "scripts": {
+        "lint": "oxlint .",
+        "lint:fix": "oxlint --fix .",
+        "fmt": "oxfmt .",
+        "fmt:check": "oxfmt --check .",
+        "lint:ci": "npm run lint && npm run fmt:check",
+        "test": "vitest",
+        "build": "tsc && cp package.json .npmignore ./dist/"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@testing-library/vue": "^8.1.0",
+        "@types/node": "^24.0.1",
+        "@types/object-hash": "^3.0.6",
+        "@vitejs/plugin-vue": "^5.2.1",
+        "@vue/test-utils": "^2.4.6",
+        "@vue/tsconfig": "^0.7.0",
+        "jiti": "^2.4.2",
+        "jsdom": "^26.1.0",
+        "oxfmt": "^0.64.0",
+        "oxlint": "^1.79.0",
+        "typescript": "<7.0.0",
+        "typescript-language-server": "^5.3.0",
+        "vue": "^3.5.13",
+        "vue-tsc": "^2.2.0",
+        "vitest": "^3.2.4"
+    },
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "zod": ">=4.0.5"
+    },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-gnu": "4.9.5"
+    },
+    "allowScripts": {}
+}

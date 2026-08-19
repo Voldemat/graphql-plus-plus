@@ -1,0 +1,79 @@
+import type {
+    IExecutor,
+    OperationResult,
+    RequestContext,
+    SyncOperation,
+} from '@/types.js'
+import assert from 'assert'
+import { describe, expect, it } from 'vitest'
+import { nextTick } from 'vue'
+import { useLazyOperation } from '../use-lazy-operation/index.js'
+import { mountComposable, testOperation } from './utils.js'
+
+describe('useLazyOperation', () => {
+    it('Should preserve initial state if no one calls', async () => {
+        const [, { state }] = mountComposable(() =>
+            useLazyOperation({} as IExecutor<RequestContext>, testOperation),
+        )
+
+        expect(state.value.state).toBe('initial')
+        await nextTick()
+        expect(state.value.state).toBe('initial')
+    })
+
+    it('Should return loading state after invoking, then success state', async () => {
+        const executor = {
+            executeSync: async <
+                T extends SyncOperation<unknown, unknown>,
+            >() => ({
+                result: { a: 1 } as OperationResult<T>,
+                response: new Response(),
+            }),
+        } as unknown as IExecutor<RequestContext>
+
+        const [execute, { state }] = mountComposable(() =>
+            useLazyOperation(executor, testOperation),
+        )
+
+        const promise = execute({}, {})
+
+        // Immediately after invocation, state ref transitions to 'loading'
+        expect(state.value.state).toBe('loading')
+
+        const newState = await promise
+
+        expect(newState.state).toBe('success')
+        assert(newState.state === 'success')
+        expect(newState.result).toStrictEqual({ a: 1 })
+
+        await nextTick()
+        expect(state.value).toStrictEqual(newState)
+    })
+
+    it('Should return loading state after invoking, then failure state', async () => {
+        const error = new Error('Network error')
+        const executor = {
+            executeSync: async () => {
+                throw error
+            },
+        } as unknown as IExecutor<RequestContext>
+
+        const [execute, { state }] = mountComposable(() =>
+            useLazyOperation(executor, testOperation),
+        )
+
+        const promise = execute({}, {})
+
+        // Immediately after invocation, state ref transitions to 'loading'
+        expect(state.value.state).toBe('loading')
+
+        const newState = await promise
+
+        expect(newState.state).toBe('failure')
+        assert(newState.state === 'failure')
+        expect(newState.error).toBe(error)
+
+        await nextTick()
+        expect(state.value).toStrictEqual(newState)
+    })
+})
