@@ -1,8 +1,8 @@
-import { PathOrFileDescriptor, writeFileSync } from 'fs';
 import { Actor, ActorContext } from '@/config.js';
+import { PathOrFileDescriptor, writeFileSync } from 'fs';
+import ts from 'typescript';
 import { renderNodes, TSActorConfig } from '../shared.js';
 import { generateNodes } from './generators/main.js';
-import ts from 'typescript';
 
 export interface Config extends TSActorConfig {
     outPath: PathOrFileDescriptor;
@@ -14,6 +14,7 @@ export interface Config extends TSActorConfig {
         subscriptionsKey: string;
     };
 }
+
 async function actor(config: Config, context: ActorContext) {
     const nodes = generateNodes(config, context);
     const code = await renderNodes(config, nodes);

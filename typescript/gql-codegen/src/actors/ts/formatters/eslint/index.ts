@@ -4,4 +4,4 @@ export type {
     ESLintClassConstructor,
     LoadESLintFuncType,
 } from './types.js';
-export { buildESLintFormatter } from './formatter.js';
+export { build } from './formatter.js';

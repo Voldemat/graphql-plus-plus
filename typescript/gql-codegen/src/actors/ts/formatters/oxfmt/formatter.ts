@@ -2,7 +2,7 @@
 import { Formatter } from '../../shared.js';
 import { FormatFunc } from './types.js';
 
-export async function buildOxfmtFormatter<T>(
+export async function build<T>(
     formatFunc: FormatFunc<T>,
     options: T,
 ): Promise<Formatter> {

@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { ActorContext } from '@/config.js';
-import { GQLClientActorConfig, OperationReturnType } from '../actor.js';
+import { Config, OperationReturnType } from '../actor.js';
 import ts from 'typescript';
 import { operationSchema } from '@/schema/client/operation.js';
 import { z } from 'zod/v4';
@@ -80,10 +80,7 @@ function createReturnTypeNode(
     return ts.factory.createTypeReferenceNode('ExecuteResult', [rType]);
 }
 
-function getReturnTypeFromConfig(
-    config: GQLClientActorConfig,
-    operationName: string,
-) {
+function getReturnTypeFromConfig(config: Config, operationName: string) {
     return (
         config.sdk.operationReturnTypeMapping[operationName] ||
         config.sdk.defaultOperationReturnType
@@ -91,7 +88,7 @@ function getReturnTypeFromConfig(
 }
 
 export function generateNodes(
-    config: GQLClientActorConfig,
+    config: Config,
     context: ActorContext,
 ): ts.Node[] {
     const graphqlImports: string[] = [];

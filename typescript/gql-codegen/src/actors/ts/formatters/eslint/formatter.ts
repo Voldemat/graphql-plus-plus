@@ -2,9 +2,7 @@ import assert from 'assert';
 import { Formatter } from '../../shared.js';
 import { LoadESLintFuncType } from './types.js';
 
-export async function buildESLintFormatter(
-    loadFunc: LoadESLintFuncType,
-): Promise<Formatter> {
+export async function build(loadFunc: LoadESLintFuncType): Promise<Formatter> {
     const ESLint = await loadFunc({ useFlatConfig: true });
     const eslint = new ESLint({ fix: true });
     return async (code) => {

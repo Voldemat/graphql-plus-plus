@@ -1,6 +1,6 @@
 export {
     type OperationReturnType,
     type SDKConfig,
-    type GQLClientActorConfig,
-    buildGQLClientActor,
+    type Config,
+    build,
 } from './actor.js';

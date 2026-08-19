@@ -5,4 +5,4 @@ export type {
     FormatResult,
     FormatFunc,
 } from './types.js';
-export { buildOxfmtFormatter } from './formatter.js';
+export { build } from './formatter.js';

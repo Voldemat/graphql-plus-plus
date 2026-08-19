@@ -12,21 +12,19 @@ export interface SDKConfig {
     mutationsKey: string;
     subscriptionsKey: string;
 }
-export interface GQLClientActorConfig extends TSActorConfig {
+export interface Config extends TSActorConfig {
     outPath: PathOrFileDescriptor;
     importDeclarations: ts.ImportDeclaration[];
     sdk: SDKConfig;
     graphqlModulePath: string;
 }
 
-async function gqlActor(config: GQLClientActorConfig, context: ActorContext) {
+async function actor(config: Config, context: ActorContext) {
     const nodes = generateNodes(config, context);
     const code = await renderNodes(config, nodes);
     writeFileSync(config.outPath, code);
 }
 
-export function buildGQLClientActor(
-    config: GQLClientActorConfig,
-): Actor<ActorContext> {
-    return (context) => gqlActor(config, context);
+export function build(config: Config): Actor<ActorContext> {
+    return (context) => actor(config, context);
 }

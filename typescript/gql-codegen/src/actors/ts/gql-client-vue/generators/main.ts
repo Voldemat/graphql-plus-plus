@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import { ActorContext } from '@/config.js';
-import { Config } from '../actor.js';
 import ts from 'typescript';
+import { Config } from '../actor.js';
 
 function generateFunctionBlock(
     operationName: string,
@@ -42,6 +42,13 @@ function generateFunctionBlock(
     }
 }
 
+function createTypeOrRefTypeNode(innerType: ts.TypeNode): ts.UnionTypeNode {
+    return ts.factory.createUnionTypeNode([
+        innerType,
+        ts.factory.createTypeReferenceNode('Ref', [innerType]),
+    ]);
+}
+
 function generateArrowFunction(
     operationName: string,
     variablesName: string,
@@ -62,30 +69,8 @@ function generateArrowFunction(
             );
             break;
         case 'SYNC': {
-            resultType = ts.factory.createTypeReferenceNode('OperationState', [
-                ts.factory.createTypeReferenceNode(resultName),
-            ]);
-            parameters.push(
-                ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    'variables',
-                    undefined,
-                    ts.factory.createTypeReferenceNode(variablesName),
-                ),
-                ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    'requestContext',
-                    undefined,
-                    ts.factory.createTypeReferenceNode('TRequestContext'),
-                ),
-            );
-            break;
-        }
-        case 'SUBSCRIPTION': {
-            resultType = ts.factory.createTypeReferenceNode('OperationState', [
-                ts.factory.createTypeReferenceNode('SubOpAsyncIterable', [
+            resultType = ts.factory.createTypeReferenceNode('ShallowRef', [
+                ts.factory.createTypeReferenceNode('OperationState', [
                     ts.factory.createTypeReferenceNode(resultName),
                 ]),
             ]);
@@ -95,14 +80,48 @@ function generateArrowFunction(
                     undefined,
                     'variables',
                     undefined,
-                    ts.factory.createTypeReferenceNode(variablesName),
+                    createTypeOrRefTypeNode(
+                        ts.factory.createTypeReferenceNode(variablesName),
+                    ),
                 ),
                 ts.factory.createParameterDeclaration(
                     undefined,
                     undefined,
                     'requestContext',
                     undefined,
-                    ts.factory.createTypeReferenceNode('TRequestContext'),
+                    createTypeOrRefTypeNode(
+                        ts.factory.createTypeReferenceNode('TRequestContext'),
+                    ),
+                ),
+            );
+            break;
+        }
+        case 'SUBSCRIPTION': {
+            resultType = ts.factory.createTypeReferenceNode('ShallowRef', [
+                ts.factory.createTypeReferenceNode('OperationState', [
+                    ts.factory.createTypeReferenceNode('SubOpAsyncIterable', [
+                        ts.factory.createTypeReferenceNode(resultName),
+                    ]),
+                ]),
+            ]);
+            parameters.push(
+                ts.factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    'variables',
+                    undefined,
+                    createTypeOrRefTypeNode(
+                        ts.factory.createTypeReferenceNode(variablesName),
+                    ),
+                ),
+                ts.factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    'requestContext',
+                    undefined,
+                    createTypeOrRefTypeNode(
+                        ts.factory.createTypeReferenceNode('TRequestContext'),
+                    ),
                 ),
             );
             break;
@@ -185,7 +204,7 @@ export function generateNodes(
             }
         }
     }
-    const gqlClientReactImports: ts.ImportSpecifier[] = [
+    const gqlClientVueImports: ts.ImportSpecifier[] = [
         ts.factory.createImportSpecifier(
             false,
             undefined,
@@ -222,7 +241,7 @@ export function generateNodes(
     ];
 
     if (subscriptionNodes.length !== 0) {
-        gqlClientReactImports.push(
+        gqlClientVueImports.push(
             ts.factory.createImportSpecifier(
                 false,
                 undefined,
@@ -275,9 +294,29 @@ export function generateNodes(
             ts.factory.createImportClause(
                 false,
                 undefined,
-                ts.factory.createNamedImports(gqlClientReactImports),
+                ts.factory.createNamedImports([
+                    ts.factory.createImportSpecifier(
+                        false,
+                        undefined,
+                        ts.factory.createIdentifier('Ref'),
+                    ),
+                    ts.factory.createImportSpecifier(
+                        false,
+                        undefined,
+                        ts.factory.createIdentifier('ShallowRef'),
+                    ),
+                ]),
             ),
-            ts.factory.createStringLiteral('@vladimirdev635/gql-client-react'),
+            ts.factory.createStringLiteral('vue'),
+        ),
+        ts.factory.createImportDeclaration(
+            [],
+            ts.factory.createImportClause(
+                false,
+                undefined,
+                ts.factory.createNamedImports(gqlClientVueImports),
+            ),
+            ts.factory.createStringLiteral('@vladimirdev635/gql-client-vue'),
         ),
         ts.factory.createImportDeclaration(
             [],
