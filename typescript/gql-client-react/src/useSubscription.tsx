@@ -35,19 +35,28 @@ export function useSubscription<
         [hash(requestContext)],
     )
     useEffect(() => {
+        const controller = new AbortController()
         executor
             .executeSubscription(
                 operation,
                 memoizedVariables,
                 memoizedRequestContext,
-                new AbortController(),
+                controller,
             )
-            .then((result) => setState({ state: 'success', ...result }))
-            .catch((error) => setState({ state: 'failure', error }))
+            .then((result) => {
+                if (controller.signal.aborted) return
+                setState({ state: 'success', ...result })
+            })
+            .catch((error) => {
+                if (controller.signal.aborted) return
+                setState({ state: 'failure', error })
+            })
         return () => {
             setState((currentState) => {
                 if (currentState.state === 'success') {
                     currentState.result.close()
+                } else {
+                    controller.abort()
                 }
                 return loadingState
             })
