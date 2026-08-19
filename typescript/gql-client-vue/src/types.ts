@@ -1,7 +1,7 @@
 import { z } from 'zod/v4'
 
-export type SchemaForInput<T> = z.ZodType<unknown, T>;
-export type SchemaForOutput<T> = z.ZodType<T>;
+export type SchemaForInput<T> = z.ZodType<unknown, T>
+export type SchemaForOutput<T> = z.ZodType<T>
 
 interface BaseOperation<V, R> {
     name: string
