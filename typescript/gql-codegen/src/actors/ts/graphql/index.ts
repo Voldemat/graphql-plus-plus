@@ -1,4 +1,4 @@
-export { buildGraphqlActor, GraphqlActorConfig } from './actor.js';
+export { build, Config } from './actor.js';
 export {
     builtinScalarsMapping,
     additionalScalarsMapping,

@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { GraphqlActorConfig } from '../../actor.js';
+import { Config } from '../../actor.js';
 import { ActorContext } from '@/config.js';
 import { generateEnumDefinition } from './enums.js';
 import { generateUnionTypeDefinitions } from './unions.js';
@@ -8,7 +8,7 @@ import { addNewLineBetweenNodes } from '../../../shared.js';
 import { generateObjectTypeNodes } from './objects.js';
 
 export function generateServerNodes(
-    config: GraphqlActorConfig,
+    config: Config,
     context: ActorContext,
 ): ts.Node[] {
     return [

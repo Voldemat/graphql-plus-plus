@@ -42,10 +42,14 @@ function generateFunctionBlock(
     }
 }
 
-function createTypeOrRefTypeNode(innerType: ts.TypeNode): ts.UnionTypeNode {
+function createTypeOrReadonlyRefTypeNode(
+    innerType: ts.TypeNode,
+): ts.UnionTypeNode {
     return ts.factory.createUnionTypeNode([
         innerType,
-        ts.factory.createTypeReferenceNode('Ref', [innerType]),
+        ts.factory.createTypeReferenceNode('Readonly', [
+            ts.factory.createTypeReferenceNode('Ref', [innerType]),
+        ]),
     ]);
 }
 
@@ -80,7 +84,7 @@ function generateArrowFunction(
                     undefined,
                     'variables',
                     undefined,
-                    createTypeOrRefTypeNode(
+                    createTypeOrReadonlyRefTypeNode(
                         ts.factory.createTypeReferenceNode(variablesName),
                     ),
                 ),
@@ -89,7 +93,7 @@ function generateArrowFunction(
                     undefined,
                     'requestContext',
                     undefined,
-                    createTypeOrRefTypeNode(
+                    createTypeOrReadonlyRefTypeNode(
                         ts.factory.createTypeReferenceNode('TRequestContext'),
                     ),
                 ),
@@ -110,7 +114,7 @@ function generateArrowFunction(
                     undefined,
                     'variables',
                     undefined,
-                    createTypeOrRefTypeNode(
+                    createTypeOrReadonlyRefTypeNode(
                         ts.factory.createTypeReferenceNode(variablesName),
                     ),
                 ),
@@ -119,7 +123,7 @@ function generateArrowFunction(
                     undefined,
                     'requestContext',
                     undefined,
-                    createTypeOrRefTypeNode(
+                    createTypeOrReadonlyRefTypeNode(
                         ts.factory.createTypeReferenceNode('TRequestContext'),
                     ),
                 ),

@@ -9,3 +9,5 @@ export const operationSchema = z.object({
     fragmentSpec: fragmentSpecSchema,
     sourceText: z.string(),
 });
+
+export interface Operation extends z.infer<typeof operationSchema> {}

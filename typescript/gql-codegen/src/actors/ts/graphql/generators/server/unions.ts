@@ -2,7 +2,7 @@ import { z } from 'zod/v4';
 import ts from 'typescript';
 import { objectSchema, unionSchema } from '@/schema/server.js';
 import { ScalarsMapping } from './scalars/index.js';
-import { generateSchemaName, generateZodInferTypeAlias } from './shared.js';
+import { generateSchemaName, generateZodInferInterfaceType } from './shared.js';
 import { generateZodObjectTypeExpression } from './objects.js';
 
 function generateZodUnionTypeNode(
@@ -51,7 +51,7 @@ export function generateUnionTypeDefinitions(
 ): ts.Node[] {
     return [
         generateZodUnionTypeNode(scalarsMapping, objects, union),
-        generateZodInferTypeAlias(
+        generateZodInferInterfaceType(
             'output',
             union.name,
             generateSchemaName(union.name),

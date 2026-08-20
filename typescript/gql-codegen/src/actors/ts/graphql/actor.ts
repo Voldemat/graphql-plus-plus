@@ -1,25 +1,23 @@
-import { ScalarsMapping } from './generators/server/scalars/index.js';
+import { Actor, ActorContext } from '@/config.js';
 import { PathOrFileDescriptor, writeFileSync } from 'fs';
 import ts from 'typescript';
-import { Actor, ActorContext } from '@/config.js';
 import { renderNodes, TSActorConfig } from '../shared.js';
 import { generateNodes } from './generators/main.js';
+import { ScalarsMapping } from './generators/server/scalars/index.js';
 
-export interface GraphqlActorConfig extends TSActorConfig {
+export interface Config extends TSActorConfig {
     outPath: PathOrFileDescriptor;
     scalarsMapping: ScalarsMapping;
     importDeclarations: ts.ImportDeclaration[];
     onlyRequiredForOperations: boolean;
 }
 
-async function graphqlActor(config: GraphqlActorConfig, context: ActorContext) {
+async function actor(config: Config, context: ActorContext) {
     const nodes = generateNodes(config, context);
     const code = await renderNodes(config, nodes);
     writeFileSync(config.outPath, code);
 }
 
-export function buildGraphqlActor(
-    config: GraphqlActorConfig,
-): Actor<ActorContext> {
-    return (context) => graphqlActor(config, context);
+export function build(config: Config): Actor<ActorContext> {
+    return (context) => actor(config, context);
 }

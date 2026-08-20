@@ -1,13 +1,10 @@
 import ts from 'typescript';
 import { ActorContext } from '@/config.js';
-import { GraphqlActorConfig } from '../actor.js';
+import { Config } from '../actor.js';
 import { generateServerNodes } from './server/main.js';
 import { generateClientNodes } from './client/main.js';
 
-export function generateNodes(
-    config: GraphqlActorConfig,
-    context: ActorContext,
-) {
+export function generateNodes(config: Config, context: ActorContext) {
     return [
         ts.factory.createImportDeclaration(
             [],

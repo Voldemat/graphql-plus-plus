@@ -1,7 +1,7 @@
-import ts from 'typescript';
-import { z } from 'zod/v4';
 import { objectNonCallableFieldSpecSchema } from '@/schema/server.js';
 import { inputFieldSpecSchema } from '@/schema/shared.js';
+import ts from 'typescript';
+import { z } from 'zod/v4';
 import { generateTypeReferenceNode } from '../shared.js';
 
 export function generateNonCallableFieldSpec(
@@ -35,12 +35,41 @@ export function generateZodInferTypeAlias(
         ts.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Export),
         name,
         undefined,
-        ts.factory.createTypeReferenceNode('z.' + inferType, [
-            ts.factory.createTypeQueryNode(
-                ts.factory.createIdentifier(typeName),
-                undefined,
-            ),
-        ]),
+        ts.factory.createExpressionWithTypeArguments(
+            ts.factory.createIdentifier('z.' + inferType),
+            [
+                ts.factory.createTypeQueryNode(
+                    ts.factory.createIdentifier(typeName),
+                    undefined,
+                ),
+            ],
+        ),
+    );
+}
+
+export function generateZodInferInterfaceType(
+    inferType: 'input' | 'output',
+    name: string,
+    typeName: string,
+) {
+    return ts.factory.createInterfaceDeclaration(
+        ts.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Export),
+        name,
+        undefined,
+        [
+            ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
+                ts.factory.createExpressionWithTypeArguments(
+                    ts.factory.createIdentifier('z.' + inferType),
+                    [
+                        ts.factory.createTypeQueryNode(
+                            ts.factory.createIdentifier(typeName),
+                            undefined,
+                        ),
+                    ],
+                ),
+            ]),
+        ],
+        [],
     );
 }
 

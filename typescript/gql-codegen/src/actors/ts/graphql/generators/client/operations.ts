@@ -11,7 +11,7 @@ import { FragmentSpecSchemaType } from '@/schema/client/fragment.js';
 import { inputFieldSchema } from '@/schema/shared.js';
 import {
     generateSchemaName,
-    generateZodInferTypeAlias,
+    generateZodInferInterfaceType,
 } from '../server/shared.js';
 import { generateInputTypeDefinitionFields } from '../server/inputs.js';
 import { ScalarsMapping } from '../server/scalars/mapping.js';
@@ -188,14 +188,14 @@ function generateOperationNodes(
 ): ts.Node[] {
     return [
         generateOperationZodInputSchema(scalarsMapping, operation),
-        generateZodInferTypeAlias(
+        generateZodInferInterfaceType(
             'input',
             operation.name + 'Variables',
             generateSchemaName(operation.name + 'Variables'),
         ),
         ts.factory.createIdentifier('\n'),
         genearteOperationZodOutputSchema(scalarsMapping, schema, operation),
-        generateZodInferTypeAlias(
+        generateZodInferInterfaceType(
             'output',
             operation.name + 'Result',
             generateSchemaName(operation.name + 'Result'),

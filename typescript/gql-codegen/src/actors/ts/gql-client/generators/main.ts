@@ -1,98 +1,17 @@
 /* eslint-disable max-lines */
 import { ActorContext } from '@/config.js';
-import { Config, OperationReturnType } from '../actor.js';
 import ts from 'typescript';
-import { operationSchema } from '@/schema/client/operation.js';
-import { z } from 'zod/v4';
-
-function generateFunctionBlock(
-    operationName: string,
-    operationType: z.infer<typeof operationSchema>['type'],
-    returnType: OperationReturnType,
-) {
-    const callArgs = [
-        ts.factory.createIdentifier(operationName),
-        ts.factory.createIdentifier('variables'),
-        ts.factory.createIdentifier('requestContext'),
-    ];
-    if (operationType === 'SUBSCRIPTION') {
-        callArgs.push(ts.factory.createIdentifier('controller'));
-    }
-    const awaitExpression = ts.factory.createAwaitExpression(
-        ts.factory.createCallExpression(
-            ts.factory.createPropertyAccessExpression(
-                ts.factory.createIdentifier('executor'),
-                operationType === 'SUBSCRIPTION'
-                    ? 'executeSubscription'
-                    : 'executeSync',
-            ),
-            undefined,
-            callArgs,
-        ),
-    );
-    if (returnType === 'ExecuteResult') {
-        return ts.factory.createBlock(
-            [ts.factory.createReturnStatement(awaitExpression)],
-            true,
-        );
-    }
-    return ts.factory.createBlock(
-        [
-            ts.factory.createVariableStatement(
-                undefined,
-                ts.factory.createVariableDeclarationList(
-                    [
-                        ts.factory.createVariableDeclaration(
-                            'executorResult',
-                            undefined,
-                            undefined,
-                            awaitExpression,
-                        ),
-                    ],
-                    ts.NodeFlags.Const,
-                ),
-            ),
-            ts.factory.createReturnStatement(
-                ts.factory.createPropertyAccessChain(
-                    ts.factory.createIdentifier('executorResult'),
-                    undefined,
-                    'result',
-                ),
-            ),
-        ],
-        true,
-    );
-}
-
-function createReturnTypeNode(
-    resultName: string,
-    returnType: OperationReturnType,
-    operationType: 'QUERY' | 'MUTATION' | 'SUBSCRIPTION',
-) {
-    const rOpType = ts.factory.createTypeReferenceNode(resultName);
-    const rType =
-        operationType === 'SUBSCRIPTION'
-            ? ts.factory.createTypeReferenceNode('SubOpAsyncIterable', [
-                  rOpType,
-              ])
-            : rOpType;
-    if (returnType === 'ExecuteResult.result') return rType;
-    return ts.factory.createTypeReferenceNode('ExecuteResult', [rType]);
-}
-
-function getReturnTypeFromConfig(config: Config, operationName: string) {
-    return (
-        config.sdk.operationReturnTypeMapping[operationName] ||
-        config.sdk.defaultOperationReturnType
-    );
-}
+import { Config } from '../actor.js';
+import { createBuildSubscriptionCallbackFunctionName } from './help-nodes/build-subscription-callback-function.js';
+import { createBuildSyncCallbackFunctionName } from './help-nodes/build-sync-callback-function.js';
+import { generateHelpNodes, hasReturnType } from './help-nodes/index.js';
+import { getReturnTypeFromConfig } from './operation-return-type.js';
 
 export function generateNodes(
     config: Config,
     context: ActorContext,
 ): ts.Node[] {
-    const graphqlImports: string[] = [];
-    let shouldIncludeExecuteResultType = false;
+    const graphqlImports: ts.ImportSpecifier[] = [];
     const queryNodes: ts.PropertyAssignment[] = [];
     const mutationNodes: ts.PropertyAssignment[] = [];
     const subscriptionNodes: ts.PropertyAssignment[] = [];
@@ -100,58 +19,52 @@ export function generateNodes(
         const operationName = operation.name + 'Operation';
         const variablesName = operation.name + 'Variables';
         const resultName = operation.name + 'Result';
-        graphqlImports.push(operationName, variablesName, resultName);
-        const returnType = getReturnTypeFromConfig(config, operation.name);
-        if (returnType === 'ExecuteResult')
-            shouldIncludeExecuteResultType = true;
-        const funcArgs = [
-            ts.factory.createParameterDeclaration(
+        graphqlImports.push(
+            ts.factory.createImportSpecifier(
+                false,
                 undefined,
-                undefined,
-                'variables',
-                undefined,
-                ts.factory.createTypeReferenceNode(variablesName),
+                ts.factory.createIdentifier(operationName),
             ),
-            ts.factory.createParameterDeclaration(
+            ts.factory.createImportSpecifier(
+                true,
                 undefined,
-                undefined,
-                'requestContext',
-                undefined,
-                ts.factory.createTypeReferenceNode('TRequestContext'),
+                ts.factory.createIdentifier(variablesName),
             ),
-        ];
-        if (operation.type === 'SUBSCRIPTION') {
-            funcArgs.push(
-                ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    'controller',
-                    undefined,
-                    ts.factory.createTypeReferenceNode('AbortController'),
-                ),
-            );
-        }
+            ts.factory.createImportSpecifier(
+                true,
+                undefined,
+                ts.factory.createIdentifier(resultName),
+            ),
+        );
+        const operationReturnType = getReturnTypeFromConfig(
+            config,
+            operation.name,
+        );
+        const functionName =
+            operation.type === 'SUBSCRIPTION'
+                ? createBuildSubscriptionCallbackFunctionName(
+                      operationReturnType,
+                  )
+                : createBuildSyncCallbackFunctionName(operationReturnType);
         const propAssignment = ts.factory.createPropertyAssignment(
             operation.name,
-            ts.factory.createArrowFunction(
-                ts.factory.createModifiersFromModifierFlags(
-                    ts.ModifierFlags.Async,
-                ),
-                undefined,
-                funcArgs,
-                ts.factory.createTypeReferenceNode('Promise', [
-                    createReturnTypeNode(
-                        resultName,
-                        returnType,
-                        operation.type,
+            ts.factory.createCallExpression(
+                ts.factory.createIdentifier(functionName),
+                [
+                    ts.factory.createTypeReferenceNode(
+                        'TRequestContext',
+                        undefined,
                     ),
-                ]),
-                ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-                generateFunctionBlock(
-                    operationName,
-                    operation.type,
-                    returnType,
-                ),
+                    ts.factory.createTypeReferenceNode(
+                        variablesName,
+                        undefined,
+                    ),
+                    ts.factory.createTypeReferenceNode(resultName, undefined),
+                ],
+                [
+                    ts.factory.createIdentifier('executor'),
+                    ts.factory.createIdentifier(operationName),
+                ],
             ),
         );
 
@@ -184,7 +97,7 @@ export function generateNodes(
         ),
     ];
 
-    if (shouldIncludeExecuteResultType) {
+    if (hasReturnType(config, 'ExecuteResult')) {
         gqlClientImports.push(
             ts.factory.createImportSpecifier(
                 false,
@@ -195,7 +108,12 @@ export function generateNodes(
     }
 
     const returnObjectNodes: ts.PropertyAssignment[] = [];
-    if (queryNodes.length !== 0) {
+    const state = {
+        hasQueries: queryNodes.length !== 0,
+        hasMutations: mutationNodes.length !== 0,
+        hasSubscriptions: subscriptionNodes.length !== 0,
+    };
+    if (state.hasQueries) {
         returnObjectNodes.push(
             ts.factory.createPropertyAssignment(
                 config.sdk.queriesKey,
@@ -203,7 +121,7 @@ export function generateNodes(
             ),
         );
     }
-    if (mutationNodes.length !== 0) {
+    if (state.hasMutations) {
         returnObjectNodes.push(
             ts.factory.createPropertyAssignment(
                 config.sdk.mutationsKey,
@@ -211,7 +129,23 @@ export function generateNodes(
             ),
         );
     }
-    if (subscriptionNodes.length !== 0) {
+    if (state.hasQueries || state.hasMutations) {
+        gqlClientImports.push(
+            ts.factory.createImportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier('SyncOperation'),
+            ),
+        );
+    }
+    if (state.hasSubscriptions) {
+        gqlClientImports.push(
+            ts.factory.createImportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier('SubscriptionOperation'),
+            ),
+        );
         gqlClientImports.push(
             ts.factory.createImportSpecifier(
                 false,
@@ -229,9 +163,7 @@ export function generateNodes(
             ),
         );
     }
-
     return [
-        ts.factory.createIdentifier('// @ts-nocheck'),
         ...config.importDeclarations,
         ts.factory.createImportDeclaration(
             [],
@@ -247,18 +179,12 @@ export function generateNodes(
             ts.factory.createImportClause(
                 false,
                 undefined,
-                ts.factory.createNamedImports(
-                    graphqlImports.map((i) =>
-                        ts.factory.createImportSpecifier(
-                            false,
-                            undefined,
-                            ts.factory.createIdentifier(i),
-                        ),
-                    ),
-                ),
+                ts.factory.createNamedImports(graphqlImports),
             ),
             ts.factory.createStringLiteral(config.graphqlModulePath),
         ),
+        ts.factory.createIdentifier('\n'),
+        ...generateHelpNodes(config, context, state),
         ts.factory.createIdentifier('\n'),
         ts.factory.createFunctionDeclaration(
             ts.factory.createModifiersFromModifierFlags(
@@ -284,7 +210,9 @@ export function generateNodes(
                     ]),
                 ),
             ],
-            undefined,
+            ts.factory.createTypeReferenceNode('SdkType', [
+                ts.factory.createTypeReferenceNode('TRequestContext'),
+            ]),
             ts.factory.createBlock(
                 [
                     ts.factory.createReturnStatement(

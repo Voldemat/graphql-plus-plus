@@ -9,7 +9,7 @@ import {
 } from '@/schema/shared.js';
 import { getScalarSpecFromMapping, ScalarsMapping } from './scalars/index.js';
 import { invokeMethod } from '../../../shared.js';
-import { generateSchemaName, generateZodInferTypeAlias } from './shared.js';
+import { generateSchemaName, generateZodInferInterfaceType } from './shared.js';
 
 function generateZodInputTypeSpec(
     scalarsMapping: ScalarsMapping,
@@ -149,7 +149,7 @@ export function generateInputTypeDefinitions(
             input.name,
             input.fields,
         ),
-        generateZodInferTypeAlias(
+        generateZodInferInterfaceType(
             'input',
             input.name,
             generateSchemaName(input.name),

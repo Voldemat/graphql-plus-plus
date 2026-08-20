@@ -14,6 +14,7 @@ import { z } from 'zod/v4';
 import { objectSchema } from '@/schema/server.js';
 import {
     generateSchemaName,
+    generateZodInferInterfaceType,
     generateZodInferTypeAlias,
 } from '../server/shared.js';
 import { ScalarsMapping } from '../server/scalars/mapping.js';
@@ -108,7 +109,11 @@ function generateZodObjectSelection(
     objectType: z.infer<typeof objectSchema>,
     selection: z.infer<typeof objectSelection>,
     typenameConfig: Parameters<typeof resolveSelections>[1],
-): ts.PropertyAssignment | ts.SpreadAssignment | null {
+):
+    | ts.PropertyAssignment
+    | ts.SpreadAssignment
+    | ts.GetAccessorDeclaration
+    | null {
     switch (selection._type) {
         case 'TypenameField': {
             if ('ignore' in typenameConfig) return null;
@@ -173,9 +178,14 @@ function generateZodObjectSelection(
                     [],
                 );
             }
-            return ts.factory.createPropertyAssignment(
+            return ts.factory.createGetAccessorDeclaration(
+                [],
                 selection.alias,
-                expression,
+                [],
+                undefined,
+                ts.factory.createBlock([
+                    ts.factory.createReturnStatement(expression),
+                ]),
             );
         }
         case 'SpreadSelection': {
@@ -253,23 +263,8 @@ function generateZodObjectFragmentSpecCallExpression(
         (s) => s._type === 'SpreadSelection',
     );
     if (!hasSpreadSelection) return expression;
-    return ts.factory.createCallExpression(
-        ts.factory.createPropertyAccessExpression(
-            ts.factory.createIdentifier('z'),
-            'lazy',
-        ),
-        undefined,
-        [
-            ts.factory.createArrowFunction(
-                undefined,
-                undefined,
-                [],
-                undefined,
-                ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-                expression,
-            ),
-        ],
-    );
+
+    return expression;
 }
 
 function resolveUnionSelections(
@@ -430,7 +425,17 @@ function generateFragmentSpecDeclarations(
             fragmentName,
             fragment,
         ),
-        generateZodInferTypeAlias('output', fName, generateSchemaName(fName)),
+        fragment.spec._type === 'ObjectFragmentSpec'
+            ? generateZodInferInterfaceType(
+                  'output',
+                  fName,
+                  generateSchemaName(fName),
+              )
+            : generateZodInferTypeAlias(
+                  'output',
+                  fName,
+                  generateSchemaName(fName),
+              ),
     ];
 }
 

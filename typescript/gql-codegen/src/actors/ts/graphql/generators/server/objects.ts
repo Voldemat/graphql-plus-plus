@@ -9,7 +9,7 @@ import {
     objectTypeSchema,
 } from '@/schema/server.js';
 import { z } from 'zod/v4';
-import { generateSchemaName, generateZodInferTypeAlias } from './shared.js';
+import { generateSchemaName, generateZodInferInterfaceType } from './shared.js';
 import { assertUnreachable } from '../../../../../utils.js';
 import { invokeMethod } from '../../../shared.js';
 
@@ -210,7 +210,7 @@ export function generateObjectTypeNodes(
 ): ts.Node[] {
     return [
         generateZodObjectTypeNode(scalarsMapping, object),
-        generateZodInferTypeAlias(
+        generateZodInferInterfaceType(
             'output',
             object.name,
             generateSchemaName(object.name),

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { ActorContext } from '@/config.js';
-import { GraphqlActorConfig } from '../../actor.js';
+import { Config } from '../../actor.js';
 import { generateFragmentTypes } from './fragments.js';
 import { generateOperationsNodes } from './operations.js';
 
@@ -57,7 +57,7 @@ const operationTypeNode = ts.factory.createInterfaceDeclaration(
     ],
 );
 export function generateClientNodes(
-    config: GraphqlActorConfig,
+    config: Config,
     context: ActorContext,
 ): ts.Node[] {
     return [
