@@ -27,6 +27,14 @@ export function generateBuildSubscriptionCallbackFunction(
         [
             ts.factory.createTypeParameterDeclaration(
                 undefined,
+                ts.factory.createIdentifier('TExecutor'),
+                ts.factory.createTypeReferenceNode('IExecutor', [
+                    ts.factory.createTypeReferenceNode('TRequestContext'),
+                ]),
+                undefined,
+            ),
+            ts.factory.createTypeParameterDeclaration(
+                undefined,
                 ts.factory.createIdentifier('TRequestContext'),
                 ts.factory.createTypeReferenceNode(
                     ts.factory.createIdentifier('RequestContext'),
@@ -53,15 +61,7 @@ export function generateBuildSubscriptionCallbackFunction(
                 undefined,
                 ts.factory.createIdentifier('executor'),
                 undefined,
-                ts.factory.createTypeReferenceNode(
-                    ts.factory.createIdentifier('IExecutor'),
-                    [
-                        ts.factory.createTypeReferenceNode(
-                            ts.factory.createIdentifier('TRequestContext'),
-                            undefined,
-                        ),
-                    ],
-                ),
+                ts.factory.createTypeReferenceNode('TExecutor'),
                 undefined,
             ),
             ts.factory.createParameterDeclaration(
@@ -86,7 +86,9 @@ export function generateBuildSubscriptionCallbackFunction(
             ),
         ],
         ts.factory.createTypeReferenceNode(
-            ts.factory.createIdentifier(config.sdk.gqlMethodFuncTypeName),
+            ts.factory.createIdentifier(
+                config.sdk.gqlSubscriptionMethodFuncTypeName,
+            ),
             [
                 ts.factory.createTypeReferenceNode(
                     ts.factory.createIdentifier('TRequestContext'),
@@ -96,19 +98,13 @@ export function generateBuildSubscriptionCallbackFunction(
                     ts.factory.createIdentifier('V'),
                     undefined,
                 ),
-                ts.factory.createTypeReferenceNode(
-                    ts.factory.createIdentifier('SubOpAsyncIterable'),
-                    [
-                        returnType === 'ExecuteResult.result'
-                            ? ts.factory.createTypeReferenceNode(
-                                  ts.factory.createIdentifier('R'),
-                              )
-                            : ts.factory.createTypeReferenceNode(
-                                  'ExecuteResult',
-                                  [ts.factory.createTypeReferenceNode('R')],
-                              ),
-                    ],
-                ),
+                returnType === 'ExecuteResult.result'
+                    ? ts.factory.createTypeReferenceNode(
+                          ts.factory.createIdentifier('R'),
+                      )
+                    : ts.factory.createTypeReferenceNode('ExecuteResult', [
+                          ts.factory.createTypeReferenceNode('R'),
+                      ]),
             ],
         ),
         ts.factory.createBlock(
@@ -118,7 +114,7 @@ export function generateBuildSubscriptionCallbackFunction(
                         config,
                         'V',
                         'R',
-                        false,
+                        true,
                         returnType,
                     ),
                 ),

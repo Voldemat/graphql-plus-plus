@@ -55,6 +55,7 @@ export function generateNodes(
             ts.factory.createCallExpression(
                 ts.factory.createIdentifier(functionName),
                 [
+                    ts.factory.createTypeReferenceNode('TExecutor', undefined),
                     ts.factory.createTypeReferenceNode(
                         'TRequestContext',
                         undefined,
@@ -199,6 +200,13 @@ export function generateNodes(
             [
                 ts.factory.createTypeParameterDeclaration(
                     undefined,
+                    'TExecutor',
+                    ts.factory.createTypeReferenceNode('IExecutor', [
+                        ts.factory.createTypeReferenceNode('TRequestContext'),
+                    ]),
+                ),
+                ts.factory.createTypeParameterDeclaration(
+                    undefined,
                     'TRequestContext',
                     ts.factory.createTypeReferenceNode('RequestContext'),
                 ),
@@ -209,9 +217,7 @@ export function generateNodes(
                     undefined,
                     'executor',
                     undefined,
-                    ts.factory.createTypeReferenceNode('IExecutor', [
-                        ts.factory.createTypeReferenceNode('TRequestContext'),
-                    ]),
+                    ts.factory.createTypeReferenceNode('TExecutor'),
                 ),
             ],
             ts.factory.createTypeReferenceNode('SdkType', [

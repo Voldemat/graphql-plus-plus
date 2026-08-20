@@ -3,10 +3,11 @@ import { ActorContext } from '@/config.js';
 import { Config, OperationReturnType } from '../../actor.js';
 import ts from 'typescript';
 import { generateSdkTypeNode } from './sdk-operations-type-node.js';
-import { generateMethodFuncAlias } from './method-func-alias.js';
 import { generateSdkType } from './sdk-type.js';
 import { generateBuildSyncCallbackFunction } from './build-sync-callback-function.js';
 import { generateBuildSubscriptionCallbackFunction } from './build-subscription-callback-function.js';
+import { generateSyncMethodFuncAlias } from './sync-method-func-alias.js';
+import { generateSubscriptionMethodFuncAlias } from './subscription-method-func-alias.js';
 
 function generateSdkTypeNodes(
     config: Config,
@@ -72,7 +73,12 @@ export function generateHelpNodes(
     const hasExecuteResultType = hasReturnType(config, 'ExecuteResult');
     const hasResultType = hasReturnType(config, 'ExecuteResult.result');
     return [
-        generateMethodFuncAlias(config),
+        ...(state.hasQueries || state.hasMutations
+            ? [generateSyncMethodFuncAlias(config)]
+            : []),
+        ...(state.hasSubscriptions
+            ? [generateSubscriptionMethodFuncAlias(config)]
+            : []),
         ...generateSdkTypeNodes(config, context, state),
         generateSdkType(config, state),
         ...(state.hasQueries || state.hasMutations

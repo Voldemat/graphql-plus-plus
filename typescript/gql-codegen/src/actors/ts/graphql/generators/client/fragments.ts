@@ -1,6 +1,4 @@
 /* eslint-disable max-lines */
-import ts from 'typescript';
-import { RootSchema } from '@/schema/root.js';
 import {
     fragmentSchema,
     FragmentSpecSchemaType,
@@ -10,17 +8,19 @@ import {
     unionFragmentSpec,
     UnionSelection,
 } from '@/schema/client/fragment.js';
-import { z } from 'zod/v4';
+import { RootSchema } from '@/schema/root.js';
 import { objectSchema } from '@/schema/server.js';
+import assert from 'assert';
+import ts from 'typescript';
+import { z } from 'zod/v4';
+import { invokeMethod } from '../../../shared.js';
+import { generateZodObjectFieldSpec } from '../server/objects.js';
+import { ScalarsMapping } from '../server/scalars/mapping.js';
 import {
     generateSchemaName,
     generateZodInferInterfaceType,
     generateZodInferTypeAlias,
 } from '../server/shared.js';
-import { ScalarsMapping } from '../server/scalars/mapping.js';
-import { generateZodObjectFieldSpec } from '../server/objects.js';
-import assert from 'assert';
-import { invokeMethod } from '../../../shared.js';
 
 export function extractFragmentNamesInSpec(
     schema: RootSchema,
@@ -108,6 +108,7 @@ function generateZodObjectSelection(
     schema: RootSchema,
     objectType: z.infer<typeof objectSchema>,
     selection: z.infer<typeof objectSelection>,
+    insideLazy: boolean,
     typenameConfig: Parameters<typeof resolveSelections>[1],
 ):
     | ts.PropertyAssignment
@@ -178,23 +179,54 @@ function generateZodObjectSelection(
                     [],
                 );
             }
-            return ts.factory.createGetAccessorDeclaration(
-                [],
+            return ts.factory.createPropertyAssignment(
                 selection.alias,
-                [],
-                undefined,
-                ts.factory.createBlock([
-                    ts.factory.createReturnStatement(expression),
-                ]),
+                expression,
             );
         }
         case 'SpreadSelection': {
+            const schemaName = generateSchemaName(
+                selection.fragment + 'Fragment',
+            );
+            const expressionForShape = insideLazy
+                ? ts.factory.createIdentifier(schemaName)
+                : ts.factory.createCallExpression(
+                      ts.factory.createPropertyAccessExpression(
+                          ts.factory.createPropertyAccessExpression(
+                              ts.factory.createCallExpression(
+                                  ts.factory.createPropertyAccessExpression(
+                                      ts.factory.createIdentifier('z'),
+                                      ts.factory.createIdentifier('lazy'),
+                                  ),
+                                  undefined,
+                                  [
+                                      ts.factory.createArrowFunction(
+                                          undefined,
+                                          undefined,
+                                          [],
+                                          undefined,
+                                          ts.factory.createToken(
+                                              ts.SyntaxKind
+                                                  .EqualsGreaterThanToken,
+                                          ),
+                                          ts.factory.createIdentifier(
+                                              schemaName,
+                                          ),
+                                      ),
+                                  ],
+                              ),
+                              ts.factory.createIdentifier('def'),
+                          ),
+                          ts.factory.createIdentifier('getter'),
+                      ),
+                      undefined,
+                      [],
+                  );
+
             return ts.factory.createSpreadAssignment(
                 ts.factory.createPropertyAccessExpression(
-                    ts.factory.createIdentifier(
-                        generateSchemaName(selection.fragment + 'Fragment'),
-                    ),
-                    'shape',
+                    expressionForShape,
+                    ts.factory.createIdentifier('shape'),
                 ),
             );
         }
@@ -250,6 +282,7 @@ function generateZodObjectFragmentSpecCallExpression(
                             schema,
                             object,
                             s,
+                            insideLazy,
                             typenameConfig,
                         ),
                     )
@@ -258,12 +291,6 @@ function generateZodObjectFragmentSpecCallExpression(
             ),
         ],
     );
-    if (insideLazy) return expression;
-    const hasSpreadSelection = selections.some(
-        (s) => s._type === 'SpreadSelection',
-    );
-    if (!hasSpreadSelection) return expression;
-
     return expression;
 }
 

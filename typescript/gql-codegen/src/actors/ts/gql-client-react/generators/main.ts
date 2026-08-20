@@ -1,120 +1,42 @@
 /* eslint-disable max-lines */
 import { ActorContext } from '@/config.js';
-import { Config } from '../actor.js';
 import ts from 'typescript';
+import { Config } from '../actor.js';
+import { generateHelpNodes } from './help-nodes/index.js';
 
-function generateFunctionBlock(
-    operationName: string,
+function getHookBuilderName(
+    config: Config,
     type: 'SYNC' | 'LAZY' | 'SUBSCRIPTION',
-) {
+): string {
     switch (type) {
         case 'SYNC':
-            return ts.factory.createCallExpression(
-                ts.factory.createIdentifier('useOperation'),
-                undefined,
-                [
-                    ts.factory.createIdentifier('executor'),
-                    ts.factory.createIdentifier(operationName),
-                    ts.factory.createIdentifier('variables'),
-                    ts.factory.createIdentifier('requestContext'),
-                ],
-            );
+            return config.sdk.syncHookBuilderName;
         case 'LAZY':
-            return ts.factory.createCallExpression(
-                ts.factory.createIdentifier('useLazyOperation'),
-                undefined,
-                [
-                    ts.factory.createIdentifier('executor'),
-                    ts.factory.createIdentifier(operationName),
-                ],
-            );
+            return config.sdk.lazyHookBuilderName;
         case 'SUBSCRIPTION':
-            return ts.factory.createCallExpression(
-                ts.factory.createIdentifier('useSubscription'),
-                undefined,
-                [
-                    ts.factory.createIdentifier('executor'),
-                    ts.factory.createIdentifier(operationName),
-                    ts.factory.createIdentifier('variables'),
-                    ts.factory.createIdentifier('requestContext'),
-                ],
-            );
+            return config.sdk.subscriptionHookBuilderName;
     }
 }
 
-function generateArrowFunction(
+function generateHookValueExpression(
+    config: Config,
     operationName: string,
     variablesName: string,
     resultName: string,
     type: 'SYNC' | 'LAZY' | 'SUBSCRIPTION',
 ) {
-    const parameters: ts.ParameterDeclaration[] = [];
-    let resultType: ts.TypeNode;
-    switch (type) {
-        case 'LAZY':
-            resultType = ts.factory.createTypeReferenceNode(
-                'UseLazyOperationReturnType',
-                [
-                    ts.factory.createTypeReferenceNode(variablesName),
-                    ts.factory.createTypeReferenceNode(resultName),
-                    ts.factory.createTypeReferenceNode('TRequestContext'),
-                ],
-            );
-            break;
-        case 'SYNC': {
-            resultType = ts.factory.createTypeReferenceNode('OperationState', [
-                ts.factory.createTypeReferenceNode(resultName),
-            ]);
-            parameters.push(
-                ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    'variables',
-                    undefined,
-                    ts.factory.createTypeReferenceNode(variablesName),
-                ),
-                ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    'requestContext',
-                    undefined,
-                    ts.factory.createTypeReferenceNode('TRequestContext'),
-                ),
-            );
-            break;
-        }
-        case 'SUBSCRIPTION': {
-            resultType = ts.factory.createTypeReferenceNode('OperationState', [
-                ts.factory.createTypeReferenceNode('SubOpAsyncIterable', [
-                    ts.factory.createTypeReferenceNode(resultName),
-                ]),
-            ]);
-            parameters.push(
-                ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    'variables',
-                    undefined,
-                    ts.factory.createTypeReferenceNode(variablesName),
-                ),
-                ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    'requestContext',
-                    undefined,
-                    ts.factory.createTypeReferenceNode('TRequestContext'),
-                ),
-            );
-            break;
-        }
-    }
-    return ts.factory.createArrowFunction(
-        undefined,
-        undefined,
-        parameters,
-        resultType,
-        ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
-        generateFunctionBlock(operationName, type),
+    return ts.factory.createCallExpression(
+        ts.factory.createIdentifier(getHookBuilderName(config, type)),
+        [
+            ts.factory.createTypeReferenceNode('TExecutor'),
+            ts.factory.createTypeReferenceNode('TRequestContext'),
+            ts.factory.createTypeReferenceNode(variablesName),
+            ts.factory.createTypeReferenceNode(resultName),
+        ],
+        [
+            ts.factory.createIdentifier('executor'),
+            ts.factory.createIdentifier(operationName),
+        ],
     );
 }
 
@@ -122,21 +44,44 @@ export function generateNodes(
     config: Config,
     context: ActorContext,
 ): ts.Node[] {
-    const graphqlImports: string[] = [];
+    const graphqlImports: ts.ImportSpecifier[] = [];
     const queryNodes: ts.PropertyAssignment[] = [];
     const mutationNodes: ts.PropertyAssignment[] = [];
     const subscriptionNodes: ts.PropertyAssignment[] = [];
     for (const operation of Object.values(context.schema.client.operations)) {
-        const operationName = operation.name + 'Operation';
-        const variablesName = operation.name + 'Variables';
-        const resultName = operation.name + 'Result';
-        graphqlImports.push(operationName, variablesName, resultName);
+        const operationName =
+            config.sdk.clientTypeNameBuilders.operationTypeName(operation.name);
+        const variablesName =
+            config.sdk.clientTypeNameBuilders.variablesTypeName(operation.name);
+        const resultName = config.sdk.clientTypeNameBuilders.resultTypeName(
+            operation.name,
+        );
+        graphqlImports.push(
+            ts.factory.createImportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier(operationName),
+            ),
+            ts.factory.createImportSpecifier(
+                true,
+                undefined,
+                ts.factory.createIdentifier(variablesName),
+            ),
+            ts.factory.createImportSpecifier(
+                true,
+                undefined,
+                ts.factory.createIdentifier(resultName),
+            ),
+        );
         switch (operation.type) {
             case 'SUBSCRIPTION': {
                 subscriptionNodes.push(
                     ts.factory.createPropertyAssignment(
-                        'use' + operation.name,
-                        generateArrowFunction(
+                        config.sdk.hookNameBuilders.subscription.immediate(
+                            operation.name,
+                        ),
+                        generateHookValueExpression(
+                            config,
                             operationName,
                             variablesName,
                             resultName,
@@ -149,8 +94,11 @@ export function generateNodes(
             case 'MUTATION': {
                 mutationNodes.push(
                     ts.factory.createPropertyAssignment(
-                        'use' + operation.name,
-                        generateArrowFunction(
+                        config.sdk.hookNameBuilders.mutation.lazy(
+                            operation.name,
+                        ),
+                        generateHookValueExpression(
+                            config,
                             operationName,
                             variablesName,
                             resultName,
@@ -163,8 +111,11 @@ export function generateNodes(
             case 'QUERY': {
                 queryNodes.push(
                     ts.factory.createPropertyAssignment(
-                        'use' + operation.name,
-                        generateArrowFunction(
+                        config.sdk.hookNameBuilders.query.immediate(
+                            operation.name,
+                        ),
+                        generateHookValueExpression(
+                            config,
                             operationName,
                             variablesName,
                             resultName,
@@ -172,8 +123,9 @@ export function generateNodes(
                         ),
                     ),
                     ts.factory.createPropertyAssignment(
-                        'useLazy' + operation.name,
-                        generateArrowFunction(
+                        config.sdk.hookNameBuilders.query.lazy(operation.name),
+                        generateHookValueExpression(
+                            config,
                             operationName,
                             variablesName,
                             resultName,
@@ -221,7 +173,39 @@ export function generateNodes(
         ),
     ];
 
-    if (subscriptionNodes.length !== 0) {
+    const state = {
+        hasQueries: queryNodes.length !== 0,
+        hasMutations: mutationNodes.length !== 0,
+        hasSubscriptions: subscriptionNodes.length !== 0,
+    };
+
+    const returnObjectNodes: ts.PropertyAssignment[] = [];
+    if (state.hasQueries) {
+        returnObjectNodes.push(
+            ts.factory.createPropertyAssignment(
+                config.sdk.queriesKey,
+                ts.factory.createObjectLiteralExpression(queryNodes, true),
+            ),
+        );
+    }
+    if (state.hasMutations) {
+        returnObjectNodes.push(
+            ts.factory.createPropertyAssignment(
+                config.sdk.mutationsKey,
+                ts.factory.createObjectLiteralExpression(mutationNodes, true),
+            ),
+        );
+    }
+    if (state.hasQueries || state.hasMutations) {
+        gqlClientImports.push(
+            ts.factory.createImportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier('SyncOperation'),
+            ),
+        );
+    }
+    if (state.hasSubscriptions) {
         gqlClientReactImports.push(
             ts.factory.createImportSpecifier(
                 false,
@@ -233,29 +217,14 @@ export function generateNodes(
             ts.factory.createImportSpecifier(
                 false,
                 undefined,
+                ts.factory.createIdentifier('SubscriptionOperation'),
+            ),
+            ts.factory.createImportSpecifier(
+                false,
+                undefined,
                 ts.factory.createIdentifier('SubOpAsyncIterable'),
             ),
         );
-    }
-
-    const returnObjectNodes: ts.PropertyAssignment[] = [];
-    if (queryNodes.length !== 0) {
-        returnObjectNodes.push(
-            ts.factory.createPropertyAssignment(
-                config.sdk.queriesKey,
-                ts.factory.createObjectLiteralExpression(queryNodes, true),
-            ),
-        );
-    }
-    if (mutationNodes.length !== 0) {
-        returnObjectNodes.push(
-            ts.factory.createPropertyAssignment(
-                config.sdk.mutationsKey,
-                ts.factory.createObjectLiteralExpression(mutationNodes, true),
-            ),
-        );
-    }
-    if (subscriptionNodes.length !== 0) {
         returnObjectNodes.push(
             ts.factory.createPropertyAssignment(
                 config.sdk.subscriptionsKey,
@@ -268,12 +237,11 @@ export function generateNodes(
     }
 
     return [
-        ts.factory.createIdentifier('// @ts-nocheck'),
         ...config.importDeclarations,
         ts.factory.createImportDeclaration(
             [],
             ts.factory.createImportClause(
-                false,
+                undefined,
                 undefined,
                 ts.factory.createNamedImports(gqlClientReactImports),
             ),
@@ -282,7 +250,7 @@ export function generateNodes(
         ts.factory.createImportDeclaration(
             [],
             ts.factory.createImportClause(
-                true,
+                ts.SyntaxKind.TypeKeyword,
                 undefined,
                 ts.factory.createNamedImports(gqlClientImports),
             ),
@@ -291,20 +259,14 @@ export function generateNodes(
         ts.factory.createImportDeclaration(
             undefined,
             ts.factory.createImportClause(
-                false,
                 undefined,
-                ts.factory.createNamedImports(
-                    graphqlImports.map((i) =>
-                        ts.factory.createImportSpecifier(
-                            false,
-                            undefined,
-                            ts.factory.createIdentifier(i),
-                        ),
-                    ),
-                ),
+                undefined,
+                ts.factory.createNamedImports(graphqlImports),
             ),
             ts.factory.createStringLiteral(config.graphqlModulePath),
         ),
+        ts.factory.createIdentifier('\n'),
+        ...generateHelpNodes(config, context, state),
         ts.factory.createIdentifier('\n'),
         ts.factory.createFunctionDeclaration(
             ts.factory.createModifiersFromModifierFlags(
@@ -313,6 +275,13 @@ export function generateNodes(
             undefined,
             'createSdk',
             [
+                ts.factory.createTypeParameterDeclaration(
+                    undefined,
+                    'TExecutor',
+                    ts.factory.createTypeReferenceNode('IExecutor', [
+                        ts.factory.createTypeReferenceNode('TRequestContext'),
+                    ]),
+                ),
                 ts.factory.createTypeParameterDeclaration(
                     undefined,
                     'TRequestContext',
@@ -325,12 +294,12 @@ export function generateNodes(
                     undefined,
                     'executor',
                     undefined,
-                    ts.factory.createTypeReferenceNode('IExecutor', [
-                        ts.factory.createTypeReferenceNode('TRequestContext'),
-                    ]),
+                    ts.factory.createTypeReferenceNode('TExecutor'),
                 ),
             ],
-            undefined,
+            ts.factory.createTypeReferenceNode(config.sdk.typeName, [
+                ts.factory.createTypeReferenceNode('TRequestContext'),
+            ]),
             ts.factory.createBlock(
                 [
                     ts.factory.createReturnStatement(

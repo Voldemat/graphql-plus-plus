@@ -1,12 +1,14 @@
 import ts from 'typescript';
 import { Config } from '../../actor.js';
 
-export function generateMethodFuncAlias(
+export function generateSubscriptionMethodFuncAlias(
     config: Config,
 ): ts.TypeAliasDeclaration {
     return ts.factory.createTypeAliasDeclaration(
         undefined,
-        ts.factory.createIdentifier(config.sdk.gqlMethodFuncTypeName),
+        ts.factory.createIdentifier(
+            config.sdk.gqlSubscriptionMethodFuncTypeName,
+        ),
         [
             ts.factory.createTypeParameterDeclaration(
                 undefined,
@@ -52,14 +54,24 @@ export function generateMethodFuncAlias(
                     ),
                     undefined,
                 ),
+                ts.factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    ts.factory.createIdentifier('controller'),
+                    undefined,
+                    ts.factory.createTypeReferenceNode(
+                        ts.factory.createIdentifier('AbortController'),
+                        undefined,
+                    ),
+                    undefined,
+                ),
             ],
             ts.factory.createTypeReferenceNode(
                 ts.factory.createIdentifier('Promise'),
                 [
-                    ts.factory.createTypeReferenceNode(
-                        ts.factory.createIdentifier('R'),
-                        undefined,
-                    ),
+                    ts.factory.createTypeReferenceNode('SubOpAsyncIterable', [
+                        ts.factory.createTypeReferenceNode('R'),
+                    ]),
                 ],
             ),
         ),

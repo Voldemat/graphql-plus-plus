@@ -11,3 +11,4 @@ export const operationSchema = z.object({
 });
 
 export interface Operation extends z.infer<typeof operationSchema> {}
+export type OperationType = Operation['type'];

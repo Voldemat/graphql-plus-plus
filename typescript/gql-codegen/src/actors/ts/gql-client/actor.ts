@@ -7,7 +7,7 @@ import {
     TSActorConfig,
 } from '../shared.js';
 import { generateNodes } from './generators/main.js';
-import { Operation } from '@/schema/client/operation.js';
+import { OperationType } from '@/schema/client/operation.js';
 
 export type OperationReturnType = 'ExecuteResult' | 'ExecuteResult.result';
 export interface SDKConfig {
@@ -16,8 +16,9 @@ export interface SDKConfig {
     queriesKey: string;
     mutationsKey: string;
     subscriptionsKey: string;
-    gqlMethodFuncTypeName: string;
-    operationRequestsTypeNameBuilder: (type: Operation['type']) => string;
+    gqlSyncMethodFuncTypeName: string;
+    gqlSubscriptionMethodFuncTypeName: string;
+    operationRequestsTypeNameBuilder: (type: OperationType) => string;
     typeName: string;
     clientTypeNameBuilders: ClientTypeNameBuilders;
 }

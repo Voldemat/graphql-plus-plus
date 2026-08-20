@@ -27,6 +27,14 @@ export function generateBuildSyncCallbackFunction(
         [
             ts.factory.createTypeParameterDeclaration(
                 undefined,
+                ts.factory.createIdentifier('TExecutor'),
+                ts.factory.createTypeReferenceNode('IExecutor', [
+                    ts.factory.createTypeReferenceNode('TRequestContext'),
+                ]),
+                undefined,
+            ),
+            ts.factory.createTypeParameterDeclaration(
+                undefined,
                 ts.factory.createIdentifier('TRequestContext'),
                 ts.factory.createTypeReferenceNode(
                     ts.factory.createIdentifier('RequestContext'),
@@ -53,15 +61,7 @@ export function generateBuildSyncCallbackFunction(
                 undefined,
                 ts.factory.createIdentifier('executor'),
                 undefined,
-                ts.factory.createTypeReferenceNode(
-                    ts.factory.createIdentifier('IExecutor'),
-                    [
-                        ts.factory.createTypeReferenceNode(
-                            ts.factory.createIdentifier('TRequestContext'),
-                            undefined,
-                        ),
-                    ],
-                ),
+                ts.factory.createTypeReferenceNode('TExecutor'),
                 undefined,
             ),
             ts.factory.createParameterDeclaration(
@@ -86,7 +86,7 @@ export function generateBuildSyncCallbackFunction(
             ),
         ],
         ts.factory.createTypeReferenceNode(
-            ts.factory.createIdentifier(config.sdk.gqlMethodFuncTypeName),
+            ts.factory.createIdentifier(config.sdk.gqlSyncMethodFuncTypeName),
             [
                 ts.factory.createTypeReferenceNode(
                     ts.factory.createIdentifier('TRequestContext'),
