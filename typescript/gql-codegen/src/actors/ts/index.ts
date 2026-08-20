@@ -5,6 +5,7 @@ export * as graphql from './graphql/index.js';
 export {
     type Formatter,
     type TSActorConfig,
+    type ClientTypeNameBuilders,
     renderNodes,
     loadTsConfigCompilerOptions,
     addNewLineBetweenNodes,

@@ -1,7 +1,11 @@
 import { PathOrFileDescriptor, writeFileSync } from 'fs';
 import ts from 'typescript';
 import { Actor, ActorContext } from '@/config.js';
-import { renderNodes, TSActorConfig } from '../shared.js';
+import {
+    ClientTypeNameBuilders,
+    renderNodes,
+    TSActorConfig,
+} from '../shared.js';
 import { generateNodes } from './generators/main.js';
 import { Operation } from '@/schema/client/operation.js';
 
@@ -15,9 +19,7 @@ export interface SDKConfig {
     gqlMethodFuncTypeName: string;
     operationRequestsTypeNameBuilder: (type: Operation['type']) => string;
     typeName: string;
-    operationNameBuilder: (operationName: string) => string;
-    variablesNameBuilder: (operationName: string) => string;
-    resultNameBuilder: (operationName: string) => string;
+    clientTypeNameBuilders: ClientTypeNameBuilders;
 }
 export interface Config extends TSActorConfig {
     outPath: PathOrFileDescriptor;

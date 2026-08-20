@@ -63,6 +63,10 @@ export function generateClientNodes(
     return [
         operationTypeNode,
         ...generateFragmentTypes(config.scalarsMapping, context.schema),
-        ...generateOperationsNodes(config.scalarsMapping, context.schema),
+        ...generateOperationsNodes(
+            config.clientTypeNameBuilders,
+            config.scalarsMapping,
+            context.schema,
+        ),
     ];
 }

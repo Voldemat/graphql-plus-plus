@@ -16,9 +16,13 @@ export function generateNodes(
     const mutationNodes: ts.PropertyAssignment[] = [];
     const subscriptionNodes: ts.PropertyAssignment[] = [];
     for (const operation of Object.values(context.schema.client.operations)) {
-        const operationName = operation.name + 'Operation';
-        const variablesName = operation.name + 'Variables';
-        const resultName = operation.name + 'Result';
+        const operationName =
+            config.sdk.clientTypeNameBuilders.operationTypeName(operation.name);
+        const variablesName =
+            config.sdk.clientTypeNameBuilders.variablesTypeName(operation.name);
+        const resultName = config.sdk.clientTypeNameBuilders.resultTypeName(
+            operation.name,
+        );
         graphqlImports.push(
             ts.factory.createImportSpecifier(
                 false,

@@ -1,6 +1,12 @@
 import { readFileSync } from 'fs';
 import ts from 'typescript';
 
+export interface ClientTypeNameBuilders {
+    operationTypeName: (operationName: string) => string;
+    variablesTypeName: (operationName: string) => string;
+    resultTypeName: (operationName: string) => string;
+}
+
 export type Formatter = (code: string) => Promise<string> | string;
 export interface TSActorConfig {
     tsconfigCompilerOptions: ts.CompilerOptions;

@@ -1,8 +1,8 @@
 /* eslint-disable max-lines */
 import ts from 'typescript';
-import { buildSymmetricScalarSpec, ScalarSpec } from './mapping.js';
 import { invokeMethod } from '../../../../shared.js';
 import { builtinScalarsMapping } from './builtin.js';
+import { buildSymmetricScalarSpec, ScalarSpec } from './mapping.js';
 
 export const additionalScalarsMapping = {
     Int64: builtinScalarsMapping.Int,
@@ -185,4 +185,17 @@ export const additionalScalarsMapping = {
             ],
         ),
     },
+    Duration: buildSymmetricScalarSpec(
+        ts.factory.createCallExpression(
+            ts.factory.createPropertyAccessExpression(
+                ts.factory.createPropertyAccessExpression(
+                    ts.factory.createIdentifier('z'),
+                    'iso',
+                ),
+                'duration',
+            ),
+            undefined,
+            [],
+        ),
+    ),
 } as const satisfies Record<string, ScalarSpec>;

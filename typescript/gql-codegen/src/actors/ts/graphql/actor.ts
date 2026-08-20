@@ -1,7 +1,11 @@
 import { Actor, ActorContext } from '@/config.js';
 import { PathOrFileDescriptor, writeFileSync } from 'fs';
 import ts from 'typescript';
-import { renderNodes, TSActorConfig } from '../shared.js';
+import {
+    ClientTypeNameBuilders,
+    renderNodes,
+    TSActorConfig,
+} from '../shared.js';
 import { generateNodes } from './generators/main.js';
 import { ScalarsMapping } from './generators/server/scalars/index.js';
 
@@ -10,6 +14,7 @@ export interface Config extends TSActorConfig {
     scalarsMapping: ScalarsMapping;
     importDeclarations: ts.ImportDeclaration[];
     onlyRequiredForOperations: boolean;
+    clientTypeNameBuilders: ClientTypeNameBuilders;
 }
 
 async function actor(config: Config, context: ActorContext) {

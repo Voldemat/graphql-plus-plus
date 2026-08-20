@@ -1,20 +1,21 @@
 /* eslint-disable max-lines */
-import ts from 'typescript';
-import { RootSchema } from '@/schema/root.js';
-import { operationSchema } from '@/schema/client/operation.js';
-import { z } from 'zod/v4';
-import {
-    extractFragmentSourceTextsInSpec,
-    generateZodFragmentSpecCallExpression,
-} from './fragments.js';
+import { ClientTypeNameBuilders } from '@/actors/ts/shared.js';
 import { FragmentSpecSchemaType } from '@/schema/client/fragment.js';
+import { operationSchema } from '@/schema/client/operation.js';
+import { RootSchema } from '@/schema/root.js';
 import { inputFieldSchema } from '@/schema/shared.js';
+import ts from 'typescript';
+import { z } from 'zod/v4';
+import { generateInputTypeDefinitionFields } from '../server/inputs.js';
+import { ScalarsMapping } from '../server/scalars/mapping.js';
 import {
     generateSchemaName,
     generateZodInferInterfaceType,
 } from '../server/shared.js';
-import { generateInputTypeDefinitionFields } from '../server/inputs.js';
-import { ScalarsMapping } from '../server/scalars/mapping.js';
+import {
+    extractFragmentSourceTextsInSpec,
+    generateZodFragmentSpecCallExpression,
+} from './fragments.js';
 
 export function opTypeToName(
     type: z.infer<typeof operationSchema>['type'],
@@ -41,6 +42,7 @@ function parametersToFields(
 }
 
 function generateOperationNode(
+    clientTypeNameBuilders: ClientTypeNameBuilders,
     schema: RootSchema,
     operation: z.infer<typeof operationSchema>,
 ) {
@@ -49,7 +51,11 @@ function generateOperationNode(
         ts.factory.createVariableDeclarationList(
             [
                 ts.factory.createVariableDeclaration(
-                    ts.factory.createIdentifier(operation.name + 'Operation'),
+                    ts.factory.createIdentifier(
+                        clientTypeNameBuilders.operationTypeName(
+                            operation.name,
+                        ),
+                    ),
                     undefined,
                     undefined,
                     ts.factory.createSatisfiesExpression(
@@ -84,7 +90,9 @@ function generateOperationNode(
                                         'variablesSchema',
                                         ts.factory.createIdentifier(
                                             generateSchemaName(
-                                                operation.name + 'Variables',
+                                                clientTypeNameBuilders.variablesTypeName(
+                                                    operation.name,
+                                                ),
                                             ),
                                         ),
                                     ),
@@ -92,7 +100,9 @@ function generateOperationNode(
                                         'resultSchema',
                                         ts.factory.createIdentifier(
                                             generateSchemaName(
-                                                operation.name + 'Result',
+                                                clientTypeNameBuilders.resultTypeName(
+                                                    operation.name,
+                                                ),
                                             ),
                                         ),
                                     ),
@@ -103,10 +113,14 @@ function generateOperationNode(
                         ),
                         ts.factory.createTypeReferenceNode('Operation', [
                             ts.factory.createTypeReferenceNode(
-                                operation.name + 'Variables',
+                                clientTypeNameBuilders.variablesTypeName(
+                                    operation.name,
+                                ),
                             ),
                             ts.factory.createTypeReferenceNode(
-                                operation.name + 'Result',
+                                clientTypeNameBuilders.resultTypeName(
+                                    operation.name,
+                                ),
                             ),
                         ]),
                     ),
@@ -120,6 +134,7 @@ function generateOperationNode(
 function generateOperationZodInputSchema(
     scalarsMapping: ScalarsMapping,
     operation: z.infer<typeof operationSchema>,
+    variablesName: string,
 ): ts.VariableStatement {
     return ts.factory.createVariableStatement(
         [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
@@ -127,7 +142,7 @@ function generateOperationZodInputSchema(
             [
                 ts.factory.createVariableDeclaration(
                     ts.factory.createIdentifier(
-                        generateSchemaName(operation.name + 'Variables'),
+                        generateSchemaName(variablesName),
                     ),
                     undefined,
                     undefined,
@@ -158,15 +173,14 @@ function genearteOperationZodOutputSchema(
     scalarsMapping: ScalarsMapping,
     schema: RootSchema,
     operation: z.infer<typeof operationSchema>,
+    resultName: string,
 ): ts.VariableStatement {
     return ts.factory.createVariableStatement(
         [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
         ts.factory.createVariableDeclarationList(
             [
                 ts.factory.createVariableDeclaration(
-                    ts.factory.createIdentifier(
-                        generateSchemaName(operation.name + 'Result'),
-                    ),
+                    ts.factory.createIdentifier(generateSchemaName(resultName)),
                     undefined,
                     undefined,
                     generateZodFragmentSpecCallExpression(
@@ -182,36 +196,56 @@ function genearteOperationZodOutputSchema(
 }
 
 function generateOperationNodes(
+    clientTypeNameBuilders: ClientTypeNameBuilders,
     scalarsMapping: ScalarsMapping,
     schema: RootSchema,
     operation: z.infer<typeof operationSchema>,
 ): ts.Node[] {
+    const variablesName = clientTypeNameBuilders.variablesTypeName(
+        operation.name,
+    );
+    const resultName = clientTypeNameBuilders.resultTypeName(operation.name);
     return [
-        generateOperationZodInputSchema(scalarsMapping, operation),
+        generateOperationZodInputSchema(
+            scalarsMapping,
+            operation,
+            variablesName,
+        ),
         generateZodInferInterfaceType(
             'input',
-            operation.name + 'Variables',
-            generateSchemaName(operation.name + 'Variables'),
+            variablesName,
+            generateSchemaName(variablesName),
         ),
         ts.factory.createIdentifier('\n'),
-        genearteOperationZodOutputSchema(scalarsMapping, schema, operation),
+        genearteOperationZodOutputSchema(
+            scalarsMapping,
+            schema,
+            operation,
+            resultName,
+        ),
         generateZodInferInterfaceType(
             'output',
-            operation.name + 'Result',
-            generateSchemaName(operation.name + 'Result'),
+            resultName,
+            generateSchemaName(resultName),
         ),
-        generateOperationNode(schema, operation),
+        generateOperationNode(clientTypeNameBuilders, schema, operation),
         ts.factory.createIdentifier('\n'),
     ];
 }
 
 export function generateOperationsNodes(
+    clientTypeNameBuilders: ClientTypeNameBuilders,
     scalarsMapping: ScalarsMapping,
     schema: RootSchema,
 ): ts.Node[] {
     return Object.values(schema.client.operations)
         .map((operation) => {
-            return generateOperationNodes(scalarsMapping, schema, operation);
+            return generateOperationNodes(
+                clientTypeNameBuilders,
+                scalarsMapping,
+                schema,
+                operation,
+            );
         })
         .flat();
 }
