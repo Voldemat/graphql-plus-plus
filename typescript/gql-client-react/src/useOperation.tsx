@@ -29,16 +29,17 @@ export type OperationState<TResult> =
     | OperationFailureState
 export type UseOperationHookReturnType<TResult> = OperationState<TResult>
 export function useOperation<
-    T extends SyncOperation<unknown, unknown>,
+    TExecutor extends IExecutor<TRequestContext>,
     TRequestContext extends RequestContext,
+    TOperation extends SyncOperation<unknown, unknown>,
 >(
-    executor: IExecutor<TRequestContext>,
-    operation: T,
-    variables: OperationVariables<T>,
+    executor: TExecutor,
+    operation: TOperation,
+    variables: OperationVariables<TOperation>,
     requestContext: TRequestContext,
-): UseOperationHookReturnType<OperationResult<T>> {
+): UseOperationHookReturnType<OperationResult<TOperation>> {
     const [state, setState] =
-        useState<OperationState<OperationResult<T>>>(loadingState)
+        useState<OperationState<OperationResult<TOperation>>>(loadingState)
     const memoizedVariables = useMemo(
         () => variables,
         // oxlint-disable-next-line exhaustive-deps,use-memo

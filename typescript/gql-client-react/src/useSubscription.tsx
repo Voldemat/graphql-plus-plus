@@ -16,18 +16,19 @@ export type UseSubscriptionHookReturnType<TResult> = OperationState<
 >
 
 export function useSubscription<
-    T extends SubscriptionOperation<unknown, unknown>,
+    TExecutor extends IExecutor<TRequestContext>,
     TRequestContext extends RequestContext,
+    TOperation extends SubscriptionOperation<unknown, unknown>,
 >(
-    executor: IExecutor<TRequestContext>,
-    operation: T,
-    variables: OperationVariables<T>,
+    executor: TExecutor,
+    operation: TOperation,
+    variables: OperationVariables<TOperation>,
     requestContext: TRequestContext,
-): UseSubscriptionHookReturnType<OperationResult<T>> {
+): UseSubscriptionHookReturnType<OperationResult<TOperation>> {
     const [state, setState] =
-        useState<OperationState<SubOpAsyncIterable<OperationResult<T>>>>(
-            loadingState,
-        )
+        useState<
+            OperationState<SubOpAsyncIterable<OperationResult<TOperation>>>
+        >(loadingState)
     const memoizedVariables = useMemo(
         () => variables,
         // oxlint-disable-next-line exhaustive-deps,use-memo
