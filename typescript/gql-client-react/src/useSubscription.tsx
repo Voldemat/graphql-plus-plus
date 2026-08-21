@@ -11,9 +11,9 @@ import type {
 } from './types.js'
 import { type OperationState } from './useOperation.jsx'
 
-export type UseSubscriptionHookReturnType<
-    T extends SubscriptionOperation<unknown, unknown>,
-> = OperationState<SubOpAsyncIterable<OperationResult<T>>>
+export type UseSubscriptionHookReturnType<TResult> = OperationState<
+    SubOpAsyncIterable<TResult>
+>
 
 export function useSubscription<
     T extends SubscriptionOperation<unknown, unknown>,
@@ -23,7 +23,7 @@ export function useSubscription<
     operation: T,
     variables: OperationVariables<T>,
     requestContext: TRequestContext,
-): UseSubscriptionHookReturnType<T> {
+): UseSubscriptionHookReturnType<OperationResult<T>> {
     const [state, setState] =
         useState<OperationState<SubOpAsyncIterable<OperationResult<T>>>>(
             loadingState,
