@@ -17,9 +17,9 @@ import type {
 } from './types.js'
 import { type OperationState } from './useOperation.js'
 
-export type UseSubscriptionHookReturnType<
-    T extends SubscriptionOperation<unknown, unknown>,
-> = ShallowRef<OperationState<SubOpAsyncIterable<OperationResult<T>>>>
+export type UseSubscriptionHookReturnType<TResult> = ShallowRef<
+    OperationState<SubOpAsyncIterable<TResult>>
+>
 
 export function useSubscription<
     T extends SubscriptionOperation<unknown, unknown>,
@@ -29,7 +29,7 @@ export function useSubscription<
     operation: T,
     variables: OperationVariables<T> | Ref<OperationVariables<T>>,
     requestContext: TRequestContext | Ref<TRequestContext>,
-): UseSubscriptionHookReturnType<T> {
+): UseSubscriptionHookReturnType<OperationResult<T>> {
     const state =
         shallowRef<OperationState<SubOpAsyncIterable<OperationResult<T>>>>(
             loadingState,
