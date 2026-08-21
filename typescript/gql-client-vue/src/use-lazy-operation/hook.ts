@@ -1,4 +1,5 @@
 import { shallowRef, type ShallowRef } from 'vue'
+import { loadingState } from '../loading-state.js'
 import type {
     IExecutor,
     OperationResult,
@@ -7,12 +8,12 @@ import type {
     SyncOperation,
 } from '../types.js'
 import { type OperationState } from '../useOperation.js'
-import {
-    type LazyOperationExecuteReturnType,
-    type LazyOperationInitialState,
-    type LazyOperationState,
+import type {
+    UseLazyOperationHookReturnType,
+    LazyOperationExecuteReturnType,
+    LazyOperationInitialState,
+    LazyOperationState,
 } from './types.js'
-import { loadingState } from '../loading-state.js'
 
 const lazyInitialState = Object.freeze({
     state: 'initial',
@@ -44,21 +45,16 @@ async function execute<
 }
 
 export function useLazyOperation<
-    T extends SyncOperation<unknown, unknown>,
     TRequestContext extends RequestContext,
+    T extends SyncOperation<unknown, unknown>,
 >(
     executor: IExecutor<TRequestContext>,
     operation: T,
-): [
-    (
-        variables: OperationVariables<T>,
-        requestContext: TRequestContext,
-    ) => LazyOperationExecuteReturnType<OperationResult<T>>,
-    {
-        state: ShallowRef<LazyOperationState<OperationResult<T>>>
-        reset: () => void
-    },
-] {
+): UseLazyOperationHookReturnType<
+    TRequestContext,
+    OperationVariables<T>,
+    OperationResult<T>
+> {
     const state =
         shallowRef<LazyOperationState<OperationResult<T>>>(lazyInitialState)
 

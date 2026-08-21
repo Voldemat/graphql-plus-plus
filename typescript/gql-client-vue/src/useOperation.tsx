@@ -10,6 +10,7 @@ import { loadingState } from './loading-state.js'
 import type {
     ExecuteResult,
     IExecutor,
+    Operation,
     OperationResult,
     OperationVariables,
     RequestContext,
@@ -34,6 +35,8 @@ export type OperationState<TResult> =
     | OperationSuccessState<TResult>
     | OperationFailureState
 
+export type UseOperationHookReturnType<T extends Operation<unknown, unknown>> =
+    ShallowRef<OperationState<OperationResult<T>>>
 export function useOperation<
     T extends SyncOperation<unknown, unknown>,
     TRequestContext extends RequestContext,
@@ -42,7 +45,7 @@ export function useOperation<
     operation: T,
     variables: OperationVariables<T> | Ref<OperationVariables<T>>,
     requestContext: TRequestContext | Ref<TRequestContext>,
-): ShallowRef<OperationState<OperationResult<T>>> {
+): UseOperationHookReturnType<T> {
     const state = shallowRef<OperationState<OperationResult<T>>>(loadingState)
 
     watch(

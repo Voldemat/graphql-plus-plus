@@ -1,3 +1,4 @@
+import { ShallowRef } from 'vue'
 import type { RequestContext } from '../types.js'
 import {
     type OperationFailureState,
@@ -16,17 +17,17 @@ export type LazyOperationExecuteReturnType<TResult> = Promise<
     OperationSuccessState<TResult> | OperationFailureState
 >
 
-export type UseLazyOperationReturnType<
+export type UseLazyOperationHookReturnType<
+    TRequestContext extends RequestContext,
     TVariables,
     TResult,
-    TRequestContext extends RequestContext,
 > = [
     (
         variables: TVariables,
         requestContext: TRequestContext,
     ) => LazyOperationExecuteReturnType<TResult>,
     {
-        state: LazyOperationState<TResult>
+        state: ShallowRef<LazyOperationState<TResult>>
         reset: () => void
     },
 ]

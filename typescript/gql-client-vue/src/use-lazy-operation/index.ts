@@ -3,5 +3,5 @@ export type {
     LazyOperationInitialState,
     LazyOperationState,
     LazyOperationExecuteReturnType,
-    UseLazyOperationReturnType,
+    UseLazyOperationHookReturnType,
 } from './types.js'
