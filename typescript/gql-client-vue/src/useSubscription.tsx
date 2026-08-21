@@ -9,7 +9,6 @@ import {
 import { loadingState } from './loading-state.js'
 import type {
     IExecutor,
-    Operation,
     OperationResult,
     OperationVariables,
     RequestContext,
@@ -19,7 +18,7 @@ import type {
 import { type OperationState } from './useOperation.js'
 
 export type UseSubscriptionHookReturnType<
-    T extends Operation<unknown, unknown>,
+    T extends SubscriptionOperation<unknown, unknown>,
 > = ShallowRef<OperationState<SubOpAsyncIterable<OperationResult<T>>>>
 
 export function useSubscription<
