@@ -1,4 +1,6 @@
+import hash, { type NotUndefined } from 'object-hash'
 import { useEffect, useMemo, useState } from 'react'
+import { loadingState } from './loading-state.js'
 import type {
     IExecutor,
     OperationResult,
@@ -7,9 +9,11 @@ import type {
     SubOpAsyncIterable,
     SubscriptionOperation,
 } from './types.js'
-import hash, { type NotUndefined } from 'object-hash'
 import { type OperationState } from './useOperation.jsx'
-import { loadingState } from './loading-state.js'
+
+export type UseSubscriptionHookReturnType<
+    T extends SubscriptionOperation<unknown, unknown>,
+> = OperationState<SubOpAsyncIterable<OperationResult<T>>>
 
 export function useSubscription<
     T extends SubscriptionOperation<unknown, unknown>,
@@ -19,7 +23,7 @@ export function useSubscription<
     operation: T,
     variables: OperationVariables<T>,
     requestContext: TRequestContext,
-) {
+): UseSubscriptionHookReturnType<T> {
     const [state, setState] =
         useState<OperationState<SubOpAsyncIterable<OperationResult<T>>>>(
             loadingState,

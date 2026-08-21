@@ -12,11 +12,11 @@ import type {
     SyncOperation,
 } from '../types.js'
 import { type OperationState } from '../useOperation.jsx'
-import {
+import type {
     LazyOperationExecuteReturnType,
     LazyOperationInitialState,
     LazyOperationState,
-    UseLazyOperationReturnType,
+    UseLazyOperationHookReturnType,
 } from './types.js'
 import { loadingState } from '../loading-state.js'
 
@@ -55,10 +55,10 @@ export function useLazyOperation<
 >(
     executor: IExecutor<TRequestContext>,
     operation: T,
-): UseLazyOperationReturnType<
+): UseLazyOperationHookReturnType<
+    TRequestContext,
     OperationVariables<T>,
-    OperationResult<T>,
-    TRequestContext
+    OperationResult<T>
 > {
     const [state, setState] =
         useState<LazyOperationState<OperationResult<T>>>(lazyInitialState)

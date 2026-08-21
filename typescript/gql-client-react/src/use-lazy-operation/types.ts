@@ -16,10 +16,10 @@ export type LazyOperationExecuteReturnType<TResult> = Promise<
     OperationSuccessState<TResult> | OperationFailureState
 >
 
-export type UseLazyOperationReturnType<
+export type UseLazyOperationHookReturnType<
+    TRequestContext extends RequestContext,
     TVariables,
     TResult,
-    TRequestContext extends RequestContext,
 > = [
     (
         variables: TVariables,

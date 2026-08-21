@@ -27,7 +27,9 @@ export type OperationState<TResult> =
     | OperationLoadingState
     | OperationSuccessState<TResult>
     | OperationFailureState
-
+export type UseOperationHookReturnType<
+    T extends SyncOperation<unknown, unknown>,
+> = OperationState<OperationResult<T>>
 export function useOperation<
     T extends SyncOperation<unknown, unknown>,
     TRequestContext extends RequestContext,
@@ -36,7 +38,7 @@ export function useOperation<
     operation: T,
     variables: OperationVariables<T>,
     requestContext: TRequestContext,
-): OperationState<OperationResult<T>> {
+): UseOperationHookReturnType<T> {
     const [state, setState] =
         useState<OperationState<OperationResult<T>>>(loadingState)
     const memoizedVariables = useMemo(
