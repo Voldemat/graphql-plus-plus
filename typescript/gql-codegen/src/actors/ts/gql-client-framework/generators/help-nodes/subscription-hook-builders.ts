@@ -33,7 +33,9 @@ export function generateSubscriptionHookType(
                     undefined,
                     'variables',
                     undefined,
-                    ts.factory.createTypeReferenceNode('TVariables'),
+                    config.sdk.buildVariablesType(
+                        ts.factory.createTypeReferenceNode('TVariables'),
+                    ),
                 ),
                 ts.factory.createParameterDeclaration(
                     undefined,
@@ -125,13 +127,15 @@ export function generateSubscriptionHookBuilder(
                             undefined,
                             'variables',
                             undefined,
-                            ts.factory.createTypeReferenceNode(
-                                'types.OperationVariables',
-                                [
-                                    ts.factory.createTypeReferenceNode(
-                                        'TOperation',
-                                    ),
-                                ],
+                            config.sdk.buildVariablesType(
+                                ts.factory.createTypeReferenceNode(
+                                    'types.OperationVariables',
+                                    [
+                                        ts.factory.createTypeReferenceNode(
+                                            'TOperation',
+                                        ),
+                                    ],
+                                ),
                             ),
                         ),
                         ts.factory.createParameterDeclaration(
@@ -139,9 +143,11 @@ export function generateSubscriptionHookBuilder(
                             undefined,
                             'requestContext',
                             undefined,
-                            ts.factory.createTypeReferenceNode(
-                                'TRequestContext',
-                            ),
+                            config.sdk.buildRequestContextType(
+                                ts.factory.createTypeReferenceNode(
+                                    'TRequestContext',
+                                ),
+                            )
                         ),
                     ],
                     generateSubscriptionHookReturnType(

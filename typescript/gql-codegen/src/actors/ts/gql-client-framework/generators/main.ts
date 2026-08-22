@@ -218,7 +218,7 @@ export function generateNodes(
                 undefined,
                 ts.factory.createNamedImports(gqlClientReactImports),
             ),
-            ts.factory.createStringLiteral('@vladimirdev635/gql-client-react'),
+            ts.factory.createStringLiteral(config.frameworkImportName),
         ),
         ts.factory.createImportDeclaration(
             undefined,

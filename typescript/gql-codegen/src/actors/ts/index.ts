@@ -1,5 +1,7 @@
 export * as gqlClient from './gql-client/index.js';
 export * as gqlClientReact from './gql-client-react/index.js';
+export * as gqlClientVue from './gql-client-vue/index.js';
+export * as gqlClientFramework from './gql-client-framework/index.js';
 export * as graphql from './graphql/index.js';
 export {
     type Formatter,

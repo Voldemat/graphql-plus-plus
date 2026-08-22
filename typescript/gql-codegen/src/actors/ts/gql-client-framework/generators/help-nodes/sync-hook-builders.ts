@@ -29,14 +29,18 @@ export function generateSyncHookType(config: Config): ts.TypeAliasDeclaration {
                     undefined,
                     'variables',
                     undefined,
-                    ts.factory.createTypeReferenceNode('TVariables'),
+                    config.sdk.buildVariablesType(
+                        ts.factory.createTypeReferenceNode('TVariables'),
+                    ),
                 ),
                 ts.factory.createParameterDeclaration(
                     undefined,
                     undefined,
                     'requestContext',
                     undefined,
-                    ts.factory.createTypeReferenceNode('TRequestContext'),
+                    config.sdk.buildRequestContextType(
+                        ts.factory.createTypeReferenceNode('TRequestContext'),
+                    )
                 ),
             ],
             generateSyncHookReturnType(
@@ -115,13 +119,15 @@ export function generateSyncHookBuilder(
                             undefined,
                             'variables',
                             undefined,
-                            ts.factory.createTypeReferenceNode(
-                                'types.OperationVariables',
-                                [
-                                    ts.factory.createTypeReferenceNode(
-                                        'TOperation',
-                                    ),
-                                ],
+                            config.sdk.buildVariablesType(
+                                ts.factory.createTypeReferenceNode(
+                                    'types.OperationVariables',
+                                    [
+                                        ts.factory.createTypeReferenceNode(
+                                            'TOperation',
+                                        ),
+                                    ],
+                                ),
                             ),
                         ),
                         ts.factory.createParameterDeclaration(
@@ -129,9 +135,11 @@ export function generateSyncHookBuilder(
                             undefined,
                             'requestContext',
                             undefined,
-                            ts.factory.createTypeReferenceNode(
-                                'TRequestContext',
-                            ),
+                            config.sdk.buildRequestContextType(
+                                ts.factory.createTypeReferenceNode(
+                                    'TRequestContext',
+                                ),
+                            )
                         ),
                     ],
                     generateSyncHookReturnType(
