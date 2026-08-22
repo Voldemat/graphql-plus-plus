@@ -33,9 +33,6 @@
         "typescript": "<7.0.0",
         "vitest": "^3.2.4"
     },
-    "peerDependencies": {
-        "zod": ">=3.25.76"
-    },
     "allowScripts": {
         "esbuild@0.25.5": true,
         "fsevents@2.3.3": true

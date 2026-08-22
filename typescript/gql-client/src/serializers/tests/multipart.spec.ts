@@ -40,7 +40,7 @@ describe('Multipart serializer', () => {
                 file: z.file(),
             }),
             resultSchema: z.void(),
-        } satisfies Operation<{ name: string; file: File }, void>;
+        } as Operation<{ name: string; file: File }, void>;
         const variables: OperationVariables<typeof operation> = {
             name: 'test-name',
             file: new File([], 'check.txt'),
