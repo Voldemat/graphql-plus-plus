@@ -147,7 +147,7 @@ export function generateSubscriptionHookBuilder(
                                 ts.factory.createTypeReferenceNode(
                                     'TRequestContext',
                                 ),
-                            )
+                            ),
                         ),
                     ],
                     generateSubscriptionHookReturnType(

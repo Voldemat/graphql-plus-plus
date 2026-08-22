@@ -8,7 +8,7 @@ import {
 export interface SDKConfig extends Omit<
     FrameworkSDKConfig,
     'buildVariablesType'
-> { }
+> {}
 
 export interface Config extends Omit<
     FrameworkConfig,

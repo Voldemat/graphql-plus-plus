@@ -40,7 +40,7 @@ export function generateSyncHookType(config: Config): ts.TypeAliasDeclaration {
                     undefined,
                     config.sdk.buildRequestContextType(
                         ts.factory.createTypeReferenceNode('TRequestContext'),
-                    )
+                    ),
                 ),
             ],
             generateSyncHookReturnType(
@@ -139,7 +139,7 @@ export function generateSyncHookBuilder(
                                 ts.factory.createTypeReferenceNode(
                                     'TRequestContext',
                                 ),
-                            )
+                            ),
                         ),
                     ],
                     generateSyncHookReturnType(

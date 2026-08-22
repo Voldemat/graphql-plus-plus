@@ -69,9 +69,10 @@ export function generateSubscriptionMethodFuncAlias(
             ts.factory.createTypeReferenceNode(
                 ts.factory.createIdentifier('Promise'),
                 [
-                    ts.factory.createTypeReferenceNode('SubOpAsyncIterable', [
-                        ts.factory.createTypeReferenceNode('R'),
-                    ]),
+                    ts.factory.createTypeReferenceNode(
+                        'types.SubOpAsyncIterable',
+                        [ts.factory.createTypeReferenceNode('R')],
+                    ),
                 ],
             ),
         ),
