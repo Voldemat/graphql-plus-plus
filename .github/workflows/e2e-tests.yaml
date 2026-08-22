@@ -29,6 +29,7 @@ jobs:
       COMPOSE_FILE: ./e2e-tests/docker-compose.yaml
       RUST_SERVER_IMAGE: vladimirdev635/e2e-tests-rust-server:${{ github.ref_name }}
       TYPESCRIPT_CLIENT_IMAGE: vladimirdev635/e2e-tests-typescript-client:${{ github.ref_name }}
+      GQL_IMAGE_TAG: vladimirdev635/gql:${{ github.ref_name }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -59,6 +60,8 @@ jobs:
         cache-to: type=registry,ref=vladimirdev635/e2e-tests-typescript-client:buildcache,mode=max
         provenance: false
         sbom: false
+        build-args: |
+          GQL_IMAGE_TAG=${{ env.GQL_IMAGE_TAG }}
     - name: Docker compose up
       run: docker compose up -d
     - name: Run typescript-client tests
