@@ -1,19 +1,32 @@
 import { Actor, ActorContext } from '@/config.js';
+import ts from 'typescript';
 import {
     Config as FrameworkConfig,
     SDKConfig as FrameworkSDKConfig,
     build as frameworkBuild,
 } from '../gql-client-framework/index.js';
-import ts from 'typescript';
+import { TSActorConfig } from '../shared.js';
 
-export interface SDKConfig extends Omit<
+export interface SDKConfig extends Pick<
     FrameworkSDKConfig,
-    'buildVariablesType'
+    | 'typeName'
+    | 'queriesKey'
+    | 'mutationsKey'
+    | 'subscriptionsKey'
+    | 'clientTypeNameBuilders'
+    | 'hookNameBuilders'
+    | 'operationHooksTypeNameBuilder'
+    | 'lazyHookBuilderName'
+    | 'lazyHookTypeName'
+    | 'syncHookBuilderName'
+    | 'syncHookTypeName'
+    | 'subscriptionHookBuilderName'
+    | 'subscriptionHookTypeName'
 > {}
 
-export interface Config extends Omit<
+export interface Config extends Pick<
     FrameworkConfig,
-    'frameworkImportName' | 'sdk'
+    'outPath' | 'importDeclarations' | 'graphqlModulePath' | keyof TSActorConfig
 > {
     sdk: SDKConfig;
 }
