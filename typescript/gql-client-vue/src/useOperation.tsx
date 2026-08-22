@@ -38,15 +38,19 @@ export type UseOperationHookReturnType<TResult> = ShallowRef<
     OperationState<TResult>
 >
 export function useOperation<
-    T extends SyncOperation<unknown, unknown>,
+    TExecutor extends IExecutor<TRequestContext>,
     TRequestContext extends RequestContext,
+    TOperation extends SyncOperation<unknown, unknown>,
 >(
-    executor: IExecutor<TRequestContext>,
-    operation: T,
-    variables: OperationVariables<T> | Ref<OperationVariables<T>>,
+    executor: TExecutor,
+    operation: TOperation,
+    variables:
+        | OperationVariables<TOperation>
+        | Ref<OperationVariables<TOperation>>,
     requestContext: TRequestContext | Ref<TRequestContext>,
-): UseOperationHookReturnType<OperationResult<T>> {
-    const state = shallowRef<OperationState<OperationResult<T>>>(loadingState)
+): UseOperationHookReturnType<OperationResult<TOperation>> {
+    const state =
+        shallowRef<OperationState<OperationResult<TOperation>>>(loadingState)
 
     watch(
         [

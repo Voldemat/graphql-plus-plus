@@ -9,10 +9,10 @@ import type {
 } from '../types.js'
 import { type OperationState } from '../useOperation.js'
 import type {
-    UseLazyOperationHookReturnType,
     LazyOperationExecuteReturnType,
     LazyOperationInitialState,
     LazyOperationState,
+    UseLazyOperationHookReturnType,
 } from './types.js'
 
 const lazyInitialState = Object.freeze({
@@ -20,16 +20,17 @@ const lazyInitialState = Object.freeze({
 } as const) satisfies LazyOperationInitialState
 
 async function execute<
+    TExecutor extends IExecutor<TRequestContext>,
     TRequestContext extends RequestContext,
-    T extends SyncOperation<unknown, unknown>,
+    TOperation extends SyncOperation<unknown, unknown>,
 >(
-    executor: IExecutor<TRequestContext>,
-    operation: T,
-    variables: OperationVariables<T>,
+    executor: TExecutor,
+    operation: TOperation,
+    variables: OperationVariables<TOperation>,
     requestContext: TRequestContext,
-    stateRef: ShallowRef<LazyOperationState<OperationResult<T>>>,
-): LazyOperationExecuteReturnType<OperationResult<T>> {
-    let newState: OperationState<OperationResult<T>>
+    stateRef: ShallowRef<LazyOperationState<OperationResult<TOperation>>>,
+): LazyOperationExecuteReturnType<OperationResult<TOperation>> {
+    let newState: OperationState<OperationResult<TOperation>>
     try {
         const result = await executor.executeSync(
             operation,
@@ -45,21 +46,24 @@ async function execute<
 }
 
 export function useLazyOperation<
+    TExecutor extends IExecutor<TRequestContext>,
     TRequestContext extends RequestContext,
-    T extends SyncOperation<unknown, unknown>,
+    TOperation extends SyncOperation<unknown, unknown>,
 >(
-    executor: IExecutor<TRequestContext>,
-    operation: T,
+    executor: TExecutor,
+    operation: TOperation,
 ): UseLazyOperationHookReturnType<
     TRequestContext,
-    OperationVariables<T>,
-    OperationResult<T>
+    OperationVariables<TOperation>,
+    OperationResult<TOperation>
 > {
     const state =
-        shallowRef<LazyOperationState<OperationResult<T>>>(lazyInitialState)
+        shallowRef<LazyOperationState<OperationResult<TOperation>>>(
+            lazyInitialState,
+        )
 
     const executeCallback = (
-        variables: OperationVariables<T>,
+        variables: OperationVariables<TOperation>,
         requestContext: TRequestContext,
     ) => {
         state.value = loadingState

@@ -22,18 +22,21 @@ export type UseSubscriptionHookReturnType<TResult> = ShallowRef<
 >
 
 export function useSubscription<
-    T extends SubscriptionOperation<unknown, unknown>,
+    TExecutor extends IExecutor<TRequestContext>,
     TRequestContext extends RequestContext,
+    TOperation extends SubscriptionOperation<unknown, unknown>,
 >(
-    executor: IExecutor<TRequestContext>,
-    operation: T,
-    variables: OperationVariables<T> | Ref<OperationVariables<T>>,
+    executor: TExecutor,
+    operation: TOperation,
+    variables:
+        | OperationVariables<TOperation>
+        | Ref<OperationVariables<TOperation>>,
     requestContext: TRequestContext | Ref<TRequestContext>,
-): UseSubscriptionHookReturnType<OperationResult<T>> {
+): UseSubscriptionHookReturnType<OperationResult<TOperation>> {
     const state =
-        shallowRef<OperationState<SubOpAsyncIterable<OperationResult<T>>>>(
-            loadingState,
-        )
+        shallowRef<
+            OperationState<SubOpAsyncIterable<OperationResult<TOperation>>>
+        >(loadingState)
 
     watch(
         [
