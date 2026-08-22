@@ -23,7 +23,7 @@ export const userSchema = z.object({
 export interface User extends z.output<typeof userSchema> {}
 
 export const BaseUserFragmentDocument =
-    "fragment BaseUser on User {\n    __typename\n    id\n";
+    "fragment BaseUser on User {\n    __typename\n    id\n}";
 export const baseUserFragmentSchema = z.object({
     id: z.string(),
     __typename: z.literal("User").nullable().optional(),
@@ -32,7 +32,7 @@ export interface BaseUserFragment extends z.output<
     typeof baseUserFragmentSchema
 > {}
 export const UserFragmentDocument =
-    "fragment User on User {\n    ...BaseUser\n    email\n    name\n fragment BaseUser on User {\n    __typename\n    id\n";
+    "fragment User on User {\n    ...BaseUser\n    email\n    name\n} fragment BaseUser on User {\n    __typename\n    id\n}";
 export const userFragmentSchema = z.object({
     email: z.string(),
     name: z.string(),
@@ -59,7 +59,7 @@ export const GetUserOperation = {
     name: "GetUser",
     type: "QUERY",
     document:
-        "query GetUser($id: UUID!) {\n    getUser(id: $id) {\n        ...User\n    }\n fragment User on User {\n    ...BaseUser\n    email\n    name\n fragment BaseUser on User {\n    __typename\n    id\n",
+        "query GetUser($id: UUID!) {\n    getUser(id: $id) {\n        ...User\n    }\n} fragment User on User {\n    ...BaseUser\n    email\n    name\n} fragment BaseUser on User {\n    __typename\n    id\n}",
     variablesSchema: getUserVariablesSchema,
     resultSchema: getUserResultSchema,
 } as const;
@@ -83,7 +83,7 @@ export const StreamUsersOperation = {
     name: "StreamUsers",
     type: "SUBSCRIPTION",
     document:
-        "subscription StreamUsers {\n    streamUsers {\n        ...User\n    }\n fragment User on User {\n    ...BaseUser\n    email\n    name\n fragment BaseUser on User {\n    __typename\n    id\n",
+        "subscription StreamUsers {\n    streamUsers {\n        ...User\n    }\n} fragment User on User {\n    ...BaseUser\n    email\n    name\n} fragment BaseUser on User {\n    __typename\n    id\n}",
     variablesSchema: streamUsersVariablesSchema,
     resultSchema: streamUsersResultSchema,
 } as const;
