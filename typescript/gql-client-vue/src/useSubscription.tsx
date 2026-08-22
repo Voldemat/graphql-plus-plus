@@ -1,9 +1,9 @@
 import {
-    isRef,
+    MaybeRefOrGetter,
     onUnmounted,
     shallowRef,
+    toValue,
     watch,
-    type Ref,
     type ShallowRef,
 } from 'vue'
 import { loadingState } from './loading-state.js'
@@ -28,10 +28,8 @@ export function useSubscription<
 >(
     executor: TExecutor,
     operation: TOperation,
-    variables:
-        | OperationVariables<TOperation>
-        | Ref<OperationVariables<TOperation>>,
-    requestContext: TRequestContext | Ref<TRequestContext>,
+    variables: MaybeRefOrGetter<OperationVariables<TOperation>>,
+    requestContext: MaybeRefOrGetter<TRequestContext>,
 ): UseSubscriptionHookReturnType<OperationResult<TOperation>> {
     const state =
         shallowRef<
@@ -39,14 +37,8 @@ export function useSubscription<
         >(loadingState)
 
     watch(
-        [
-            () => executor,
-            () => operation,
-            () => (isRef(variables) ? variables.value : variables),
-            () =>
-                isRef(requestContext) ? requestContext.value : requestContext,
-        ],
-        ([exec, op, vars, ctx], _oldValues, onCleanup) => {
+        [() => toValue(variables), () => toValue(requestContext)],
+        ([vars, ctx], _, onCleanup) => {
             const controller = new AbortController()
             onCleanup(() => {
                 if (state.value.state === 'success') {
@@ -56,7 +48,8 @@ export function useSubscription<
                 }
                 state.value = loadingState
             })
-            exec.executeSubscription(op, vars, ctx, controller)
+            executor
+                .executeSubscription(operation, vars, ctx, controller)
                 .then((result) => {
                     if (controller.signal.aborted) return
                     state.value = { state: 'success', ...result }

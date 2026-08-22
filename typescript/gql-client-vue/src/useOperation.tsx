@@ -1,10 +1,10 @@
 import {
-    isRef,
+    MaybeRefOrGetter,
     onUnmounted,
     shallowRef,
     ShallowRef,
+    toValue,
     watch,
-    type Ref,
 } from 'vue'
 import { loadingState } from './loading-state.js'
 import type {
@@ -44,24 +44,17 @@ export function useOperation<
 >(
     executor: TExecutor,
     operation: TOperation,
-    variables:
-        | OperationVariables<TOperation>
-        | Ref<OperationVariables<TOperation>>,
-    requestContext: TRequestContext | Ref<TRequestContext>,
+    variables: MaybeRefOrGetter<OperationVariables<TOperation>>,
+    requestContext: MaybeRefOrGetter<TRequestContext>,
 ): UseOperationHookReturnType<OperationResult<TOperation>> {
     const state =
         shallowRef<OperationState<OperationResult<TOperation>>>(loadingState)
 
     watch(
-        [
-            () => executor,
-            () => operation,
-            () => (isRef(variables) ? variables.value : variables),
-            () =>
-                isRef(requestContext) ? requestContext.value : requestContext,
-        ],
-        ([exec, op, vars, ctx]) => {
-            exec.executeSync(op, vars, ctx)
+        [() => toValue(variables), () => toValue(requestContext)],
+        ([vars, ctx]) => {
+            executor
+                .executeSync(operation, vars, ctx)
                 .then((result) => {
                     state.value = { state: 'success', ...result }
                 })
