@@ -28,7 +28,7 @@ export function generateBuildSubscriptionCallbackFunction(
             ts.factory.createTypeParameterDeclaration(
                 undefined,
                 ts.factory.createIdentifier('TExecutor'),
-                ts.factory.createTypeReferenceNode('IExecutor', [
+                ts.factory.createTypeReferenceNode('types.IExecutor', [
                     ts.factory.createTypeReferenceNode('TRequestContext'),
                 ]),
                 undefined,
@@ -37,7 +37,7 @@ export function generateBuildSubscriptionCallbackFunction(
                 undefined,
                 ts.factory.createIdentifier('TRequestContext'),
                 ts.factory.createTypeReferenceNode(
-                    ts.factory.createIdentifier('RequestContext'),
+                    ts.factory.createIdentifier('types.RequestContext'),
                     undefined,
                 ),
                 undefined,
@@ -70,7 +70,7 @@ export function generateBuildSubscriptionCallbackFunction(
                 ts.factory.createIdentifier('operation'),
                 undefined,
                 ts.factory.createTypeReferenceNode(
-                    ts.factory.createIdentifier('SubscriptionOperation'),
+                    ts.factory.createIdentifier('types.SubscriptionOperation'),
                     [
                         ts.factory.createTypeReferenceNode(
                             ts.factory.createIdentifier('V'),
@@ -102,9 +102,10 @@ export function generateBuildSubscriptionCallbackFunction(
                     ? ts.factory.createTypeReferenceNode(
                           ts.factory.createIdentifier('R'),
                       )
-                    : ts.factory.createTypeReferenceNode('ExecuteResult', [
-                          ts.factory.createTypeReferenceNode('R'),
-                      ]),
+                    : ts.factory.createTypeReferenceNode(
+                          'types.ExecuteResult',
+                          [ts.factory.createTypeReferenceNode('R')],
+                      ),
             ],
         ),
         ts.factory.createBlock(

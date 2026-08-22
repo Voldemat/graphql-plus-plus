@@ -8,10 +8,12 @@ export function createReturnTypeNode(
 ) {
     const rOpType = ts.factory.createTypeReferenceNode(resultName);
     const rType = isSubscription
-        ? ts.factory.createTypeReferenceNode('SubOpAsyncIterable', [rOpType])
+        ? ts.factory.createTypeReferenceNode('types.SubOpAsyncIterable', [
+              rOpType,
+          ])
         : rOpType;
     if (returnType === 'ExecuteResult.result') return rType;
-    return ts.factory.createTypeReferenceNode('ExecuteResult', [rType]);
+    return ts.factory.createTypeReferenceNode('types.ExecuteResult', [rType]);
 }
 
 export function getReturnTypeFromConfig(config: Config, operationName: string) {

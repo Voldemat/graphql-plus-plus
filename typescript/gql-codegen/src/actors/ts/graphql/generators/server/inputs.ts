@@ -84,10 +84,11 @@ function isFieldLazy(spec: z.infer<typeof inputFieldSpecSchema>): boolean {
 export function generateInputTypeDefinitionFields(
     scalarsMapping: ScalarsMapping,
     fields: Record<string, z.infer<typeof inputFieldSchema>>,
+    insideLazy: boolean,
 ): (ts.PropertyAssignment | ts.GetAccessorDeclaration)[] {
     return Object.entries(fields).map(([name, field]) => {
         const fieldSpec = generateZodInputField(scalarsMapping, field);
-        if (isFieldLazy(field.spec)) {
+        if (isFieldLazy(field.spec) && !insideLazy) {
             return ts.factory.createGetAccessorDeclaration(
                 [],
                 name,
@@ -107,6 +108,7 @@ function generateZodInputTypeDefinition(
     scalarsMapping: ScalarsMapping,
     name: string,
     fields: Record<string, z.infer<typeof inputFieldSchema>>,
+    insideLazy: boolean = false,
 ): ts.Node {
     return ts.factory.createVariableStatement(
         [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
@@ -127,6 +129,7 @@ function generateZodInputTypeDefinition(
                                 generateInputTypeDefinitionFields(
                                     scalarsMapping,
                                     fields,
+                                    insideLazy,
                                 ),
                                 true,
                             ),

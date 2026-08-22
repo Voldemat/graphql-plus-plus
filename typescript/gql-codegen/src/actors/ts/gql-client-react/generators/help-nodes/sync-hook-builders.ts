@@ -1,10 +1,11 @@
 /* oxlint-disable max-lines */
 import ts from 'typescript';
 import { Config } from '../../actor.js';
-import { generateHookReturnType } from '../hook-return-type.js';
 
-function generateSyncHookReturnType(config: Config): ts.TypeNode {
-    return generateHookReturnType(config, 'SYNC', 'TVariables', 'TResult');
+function generateSyncHookReturnType(resultTypeNode: ts.TypeNode): ts.TypeNode {
+    return ts.factory.createTypeReferenceNode('UseOperationHookReturnType', [
+        resultTypeNode,
+    ]);
 }
 
 export function generateSyncHookType(config: Config): ts.TypeAliasDeclaration {
@@ -15,7 +16,7 @@ export function generateSyncHookType(config: Config): ts.TypeAliasDeclaration {
             ts.factory.createTypeParameterDeclaration(
                 undefined,
                 'TRequestContext',
-                ts.factory.createTypeReferenceNode('RequestContext'),
+                ts.factory.createTypeReferenceNode('types.RequestContext'),
             ),
             ts.factory.createTypeParameterDeclaration(undefined, 'TVariables'),
             ts.factory.createTypeParameterDeclaration(undefined, 'TResult'),
@@ -38,7 +39,9 @@ export function generateSyncHookType(config: Config): ts.TypeAliasDeclaration {
                     ts.factory.createTypeReferenceNode('TRequestContext'),
                 ),
             ],
-            generateSyncHookReturnType(config),
+            generateSyncHookReturnType(
+                ts.factory.createTypeReferenceNode('TResult'),
+            ),
         ),
     );
 }
@@ -54,17 +57,27 @@ export function generateSyncHookBuilder(
             ts.factory.createTypeParameterDeclaration(
                 undefined,
                 'TExecutor',
-                ts.factory.createTypeReferenceNode('IExecutor', [
+                ts.factory.createTypeReferenceNode('types.IExecutor', [
                     ts.factory.createTypeReferenceNode('TRequestContext'),
                 ]),
             ),
             ts.factory.createTypeParameterDeclaration(
                 undefined,
                 'TRequestContext',
-                ts.factory.createTypeReferenceNode('RequestContext'),
+                ts.factory.createTypeReferenceNode('types.RequestContext'),
             ),
-            ts.factory.createTypeParameterDeclaration(undefined, 'TVariables'),
-            ts.factory.createTypeParameterDeclaration(undefined, 'TResult'),
+            ts.factory.createTypeParameterDeclaration(
+                undefined,
+                'TOperation',
+                ts.factory.createTypeReferenceNode('types.SyncOperation', [
+                    ts.factory.createKeywordTypeNode(
+                        ts.SyntaxKind.UnknownKeyword,
+                    ),
+                    ts.factory.createKeywordTypeNode(
+                        ts.SyntaxKind.UnknownKeyword,
+                    ),
+                ]),
+            ),
         ],
         [
             ts.factory.createParameterDeclaration(
@@ -79,16 +92,17 @@ export function generateSyncHookBuilder(
                 undefined,
                 'operation',
                 undefined,
-                ts.factory.createTypeReferenceNode('SyncOperation', [
-                    ts.factory.createTypeReferenceNode('TVariables'),
-                    ts.factory.createTypeReferenceNode('TResult'),
-                ]),
+                ts.factory.createTypeReferenceNode('TOperation'),
             ),
         ],
         ts.factory.createTypeReferenceNode(config.sdk.syncHookTypeName, [
             ts.factory.createTypeReferenceNode('TRequestContext'),
-            ts.factory.createTypeReferenceNode('TVariables'),
-            ts.factory.createTypeReferenceNode('TResult'),
+            ts.factory.createTypeReferenceNode('types.OperationVariables', [
+                ts.factory.createTypeReferenceNode('TOperation'),
+            ]),
+            ts.factory.createTypeReferenceNode('types.OperationResult', [
+                ts.factory.createTypeReferenceNode('TOperation'),
+            ]),
         ]),
         ts.factory.createBlock([
             ts.factory.createReturnStatement(
@@ -101,7 +115,14 @@ export function generateSyncHookBuilder(
                             undefined,
                             'variables',
                             undefined,
-                            ts.factory.createTypeReferenceNode('TVariables'),
+                            ts.factory.createTypeReferenceNode(
+                                'types.OperationVariables',
+                                [
+                                    ts.factory.createTypeReferenceNode(
+                                        'TOperation',
+                                    ),
+                                ],
+                            ),
                         ),
                         ts.factory.createParameterDeclaration(
                             undefined,
@@ -113,7 +134,12 @@ export function generateSyncHookBuilder(
                             ),
                         ),
                     ],
-                    generateSyncHookReturnType(config),
+                    generateSyncHookReturnType(
+                        ts.factory.createTypeReferenceNode(
+                            'types.OperationResult',
+                            [ts.factory.createTypeReferenceNode('TOperation')],
+                        ),
+                    ),
                     ts.factory.createToken(
                         ts.SyntaxKind.EqualsGreaterThanToken,
                     ),

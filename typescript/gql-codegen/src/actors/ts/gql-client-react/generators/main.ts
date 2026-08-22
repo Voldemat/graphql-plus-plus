@@ -27,15 +27,21 @@ function generateHookValueExpression(
 ) {
     return ts.factory.createCallExpression(
         ts.factory.createIdentifier(getHookBuilderName(config, type)),
-        [
-            ts.factory.createTypeReferenceNode('TExecutor'),
-            ts.factory.createTypeReferenceNode('TRequestContext'),
-            ts.factory.createTypeReferenceNode(variablesName),
-            ts.factory.createTypeReferenceNode(resultName),
-        ],
+        undefined,
         [
             ts.factory.createIdentifier('executor'),
-            ts.factory.createIdentifier(operationName),
+            ts.factory.createAsExpression(
+                ts.factory.createIdentifier(operationName),
+                ts.factory.createTypeReferenceNode(
+                    type !== 'SUBSCRIPTION'
+                        ? 'types.SyncOperation'
+                        : 'types.SubscriptionOperation',
+                    [
+                        ts.factory.createTypeReferenceNode(variablesName),
+                        ts.factory.createTypeReferenceNode(resultName),
+                    ],
+                ),
+            ),
         ],
     );
 }
@@ -137,41 +143,7 @@ export function generateNodes(
             }
         }
     }
-    const gqlClientReactImports: ts.ImportSpecifier[] = [
-        ts.factory.createImportSpecifier(
-            false,
-            undefined,
-            ts.factory.createIdentifier('useOperation'),
-        ),
-        ts.factory.createImportSpecifier(
-            false,
-            undefined,
-            ts.factory.createIdentifier('useLazyOperation'),
-        ),
-        ts.factory.createImportSpecifier(
-            true,
-            undefined,
-            ts.factory.createIdentifier('OperationState'),
-        ),
-        ts.factory.createImportSpecifier(
-            true,
-            undefined,
-            ts.factory.createIdentifier('UseLazyOperationReturnType'),
-        ),
-    ];
-
-    const gqlClientImports = [
-        ts.factory.createImportSpecifier(
-            false,
-            undefined,
-            ts.factory.createIdentifier('IExecutor'),
-        ),
-        ts.factory.createImportSpecifier(
-            false,
-            undefined,
-            ts.factory.createIdentifier('RequestContext'),
-        ),
-    ];
+    const gqlClientReactImports: ts.ImportSpecifier[] = [];
 
     const state = {
         hasQueries: queryNodes.length !== 0,
@@ -181,6 +153,27 @@ export function generateNodes(
 
     const returnObjectNodes: ts.PropertyAssignment[] = [];
     if (state.hasQueries) {
+        gqlClientReactImports.push(
+            ts.factory.createImportSpecifier(
+                false,
+                undefined,
+                ts.factory.createIdentifier('useOperation'),
+            ),
+        );
+        gqlClientReactImports.push(
+            ts.factory.createImportSpecifier(
+                true,
+                undefined,
+                ts.factory.createIdentifier('UseOperationHookReturnType'),
+            ),
+        );
+        gqlClientReactImports.push(
+            ts.factory.createImportSpecifier(
+                true,
+                undefined,
+                ts.factory.createIdentifier('types'),
+            ),
+        );
         returnObjectNodes.push(
             ts.factory.createPropertyAssignment(
                 config.sdk.queriesKey,
@@ -196,12 +189,20 @@ export function generateNodes(
             ),
         );
     }
+
     if (state.hasQueries || state.hasMutations) {
-        gqlClientImports.push(
+        gqlClientReactImports.push(
             ts.factory.createImportSpecifier(
                 false,
                 undefined,
-                ts.factory.createIdentifier('SyncOperation'),
+                ts.factory.createIdentifier('useLazyOperation'),
+            ),
+        );
+        gqlClientReactImports.push(
+            ts.factory.createImportSpecifier(
+                true,
+                undefined,
+                ts.factory.createIdentifier('UseLazyOperationHookReturnType'),
             ),
         );
     }
@@ -212,17 +213,10 @@ export function generateNodes(
                 undefined,
                 ts.factory.createIdentifier('useSubscription'),
             ),
-        );
-        gqlClientImports.push(
             ts.factory.createImportSpecifier(
-                false,
+                true,
                 undefined,
-                ts.factory.createIdentifier('SubscriptionOperation'),
-            ),
-            ts.factory.createImportSpecifier(
-                false,
-                undefined,
-                ts.factory.createIdentifier('SubOpAsyncIterable'),
+                ts.factory.createIdentifier('UseSubscriptionHookReturnType'),
             ),
         );
         returnObjectNodes.push(
@@ -248,15 +242,6 @@ export function generateNodes(
             ts.factory.createStringLiteral('@vladimirdev635/gql-client-react'),
         ),
         ts.factory.createImportDeclaration(
-            [],
-            ts.factory.createImportClause(
-                ts.SyntaxKind.TypeKeyword,
-                undefined,
-                ts.factory.createNamedImports(gqlClientImports),
-            ),
-            ts.factory.createStringLiteral('@vladimirdev635/gql-client/types'),
-        ),
-        ts.factory.createImportDeclaration(
             undefined,
             ts.factory.createImportClause(
                 undefined,
@@ -278,14 +263,14 @@ export function generateNodes(
                 ts.factory.createTypeParameterDeclaration(
                     undefined,
                     'TExecutor',
-                    ts.factory.createTypeReferenceNode('IExecutor', [
+                    ts.factory.createTypeReferenceNode('types.IExecutor', [
                         ts.factory.createTypeReferenceNode('TRequestContext'),
                     ]),
                 ),
                 ts.factory.createTypeParameterDeclaration(
                     undefined,
                     'TRequestContext',
-                    ts.factory.createTypeReferenceNode('RequestContext'),
+                    ts.factory.createTypeReferenceNode('types.RequestContext'),
                 ),
             ],
             [

@@ -1,15 +1,13 @@
 /* oxlint-disable max-lines */
 import ts from 'typescript';
 import { Config } from '../../actor.js';
-import { generateHookReturnType } from '../hook-return-type.js';
 
-function generateSubscriptionHookReturnType(config: Config): ts.TypeNode {
-    return generateHookReturnType(
-        config,
-        'SUBSCRIPTION',
-        'TVariables',
-        'TRequestContext',
-    );
+function generateSubscriptionHookReturnType(
+    resultTypeNode: ts.TypeNode,
+): ts.TypeNode {
+    return ts.factory.createTypeReferenceNode('UseSubscriptionHookReturnType', [
+        resultTypeNode,
+    ]);
 }
 
 export function generateSubscriptionHookType(
@@ -22,7 +20,7 @@ export function generateSubscriptionHookType(
             ts.factory.createTypeParameterDeclaration(
                 undefined,
                 'TRequestContext',
-                ts.factory.createTypeReferenceNode('RequestContext'),
+                ts.factory.createTypeReferenceNode('types.RequestContext'),
             ),
             ts.factory.createTypeParameterDeclaration(undefined, 'TVariables'),
             ts.factory.createTypeParameterDeclaration(undefined, 'TResult'),
@@ -45,7 +43,9 @@ export function generateSubscriptionHookType(
                     ts.factory.createTypeReferenceNode('TRequestContext'),
                 ),
             ],
-            generateSubscriptionHookReturnType(config),
+            generateSubscriptionHookReturnType(
+                ts.factory.createTypeReferenceNode('TResult'),
+            ),
         ),
     );
 }
@@ -61,17 +61,30 @@ export function generateSubscriptionHookBuilder(
             ts.factory.createTypeParameterDeclaration(
                 undefined,
                 'TExecutor',
-                ts.factory.createTypeReferenceNode('IExecutor', [
+                ts.factory.createTypeReferenceNode('types.IExecutor', [
                     ts.factory.createTypeReferenceNode('TRequestContext'),
                 ]),
             ),
             ts.factory.createTypeParameterDeclaration(
                 undefined,
                 'TRequestContext',
-                ts.factory.createTypeReferenceNode('RequestContext'),
+                ts.factory.createTypeReferenceNode('types.RequestContext'),
             ),
-            ts.factory.createTypeParameterDeclaration(undefined, 'TVariables'),
-            ts.factory.createTypeParameterDeclaration(undefined, 'TResult'),
+            ts.factory.createTypeParameterDeclaration(
+                undefined,
+                'TOperation',
+                ts.factory.createTypeReferenceNode(
+                    'types.SubscriptionOperation',
+                    [
+                        ts.factory.createKeywordTypeNode(
+                            ts.SyntaxKind.UnknownKeyword,
+                        ),
+                        ts.factory.createKeywordTypeNode(
+                            ts.SyntaxKind.UnknownKeyword,
+                        ),
+                    ],
+                ),
+            ),
         ],
         [
             ts.factory.createParameterDeclaration(
@@ -86,18 +99,19 @@ export function generateSubscriptionHookBuilder(
                 undefined,
                 'operation',
                 undefined,
-                ts.factory.createTypeReferenceNode('SubscriptionOperation', [
-                    ts.factory.createTypeReferenceNode('TVariables'),
-                    ts.factory.createTypeReferenceNode('TResult'),
-                ]),
+                ts.factory.createTypeReferenceNode('TOperation'),
             ),
         ],
         ts.factory.createTypeReferenceNode(
             config.sdk.subscriptionHookTypeName,
             [
                 ts.factory.createTypeReferenceNode('TRequestContext'),
-                ts.factory.createTypeReferenceNode('TVariables'),
-                ts.factory.createTypeReferenceNode('TResult'),
+                ts.factory.createTypeReferenceNode('types.OperationVariables', [
+                    ts.factory.createTypeReferenceNode('TOperation'),
+                ]),
+                ts.factory.createTypeReferenceNode('types.OperationResult', [
+                    ts.factory.createTypeReferenceNode('TOperation'),
+                ]),
             ],
         ),
         ts.factory.createBlock([
@@ -111,7 +125,14 @@ export function generateSubscriptionHookBuilder(
                             undefined,
                             'variables',
                             undefined,
-                            ts.factory.createTypeReferenceNode('TVariables'),
+                            ts.factory.createTypeReferenceNode(
+                                'types.OperationVariables',
+                                [
+                                    ts.factory.createTypeReferenceNode(
+                                        'TOperation',
+                                    ),
+                                ],
+                            ),
                         ),
                         ts.factory.createParameterDeclaration(
                             undefined,
@@ -123,7 +144,12 @@ export function generateSubscriptionHookBuilder(
                             ),
                         ),
                     ],
-                    generateSubscriptionHookReturnType(config),
+                    generateSubscriptionHookReturnType(
+                        ts.factory.createTypeReferenceNode(
+                            'types.OperationResult',
+                            [ts.factory.createTypeReferenceNode('TOperation')],
+                        ),
+                    ),
                     ts.factory.createToken(
                         ts.SyntaxKind.EqualsGreaterThanToken,
                     ),

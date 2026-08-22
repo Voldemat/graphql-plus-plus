@@ -156,6 +156,7 @@ function generateZodObjectSelection(
                     schema,
                     selection.selection,
                     { ensurePresent: true, optional },
+                    insideLazy,
                 );
                 if (
                     fieldSpec.spec._type === 'array' ||
@@ -327,6 +328,7 @@ function generateZodUnionFragmentSpecCallExpression(
     scalarsMapping: ScalarsMapping,
     schema: RootSchema,
     spec: z.infer<typeof unionFragmentSpec>,
+    insideLazy: boolean,
 ) {
     const [objectSelections, typenameSelections] = resolveUnionSelections(
         schema,
@@ -367,6 +369,7 @@ function generateZodUnionFragmentSpecCallExpression(
             ),
         ],
     );
+    if (insideLazy) return expression;
     return ts.factory.createCallExpression(
         ts.factory.createPropertyAccessExpression(
             ts.factory.createIdentifier('z'),
@@ -391,6 +394,7 @@ export function generateZodFragmentSpecCallExpression(
     schema: RootSchema,
     spec: FragmentSpecSchemaType,
     typenameConfig?: Parameters<typeof resolveSelections>[1],
+    insideLazy: boolean = false,
 ) {
     if (spec._type === 'ObjectFragmentSpec') {
         return generateZodObjectFragmentSpecCallExpression(
@@ -398,7 +402,7 @@ export function generateZodFragmentSpecCallExpression(
             schema,
             schema.server.objects[spec.name],
             spec.selections,
-            false,
+            insideLazy,
             typenameConfig || { ensurePresent: true, optional: true },
         );
     }
@@ -406,6 +410,7 @@ export function generateZodFragmentSpecCallExpression(
         scalarsMapping,
         schema,
         spec,
+        insideLazy,
     );
 }
 

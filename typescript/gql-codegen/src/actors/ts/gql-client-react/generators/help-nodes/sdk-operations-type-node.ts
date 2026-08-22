@@ -58,7 +58,7 @@ export function generateSdkTypeNode(
             ts.factory.createTypeParameterDeclaration(
                 undefined,
                 ts.factory.createIdentifier('TRequestContext'),
-                ts.factory.createTypeReferenceNode('RequestContext'),
+                ts.factory.createTypeReferenceNode('types.RequestContext'),
                 undefined,
             ),
         ],

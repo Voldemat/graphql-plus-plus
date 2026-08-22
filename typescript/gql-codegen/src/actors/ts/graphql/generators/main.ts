@@ -9,7 +9,7 @@ export function generateNodes(config: Config, context: ActorContext) {
         ts.factory.createImportDeclaration(
             [],
             ts.factory.createImportClause(
-                false,
+                undefined,
                 undefined,
                 ts.factory.createNamedImports([
                     ts.factory.createImportSpecifier(

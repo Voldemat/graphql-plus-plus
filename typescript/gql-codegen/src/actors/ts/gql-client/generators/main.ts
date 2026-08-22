@@ -4,7 +4,7 @@ import ts from 'typescript';
 import { Config } from '../actor.js';
 import { createBuildSubscriptionCallbackFunctionName } from './help-nodes/build-subscription-callback-function.js';
 import { createBuildSyncCallbackFunctionName } from './help-nodes/build-sync-callback-function.js';
-import { generateHelpNodes, hasReturnType } from './help-nodes/index.js';
+import { generateHelpNodes } from './help-nodes/index.js';
 import { getReturnTypeFromConfig } from './operation-return-type.js';
 
 export function generateNodes(
@@ -93,24 +93,9 @@ export function generateNodes(
         ts.factory.createImportSpecifier(
             false,
             undefined,
-            ts.factory.createIdentifier('IExecutor'),
-        ),
-        ts.factory.createImportSpecifier(
-            false,
-            undefined,
-            ts.factory.createIdentifier('RequestContext'),
+            ts.factory.createIdentifier('types'),
         ),
     ];
-
-    if (hasReturnType(config, 'ExecuteResult')) {
-        gqlClientImports.push(
-            ts.factory.createImportSpecifier(
-                false,
-                undefined,
-                ts.factory.createIdentifier('ExecuteResult'),
-            ),
-        );
-    }
 
     const returnObjectNodes: ts.PropertyAssignment[] = [];
     const state = {
@@ -134,30 +119,7 @@ export function generateNodes(
             ),
         );
     }
-    if (state.hasQueries || state.hasMutations) {
-        gqlClientImports.push(
-            ts.factory.createImportSpecifier(
-                false,
-                undefined,
-                ts.factory.createIdentifier('SyncOperation'),
-            ),
-        );
-    }
     if (state.hasSubscriptions) {
-        gqlClientImports.push(
-            ts.factory.createImportSpecifier(
-                false,
-                undefined,
-                ts.factory.createIdentifier('SubscriptionOperation'),
-            ),
-        );
-        gqlClientImports.push(
-            ts.factory.createImportSpecifier(
-                false,
-                undefined,
-                ts.factory.createIdentifier('SubOpAsyncIterable'),
-            ),
-        );
         returnObjectNodes.push(
             ts.factory.createPropertyAssignment(
                 config.sdk.subscriptionsKey,
@@ -177,12 +139,12 @@ export function generateNodes(
                 undefined,
                 ts.factory.createNamedImports(gqlClientImports),
             ),
-            ts.factory.createStringLiteral('@vladimirdev635/gql-client/types'),
+            ts.factory.createStringLiteral('@vladimirdev635/gql-client'),
         ),
         ts.factory.createImportDeclaration(
             undefined,
             ts.factory.createImportClause(
-                false,
+                undefined,
                 undefined,
                 ts.factory.createNamedImports(graphqlImports),
             ),
@@ -201,14 +163,14 @@ export function generateNodes(
                 ts.factory.createTypeParameterDeclaration(
                     undefined,
                     'TExecutor',
-                    ts.factory.createTypeReferenceNode('IExecutor', [
+                    ts.factory.createTypeReferenceNode('types.IExecutor', [
                         ts.factory.createTypeReferenceNode('TRequestContext'),
                     ]),
                 ),
                 ts.factory.createTypeParameterDeclaration(
                     undefined,
                     'TRequestContext',
-                    ts.factory.createTypeReferenceNode('RequestContext'),
+                    ts.factory.createTypeReferenceNode('types.RequestContext'),
                 ),
             ],
             [

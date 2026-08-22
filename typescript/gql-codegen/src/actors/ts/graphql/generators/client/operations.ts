@@ -58,71 +58,57 @@ function generateOperationNode(
                     ),
                     undefined,
                     undefined,
-                    ts.factory.createSatisfiesExpression(
-                        ts.factory.createAsExpression(
-                            ts.factory.createObjectLiteralExpression(
-                                [
-                                    ts.factory.createPropertyAssignment(
-                                        'name',
-                                        ts.factory.createStringLiteral(
-                                            operation.name,
-                                        ),
+                    ts.factory.createAsExpression(
+                        ts.factory.createObjectLiteralExpression(
+                            [
+                                ts.factory.createPropertyAssignment(
+                                    'name',
+                                    ts.factory.createStringLiteral(
+                                        operation.name,
                                     ),
-                                    ts.factory.createPropertyAssignment(
-                                        'type',
-                                        ts.factory.createStringLiteral(
-                                            operation.type,
-                                        ),
+                                ),
+                                ts.factory.createPropertyAssignment(
+                                    'type',
+                                    ts.factory.createStringLiteral(
+                                        operation.type,
                                     ),
-                                    ts.factory.createPropertyAssignment(
-                                        'document',
-                                        ts.factory.createStringLiteral(
-                                            [
-                                                operation.sourceText,
-                                                ...extractFragmentSourceTextsInSpec(
-                                                    schema,
-                                                    operation.fragmentSpec as FragmentSpecSchemaType,
-                                                ),
-                                            ].join(' '),
-                                        ),
+                                ),
+                                ts.factory.createPropertyAssignment(
+                                    'document',
+                                    ts.factory.createStringLiteral(
+                                        [
+                                            operation.sourceText,
+                                            ...extractFragmentSourceTextsInSpec(
+                                                schema,
+                                                operation.fragmentSpec as FragmentSpecSchemaType,
+                                            ),
+                                        ].join(' '),
                                     ),
-                                    ts.factory.createPropertyAssignment(
-                                        'variablesSchema',
-                                        ts.factory.createIdentifier(
-                                            generateSchemaName(
-                                                clientTypeNameBuilders.variablesTypeName(
-                                                    operation.name,
-                                                ),
+                                ),
+                                ts.factory.createPropertyAssignment(
+                                    'variablesSchema',
+                                    ts.factory.createIdentifier(
+                                        generateSchemaName(
+                                            clientTypeNameBuilders.variablesTypeName(
+                                                operation.name,
                                             ),
                                         ),
                                     ),
-                                    ts.factory.createPropertyAssignment(
-                                        'resultSchema',
-                                        ts.factory.createIdentifier(
-                                            generateSchemaName(
-                                                clientTypeNameBuilders.resultTypeName(
-                                                    operation.name,
-                                                ),
+                                ),
+                                ts.factory.createPropertyAssignment(
+                                    'resultSchema',
+                                    ts.factory.createIdentifier(
+                                        generateSchemaName(
+                                            clientTypeNameBuilders.resultTypeName(
+                                                operation.name,
                                             ),
                                         ),
                                     ),
-                                ],
-                                true,
-                            ),
-                            ts.factory.createTypeReferenceNode('const'),
+                                ),
+                            ],
+                            true,
                         ),
-                        ts.factory.createTypeReferenceNode('Operation', [
-                            ts.factory.createTypeReferenceNode(
-                                clientTypeNameBuilders.variablesTypeName(
-                                    operation.name,
-                                ),
-                            ),
-                            ts.factory.createTypeReferenceNode(
-                                clientTypeNameBuilders.resultTypeName(
-                                    operation.name,
-                                ),
-                            ),
-                        ]),
+                        ts.factory.createTypeReferenceNode('const'),
                     ),
                 ),
             ],
@@ -157,6 +143,7 @@ function generateOperationZodInputSchema(
                                 generateInputTypeDefinitionFields(
                                     scalarsMapping,
                                     parametersToFields(operation.parameters),
+                                    true,
                                 ),
                                 true,
                             ),
@@ -187,6 +174,8 @@ function genearteOperationZodOutputSchema(
                         scalarsMapping,
                         schema,
                         operation.fragmentSpec,
+                        undefined,
+                        true,
                     ),
                 ),
             ],
