@@ -21,8 +21,6 @@ function getHookBuilderName(
 function generateHookValueExpression(
     config: Config,
     operationName: string,
-    variablesName: string,
-    resultName: string,
     type: 'SYNC' | 'LAZY' | 'SUBSCRIPTION',
 ) {
     return ts.factory.createCallExpression(
@@ -30,18 +28,7 @@ function generateHookValueExpression(
         undefined,
         [
             ts.factory.createIdentifier('executor'),
-            ts.factory.createAsExpression(
-                ts.factory.createIdentifier(operationName),
-                ts.factory.createTypeReferenceNode(
-                    type !== 'SUBSCRIPTION'
-                        ? 'types.SyncOperation'
-                        : 'types.SubscriptionOperation',
-                    [
-                        ts.factory.createTypeReferenceNode(variablesName),
-                        ts.factory.createTypeReferenceNode(resultName),
-                    ],
-                ),
-            ),
+            ts.factory.createIdentifier(operationName),
         ],
     );
 }
@@ -89,8 +76,6 @@ export function generateNodes(
                         generateHookValueExpression(
                             config,
                             operationName,
-                            variablesName,
-                            resultName,
                             'SUBSCRIPTION',
                         ),
                     ),
@@ -106,8 +91,6 @@ export function generateNodes(
                         generateHookValueExpression(
                             config,
                             operationName,
-                            variablesName,
-                            resultName,
                             'LAZY',
                         ),
                     ),
@@ -123,8 +106,6 @@ export function generateNodes(
                         generateHookValueExpression(
                             config,
                             operationName,
-                            variablesName,
-                            resultName,
                             'SYNC',
                         ),
                     ),
@@ -133,8 +114,6 @@ export function generateNodes(
                         generateHookValueExpression(
                             config,
                             operationName,
-                            variablesName,
-                            resultName,
                             'LAZY',
                         ),
                     ),
