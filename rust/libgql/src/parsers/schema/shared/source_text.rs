@@ -4,7 +4,7 @@ fn get_source_text<'buffer>(
     source_buffer: &'buffer str,
     location: &file::shared::ast::NodeLocation,
 ) -> &'buffer str {
-    &source_buffer[location.start..location.end]
+    &source_buffer[location.start..=location.end]
 }
 
 pub fn extract_from_fragment<'buffer>(
