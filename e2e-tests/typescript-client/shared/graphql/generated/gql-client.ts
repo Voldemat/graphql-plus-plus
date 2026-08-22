@@ -1,50 +1,106 @@
-/* oxlint-disable no-use-before-define */
-// @ts-nocheck
-import type {
-    IExecutor,
-    RequestContext,
-    SubOpAsyncIterable,
-} from "@vladimirdev635/gql-client/types";
+/* oxlint-disable no-use-before-define,max-lines */
+import type { types } from "@vladimirdev635/gql-client";
 import {
     GetUserOperation,
-    GetUserVariables,
-    GetUserResult,
+    type GetUserVariables,
+    type GetUserResult,
     StreamUsersOperation,
-    StreamUsersVariables,
-    StreamUsersResult,
+    type StreamUsersVariables,
+    type StreamUsersResult,
 } from "./graphql.ts";
 
-export function createSdk<TRequestContext extends RequestContext>(
-    executor: IExecutor<TRequestContext>,
-) {
+type GQLSyncMethodFuncType<TRequestContext, V, R> = (
+    variables: V,
+    context: TRequestContext,
+) => Promise<R>;
+type GQLSubscriptionMethodFuncType<TRequestContext, V, R> = (
+    variables: V,
+    context: TRequestContext,
+    controller: AbortController,
+) => Promise<types.SubOpAsyncIterable<R>>;
+export interface GQLQueryRequests<TRequestContext> {
+    GetUser: GQLSyncMethodFuncType<
+        TRequestContext,
+        GetUserVariables,
+        GetUserResult
+    >;
+}
+export interface GQLSubscriptionRequests<TRequestContext> {
+    StreamUsers: GQLSubscriptionMethodFuncType<
+        TRequestContext,
+        StreamUsersVariables,
+        StreamUsersResult
+    >;
+}
+export interface SdkType<TRequestContext> {
+    queries: GQLQueryRequests<TRequestContext>;
+    subscriptions: GQLSubscriptionRequests<TRequestContext>;
+}
+function buildSyncResultCallback<
+    TExecutor extends types.IExecutor<TRequestContext>,
+    TRequestContext extends types.RequestContext,
+    V,
+    R,
+>(
+    executor: TExecutor,
+    operation: types.SyncOperation<V, R>,
+): GQLSyncMethodFuncType<TRequestContext, V, R> {
+    return async (
+        variables: V,
+        requestContext: TRequestContext,
+    ): Promise<R> => {
+        const executorResult = await executor.executeSync(
+            operation,
+            variables,
+            requestContext,
+        );
+        return executorResult.result;
+    };
+}
+function buildSubscriptionResultCallback<
+    TExecutor extends types.IExecutor<TRequestContext>,
+    TRequestContext extends types.RequestContext,
+    V,
+    R,
+>(
+    executor: TExecutor,
+    operation: types.SubscriptionOperation<V, R>,
+): GQLSubscriptionMethodFuncType<TRequestContext, V, R> {
+    return async (
+        variables: V,
+        requestContext: TRequestContext,
+        controller: AbortController,
+    ): Promise<types.SubOpAsyncIterable<R>> => {
+        const executorResult = await executor.executeSubscription(
+            operation,
+            variables,
+            requestContext,
+            controller,
+        );
+        return executorResult.result;
+    };
+}
+
+export function createSdk<
+    TExecutor extends types.IExecutor<TRequestContext>,
+    TRequestContext extends types.RequestContext,
+>(executor: TExecutor): SdkType<TRequestContext> {
     return {
         queries: {
-            GetUser: async (
-                variables: GetUserVariables,
-                requestContext: TRequestContext,
-            ): Promise<GetUserResult> => {
-                const executorResult = await executor.executeSync(
-                    GetUserOperation,
-                    variables,
-                    requestContext,
-                );
-                return executorResult.result;
-            },
+            GetUser: buildSyncResultCallback<
+                TExecutor,
+                TRequestContext,
+                GetUserVariables,
+                GetUserResult
+            >(executor, GetUserOperation),
         },
         subscriptions: {
-            StreamUsers: async (
-                variables: StreamUsersVariables,
-                requestContext: TRequestContext,
-                controller: AbortController,
-            ): Promise<SubOpAsyncIterable<StreamUsersResult>> => {
-                const executorResult = await executor.executeSubscription(
-                    StreamUsersOperation,
-                    variables,
-                    requestContext,
-                    controller,
-                );
-                return executorResult.result;
-            },
+            StreamUsers: buildSubscriptionResultCallback<
+                TExecutor,
+                TRequestContext,
+                StreamUsersVariables,
+                StreamUsersResult
+            >(executor, StreamUsersOperation),
         },
     } as const;
 }

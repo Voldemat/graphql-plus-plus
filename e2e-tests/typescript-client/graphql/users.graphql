@@ -1,0 +1,22 @@
+fragment BaseUser on User {
+    __typename
+    id
+}
+
+fragment User on User {
+    ...BaseUser
+    email
+    name
+}
+
+query GetUser($id: UUID!) {
+    getUser(id: $id) {
+        ...User
+    }
+}
+
+subscription StreamUsers {
+    streamUsers {
+        ...User
+    }
+}

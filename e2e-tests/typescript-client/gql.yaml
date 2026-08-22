@@ -1,0 +1,16 @@
+server:
+  inputs:
+    graphql: []
+    jsonSchema:
+        - ../graphql/server-schema.json
+  outputs:
+    filepath: "-"
+    onlyUsedInOperations: true
+client:
+  inputs:
+    graphql:
+        - ./graphql/**/*.graphql
+    jsonSchema: []
+  outputs:
+    filepath: "-"
+    onlyUsedInOperations: true
