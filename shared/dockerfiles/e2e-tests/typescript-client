@@ -12,6 +12,7 @@ RUN npm install
 COPY ./typescript/gql-client/ ./
 RUN npm run build && mv ./node_modules ./dist/node_modules
 
+ARG GQL_IMAGE_TAG
 FROM ${GQL_IMAGE_TAG} as gql
 FROM oven/bun:1.3.14-alpine
 COPY --from=gql /gql /usr/bin/gql
