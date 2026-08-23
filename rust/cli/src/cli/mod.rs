@@ -61,7 +61,15 @@ impl CLI {
 
 fn parse_config(config_path: &std::path::Path) -> config::Config {
     let buffer = std::fs::read_to_string(config_path).unwrap();
-    return serde_yaml::from_str(&buffer).unwrap();
+    let config: config::Config = serde_yaml::from_str(&buffer).unwrap();
+    if config.version != CLI_VERSION {
+        eprintln!(
+            "Version mismatch. cli version: {} and config version {}",
+            CLI_VERSION, config.version
+        );
+        std::process::exit(1);
+    }
+    config
 }
 
 fn generate(args: MainArgs) {

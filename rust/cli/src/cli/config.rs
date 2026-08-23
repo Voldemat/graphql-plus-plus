@@ -58,6 +58,7 @@ pub struct OperationsMapConfig {
 
 #[derive(serde::Deserialize)]
 pub struct Config {
+    pub version: String,
     pub formatting: Option<GraphqlFormattingConfig>,
     pub server: Option<ServerConfig>,
     pub client: Option<ClientConfig>,
