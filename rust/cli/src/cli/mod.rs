@@ -62,10 +62,12 @@ impl CLI {
 fn parse_config(config_path: &std::path::Path) -> config::Config {
     let buffer = std::fs::read_to_string(config_path).unwrap();
     let config: config::Config = serde_yaml::from_str(&buffer).unwrap();
-    if config.version != CLI_VERSION {
+    if let Some(config_version) = &config.version
+        && config_version != CLI_VERSION
+    {
         eprintln!(
             "Version mismatch. cli version: {} and config version {}",
-            CLI_VERSION, config.version
+            CLI_VERSION, config_version
         );
         std::process::exit(1);
     }
