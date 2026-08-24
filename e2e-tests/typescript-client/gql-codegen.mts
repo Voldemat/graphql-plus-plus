@@ -5,6 +5,7 @@ import {
     actors,
     type Config,
     run,
+    runActionFromArgv,
 } from "@vladimirdev635/gql-codegen";
 import { loadRootSchemaFromGQLSubprocess } from "@vladimirdev635/gql-codegen/schema/utils";
 import { format } from "oxfmt";
@@ -82,4 +83,4 @@ const config: Config<ActorContext> = {
         }),
     ],
 };
-await run(config);
+await run(config, runActionFromArgv(process.argv));

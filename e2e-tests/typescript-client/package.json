@@ -15,9 +15,8 @@
         "lint:fix": "oxlint --fix .",
         "lint:ci": "bun run fmt:check && bun run lint && bun run codegen:validate && bun run lint:ts",
         "lint:ts": "bun run tsc --noEmit",
-        "codegen": "bun run ./gql-codegen.mts",
-        "codegen:validate": "previous_hash=$(bun run --silent codegen:hash) && bun run codegen && if test $previous_hash = $(bun run --silent codegen:hash);then echo 'Types is consistent within current schema'; exit 0; else echo 'Types is not consistent within schema'; exit 1; fi",
-        "codegen:hash": "echo $(find ./shared/graphql/generated -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d \" \" -f 1);"
+        "codegen": "bun run ./gql-codegen.mts generate",
+        "codegen:validate": "bun run ./gql-codegen.mts validate"
     },
     "dependencies": {
         "@vladimirdev635/gql-client": "file:../../typescript/gql-client/dist"
