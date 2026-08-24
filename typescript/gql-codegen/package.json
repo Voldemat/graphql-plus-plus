@@ -25,6 +25,10 @@
         "test": "vitest",
         "build": "tsc && tsc-alias && cp package.json ./dist/package.json"
     },
+    "dependencies": {
+        "diff": "^9.0.0",
+        "picocolors": "^1.1.1"
+    },
     "devDependencies": {
         "@types/node": "^24.0.1",
         "assert": "^2.1.0",

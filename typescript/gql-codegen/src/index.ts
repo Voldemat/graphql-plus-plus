@@ -1,4 +1,10 @@
-export { Actor, ActorContext, Config } from './config.js';
+export {
+    type Actor,
+    type ActorContext,
+    type Config,
+    type RunAction,
+    runActionFromArgv,
+} from './config.js';
 export { run } from './main.js';
 export {
     loadClientSchemaFromFile,
