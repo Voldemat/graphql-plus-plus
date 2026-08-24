@@ -5,7 +5,7 @@ export {
     type OperationState,
     type UseOperationHookReturnType,
     useOperation,
-} from './useOperation.jsx'
+} from './useOperation.js'
 export {
     type LazyOperationInitialState,
     type LazyOperationState,
@@ -16,5 +16,5 @@ export {
 export {
     type UseSubscriptionHookReturnType,
     useSubscription,
-} from './useSubscription.jsx'
+} from './useSubscription.js'
 export * as types from './types.js'
