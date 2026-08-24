@@ -33,12 +33,14 @@ export interface BaseUserFragment extends z.output<
 > {}
 export const UserFragmentDocument =
     "fragment User on User {\n    ...BaseUser\n    email\n    name\n} fragment BaseUser on User {\n    __typename\n    id\n}";
-export const userFragmentSchema = z.object({
-    email: z.string(),
-    name: z.string(),
-    ...z.lazy(() => baseUserFragmentSchema).def.getter().shape,
-    __typename: z.literal("User").nullable().optional(),
-});
+export const userFragmentSchema = z.lazy(() =>
+    z.object({
+        email: z.string(),
+        name: z.string(),
+        ...baseUserFragmentSchema.shape,
+        __typename: z.literal("User").nullable().optional(),
+    }),
+);
 export interface UserFragment extends z.output<typeof userFragmentSchema> {}
 export const getUserVariablesSchema = z.object({
     id: z.string(),
@@ -49,10 +51,12 @@ export interface GetUserVariables extends z.input<
 
 export const getUserResultSchema = z.object({
     __typename: z.literal("Query").nullable().optional(),
-    getUser: z.object({
-        ...userFragmentSchema.shape,
-        __typename: z.literal("User").nullable().optional(),
-    }),
+    getUser: z.lazy(() =>
+        z.object({
+            ...userFragmentSchema.def.getter().shape,
+            __typename: z.literal("User").nullable().optional(),
+        }),
+    ),
 });
 export interface GetUserResult extends z.output<typeof getUserResultSchema> {}
 export const GetUserOperation = {
@@ -71,10 +75,12 @@ export interface StreamUsersVariables extends z.input<
 
 export const streamUsersResultSchema = z.object({
     __typename: z.literal("Subscription").nullable().optional(),
-    streamUsers: z.object({
-        ...userFragmentSchema.shape,
-        __typename: z.literal("User").nullable().optional(),
-    }),
+    streamUsers: z.lazy(() =>
+        z.object({
+            ...userFragmentSchema.def.getter().shape,
+            __typename: z.literal("User").nullable().optional(),
+        }),
+    ),
 });
 export interface StreamUsersResult extends z.output<
     typeof streamUsersResultSchema
