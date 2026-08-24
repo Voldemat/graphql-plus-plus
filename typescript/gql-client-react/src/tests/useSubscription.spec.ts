@@ -1,4 +1,4 @@
-import { useSubscription } from '../useSubscription.jsx'
+import { useSubscription } from '../useSubscription.js'
 import { describe, expect, it } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import assert from 'assert'

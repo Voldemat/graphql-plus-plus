@@ -1,4 +1,4 @@
-import { useOperation } from '../useOperation.jsx'
+import { useOperation } from '../useOperation.js'
 import { describe, expect, it } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import assert from 'assert'
