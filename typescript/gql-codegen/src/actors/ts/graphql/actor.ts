@@ -1,7 +1,4 @@
-import { diffLines } from 'diff';
-import { PathOrFileDescriptor, readFileSync, writeFileSync } from 'fs';
-import path from 'path';
-import pc from 'picocolors';
+import { PathOrFileDescriptor } from 'fs';
 import ts from 'typescript';
 import { Actor, ActorContext, RunAction } from '../../../config.js';
 import {
@@ -9,7 +6,7 @@ import {
     renderNodes,
     TSActorConfig,
 } from '../shared.js';
-import { printChanges } from '../text-diff.js';
+import { executeRunAction } from '../../utils.js';
 import { generateNodes } from './generators/main.js';
 import { ScalarsMapping } from './generators/server/scalars/index.js';
 
@@ -24,22 +21,7 @@ export interface Config extends TSActorConfig {
 async function actor(config: Config, context: ActorContext, action: RunAction) {
     const nodes = generateNodes(config, context);
     const code = await renderNodes(config, nodes);
-    switch (action) {
-        case RunAction.Generate: {
-            writeFileSync(config.outPath, code);
-            break;
-        }
-        case RunAction.Validate: {
-            const fileCode = readFileSync(config.outPath).toString();
-            const changes = diffLines(fileCode, code);
-            process.stdout.write(
-                pc.blue(
-                    `${path.relative(process.cwd(), config.outPath.toString())}:\n`,
-                ),
-            );
-            printChanges(changes);
-        }
-    }
+    executeRunAction(config.outPath, action, code);
 }
 
 export function build(config: Config): Actor<ActorContext> {

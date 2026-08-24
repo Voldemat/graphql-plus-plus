@@ -1,13 +1,14 @@
-import { PathOrFileDescriptor, writeFileSync } from 'fs';
+import { Actor, ActorContext, RunAction } from '@/config.js';
+import { OperationType } from '@/schema/client/operation.js';
+import { PathOrFileDescriptor } from 'fs';
 import ts from 'typescript';
-import { Actor, ActorContext } from '@/config.js';
+import { executeRunAction } from '../../utils.js';
 import {
     ClientTypeNameBuilders,
     renderNodes,
     TSActorConfig,
 } from '../shared.js';
 import { generateNodes } from './generators/main.js';
-import { OperationType } from '@/schema/client/operation.js';
 
 export type OperationReturnType = 'ExecuteResult' | 'ExecuteResult.result';
 export interface SDKConfig {
@@ -29,12 +30,12 @@ export interface Config extends TSActorConfig {
     graphqlModulePath: string;
 }
 
-async function actor(config: Config, context: ActorContext) {
+async function actor(config: Config, context: ActorContext, action: RunAction) {
     const nodes = generateNodes(config, context);
     const code = await renderNodes(config, nodes);
-    writeFileSync(config.outPath, code);
+    executeRunAction(config.outPath, action, code);
 }
 
 export function build(config: Config): Actor<ActorContext> {
-    return (context) => actor(config, context);
+    return (context, action) => actor(config, context, action);
 }
