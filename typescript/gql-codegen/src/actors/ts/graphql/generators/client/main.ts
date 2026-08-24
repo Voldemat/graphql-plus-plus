@@ -1,19 +1,25 @@
 import { ActorContext } from '@/config.js';
 import ts from 'typescript';
 import { Config } from '../../actor.js';
-import { generateFragmentTypes } from './fragments.js';
-import { generateOperationsNodes } from './operations.js';
+import { generateFragmentTypes } from './fragments/index.js';
+import { generateOperationsNodes } from './operations/index.js';
 
 export function generateClientNodes(
     config: Config,
     context: ActorContext,
 ): ts.Node[] {
+    const lazyFragmentsSet = new Set<string>();
     return [
-        ...generateFragmentTypes(config.scalarsMapping, context.schema),
+        ...generateFragmentTypes(
+            config.scalarsMapping,
+            context.schema,
+            lazyFragmentsSet,
+        ),
         ...generateOperationsNodes(
             config.clientTypeNameBuilders,
             config.scalarsMapping,
             context.schema,
+            lazyFragmentsSet,
         ),
     ];
 }
