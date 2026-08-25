@@ -281,7 +281,7 @@ pub fn run_config_action<'a>(
     };
     if let Some(outputs) = config_server.outputs.as_ref() {
         let json_string =
-            libgql::json::serializers::schema::serialize_server_schema(
+            libgql::json::serializers::schema::server::serialize_server_schema(
                 &server_registry,
                 if outputs.only_used_in_operations {
                     client_registry.as_ref()
@@ -298,7 +298,7 @@ pub fn run_config_action<'a>(
         && let Some(c_registry) = client_registry
     {
         let json_string =
-            libgql::json::serializers::schema::serialize_client_schema(
+            libgql::json::serializers::schema::client::serialize_client_schema(
                 &c_registry,
                 outputs.pretty,
             )?;

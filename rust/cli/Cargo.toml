@@ -13,7 +13,7 @@ futures-core = { version = "0.3.32", default-features = false }
 futures-util = { version = "0.3.32", default-features = false }
 glob = "0.3.3"
 indexmap = { version = "2.13.0", features = ["std"], default-features = false }
-libgql = { path = "../libgql" }
+libgql = { path = "../libgql", features = ["formatter", "parsers", "json-serializers-schema", "json-parsers-schema-server", "json-parsers-introspection"] }
 reqwest = { version = "0.13.2", default-features = false, features = ["blocking"] }
 serde = { version = "1.0.228", features = ["rc"], default-features = false }
 serde_json = { version = "1.0.148", default-features = false }
