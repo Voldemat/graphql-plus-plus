@@ -6,19 +6,47 @@ license = "MIT"
 description = "Library for parsing and executing gql queries"
 repository = "https://github.com/Voldemat/graphql-plus-plus"
 
+[features]
+all = ["executor", "lexer", "parsers", "json", "formatter"]
+executor = ["parsers-schema", "dep:async-stream", "dep:futures", "dep:futures-core"]
+lexer = []
+parsers = ["parsers-file", "parsers-schema"]
+parsers-file = ["parsers-file-server", "parsers-file-client"]
+parsers-file-shared = ["lexer"]
+parsers-file-client = ["lexer", "parsers-file-shared"]
+parsers-file-server = ["lexer", "parsers-file-shared"]
+parsers-schema = ["parsers-schema-client", "parsers-schema-server"]
+parsers-schema-shared = ["dep:phf"]
+parsers-schema-client = ["parsers-schema-shared"]
+parsers-schema-server = ["parsers-schema-shared"]
+json = ["json-serializers", "json-parsers", "json-executor"]
+json-serializers = ["json-serializers-schema"]
+json-serializers-schema = ["json-serializers-schema-server", "json-serializers-schema-client"]
+json-serializers-schema-shared = ["dep:struson"]
+json-serializers-schema-server = ["json-serializers-schema-shared", "dep:struson"]
+json-serializers-schema-client = ["json-serializers-schema-shared", "dep:struson"]
+json-parsers = ["json-parsers-introspection", "json-parsers-schema"]
+json-parsers-introspection = []
+json-parsers-schema = ["json-parsers-schema-server"]
+json-parsers-schema-server = []
+json-executor = []
+formatter = ["formatter-client", "formatter-server"]
+formatter-shared = ["parsers-file-shared", "dep:codeform", "dep:unicode-width"]
+formatter-client = ["formatter-shared", "parsers-file-client", "dep:codeform", "dep:unicode-width"]
+formatter-server = ["formatter-shared", "parsers-file-server", "dep:codeform", "dep:unicode-width"]
+
 [dependencies]
-async-stream = "0.3.6"
-codeform = { version = "0.0.6" }
+async-stream = { version = "0.3.6", optional = true }
+codeform = { version = "0.0.6", optional = true }
 derive_more = { version = "2.1.0", features = ["from", "display"], default-features = false }
-futures = { version = "0.3.32", features = ["alloc"], default-features = false }
-futures-core = { version = "0.3.32", features = [], default-features = false }
+futures = { version = "0.3.32", features = ["alloc"], default-features = false, optional = true }
+futures-core = { version = "0.3.32", features = [], default-features = false, optional = true }
 indexmap = { version = "2.12.1", features = ["serde"], default-features = false }
-ouroboros = { version = "0.18.5", default-features = false }
-phf = "0.13.1"
+phf = { version = "0.13.1", optional = true }
 serde = { version = "1.0.228", features = ["serde_derive", "rc"], default-features = false }
 serde_json = { version = "1.0.148", features = ["preserve_order"], default-features = false }
-struson = { version = "0.6.0", features = ["simple-api"], default-features = false }
-unicode-width = "0.2.2"
+struson = { version = "0.6.0", features = ["simple-api"], default-features = false, optional = true }
+unicode-width = { version = "0.2.2", optional = true }
 
 [dev-dependencies]
 pretty_assertions = { version = "1.4.1", features = ["std"], default-features = false }
