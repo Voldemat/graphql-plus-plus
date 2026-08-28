@@ -14,4 +14,4 @@ quote = "1.0.45"
 
 [dev-dependencies]
 pretty_assertions = { version = "1.4.1", features = ["std"], default-features = false }
-serde_json = { version = "1.0.149", features = [], default-features = false }
+serde_json = { version = "1.0.149", features = ["std"], default-features = false }
