@@ -24,7 +24,7 @@ jobs:
       run: cargo build --profile ${{ matrix.BUILD_TARGET }}
     - name: Run tests in "${{ matrix.BUILD_TARGET }}" mode
       working-directory: rust/libgql
-      run: cargo test --profile ${{ matrix.BUILD_TARGET }}
+      run: cargo test --profile ${{ matrix.BUILD_TARGET }} --features=formatter
     - name: Get crates.io token
       if: github.ref_type == 'tag'
       uses: rust-lang/crates-io-auth-action@v1
