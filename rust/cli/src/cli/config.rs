@@ -1,5 +1,10 @@
 use std::collections::HashMap;
 
+pub const CLI_VERSION: &str = match option_env!("CLI_VERSION") {
+    Some(v) => v,
+    None => "unspecified",
+};
+
 #[derive(serde::Deserialize)]
 pub struct GraphqlFormattingServerConfig {}
 
@@ -64,4 +69,21 @@ pub struct Config {
     pub client: Option<ClientConfig>,
     #[serde(alias = "operationsMap")]
     pub operations_map: Option<OperationsMapConfig>,
+}
+
+impl Config {
+    pub fn from_yaml_file_path(config_path: &std::path::Path) -> Config {
+        let buffer = std::fs::read_to_string(config_path).unwrap();
+        let config: Config = serde_yaml::from_str(&buffer).unwrap();
+        if let Some(config_version) = &config.version
+            && config_version != CLI_VERSION
+        {
+            eprintln!(
+                "Version mismatch. cli version: {} and config version {}",
+                CLI_VERSION, config_version
+            );
+            std::process::exit(1);
+        }
+        config
+    }
 }
