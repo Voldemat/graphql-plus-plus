@@ -283,10 +283,13 @@ fn wrap_stream<'a>(
     ))
 }
 
-fn build_response(body: String, status_code: hyper::StatusCode) -> Response<'static> {
-    let mut response: Response = hyper::Response::new(
-        Box::pin(Full(Some(hyper::body::Bytes::from(body)))),
-    );
+fn build_response(
+    body: String,
+    status_code: hyper::StatusCode,
+) -> Response<'static> {
+    let mut response: Response = hyper::Response::new(Box::pin(Full(Some(
+        hyper::body::Bytes::from(body),
+    ))));
     *response.status_mut() = status_code;
     response
 }

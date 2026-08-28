@@ -3,9 +3,10 @@ use std::collections::HashSet;
 use libgqlcodegen::{format, generator, schema};
 
 fn run_schema() {
-    let server_schema: schema::server::schema::Schema =
-        serde_json::from_str(&std::fs::read_to_string("../graphql/server-schema.json").unwrap())
-            .unwrap();
+    let server_schema: schema::server::schema::Schema = serde_json::from_str(
+        &std::fs::read_to_string("../graphql/server-schema.json").unwrap(),
+    )
+    .unwrap();
     let client_schema = schema::client::schema::Schema::default();
     let scalars_mapping = indexmap::IndexMap::<String, String>::from([
         ("Boolean".into(), "bool".into()),
@@ -15,8 +16,9 @@ fn run_schema() {
         ("UUID".into(), "uuid::Uuid".into()),
     ]);
     let filepath = "./src/api/generated.rs";
-    let (imports, code_map) =
-        generator::main::extract_resolvers_code(std::fs::read_to_string(filepath).unwrap());
+    let (imports, code_map) = generator::main::extract_resolvers_code(
+        std::fs::read_to_string(filepath).unwrap(),
+    );
     let mut scope = codegen::Scope::new();
     if imports != "" {
         scope.raw(imports);
@@ -28,7 +30,10 @@ fn run_schema() {
             resolvers: generator::config::ResolversConfig {
                 context_type: "super::context::Context".to_string(),
             },
-            field_to_resolver: HashSet::from_iter([("User".to_string(), "email".to_string())]),
+            field_to_resolver: HashSet::from_iter([(
+                "User".to_string(),
+                "email".to_string(),
+            )]),
         },
         &schema::Schema {
             server: server_schema,
@@ -37,7 +42,8 @@ fn run_schema() {
         code_map,
         &mut scope,
     );
-    let formatted = format::format_using_rustfmt("./", &scope.to_string()).unwrap();
+    let formatted =
+        format::format_using_rustfmt("./", &scope.to_string()).unwrap();
     if std::env::var("GQL_OVERWRITE").unwrap_or("".to_string()) == "true" {
         std::fs::write(filepath, formatted).unwrap();
     } else {
