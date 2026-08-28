@@ -1,6 +1,6 @@
 pub mod commands;
 pub mod config;
-pub mod text_diff;
+pub mod shared;
 pub mod utils;
 
 #[derive(clap::Parser)]
