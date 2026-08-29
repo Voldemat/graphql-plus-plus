@@ -23,6 +23,21 @@ pub enum Error<'buffer> {
     },
 }
 
+impl<'buffer> std::fmt::Display for Error<'buffer> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Base(error) => error.fmt(f),
+            Self::UnexpectedOpType(token) => f.write_fmt(format_args!(
+                "Unexpected op type: {}",
+                token.lexeme
+            )),
+            Self::DuplicateParameter { .. } => {
+                f.write_fmt(format_args!("Duplicate parameter"))
+            }
+        }
+    }
+}
+
 impl<'buffer> Error<'buffer> {
     pub fn is_eof(self: &Self) -> bool {
         match self {

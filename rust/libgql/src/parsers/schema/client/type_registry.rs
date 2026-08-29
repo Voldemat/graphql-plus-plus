@@ -18,6 +18,19 @@ pub enum Error<'buffer> {
     UnknownArgument(file::shared::ast::NameNode<'buffer>),
 }
 
+impl<'buffer> std::fmt::Display for Error<'buffer> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UnknownType(node) => {
+                f.write_fmt(format_args!("Unknown type: {}", node.name))
+            }
+            Self::UnknownArgument(node) => {
+                f.write_fmt(format_args!("Unknown argument: {}", node.name))
+            }
+        }
+    }
+}
+
 impl<'buffer> Error<'buffer> {
     pub fn get_location(
         self: &Self,

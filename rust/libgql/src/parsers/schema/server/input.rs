@@ -6,7 +6,7 @@ use super::{
 };
 use crate::parsers::{
     file::{self, server::ast::InputObjectDefinitionNode},
-    schema::shared,
+    schema::shared::{self, ast::traits::InputTypeSpec},
 };
 
 fn parse_input_field_spec<
@@ -25,9 +25,7 @@ fn parse_input_field_spec<
     return parse_noncallable_input_field_spec(
         registry,
         &node.r#type,
-        node.default_value
-            .as_ref()
-            .map(shared::ast::runtime::Literal::parse),
+        node.default_value.as_ref(),
     )
     .map(|(return_type, nullable)| (return_type.into(), nullable));
 }
@@ -41,7 +39,7 @@ fn parse_noncallable_input_field_spec<
 >(
     registry: &T,
     node: &file::shared::ast::TypeNode<'input_buffer>,
-    default_value: Option<shared::ast::runtime::Literal>,
+    default_value: Option<&file::shared::ast::LiteralNode<'input_buffer>>,
 ) -> Result<
     (
         shared::ast::runtime::NonCallableFieldSpec<
@@ -74,17 +72,24 @@ fn parse_noncallable_input_field_spec<
             ));
         }
         file::shared::ast::TypeNode::Named(n) => {
+            let r#type = registry
+                .get_input_type_spec_by_name(&n.name)
+                .ok_or(type_registry::Error::UnknownType(n.name.clone()))?;
+            let dvalue = default_value
+                .map(|v| {
+                    shared::default_value::parse_default_value(
+                        r#type.get_ref(),
+                        v,
+                    )
+                })
+                .transpose()?;
             return Ok((
                 shared::ast::runtime::LiteralFieldSpec::<
                     shared::ast::runtime::InputTypeSpec<InputStringType>,
                     InputStringType,
                 > {
-                    r#type: registry
-                        .get_input_type_spec_by_name(&n.name)
-                        .ok_or(type_registry::Error::UnknownType(
-                            n.name.clone(),
-                        ))?,
-                    default_value: Some(default_value),
+                    r#type,
+                    default_value: Some(dvalue),
                     directive_invocations: IndexMap::new(),
                 }
                 .into(),

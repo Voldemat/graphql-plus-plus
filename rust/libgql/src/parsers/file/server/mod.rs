@@ -17,6 +17,18 @@ pub enum Error<'buffer> {
     UnknownStartOfAstNode(lexer::tokens::Token<'buffer>),
 }
 
+impl<'buffer> std::fmt::Display for Error<'buffer> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Base(error) => error.fmt(f),
+            Self::UnknownStartOfAstNode(token) => f.write_fmt(format_args!(
+                "Unknown start of ast node: {}",
+                token.lexeme
+            )),
+        }
+    }
+}
+
 impl<'buffer> From<tokens_source::ConsumeError<'buffer>> for Error<'buffer> {
     fn from(value: tokens_source::ConsumeError<'buffer>) -> Self {
         return Self::Base(value.into());

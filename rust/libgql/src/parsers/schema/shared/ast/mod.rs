@@ -10,6 +10,7 @@ pub trait AsStr<'s>:
     + Send
     + Sync
     + std::fmt::Debug
+    + std::fmt::Display
 {
     fn to_str(self: &Self) -> &str;
     fn from_str(s: &'s str) -> Self;

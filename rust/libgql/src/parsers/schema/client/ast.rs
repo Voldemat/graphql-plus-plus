@@ -62,6 +62,23 @@ pub enum FragmentSpec<S = String> {
     Interface(InterfaceFragmentSpec<S>),
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum FragmentSpecTypeTag {
+    Union,
+    Object,
+    Interface,
+}
+
+impl<S> FragmentSpec<S> {
+    pub fn to_type_tag(self: &Self) -> FragmentSpecTypeTag {
+        match self {
+            Self::Union(_) => FragmentSpecTypeTag::Union,
+            Self::Object(_) => FragmentSpecTypeTag::Object,
+            Self::Interface(_) => FragmentSpecTypeTag::Interface,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct FieldSelection<S = String> {
     pub name: S,

@@ -125,6 +125,7 @@ pub enum Error<'buffer> {
     ScalarNameCollision(file::shared::ast::NameNode<'buffer>),
     InputNameCollision(file::shared::ast::NameNode<'buffer>),
     DirectiveNameCollision(file::shared::ast::NameNode<'buffer>),
+    DefaultValueValidationError(shared::default_value::Error<'buffer>),
 }
 
 impl<'buffer> Error<'buffer> {
@@ -141,7 +142,56 @@ impl<'buffer> Error<'buffer> {
             Self::ScalarNameCollision(node) => &node.location,
             Self::InputNameCollision(node) => &node.location,
             Self::DirectiveNameCollision(node) => &node.location,
+            Self::DefaultValueValidationError(error) => error.get_location(),
         }
+    }
+}
+
+impl<'buffer> std::fmt::Display for Error<'buffer> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UnknownType(node) => {
+                f.write_fmt(format_args!("Unknown type: {}", node.name))
+            }
+            Self::UnknownArgument(node) => {
+                f.write_fmt(format_args!("Unknown argument: {}", node.name))
+            }
+            Self::EnumNameCollision(node) => f.write_fmt(format_args!(
+                "Enum with the name {} already exists",
+                node.name
+            )),
+            Self::ObjectNameCollision(node) => f.write_fmt(format_args!(
+                "Object with the name {} already exists",
+                node.name
+            )),
+            Self::InterfaceNameCollision(node) => f.write_fmt(format_args!(
+                "Interface with the name {} already exists",
+                node.name
+            )),
+            Self::UnionNameCollision(node) => f.write_fmt(format_args!(
+                "Union with the name {} already exists",
+                node.name
+            )),
+            Self::ScalarNameCollision(node) => f.write_fmt(format_args!(
+                "Scalar with the name {} already exists",
+                node.name
+            )),
+            Self::InputNameCollision(node) => f.write_fmt(format_args!(
+                "Input with the name {} already exists",
+                node.name
+            )),
+            Self::DirectiveNameCollision(node) => f.write_fmt(format_args!(
+                "Directive with the name {} already exists",
+                node.name
+            )),
+            Self::DefaultValueValidationError(error) => error.fmt(f),
+        }
+    }
+}
+
+impl<'buffer> From<shared::default_value::Error<'buffer>> for Error<'buffer> {
+    fn from(value: shared::default_value::Error<'buffer>) -> Self {
+        Self::DefaultValueValidationError(value)
     }
 }
 

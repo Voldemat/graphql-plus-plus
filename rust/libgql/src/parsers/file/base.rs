@@ -22,6 +22,33 @@ pub enum Error<'buffer> {
     },
 }
 
+impl<'buffer> std::fmt::Display for Error<'buffer> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Consume(error) => error.fmt(f),
+            Self::IdentifierIsKeyword(_) => {
+                f.write_str("Identifier is reserved keyword")
+            }
+            Self::ExpectedComplexType(token) => f.write_fmt(format_args!(
+                "Expected complex token, but received: {:?}",
+                token.token_type
+            )),
+            Self::CannotParseNumberLiteral(_) => {
+                f.write_str("Cannot parse number literal")
+            }
+            Self::UnexpectedSpreadInLiteral(_) => {
+                f.write_str("Unexpected spread in literal")
+            }
+            Self::UnknownDirectiveLocation(_) => {
+                f.write_str("Unknown directive location")
+            }
+            Self::DuplicateDocumentationString { .. } => {
+                f.write_str("Duplicate documentation string")
+            }
+        }
+    }
+}
+
 impl<'buffer> Error<'buffer> {
     pub fn is_eof(self: &Self) -> bool {
         match self {
@@ -256,7 +283,7 @@ impl<
 
     fn parse_literal_node(
         self: &mut Self,
-    ) -> Result<shared::ast::LiteralNode<'buffer>, Error<'buffer>> {
+    ) -> Result<Option<shared::ast::LiteralNode<'buffer>>, Error<'buffer>> {
         T::advance(&mut self.tokens_source)?;
         let current_token = T::get_current_token(&self.tokens_source).clone();
         let TokenType::Complex(token_type) = current_token.token_type else {
@@ -270,38 +297,43 @@ impl<
         match token_type {
             ComplexTokenType::Number => {
                 if let Some(int_node) = self.parse_literal_int_node() {
-                    return Ok(int_node.into());
-                };
-                if let Some(float_node) = self.parse_literal_float_node() {
-                    return Ok(float_node.into());
-                };
-                return Err(Error::CannotParseNumberLiteral(current_token));
+                    Ok(Some(int_node.into()))
+                } else if let Some(float_node) = self.parse_literal_float_node()
+                {
+                    Ok(Some(float_node.into()))
+                } else {
+                    Err(Error::CannotParseNumberLiteral(current_token))
+                }
             }
-            ComplexTokenType::Boolean => {
-                return Ok(shared::ast::LiteralBooleanNode {
+            ComplexTokenType::Boolean => Ok(Some(
+                shared::ast::LiteralBooleanNode {
                     location,
                     value: current_token.lexeme == "true",
                 }
-                .into());
-            }
-            ComplexTokenType::String => {
-                return Ok(shared::ast::LiteralStringNode {
+                .into(),
+            )),
+            ComplexTokenType::String => Ok(Some(
+                shared::ast::LiteralStringNode {
                     location,
                     value: current_token.lexeme,
                 }
-                .into());
-            }
+                .into(),
+            )),
             ComplexTokenType::Identifier => {
-                return Ok(shared::ast::LiteralEnumValueNode {
-                    location,
-                    value: current_token.lexeme,
+                if current_token.lexeme == "null" {
+                    Ok(None)
+                } else {
+                    Ok(Some(
+                        shared::ast::LiteralEnumValueNode {
+                            location,
+                            value: current_token.lexeme,
+                        }
+                        .into(),
+                    ))
                 }
-                .into());
             }
             ComplexTokenType::Spread => {
-                return Err(Error::UnexpectedSpreadInLiteral(
-                    current_token.clone(),
-                ));
+                Err(Error::UnexpectedSpreadInLiteral(current_token.clone()))
             }
         }
     }
@@ -348,7 +380,9 @@ impl<
                 &self.tokens_source,
                 ComplexTokenType::Identifier.into(),
             ) {
-                arguments.push(self.parse_argument()?);
+                if let Some(argument) = self.parse_argument()? {
+                    arguments.push(argument);
+                }
                 T::consume_if_is_ahead(
                     &mut self.tokens_source,
                     SimpleTokenType::Comma.into(),
@@ -364,11 +398,13 @@ impl<
 
     fn parse_argument(
         self: &mut Self,
-    ) -> Result<shared::ast::Argument<'buffer>, Error<'buffer>> {
+    ) -> Result<Option<shared::ast::Argument<'buffer>>, Error<'buffer>> {
         let name = self.parse_name_node(false)?;
         T::consume(&mut self.tokens_source, SimpleTokenType::Colon.into())?;
-        let value = self.parse_argument_value()?;
-        return Ok(shared::ast::Argument {
+        let Some(value) = self.parse_argument_value()? else {
+            return Ok(None);
+        };
+        return Ok(Some(shared::ast::Argument {
             location: shared::ast::NodeLocation {
                 start: name.location.start,
                 end: T::get_current_token(&self.tokens_source).location.end,
@@ -376,12 +412,13 @@ impl<
             },
             name,
             value,
-        });
+        }));
     }
 
     fn parse_argument_value(
         self: &mut Self,
-    ) -> Result<shared::ast::ArgumentValue<'buffer>, Error<'buffer>> {
+    ) -> Result<Option<shared::ast::ArgumentValue<'buffer>>, Error<'buffer>>
+    {
         let Some(token) = T::lookahead(&self.tokens_source) else {
             return Err(tokens_source::ConsumeError::EOF(
                 T::get_current_token(&self.tokens_source).clone(),
@@ -389,9 +426,9 @@ impl<
             .into());
         };
         if token.token_type == ComplexTokenType::Identifier.into() {
-            return self.parse_name_node(false).map(|v| v.into());
+            return self.parse_name_node(false).map(|v| Some(v.into()));
         }
-        return self.parse_literal_node().map(|v| v.into());
+        return self.parse_literal_node().map(|v| v.map(|i| i.into()));
     }
 
     pub fn parse_default_value(
@@ -401,7 +438,7 @@ impl<
             &mut self.tokens_source,
             SimpleTokenType::Equal.into(),
         ) {
-            return Ok(Some(self.parse_literal_node()?));
+            return Ok(self.parse_literal_node()?);
         }
         return Ok(None);
     }

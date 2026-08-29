@@ -16,6 +16,28 @@ pub enum ConsumeError<'buffer> {
     },
 }
 
+impl<'buffer> std::fmt::Display for ConsumeError<'buffer> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::EOF(_) => f.write_str("Unexpected end of input"),
+            Self::WrongType {
+                expected_token_type,
+                received_token,
+            } => f.write_fmt(format_args!(
+                "Wrong token type, expected: {:?}, received: {:?}",
+                expected_token_type, received_token.token_type
+            )),
+            Self::UnexpectedLexeme {
+                expected_lexeme,
+                received_token,
+            } => f.write_fmt(format_args!(
+                "Unexpected lexeme, expected: {}, received: {:?})",
+                expected_lexeme, received_token.token_type
+            )),
+        }
+    }
+}
+
 impl<'buffer, 'tokens> ConsumeError<'buffer> {
     pub fn is_eof(self: &Self) -> bool {
         match self {

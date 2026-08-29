@@ -189,6 +189,7 @@ fn parse_interface_spread_selection_node<
     if has_invalid_type {
         return Err(errors::Error::InvalidFragmentType {
             selection_node: node.clone(),
+            selection_fragment_type: fragment.spec.to_type_tag(),
             expected_type: errors::FragmentType::Interface(
                 ClientStringType::from_str(r#type.name.to_str()),
             ),
@@ -228,6 +229,7 @@ fn parse_object_spread_selection_node<
     if has_invalid_type {
         return Err(errors::Error::InvalidFragmentType {
             selection_node: node.clone(),
+            selection_fragment_type: fragment.spec.to_type_tag(),
             expected_type: errors::FragmentType::Object(
                 ClientStringType::from_str(r#type.name.to_str()),
             ),
@@ -273,6 +275,7 @@ fn parse_union_spread_selection_node<
     if has_invalid_type {
         return Err(errors::Error::InvalidFragmentType {
             selection_node: node.clone(),
+            selection_fragment_type: fragment.spec.to_type_tag(),
             expected_type: errors::FragmentType::Union(
                 ClientStringType::from_str(r#type.name.to_str()),
             ),

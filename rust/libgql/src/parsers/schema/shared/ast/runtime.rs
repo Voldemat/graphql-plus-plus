@@ -25,6 +25,30 @@ pub enum InputTypeSpec<S = String> {
     Enum(S),
 }
 
+impl<S: std::fmt::Display> std::fmt::Display for InputTypeSpec<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::InputType(s) => s.fmt(f),
+            Self::Scalar(s) => s.fmt(f),
+            Self::Enum(s) => s.fmt(f),
+        }
+    }
+}
+
+impl<'s, S: AsStr<'s>> super::traits::InputTypeSpec for InputTypeSpec<S> {
+    fn get_ref(self: &Self) -> super::traits::InputTypeSpecRef<'_> {
+        match self {
+            Self::InputType(s) => {
+                super::traits::InputTypeSpecRef::InputType(s.to_str())
+            }
+            Self::Scalar(s) => {
+                super::traits::InputTypeSpecRef::Scalar(s.to_str())
+            }
+            Self::Enum(s) => super::traits::InputTypeSpecRef::Enum(s.to_str()),
+        }
+    }
+}
+
 impl<'s1, S: AsStr<'s1>> InputTypeSpec<S> {
     pub fn clone_with_string_type<'s2, NS: AsStr<'s2>>(
         self: &'s1 Self,
@@ -38,20 +62,6 @@ impl<'s1, S: AsStr<'s1>> InputTypeSpec<S> {
             }
             Self::Scalar(s) => InputTypeSpec::Scalar(NS::from_str(s.to_str())),
             Self::Enum(s) => InputTypeSpec::Enum(NS::from_str(s.to_str())),
-        }
-    }
-}
-
-impl super::traits::InputTypeSpec for InputTypeSpec {
-    fn get_ref(self: &Self) -> super::traits::InputTypeSpecRef<'_> {
-        match self {
-            Self::InputType(i) => {
-                super::traits::InputTypeSpecRef::InputType(i.as_str())
-            }
-            Self::Scalar(s) => {
-                super::traits::InputTypeSpecRef::Scalar(s.as_str())
-            }
-            Self::Enum(e) => super::traits::InputTypeSpecRef::Enum(e.as_str()),
         }
     }
 }
@@ -71,6 +81,17 @@ impl super::traits::Literal for Literal {
             Self::Float(f) => super::traits::LiteralRef::Float(f),
             Self::Boolean(b) => super::traits::LiteralRef::Boolean(b),
             Self::String(s) => super::traits::LiteralRef::String(s.as_str()),
+        }
+    }
+}
+
+impl std::fmt::Display for Literal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Int(v) => f.write_fmt(format_args!("{}", v)),
+            Self::Float(v) => f.write_fmt(format_args!("{}", v)),
+            Self::Boolean(v) => f.write_fmt(format_args!("{}", v)),
+            Self::String(v) => f.write_fmt(format_args!("{}", v)),
         }
     }
 }
@@ -116,12 +137,52 @@ impl super::traits::ArrayLiteral for ArrayLiteral {
     }
 }
 
+fn format_slice<T: std::fmt::Display>(
+    v: &[T],
+    f: &mut std::fmt::Formatter<'_>,
+) -> std::fmt::Result {
+    f.write_str("[")?;
+    for (index, value) in v.iter().enumerate() {
+        f.write_fmt(format_args!("{}", value))?;
+        if index != v.len() - 1 {
+            f.write_str(", ")?;
+        }
+    }
+    f.write_str("]")
+}
+
+impl std::fmt::Display for ArrayLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Int(v) => format_slice(v, f),
+            Self::Float(v) => format_slice(v, f),
+            Self::Boolean(v) => format_slice(v, f),
+            Self::String(v) => format_slice(v, f),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct LiteralFieldSpec<T, S = String> {
     pub r#type: T,
     pub default_value: Option<Option<Literal>>,
     pub directive_invocations:
         indexmap::IndexMap<S, ServerDirectiveInvocation<S>>,
+}
+
+impl<T: std::fmt::Display, S: std::fmt::Display> std::fmt::Display
+    for LiteralFieldSpec<T, S>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}", self.r#type))?;
+        if let Some(Some(default_value)) = &self.default_value {
+            f.write_fmt(format_args!(" = {}", default_value))?;
+        }
+        for invocation in self.directive_invocations.values() {
+            f.write_fmt(format_args!(" {}", invocation))?;
+        }
+        Ok(())
+    }
 }
 
 impl<'s1, T, S: AsStr<'s1>> LiteralFieldSpec<T, S> {
@@ -157,6 +218,25 @@ pub struct ArrayFieldSpec<T, S = String> {
     pub directive_invocations: Vec<ServerDirectiveInvocation<S>>,
 }
 
+impl<T: std::fmt::Display, S: std::fmt::Display> std::fmt::Display
+    for ArrayFieldSpec<T, S>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!(
+            "{}{}",
+            self.r#type,
+            if self.nullable { "" } else { "!" }
+        ))?;
+        if let Some(Some(default_value)) = &self.default_value {
+            f.write_fmt(format_args!(" = {}", default_value))?;
+        }
+        for invocation in &self.directive_invocations {
+            f.write_fmt(format_args!(" {}", invocation))?;
+        }
+        Ok(())
+    }
+}
+
 impl<'s1, T, S: AsStr<'s1>> ArrayFieldSpec<T, S> {
     pub fn clone_with_string_type<'s2, NS: AsStr<'s2>, T2>(
         self: &'s1 Self,
@@ -182,6 +262,17 @@ impl<'s1, T, S: AsStr<'s1>> ArrayFieldSpec<T, S> {
 pub enum NonCallableFieldSpec<T, S = String> {
     Literal(LiteralFieldSpec<T, S>),
     Array(ArrayFieldSpec<T, S>),
+}
+
+impl<T: std::fmt::Display, S: std::fmt::Display> std::fmt::Display
+    for NonCallableFieldSpec<T, S>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Literal(literal) => literal.fmt(f),
+            Self::Array(array) => array.fmt(f),
+        }
+    }
 }
 
 impl<'s1, T, S: AsStr<'s1>> NonCallableFieldSpec<T, S> {
@@ -232,6 +323,19 @@ pub struct FieldDefinition<T, S = String> {
     pub nullable: bool,
 }
 
+impl<T: std::fmt::Display, S: std::fmt::Display> std::fmt::Display
+    for FieldDefinition<T, S>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!(
+            "{}: {}{}",
+            self.name,
+            self.spec,
+            if self.nullable { "" } else { "!" }
+        ))
+    }
+}
+
 impl<'s1, T, S: AsStr<'s1>> FieldDefinition<T, S> {
     pub fn clone_with_string_type<'s2, NS: AsStr<'s2>, T2>(
         self: &'s1 Self,
@@ -261,6 +365,18 @@ pub enum ArgumentLiteralValue<S = String> {
     Float(f64),
     Boolean(bool),
     EnumValue(S),
+}
+
+impl<S: std::fmt::Display> std::fmt::Display for ArgumentLiteralValue<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::String(s) => s.fmt(f),
+            Self::Int(i) => f.write_fmt(format_args!("{}", i)),
+            Self::Float(v) => f.write_fmt(format_args!("{}", v)),
+            Self::Boolean(b) => f.write_fmt(format_args!("{}", b)),
+            Self::EnumValue(s) => f.write_fmt(format_args!("{}", s)),
+        }
+    }
 }
 
 impl<'s1, S: AsStr<'s1>> ArgumentLiteralValue<S> {
@@ -308,6 +424,15 @@ pub enum ArgumentValue<S = String> {
     Literal(ArgumentLiteralValue<S>),
 }
 
+impl<S: std::fmt::Display> std::fmt::Display for ArgumentValue<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Ref(v) => v.fmt(f),
+            Self::Literal(v) => v.fmt(f),
+        }
+    }
+}
+
 impl<'s1, S: AsStr<'s1>> ArgumentValue<S> {
     pub fn clone_with_string_type<'s2, NS: AsStr<'s2>>(
         self: &'s1 Self,
@@ -329,6 +454,14 @@ pub struct FieldSelectionArgument<S = String> {
     pub name: S,
     pub value: ArgumentValue<S>,
     pub r#type: FieldDefinition<InputFieldSpec<S>, S>,
+}
+
+impl<S: std::fmt::Display> std::fmt::Display for FieldSelectionArgument<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.name.fmt(f)?;
+        f.write_str(": ")?;
+        self.value.fmt(f)
+    }
 }
 
 impl<'s1, S: AsStr<'s1>> FieldSelectionArgument<S> {
@@ -362,6 +495,23 @@ pub struct ServerDirective<S = String> {
 pub struct ServerDirectiveInvocation<S = String> {
     pub directive: S,
     pub arguments: indexmap::IndexMap<S, FieldSelectionArgument<S>>,
+}
+
+impl<S: std::fmt::Display> std::fmt::Display for ServerDirectiveInvocation<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("@{}", self.directive))?;
+        if self.arguments.len() == 0 {
+            return Ok(());
+        }
+        f.write_str("(")?;
+        for (index, argument) in self.arguments.values().enumerate() {
+            argument.fmt(f)?;
+            if index != self.arguments.len() - 1 {
+                f.write_str(", ")?;
+            }
+        }
+        f.write_str(")")
+    }
 }
 
 impl<'s1, S: AsStr<'s1>> ServerDirectiveInvocation<S> {

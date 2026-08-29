@@ -11,6 +11,18 @@ pub enum ObjectTypeSpec<S = String> {
     Union(S),
 }
 
+impl<S: std::fmt::Display> std::fmt::Display for ObjectTypeSpec<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ObjectType(s) => s.fmt(f),
+            Self::Interface(s) => s.fmt(f),
+            Self::Scalar(s) => s.fmt(f),
+            Self::Enum(s) => s.fmt(f),
+            Self::Union(s) => s.fmt(f),
+        }
+    }
+}
+
 impl<'s1, S: shared::ast::AsStr<'s1>> ObjectTypeSpec<S> {
     pub fn clone_with_string_type<'s2, NS: shared::ast::AsStr<'s2>>(
         self: &'s1 Self,
@@ -50,6 +62,21 @@ pub struct CallableFieldSpec<S = String> {
         >,
     >,
 }
+
+impl<S: std::fmt::Display> std::fmt::Display for CallableFieldSpec<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("(")?;
+        for (index, argument) in self.arguments.values().enumerate() {
+            argument.fmt(f)?;
+            if index != self.arguments.len() - 1 {
+                f.write_str(", ")?;
+            }
+        }
+        f.write_str(")")?;
+        self.return_type.fmt(f)
+    }
+}
+
 impl<'s1, S: shared::ast::AsStr<'s1>> CallableFieldSpec<S> {
     pub fn clone_with_string_type<'s2, NS: shared::ast::AsStr<'s2>>(
         self: &'s1 Self,
@@ -73,6 +100,16 @@ pub enum ObjectFieldSpec<S = String> {
     Literal(shared::ast::runtime::LiteralFieldSpec<ObjectTypeSpec<S>>),
     Array(shared::ast::runtime::ArrayFieldSpec<ObjectTypeSpec<S>>),
     Callable(CallableFieldSpec<S>),
+}
+
+impl<S: std::fmt::Display> std::fmt::Display for ObjectFieldSpec<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Literal(v) => v.fmt(f),
+            Self::Array(v) => v.fmt(f),
+            Self::Callable(v) => v.fmt(f),
+        }
+    }
 }
 
 impl<'s1, S: shared::ast::AsStr<'s1>> ObjectFieldSpec<S> {
