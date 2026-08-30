@@ -24,8 +24,7 @@
                   "type": {
                     "_type": "Scalar",
                     "name": "UUID"
-                  },
-                  "defaultValue": null
+                  }
                 }
               }
             }
