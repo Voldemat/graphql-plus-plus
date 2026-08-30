@@ -7,25 +7,32 @@ use crate::parsers::schema::{
 
 fn parse_literal(
     value: &serde_json::Value,
-) -> Result<shared::ast::runtime::Literal, String> {
-    if let Some(v) = value.as_i64() {
-        return Ok(shared::ast::runtime::Literal::Int(v));
-    };
-    if let Some(v) = value.as_f64() {
-        return Ok(shared::ast::runtime::Literal::Float(v));
-    };
-    if let Some(v) = value.as_bool() {
-        return Ok(shared::ast::runtime::Literal::Boolean(v));
-    };
-    if let Some(v) = value.as_str() {
-        return Ok(shared::ast::runtime::Literal::String(v.into()));
-    };
-    return Err(format!("Unexpected literal value: {}", value));
+) -> Result<shared::ast::runtime::Literal<String>, String> {
+    match value["_type"].as_str().unwrap() {
+        "string" => Ok(shared::ast::runtime::Literal::String(
+            value["value"].as_str().unwrap().to_string(),
+        )),
+        "enum-value" => Ok(shared::ast::runtime::Literal::EnumValue(
+            value["value"].as_str().unwrap().to_string(),
+        )),
+        "int" => Ok(shared::ast::runtime::Literal::Int(
+            value["value"].as_i64().unwrap(),
+        )),
+        "float" => Ok(shared::ast::runtime::Literal::Float(
+            value["value"].as_f64().unwrap(),
+        )),
+        "boolean" => Ok(shared::ast::runtime::Literal::Boolean(
+            value["value"].as_bool().unwrap(),
+        )),
+        unknown_type => {
+            Err(format!("Unexpected literal type: {}", unknown_type))
+        }
+    }
 }
 
 fn parse_optional_literal(
     value: &serde_json::Value,
-) -> Result<Option<shared::ast::runtime::Literal>, String> {
+) -> Result<Option<shared::ast::runtime::Literal<String>>, String> {
     if value.is_null() {
         Ok(None)
     } else {
@@ -192,7 +199,7 @@ fn parse_input_literal_field_spec(
     String,
 > {
     return Ok(shared::ast::runtime::LiteralFieldSpec {
-        default_value: Some(parse_optional_literal(&value["default_value"])?),
+        default_value: parse_optional_literal(&value["default_value"])?,
         directive_invocations: IndexMap::new(),
         r#type: parse_input_type_spec(&value["type"])?,
     });
@@ -205,9 +212,7 @@ fn parse_input_array_field_spec(
     String,
 > {
     return Ok(shared::ast::runtime::ArrayFieldSpec {
-        default_value: Some(parse_optional_array_literal(
-            &value["default_value"],
-        )?),
+        default_value: parse_optional_array_literal(&value["default_value"])?,
         directive_invocations: Vec::new(),
         r#type: Box::new(parse_input_field_spec(&value["type"])?),
         nullable: value["nullable"].as_bool().unwrap(),

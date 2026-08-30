@@ -67,31 +67,75 @@ impl<'s1, S: AsStr<'s1>> InputTypeSpec<S> {
 }
 
 #[derive(Debug, Clone)]
-pub enum Literal {
+pub enum Literal<S> {
+    Null,
     Int(i64),
     Float(f64),
-    String(String),
+    String(S),
     Boolean(bool),
+    EnumValue(S),
 }
 
-impl super::traits::Literal for Literal {
-    fn get_ref(self: &Self) -> super::traits::LiteralRef<'_> {
+impl<S: std::fmt::Display> std::fmt::Display for Literal<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Int(i) => super::traits::LiteralRef::Int(i),
-            Self::Float(f) => super::traits::LiteralRef::Float(f),
-            Self::Boolean(b) => super::traits::LiteralRef::Boolean(b),
-            Self::String(s) => super::traits::LiteralRef::String(s.as_str()),
+            Self::Null => f.write_str("null"),
+            Self::String(s) => s.fmt(f),
+            Self::Int(i) => f.write_fmt(format_args!("{}", i)),
+            Self::Float(v) => f.write_fmt(format_args!("{}", v)),
+            Self::Boolean(b) => f.write_fmt(format_args!("{}", b)),
+            Self::EnumValue(s) => f.write_fmt(format_args!("{}", s)),
         }
     }
 }
 
-impl std::fmt::Display for Literal {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl<'s1, S: AsStr<'s1>> Literal<S> {
+    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>>(
+        self: &'s1 Self,
+    ) -> Literal<NS>
+    where
+        's1: 's2,
+    {
         match self {
-            Self::Int(v) => f.write_fmt(format_args!("{}", v)),
-            Self::Float(v) => f.write_fmt(format_args!("{}", v)),
-            Self::Boolean(v) => f.write_fmt(format_args!("{}", v)),
-            Self::String(v) => f.write_fmt(format_args!("{}", v)),
+            Self::Null => Literal::Null,
+            Self::String(s) => Literal::String(NS::from_str(s.to_str())),
+            Self::Int(i) => Literal::Int(*i),
+            Self::Float(f) => Literal::Float(*f),
+            Self::Boolean(b) => Literal::Boolean(*b),
+            Self::EnumValue(s) => Literal::EnumValue(NS::from_str(s.to_str())),
+        }
+    }
+}
+
+impl<S> From<i64> for Literal<S> {
+    fn from(value: i64) -> Self {
+        return Self::Int(value);
+    }
+}
+
+impl<S> From<f64> for Literal<S> {
+    fn from(value: f64) -> Self {
+        return Self::Float(value);
+    }
+}
+
+impl<S> From<bool> for Literal<S> {
+    fn from(value: bool) -> Self {
+        return Self::Boolean(value);
+    }
+}
+
+impl<'s, S: AsStr<'s>> super::traits::Literal for Literal<S> {
+    fn get_ref(self: &Self) -> super::traits::LiteralRef<'_> {
+        match self {
+            Self::Null => super::traits::LiteralRef::Null,
+            Self::Int(i) => super::traits::LiteralRef::Int(i),
+            Self::Float(f) => super::traits::LiteralRef::Float(f),
+            Self::Boolean(b) => super::traits::LiteralRef::Boolean(b),
+            Self::String(s) => super::traits::LiteralRef::String(s.to_str()),
+            Self::EnumValue(s) => {
+                super::traits::LiteralRef::EnumValue(s.to_str())
+            }
         }
     }
 }
@@ -147,7 +191,7 @@ impl std::fmt::Display for ArrayLiteral {
 #[derive(Debug, Clone)]
 pub struct LiteralFieldSpec<T, S = String> {
     pub r#type: T,
-    pub default_value: Option<Option<Literal>>,
+    pub default_value: Option<Literal<S>>,
     pub directive_invocations:
         indexmap::IndexMap<S, ServerDirectiveInvocation<S>>,
 }
@@ -157,7 +201,7 @@ impl<T: std::fmt::Display, S: std::fmt::Display> std::fmt::Display
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{}", self.r#type))?;
-        if let Some(Some(default_value)) = &self.default_value {
+        if let Some(default_value) = &self.default_value {
             f.write_fmt(format_args!(" = {}", default_value))?;
         }
         for invocation in self.directive_invocations.values() {
@@ -177,7 +221,10 @@ impl<'s1, T, S: AsStr<'s1>> LiteralFieldSpec<T, S> {
     {
         LiteralFieldSpec {
             r#type: clone_t(&self.r#type),
-            default_value: self.default_value.clone(),
+            default_value: self
+                .default_value
+                .as_ref()
+                .map(|v| v.clone_with_string_type()),
             directive_invocations: self
                 .directive_invocations
                 .iter()
@@ -196,7 +243,7 @@ impl<'s1, T, S: AsStr<'s1>> LiteralFieldSpec<T, S> {
 pub struct ArrayFieldSpec<T, S = String> {
     pub r#type: Box<NonCallableFieldSpec<T, S>>,
     pub nullable: bool,
-    pub default_value: Option<Option<ArrayLiteral>>,
+    pub default_value: Option<ArrayLiteral>,
     pub directive_invocations: Vec<ServerDirectiveInvocation<S>>,
 }
 
@@ -209,7 +256,7 @@ impl<T: std::fmt::Display, S: std::fmt::Display> std::fmt::Display
             self.r#type,
             if self.nullable { "" } else { "!" }
         ))?;
-        if let Some(Some(default_value)) = &self.default_value {
+        if let Some(default_value) = &self.default_value {
             f.write_fmt(format_args!(" = {}", default_value))?;
         }
         for invocation in &self.directive_invocations {
@@ -260,14 +307,8 @@ impl<T: std::fmt::Display, S: std::fmt::Display> std::fmt::Display
 impl<'s1, T, S: AsStr<'s1>> NonCallableFieldSpec<T, S> {
     pub fn has_default_value(self: &Self) -> bool {
         match self {
-            Self::Literal(literal) => {
-                literal.default_value.is_some()
-                    && literal.default_value.as_ref().unwrap().is_some()
-            }
-            Self::Array(array) => {
-                array.default_value.is_some()
-                    && array.default_value.as_ref().unwrap().is_some()
-            }
+            Self::Literal(literal) => literal.default_value.is_some(),
+            Self::Array(array) => array.default_value.is_some(),
         }
     }
 
@@ -340,73 +381,10 @@ pub struct InputType<S = String> {
     pub fields: indexmap::IndexMap<S, FieldDefinition<InputFieldSpec<S>, S>>,
 }
 
-#[derive(Debug, Clone)]
-pub enum ArgumentLiteralValue<S = String> {
-    Null,
-    String(S),
-    Int(i64),
-    Float(f64),
-    Boolean(bool),
-    EnumValue(S),
-}
-
-impl<S: std::fmt::Display> std::fmt::Display for ArgumentLiteralValue<S> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Null => f.write_str("null"),
-            Self::String(s) => s.fmt(f),
-            Self::Int(i) => f.write_fmt(format_args!("{}", i)),
-            Self::Float(v) => f.write_fmt(format_args!("{}", v)),
-            Self::Boolean(b) => f.write_fmt(format_args!("{}", b)),
-            Self::EnumValue(s) => f.write_fmt(format_args!("{}", s)),
-        }
-    }
-}
-
-impl<'s1, S: AsStr<'s1>> ArgumentLiteralValue<S> {
-    pub fn clone_with_string_type<'s2, NS: AsStr<'s2>>(
-        self: &'s1 Self,
-    ) -> ArgumentLiteralValue<NS>
-    where
-        's1: 's2,
-    {
-        match self {
-            Self::Null => ArgumentLiteralValue::Null,
-            Self::String(s) => {
-                ArgumentLiteralValue::String(NS::from_str(s.to_str()))
-            }
-            Self::Int(i) => ArgumentLiteralValue::Int(*i),
-            Self::Float(f) => ArgumentLiteralValue::Float(*f),
-            Self::Boolean(b) => ArgumentLiteralValue::Boolean(*b),
-            Self::EnumValue(s) => {
-                ArgumentLiteralValue::EnumValue(NS::from_str(s.to_str()))
-            }
-        }
-    }
-}
-
-impl<S> From<i64> for ArgumentLiteralValue<S> {
-    fn from(value: i64) -> Self {
-        return Self::Int(value);
-    }
-}
-
-impl<S> From<f64> for ArgumentLiteralValue<S> {
-    fn from(value: f64) -> Self {
-        return Self::Float(value);
-    }
-}
-
-impl<S> From<bool> for ArgumentLiteralValue<S> {
-    fn from(value: bool) -> Self {
-        return Self::Boolean(value);
-    }
-}
-
 #[derive(Debug, Clone, derive_more::From)]
 pub enum ArgumentValue<S = String> {
     Ref(S),
-    Literal(ArgumentLiteralValue<S>),
+    Literal(Literal<S>),
 }
 
 impl<S: std::fmt::Display> std::fmt::Display for ArgumentValue<S> {

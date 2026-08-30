@@ -21,11 +21,14 @@ pub fn hash_input_type_spec<
     std::hash::Hash::hash(name, hasher);
 }
 
-pub fn hash_literal<T: std::hash::Hasher>(
+pub fn hash_literal<'s, S: shared::ast::AsStr<'s>, T: std::hash::Hasher>(
     hasher: &mut T,
-    value: &shared::ast::runtime::Literal,
+    value: &shared::ast::runtime::Literal<S>,
 ) {
     match value {
+        shared::ast::runtime::Literal::Null => {
+            std::hash::Hash::hash("null", hasher);
+        }
         shared::ast::runtime::Literal::Int(i) => {
             std::hash::Hash::hash(i, hasher)
         }
@@ -35,19 +38,13 @@ pub fn hash_literal<T: std::hash::Hasher>(
         shared::ast::runtime::Literal::String(s) => {
             std::hash::Hash::hash(s, hasher)
         }
+        shared::ast::runtime::Literal::EnumValue(s) => {
+            std::hash::Hash::hash("e", hasher);
+            std::hash::Hash::hash(s, hasher)
+        }
         shared::ast::runtime::Literal::Boolean(b) => {
             std::hash::Hash::hash(b, hasher)
         }
-    }
-}
-
-pub fn hash_literal_default_value<T: std::hash::Hasher>(
-    hasher: &mut T,
-    value: &Option<shared::ast::runtime::Literal>,
-) {
-    match value {
-        Some(literal) => hash_literal(hasher, literal),
-        None => {}
     }
 }
 
@@ -74,16 +71,6 @@ pub fn hash_array_literal<T: std::hash::Hasher>(
     }
 }
 
-pub fn hash_array_default_value<T: std::hash::Hasher>(
-    hasher: &mut T,
-    value: &Option<shared::ast::runtime::ArrayLiteral>,
-) {
-    match value {
-        Some(literal) => hash_array_literal(hasher, literal),
-        None => {}
-    }
-}
-
 pub fn hash_input_field_spec<
     's,
     T: std::hash::Hasher,
@@ -100,7 +87,7 @@ pub fn hash_input_field_spec<
             hasher.write_u8(b'l');
             hash_input_type_spec(hasher, &literal.r#type);
             if let Some(default_value) = &literal.default_value {
-                hash_literal_default_value(hasher, &default_value);
+                hash_literal(hasher, default_value);
             }
         }
         shared::ast::runtime::NonCallableFieldSpec::Array(array) => {
@@ -108,7 +95,7 @@ pub fn hash_input_field_spec<
             std::hash::Hash::hash(&array.nullable, hasher);
             hash_input_field_spec(hasher, &array.r#type);
             if let Some(default_value) = &array.default_value {
-                hash_array_default_value(hasher, default_value);
+                hash_array_literal(hasher, default_value);
             }
         }
     }
@@ -154,36 +141,6 @@ pub fn get_operation_parameters_hash<'s, S: shared::ast::AsStr<'s>>(
     return std::hash::Hasher::finish(&hasher);
 }
 
-fn hash_argument_literal_value<
-    's,
-    T: std::hash::Hasher,
-    S: shared::ast::AsStr<'s>,
->(
-    hasher: &mut T,
-    value: &shared::ast::runtime::ArgumentLiteralValue<S>,
-) {
-    match value {
-        shared::ast::runtime::ArgumentLiteralValue::Null => {
-            std::hash::Hash::hash("null", hasher);
-        }
-        shared::ast::runtime::ArgumentLiteralValue::Int(i) => {
-            std::hash::Hash::hash(i, hasher);
-        }
-        shared::ast::runtime::ArgumentLiteralValue::Float(f) => {
-            std::hash::Hash::hash(&f.to_string(), hasher);
-        }
-        shared::ast::runtime::ArgumentLiteralValue::String(s) => {
-            std::hash::Hash::hash(s, hasher);
-        }
-        shared::ast::runtime::ArgumentLiteralValue::Boolean(b) => {
-            std::hash::Hash::hash(b, hasher);
-        }
-        shared::ast::runtime::ArgumentLiteralValue::EnumValue(e) => {
-            std::hash::Hash::hash(e, hasher);
-        }
-    }
-}
-
 fn hash_argument_value<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
     hasher: &mut T,
     value: &shared::ast::runtime::ArgumentValue<S>,
@@ -195,7 +152,7 @@ fn hash_argument_value<'s, T: std::hash::Hasher, S: shared::ast::AsStr<'s>>(
         }
         shared::ast::runtime::ArgumentValue::Literal(literal) => {
             std::hash::Hash::hash(&'l', hasher);
-            hash_argument_literal_value(hasher, literal);
+            hash_literal(hasher, literal);
         }
     }
 }

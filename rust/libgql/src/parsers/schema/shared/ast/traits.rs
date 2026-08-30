@@ -16,10 +16,12 @@ pub trait InputTypeSpec {
 }
 
 pub enum LiteralRef<'r> {
+    Null,
     Int(&'r i64),
     Float(&'r f64),
     String(&'r str),
     Boolean(&'r bool),
+    EnumValue(&'r str),
 }
 
 pub trait Literal {

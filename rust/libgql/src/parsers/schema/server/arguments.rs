@@ -21,7 +21,7 @@ fn parse_argument_value_from_literal_node<'buffer>(
         file::shared::ast::LiteralNode::Null(location) => {
             if arg_type.nullable {
                 Ok(shared::ast::runtime::ArgumentValue::Literal(
-                    shared::ast::runtime::ArgumentLiteralValue::Null,
+                    shared::ast::runtime::Literal::Null,
                 ))
             } else {
                 Err(server::type_registry::Error::DefaultValueValidationError(
@@ -43,9 +43,7 @@ fn parse_argument_value_from_literal_node<'buffer>(
         }
         file::shared::ast::LiteralNode::String(s) => {
             Ok(shared::ast::runtime::ArgumentValue::Literal(
-                shared::ast::runtime::ArgumentLiteralValue::String(
-                    s.value.to_string(),
-                ),
+                shared::ast::runtime::Literal::String(s.value.to_string()),
             ))
         }
         file::shared::ast::LiteralNode::EnumValue(e) => {
@@ -81,7 +79,7 @@ fn parse_argument_value_from_literal_node<'buffer>(
                     enum_type: enum_type.to_string(),
                 });
             };
-            return Ok(shared::ast::runtime::ArgumentLiteralValue::EnumValue(
+            return Ok(shared::ast::runtime::Literal::EnumValue(
                 e.value.to_string(),
             )
             .into());

@@ -63,7 +63,9 @@ fn write_literal_object_field_spec<'a, J: struson::writer::JsonWriter>(
         write_object_type_spec(type_writer, &spec.r#type)
     })?;
     if let Some(default_value) = &spec.default_value {
-        super::shared::write_literal(writer, default_value)?;
+        writer.write_member("defaultValue", |default_value_writer| {
+            super::shared::write_literal(default_value_writer, default_value)
+        })?;
     } else {
         if !skip_invocations {
             writer.write_object_member(
@@ -106,7 +108,12 @@ fn write_array_object_field_spec<'a, J: struson::writer::JsonWriter>(
         write_non_callable_object_field_spec(type_writer, &spec.r#type)
     })?;
     if let Some(default_value) = &spec.default_value {
-        super::shared::write_array_literal(writer, &default_value)?;
+        writer.write_member("defaultValue", |default_value_writer| {
+            super::shared::write_array_literal(
+                default_value_writer,
+                default_value,
+            )
+        })?;
     }
     Ok(())
 }

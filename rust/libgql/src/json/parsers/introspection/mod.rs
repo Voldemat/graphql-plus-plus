@@ -155,7 +155,7 @@ fn parse_input_field_spec(
                 shared::ast::runtime::InputTypeSpec,
             > {
                 r#type: Box::new(t),
-                default_value: Some(None),
+                default_value: None,
                 directive_invocations: Vec::new(),
                 nullable: value["ofType"]["kind"].as_str().unwrap()
                     != "NON_NULL",
@@ -168,7 +168,7 @@ fn parse_input_field_spec(
                 shared::ast::runtime::InputTypeSpec,
             > {
                 r#type: t,
-                default_value: Some(None),
+                default_value: None,
                 directive_invocations: IndexMap::new(),
             }
             .into()

@@ -33,25 +33,38 @@ pub fn write_input_type_spec<'a, J: struson::writer::JsonWriter>(
 }
 
 pub fn write_literal<'a, J: struson::writer::JsonWriter>(
-    writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    value: &Option<shared::ast::runtime::Literal>,
+    member_writer: struson::writer::simple::MemberValueWriter<'a, J>,
+    value: &shared::ast::runtime::Literal<String>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    match value {
-        Some(shared::ast::runtime::Literal::Int(i)) => {
-            writer.write_number_member("defaultValue", *i)?
+    member_writer.write_object(|writer| match value {
+        shared::ast::runtime::Literal::Null => writer
+            .write_string_member("_type", "null")
+            .map_err(|e| e.into()),
+        shared::ast::runtime::Literal::Int(i) => {
+            writer.write_string_member("_type", "int")?;
+            writer
+                .write_number_member("value", *i)
+                .map_err(|e| e.into())
         }
-        Some(shared::ast::runtime::Literal::Float(f)) => {
-            writer.write_fp_number_member("defaultValue", *f)?
+        shared::ast::runtime::Literal::Float(f) => {
+            writer.write_string_member("_type", "float")?;
+            writer
+                .write_fp_number_member("value", *f)
+                .map_err(|e| e.into())
         }
-        Some(shared::ast::runtime::Literal::Boolean(b)) => {
-            writer.write_bool_member("defaultValue", *b)?
+        shared::ast::runtime::Literal::Boolean(b) => {
+            writer.write_string_member("_type", "boolean")?;
+            writer.write_bool_member("value", *b).map_err(|e| e.into())
         }
-        Some(shared::ast::runtime::Literal::String(s)) => {
-            writer.write_string_member("defaultValue", s)?
+        shared::ast::runtime::Literal::String(s) => {
+            writer.write_string_member("_type", "string")?;
+            writer.write_string_member("value", s).map_err(|e| e.into())
         }
-        None => writer.write_null_member("defaultValue")?,
-    }
-    Ok(())
+        shared::ast::runtime::Literal::EnumValue(s) => {
+            writer.write_string_member("_type", "enum-value")?;
+            writer.write_string_member("value", s).map_err(|e| e.into())
+        }
+    })
 }
 
 pub fn write_literal_input_field_spec<'a, J: struson::writer::JsonWriter>(
@@ -64,7 +77,11 @@ pub fn write_literal_input_field_spec<'a, J: struson::writer::JsonWriter>(
     writer.write_object_member("type", |type_writer| {
         write_input_type_spec(type_writer, &spec.r#type)
     })?;
-    write_literal(writer, spec.default_value.as_ref().unwrap())?;
+    if let Some(default_value) = spec.default_value.as_ref() {
+        writer.write_member("defaultValue", |member_writer| {
+            write_literal(member_writer, default_value)
+        })?;
+    }
     Ok(())
 }
 
@@ -88,37 +105,29 @@ pub fn write_non_callable_input_field_spec<
 }
 
 pub fn write_array_literal<'a, J: struson::writer::JsonWriter>(
-    writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    value: &Option<shared::ast::runtime::ArrayLiteral>,
+    writer: struson::writer::simple::MemberValueWriter<'a, J>,
+    value: &shared::ast::runtime::ArrayLiteral,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    match value {
-        Some(arr_value) => {
-            writer.write_array_member(
-                "defaultValue",
-                |array_writer| -> Result<(), Box<dyn std::error::Error>> {
-                    match arr_value {
-                        shared::ast::runtime::ArrayLiteral::Int(i) => Ok(i
-                            .iter()
-                            .try_for_each(|v| array_writer.write_number(*v))?),
+    writer.write_array(
+        |array_writer| -> Result<(), Box<dyn std::error::Error>> {
+            match value {
+                shared::ast::runtime::ArrayLiteral::Int(i) => Ok(i
+                    .iter()
+                    .try_for_each(|v| array_writer.write_number(*v))?),
 
-                        shared::ast::runtime::ArrayLiteral::Float(f) => {
-                            Ok(f.iter().try_for_each(|v| {
-                                array_writer.write_fp_number(*v)
-                            })?)
-                        }
-                        shared::ast::runtime::ArrayLiteral::Boolean(b) => Ok(b
-                            .iter()
-                            .try_for_each(|v| array_writer.write_bool(*v))?),
-                        shared::ast::runtime::ArrayLiteral::String(s) => Ok(s
-                            .iter()
-                            .try_for_each(|v| array_writer.write_string(v))?),
-                    }
-                },
-            )?;
-        }
-        None => writer.write_null_member("defaultValue")?,
-    };
-    Ok(())
+                shared::ast::runtime::ArrayLiteral::Float(f) => Ok(f
+                    .iter()
+                    .try_for_each(|v| array_writer.write_fp_number(*v))?),
+                shared::ast::runtime::ArrayLiteral::Boolean(b) => Ok(b
+                    .iter()
+                    .try_for_each(|v| array_writer.write_bool(*v))?),
+                shared::ast::runtime::ArrayLiteral::String(s) => {
+                    Ok(s.iter()
+                        .try_for_each(|v| array_writer.write_string(v))?)
+                }
+            }
+        },
+    )
 }
 
 pub fn write_array_input_field_spec<'a, J: struson::writer::JsonWriter>(
@@ -132,7 +141,11 @@ pub fn write_array_input_field_spec<'a, J: struson::writer::JsonWriter>(
     writer.write_object_member("type", |type_writer| {
         write_non_callable_input_field_spec(type_writer, &spec.r#type)
     })?;
-    write_array_literal(writer, spec.default_value.as_ref().unwrap_or(&None))?;
+    if let Some(default_value) = spec.default_value.as_ref() {
+        writer.write_member("defaultValue", |default_value_writer| {
+            write_array_literal(default_value_writer, default_value)
+        })?;
+    }
     Ok(())
 }
 
@@ -163,33 +176,6 @@ pub fn write_input_field_definition<'a, J: struson::writer::JsonWriter>(
     Ok(())
 }
 
-fn write_argument_literal_value<'a, J: struson::writer::JsonWriter>(
-    writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
-    value: &shared::ast::runtime::ArgumentLiteralValue,
-) -> Result<(), Box<dyn std::error::Error>> {
-    match value {
-        shared::ast::runtime::ArgumentLiteralValue::Null => {
-            writer.write_null_member("value")?;
-        }
-        shared::ast::runtime::ArgumentLiteralValue::Int(i) => {
-            writer.write_number_member("value", *i)?;
-        }
-        shared::ast::runtime::ArgumentLiteralValue::Boolean(b) => {
-            writer.write_bool_member("value", *b)?;
-        }
-        shared::ast::runtime::ArgumentLiteralValue::Float(f) => {
-            writer.write_fp_number_member("value", *f)?;
-        }
-        shared::ast::runtime::ArgumentLiteralValue::String(s) => {
-            writer.write_string_member("value", s)?;
-        }
-        shared::ast::runtime::ArgumentLiteralValue::EnumValue(e) => {
-            writer.write_string_member("value", e)?;
-        }
-    }
-    Ok(())
-}
-
 pub fn write_argument_value<'a, J: struson::writer::JsonWriter>(
     writer: &mut struson::writer::simple::ObjectWriter<'a, J>,
     value: &shared::ast::runtime::ArgumentValue,
@@ -201,7 +187,9 @@ pub fn write_argument_value<'a, J: struson::writer::JsonWriter>(
         }
         shared::ast::runtime::ArgumentValue::Literal(literal) => {
             writer.write_string_member("_type", "literal")?;
-            write_argument_literal_value(writer, literal)?;
+            writer.write_member("literal", |literal_writer| {
+                write_literal(literal_writer, literal)
+            })?;
         }
     }
     Ok(())

@@ -91,7 +91,7 @@ fn parse_noncallable_input_field_spec<
                     InputStringType,
                 > {
                     r#type,
-                    default_value: Some(dvalue),
+                    default_value: dvalue,
                     directive_invocations: IndexMap::new(),
                 }
                 .into(),

@@ -31,8 +31,8 @@ pub struct ASTVisitorHooks<'a> {
     pub visit_argument_value:
         ASTVisitorHook<'a, shared::ast::runtime::ArgumentValue>,
     pub visit_argument_ref_value: ASTVisitorHook<'a, String>,
-    pub visit_argument_literal_value:
-        ASTVisitorHook<'a, shared::ast::runtime::ArgumentLiteralValue>,
+    pub visit_literal:
+        ASTVisitorHook<'a, shared::ast::runtime::Literal<String>>,
     pub visit_client_directive:
         ASTVisitorHook<'a, client::ast::ClientDirective>,
     pub visit_client_directive_location:
@@ -114,8 +114,7 @@ fn visit_field_selection(
                 }
             }
             shared::ast::runtime::ArgumentValue::Literal(literal) => {
-                if let Some(hook) = hooks.visit_argument_literal_value.as_mut()
-                {
+                if let Some(hook) = hooks.visit_literal.as_mut() {
                     hook(literal);
                 }
             }

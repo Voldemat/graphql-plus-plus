@@ -108,11 +108,7 @@ fn resolve_operation_parameter<
                         &spec,
                         LiteralValue::Scalar(S::from_literal(
                             shared::ast::traits::Literal::get_ref(
-                                spec.default_value
-                                    .as_ref()
-                                    .unwrap()
-                                    .as_ref()
-                                    .unwrap(),
+                                spec.default_value.as_ref().unwrap(),
                             ),
                         )?),
                     )?));
