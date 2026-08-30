@@ -18,6 +18,7 @@ pub fn format_parse_error<'buffer>(
     format_error_with_range(exc, location.start, location.end, source)
 }
 
+const CONTEXT_LINES: usize = 5;
 fn format_error_with_range<'buffer>(
     exc: &str,
     start: usize,
@@ -30,43 +31,61 @@ fn format_error_with_range<'buffer>(
     let start = start.min(buffer.len());
     let end = end.min(buffer.len()).max(start);
 
-    // Calculate line number (1-indexed) and line start index
-    let line_number = buffer[..start].lines().count().max(1);
+    // Calculate error line index (0-indexed)
+    let target_line_idx = buffer[..start].lines().count().saturating_sub(1);
+
+    // Collect lines to extract context ranges safely
+    let lines: Vec<&str> = buffer.lines().collect();
+    if lines.is_empty() {
+        return format!("error: {}\n --> {}\n", exc, source.filepath.display());
+    }
+
+    // Determine range of lines to display
+    let start_line_idx = target_line_idx.saturating_sub(CONTEXT_LINES);
+    let end_line_idx = (target_line_idx + CONTEXT_LINES + 1).min(lines.len());
+
+    // Compute column offset (1-indexed character position) for the target line
     let line_start_offset =
         buffer[..start].rfind('\n').map(|i| i + 1).unwrap_or(0);
-
-    // Locate end of the current line
-    let line_end_offset = buffer[start..]
-        .find('\n')
-        .map(|i| start + i)
-        .unwrap_or(buffer.len());
-
-    // Extract line contents
-    let line_content = &buffer[line_start_offset..line_end_offset];
-
-    // Compute column offsets (1-indexed character position)
     let start_col = buffer[line_start_offset..start].chars().count();
     let length = buffer[start..end].chars().count().max(1);
 
-    // Format output
-    let line_num_str = line_number.to_string();
-    let padding = " ".repeat(line_num_str.len());
-    let carets = "^".repeat(length);
-    let spaces = " ".repeat(start_col);
+    // Calculate max padding based on the largest line number rendered
+    let max_line_num = end_line_idx;
+    let pad_len = max_line_num.to_string().len();
 
-    format!(
-        "error: {}\n --> {}:{}:{}\n{} |\n{} | {}\n{} | {}{}\n",
-        exc,
+    let mut output = format!(
+        " --> {}:{}:{}\n{:pad_len$} |\n",
         source.filepath.display(),
-        line_number,
+        target_line_idx + 1,
         start_col + 1,
-        padding,
-        line_num_str,
-        line_content,
-        padding,
-        spaces,
-        carets
-    )
+        ""
+    );
+
+    // Render context lines before, target line with message under carets, and context lines after
+    for line_idx in start_line_idx..end_line_idx {
+        let line_number = line_idx + 1;
+        let line_content = lines[line_idx];
+
+        output.push_str(&format!(
+            "{:width$} | {}\n",
+            line_number,
+            line_content,
+            width = pad_len
+        ));
+
+        // Insert caret line with error string appended right under the targeted line
+        if line_idx == target_line_idx {
+            let spaces = " ".repeat(start_col);
+            let carets = "^".repeat(length + 1);
+            output.push_str(&format!(
+                "{:pad_len$} | {}{} {}\n",
+                "", spaces, carets, exc
+            ));
+        }
+    }
+
+    output
 }
 
 pub fn read_buffer_from_filepath(filepath: &std::path::Path) -> String {
@@ -109,11 +128,38 @@ pub fn resolve_paths(
         .collect()
 }
 
+pub fn format_server_schema_error(
+    error: libgql::parsers::schema::server::Error<'_>,
+) -> String {
+    let node_location = error.get_location();
+    format_error_with_range(
+        &format!("{error}"),
+        node_location.start,
+        node_location.end,
+        &node_location.source,
+    )
+}
+
+pub fn format_client_schema_error<
+    's,
+    S: libgql::parsers::schema::shared::ast::AsStr<'s>,
+>(
+    error: libgql::parsers::schema::client::errors::Error<'s, S>,
+) -> String {
+    let node_location = error.get_location();
+    format_error_with_range(
+        &format!("{error}"),
+        node_location.start,
+        node_location.end,
+        &node_location.source,
+    )
+}
+
 pub fn load_server_schema_from_inputs(
     registry: &mut libgql::parsers::schema::server::type_registry::HashMapTypeRegistry,
     config_dir_path: &std::path::Path,
     conf: &config::InputsConfig,
-) -> Result<(), Vec<String>> {
+) -> Result<Vec<String>, String> {
     let mut nodes = Vec::<libgql::parsers::file::server::ast::ASTNode>::new();
     let mut errors = Vec::<String>::new();
     for jsonpath in resolve_paths(config_dir_path, &conf.json_schema) {
@@ -153,7 +199,7 @@ pub fn load_server_schema_from_inputs(
             Ok(n) => n,
             Err(e) => {
                 errors.push(format_parse_error(
-                    &format!("{:?}", e),
+                    &format!("{}", e),
                     e.get_location(),
                     &source_file,
                 ));
@@ -164,11 +210,11 @@ pub fn load_server_schema_from_inputs(
         nodes.extend(file_nodes);
     }
     if errors.len() > 0 {
-        return Err(errors);
+        return Ok(errors);
     }
     libgql::parsers::schema::server::parse_server_schema(registry, &nodes)
-        .unwrap();
-    Ok(())
+        .map(|_| Vec::new())
+        .map_err(|e| format_server_schema_error(e))
 }
 
 pub fn load_client_schema_from_inputs(
@@ -208,7 +254,7 @@ pub fn load_client_schema_from_inputs(
             Ok(n) => n,
             Err(e) => {
                 errors.push(format_lexer_error(
-                    &format!("{:?}", e),
+                    &format!("{}", e),
                     e.get_location(),
                     &source_file,
                 ));
@@ -217,21 +263,26 @@ pub fn load_client_schema_from_inputs(
         };
         nodes.extend(file_nodes);
     }
-    if errors.len() > 0 {
-        return Err(errors);
-    }
     match libgql::parsers::schema::client::parse_client_schema(
         server_registry,
         registry,
         &nodes,
-    ) {
-        Ok(_) => {}
-        Err(error) => {
-            errors.push(format!("{:?}", error));
-            return Err(errors);
+    )
+    .err()
+    {
+        None => {}
+        Some(new_errors) => {
+            errors.extend(
+                new_errors
+                    .into_iter()
+                    .map(|e| format_client_schema_error(e)),
+            );
         }
     };
-    return Ok(());
+    if errors.len() > 0 {
+        return Err(errors);
+    }
+    Ok(())
 }
 
 pub fn run_config_action<'a>(
@@ -249,11 +300,16 @@ pub fn run_config_action<'a>(
         config_path.parent().unwrap(),
         &config_server.inputs,
     ) {
-        Ok(_) => {}
-        Err(errors) => {
-            for e in errors {
-                println!("{}", e);
+        Ok(errors) => {
+            if errors.len() > 0 {
+                for e in errors {
+                    println!("{}", e);
+                }
+                return Ok(());
             }
+        }
+        Err(error) => {
+            println!("{}", error);
             return Ok(());
         }
     };
@@ -266,7 +322,7 @@ pub fn run_config_action<'a>(
             config_path.parent().unwrap(),
             &client_config.inputs,
         ) {
-            Ok(_) => Some(c_registry),
+            Ok(()) => Some(c_registry),
             Err(errors) => {
                 for e in errors {
                     println!("{}", e);
