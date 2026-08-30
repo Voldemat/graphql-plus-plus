@@ -28,6 +28,41 @@ pub fn parse_definition<'buffer>(
     return Ok(());
 }
 
+pub fn parse_arguments<'buffer>(
+    arguments: &Vec<file::shared::ast::Argument<'buffer>>,
+    directive: &shared::ast::runtime::ServerDirective,
+    registry: &HashMapTypeRegistry,
+) -> Result<
+    indexmap::IndexMap<String, shared::ast::runtime::FieldSelectionArgument>,
+    errors::Error<'buffer>,
+> {
+    let mut final_arguments = indexmap::IndexMap::<
+        String,
+        shared::ast::runtime::FieldSelectionArgument,
+    >::new();
+    for argument in arguments {
+        let Some(arg_type) = directive.arguments.get(argument.name.name) else {
+            return Err(super::type_registry::Error::UnknownArgument(
+                argument.name.clone(),
+            )
+            .into());
+        };
+        final_arguments.insert(
+            argument.name.name.to_string(),
+            shared::ast::runtime::FieldSelectionArgument {
+                name: argument.name.name.to_string(),
+                value: super::arguments::parse_argument_value(
+                    &argument.value,
+                    arg_type,
+                    registry,
+                )?,
+                r#type: arg_type.clone(),
+            },
+        );
+    }
+    return Ok(final_arguments);
+}
+
 pub fn parse_invocation<'buffer>(
     node: &file::shared::ast::DirectiveInvocationNode<'buffer>,
     registry: &HashMapTypeRegistry,
@@ -38,11 +73,7 @@ pub fn parse_invocation<'buffer>(
     let Some(directive) = registry.directives.get(node.name.name) else {
         return Err(errors::Error::UnknownServerDirective(node.name.clone()));
     };
-    let arguments = super::arguments::parse_arguments(
-        &node.arguments,
-        directive,
-        registry,
-    )?;
+    let arguments = parse_arguments(&node.arguments, directive, registry)?;
     return Ok(shared::ast::runtime::ServerDirectiveInvocation {
         directive: node.name.name.to_string(),
         arguments,

@@ -7,6 +7,13 @@ pub fn format_node<'s>(
     ast_node: &ast::LiteralNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     match ast_node {
+        ast::LiteralNode::Null(location) => {
+            ir::hir::builders::NodesVec::from_node(
+                ir::hir::builders::ascii_oneline_text(
+                    location.get_source_slice(),
+                ),
+            )
+        }
         ast::LiteralNode::Int(value) => ir::hir::builders::NodesVec::from_node(
             ir::hir::builders::ascii_oneline_text(
                 value.location.get_source_slice(),

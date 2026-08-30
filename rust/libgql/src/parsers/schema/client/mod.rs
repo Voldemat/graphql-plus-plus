@@ -1,5 +1,8 @@
+use std::collections::HashSet;
+
 use crate::parsers::file;
 
+pub mod arguments;
 pub mod ast;
 pub mod directive;
 pub mod errors;
@@ -25,13 +28,40 @@ pub fn parse_client_schema<
     server_registry: &'server_buffer T,
     registry: &mut TypeRegistry<ClientStringType>,
     ast_nodes: &[file::client::ast::ASTNode<'client_buffer>],
-) -> Result<(), errors::Error<'client_buffer, ClientStringType>> {
-    ast_nodes.iter().try_for_each(|node| {
-        nodes::parse_first_pass(server_registry, registry, node)
-    })?;
-    ast_nodes.iter().try_for_each(|node| {
-        nodes::parse_second_pass(server_registry, registry, node)
-    })?;
+) -> Result<(), Vec<errors::Error<'client_buffer, ClientStringType>>> {
+    let mut skip_indices = HashSet::new();
+    let mut errors = ast_nodes
+        .iter()
+        .enumerate()
+        .filter_map(|(index, node)| {
+            match nodes::parse_first_pass(server_registry, registry, node) {
+                Ok(_) => None,
+                Err(error) => {
+                    skip_indices.insert(index);
+                    Some(error)
+                }
+            }
+        })
+        .collect::<Vec<_>>();
+    errors.extend(
+        ast_nodes
+            .iter()
+            .enumerate()
+            .filter_map(|(index, node)| {
+                if skip_indices.contains(&index) {
+                    None
+                } else {
+                    Some(node)
+                }
+            })
+            .filter_map(|node| {
+                nodes::parse_second_pass(server_registry, registry, node).err()
+            })
+            .collect::<Vec<_>>(),
+    );
+    if errors.len() > 0 {
+        return Err(errors);
+    }
     let mut intermediate = Vec::new();
     for operation in registry.operations.values() {
         let parameters_hash =

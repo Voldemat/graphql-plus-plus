@@ -13,6 +13,7 @@ pub enum Error<'buffer> {
     UnexpectedEnumValueForScalar(
         file::shared::ast::LiteralEnumValueNode<'buffer>,
     ),
+    UnexpectedNullOnNonNullField(file::shared::ast::NodeLocation<'buffer>),
 }
 
 impl<'buffer> std::fmt::Display for Error<'buffer> {
@@ -27,6 +28,9 @@ impl<'buffer> std::fmt::Display for Error<'buffer> {
             }
             Self::UnexpectedEnumValueForScalar(_) => {
                 f.write_str("Unexpected enum value for scalar")
+            }
+            Self::UnexpectedNullOnNonNullField(_) => {
+                f.write_str("Unexpected null on non-null field")
             }
         }
     }
@@ -43,28 +47,51 @@ impl<'buffer> Error<'buffer> {
                 literal.get_location()
             }
             Self::UnexpectedEnumValueForScalar(literal) => &literal.location,
+            Self::UnexpectedNullOnNonNullField(location) => location,
         }
     }
 }
 
 pub fn parse_default_value<'buffer>(
     r#type: ast::traits::InputTypeSpecRef<'_>,
+    nullable: bool,
     literal: &file::shared::ast::LiteralNode<'buffer>,
-) -> Result<ast::runtime::Literal, Error<'buffer>> {
+) -> Result<Option<ast::runtime::Literal>, Error<'buffer>> {
     match r#type {
-        ast::traits::InputTypeSpecRef::InputType(_) => {
-            Err(Error::UnexpectedLiteralForInputType(literal.clone()))
-        }
+        ast::traits::InputTypeSpecRef::InputType(_) => match literal {
+            file::shared::ast::LiteralNode::Null(location) => {
+                if nullable {
+                    Ok(None)
+                } else {
+                    Err(Error::UnexpectedNullOnNonNullField(location.clone()))
+                }
+            }
+            _ => Err(Error::UnexpectedLiteralForInputType(literal.clone())),
+        },
         ast::traits::InputTypeSpecRef::Enum(_) => match literal {
+            file::shared::ast::LiteralNode::Null(location) => {
+                if nullable {
+                    Ok(None)
+                } else {
+                    Err(Error::UnexpectedNullOnNonNullField(location.clone()))
+                }
+            }
             file::shared::ast::LiteralNode::EnumValue(s) => {
-                Ok(ast::runtime::Literal::String(s.value.to_string()))
+                Ok(Some(ast::runtime::Literal::String(s.value.to_string())))
             }
             _ => Err(Error::UnexpectedLiteralForEnumType(literal.clone())),
         },
         ast::traits::InputTypeSpecRef::Scalar(scalar) => match literal {
+            file::shared::ast::LiteralNode::Null(location) => {
+                if nullable {
+                    Ok(None)
+                } else {
+                    Err(Error::UnexpectedNullOnNonNullField(location.clone()))
+                }
+            }
             file::shared::ast::LiteralNode::Int(v) => {
-                if scalar == "Int" {
-                    Ok(ast::runtime::Literal::Int(v.value))
+                if scalar == "Int" || scalar == "Float" {
+                    Ok(Some(ast::runtime::Literal::Int(v.value)))
                 } else {
                     Err(Error::UnexpectedLiteralForScalar {
                         literal: literal.clone(),
@@ -74,7 +101,7 @@ pub fn parse_default_value<'buffer>(
             }
             file::shared::ast::LiteralNode::Float(v) => {
                 if scalar == "Float" {
-                    Ok(ast::runtime::Literal::Float(v.value))
+                    Ok(Some(ast::runtime::Literal::Float(v.value)))
                 } else {
                     Err(Error::UnexpectedLiteralForScalar {
                         literal: literal.clone(),
@@ -84,7 +111,7 @@ pub fn parse_default_value<'buffer>(
             }
             file::shared::ast::LiteralNode::Boolean(v) => {
                 if scalar == "Boolean" {
-                    Ok(ast::runtime::Literal::Boolean(v.value))
+                    Ok(Some(ast::runtime::Literal::Boolean(v.value)))
                 } else {
                     Err(Error::UnexpectedLiteralForScalar {
                         literal: literal.clone(),
@@ -94,7 +121,7 @@ pub fn parse_default_value<'buffer>(
             }
             file::shared::ast::LiteralNode::String(v) => {
                 if scalar == "String" {
-                    Ok(ast::runtime::Literal::String(v.value.to_string()))
+                    Ok(Some(ast::runtime::Literal::String(v.value.to_string())))
                 } else {
                     Err(Error::UnexpectedLiteralForScalar {
                         literal: literal.clone(),

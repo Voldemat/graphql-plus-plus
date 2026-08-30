@@ -75,6 +75,20 @@ pub enum Error<'buffer, S: shared::ast::AsStr<'buffer>> {
     FragmentNameCollision(file::shared::ast::NameNode<'buffer>),
     OperationNameCollision(file::shared::ast::NameNode<'buffer>),
     DirectiveNameCollision(file::shared::ast::NameNode<'buffer>),
+    UnexpectedArgumentValue {
+        value: file::shared::ast::LiteralNode<'buffer>,
+        arg_type: shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::NonCallableFieldSpec<
+                shared::ast::runtime::InputTypeSpec<S>,
+                S,
+            >,
+            S,
+        >,
+    },
+    InvalidEnumValue {
+        value: file::shared::ast::LiteralEnumValueNode<'buffer>,
+        enum_type: S,
+    },
 }
 
 impl<'buffer, S: shared::ast::AsStr<'buffer>> std::fmt::Display
@@ -134,6 +148,10 @@ impl<'buffer, S: shared::ast::AsStr<'buffer>> std::fmt::Display
                 f.write_str("Unexpected selection on literal field"),
             Self::InvalidLiteralForInput { type_spec, node } =>
                 f.write_fmt(format_args!("Invalid literal {} for input with type {}", node.get_location().get_source_slice(), type_spec)),
+            Self::InvalidEnumValue { .. } =>
+                f.write_str("Invalid enum value"),
+            Self::UnexpectedArgumentValue { .. } =>
+                f.write_str("Unexpected argument value")
         }
     }
 }
@@ -169,6 +187,8 @@ impl<'buffer, S: shared::ast::AsStr<'buffer>> Error<'buffer, S> {
                 &spec.location
             }
             Self::InvalidLiteralForInput { node, .. } => node.get_location(),
+            Self::InvalidEnumValue { value, .. } => &value.location,
+            Self::UnexpectedArgumentValue { value, .. } => value.get_location(),
         }
     }
 }

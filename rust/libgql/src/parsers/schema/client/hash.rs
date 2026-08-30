@@ -163,6 +163,9 @@ fn hash_argument_literal_value<
     value: &shared::ast::runtime::ArgumentLiteralValue<S>,
 ) {
     match value {
+        shared::ast::runtime::ArgumentLiteralValue::Null => {
+            std::hash::Hash::hash("null", hasher);
+        }
         shared::ast::runtime::ArgumentLiteralValue::Int(i) => {
             std::hash::Hash::hash(i, hasher);
         }

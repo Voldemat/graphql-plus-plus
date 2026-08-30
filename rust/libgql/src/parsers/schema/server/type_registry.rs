@@ -27,6 +27,8 @@ pub trait TypeRegistry<'s, S: shared::ast::AsStr<'s>> {
         self: &Self,
         name: &str,
     ) -> Option<&server::ast::Interface<S>>;
+    fn get_enum(self: &Self, name: &str)
+    -> Option<&shared::ast::runtime::Enum>;
 }
 
 #[derive(Debug)]
@@ -93,6 +95,13 @@ impl<'s> TypeRegistry<'s, String> for HashMapTypeRegistry {
         } else {
             None
         }
+    }
+
+    fn get_enum(
+        self: &Self,
+        name: &str,
+    ) -> Option<&shared::ast::runtime::Enum> {
+        self.enums.get(name)
     }
 
     fn get_union(

@@ -71,6 +71,7 @@ pub struct LiteralEnumValueNode<'buffer> {
 
 #[derive(Debug, Clone, derive_more::From, serde::Serialize)]
 pub enum LiteralNode<'buffer> {
+    Null(NodeLocation<'buffer>),
     Int(LiteralIntNode<'buffer>),
     Float(LiteralFloatNode<'buffer>),
     String(LiteralStringNode<'buffer>),
@@ -81,6 +82,7 @@ pub enum LiteralNode<'buffer> {
 impl<'buffer> LiteralNode<'buffer> {
     pub fn get_location(self: &Self) -> &NodeLocation<'buffer> {
         match self {
+            Self::Null(location) => location,
             Self::Int(node) => &node.location,
             Self::Float(node) => &node.location,
             Self::String(node) => &node.location,
@@ -90,6 +92,7 @@ impl<'buffer> LiteralNode<'buffer> {
     }
     pub fn get_source_file(self: &Self) -> &Arc<SourceFile<'buffer>> {
         match self {
+            Self::Null(location) => &location.source,
             Self::Int(node) => &node.location.source,
             Self::Float(node) => &node.location.source,
             Self::String(node) => &node.location.source,

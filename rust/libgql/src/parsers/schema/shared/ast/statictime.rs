@@ -54,22 +54,6 @@ impl super::traits::Literal for Literal {
     }
 }
 
-impl Literal {
-    pub fn parse(node: &file::shared::ast::LiteralNode<'static>) -> Self {
-        match node {
-            file::shared::ast::LiteralNode::Int(i) => Self::Int(i.value),
-            file::shared::ast::LiteralNode::Float(i) => Self::Float(i.value),
-            file::shared::ast::LiteralNode::Boolean(i) => {
-                Self::Boolean(i.value)
-            }
-            file::shared::ast::LiteralNode::String(i) => Self::String(i.value),
-            file::shared::ast::LiteralNode::EnumValue(i) => {
-                Self::String(i.value)
-            }
-        }
-    }
-}
-
 #[derive(Debug)]
 pub enum ArrayLiteral {
     Int(&'static [i64]),

@@ -1,7 +1,4 @@
-use crate::{
-    lexer,
-    parsers::{file, schema::shared},
-};
+use crate::parsers::{file, schema::shared};
 
 pub type ArgType = shared::ast::runtime::FieldDefinition<
     shared::ast::runtime::NonCallableFieldSpec<
@@ -62,7 +59,7 @@ impl<'buffer> std::fmt::Display for Error<'buffer> {
                     arg_type
                 ))
             }
-            Self::InvalidEnumValue { value, enum_type } => f.write_fmt(
+            Self::InvalidEnumValue { enum_type, .. } => f.write_fmt(
                 format_args!("Invalid enum value for {}", enum_type),
             ),
             Self::UnknownServerDirective(node) => f.write_fmt(format_args!(

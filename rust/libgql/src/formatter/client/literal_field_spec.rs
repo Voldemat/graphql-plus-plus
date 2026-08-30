@@ -3,7 +3,7 @@ use codeform::ir;
 use crate::parsers::file::client::ast;
 
 pub fn format_node<'s>(
-    config: &super::config::Config,
+    _config: &super::config::Config,
     ast_node: &ast::ObjectLiteralFieldSpec<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     ir::hir::builders::NodesVec::empty()

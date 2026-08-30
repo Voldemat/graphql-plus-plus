@@ -79,10 +79,12 @@ fn parse_noncallable_input_field_spec<
                 .map(|v| {
                     shared::default_value::parse_default_value(
                         r#type.get_ref(),
+                        n.nullable,
                         v,
                     )
                 })
-                .transpose()?;
+                .transpose()?
+                .flatten();
             return Ok((
                 shared::ast::runtime::LiteralFieldSpec::<
                     shared::ast::runtime::InputTypeSpec<InputStringType>,

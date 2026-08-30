@@ -11,7 +11,7 @@ pub fn format_node<'s>(
         ir::hir::builders::ascii_oneline_text(ast_node.name.name),
         ir::hir::builders::ascii_oneline_text(": "),
     ])
-    .push(super::argument_value::format_node(config, &ast_node.value))
+    .extend(super::argument_value::format_node(config, &ast_node.value))
     .extend_if(
         !is_last_node,
         [

@@ -96,24 +96,6 @@ impl std::fmt::Display for Literal {
     }
 }
 
-impl Literal {
-    pub fn parse(node: &file::shared::ast::LiteralNode) -> Self {
-        match node {
-            file::shared::ast::LiteralNode::Int(i) => Self::Int(i.value),
-            file::shared::ast::LiteralNode::Float(i) => Self::Float(i.value),
-            file::shared::ast::LiteralNode::Boolean(i) => {
-                Self::Boolean(i.value)
-            }
-            file::shared::ast::LiteralNode::String(i) => {
-                Self::String(i.value.to_string())
-            }
-            file::shared::ast::LiteralNode::EnumValue(i) => {
-                Self::String(i.value.to_string())
-            }
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
 pub enum ArrayLiteral {
     Int(Vec<i64>),
@@ -360,6 +342,7 @@ pub struct InputType<S = String> {
 
 #[derive(Debug, Clone)]
 pub enum ArgumentLiteralValue<S = String> {
+    Null,
     String(S),
     Int(i64),
     Float(f64),
@@ -370,6 +353,7 @@ pub enum ArgumentLiteralValue<S = String> {
 impl<S: std::fmt::Display> std::fmt::Display for ArgumentLiteralValue<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::Null => f.write_str("null"),
             Self::String(s) => s.fmt(f),
             Self::Int(i) => f.write_fmt(format_args!("{}", i)),
             Self::Float(v) => f.write_fmt(format_args!("{}", v)),
@@ -387,6 +371,7 @@ impl<'s1, S: AsStr<'s1>> ArgumentLiteralValue<S> {
         's1: 's2,
     {
         match self {
+            Self::Null => ArgumentLiteralValue::Null,
             Self::String(s) => {
                 ArgumentLiteralValue::String(NS::from_str(s.to_str()))
             }
@@ -400,19 +385,19 @@ impl<'s1, S: AsStr<'s1>> ArgumentLiteralValue<S> {
     }
 }
 
-impl From<i64> for ArgumentLiteralValue {
+impl<S> From<i64> for ArgumentLiteralValue<S> {
     fn from(value: i64) -> Self {
         return Self::Int(value);
     }
 }
 
-impl From<f64> for ArgumentLiteralValue {
+impl<S> From<f64> for ArgumentLiteralValue<S> {
     fn from(value: f64) -> Self {
         return Self::Float(value);
     }
 }
 
-impl From<bool> for ArgumentLiteralValue {
+impl<S> From<bool> for ArgumentLiteralValue<S> {
     fn from(value: bool) -> Self {
         return Self::Boolean(value);
     }

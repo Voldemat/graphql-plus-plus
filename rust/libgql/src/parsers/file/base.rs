@@ -283,7 +283,7 @@ impl<
 
     fn parse_literal_node(
         self: &mut Self,
-    ) -> Result<Option<shared::ast::LiteralNode<'buffer>>, Error<'buffer>> {
+    ) -> Result<shared::ast::LiteralNode<'buffer>, Error<'buffer>> {
         T::advance(&mut self.tokens_source)?;
         let current_token = T::get_current_token(&self.tokens_source).clone();
         let TokenType::Complex(token_type) = current_token.token_type else {
@@ -297,39 +297,33 @@ impl<
         match token_type {
             ComplexTokenType::Number => {
                 if let Some(int_node) = self.parse_literal_int_node() {
-                    Ok(Some(int_node.into()))
+                    Ok(int_node.into())
                 } else if let Some(float_node) = self.parse_literal_float_node()
                 {
-                    Ok(Some(float_node.into()))
+                    Ok(float_node.into())
                 } else {
                     Err(Error::CannotParseNumberLiteral(current_token))
                 }
             }
-            ComplexTokenType::Boolean => Ok(Some(
-                shared::ast::LiteralBooleanNode {
-                    location,
-                    value: current_token.lexeme == "true",
-                }
-                .into(),
-            )),
-            ComplexTokenType::String => Ok(Some(
-                shared::ast::LiteralStringNode {
-                    location,
-                    value: current_token.lexeme,
-                }
-                .into(),
-            )),
+            ComplexTokenType::Boolean => Ok(shared::ast::LiteralBooleanNode {
+                location,
+                value: current_token.lexeme == "true",
+            }
+            .into()),
+            ComplexTokenType::String => Ok(shared::ast::LiteralStringNode {
+                location,
+                value: current_token.lexeme,
+            }
+            .into()),
             ComplexTokenType::Identifier => {
                 if current_token.lexeme == "null" {
-                    Ok(None)
+                    Ok(location.into())
                 } else {
-                    Ok(Some(
-                        shared::ast::LiteralEnumValueNode {
-                            location,
-                            value: current_token.lexeme,
-                        }
-                        .into(),
-                    ))
+                    Ok(shared::ast::LiteralEnumValueNode {
+                        location,
+                        value: current_token.lexeme,
+                    }
+                    .into())
                 }
             }
             ComplexTokenType::Spread => {
@@ -380,9 +374,7 @@ impl<
                 &self.tokens_source,
                 ComplexTokenType::Identifier.into(),
             ) {
-                if let Some(argument) = self.parse_argument()? {
-                    arguments.push(argument);
-                }
+                arguments.push(self.parse_argument()?);
                 T::consume_if_is_ahead(
                     &mut self.tokens_source,
                     SimpleTokenType::Comma.into(),
@@ -398,13 +390,11 @@ impl<
 
     fn parse_argument(
         self: &mut Self,
-    ) -> Result<Option<shared::ast::Argument<'buffer>>, Error<'buffer>> {
+    ) -> Result<shared::ast::Argument<'buffer>, Error<'buffer>> {
         let name = self.parse_name_node(false)?;
         T::consume(&mut self.tokens_source, SimpleTokenType::Colon.into())?;
-        let Some(value) = self.parse_argument_value()? else {
-            return Ok(None);
-        };
-        return Ok(Some(shared::ast::Argument {
+        let value = self.parse_argument_value()?;
+        return Ok(shared::ast::Argument {
             location: shared::ast::NodeLocation {
                 start: name.location.start,
                 end: T::get_current_token(&self.tokens_source).location.end,
@@ -412,13 +402,12 @@ impl<
             },
             name,
             value,
-        }));
+        });
     }
 
     fn parse_argument_value(
         self: &mut Self,
-    ) -> Result<Option<shared::ast::ArgumentValue<'buffer>>, Error<'buffer>>
-    {
+    ) -> Result<shared::ast::ArgumentValue<'buffer>, Error<'buffer>> {
         let Some(token) = T::lookahead(&self.tokens_source) else {
             return Err(tokens_source::ConsumeError::EOF(
                 T::get_current_token(&self.tokens_source).clone(),
@@ -426,9 +415,9 @@ impl<
             .into());
         };
         if token.token_type == ComplexTokenType::Identifier.into() {
-            return self.parse_name_node(false).map(|v| Some(v.into()));
+            return self.parse_name_node(false).map(|v| v.into());
         }
-        return self.parse_literal_node().map(|v| v.map(|i| i.into()));
+        return self.parse_literal_node().map(|v| v.into());
     }
 
     pub fn parse_default_value(
@@ -438,7 +427,7 @@ impl<
             &mut self.tokens_source,
             SimpleTokenType::Equal.into(),
         ) {
-            return Ok(self.parse_literal_node()?);
+            return Ok(Some(self.parse_literal_node()?));
         }
         return Ok(None);
     }

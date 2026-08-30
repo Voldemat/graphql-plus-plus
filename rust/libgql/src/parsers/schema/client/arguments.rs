@@ -1,22 +1,29 @@
+use super::errors;
 use crate::parsers::{
     file,
-    schema::{
-        server::{self, errors},
-        shared,
-    },
+    schema::{server, shared},
 };
 
-use super::type_registry::{HashMapTypeRegistry, TypeRegistry};
-
-fn parse_argument_value_from_literal_node<'buffer>(
-    value: &file::shared::ast::LiteralNode<'buffer>,
-    arg_type: &shared::ast::runtime::FieldDefinition<
+fn parse_argument_value_from_literal_node<
+    'client_buffer,
+    'server_buffer: 'client_buffer,
+    ClientStringType: shared::ast::AsStr<'client_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
+>(
+    value: &file::shared::ast::LiteralNode<'client_buffer>,
+    arg_type: &'server_buffer shared::ast::runtime::FieldDefinition<
         shared::ast::runtime::NonCallableFieldSpec<
-            shared::ast::runtime::InputTypeSpec,
+            shared::ast::runtime::InputTypeSpec<ServerStringType>,
+            ServerStringType,
         >,
+        ServerStringType,
     >,
-    registry: &HashMapTypeRegistry,
-) -> Result<shared::ast::runtime::ArgumentValue, errors::Error<'buffer>> {
+    registry: &T,
+) -> Result<
+    shared::ast::runtime::ArgumentValue<ClientStringType>,
+    errors::Error<'client_buffer, ClientStringType>,
+> {
     return match value {
         file::shared::ast::LiteralNode::Null(location) => {
             if arg_type.nullable {
@@ -44,7 +51,7 @@ fn parse_argument_value_from_literal_node<'buffer>(
         file::shared::ast::LiteralNode::String(s) => {
             Ok(shared::ast::runtime::ArgumentValue::Literal(
                 shared::ast::runtime::ArgumentLiteralValue::String(
-                    s.value.to_string(),
+                    ClientStringType::from_str(s.value),
                 ),
             ))
         }
@@ -59,8 +66,9 @@ fn parse_argument_value_from_literal_node<'buffer>(
                     ),
                 });
             };
-            let shared::ast::runtime::InputTypeSpec::Enum(enum_type) =
-                &s.r#type
+            let shared::ast::runtime::InputTypeSpec::<ServerStringType>::Enum(
+                enum_type,
+            ) = &s.r#type
             else {
                 return Err(errors::Error::UnexpectedArgumentValue {
                     value: value.clone(),
@@ -70,7 +78,7 @@ fn parse_argument_value_from_literal_node<'buffer>(
                 });
             };
             if !registry
-                .get_enum(&enum_type)
+                .get_enum(enum_type.to_str())
                 .unwrap()
                 .values
                 .iter()
@@ -78,30 +86,43 @@ fn parse_argument_value_from_literal_node<'buffer>(
             {
                 return Err(errors::Error::InvalidEnumValue {
                     value: e.clone(),
-                    enum_type: enum_type.to_string(),
+                    enum_type: ClientStringType::from_str(enum_type.to_str()),
                 });
             };
             return Ok(shared::ast::runtime::ArgumentLiteralValue::EnumValue(
-                e.value.to_string(),
+                ClientStringType::from_str(e.value),
             )
             .into());
         }
     };
 }
 
-pub fn parse_argument_value<'buffer>(
-    value: &file::shared::ast::ArgumentValue<'buffer>,
-    arg_type: &shared::ast::runtime::FieldDefinition<
+pub fn parse_argument_value<
+    'client_buffer,
+    'server_buffer: 'client_buffer,
+    ClientStringType: shared::ast::AsStr<'client_buffer>,
+    ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
+>(
+    value: &file::shared::ast::ArgumentValue<'client_buffer>,
+    arg_type: &'server_buffer shared::ast::runtime::FieldDefinition<
         shared::ast::runtime::NonCallableFieldSpec<
-            shared::ast::runtime::InputTypeSpec,
+            shared::ast::runtime::InputTypeSpec<ServerStringType>,
+            ServerStringType,
         >,
+        ServerStringType,
     >,
-    registry: &HashMapTypeRegistry,
-) -> Result<shared::ast::runtime::ArgumentValue, errors::Error<'buffer>> {
+    registry: &T,
+) -> Result<
+    shared::ast::runtime::ArgumentValue<ClientStringType>,
+    errors::Error<'client_buffer, ClientStringType>,
+> {
     match value {
-        file::shared::ast::ArgumentValue::NameNode(name) => Ok(
-            shared::ast::runtime::ArgumentValue::Ref(name.name.to_string()),
-        ),
+        file::shared::ast::ArgumentValue::NameNode(name) => {
+            Ok(shared::ast::runtime::ArgumentValue::Ref(
+                ClientStringType::from_str(name.name),
+            ))
+        }
         file::shared::ast::ArgumentValue::LiteralNode(literal) => {
             parse_argument_value_from_literal_node(&literal, arg_type, registry)
         }

@@ -168,6 +168,9 @@ fn write_argument_literal_value<'a, J: struson::writer::JsonWriter>(
     value: &shared::ast::runtime::ArgumentLiteralValue,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match value {
+        shared::ast::runtime::ArgumentLiteralValue::Null => {
+            writer.write_null_member("value")?;
+        }
         shared::ast::runtime::ArgumentLiteralValue::Int(i) => {
             writer.write_number_member("value", *i)?;
         }

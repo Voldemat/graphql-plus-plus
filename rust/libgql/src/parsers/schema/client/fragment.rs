@@ -368,7 +368,9 @@ fn parse_selection_arguments<
     'server_buffer: 'client_buffer,
     ClientStringType: shared::ast::AsStr<'client_buffer>,
     ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
 >(
+    server_registry: &T,
     spec: &'server_buffer server::ast::CallableFieldSpec<ServerStringType>,
     arguments: &[file::shared::ast::Argument<'client_buffer>],
 ) -> Result<
@@ -380,113 +382,11 @@ fn parse_selection_arguments<
 > {
     Ok(arguments
         .iter()
-        .map(|arg| parse_selection_argument(spec, arg))
+        .map(|arg| parse_selection_argument(server_registry, spec, arg))
         .collect::<Result<Vec<_>, errors::Error<'client_buffer, ClientStringType>>>()?
         .into_iter()
         .map(|arg| (arg.name.clone(), arg))
         .collect())
-}
-
-fn parse_argument_literal_value<
-    'client_buffer,
-    'server_buffer: 'client_buffer,
-    ClientStringType: shared::ast::AsStr<'client_buffer>,
-    ServerStringType: shared::ast::AsStr<'server_buffer>,
->(
-    type_spec: &'server_buffer shared::ast::runtime::InputTypeSpec<
-        ServerStringType,
-    >,
-    node: &file::shared::ast::LiteralNode<'client_buffer>,
-) -> Result<
-    shared::ast::runtime::ArgumentLiteralValue<ClientStringType>,
-    errors::Error<'client_buffer, ClientStringType>,
-> {
-    match node {
-        file::shared::ast::LiteralNode::Int(i) => {
-            let is_valid = match type_spec {
-                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
-                    s.to_str() == "Int"
-                }
-                _ => false,
-            };
-            if !is_valid {
-                Err(errors::Error::InvalidLiteralForInput {
-                    type_spec: type_spec.clone_with_string_type(),
-                    node: node.clone(),
-                })
-            } else {
-                Ok(shared::ast::runtime::ArgumentLiteralValue::Int(i.value))
-            }
-        }
-        file::shared::ast::LiteralNode::Float(i) => {
-            let is_valid = match type_spec {
-                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
-                    s.to_str() == "Float"
-                }
-                _ => false,
-            };
-            if !is_valid {
-                Err(errors::Error::InvalidLiteralForInput {
-                    type_spec: type_spec.clone_with_string_type(),
-                    node: node.clone(),
-                })
-            } else {
-                Ok(shared::ast::runtime::ArgumentLiteralValue::Float(i.value))
-            }
-        }
-        file::shared::ast::LiteralNode::Boolean(i) => {
-            let is_valid = match type_spec {
-                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
-                    s.to_str() == "Boolean"
-                }
-                _ => false,
-            };
-            if !is_valid {
-                Err(errors::Error::InvalidLiteralForInput {
-                    type_spec: type_spec.clone_with_string_type(),
-                    node: node.clone(),
-                })
-            } else {
-                Ok(shared::ast::runtime::ArgumentLiteralValue::Boolean(i.value))
-            }
-        }
-        file::shared::ast::LiteralNode::String(i) => {
-            let is_valid = match type_spec {
-                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
-                    s.to_str() == "String"
-                }
-                _ => false,
-            };
-            if !is_valid {
-                Err(errors::Error::InvalidLiteralForInput {
-                    type_spec: type_spec.clone_with_string_type(),
-                    node: node.clone(),
-                })
-            } else {
-                Ok(shared::ast::runtime::ArgumentLiteralValue::String(
-                    ClientStringType::from_str(i.value),
-                ))
-            }
-        }
-        file::shared::ast::LiteralNode::EnumValue(i) => {
-            let is_valid = match type_spec {
-                shared::ast::runtime::InputTypeSpec::Scalar(s) => {
-                    s.to_str() == "String"
-                }
-                _ => false,
-            };
-            if !is_valid {
-                Err(errors::Error::InvalidLiteralForInput {
-                    type_spec: type_spec.clone_with_string_type(),
-                    node: node.clone(),
-                })
-            } else {
-                Ok(shared::ast::runtime::ArgumentLiteralValue::EnumValue(
-                    ClientStringType::from_str(i.value),
-                ))
-            }
-        }
-    }
 }
 
 fn parse_selection_argument<
@@ -494,7 +394,9 @@ fn parse_selection_argument<
     'server_buffer: 'client_buffer,
     ClientStringType: shared::ast::AsStr<'client_buffer>,
     ServerStringType: shared::ast::AsStr<'server_buffer>,
+    T: server::type_registry::TypeRegistry<'server_buffer, ServerStringType>,
 >(
+    server_registry: &T,
     spec: &'server_buffer server::ast::CallableFieldSpec<ServerStringType>,
     argument: &file::shared::ast::Argument<'client_buffer>,
 ) -> Result<
@@ -507,20 +409,13 @@ fn parse_selection_argument<
         )
         .into());
     };
-    let type_spec = t.spec.get_type_spec();
     return Ok(shared::ast::runtime::FieldSelectionArgument {
         name: ClientStringType::from_str(argument.name.name),
-        value: match &argument.value {
-            file::shared::ast::ArgumentValue::NameNode(node) => {
-                shared::ast::runtime::ArgumentValue::Ref(
-                    ClientStringType::from_str(node.name),
-                )
-                .into()
-            }
-            file::shared::ast::ArgumentValue::LiteralNode(node) => {
-                parse_argument_literal_value(type_spec, node)?.into()
-            }
-        },
+        value: super::arguments::parse_argument_value::<
+            ClientStringType,
+            ServerStringType,
+            T,
+        >(&argument.value, t, server_registry)?,
         r#type: t.clone_with_string_type(|s| {
             s.clone_with_string_type(
                 shared::ast::runtime::InputTypeSpec::clone_with_string_type,
@@ -591,7 +486,11 @@ fn parse_object_field_selection_node<
                     }
                     server::ast::ObjectFieldSpec::Callable(c) => Ok(c),
                 }?;
-                parse_selection_arguments(&spec, &callable.arguments)
+                parse_selection_arguments(
+                    server_registry,
+                    &spec,
+                    &callable.arguments,
+                )
             }
         }?,
     });
