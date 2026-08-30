@@ -22,7 +22,7 @@
         "lint": "oxlint .",
         "lint:fix": "oxlint --fix .",
         "lint:ci": "npm run fmt:check && npm run lint",
-        "test": "vitest",
+        "test": "vitest --passWithNoTests",
         "build": "tsc && tsc-alias && cp package.json ./dist/package.json"
     },
     "dependencies": {
