@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { literalSchema } from '../shared.js';
 
 export const argumentValue = z.discriminatedUnion('_type', [
     z.object({
@@ -7,7 +8,7 @@ export const argumentValue = z.discriminatedUnion('_type', [
     }),
     z.object({
         _type: z.literal('literal'),
-        value: z.union([z.string(), z.number(), z.boolean()]),
+        literal: literalSchema,
     }),
 ]);
 

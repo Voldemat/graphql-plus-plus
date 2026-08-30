@@ -17,12 +17,32 @@ export const inputTypeSchema = z.discriminatedUnion('_type', [
     }),
 ]);
 
-export const literalSchema = z.union([
-    z.string(),
-    z.int(),
-    z.float32(),
-    z.boolean(),
+export const literalSchema = z.discriminatedUnion('_type', [
+    z.object({
+        _type: z.literal('string'),
+        value: z.string(),
+    }),
+    z.object({
+        _type: z.literal('enum-value'),
+        value: z.string(),
+    }),
+    z.object({
+        _type: z.literal('null'),
+    }),
+    z.object({
+        _type: z.literal('int'),
+        value: z.number(),
+    }),
+    z.object({
+        _type: z.literal('float'),
+        value: z.number(),
+    }),
+    z.object({
+        _type: z.literal('boolean'),
+        value: z.boolean(),
+    }),
 ]);
+
 export const arrayLiteralSchema = z.union([
     z.array(z.string()),
     z.array(z.int()),
@@ -33,13 +53,13 @@ export const arrayLiteralSchema = z.union([
 export const inputLiteralSpecSchema = z.object({
     _type: z.literal('literal'),
     type: inputTypeSchema,
-    defaultValue: literalSchema.optional().nullable(),
+    defaultValue: literalSchema.optional(),
 });
 
 export const inputArraySpecSchema = z.object({
     _type: z.literal('array'),
     nullable: z.boolean(),
-    defaultValue: arrayLiteralSchema.optional().nullable(),
+    defaultValue: arrayLiteralSchema.optional(),
     get type(): z.ZodDiscriminatedUnion<
         [typeof inputLiteralSpecSchema, typeof inputArraySpecSchema]
     > {
