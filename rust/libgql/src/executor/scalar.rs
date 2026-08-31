@@ -5,5 +5,5 @@ pub trait Scalar: Sized + Send + Sync + std::fmt::Debug {
     fn from_str(s: &str) -> Result<Self, String>;
     fn from_literal(
         literal: shared::ast::traits::LiteralRef<'_>,
-    ) -> Result<Self, String>;
+    ) -> Result<Option<Self>, String>;
 }

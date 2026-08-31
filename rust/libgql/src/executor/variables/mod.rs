@@ -103,14 +103,25 @@ fn resolve_operation_parameter<
                     return Ok(None);
                 }
                 shared::ast::runtime::NonCallableFieldSpec::Literal(spec) => {
+                    let Some(literal) = S::from_literal(
+                        shared::ast::traits::Literal::get_ref(
+                            spec.default_value.as_ref().unwrap(),
+                        ),
+                    )?
+                    else {
+                        if param.nullable {
+                            return Ok(None);
+                        } else {
+                            return Err(format!(
+                                "Received null for nonnullable parameter: {}",
+                                param.name.to_str()
+                            ));
+                        }
+                    };
                     return Ok(Some(resolve_literal(
                         registry,
                         &spec,
-                        LiteralValue::Scalar(S::from_literal(
-                            shared::ast::traits::Literal::get_ref(
-                                spec.default_value.as_ref().unwrap(),
-                            ),
-                        )?),
+                        LiteralValue::Scalar(literal),
                     )?));
                 }
             }
