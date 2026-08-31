@@ -20,16 +20,18 @@ impl libgql::executor::Scalar for Scalar {
 
     fn from_literal(
         literal: libgql::parsers::schema::shared::ast::traits::LiteralRef<'_>,
-    ) -> Result<Scalar, String> {
+    ) -> Result<Option<Scalar>, String> {
         match literal {
-            libgql::parsers::schema::shared::ast::traits::LiteralRef::Int(i) => Ok(Scalar::Int(
+            libgql::parsers::schema::shared::ast::traits::LiteralRef::Null => Ok(None),
+            libgql::parsers::schema::shared::ast::traits::LiteralRef::EnumValue(_) => Err("Unexpected enum value for scalar".to_string()),
+            libgql::parsers::schema::shared::ast::traits::LiteralRef::Int(i) => Ok(Some(Scalar::Int(
                 TryInto::<i32>::try_into(*i).map_err(|e| e.to_string())?,
-            )),
-            libgql::parsers::schema::shared::ast::traits::LiteralRef::Float(f) => Ok(Scalar::Float(*f as f32)),
+            ))),
+            libgql::parsers::schema::shared::ast::traits::LiteralRef::Float(f) => Ok(Some(Scalar::Float(*f as f32))),
             libgql::parsers::schema::shared::ast::traits::LiteralRef::String(s) => {
-                Ok(Scalar::String(s.to_string()))
+                Ok(Some(Scalar::String(s.to_string())))
             }
-            libgql::parsers::schema::shared::ast::traits::LiteralRef::Boolean(b) => Ok(Scalar::Boolean(*b)),
+            libgql::parsers::schema::shared::ast::traits::LiteralRef::Boolean(b) => Ok(Some(Scalar::Boolean(*b))),
         }
     }
 }
