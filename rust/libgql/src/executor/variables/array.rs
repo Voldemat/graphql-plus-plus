@@ -168,7 +168,7 @@ mod tests {
 
         fn from_literal(
             _: shared::ast::traits::LiteralRef<'_>,
-        ) -> Result<Self, String> {
+        ) -> Result<Option<Self>, String> {
             todo!()
         }
     }
@@ -199,11 +199,11 @@ mod tests {
                     shared::ast::runtime::InputTypeSpec,
                 > {
                     nullable: true,
-                    default_value: Some(None),
+                    default_value: None,
                     r#type: Box::new(
                         shared::ast::runtime::NonCallableFieldSpec::Literal(
                             shared::ast::runtime::LiteralFieldSpec {
-                                default_value: Some(None),
+                                default_value: None,
                                 r#type:
                                     shared::ast::runtime::InputTypeSpec::Scalar(
                                         "Empty".to_string(),
@@ -241,11 +241,11 @@ mod tests {
                 r#type: Box::new(shared::ast::runtime::NonCallableFieldSpec::Array(
                     shared::ast::runtime::ArrayFieldSpec::<shared::ast::runtime::InputTypeSpec> {
                         nullable: true,
-                        default_value: Some(None),
+                        default_value: None,
                         r#type: Box::new(
                             shared::ast::runtime::NonCallableFieldSpec::Literal(
                                 shared::ast::runtime::LiteralFieldSpec {
-                                    default_value: Some(None),
+                                    default_value: None,
                                     r#type: shared::ast::runtime::InputTypeSpec::Scalar(
                                         "Empty".to_string(),
                                     ),
@@ -256,7 +256,7 @@ mod tests {
                         directive_invocations: Vec::new(),
                     },
                 )),
-                default_value: Some(None),
+                default_value: None,
                 nullable: true,
                 directive_invocations: Vec::new(),
             },

@@ -4,6 +4,7 @@ use super::token_type::ComplexTokenType;
 pub enum ConditionResult {
     True,
     False { is_char_part_of_token: bool },
+    UnexpectedChar,
 }
 
 pub trait Condition {
@@ -46,10 +47,19 @@ impl Condition for MultilineStringCondition {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct NumberCondition {
     pub contains_point: bool,
     pub last_char_is_digit: bool,
+}
+
+impl Default for NumberCondition {
+    fn default() -> Self {
+        Self {
+            contains_point: false,
+            last_char_is_digit: true,
+        }
+    }
 }
 
 impl Condition for NumberCondition {
@@ -97,19 +107,30 @@ mod tests {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct SpreadCondition {
     pub dot_count: u8,
 }
 
+impl Default for SpreadCondition {
+    fn default() -> Self {
+        Self { dot_count: 1 }
+    }
+}
+
 impl Condition for SpreadCondition {
     fn evaluate(self: &mut Self, c: char) -> ConditionResult {
-        if c == '.' && self.dot_count == 2 {
-            ConditionResult::False {
-                is_char_part_of_token: true,
+        if c == '.' {
+            if self.dot_count == 2 {
+                ConditionResult::False {
+                    is_char_part_of_token: true,
+                }
+            } else {
+                self.dot_count += 1;
+                ConditionResult::True
             }
         } else {
-            ConditionResult::True
+            ConditionResult::UnexpectedChar
         }
     }
 }

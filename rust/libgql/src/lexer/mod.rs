@@ -51,7 +51,7 @@ impl<'buffer> Lexer<'buffer> {
         let mut maybe_token: Option<Token<'buffer>> = None;
         if let Some(state) = self.pending_token_state.take() {
             if let Some((token, is_char_part_of_token)) =
-                self.feed_with_type(state, c)
+                self.feed_with_type(state, c)?
             {
                 if is_char_part_of_token {
                     return Ok(Some(token.into()).into());
@@ -113,8 +113,15 @@ impl<'buffer> Lexer<'buffer> {
         self: &mut Self,
         mut state: PendingTokenState,
         c: char,
-    ) -> Option<(Token<'buffer>, bool)> {
+    ) -> Result<Option<(Token<'buffer>, bool)>, Error> {
         match state.condition.evaluate(c) {
+            ConditionResult::UnexpectedChar => Err(Error::UnexpectedChar {
+                c: c,
+                location: TokenLocation {
+                    start: self.location.end.0 + 1,
+                    end: self.location.end.0 + 1,
+                },
+            }),
             ConditionResult::False {
                 is_char_part_of_token,
             } => {
@@ -127,14 +134,14 @@ impl<'buffer> Lexer<'buffer> {
                 {
                     self.pending_empty_string_token =
                         Some(self.extract_token(state));
-                    return None;
+                    return Ok(None);
                 }
-                Some((self.extract_token(state), is_char_part_of_token))
+                Ok(Some((self.extract_token(state), is_char_part_of_token)))
             }
             ConditionResult::True => {
                 self.pending_token_state = Some(state);
                 self.location.advance();
-                None
+                Ok(None)
             }
         }
     }
