@@ -136,6 +136,8 @@ impl<
                     source: T::get_source_file(&self.tokens_source),
                 },
                 string: current_token.lexeme,
+                multiline: current_token.token_type
+                    == ComplexTokenType::MultilineString.into(),
             });
             if consume {
                 self.tokens_source.advance()?;
@@ -261,9 +263,12 @@ impl<
             &mut self.tokens_source,
             SimpleTokenType::LeftParen.into(),
         ) {
-            T::consume_if_is_ahead(
+            T::consume_if_is_ahead_one_of(
                 &mut self.tokens_source,
-                ComplexTokenType::String.into(),
+                &[
+                    ComplexTokenType::String.into(),
+                    ComplexTokenType::MultilineString.into(),
+                ],
             );
             while T::is_ahead(
                 &self.tokens_source,

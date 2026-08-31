@@ -1,6 +1,6 @@
 use codeform::ir;
 
-use crate::parsers::file::server::ast;
+use crate::{formatter::shared, parsers::file::server::ast};
 
 pub fn format_node<'s>(
     config: &super::config::Config,
@@ -9,17 +9,7 @@ pub fn format_node<'s>(
     let last_node_index = ast_node.values.len() - 1;
     ir::hir::builders::NodesVec::empty()
         .extend_if_some(ast_node.documentation.as_ref(), |documentation| {
-            [
-                ir::hir::builders::unicode_text(
-                    documentation.location.get_source_slice(),
-                    config.shared.indent_width,
-                    |c| {
-                        unicode_width::UnicodeWidthChar::width(c)
-                            .unwrap_or_default()
-                    },
-                ),
-                ir::hir::builders::hard_line(),
-            ]
+            shared::documentation::format_node(config.shared, documentation)
         })
         .extend([
             ir::hir::builders::ascii_oneline_text("enum"),

@@ -105,6 +105,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     pub fn parse_ast_node(
         self: &mut Self,
     ) -> Result<ast::ASTNode<'buffer>, Error<'buffer>> {
+        self.base.process_potential_documentation_string(true)?;
         let token = T::get_current_token(&self.base.tokens_source);
         match token.lexeme {
             "fragment" => Ok(self.parse_fragment_definition()?.into()),
@@ -116,9 +117,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     fn parse_fragment_definition(
         self: &mut Self,
     ) -> Result<ast::FragmentDefinitionNode<'buffer>, Error<'buffer>> {
-        let start = T::get_current_token(&self.base.tokens_source)
-            .location
-            .start;
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         let name = self.base.parse_name_node(false)?;
         T::consume_identifier_by_lexeme(&mut self.base.tokens_source, "on")?;
         let type_name = self.base.parse_name_node(false)?;
@@ -131,6 +138,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                     .end,
                 source: T::get_source_file(&self.base.tokens_source),
             },
+            documentation,
             name,
             type_name,
             spec,
@@ -140,6 +148,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     fn parse_operation_definition(
         self: &mut Self,
     ) -> Result<ast::OperationDefinitionNode<'buffer>, Error<'buffer>> {
+        let documentation = self.base.documentation_node.take();
+        let start = match &documentation {
+            Some(d) => d.location.start,
+            None => {
+                T::get_current_token(&self.base.tokens_source)
+                    .location
+                    .start
+            }
+        };
         let start_token = T::get_current_token(&self.base.tokens_source);
         let Ok(optype) = ast::OpType::try_from(start_token.lexeme) else {
             return Err(Error::UnexpectedOpType(start_token.clone()));
@@ -149,7 +166,6 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
             end: start_token.location.end,
             source: T::get_source_file(&self.base.tokens_source),
         };
-        let start = start_token.location.start;
         let name = self.base.parse_name_node(false)?;
         let parameters = self.parse_operation_parameters()?;
         let fragment = self.parse_fragment_spec()?;
@@ -161,6 +177,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
                     .end,
                 source: T::get_source_file(&self.base.tokens_source),
             },
+            documentation,
             r#type: ast::OperationTypeNode {
                 location: optype_location,
                 r#type: optype,

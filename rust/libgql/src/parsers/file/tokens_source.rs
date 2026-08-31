@@ -93,6 +93,20 @@ pub trait TokensSource<'buffer> {
         return true;
     }
 
+    fn consume_if_is_ahead_one_of(
+        self: &mut Self,
+        token_types: &[lexer::token_type::TokenType],
+    ) -> bool {
+        let Some(token) = Self::lookahead(self) else {
+            return false;
+        };
+        if !token_types.contains(&token.token_type) {
+            return false;
+        }
+        Self::advance(self).unwrap();
+        return true;
+    }
+
     fn consume_identifier_by_lexeme(
         self: &mut Self,
         lexeme: &'static str,

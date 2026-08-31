@@ -31,6 +31,7 @@ impl<'buffer> NodeLocation<'buffer> {
 pub struct DocumentationNode<'buffer> {
     pub location: NodeLocation<'buffer>,
     pub string: &'buffer str,
+    pub multiline: bool,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]

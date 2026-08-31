@@ -16,18 +16,7 @@ pub fn format_node<'s>(
 ) -> ir::hir::builders::NodesVec<'s> {
     ir::hir::builders::NodesVec::empty()
         .extend_if_some(ast_node.documentation.as_ref(), |documentation| {
-            [
-                ir::hir::builders::expand_parent(),
-                ir::hir::builders::unicode_text(
-                    documentation.location.get_source_slice(),
-                    config.indent_width,
-                    |c| {
-                        unicode_width::UnicodeWidthChar::width(c)
-                            .unwrap_or_default()
-                    },
-                ),
-                ir::hir::builders::hard_line(),
-            ]
+            super::documentation::format_node(config, documentation)
         })
         .extend(ir::hir::builders::wrap_in_group(
             ir::hir::builders::unanonymous_default_flat_group(),

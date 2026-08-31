@@ -221,6 +221,7 @@ pub struct OperationTypeNode<'buffer> {
 #[derive(serde::Serialize)]
 pub struct OperationDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub r#type: OperationTypeNode<'buffer>,
     pub name: shared::ast::NameNode<'buffer>,
     pub parameters: Vec<shared::ast::InputFieldDefinitionNode<'buffer>>,
@@ -230,6 +231,7 @@ pub struct OperationDefinitionNode<'buffer> {
 #[derive(Debug, serde::Serialize)]
 pub struct FragmentDefinitionNode<'buffer> {
     pub location: shared::ast::NodeLocation<'buffer>,
+    pub documentation: Option<shared::ast::DocumentationNode<'buffer>>,
     pub name: shared::ast::NameNode<'buffer>,
     pub type_name: shared::ast::NameNode<'buffer>,
     pub spec: FragmentSpec<'buffer>,
