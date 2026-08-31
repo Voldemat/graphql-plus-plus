@@ -2,16 +2,16 @@ use super::tokens::{Token, TokenLocation};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct LexerLocation {
-    pub start: usize,
-    pub end: usize,
+    pub start: std::num::Wrapping<usize>,
+    pub end: std::num::Wrapping<usize>,
     is_start_locked: bool,
 }
 
 impl Default for LexerLocation {
     fn default() -> Self {
         Self {
-            start: 0,
-            end: 0,
+            start: std::num::Wrapping(usize::MAX),
+            end: std::num::Wrapping(usize::MAX),
             is_start_locked: false,
         }
     }
@@ -20,8 +20,8 @@ impl Default for LexerLocation {
 impl LexerLocation {
     pub fn create_token_location(self: &Self) -> TokenLocation {
         TokenLocation {
-            start: self.start,
-            end: self.end,
+            start: self.start.0,
+            end: self.end.0,
         }
     }
 
