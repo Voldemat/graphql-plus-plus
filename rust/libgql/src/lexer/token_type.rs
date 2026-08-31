@@ -24,6 +24,7 @@ pub enum SimpleTokenType {
 pub enum ComplexTokenType {
     Identifier,
     String,
+    MultilineString,
     Number,
     Boolean,
     Spread,
@@ -42,6 +43,22 @@ pub enum ComplexTokenType {
 pub enum TokenType {
     Simple(SimpleTokenType),
     Complex(ComplexTokenType),
+}
+
+impl TokenType {
+    pub fn as_complex(self: &Self) -> Option<&ComplexTokenType> {
+        match self {
+            Self::Simple(_) => None,
+            Self::Complex(c) => Some(c),
+        }
+    }
+
+    pub fn as_simple(self: &Self) -> Option<&SimpleTokenType> {
+        match self {
+            Self::Simple(s) => Some(s),
+            Self::Complex(_) => None,
+        }
+    }
 }
 
 impl TryFrom<char> for TokenType {

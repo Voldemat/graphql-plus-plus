@@ -15,6 +15,7 @@ pub struct Lexer<'buffer> {
     buffer: &'buffer str,
     token_type: Option<ComplexTokenType>,
     location: LexerLocation,
+    pending_empty_string_token: Option<Token<'buffer>>,
 }
 
 impl<'buffer> Lexer<'buffer> {
@@ -23,13 +24,20 @@ impl<'buffer> Lexer<'buffer> {
             buffer,
             token_type: None,
             location: LexerLocation::default(),
+            pending_empty_string_token: None,
         };
     }
 }
 
 impl<'buffer> Lexer<'buffer> {
+    pub fn is_in_multiline_token(self: &Self) -> bool {
+        self.token_type
+            .map(|token_type| token_type == ComplexTokenType::MultilineString)
+            .unwrap_or(false)
+    }
+
     pub fn feed(self: &mut Self, c: char) -> LexerResult<'buffer> {
-        if c == '\n' {
+        if c == '\n' && !self.is_in_multiline_token() {
             let maybe_token = self.maybe_extract_token();
             self.location.advance();
             return Ok(maybe_token.map(|t| t.into()).into());
@@ -40,12 +48,20 @@ impl<'buffer> Lexer<'buffer> {
             if maybe_token.is_none() {
                 return Ok(None.into());
             }
-            if token_type == ComplexTokenType::String
+            if (token_type == ComplexTokenType::String
+                || token_type == ComplexTokenType::MultilineString)
                 && let Some(token) = maybe_token
             {
                 self.location.advance();
                 return Ok(Some(token.into()).into());
             };
+        }
+        if c != '"'
+            && let Some(pending_token) = self.pending_empty_string_token.take()
+        {
+            assert!(maybe_token.is_none());
+            self.location.advance();
+            maybe_token = Some(pending_token);
         }
         let result = self.feed_new(c)?;
         return Ok(LexerSuccessResult::from((maybe_token, result)));
@@ -67,15 +83,25 @@ impl<'buffer> Lexer<'buffer> {
                 location: self.location.create_token_location(),
             });
         };
-        if let TokenType::Complex(complex_token_type) = token_type {
+        if let TokenType::Complex(mut complex_token_type) = token_type {
+            if complex_token_type == ComplexTokenType::String
+                && self.pending_empty_string_token.is_some()
+            {
+                complex_token_type = ComplexTokenType::MultilineString;
+                self.pending_empty_string_token = None;
+                self.location.start = self.location.start.saturating_sub(1);
+                self.location.end += 1;
+                if self.location.end == 1 {
+                    self.location.end += 1;
+                }
+            }
             self.token_type = Some(complex_token_type);
             self.location.lock_start();
             return Ok(None);
         }
         let token = Token {
             token_type: token_type,
-            lexeme: &self.buffer
-                [self.location.start..(self.location.start + 1)],
+            lexeme: &self.buffer[self.location.start..=self.location.start],
             location: self.location.create_token_location(),
         };
         return Ok(Some(token));
@@ -87,27 +113,36 @@ impl<'buffer> Lexer<'buffer> {
         c: char,
     ) -> Option<Token<'buffer>> {
         let condition = get_condition_for_token_type(token_type);
-        let result = condition(
-            c,
-            &self.buffer[self.location.start..self.location.end + 1],
-        );
-        if !result {
-            return Some(self.extract_token(token_type));
+        if !condition(c, &self.buffer[self.location.start..=self.location.end])
+        {
+            if token_type == ComplexTokenType::String
+                && self.location.start == self.location.end
+            {
+                self.pending_empty_string_token =
+                    Some(self.extract_token(token_type));
+                return None;
+            }
+            Some(self.extract_token(token_type))
+        } else {
+            self.location.advance();
+            None
         }
-        self.location.advance();
-        return None;
     }
 
     fn extract_token(
         self: &mut Self,
         mut token_type: ComplexTokenType,
     ) -> Token<'buffer> {
-        let lexeme_start = if token_type == ComplexTokenType::String {
-            self.location.start + 1
-        } else {
-            self.location.start
+        let lexeme_start = match token_type {
+            ComplexTokenType::String => self.location.start + 1,
+            ComplexTokenType::MultilineString => self.location.start + 3,
+            _ => self.location.start,
         };
-        let lexeme = &self.buffer[lexeme_start..(self.location.end + 1)];
+        let lexeme_end = match token_type {
+            ComplexTokenType::MultilineString => self.location.end - 2,
+            _ => self.location.end,
+        };
+        let lexeme = &self.buffer[lexeme_start..=lexeme_end];
         if token_type == ComplexTokenType::Identifier
             && (lexeme == "true" || lexeme == "false")
         {
@@ -118,7 +153,9 @@ impl<'buffer> Lexer<'buffer> {
             lexeme,
             location: TokenLocation {
                 start: self.location.start,
-                end: if token_type == ComplexTokenType::String {
+                end: if token_type == ComplexTokenType::String
+                    || token_type == ComplexTokenType::MultilineString
+                {
                     self.location.end + 1
                 } else {
                     self.location.end

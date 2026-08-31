@@ -15,6 +15,7 @@ pub enum Error<'buffer> {
     ExpectedComplexType(lexer::tokens::Token<'buffer>),
     CannotParseNumberLiteral(lexer::tokens::Token<'buffer>),
     UnexpectedSpreadInLiteral(lexer::tokens::Token<'buffer>),
+    UnexpectedMultilineStringInLiteral(lexer::tokens::Token<'buffer>),
     UnknownDirectiveLocation(lexer::tokens::Token<'buffer>),
     DuplicateDocumentationString {
         first: shared::ast::DocumentationNode<'buffer>,
@@ -38,6 +39,9 @@ impl<'buffer> std::fmt::Display for Error<'buffer> {
             }
             Self::UnexpectedSpreadInLiteral(_) => {
                 f.write_str("Unexpected spread in literal")
+            }
+            Self::UnexpectedMultilineStringInLiteral(_) => {
+                f.write_str("Unexpected multiline string in literal")
             }
             Self::UnknownDirectiveLocation(_) => {
                 f.write_str("Unknown directive location")
@@ -64,6 +68,7 @@ impl<'buffer> Error<'buffer> {
             Self::ExpectedComplexType(token) => &token.location,
             Self::CannotParseNumberLiteral(token) => &token.location,
             Self::UnexpectedSpreadInLiteral(token) => &token.location,
+            Self::UnexpectedMultilineStringInLiteral(token) => &token.location,
             Self::UnknownDirectiveLocation(token) => &token.location,
             Self::DuplicateDocumentationString { second, .. } => {
                 &second.location
@@ -109,13 +114,14 @@ impl<
         consume: bool,
     ) -> Result<(), Error<'buffer>> {
         let current_token = T::get_current_token(&self.tokens_source);
-        if current_token.token_type
-            == TokenType::Complex(ComplexTokenType::String)
+        if (current_token.token_type == ComplexTokenType::String.into()
             && T::lookback(&self.tokens_source)
                 .map(|prev_token| {
                     prev_token.token_type != SimpleTokenType::Equal.into()
                 })
-                .unwrap_or(true)
+                .unwrap_or(true))
+            || current_token.token_type
+                == ComplexTokenType::MultilineString.into()
         {
             if let Some(current) = self.documentation_node.as_ref() {
                 return Err(Error::DuplicateDocumentationString {
@@ -325,6 +331,11 @@ impl<
                     }
                     .into())
                 }
+            }
+            ComplexTokenType::MultilineString => {
+                Err(Error::UnexpectedMultilineStringInLiteral(
+                    current_token.clone(),
+                ))
             }
             ComplexTokenType::Spread => {
                 Err(Error::UnexpectedSpreadInLiteral(current_token.clone()))

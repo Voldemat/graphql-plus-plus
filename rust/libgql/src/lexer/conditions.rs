@@ -2,8 +2,14 @@ use super::token_type::ComplexTokenType;
 
 pub type Condition = fn(char, &str) -> bool;
 
-fn string_condition(c: char, _: &str) -> bool {
+fn string_condition(c: char, buffer: &str) -> bool {
     return c != '"';
+}
+
+fn multiline_string_condition(c: char, buffer: &str) -> bool {
+    return c != '"'
+        || buffer.chars().last().unwrap() != '"'
+        || buffer.chars().nth_back(1).unwrap() != '"';
 }
 
 fn number_condition(c: char, buffer: &str) -> bool {
@@ -44,6 +50,7 @@ fn identifier_condition(c: char, _: &str) -> bool {
 pub fn get_condition_for_token_type(token_type: ComplexTokenType) -> Condition {
     match token_type {
         ComplexTokenType::String => string_condition,
+        ComplexTokenType::MultilineString => multiline_string_condition,
         ComplexTokenType::Number => number_condition,
         ComplexTokenType::Spread => spread_condition,
         ComplexTokenType::Boolean | ComplexTokenType::Identifier => {
