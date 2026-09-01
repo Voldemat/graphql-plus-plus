@@ -1,0 +1,14 @@
+[package]
+name = "gqlup"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "gqlup"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.6.5", features = ["derive", "std", "help"], default-features = false }
+reqwest = { version = "0.13.2", default-features = false, features = ["blocking", "rustls"] }
+serde = { version = "1.0.228", features = ["derive"], default-features = false }
+serde_json = { version = "1.0.148", features = ["std"], default-features = false }
