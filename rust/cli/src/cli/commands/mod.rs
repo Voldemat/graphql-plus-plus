@@ -1,6 +1,7 @@
 mod format;
 mod generate;
 mod internal;
+mod lsp;
 mod validate;
 
 #[derive(clap::Subcommand)]
@@ -11,6 +12,7 @@ pub enum Commands {
     Generate(generate::Args),
     Validate(validate::Args),
     Format(format::Args),
+    Lsp(lsp::Args),
 }
 
 impl Commands {
@@ -20,6 +22,7 @@ impl Commands {
             Commands::Generate(args) => args.execute(),
             Commands::Validate(args) => args.execute(),
             Commands::Format(args) => args.execute(),
+            Commands::Lsp(args) => args.execute(),
         }
     }
 }
