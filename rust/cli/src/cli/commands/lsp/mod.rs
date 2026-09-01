@@ -1,4 +1,6 @@
 mod codec;
+mod handlers;
+mod meta;
 mod server;
 
 #[derive(clap::Args)]
@@ -24,7 +26,7 @@ async fn run(
         codec::LspCodec,
     );
     let context =
-        server::ServerMetadata(std::sync::Arc::new(server::ServerContext {
+        meta::ServerMetadata(std::sync::Arc::new(meta::ServerContext {
             config_directory_path,
             config,
         }));
