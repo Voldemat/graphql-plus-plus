@@ -1,12 +1,12 @@
 pub fn print_lir_nodes<TWriter: std::io::Write>(
     writer: &mut TWriter,
-    config: &codeform::lir_printer::Config,
+    config: &impl codeform::lir_printer::Config,
     lir_nodes: Vec<codeform::ir::lir::node::Node<'_>>,
 ) -> std::io::Result<()> {
     let mut printer_state = codeform::lir_printer::State::default();
     codeform::lir_printer::print_nodes(
         writer,
-        &config,
+        config,
         &mut printer_state,
         &lir_nodes,
     )
@@ -28,8 +28,7 @@ pub fn format_print_action<
     initial_buffer: &'buffer str,
     buffer_to_ast_nodes: TBufferToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
-    hir_to_lir_config: &codeform::hir_to_lir::config::Config,
-    lir_printer_config: &codeform::lir_printer::Config,
+    shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
 ) -> Result<(), String> {
     let mut writer =
         std::io::BufWriter::new(std::fs::File::create(graphql_path).unwrap());
@@ -38,8 +37,7 @@ pub fn format_print_action<
         initial_buffer,
         buffer_to_ast_nodes,
         ast_nodes_to_hir_nodes,
-        hir_to_lir_config,
-        lir_printer_config,
+        shared_formatting_config,
         &mut writer,
     )
 }
@@ -60,8 +58,7 @@ fn format_check_action<
     initial_buffer: &'buffer str,
     buffer_to_ast_nodes: TBufferToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
-    hir_to_lir_config: &codeform::hir_to_lir::config::Config,
-    lir_printer_config: &codeform::lir_printer::Config,
+    shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
 ) -> Result<(), String> {
     let mut writer = std::io::BufWriter::new(Vec::<u8>::new());
     format_buffer::<TASTNodeWrapper, TBufferToASTNodes, TASTNodesToHIRNodes, _>(
@@ -69,8 +66,7 @@ fn format_check_action<
         initial_buffer,
         buffer_to_ast_nodes,
         ast_nodes_to_hir_nodes,
-        hir_to_lir_config,
-        lir_printer_config,
+        shared_formatting_config,
         &mut writer,
     )?;
     let formatted_string =
@@ -103,8 +99,7 @@ pub fn format_action<
     initial_buffer: &'buffer str,
     buffer_to_ast_nodes: TBufferToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
-    hir_to_lir_config: &codeform::hir_to_lir::config::Config,
-    lir_printer_config: &codeform::lir_printer::Config,
+    shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
 ) -> Result<(), String> {
     if is_check {
         format_check_action::<TASTNodeWrapper, _, _>(
@@ -112,8 +107,7 @@ pub fn format_action<
             initial_buffer,
             buffer_to_ast_nodes,
             ast_nodes_to_hir_nodes,
-            hir_to_lir_config,
-            lir_printer_config,
+            shared_formatting_config,
         )
     } else {
         format_print_action::<TASTNodeWrapper, _, _>(
@@ -121,8 +115,7 @@ pub fn format_action<
             initial_buffer,
             buffer_to_ast_nodes,
             ast_nodes_to_hir_nodes,
-            hir_to_lir_config,
-            lir_printer_config,
+            shared_formatting_config,
         )
     }
 }
@@ -162,19 +155,18 @@ pub fn format_buffer<
     buffer: &'buffer str,
     buffer_to_ast_nodes: TBufferToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
-    hir_to_lir_config: &codeform::hir_to_lir::config::Config,
-    lir_printer_config: &codeform::lir_printer::Config,
+    shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
     writer: &mut TWriter,
 ) -> Result<(), String> {
     let ast_nodes = buffer_to_ast_nodes(&path, &buffer)?;
     let hir_nodes = ast_nodes_to_hir_nodes(&buffer, ast_nodes);
     let mut hir_to_lir_state = codeform::hir_to_lir::state::State::default();
     let lir_nodes = codeform::hir_to_lir::mappers::nodes::lower(
-        hir_to_lir_config,
+        shared_formatting_config,
         &mut hir_to_lir_state,
         hir_nodes,
     );
-    print_lir_nodes(writer, lir_printer_config, lir_nodes)
+    print_lir_nodes(writer, shared_formatting_config, lir_nodes)
         .map_err(|e| format!("LIR printer error: {}", e))
 }
 
@@ -193,8 +185,7 @@ pub fn format_config<
     graphql_paths: &[std::path::PathBuf],
     buffer_to_ast_nodes: TBufferToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
-    hir_to_lir_config: &codeform::hir_to_lir::config::Config,
-    lir_printer_config: &codeform::lir_printer::Config,
+    shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
     is_check: bool,
 ) -> Vec<String> {
     graphql_paths
@@ -207,8 +198,7 @@ pub fn format_config<
                 &buffer,
                 &buffer_to_ast_nodes,
                 &ast_nodes_to_hir_nodes,
-                hir_to_lir_config,
-                lir_printer_config,
+                shared_formatting_config,
             )
             .err()
         })

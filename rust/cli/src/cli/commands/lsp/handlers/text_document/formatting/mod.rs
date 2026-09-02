@@ -15,7 +15,7 @@ fn format_file<
         Vec<TASTNodeWrapper::ASTNode<'buffer>>,
     ) -> Vec<codeform::ir::hir::node::Node<'buffer>>,
 >(
-    shared_configs: &SharedConfigs,
+    shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
     buffer_to_ast_nodes: TBufferToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
     local_path: &std::path::PathBuf,
@@ -32,8 +32,7 @@ fn format_file<
         &buffer,
         buffer_to_ast_nodes,
         ast_nodes_to_hir_nodes,
-        &shared_configs.hir_to_lir_config,
-        &shared_configs.lir_printer_config,
+        shared_formatting_config,
         &mut writer,
     )?;
     let formatted_string =
@@ -42,23 +41,21 @@ fn format_file<
 }
 
 fn format_server_file(
-    shared_configs: SharedConfigs,
-    formatting_server_config: &crate::cli::config::GraphqlFormattingServerConfig,
+    shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
+    server_formatting_config: &crate::cli::config::GraphqlFormattingServerConfig,
     local_path: &std::path::PathBuf,
 ) -> Result<Vec<lsp_types::TextEdit>, String> {
-    let libgql_formatting_config = libgql::formatter::server::config::Config {
-        shared: &shared_configs.shared_formatter_config,
-    };
     format_file::<
         crate::cli::commands::format::shared::ServerASTNodeWrapper,
         _,
         _,
     >(
-        &shared_configs,
+        shared_formatting_config,
         crate::cli::shared::buffer_to_server_ast,
         |_, nodes| {
             libgql::formatter::server::nodes::format_nodes(
-                &libgql_formatting_config,
+                shared_formatting_config,
+                server_formatting_config,
                 &nodes,
             )
             .to_vec()
@@ -68,59 +65,27 @@ fn format_server_file(
 }
 
 fn format_client_file(
-    shared_configs: SharedConfigs,
-    formatting_client_config: &crate::cli::config::GraphqlFormattingClientConfig,
+    shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
+    client_formatting_config: &crate::cli::config::GraphqlFormattingClientConfig,
     local_path: &std::path::PathBuf,
 ) -> Result<Vec<lsp_types::TextEdit>, String> {
-    let libgql_formatting_config = libgql::formatter::client::config::Config {
-        shared: &shared_configs.shared_formatter_config,
-    };
     format_file::<
         crate::cli::commands::format::shared::ClientASTNodeWrapper,
         _,
         _,
     >(
-        &shared_configs,
+        &shared_formatting_config,
         crate::cli::shared::buffer_to_client_ast,
         |_, nodes| {
             libgql::formatter::client::nodes::format_nodes(
-                &libgql_formatting_config,
+                shared_formatting_config,
+                client_formatting_config,
                 &nodes,
             )
             .to_vec()
         },
         local_path,
     )
-}
-
-pub struct SharedConfigs {
-    shared_formatter_config: libgql::formatter::shared::config::Config,
-    hir_to_lir_config: codeform::hir_to_lir::config::Config,
-    lir_printer_config: codeform::lir_printer::Config,
-}
-
-fn get_shared_configs(
-    formatting_shared_config: &crate::cli::config::GraphqlFormattingSharedConfig,
-) -> SharedConfigs {
-    let shared_formatter_config = libgql::formatter::shared::config::Config {
-        indent_width: codeform::ir::shared::IndentWidth::from_u8(
-            formatting_shared_config.indent_width.into(),
-        )
-        .unwrap(),
-    };
-    let hir_to_lir_config = codeform::hir_to_lir::config::Config {
-        indent_width: shared_formatter_config.indent_width,
-        max_width: formatting_shared_config.max_line_width,
-    };
-    let lir_printer_config = codeform::lir_printer::Config {
-        indent_width: shared_formatter_config.indent_width,
-        new_line_control_sequence: b"\n",
-    };
-    SharedConfigs {
-        shared_formatter_config,
-        hir_to_lir_config,
-        lir_printer_config,
-    }
 }
 
 fn format_file_with_type(
@@ -134,7 +99,7 @@ fn format_file_with_type(
             .as_ref()
             .map(|formatting_server_config| {
                 format_server_file(
-                    get_shared_configs(&formatting_config.shared),
+                    &formatting_config.shared,
                     formatting_server_config,
                     local_path,
                 )
@@ -145,7 +110,7 @@ fn format_file_with_type(
             .as_ref()
             .map(|formatting_client_config| {
                 format_client_file(
-                    get_shared_configs(&formatting_config.shared),
+                    &formatting_config.shared,
                     formatting_client_config,
                     local_path,
                 )

@@ -30,21 +30,6 @@ impl Args {
             eprintln!("No formatting config is defined");
             return;
         };
-        let shared_formatter_config =
-            libgql::formatter::shared::config::Config {
-                indent_width: codeform::ir::shared::IndentWidth::from_u8(
-                    formatting_config.shared.indent_width.into(),
-                )
-                .unwrap(),
-            };
-        let hir_to_lir_config = codeform::hir_to_lir::config::Config {
-            indent_width: shared_formatter_config.indent_width,
-            max_width: formatting_config.shared.max_line_width,
-        };
-        let lir_printer_config = codeform::lir_printer::Config {
-            indent_width: shared_formatter_config.indent_width,
-            new_line_control_sequence: b"\n",
-        };
         if let Some(formatting_server_config) = formatting_config.server {
             let Some(config_server) = conf.server.as_ref() else {
                 eprintln!("config.server is not defined");
@@ -54,9 +39,7 @@ impl Args {
                 config_directory_path,
                 self.check,
                 config_server,
-                &shared_formatter_config,
-                &hir_to_lir_config,
-                &lir_printer_config,
+                &formatting_config.shared,
                 &formatting_server_config,
             ))
         }
@@ -70,9 +53,7 @@ impl Args {
                 config_directory_path,
                 self.check,
                 config_client,
-                &shared_formatter_config,
-                &hir_to_lir_config,
-                &lir_printer_config,
+                &formatting_config.shared,
                 &formatting_client_config,
             ))
         }

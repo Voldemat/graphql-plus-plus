@@ -8,13 +8,51 @@ pub const CLI_VERSION: &str = match option_env!("CLI_VERSION") {
 #[derive(serde::Deserialize)]
 pub struct GraphqlFormattingServerConfig {}
 
+impl libgql::formatter::server::config::Config
+    for GraphqlFormattingServerConfig
+{
+}
+
 #[derive(serde::Deserialize)]
 pub struct GraphqlFormattingClientConfig {}
+
+impl libgql::formatter::client::config::Config
+    for GraphqlFormattingClientConfig
+{
+}
 
 #[derive(serde::Deserialize)]
 pub struct GraphqlFormattingSharedConfig {
     pub max_line_width: codeform::ir::shared::LineWidth,
     pub indent_width: std::num::NonZeroU8,
+}
+
+impl libgql::formatter::shared::config::Config
+    for GraphqlFormattingSharedConfig
+{
+    fn get_indent_width(self: &Self) -> codeform::ir::shared::IndentWidth {
+        self.indent_width.into()
+    }
+}
+
+impl codeform::hir_to_lir::config::Config for GraphqlFormattingSharedConfig {
+    fn get_indent_width(self: &Self) -> codeform::ir::shared::IndentWidth {
+        self.indent_width.into()
+    }
+
+    fn get_max_width(self: &Self) -> std::num::NonZeroU32 {
+        self.max_line_width
+    }
+}
+
+impl codeform::lir_printer::Config for GraphqlFormattingSharedConfig {
+    fn get_indent_width(self: &Self) -> codeform::ir::shared::IndentWidth {
+        self.indent_width.into()
+    }
+
+    fn get_new_line_control_sequence(self: &Self) -> &'static [u8] {
+        "\n".as_bytes()
+    }
 }
 
 #[derive(serde::Deserialize)]
