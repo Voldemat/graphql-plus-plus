@@ -37,7 +37,7 @@ formatter-server = ["formatter-shared", "parsers-file-server", "dep:codeform", "
 
 [dependencies]
 async-stream = { version = "0.3.6", optional = true }
-codeform = { version = "0.0.6", optional = true }
+codeform = { version = "0.0.7", optional = true }
 derive_more = { version = "2.1.0", features = ["from", "display"], default-features = false }
 futures = { version = "0.3.32", features = ["alloc"], default-features = false, optional = true }
 futures-core = { version = "0.3.32", features = [], default-features = false, optional = true }

@@ -2,8 +2,13 @@ use codeform::ir;
 
 use crate::parsers::file::shared::ast;
 
-pub fn format_node<'s>(
-    config: &super::config::Config,
+pub fn format_node<
+    's,
+    TSharedConfig: crate::formatter::shared::config::Config,
+    TClientConfig: super::config::Config,
+>(
+    shared_config: &TSharedConfig,
+    client_config: &TClientConfig,
     ast_node: &ast::Argument<'s>,
     is_last_node: bool,
 ) -> ir::hir::builders::NodesVec<'s> {
@@ -11,7 +16,11 @@ pub fn format_node<'s>(
         ir::hir::builders::ascii_oneline_text(ast_node.name.name),
         ir::hir::builders::ascii_oneline_text(": "),
     ])
-    .extend(super::argument_value::format_node(config, &ast_node.value))
+    .extend(super::argument_value::format_node(
+        shared_config,
+        client_config,
+        &ast_node.value,
+    ))
     .extend_if(
         !is_last_node,
         [

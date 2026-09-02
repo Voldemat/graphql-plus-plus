@@ -8,8 +8,8 @@ pub enum DelimeterMode {
     HardLine,
 }
 
-pub fn format_node<'s>(
-    config: &super::config::Config,
+pub fn format_node<'s, TConfig: super::config::Config>(
+    config: &TConfig,
     ast_node: &ast::InputFieldDefinitionNode<'s>,
     is_last_node: bool,
     delimeter_mode: DelimeterMode,
@@ -54,8 +54,8 @@ pub fn format_node<'s>(
         )
 }
 
-pub fn format_nodes<'s>(
-    config: &super::config::Config,
+pub fn format_nodes<'s, TConfig: super::config::Config>(
+    config: &TConfig,
     ast_nodes: &[ast::InputFieldDefinitionNode<'s>],
     delimeter_mode: DelimeterMode,
 ) -> ir::hir::builders::NodesVec<'s> {

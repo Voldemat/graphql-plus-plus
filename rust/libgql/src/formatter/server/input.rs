@@ -2,13 +2,18 @@ use codeform::ir;
 
 use crate::{formatter::shared, parsers::file::server::ast};
 
-pub fn format_node<'s>(
-    config: &super::config::Config,
+pub fn format_node<
+    's,
+    TSharedConfig: crate::formatter::shared::config::Config,
+    TServerConfig: super::config::Config,
+>(
+    shared_config: &TSharedConfig,
+    server_config: &TServerConfig,
     ast_node: &ast::InputObjectDefinitionNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     ir::hir::builders::NodesVec::empty()
         .extend_if_some(ast_node.documentation.as_ref(), |documentation| {
-            shared::documentation::format_node(config.shared, documentation)
+            shared::documentation::format_node(shared_config, documentation)
         })
         .extend([
             ir::hir::builders::ascii_oneline_text("input"),
@@ -19,7 +24,7 @@ pub fn format_node<'s>(
             ir::hir::builders::hard_line(),
         ])
         .extend(crate::formatter::shared::input_field::format_nodes(
-            config.shared,
+            shared_config,
             &ast_node.fields,
             crate::formatter::shared::input_field::DelimeterMode::HardLine,
         ))

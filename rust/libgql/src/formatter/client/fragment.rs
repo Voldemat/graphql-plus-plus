@@ -2,13 +2,18 @@ use codeform::ir;
 
 use crate::{formatter::shared, parsers::file::client::ast};
 
-pub fn format_node<'s>(
-    config: &super::config::Config,
+pub fn format_node<
+    's,
+    TSharedConfig: crate::formatter::shared::config::Config,
+    TClientConfig: super::config::Config,
+>(
+    shared_config: &TSharedConfig,
+    client_config: &TClientConfig,
     ast_node: &ast::FragmentDefinitionNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     ir::hir::builders::NodesVec::empty()
         .extend_if_some(ast_node.documentation.as_ref(), |documentation| {
-            shared::documentation::format_node(config.shared, documentation)
+            shared::documentation::format_node(shared_config, documentation)
         })
         .extend(ir::hir::builders::wrap_in_group(
             ir::hir::builders::unanonymous_default_flat_group(),
@@ -30,7 +35,11 @@ pub fn format_node<'s>(
             )
             .push(ir::hir::builders::hard_line())
             .extend(ir::hir::builders::wrap_in_hard_indent(
-                super::fragment_spec::format_node(config, &ast_node.spec),
+                super::fragment_spec::format_node(
+                    shared_config,
+                    client_config,
+                    &ast_node.spec,
+                ),
             ))
             .extend([
                 ir::hir::builders::hard_line(),

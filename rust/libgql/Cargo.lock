@@ -26,9 +26,9 @@ dependencies = [
 
 [[package]]
 name = "codeform"
-version = "0.0.6"
+version = "0.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "153e6a4db89f94703e6112b372254851660fa66aa769d86cfbd8ebb840e2faf1"
+checksum = "608ac2b95986902a907d8800a57109512c9d9e021fb00ad8ad2c1ed492bd16e2"
 
 [[package]]
 name = "convert_case"

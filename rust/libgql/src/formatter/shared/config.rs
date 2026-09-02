@@ -1,4 +1,3 @@
-#[derive(Debug)]
-pub struct Config {
-    pub indent_width: codeform::ir::shared::IndentWidth,
+pub trait Config {
+    fn get_indent_width(self: &Self) -> codeform::ir::shared::IndentWidth;
 }

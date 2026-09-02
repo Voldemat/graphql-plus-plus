@@ -2,8 +2,8 @@ use codeform::ir;
 
 use crate::parsers::file::shared::ast;
 
-pub fn format_node<'s>(
-    config: &super::config::Config,
+pub fn format_node<'s, TConfig: super::config::Config>(
+    config: &TConfig,
     ast_node: &ast::LiteralNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     match ast_node {
@@ -43,7 +43,7 @@ pub fn format_node<'s>(
                 ir::hir::builders::byte(b'"'),
                 ir::hir::builders::unicode_text(
                     value.value,
-                    config.indent_width,
+                    config.get_indent_width(),
                     |c| {
                         unicode_width::UnicodeWidthChar::width(c)
                             .unwrap_or_default()

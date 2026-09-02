@@ -2,8 +2,8 @@ use codeform::ir;
 
 use crate::parsers::file::shared::ast;
 
-pub fn format_node<'buffer>(
-    config: &super::config::Config,
+pub fn format_node<'buffer, TConfig: super::config::Config>(
+    config: &TConfig,
     ast_node: &ast::DocumentationNode<'buffer>,
 ) -> ir::hir::builders::NodesVec<'buffer> {
     if !ast_node.multiline {
@@ -11,7 +11,7 @@ pub fn format_node<'buffer>(
             ir::hir::builders::expand_parent(),
             ir::hir::builders::unicode_text(
                 ast_node.location.get_source_slice(),
-                config.indent_width,
+                config.get_indent_width(),
                 |c| {
                     unicode_width::UnicodeWidthChar::width(c)
                         .unwrap_or_default()
@@ -47,7 +47,7 @@ pub fn format_node<'buffer>(
                 ir::hir::builders::NodesVec::from_iter([
                     ir::hir::builders::unicode_text(
                         line,
-                        config.indent_width,
+                        config.get_indent_width(),
                         |c| {
                             unicode_width::UnicodeWidthChar::width(c)
                                 .unwrap_or_default()

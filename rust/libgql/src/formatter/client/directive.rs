@@ -4,8 +4,13 @@ use crate::{
     formatter::shared::input_field::DelimeterMode, parsers::file::client::ast,
 };
 
-pub fn format_node<'s>(
-    config: &super::config::Config,
+pub fn format_node<
+    's,
+    TSharedConfig: crate::formatter::shared::config::Config,
+    TClientConfig: super::config::Config,
+>(
+    shared_config: &TSharedConfig,
+    client_config: &TClientConfig,
     ast_node: &ast::DirectiveDefinitionNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     ir::hir::builders::NodesVec::empty()
@@ -13,7 +18,7 @@ pub fn format_node<'s>(
             [
                 ir::hir::builders::unicode_text(
                     documentation.location.get_source_slice(),
-                    config.shared.indent_width,
+                    shared_config.get_indent_width(),
                     |c| {
                         unicode_width::UnicodeWidthChar::width(c)
                             .unwrap_or_default()
@@ -37,7 +42,7 @@ pub fn format_node<'s>(
                     ir::hir::builders::soft_line(),
                 ])
                 .extend(crate::formatter::shared::input_field::format_nodes(
-                    config.shared,
+                    shared_config,
                     &ast_node.arguments,
                     DelimeterMode::CommaAndSoftLineOrSpace,
                 ))

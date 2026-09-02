@@ -1,15 +1,13 @@
 pub mod builders;
 
 pub fn hir_nodes_to_string(
+    hir_to_lir_config: &impl codeform::hir_to_lir::config::Config,
+    lir_printer_config: &impl codeform::lir_printer::Config,
     hir_nodes: codeform::ir::hir::builders::NodesVec<'_>,
 ) -> String {
     let mut hir_to_lir_state = codeform::hir_to_lir::state::State::default();
     let lir_nodes = codeform::hir_to_lir::mappers::nodes::lower(
-        &codeform::hir_to_lir::config::Config {
-            indent_width: codeform::ir::shared::IndentWidth::from_u8(4)
-                .unwrap(),
-            max_width: codeform::ir::shared::LineWidth::try_from(80).unwrap(),
-        },
+        hir_to_lir_config,
         &mut hir_to_lir_state,
         hir_nodes,
     );
@@ -17,11 +15,7 @@ pub fn hir_nodes_to_string(
     let mut lir_printer_state = codeform::lir_printer::State::default();
     codeform::lir_printer::print_nodes(
         &mut io_writer,
-        &codeform::lir_printer::Config {
-            indent_width: codeform::ir::shared::IndentWidth::from_u8(4)
-                .unwrap(),
-            new_line_control_sequence: b"\n",
-        },
+        lir_printer_config,
         &mut lir_printer_state,
         &lir_nodes,
     )

@@ -5,13 +5,18 @@ use crate::{
     parsers::file::server::ast,
 };
 
-pub fn format_node<'s>(
-    config: &super::config::Config,
+pub fn format_node<
+    's,
+    TSharedConfig: crate::formatter::shared::config::Config,
+    TServerConfig: super::config::Config,
+>(
+    shared_config: &TSharedConfig,
+    server_config: &TServerConfig,
     ast_node: &ast::DirectiveDefinitionNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     ir::hir::builders::NodesVec::empty()
         .extend_if_some(ast_node.documentation.as_ref(), |documentation| {
-            shared::documentation::format_node(config.shared, documentation)
+            shared::documentation::format_node(shared_config, documentation)
         })
         .extend(ir::hir::builders::wrap_in_group(
             ir::hir::builders::unanonymous_default_flat_group(),
@@ -28,7 +33,7 @@ pub fn format_node<'s>(
                     ir::hir::builders::soft_line(),
                 ])
                 .extend(crate::formatter::shared::input_field::format_nodes(
-                    config.shared,
+                    shared_config,
                     &ast_node.arguments,
                     DelimeterMode::CommaAndSoftLineOrSpace,
                 ))

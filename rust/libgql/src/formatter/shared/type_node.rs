@@ -11,8 +11,8 @@ pub fn format_named_node<'s>(
     .push_if(!ast_node.nullable, ir::hir::builders::byte(b'!'))
 }
 
-pub fn format_list_node<'s>(
-    config: &super::config::Config,
+pub fn format_list_node<'s, TConfig: super::config::Config>(
+    config: &TConfig,
     ast_node: &ast::ListTypeNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     ir::hir::builders::wrap_in_group(
@@ -29,8 +29,8 @@ pub fn format_list_node<'s>(
     )
 }
 
-pub fn format_node<'s>(
-    config: &super::config::Config,
+pub fn format_node<'s, TConfig: super::config::Config>(
+    config: &TConfig,
     ast_node: &ast::TypeNode<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     match ast_node {
