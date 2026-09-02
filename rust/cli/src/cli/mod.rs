@@ -1,7 +1,8 @@
-pub mod commands;
-pub mod config;
-pub mod shared;
-pub mod utils;
+mod commands;
+mod config;
+mod format_error;
+mod shared;
+mod utils;
 
 #[derive(clap::Parser)]
 #[command(version = config::CLI_VERSION, about, disable_help_subcommand = true)]

@@ -18,8 +18,8 @@ pub fn buffer_to_client_ast<'buffer>(
     )
     .parse_ast_nodes()
     .map_err(|e| {
-        crate::cli::utils::format_parse_error(
-            &format!("{:?}", e),
+        super::format_error::format_parse_error(
+            &format!("{}", e),
             &e.get_location(),
             &source_file,
         )
@@ -46,8 +46,8 @@ pub fn buffer_to_server_ast<'buffer>(
     )
     .parse_ast_nodes()
     .map_err(|e| {
-        crate::cli::utils::format_parse_error(
-            &format!("{:?}", e),
+        super::format_error::format_parse_error(
+            &format!("{}", e),
             e.get_location(),
             &source_file,
         )
