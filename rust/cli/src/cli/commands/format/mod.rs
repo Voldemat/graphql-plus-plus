@@ -1,6 +1,6 @@
 mod client;
 mod server;
-mod shared;
+pub mod shared;
 mod text_diff;
 
 #[derive(clap::Args)]
