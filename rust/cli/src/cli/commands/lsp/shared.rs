@@ -11,56 +11,44 @@ fn get_file_diagnostics(
     file_type: FileType,
     buffer: impl std::ops::Deref<Target = str>,
 ) -> Result<Vec<lsp_types::Diagnostic>, String> {
+    let source_file =
+        std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
+            filepath: local_path.clone(),
+            buffer: &buffer,
+        });
     match file_type {
         FileType::Server => {
-            let source_file = std::sync::Arc::new(
-                libgql::parsers::file::shared::ast::SourceFile {
-                    filepath: local_path.clone(),
-                    buffer: &buffer,
-                },
-            );
             let result = crate::cli::shared::buffer_to_server_ast(&source_file);
-            let mut diagnostics = Vec::new();
-            for lexer_error in &result.lexer_errors {
-                let location = lexer_error.get_location();
-                diagnostics.push(lsp_types::Diagnostic {
-                    range: token_location_to_range(
-                        &result.new_line_positions,
-                        location,
-                    ),
-                    code: None,
-                    code_description: None,
-                    message: lexer_error.to_string(),
-                    data: None,
-                    related_information: None,
-                    severity: Some(lsp_types::DiagnosticSeverity::ERROR),
-                    source: None,
-                    tags: None,
+            Ok(result
+                .lexer_errors
+                .into_iter()
+                .map(|error| {
+                    lexer_error_to_diagnostic(&result.new_line_positions, error)
                 })
-            }
-            for parser_error in &result.parser_errors {
-                let location =
-                    libgql::parsers::file::shared::error::Error::get_location(
-                        parser_error,
-                    );
-                diagnostics.push(lsp_types::Diagnostic {
-                    range: token_location_to_range(
+                .chain(result.parser_errors.into_iter().map(|error| {
+                    file_parser_error_to_diagnostic(
                         &result.new_line_positions,
-                        location,
-                    ),
-                    code: None,
-                    code_description: None,
-                    message: parser_error.to_string(),
-                    data: None,
-                    related_information: None,
-                    severity: Some(lsp_types::DiagnosticSeverity::ERROR),
-                    source: None,
-                    tags: None,
-                })
-            }
-            Ok(diagnostics)
+                        error,
+                    )
+                }))
+                .collect::<Vec<_>>())
         }
-        FileType::Client => Ok(Vec::new()),
+        FileType::Client => {
+            let result = crate::cli::shared::buffer_to_client_ast(&source_file);
+            Ok(result
+                .lexer_errors
+                .into_iter()
+                .map(|error| {
+                    lexer_error_to_diagnostic(&result.new_line_positions, error)
+                })
+                .chain(result.parser_errors.into_iter().map(|error| {
+                    file_parser_error_to_diagnostic(
+                        &result.new_line_positions,
+                        error,
+                    )
+                }))
+                .collect::<Vec<_>>())
+        }
     }
 }
 
@@ -103,4 +91,43 @@ pub async fn publish_file_diagnostics(
         },
     )
     .await
+}
+
+pub fn lexer_error_to_diagnostic(
+    new_line_positions: &[usize],
+    error: libgql::lexer::types::Error,
+) -> lsp_types::Diagnostic {
+    lsp_types::Diagnostic {
+        range: token_location_to_range(
+            &new_line_positions,
+            error.get_location(),
+        ),
+        code: None,
+        code_description: None,
+        message: error.to_string(),
+        data: None,
+        related_information: None,
+        severity: Some(lsp_types::DiagnosticSeverity::ERROR),
+        source: None,
+        tags: None,
+    }
+}
+
+pub fn file_parser_error_to_diagnostic<'buffer>(
+    new_line_positions: &[usize],
+    error: impl libgql::parsers::file::shared::error::Error,
+) -> lsp_types::Diagnostic {
+    let location =
+        libgql::parsers::file::shared::error::Error::get_location(&error);
+    lsp_types::Diagnostic {
+        range: token_location_to_range(&new_line_positions, location),
+        code: None,
+        code_description: None,
+        message: error.to_string(),
+        data: None,
+        related_information: None,
+        severity: Some(lsp_types::DiagnosticSeverity::ERROR),
+        source: None,
+        tags: None,
+    }
 }
