@@ -131,8 +131,10 @@ impl<
             };
             self.documentation_node = Some(shared::ast::DocumentationNode {
                 location: shared::ast::NodeLocation {
-                    start: current_token.location.start,
-                    end: current_token.location.end,
+                    location: lexer::tokens::TokenLocation {
+                        start: current_token.location.start,
+                        end: current_token.location.end,
+                    },
                     source: T::get_source_file(&self.tokens_source),
                 },
                 string: current_token.lexeme,
@@ -157,8 +159,10 @@ impl<
         let name = token.lexeme;
         return Ok(shared::ast::NameNode::<'buffer> {
             location: shared::ast::NodeLocation {
-                start: token.location.start,
-                end: token.location.end,
+                location: lexer::tokens::TokenLocation {
+                    start: token.location.start,
+                    end: token.location.end,
+                },
                 source: T::get_source_file(&self.tokens_source),
             },
             name,
@@ -185,8 +189,10 @@ impl<
         );
         return Ok(shared::ast::NamedTypeNode {
             location: shared::ast::NodeLocation {
-                start: name_node.location.start,
-                end: T::get_current_token(&self.tokens_source).location.end,
+                location: lexer::tokens::TokenLocation {
+                    start: name_node.location.location.start,
+                    end: T::get_current_token(&self.tokens_source).location.end,
+                },
                 source: T::get_source_file(&self.tokens_source),
             },
             name: name_node,
@@ -214,8 +220,10 @@ impl<
         );
         return Ok(shared::ast::ListTypeNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.tokens_source).location.end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.tokens_source).location.end,
+                },
                 source: T::get_source_file(&self.tokens_source),
             },
             r#type: Box::new(type_node),
@@ -231,16 +239,18 @@ impl<
         let documentation = self.documentation_node.take();
         let name_node = self.parse_name_node(false)?;
         let start = match &documentation {
-            Some(d) => d.location.start,
-            None => name_node.location.start,
+            Some(d) => d.location.location.start,
+            None => name_node.location.location.start,
         };
         T::consume(&mut self.tokens_source, SimpleTokenType::Colon.into())?;
         let type_node = self.parse_type_node()?;
         let default_value = self.parse_default_value()?;
         return Ok(shared::ast::InputFieldDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.tokens_source).location.end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.tokens_source).location.end,
+                },
                 source: T::get_source_file(&self.tokens_source),
             },
             documentation,
@@ -301,8 +311,10 @@ impl<
             return Err(Error::ExpectedComplexType(current_token));
         };
         let location = shared::ast::NodeLocation {
-            start: current_token.location.start,
-            end: current_token.location.end,
+            location: lexer::tokens::TokenLocation {
+                start: current_token.location.start,
+                end: current_token.location.end,
+            },
             source: T::get_source_file(&self.tokens_source),
         };
         match token_type {
@@ -355,8 +367,10 @@ impl<
         let value = current_token.lexeme.parse::<i64>().ok()?;
         return Some(shared::ast::LiteralIntNode {
             location: shared::ast::NodeLocation {
-                start: current_token.location.start,
-                end: current_token.location.end,
+                location: lexer::tokens::TokenLocation {
+                    start: current_token.location.start,
+                    end: current_token.location.end,
+                },
                 source: T::get_source_file(&self.tokens_source),
             },
             value,
@@ -370,8 +384,10 @@ impl<
         let value = current_token.lexeme.parse::<f64>().ok()?;
         return Some(shared::ast::LiteralFloatNode {
             location: shared::ast::NodeLocation {
-                start: current_token.location.start,
-                end: current_token.location.end,
+                location: lexer::tokens::TokenLocation {
+                    start: current_token.location.start,
+                    end: current_token.location.end,
+                },
                 source: T::get_source_file(&self.tokens_source),
             },
             value,
@@ -412,8 +428,10 @@ impl<
         let value = self.parse_argument_value()?;
         return Ok(shared::ast::Argument {
             location: shared::ast::NodeLocation {
-                start: name.location.start,
-                end: T::get_current_token(&self.tokens_source).location.end,
+                location: lexer::tokens::TokenLocation {
+                    start: name.location.location.start,
+                    end: T::get_current_token(&self.tokens_source).location.end,
+                },
                 source: T::get_source_file(&self.tokens_source),
             },
             name,
@@ -458,8 +476,7 @@ impl<
         let current_token = T::get_current_token(&self.tokens_source);
         return Ok(shared::ast::DirectiveLocationNode::<TDirectiveLocation> {
             location: shared::ast::NodeLocation {
-                start: current_token.location.start,
-                end: current_token.location.end,
+                location: current_token.location.clone(),
                 source: T::get_source_file(&self.tokens_source),
             },
             directive_location,
@@ -492,16 +509,18 @@ impl<
         T::consume(&mut self.tokens_source, SimpleTokenType::AtSign.into())?;
         let name_node = self.parse_name_node(false)?;
         let start = match &documentation {
-            Some(d) => d.location.start,
-            None => name_node.location.start,
+            Some(d) => d.location.location.start,
+            None => name_node.location.location.start,
         };
         let arguments = self.parse_input_field_definition_nodes()?;
         T::consume_identifier_by_lexeme(&mut self.tokens_source, "on")?;
         let locations = self.parse_directive_locations()?;
         return Ok(shared::ast::DirectiveNode::<'buffer, TDirectiveLocation> {
             location: shared::ast::NodeLocation {
-                start,
-                end: locations.last().unwrap().location.end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: locations.last().unwrap().location.location.end,
+                },
                 source: name_node.location.source.clone(),
             },
             documentation,
@@ -520,8 +539,10 @@ impl<
         let arguments = self.parse_arguments()?;
         return Ok(shared::ast::DirectiveInvocationNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.tokens_source).location.end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.tokens_source).location.end,
+                },
                 source: T::get_source_file(&self.tokens_source).clone(),
             },
             name,

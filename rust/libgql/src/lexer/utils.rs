@@ -4,13 +4,25 @@ use super::{
     types::{Error, LexerSuccessTokenResult},
 };
 
-pub fn parse_buffer_into_tokens<'buffer>(
+pub type NewLinePositions = Vec<usize>;
+
+pub struct ParseBufferResult<'buffer> {
+    pub new_line_positions: NewLinePositions,
+    pub tokens: Vec<Token<'buffer>>,
+    pub errors: Vec<Error>,
+}
+
+pub fn parse_buffer<'buffer>(
     buffer: &'buffer str,
-) -> Result<Vec<Token<'buffer>>, Vec<Error>> {
+) -> ParseBufferResult<'buffer> {
     let mut lexer = Lexer::new(buffer);
+    let mut new_line_positions = NewLinePositions::new();
     let mut tokens: Vec<Token<'buffer>> = Vec::new();
     let mut errors: Vec<crate::lexer::Error> = Vec::new();
-    for c in buffer.chars() {
+    for (index, c) in buffer.chars().enumerate() {
+        if c == '\n' {
+            new_line_positions.push(index);
+        }
         match lexer.feed(c) {
             Ok(result) => {
                 let Some(r) = result.0 else {
@@ -27,11 +39,12 @@ pub fn parse_buffer_into_tokens<'buffer>(
             Err(error) => errors.push(error),
         }
     }
-    if errors.len() > 0 {
-        return Err(errors);
-    };
     if let Some(last_token) = lexer.maybe_extract_token() {
         tokens.push(last_token)
     }
-    return Ok(tokens);
+    ParseBufferResult {
+        new_line_positions,
+        tokens,
+        errors,
+    }
 }

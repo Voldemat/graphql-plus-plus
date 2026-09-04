@@ -194,8 +194,10 @@ pub async fn execute<
         client_query,
         |query| {
             let mut c_registry = client::type_registry::TypeRegistry::new();
-            let tokens = lexer::utils::parse_buffer_into_tokens(query)
-                .map_err(|errors| Error::Lexer(errors))?;
+            let lexer_result = lexer::utils::parse_buffer(query);
+            if lexer_result.errors.len() != 0 {
+                return Err(Error::Lexer(lexer_result.errors));
+            }
             let source_file =
                 std::sync::Arc::new(file::shared::ast::SourceFile {
                     filepath: "<request>".into(),
@@ -203,7 +205,7 @@ pub async fn execute<
                 });
             let file_nodes = file::client::Parser::new(
                 file::tokens_sources::VecTokensSource::new(
-                    tokens,
+                    lexer_result.tokens,
                     source_file.clone(),
                 ),
             )

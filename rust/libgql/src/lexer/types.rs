@@ -86,4 +86,20 @@ pub enum Error {
     UnexpectedChar { c: char, location: TokenLocation },
 }
 
+impl Error {
+    pub fn get_location(self: &Self) -> &TokenLocation {
+        match self {
+            Self::UnexpectedChar { location, .. } => location,
+        }
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UnexpectedChar { .. } => f.write_str("Unexpected char"),
+        }
+    }
+}
+
 pub type LexerResult<'buffer> = Result<LexerSuccessResult<'buffer>, Error>;

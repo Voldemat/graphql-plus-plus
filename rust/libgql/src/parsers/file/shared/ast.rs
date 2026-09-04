@@ -1,5 +1,7 @@
 use std::{path::PathBuf, sync::Arc};
 
+use crate::lexer::tokens::TokenLocation;
+
 pub struct SourceFile<'buffer> {
     pub filepath: PathBuf,
     pub buffer: &'buffer str,
@@ -15,15 +17,14 @@ impl<'buffer> std::fmt::Debug for SourceFile<'buffer> {
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct NodeLocation<'buffer> {
-    pub start: usize,
-    pub end: usize,
+    pub location: TokenLocation,
     #[serde(skip_serializing)]
     pub source: Arc<SourceFile<'buffer>>,
 }
 
 impl<'buffer> NodeLocation<'buffer> {
     pub fn get_source_slice(self: &Self) -> &'buffer str {
-        &self.source.buffer[self.start..self.end + 1]
+        &self.source.buffer[self.location.start..self.location.end + 1]
     }
 }
 

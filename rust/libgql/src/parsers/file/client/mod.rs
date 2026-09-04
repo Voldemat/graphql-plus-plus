@@ -38,25 +38,24 @@ impl<'buffer> std::fmt::Display for Error<'buffer> {
     }
 }
 
+impl<'buffer> shared::error::Error for Error<'buffer> {
+    fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
+        match self {
+            Self::Base(b) => b.get_location(),
+            Self::UnexpectedOpType(token) => &token.location,
+            Self::DuplicateParameter {
+                duplicate_parameter,
+                ..
+            } => &duplicate_parameter.location.location,
+        }
+    }
+}
+
 impl<'buffer> Error<'buffer> {
     pub fn is_eof(self: &Self) -> bool {
         match self {
             Error::Base(error) => error.is_eof(),
             _ => false,
-        }
-    }
-
-    pub fn get_location(self: &Self) -> lexer::tokens::TokenLocation {
-        match self {
-            Self::Base(b) => b.get_location().clone(),
-            Self::UnexpectedOpType(token) => token.location.clone(),
-            Self::DuplicateParameter {
-                duplicate_parameter,
-                ..
-            } => lexer::tokens::TokenLocation {
-                start: duplicate_parameter.location.start,
-                end: duplicate_parameter.location.end,
-            },
         }
     }
 }
@@ -119,7 +118,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     ) -> Result<ast::FragmentDefinitionNode<'buffer>, Error<'buffer>> {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -132,10 +131,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         let spec = self.parse_fragment_spec()?;
         return Ok(ast::FragmentDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: T::get_source_file(&self.base.tokens_source),
             },
             documentation,
@@ -150,7 +151,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     ) -> Result<ast::OperationDefinitionNode<'buffer>, Error<'buffer>> {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -162,8 +163,10 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
             return Err(Error::UnexpectedOpType(start_token.clone()));
         };
         let optype_location = shared::ast::NodeLocation {
-            start: start_token.location.start,
-            end: start_token.location.end,
+            location: lexer::tokens::TokenLocation {
+                start: start_token.location.start,
+                end: start_token.location.end,
+            },
             source: T::get_source_file(&self.base.tokens_source),
         };
         let name = self.base.parse_name_node(false)?;
@@ -171,10 +174,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         let fragment = self.parse_fragment_spec()?;
         return Ok(ast::OperationDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: T::get_source_file(&self.base.tokens_source),
             },
             documentation,
@@ -243,8 +248,10 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         )?;
         return Ok(ast::FragmentSpec {
             location: shared::ast::NodeLocation {
-                start,
-                end: end_token.location.end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: end_token.location.end,
+                },
                 source: T::get_source_file(&self.base.tokens_source),
             },
             selections,
@@ -289,10 +296,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         let fragment_name = self.base.parse_name_node(false)?;
         return Ok(ast::SpreadSelectionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: T::get_source_file(&self.base.tokens_source),
             },
             fragment_name,
@@ -316,10 +325,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         }
         return Ok(ast::FieldSelectionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: T::get_source_file(&self.base.tokens_source),
             },
             field: field_spec,
@@ -339,10 +350,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         let fragment_spec = self.parse_fragment_spec()?;
         return Ok(ast::ConditionalSpreadSelectionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: T::get_source_file(&self.base.tokens_source),
             },
             type_name,
@@ -363,10 +376,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         ) {
             return Ok(ast::ObjectLiteralFieldSpec {
                 location: shared::ast::NodeLocation {
-                    start,
-                    end: T::get_current_token(&self.base.tokens_source)
-                        .location
-                        .end,
+                    location: lexer::tokens::TokenLocation {
+                        start,
+                        end: T::get_current_token(&self.base.tokens_source)
+                            .location
+                            .end,
+                    },
                     source: T::get_source_file(&self.base.tokens_source),
                 },
                 selection_name,
@@ -377,10 +392,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         let arguments = self.base.parse_arguments()?;
         return Ok(ast::ObjectCallableFieldSpec {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: T::get_source_file(&self.base.tokens_source),
             },
             selection_name,

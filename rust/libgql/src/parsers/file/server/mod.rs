@@ -29,6 +29,15 @@ impl<'buffer> std::fmt::Display for Error<'buffer> {
     }
 }
 
+impl<'buffer> shared::error::Error for Error<'buffer> {
+    fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
+        match self {
+            Self::Base(b) => b.get_location(),
+            Self::UnknownStartOfAstNode(token) => &token.location,
+        }
+    }
+}
+
 impl<'buffer> From<tokens_source::ConsumeError<'buffer>> for Error<'buffer> {
     fn from(value: tokens_source::ConsumeError<'buffer>) -> Self {
         return Self::Base(value.into());
@@ -40,13 +49,6 @@ impl<'buffer> Error<'buffer> {
         match self {
             Self::Base(error) => error.is_eof(),
             _ => false,
-        }
-    }
-
-    pub fn get_location(self: &Self) -> &lexer::tokens::TokenLocation {
-        match self {
-            Self::Base(b) => b.get_location(),
-            Self::UnknownStartOfAstNode(token) => &token.location,
         }
     }
 }
@@ -115,7 +117,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     ) -> Result<ast::ScalarDefinitionNode<'buffer>, base::Error<'buffer>> {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -125,8 +127,10 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         let name = self.base.parse_name_node(false)?;
         return Ok(ast::ScalarDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: name.location.end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: name.location.location.end,
+                },
                 source: name.location.source.clone(),
             },
             documentation,
@@ -139,7 +143,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     ) -> Result<ast::UnionDefinitionNode<'buffer>, base::Error<'buffer>> {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -164,8 +168,10 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         }
         return Ok(ast::UnionDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: values.last().unwrap().location.end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: values.last().unwrap().location.location.end,
+                },
                 source: name.location.source.clone(),
             },
             documentation,
@@ -180,7 +186,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     ) -> Result<ast::ExtendTypeNode<'buffer>, base::Error<'buffer>> {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -191,10 +197,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         let type_node = self.parse_object_type_definition_node()?;
         return Ok(ast::ExtendTypeNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: T::get_source_file(&self.base.tokens_source),
             },
             documentation,
@@ -207,7 +215,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     ) -> Result<ast::EnumDefinitionNode<'buffer>, base::Error<'buffer>> {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -239,10 +247,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         )?;
         return Ok(ast::EnumDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: name.location.source.clone(),
             },
             documentation,
@@ -268,13 +278,15 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         let documentation = self.base.documentation_node.take();
         let name = self.base.parse_name_node(false)?;
         let start = match &documentation {
-            Some(d) => d.location.start,
-            None => name.location.start,
+            Some(d) => d.location.location.start,
+            None => name.location.location.start,
         };
         return Ok(ast::EnumValueDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: name.location.end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: name.location.location.end,
+                },
                 source: name.location.source.clone(),
             },
             documentation,
@@ -289,7 +301,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -314,10 +326,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         )?;
         return Ok(ast::InterfaceDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: name.location.source.clone(),
             },
             documentation,
@@ -333,7 +347,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -362,10 +376,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         )?;
         return Ok(ast::InputObjectDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: name.location.source.clone(),
             },
             documentation,
@@ -380,7 +396,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     ) -> Result<ast::FieldDefinitionNode<'buffer>, base::Error<'buffer>> {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -404,10 +420,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         }
         return Ok(ast::FieldDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: T::get_source_file(&self.base.tokens_source),
             },
             documentation,
@@ -423,7 +441,7 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
     ) -> Result<ast::ObjectDefinitionNode<'buffer>, base::Error<'buffer>> {
         let documentation = self.base.documentation_node.take();
         let start = match &documentation {
-            Some(d) => d.location.start,
+            Some(d) => d.location.location.start,
             None => {
                 T::get_current_token(&self.base.tokens_source)
                     .location
@@ -450,10 +468,12 @@ impl<'buffer, T: tokens_source::TokensSource<'buffer>> Parser<'buffer, T> {
         }
         return Ok(ast::ObjectDefinitionNode {
             location: shared::ast::NodeLocation {
-                start,
-                end: T::get_current_token(&self.base.tokens_source)
-                    .location
-                    .end,
+                location: lexer::tokens::TokenLocation {
+                    start,
+                    end: T::get_current_token(&self.base.tokens_source)
+                        .location
+                        .end,
+                },
                 source: name.location.source.clone(),
             },
             documentation,

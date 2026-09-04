@@ -2,8 +2,7 @@ use libgql::parsers::file::{server, shared};
 
 pub fn build_location<'s>() -> shared::ast::NodeLocation<'s> {
     shared::ast::NodeLocation {
-        start: 0,
-        end: 0,
+        location: libgql::lexer::tokens::TokenLocation { start: 0, end: 0 },
         source: std::sync::Arc::new(shared::ast::SourceFile {
             buffer: "",
             filepath: std::path::PathBuf::new(),
