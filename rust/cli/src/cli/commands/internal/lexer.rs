@@ -20,9 +20,8 @@ pub struct ParseArgs {
 
 fn parse(args: &ParseArgs) {
     let buffer = utils::read_buffer_from_filepath(&args.filepath);
-    let tokens =
-        libgql::lexer::utils::parse_buffer_into_tokens(&buffer).unwrap();
-    utils::print_result(args.pretty, tokens);
+    let tokens = libgql::lexer::utils::parse_buffer(&buffer);
+    utils::print_result(args.pretty, tokens.tokens);
 }
 
 impl Commands {

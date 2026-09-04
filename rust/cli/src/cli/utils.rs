@@ -1,3 +1,5 @@
+use super::format_error;
+
 pub fn read_buffer_from_filepath(filepath: &std::path::Path) -> String {
     if filepath == Into::<std::path::PathBuf>::into("-") {
         let mut temp = String::new();
@@ -62,15 +64,30 @@ pub fn load_server_schema_from_inputs(
         .iter()
         .zip(&buffers)
     {
-        match super::shared::buffer_to_server_ast(graphql_path, buffer) {
-            Ok(file_nodes) => {
-                nodes.extend(file_nodes);
-            }
-            Err(e) => {
-                errors.push(e);
-                continue;
-            }
-        };
+        let source_file = std::sync::Arc::new(
+            libgql::parsers::file::shared::ast::SourceFile {
+                filepath: graphql_path.clone(),
+                buffer: buffer,
+            },
+        );
+        let result = super::shared::buffer_to_server_ast(&source_file);
+        nodes.extend(result.ast_nodes);
+        errors.extend(result.lexer_errors.into_iter().map(|lexer_error| {
+            format_error::format_parse_error(
+                &format!("{}", lexer_error),
+                lexer_error.get_location(),
+                &source_file,
+            )
+        }));
+        errors.extend(result.parser_errors.into_iter().map(|parser_error| {
+            format_error::format_parse_error(
+                &format!("{}", parser_error),
+                libgql::parsers::file::shared::error::Error::get_location(
+                    &parser_error,
+                ),
+                &source_file,
+            )
+        }));
     }
     if errors.len() > 0 {
         return Ok(errors);
@@ -97,13 +114,30 @@ pub fn load_client_schema_from_inputs(
         .iter()
         .zip(&buffers)
     {
-        match super::shared::buffer_to_client_ast(graphql_path, buffer) {
-            Ok(file_nodes) => nodes.extend(file_nodes),
-            Err(error) => {
-                errors.push(error);
-                continue;
-            }
-        };
+        let source_file = std::sync::Arc::new(
+            libgql::parsers::file::shared::ast::SourceFile {
+                filepath: graphql_path.clone(),
+                buffer: buffer,
+            },
+        );
+        let result = super::shared::buffer_to_client_ast(&source_file);
+        nodes.extend(result.ast_nodes);
+        errors.extend(result.lexer_errors.into_iter().map(|lexer_error| {
+            format_error::format_parse_error(
+                &format!("{}", lexer_error),
+                lexer_error.get_location(),
+                &source_file,
+            )
+        }));
+        errors.extend(result.parser_errors.into_iter().map(|parser_error| {
+            format_error::format_parse_error(
+                &format!("{}", parser_error),
+                libgql::parsers::file::shared::error::Error::get_location(
+                    &parser_error,
+                ),
+                &source_file,
+            )
+        }));
     }
     match libgql::parsers::schema::client::parse_client_schema(
         server_registry,

@@ -1,7 +1,10 @@
 mod codec;
+mod context;
+mod file_type;
 mod handlers;
-mod meta;
+mod location;
 mod server;
+mod shared;
 
 #[derive(clap::Args)]
 pub struct Args {
@@ -18,18 +21,20 @@ async fn run(
     config_directory_path: std::path::PathBuf,
     config: crate::cli::config::Config,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let server = server::build_jsonrpc_server();
     let mut reader =
         tokio_util::codec::FramedRead::new(tokio::io::stdin(), codec::LspCodec);
-    let mut writer = tokio_util::codec::FramedWrite::new(
-        tokio::io::stdout(),
-        codec::LspCodec,
-    );
-    let context =
-        meta::ServerMetadata(std::sync::Arc::new(meta::ServerContext {
-            config_directory_path,
-            config,
-        }));
+    let writer = std::sync::Arc::new(tokio::sync::Mutex::new(
+        tokio_util::codec::FramedWrite::new(
+            tokio::io::stdout(),
+            codec::LspCodec,
+        ),
+    ));
+    let context = context::ServerContext {
+        config_directory_path,
+        config,
+        buffers: Default::default(),
+    };
+    let mut server = server::build_jsonrpc_server(&context, writer);
     while let Some(frame) = futures_util::StreamExt::next(&mut reader).await {
         let request_str = match frame {
             Ok(req) => req,
@@ -39,11 +44,7 @@ async fn run(
             }
         };
 
-        if let Some(response_str) =
-            server.handle_request(&request_str, context.clone()).await
-        {
-            futures_util::SinkExt::send(&mut writer, response_str).await?;
-        }
+        server.handle_request(&request_str).await?;
     }
     Ok(())
 }

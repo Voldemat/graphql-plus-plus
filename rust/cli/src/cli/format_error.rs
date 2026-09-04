@@ -84,8 +84,8 @@ pub fn format_server_schema_error(
     let node_location = error.get_location();
     format_error_with_range(
         &format!("{error}"),
-        node_location.start,
-        node_location.end,
+        node_location.location.start,
+        node_location.location.end,
         &node_location.source,
     )
 }
@@ -99,8 +99,8 @@ pub fn format_client_schema_error<
     let node_location = error.get_location();
     format_error_with_range(
         &format!("{error}"),
-        node_location.start,
-        node_location.end,
+        node_location.location.start,
+        node_location.location.end,
         &node_location.source,
     )
 }

@@ -1,55 +1,70 @@
+use libgql::lexer::utils::NewLinePositions;
+
+pub struct BufferToASTResult<TASTNode, TParserError> {
+    pub new_line_positions: NewLinePositions,
+    pub lexer_errors: Vec<libgql::lexer::types::Error>,
+    pub parser_errors: Vec<TParserError>,
+    pub ast_nodes: Vec<TASTNode>,
+}
+
 pub fn buffer_to_client_ast<'buffer>(
-    graphql_path: &std::path::PathBuf,
-    buffer: &'buffer str,
-) -> Result<Vec<libgql::parsers::file::client::ast::ASTNode<'buffer>>, String> {
-    let source_file =
-        std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
-            filepath: graphql_path.clone(),
-            buffer: buffer,
-        });
-    let tokens =
-        libgql::lexer::utils::parse_buffer_into_tokens(&source_file.buffer)
-            .unwrap();
-    libgql::parsers::file::client::Parser::new(
+    source_file: &std::sync::Arc<
+        libgql::parsers::file::shared::ast::SourceFile<'buffer>,
+    >,
+) -> BufferToASTResult<
+    libgql::parsers::file::client::ast::ASTNode<'buffer>,
+    libgql::parsers::file::client::Error<'buffer>,
+> {
+    let lexing_result = libgql::lexer::utils::parse_buffer(&source_file.buffer);
+    let mut parser_errors = Vec::new();
+    let mut ast_nodes = Vec::new();
+    match libgql::parsers::file::client::Parser::new(
         libgql::parsers::file::tokens_sources::VecTokensSource::new(
-            tokens,
+            lexing_result.tokens,
             source_file.clone(),
         ),
     )
     .parse_ast_nodes()
-    .map_err(|e| {
-        super::format_error::format_parse_error(
-            &format!("{}", e),
-            &e.get_location(),
-            &source_file,
-        )
-    })
+    {
+        Ok(nodes) => ast_nodes.extend(nodes),
+        Err(error) => parser_errors.push(error),
+    };
+
+    BufferToASTResult {
+        new_line_positions: lexing_result.new_line_positions,
+        lexer_errors: lexing_result.errors,
+        parser_errors: parser_errors,
+        ast_nodes: ast_nodes,
+    }
 }
 
 pub fn buffer_to_server_ast<'buffer>(
-    graphql_path: &std::path::PathBuf,
-    buffer: &'buffer str,
-) -> Result<Vec<libgql::parsers::file::server::ast::ASTNode<'buffer>>, String> {
-    let source_file =
-        std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
-            filepath: graphql_path.clone(),
-            buffer: buffer,
-        });
-    let tokens =
-        libgql::lexer::utils::parse_buffer_into_tokens(&source_file.buffer)
-            .unwrap();
-    libgql::parsers::file::server::Parser::new(
+    source_file: &std::sync::Arc<
+        libgql::parsers::file::shared::ast::SourceFile<'buffer>,
+    >,
+) -> BufferToASTResult<
+    libgql::parsers::file::server::ast::ASTNode<'buffer>,
+    libgql::parsers::file::server::Error<'buffer>,
+> {
+    let lexing_result = libgql::lexer::utils::parse_buffer(&source_file.buffer);
+    let mut parser_errors = Vec::new();
+    let mut ast_nodes = Vec::new();
+    match libgql::parsers::file::server::Parser::new(
         libgql::parsers::file::tokens_sources::VecTokensSource::new(
-            tokens,
+            lexing_result.tokens,
             source_file.clone(),
         ),
     )
     .parse_ast_nodes()
-    .map_err(|e| {
-        super::format_error::format_parse_error(
-            &format!("{}", e),
-            e.get_location(),
-            &source_file,
-        )
-    })
+    {
+        Ok(nodes) => ast_nodes.extend(nodes),
+        Err(error) => parser_errors.push(error),
+    };
+
+    BufferToASTResult {
+        new_line_positions: lexing_result.new_line_positions,
+        lexer_errors: lexing_result.errors,
+        parser_errors: parser_errors,
+        ast_nodes: ast_nodes,
+    }
 }

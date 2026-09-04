@@ -1,15 +1,26 @@
-mod file_type;
 mod lsp_edits;
 
-use crate::cli::commands::lsp::meta::ServerMetadata;
+use crate::cli::{
+    commands::{
+        format::shared::{format_buffer_to_lir_nodes, print_lir_nodes},
+        lsp::{
+            codec::LspCodec,
+            context::ServerContext,
+            file_type::{FileType, get_file_type},
+            shared::get_buffer,
+        },
+    },
+    shared::BufferToASTResult,
+};
 
 fn format_file<
     TASTNodeWrapper: crate::cli::commands::format::shared::ASTNodeWrapper,
     TBufferToASTNodes: for<'buffer> Fn(
-        &std::path::PathBuf,
-        &'buffer str,
-    )
-        -> Result<Vec<TASTNodeWrapper::ASTNode<'buffer>>, String>,
+        &std::sync::Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
+    ) -> BufferToASTResult<
+        TASTNodeWrapper::ASTNode<'buffer>,
+        TASTNodeWrapper::ParserError<'buffer>,
+    >,
     TASTNodesToHIRNodes: for<'buffer> Fn(
         &'buffer str,
         Vec<TASTNodeWrapper::ASTNode<'buffer>>,
@@ -18,33 +29,35 @@ fn format_file<
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
     buffer_to_ast_nodes: TBufferToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
-    local_path: &std::path::PathBuf,
-) -> Result<Vec<lsp_types::TextEdit>, String> {
-    let buffer = std::fs::read_to_string(local_path).unwrap();
+    source_file: std::sync::Arc<
+        libgql::parsers::file::shared::ast::SourceFile<'_>,
+    >,
+) -> Result<Vec<lsp_types::TextEdit>, Vec<String>> {
     let mut writer = std::io::BufWriter::new(Vec::<u8>::new());
-    crate::cli::commands::format::shared::format_buffer::<
+    let lir_nodes = format_buffer_to_lir_nodes::<
         TASTNodeWrapper,
         TBufferToASTNodes,
         TASTNodesToHIRNodes,
-        _,
     >(
-        local_path,
-        &buffer,
+        &source_file,
         buffer_to_ast_nodes,
         ast_nodes_to_hir_nodes,
         shared_formatting_config,
-        &mut writer,
     )?;
+    print_lir_nodes(&mut writer, shared_formatting_config, lir_nodes)
+        .map_err(|e| vec![format!("LIR printer error: {}", e)])?;
     let formatted_string =
         String::from_utf8(writer.into_inner().unwrap()).unwrap();
-    Ok(lsp_edits::generate(&buffer, &formatted_string))
+    Ok(lsp_edits::generate(source_file.buffer, &formatted_string))
 }
 
 fn format_server_file(
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
     server_formatting_config: &crate::cli::config::GraphqlFormattingServerConfig,
-    local_path: &std::path::PathBuf,
-) -> Result<Vec<lsp_types::TextEdit>, String> {
+    source_file: std::sync::Arc<
+        libgql::parsers::file::shared::ast::SourceFile<'_>,
+    >,
+) -> Result<Vec<lsp_types::TextEdit>, Vec<String>> {
     format_file::<
         crate::cli::commands::format::shared::ServerASTNodeWrapper,
         _,
@@ -60,15 +73,17 @@ fn format_server_file(
             )
             .to_vec()
         },
-        local_path,
+        source_file,
     )
 }
 
 fn format_client_file(
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
     client_formatting_config: &crate::cli::config::GraphqlFormattingClientConfig,
-    local_path: &std::path::PathBuf,
-) -> Result<Vec<lsp_types::TextEdit>, String> {
+    source_file: std::sync::Arc<
+        libgql::parsers::file::shared::ast::SourceFile<'_>,
+    >,
+) -> Result<Vec<lsp_types::TextEdit>, Vec<String>> {
     format_file::<
         crate::cli::commands::format::shared::ClientASTNodeWrapper,
         _,
@@ -84,44 +99,50 @@ fn format_client_file(
             )
             .to_vec()
         },
-        local_path,
+        source_file,
     )
 }
 
 fn format_file_with_type(
     formatting_config: &crate::cli::config::GraphqlFormattingConfig,
-    local_path: &std::path::PathBuf,
-    file_type: file_type::FileType,
-) -> Result<Vec<lsp_types::TextEdit>, String> {
+    source_file: std::sync::Arc<
+        libgql::parsers::file::shared::ast::SourceFile<'_>,
+    >,
+    file_type: FileType,
+) -> Result<Vec<lsp_types::TextEdit>, Vec<String>> {
     match file_type {
-        file_type::FileType::Server => formatting_config
+        FileType::Server => formatting_config
             .server
             .as_ref()
             .map(|formatting_server_config| {
                 format_server_file(
                     &formatting_config.shared,
                     formatting_server_config,
-                    local_path,
+                    source_file,
                 )
             })
             .unwrap_or(Ok(Vec::new())),
-        file_type::FileType::Client => formatting_config
+        FileType::Client => formatting_config
             .client
             .as_ref()
             .map(|formatting_client_config| {
                 format_client_file(
                     &formatting_config.shared,
                     formatting_client_config,
-                    local_path,
+                    source_file,
                 )
             })
             .unwrap_or(Ok(Vec::new())),
     }
 }
 
-fn format(
-    config_directory_path: &std::path::Path,
-    config: &crate::cli::config::Config,
+pub async fn handler(
+    context: &ServerContext,
+    _: std::sync::Arc<
+        tokio::sync::Mutex<
+            tokio_util::codec::FramedWrite<tokio::io::Stdout, LspCodec>,
+        >,
+    >,
     params: lsp_types::DocumentFormattingParams,
 ) -> Result<Vec<lsp_types::TextEdit>, String> {
     let uri = params.text_document.uri;
@@ -137,38 +158,21 @@ fn format(
             uri.path().as_str(),
         )
         .unwrap()
-        .strip_prefix(config_directory_path)
+        .strip_prefix(&context.config_directory_path)
         .unwrap(),
     );
-    return file_type::get_file_type(&config, &local_path)
+    let buffer = get_buffer(&context.buffers, &local_path).await?;
+    let source_file =
+        std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
+            filepath: local_path.clone(),
+            buffer: &buffer,
+        });
+    get_file_type(&context.config, &local_path)
         .and_then(|file_type| {
-            config.formatting.as_ref().map(|formatting_config| {
-                format_file_with_type(formatting_config, &local_path, file_type)
+            context.config.formatting.as_ref().map(|formatting_config| {
+                format_file_with_type(formatting_config, source_file, file_type)
+                    .map_err(|_| format!("Parsing errors"))
             })
         })
-        .unwrap_or(Ok(Vec::new()));
-}
-
-pub async fn handler(
-    params: jsonrpc_core::Params,
-    meta: ServerMetadata,
-) -> jsonrpc_core::Result<serde_json::Value> {
-    let format_params: lsp_types::DocumentFormattingParams =
-        params.parse::<serde_json::value::Value>().and_then(|v| {
-            serde_json::from_value(v).map_err(|error| {
-                jsonrpc_core::Error::invalid_params(error.to_string())
-            })
-        })?;
-    let context = meta.0.as_ref();
-
-    format(
-        &context.config_directory_path,
-        &context.config,
-        format_params,
-    )
-    .map_err(|_| jsonrpc_core::Error::internal_error())
-    .and_then(|result| {
-        serde_json::to_value(result)
-            .map_err(|_| jsonrpc_core::Error::internal_error())
-    })
+        .unwrap_or(Ok(Vec::new()))
 }
