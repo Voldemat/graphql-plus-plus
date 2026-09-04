@@ -96,16 +96,16 @@ interface PrintState {
 function printLine(state: PrintState, part: Change, line: string) {
     if (part.added) {
         if (state.beforeBufferList.length !== 0) {
-            process.stdout.write(
+            process.stderr.write(
                 buildSeparatorLine(state.newLineNumber, state.oldLineNumber) +
                     '\n',
             );
-            process.stdout.write(state.beforeBufferList.join('\n') + '\n');
+            process.stderr.write(state.beforeBufferList.join('\n') + '\n');
             state.beforeBufferList = [];
         }
         state.nextN = n;
 
-        process.stdout.write(
+        process.stderr.write(
             formatLine(
                 state.newLineNumber,
                 state.oldLineNumber,
@@ -116,16 +116,16 @@ function printLine(state: PrintState, part: Change, line: string) {
         state.newLineNumber++;
     } else if (part.removed) {
         if (state.beforeBufferList.length !== 0) {
-            process.stdout.write(
+            process.stderr.write(
                 buildSeparatorLine(state.newLineNumber, state.oldLineNumber) +
                     '\n',
             );
-            process.stdout.write(state.beforeBufferList.join('\n') + '\n');
+            process.stderr.write(state.beforeBufferList.join('\n') + '\n');
             state.beforeBufferList = [];
         }
         state.nextN = n;
 
-        process.stdout.write(
+        process.stderr.write(
             formatLine(
                 state.newLineNumber,
                 state.oldLineNumber,
@@ -142,7 +142,7 @@ function printLine(state: PrintState, part: Change, line: string) {
             line,
         );
         if (state.nextN !== 0) {
-            process.stdout.write(formattedLine + '\n');
+            process.stderr.write(formattedLine + '\n');
             state.nextN -= 1;
         } else {
             if (state.beforeBufferList.length < n) {

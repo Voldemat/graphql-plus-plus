@@ -19,13 +19,15 @@ export function executeRunAction(
             const fileCode = fs.readFileSync(outPath).toString();
             if (fileCode !== code) {
                 const changes = diffLines(fileCode, code);
-                process.stdout.write(
+                process.stderr.write(
                     pc.blue(
                         `${path.relative(process.cwd(), outPath.toString())}:\n`,
                     ),
                 );
                 printChanges(changes);
+                process.exit(1);
             }
+            process.stdout.write('Code is up to date\n');
         }
     }
 }
