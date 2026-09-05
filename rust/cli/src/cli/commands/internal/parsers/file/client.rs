@@ -28,6 +28,7 @@ fn parse(args: &ParseArgs) {
         Arc::new(libgql::parsers::file::shared::ast::SourceFile {
             buffer: buffer.as_str(),
             filepath: args.filepath.clone(),
+            new_line_positions: Vec::new(),
         });
     let nodes = libgql::parsers::file::client::Parser::new(
         libgql::parsers::file::tokens_sources::VecTokensSource::new(

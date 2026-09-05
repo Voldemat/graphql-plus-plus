@@ -36,7 +36,11 @@ pub fn token_location_to_range(
 ) -> lsp_types::Range {
     lsp_types::Range {
         start: index_to_position(new_line_positions, location.start),
-        end: index_to_position(new_line_positions, location.end),
+        end: {
+            let mut pos = index_to_position(new_line_positions, location.end);
+            pos.character += 1;
+            pos
+        },
     }
 }
 

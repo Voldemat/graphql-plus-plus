@@ -10,14 +10,16 @@ use crate::cli::{
             shared::get_buffer,
         },
     },
-    shared::BufferToASTResult,
+    format_error::format_error,
+    shared::TokensToASTResult,
 };
 
 fn format_file<
     TASTNodeWrapper: crate::cli::commands::format::shared::ASTNodeWrapper,
-    TBufferToASTNodes: for<'buffer> Fn(
+    TTokensToASTNodes: for<'buffer> Fn(
         &std::sync::Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
-    ) -> BufferToASTResult<
+        Vec<libgql::lexer::tokens::Token<'buffer>>,
+    ) -> TokensToASTResult<
         TASTNodeWrapper::ASTNode<'buffer>,
         TASTNodeWrapper::ParserError<'buffer>,
     >,
@@ -27,20 +29,41 @@ fn format_file<
     ) -> Vec<codeform::ir::hir::node::Node<'buffer>>,
 >(
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
-    buffer_to_ast_nodes: TBufferToASTNodes,
+    tokens_to_ast_nodes: TTokensToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
-    source_file: std::sync::Arc<
-        libgql::parsers::file::shared::ast::SourceFile<'_>,
-    >,
+    local_path: &std::path::PathBuf,
+    buffer: &str,
 ) -> Result<Vec<lsp_types::TextEdit>, Vec<String>> {
     let mut writer = std::io::BufWriter::new(Vec::<u8>::new());
+    let parse_result = libgql::lexer::utils::parse_buffer(buffer);
+    if parse_result.errors.len() > 0 {
+        return Err(parse_result
+            .errors
+            .into_iter()
+            .map(|error| {
+                format_error(
+                    &error.to_string(),
+                    error.get_location(),
+                    local_path,
+                    buffer,
+                )
+            })
+            .collect());
+    }
+    let source_file =
+        std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
+            filepath: local_path.clone(),
+            buffer: buffer,
+            new_line_positions: parse_result.new_line_positions,
+        });
     let lir_nodes = format_buffer_to_lir_nodes::<
         TASTNodeWrapper,
-        TBufferToASTNodes,
+        TTokensToASTNodes,
         TASTNodesToHIRNodes,
     >(
         &source_file,
-        buffer_to_ast_nodes,
+        parse_result.tokens,
+        tokens_to_ast_nodes,
         ast_nodes_to_hir_nodes,
         shared_formatting_config,
     )?;
@@ -51,12 +74,11 @@ fn format_file<
     Ok(lsp_edits::generate(source_file.buffer, &formatted_string))
 }
 
-fn format_server_file(
+fn format_server_file<'buffer>(
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
     server_formatting_config: &crate::cli::config::GraphqlFormattingServerConfig,
-    source_file: std::sync::Arc<
-        libgql::parsers::file::shared::ast::SourceFile<'_>,
-    >,
+    local_path: &std::path::PathBuf,
+    buffer: &str,
 ) -> Result<Vec<lsp_types::TextEdit>, Vec<String>> {
     format_file::<
         crate::cli::commands::format::shared::ServerASTNodeWrapper,
@@ -73,16 +95,16 @@ fn format_server_file(
             )
             .to_vec()
         },
-        source_file,
+        local_path,
+        buffer,
     )
 }
 
-fn format_client_file(
+fn format_client_file<'buffer>(
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
     client_formatting_config: &crate::cli::config::GraphqlFormattingClientConfig,
-    source_file: std::sync::Arc<
-        libgql::parsers::file::shared::ast::SourceFile<'_>,
-    >,
+    local_path: &std::path::PathBuf,
+    buffer: &str,
 ) -> Result<Vec<lsp_types::TextEdit>, Vec<String>> {
     format_file::<
         crate::cli::commands::format::shared::ClientASTNodeWrapper,
@@ -99,15 +121,15 @@ fn format_client_file(
             )
             .to_vec()
         },
-        source_file,
+        local_path,
+        buffer,
     )
 }
 
-fn format_file_with_type(
+fn format_file_with_type<'buffer>(
     formatting_config: &crate::cli::config::GraphqlFormattingConfig,
-    source_file: std::sync::Arc<
-        libgql::parsers::file::shared::ast::SourceFile<'_>,
-    >,
+    local_path: &std::path::PathBuf,
+    buffer: &str,
     file_type: FileType,
 ) -> Result<Vec<lsp_types::TextEdit>, Vec<String>> {
     match file_type {
@@ -118,7 +140,8 @@ fn format_file_with_type(
                 format_server_file(
                     &formatting_config.shared,
                     formatting_server_config,
-                    source_file,
+                    local_path,
+                    buffer,
                 )
             })
             .unwrap_or(Ok(Vec::new())),
@@ -129,7 +152,8 @@ fn format_file_with_type(
                 format_client_file(
                     &formatting_config.shared,
                     formatting_client_config,
-                    source_file,
+                    local_path,
+                    buffer,
                 )
             })
             .unwrap_or(Ok(Vec::new())),
@@ -161,17 +185,17 @@ pub async fn handler(
         .strip_prefix(&context.config_directory_path)
         .unwrap(),
     );
-    let buffer = get_buffer(&context.buffers, &local_path).await?;
-    let source_file =
-        std::sync::Arc::new(libgql::parsers::file::shared::ast::SourceFile {
-            filepath: local_path.clone(),
-            buffer: &buffer,
-        });
+    let buffer = get_buffer(&context.open_buffers, &local_path).await?;
     get_file_type(&context.config, &local_path)
         .and_then(|file_type| {
             context.config.formatting.as_ref().map(|formatting_config| {
-                format_file_with_type(formatting_config, source_file, file_type)
-                    .map_err(|_| format!("Parsing errors"))
+                format_file_with_type(
+                    formatting_config,
+                    &local_path,
+                    &buffer,
+                    file_type,
+                )
+                .map_err(|_| format!("Parsing errors"))
             })
         })
         .unwrap_or(Ok(Vec::new()))

@@ -1,7 +1,10 @@
-use crate::cli::commands::lsp::{
-    codec::LspCodec,
-    context::ServerContext,
-    shared::{get_buffer, publish_file_diagnostics},
+use crate::cli::{
+    commands::lsp::{
+        codec::LspCodec,
+        context::ServerContext,
+        shared::{get_buffer, publish_workspace_diagnostics},
+    },
+    shared::OpenBuffer,
 };
 
 pub async fn handler(
@@ -30,19 +33,22 @@ pub async fn handler(
         .unwrap(),
     );
     {
-        let mut write_buffers = context.buffers.write().await;
+        let mut write_buffers = context.open_buffers.write().await;
         write_buffers.insert(
             local_path.clone(),
-            std::fs::read_to_string(&local_path).map_err(|e| e.to_string())?,
+            OpenBuffer {
+                content: std::fs::read_to_string(&local_path)
+                    .map_err(|e| e.to_string())?,
+                uri: uri.clone(),
+                version: params.text_document.version,
+            },
         );
     }
-    publish_file_diagnostics(
+    publish_workspace_diagnostics(
         context,
         writer,
         &local_path,
-        get_buffer(&context.buffers, &local_path).await?,
-        uri,
-        params.text_document.version,
+        &context.open_buffers.read().await,
     )
     .await
 }

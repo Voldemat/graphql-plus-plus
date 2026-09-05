@@ -321,6 +321,10 @@ pub fn build_jsonrpc_server<'c>(
         super::handlers::text_document::did_open::handler,
     );
     server.add_handler(
+        "textDocument/didClose",
+        super::handlers::text_document::did_close::handler,
+    );
+    server.add_handler(
         "textDocument/didChange",
         super::handlers::text_document::did_change::handler,
     );

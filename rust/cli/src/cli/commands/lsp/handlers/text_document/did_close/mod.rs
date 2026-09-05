@@ -25,7 +25,7 @@ pub async fn handler(
         .strip_prefix(&context.config_directory_path)
         .unwrap(),
     );
-    let mut write_buffers = context.buffers.write().await;
+    let mut write_buffers = context.open_buffers.write().await;
     write_buffers.remove(&local_path);
     Ok(())
 }

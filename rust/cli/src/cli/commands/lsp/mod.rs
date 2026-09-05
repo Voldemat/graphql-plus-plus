@@ -32,7 +32,7 @@ async fn run(
     let context = context::ServerContext {
         config_directory_path,
         config,
-        buffers: Default::default(),
+        open_buffers: Default::default(),
     };
     let mut server = server::build_jsonrpc_server(&context, writer);
     while let Some(frame) = futures_util::StreamExt::next(&mut reader).await {

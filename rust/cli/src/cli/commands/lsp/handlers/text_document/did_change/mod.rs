@@ -1,8 +1,6 @@
 use crate::cli::commands::lsp::{
-    codec::LspCodec,
-    context::ServerContext,
-    location::lsp_range_to_index_range,
-    shared::{get_buffer, publish_file_diagnostics},
+    codec::LspCodec, context::ServerContext,
+    location::lsp_range_to_index_range, shared::publish_workspace_diagnostics,
 };
 
 pub async fn handler(
@@ -31,18 +29,20 @@ pub async fn handler(
         .unwrap(),
     );
     {
-        let mut write_buffers = context.buffers.write().await;
+        let mut write_buffers = context.open_buffers.write().await;
         let buffer = write_buffers.get_mut(&local_path).unwrap();
+        buffer.version = params.text_document.version;
         for change in params.content_changes {
             let Some(range) = change.range else {
-                *buffer = change.text;
+                buffer.content = change.text;
                 continue;
             };
             let Some(_) = change.range_length else {
-                *buffer = change.text;
+                buffer.content = change.text;
                 continue;
             };
             let new_line_positions = buffer
+                .content
                 .bytes()
                 .enumerate()
                 .filter_map(|(index, c)| match c {
@@ -52,16 +52,14 @@ pub async fn handler(
                 .collect::<Vec<_>>();
             let index_range =
                 lsp_range_to_index_range(&new_line_positions, range);
-            buffer.replace_range(index_range, &change.text);
+            buffer.content.replace_range(index_range, &change.text);
         }
-    }
-    publish_file_diagnostics(
+    };
+    publish_workspace_diagnostics(
         context,
         writer,
         &local_path,
-        get_buffer(&context.buffers, &local_path).await?,
-        uri,
-        params.text_document.version,
+        &context.open_buffers.read().await,
     )
     .await
 }

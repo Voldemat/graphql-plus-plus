@@ -1,17 +1,15 @@
-use std::sync::Arc;
-
 const CONTEXT_LINES: usize = 5;
-pub fn format_error_with_range<'buffer>(
+pub fn format_error<'buffer>(
     exc: &str,
-    start: usize,
-    end: usize,
-    source: &Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
+    location: &libgql::lexer::tokens::TokenLocation,
+    source_filepath: &std::path::Path,
+    source_buffer: &str,
 ) -> String {
-    let buffer = source.buffer;
+    let buffer = source_buffer;
 
     // Bounds checking to prevent slicing panics
-    let start = start.min(buffer.len());
-    let end = end.min(buffer.len()).max(start);
+    let start = location.start.min(buffer.len());
+    let end = location.end.min(buffer.len()).max(start);
 
     // Calculate error line index (0-indexed)
     let target_line_idx = buffer[..start].lines().count().saturating_sub(1);
@@ -19,7 +17,7 @@ pub fn format_error_with_range<'buffer>(
     // Collect lines to extract context ranges safely
     let lines: Vec<&str> = buffer.lines().collect();
     if lines.is_empty() {
-        return format!("error: {}\n --> {}\n", exc, source.filepath.display());
+        return format!("error: {}\n --> {}\n", exc, source_filepath.display());
     }
 
     // Determine range of lines to display
@@ -38,7 +36,7 @@ pub fn format_error_with_range<'buffer>(
 
     let mut output = format!(
         " --> {}:{}:{}\n{:pad_len$} |\n",
-        source.filepath.display(),
+        source_filepath.display(),
         target_line_idx + 1,
         start_col + 1,
         ""
@@ -68,39 +66,4 @@ pub fn format_error_with_range<'buffer>(
     }
 
     output
-}
-
-pub fn format_parse_error<'buffer>(
-    exc: &str,
-    location: &libgql::lexer::tokens::TokenLocation,
-    source: &Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
-) -> String {
-    format_error_with_range(exc, location.start, location.end, source)
-}
-
-pub fn format_server_schema_error(
-    error: libgql::parsers::schema::server::Error<'_>,
-) -> String {
-    let node_location = error.get_location();
-    format_error_with_range(
-        &format!("{error}"),
-        node_location.location.start,
-        node_location.location.end,
-        &node_location.source,
-    )
-}
-
-pub fn format_client_schema_error<
-    's,
-    S: libgql::parsers::schema::shared::ast::AsStr<'s>,
->(
-    error: libgql::parsers::schema::client::errors::Error<'s, S>,
-) -> String {
-    let node_location = error.get_location();
-    format_error_with_range(
-        &format!("{error}"),
-        node_location.location.start,
-        node_location.location.end,
-        &node_location.source,
-    )
 }

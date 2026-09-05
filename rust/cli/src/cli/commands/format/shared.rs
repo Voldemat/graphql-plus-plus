@@ -1,4 +1,4 @@
-use crate::cli::{format_error::format_parse_error, shared::BufferToASTResult};
+use crate::cli::{format_error::format_error, shared::TokensToASTResult};
 
 pub fn print_lir_nodes<TWriter: std::io::Write>(
     writer: &mut TWriter,
@@ -17,9 +17,10 @@ pub fn print_lir_nodes<TWriter: std::io::Write>(
 pub fn format_print_action<
     'buffer,
     TASTNodeWrapper: ASTNodeWrapper,
-    TBufferToASTNodes: Fn(
+    TTokensToASTNodes: Fn(
         &std::sync::Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
-    ) -> BufferToASTResult<
+        Vec<libgql::lexer::tokens::Token<'buffer>>,
+    ) -> TokensToASTResult<
         TASTNodeWrapper::ASTNode<'buffer>,
         TASTNodeWrapper::ParserError<'buffer>,
     >,
@@ -31,17 +32,19 @@ pub fn format_print_action<
     source_file: &std::sync::Arc<
         libgql::parsers::file::shared::ast::SourceFile<'buffer>,
     >,
-    buffer_to_ast_nodes: TBufferToASTNodes,
+    tokens: Vec<libgql::lexer::tokens::Token<'buffer>>,
+    tokens_to_ast_nodes: TTokensToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
 ) -> Result<(), Vec<String>> {
     let lir_nodes = format_buffer_to_lir_nodes::<
         TASTNodeWrapper,
-        TBufferToASTNodes,
+        TTokensToASTNodes,
         TASTNodesToHIRNodes,
     >(
         source_file,
-        buffer_to_ast_nodes,
+        tokens,
+        tokens_to_ast_nodes,
         ast_nodes_to_hir_nodes,
         shared_formatting_config,
     )?;
@@ -55,9 +58,10 @@ pub fn format_print_action<
 fn format_check_action<
     'buffer,
     TASTNodeWrapper: ASTNodeWrapper,
-    TBufferToASTNodes: Fn(
+    TTokensToASTNodes: Fn(
         &std::sync::Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
-    ) -> BufferToASTResult<
+        Vec<libgql::lexer::tokens::Token<'buffer>>,
+    ) -> TokensToASTResult<
         TASTNodeWrapper::ASTNode<'buffer>,
         TASTNodeWrapper::ParserError<'buffer>,
     >,
@@ -69,18 +73,20 @@ fn format_check_action<
     source_file: &std::sync::Arc<
         libgql::parsers::file::shared::ast::SourceFile<'buffer>,
     >,
-    buffer_to_ast_nodes: TBufferToASTNodes,
+    tokens: Vec<libgql::lexer::tokens::Token<'buffer>>,
+    tokens_to_ast_nodes: TTokensToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
 ) -> Result<(), Vec<String>> {
     let mut writer = std::io::BufWriter::new(Vec::<u8>::new());
     let lir_nodes = format_buffer_to_lir_nodes::<
         TASTNodeWrapper,
-        TBufferToASTNodes,
+        TTokensToASTNodes,
         TASTNodesToHIRNodes,
     >(
         source_file,
-        buffer_to_ast_nodes,
+        tokens,
+        tokens_to_ast_nodes,
         ast_nodes_to_hir_nodes,
         shared_formatting_config,
     )?;
@@ -108,9 +114,10 @@ fn format_check_action<
 pub fn format_action<
     'buffer,
     TASTNodeWrapper: ASTNodeWrapper,
-    TBufferToASTNodes: Fn(
+    TTokensToASTNodes: Fn(
         &std::sync::Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
-    ) -> BufferToASTResult<
+        Vec<libgql::lexer::tokens::Token<'buffer>>,
+    ) -> TokensToASTResult<
         TASTNodeWrapper::ASTNode<'buffer>,
         TASTNodeWrapper::ParserError<'buffer>,
     >,
@@ -123,21 +130,24 @@ pub fn format_action<
     source_file: &std::sync::Arc<
         libgql::parsers::file::shared::ast::SourceFile<'buffer>,
     >,
-    buffer_to_ast_nodes: TBufferToASTNodes,
+    tokens: Vec<libgql::lexer::tokens::Token<'buffer>>,
+    tokens_to_ast_nodes: TTokensToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
 ) -> Result<(), Vec<String>> {
     if is_check {
         format_check_action::<TASTNodeWrapper, _, _>(
             source_file,
-            buffer_to_ast_nodes,
+            tokens,
+            tokens_to_ast_nodes,
             ast_nodes_to_hir_nodes,
             shared_formatting_config,
         )
     } else {
         format_print_action::<TASTNodeWrapper, _, _>(
             source_file,
-            buffer_to_ast_nodes,
+            tokens,
+            tokens_to_ast_nodes,
             ast_nodes_to_hir_nodes,
             shared_formatting_config,
         )
@@ -168,9 +178,10 @@ impl ASTNodeWrapper for ServerASTNodeWrapper {
 pub fn format_buffer_to_lir_nodes<
     'buffer,
     TASTNodeWrapper: ASTNodeWrapper,
-    TBufferToASTNodes: Fn(
+    TTokensToASTNodes: Fn(
         &std::sync::Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
-    ) -> BufferToASTResult<
+        Vec<libgql::lexer::tokens::Token<'buffer>>,
+    ) -> TokensToASTResult<
         TASTNodeWrapper::ASTNode<'buffer>,
         TASTNodeWrapper::ParserError<'buffer>,
     >,
@@ -182,27 +193,22 @@ pub fn format_buffer_to_lir_nodes<
     source_file: &std::sync::Arc<
         libgql::parsers::file::shared::ast::SourceFile<'buffer>,
     >,
-    buffer_to_ast_nodes: TBufferToASTNodes,
+    tokens: Vec<libgql::lexer::tokens::Token<'buffer>>,
+    tokens_to_ast_nodes: TTokensToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
 ) -> Result<Vec<codeform::ir::lir::node::Node<'buffer>>, Vec<String>> {
-    let result = buffer_to_ast_nodes(source_file);
-    if result.lexer_errors.len() > 0 || result.parser_errors.len() > 0 {
+    let result = tokens_to_ast_nodes(source_file, tokens);
+    if result.parser_errors.len() > 0 {
         let mut errors = Vec::new();
-        errors.extend(result.lexer_errors.into_iter().map(|lexer_error| {
-            format_parse_error(
-                &format!("{}", lexer_error),
-                lexer_error.get_location(),
-                &source_file,
-            )
-        }));
         errors.extend(result.parser_errors.into_iter().map(|parser_error| {
-            format_parse_error(
-                &format!("{}", parser_error),
+            format_error(
+                &parser_error.to_string(),
                 libgql::parsers::file::shared::error::Error::get_location(
                     &parser_error,
                 ),
-                &source_file,
+                &source_file.filepath,
+                source_file.buffer,
             )
         }));
         return Err(errors);
@@ -219,9 +225,10 @@ pub fn format_buffer_to_lir_nodes<
 
 pub fn format_config<
     TASTNodeWrapper: ASTNodeWrapper,
-    TBufferToASTNodes: for<'buffer> Fn(
+    TTokensToASTNodes: for<'buffer> Fn(
         &std::sync::Arc<libgql::parsers::file::shared::ast::SourceFile<'buffer>>,
-    ) -> BufferToASTResult<
+        Vec<libgql::lexer::tokens::Token<'buffer>>,
+    ) -> TokensToASTResult<
         TASTNodeWrapper::ASTNode<'buffer>,
         TASTNodeWrapper::ParserError<'buffer>,
     >,
@@ -231,7 +238,7 @@ pub fn format_config<
     ) -> Vec<codeform::ir::hir::node::Node<'buffer>>,
 >(
     graphql_paths: &[std::path::PathBuf],
-    buffer_to_ast_nodes: TBufferToASTNodes,
+    tokens_to_ast_nodes: TTokensToASTNodes,
     ast_nodes_to_hir_nodes: TASTNodesToHIRNodes,
     shared_formatting_config: &crate::cli::config::GraphqlFormattingSharedConfig,
     is_check: bool,
@@ -240,21 +247,34 @@ pub fn format_config<
         .into_iter()
         .map(|graphql_path| -> Vec<String> {
             let buffer = std::fs::read_to_string(&graphql_path).unwrap();
+            let parse_result = libgql::lexer::utils::parse_buffer(&buffer);
             let source_file = std::sync::Arc::new(
                 libgql::parsers::file::shared::ast::SourceFile {
                     filepath: graphql_path.clone(),
                     buffer: &buffer,
+                    new_line_positions: parse_result.new_line_positions,
                 },
             );
             format_action::<TASTNodeWrapper, _, _>(
                 is_check,
                 &source_file,
-                &buffer_to_ast_nodes,
+                parse_result.tokens,
+                &tokens_to_ast_nodes,
                 &ast_nodes_to_hir_nodes,
                 shared_formatting_config,
             )
             .err()
             .unwrap_or(Vec::new())
+            .into_iter()
+            .chain(parse_result.errors.into_iter().map(|error| {
+                format_error(
+                    &error.to_string(),
+                    error.get_location(),
+                    &source_file.filepath,
+                    source_file.buffer,
+                )
+            }))
+            .collect::<Vec<_>>()
         })
         .flatten()
         .collect::<Vec<_>>()
