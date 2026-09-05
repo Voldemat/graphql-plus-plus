@@ -180,7 +180,12 @@ pub fn get_workspace_diagnostics(
                 .unwrap_or_else(|| {
                     (
                         <lsp_types::Uri as std::str::FromStr>::from_str(
-                            &format!("file://{}", filepath.to_string_lossy()),
+                            &format!(
+                                "file://{}",
+                                config_directory_path
+                                    .join(filepath)
+                                    .to_string_lossy()
+                            ),
                         )
                         .unwrap(),
                         None,
