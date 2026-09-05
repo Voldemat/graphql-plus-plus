@@ -202,6 +202,7 @@ pub async fn execute<
                 std::sync::Arc::new(file::shared::ast::SourceFile {
                     filepath: "<request>".into(),
                     buffer: &query,
+                    new_line_positions: lexer_result.new_line_positions,
                 });
             let file_nodes = file::client::Parser::new(
                 file::tokens_sources::VecTokensSource::new(

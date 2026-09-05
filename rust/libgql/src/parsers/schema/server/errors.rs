@@ -28,10 +28,8 @@ impl<'buffer> From<super::type_registry::Error<'buffer>> for Error<'buffer> {
     }
 }
 
-impl<'buffer> Error<'buffer> {
-    pub fn get_location(
-        self: &Self,
-    ) -> &file::shared::ast::NodeLocation<'buffer> {
+impl<'buffer> shared::error::Error<'buffer> for Error<'buffer> {
+    fn get_location(self: &Self) -> &file::shared::ast::NodeLocation<'buffer> {
         match self {
             Self::TypeRegistryError(e) => e.get_location(),
             Self::UnexpectedArgumentValue { value, arg_type: _ } => {

@@ -5,6 +5,7 @@ use crate::lexer::tokens::TokenLocation;
 pub struct SourceFile<'buffer> {
     pub filepath: PathBuf,
     pub buffer: &'buffer str,
+    pub new_line_positions: Vec<usize>,
 }
 
 impl<'buffer> std::fmt::Debug for SourceFile<'buffer> {

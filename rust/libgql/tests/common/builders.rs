@@ -6,6 +6,7 @@ pub fn build_location<'s>() -> shared::ast::NodeLocation<'s> {
         source: std::sync::Arc::new(shared::ast::SourceFile {
             buffer: "",
             filepath: std::path::PathBuf::new(),
+            new_line_positions: Vec::new(),
         }),
     }
 }

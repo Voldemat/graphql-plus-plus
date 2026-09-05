@@ -156,10 +156,10 @@ impl<'buffer, S: shared::ast::AsStr<'buffer>> std::fmt::Display
     }
 }
 
-impl<'buffer, S: shared::ast::AsStr<'buffer>> Error<'buffer, S> {
-    pub fn get_location(
-        self: &Self,
-    ) -> &file::shared::ast::NodeLocation<'buffer> {
+impl<'buffer, S: shared::ast::AsStr<'buffer>> shared::error::Error<'buffer>
+    for Error<'buffer, S>
+{
+    fn get_location(self: &Self) -> &file::shared::ast::NodeLocation<'buffer> {
         match self {
             Self::TypeRegistryError(error) => error.get_location(),
             Self::ServerTypeRegistryError(error) => error.get_location(),
