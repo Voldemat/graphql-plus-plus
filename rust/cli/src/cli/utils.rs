@@ -287,13 +287,15 @@ pub fn load_schema_from_graphql_inputs<
                 new_line_positions: parse_result.new_line_positions,
             },
         );
-        if !file_errors.contains_key(&graphql_path) {
-            file_errors.insert(graphql_path.clone(), Vec::new());
-        };
-        let errors = file_errors.get_mut(&graphql_path).unwrap();
-        errors.extend(parse_result.errors.into_iter().map(|lexer_error| {
-            TSchemaErrorSerializer::lexer_error(&source_file, lexer_error)
-        }));
+        if parse_result.errors.len() != 0 {
+            if !file_errors.contains_key(&graphql_path) {
+                file_errors.insert(graphql_path.clone(), Vec::new());
+            };
+            let errors = file_errors.get_mut(&graphql_path).unwrap();
+            errors.extend(parse_result.errors.into_iter().map(|lexer_error| {
+                TSchemaErrorSerializer::lexer_error(&source_file, lexer_error)
+            }));
+        }
         tokens.push(parse_result.tokens);
         source_files.push(source_file);
     }
@@ -301,13 +303,20 @@ pub fn load_schema_from_graphql_inputs<
     for (source_file, tokens) in source_files.iter().zip(tokens) {
         let result = TASTWrapper::tokens_to_ast_nodes(source_file, tokens);
         nodes.extend(result.ast_nodes);
-        if !file_errors.contains_key(&source_file.filepath) {
-            file_errors.insert(source_file.filepath.clone(), Vec::new());
-        };
-        let errors = file_errors.get_mut(&source_file.filepath).unwrap();
-        errors.extend(result.parser_errors.into_iter().map(|parser_error| {
-            TSchemaErrorSerializer::file_parser_error(source_file, parser_error)
-        }));
+        if result.parser_errors.len() != 0 {
+            if !file_errors.contains_key(&source_file.filepath) {
+                file_errors.insert(source_file.filepath.clone(), Vec::new());
+            };
+            let errors = file_errors.get_mut(&source_file.filepath).unwrap();
+            errors.extend(result.parser_errors.into_iter().map(
+                |parser_error| {
+                    TSchemaErrorSerializer::file_parser_error(
+                        source_file,
+                        parser_error,
+                    )
+                },
+            ));
+        }
     }
     for schema_parser_error in parse_schema_from_nodes
         .parse(&nodes)
@@ -318,6 +327,9 @@ pub fn load_schema_from_graphql_inputs<
             libgql::parsers::schema::shared::error::Error::get_location(
                 &schema_parser_error,
             );
+        if !file_errors.contains_key(&location.source.filepath) {
+            file_errors.insert(location.source.filepath.clone(), Vec::new());
+        };
         file_errors
             .get_mut(&location.source.filepath)
             .unwrap()
