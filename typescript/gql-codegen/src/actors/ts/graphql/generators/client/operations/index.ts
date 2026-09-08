@@ -7,6 +7,7 @@ import { ScalarsMapping } from '../../server/scalars/mapping.js';
 import {
     generateSchemaName,
     generateZodInferInterfaceType,
+    generateZodInferTypeAlias,
 } from '../../server/shared.js';
 import { generateOperationZodInputSchema } from './input-schema.js';
 import { generateOperationNode } from './node.js';
@@ -55,11 +56,17 @@ function generateOperationNodes(
             operation,
             resultName,
         ),
-        generateZodInferInterfaceType(
-            'output',
-            resultName,
-            generateSchemaName(resultName),
-        ),
+        operation.fragmentSpec._type === 'ObjectFragmentSpec'
+            ? generateZodInferInterfaceType(
+                  'output',
+                  resultName,
+                  generateSchemaName(resultName),
+              )
+            : generateZodInferTypeAlias(
+                  'output',
+                  resultName,
+                  generateSchemaName(resultName),
+              ),
         generateOperationNode(clientTypeNameBuilders, schema, operation),
         ts.factory.createIdentifier('\n'),
     ];
