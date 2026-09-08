@@ -58,7 +58,7 @@ export function generateSubscriptionHookBuilder(
     return ts.factory.createFunctionDeclaration(
         undefined,
         undefined,
-        config.sdk.syncHookBuilderName,
+        config.sdk.subscriptionHookBuilderName,
         [
             ts.factory.createTypeParameterDeclaration(
                 undefined,
