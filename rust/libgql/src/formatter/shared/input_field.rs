@@ -40,6 +40,23 @@ pub fn format_node<'s, TConfig: super::config::Config>(
                 ),
             ),
         ))
+        .extend_if(
+            ast_node.directives.len() != 0,
+            ir::hir::builders::wrap_in_group(
+                ir::hir::builders::unanonymous_default_flat_group(),
+                ir::hir::builders::wrap_in_soft_indent(
+                    ir::hir::builders::NodesVec::from_node(
+                        ir::hir::builders::soft_line_or_space(),
+                    )
+                    .extend(
+                        super::directive_invocation::format_nodes(
+                            config,
+                            &ast_node.directives,
+                        ),
+                    ),
+                ),
+            ),
+        )
         .push_if(
             !is_last_node && delimeter_mode == DelimeterMode::HardLine,
             ir::hir::builders::hard_line(),

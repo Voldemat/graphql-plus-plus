@@ -41,6 +41,18 @@ pub fn format_node<
             shared_config,
             &ast_node.r#type,
         ))
+        .extend_if(
+            ast_node.directives.len() != 0,
+            ir::hir::builders::wrap_in_group(
+                ir::hir::builders::unanonymous_default_flat_group(),
+                ir::hir::builders::wrap_in_soft_indent(
+                    ir::hir::builders::NodesVec::from_node(
+                        ir::hir::builders::soft_line_or_space(),
+                    )
+                    .extend(crate::formatter::shared::directive_invocation::format_nodes(shared_config, &ast_node.directives))
+                )
+            )
+        )
     )
     .push_if(!is_last_node, ir::hir::builders::soft_line_or_space())
 }

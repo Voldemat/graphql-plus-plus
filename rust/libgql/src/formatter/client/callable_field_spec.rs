@@ -34,9 +34,8 @@ pub fn format_node<
                     .iter()
                     .enumerate()
                     .map(|(index, argument)| {
-                        super::argument::format_node(
+                        crate::formatter::shared::argument::format_node(
                             shared_config,
-                            client_config,
                             argument,
                             index == ast_node.arguments.len() - 1,
                         )

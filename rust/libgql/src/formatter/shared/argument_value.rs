@@ -2,13 +2,8 @@ use codeform::ir;
 
 use crate::parsers::file::shared::ast;
 
-pub fn format_node<
-    's,
-    TSharedConfig: crate::formatter::shared::config::Config,
-    TClientConfig: super::config::Config,
->(
+pub fn format_node<'s, TSharedConfig: super::config::Config>(
     shared_config: &TSharedConfig,
-    client_config: &TClientConfig,
     ast_node: &ast::ArgumentValue<'s>,
 ) -> ir::hir::builders::NodesVec<'s> {
     match ast_node {
