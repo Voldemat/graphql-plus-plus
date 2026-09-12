@@ -13,7 +13,7 @@ impl Args {
     pub fn execute(self: &Self) {
         let config =
             crate::cli::config::Config::from_yaml_file_path(&self.config);
-        crate::cli::utils::run_config_action(
+        let exit_code = crate::cli::utils::run_config_action(
             &self.config,
             &config,
             Box::new(|json_string, filepath, schema_name| {
@@ -33,5 +33,6 @@ impl Args {
             }),
         )
         .unwrap();
+        std::process::exit(exit_code as i32);
     }
 }

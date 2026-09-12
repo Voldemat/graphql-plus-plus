@@ -400,7 +400,7 @@ pub fn run_config_action<'a>(
     config_path: &std::path::Path,
     config: &'a super::config::Config,
     json_callback: Box<dyn Fn(&str, &std::path::Path, &str) + 'a>,
-) -> Result<(), String> {
+) -> Result<u8, String> {
     let mut server_registry =
         libgql::parsers::schema::server::type_registry::HashMapTypeRegistry::new();
     let Some(config_server) = config.server.as_ref() else {
@@ -414,9 +414,9 @@ pub fn run_config_action<'a>(
     );
     if server_errors.len() > 0 {
         for e in server_errors.values().flatten() {
-            println!("{}", e);
+            eprintln!("{}", e);
         }
-        return Ok(());
+        return Ok(1);
     }
     let client_registry = match config.client.as_ref().map(|client_config| {
         let mut c_registry =
@@ -433,12 +433,12 @@ pub fn run_config_action<'a>(
             return Some(c_registry);
         };
         for e in client_errors.values().flatten() {
-            println!("{}", e);
+            eprintln!("{}", e);
         }
         return None;
     }) {
         None => None,
-        Some(None) => return Ok(()),
+        Some(None) => return Ok(1),
         Some(s) => s,
     };
     if let Some(outputs) = config_server.outputs.as_ref() {
@@ -466,7 +466,7 @@ pub fn run_config_action<'a>(
             )?;
         json_callback(&json_string, &outputs.filepath, "Client");
     };
-    return Ok(());
+    return Ok(0);
 }
 
 pub fn does_file_have_changes(

@@ -28,12 +28,12 @@ impl Args {
         let mut errors = Vec::<String>::new();
         let Some(formatting_config) = conf.formatting else {
             eprintln!("No formatting config is defined");
-            return;
+            std::process::exit(1);
         };
         if let Some(formatting_server_config) = formatting_config.server {
             let Some(config_server) = conf.server.as_ref() else {
                 eprintln!("config.server is not defined");
-                return;
+                std::process::exit(1);
             };
             errors.extend(server::format_config(
                 config_directory_path,
@@ -47,7 +47,7 @@ impl Args {
         if let Some(formatting_client_config) = formatting_config.client {
             let Some(config_client) = conf.client.as_ref() else {
                 eprintln!("config.client is not defined");
-                return;
+                std::process::exit(1);
             };
             errors.extend(client::format_config(
                 config_directory_path,
