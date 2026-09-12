@@ -25,7 +25,7 @@ function generateZodUnionTypeNode(
                         ),
                         undefined,
                         [
-                            ts.factory.createStringLiteral(union.name),
+                            ts.factory.createStringLiteral('__typename'),
                             ts.factory.createArrayLiteralExpression(
                                 Object.keys(union.items).map((item) =>
                                     generateZodObjectTypeExpression(
