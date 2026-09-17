@@ -169,6 +169,11 @@ pub fn get_workspace_diagnostics(
                 .extend(diagnostics);
         }
     };
+    for filepath in open_buffers.deref().keys() {
+        if !diagnostics_map.contains_key(filepath) {
+            diagnostics_map.insert(filepath.clone(), Vec::new());
+        }
+    }
     Ok(diagnostics_map
         .into_iter()
         .map(|(filepath, diagnostics)| {
