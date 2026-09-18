@@ -23,7 +23,6 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    environment: cpp-gql
     env:
       GRAPHQL_BASE_IMAGE: vladimirdev635/gql-alpine:${{ github.ref_name }}
       COMPOSE_FILE: ./e2e-tests/docker-compose.yaml

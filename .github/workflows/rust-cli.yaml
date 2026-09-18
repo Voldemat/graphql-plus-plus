@@ -12,7 +12,6 @@ on:
 jobs:
   docker:
       runs-on: ubuntu-latest
-      environment: cpp-gql
       steps:
         - name: Checkout
           uses: actions/checkout@v4
