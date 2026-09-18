@@ -1,0 +1,4 @@
+*
+!shared/treesitter/
+shared/treesitter/build
+shared/treesitter/node_modules

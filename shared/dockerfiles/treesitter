@@ -1,0 +1,63 @@
+FROM crazymax/osxcross:15.5-alpine AS osxcross
+FROM oven/bun:1.4.1-alpine AS builder
+WORKDIR /usr/local/app/shared/treesitter/
+RUN apk --no-cache add tree-sitter-cli cmake make clang lld musl-dev && \
+    arch="$(apk --print-arch)" && \
+    if [ "$arch" = "x86_64" ]; then \
+        ln -sf /usr/bin/cc /usr/local/bin/linker-x86_64 && \
+        wget https://github.com/troglobit/misc/releases/download/11-20211120/aarch64-linux-musl-cross.tgz && \
+        tar -C /usr/local -xzf aarch64-linux-musl-cross.tgz && \
+        rm aarch64-linux-musl-cross.tgz && \
+        ln -sf /usr/local/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc /usr/local/bin/linker-aarch64; \
+    elif [ "$arch" = "aarch64" ]; then \
+        wget https://github.com/troglobit/misc/releases/download/11-20211120/x86_64-linux-musl-cross.tgz && \
+        tar -C /usr/local -xzf x86_64-linux-musl-cross.tgz && \
+        rm x86_64-linux-musl-cross.tgz && \
+        ln -sf /usr/local/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc /usr/local/bin/linker-x86_64 && \
+        ln -sf /usr/bin/cc /usr/local/bin/linker-aarch64; \
+    fi
+ENV TREESITTER_CLI /usr/bin/tree-sitter
+COPY shared/treesitter/package.json shared/treesitter/bun.lock ./
+RUN bun i
+COPY shared/treesitter/ ./
+RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
+    bun run ci && \
+    CC=/osxcross/bin/x86_64-apple-darwin24.5-clang \
+    PATH="/osxcross/bin/:$PATH" \
+    LD_LIBRARY_PATH="/osxcross/lib/:$LD_LIBRARY_PATH" \
+    CFLAGS="-mmacosx-version-min=15.0 -L/osxcross/lib" \
+        cmake -DCMAKE_SYSTEM_NAME=Darwin -S . -B build-darwin-x86_64 && \
+    CC=/osxcross/bin/x86_64-apple-darwin24.5-clang \
+    PATH="/osxcross/bin/:$PATH" \
+    LD_LIBRARY_PATH="/osxcross/lib/:$LD_LIBRARY_PATH" \
+    CFLAGS="-mmacosx-version-min=15.0 -L/osxcross/lib" \
+        cmake --build build-darwin-x86_64 --verbose && \
+    CC=/osxcross/bin/aarch64-apple-darwin24.5-clang \
+    LD_LIBRARY_PATH="/osxcross/lib/:$LD_LIBRARY_PATH" \
+    PATH="/osxcross/bin/:$PATH" \
+    CFLAGS="-mmacosx-version-min=15.0 -L/osxcross/lib" \
+        cmake -DCMAKE_SYSTEM_NAME=Darwin -S . -B build-darwin-aarch64 && \
+    CC=/osxcross/bin/aarch64-apple-darwin24.5-clang \
+    LD_LIBRARY_PATH="/osxcross/lib/:$LD_LIBRARY_PATH" \
+    PATH="/osxcross/bin/:$PATH" \
+    CFLAGS="-mmacosx-version-min=15.0 -L/osxcross/lib" \
+        cmake --build build-darwin-aarch64 && \
+    CC=/usr/local/bin/linker-x86_64 \
+        cmake -S . -B build-linux-x86_64 && \
+        cmake --build build-linux-x86_64 && \
+    CC=/usr/local/bin/linker-aarch64 \
+        cmake -S . -B build-linux-aarch64 && \
+        cmake --build build-linux-aarch64 && \
+    mkdir targets && \
+    ls build-darwin-x86_64 && \
+    mv build-darwin-x86_64/libgql_server.dylib ./targets/x86_64-darwin-server && \
+    mv build-darwin-x86_64/libgql_client.dylib ./targets/x86_64-darwin-client && \
+    mv build-darwin-aarch64/libgql_server.dylib ./targets/aarch64-darwin-server && \
+    mv build-darwin-aarch64/libgql_client.dylib ./targets/aarch64-darwin-client && \
+    mv build-linux-x86_64/libgql_server.so ./targets/x86_64-linux-server && \
+    mv build-linux-x86_64/libgql_client.so ./targets/x86_64-linux-client && \
+    mv build-linux-aarch64/libgql_server.so ./targets/aarch64-linux-server && \
+    mv build-linux-aarch64/libgql_client.so ./targets/aarch64-linux-client
+
+FROM scratch AS targets
+COPY --from=builder /usr/local/app/shared/treesitter/targets /targets
