@@ -1,0 +1,17 @@
+{
+  "name": "treesitter",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "oxfmt": "^0.68.0",
+    "tree-sitter-cli": "^0.27.0",
+    "typescript": "^7"
+  },
+  "scripts": {
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt --check .",
+    "tsc": "tsc --noEmit",
+    "ci": "bun run fmt:check && bun run tsc"
+  }
+}
