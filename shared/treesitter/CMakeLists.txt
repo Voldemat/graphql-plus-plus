@@ -1,13 +1,21 @@
-cmake_minimum_required(VERSION 4.1.0)
+cmake_minimum_required(VERSION 3.31.7)
 project(treesitter-plugin VERSION 0.0.1 LANGUAGES C)
 
+if(NOT "$ENV{TREESITTER_CLI}" STREQUAL "")
+    set(TREESITTER_CLI "$ENV{TREESITTER_CLI}")
+else()
+    set(
+        TREESITTER_CLI
+        "${CMAKE_CURRENT_SOURCE_DIR}/node_modules/.bin/tree-sitter"
+    )
+endif()
 set(PARSERS_DIR "${CMAKE_CURRENT_BINARY_DIR}/parsers")
 function(add_treesitter_parser GRAMMAR_NAME)
     set(PARSER_DIR "${PARSERS_DIR}/${GRAMMAR_NAME}")
     file(MAKE_DIRECTORY ${PARSER_DIR})
     message(STATUS "Generating parser for ${GRAMMAR_NAME}...")
     execute_process(
-        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/node_modules/.bin/tree-sitter"
+        COMMAND "${TREESITTER_CLI}"
             generate grammar.${GRAMMAR_NAME}.js
             --output "${PARSER_DIR}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
