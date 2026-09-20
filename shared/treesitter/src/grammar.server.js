@@ -17,6 +17,7 @@ export function helper(rules) {
 
 export default grammar({
     name: 'gql_server',
+    extras: ($) => [/[\s\uFEFF\u0009\u0020\u000A\u000D]/, $.comment],
     rules: {
         ...helper({
             source_file: ($) => repeat($.node),
@@ -52,21 +53,27 @@ export default grammar({
                     '}',
                 ),
             enum_type_definition: ($) =>
-                seq('enum', $.identifier, '{', repeat($.identifier), '}'),
+                seq(
+                    'enum',
+                    $.identifier,
+                    optional($.directive_invocations),
+                    '{',
+                    repeat($.enum_value_definition),
+                    '}',
+                ),
+            enum_value_definition: ($) => $.identifier,
             object_type_definition: ($) =>
                 seq(
                     'type',
                     $.identifier,
                     optional($.implements_interfaces),
                     optional($.directive_invocations),
-                    '{',
-                    repeat($.object_field_definition),
-                    '}',
+                    optional(seq('{', repeat($.object_field_definition), '}')),
                 ),
             implements_interfaces: ($) =>
                 seq(
                     'implements',
-                    seq($.identifier, repeat1(seq('&', $.identifier))),
+                    seq($.identifier, repeat(seq('&', $.identifier))),
                 ),
             object_field_definition: ($) =>
                 seq(
@@ -102,7 +109,7 @@ export default grammar({
                     'directive',
                     '@',
                     $.identifier,
-                    optional($.arguments),
+                    optional($.argument_definitions),
                     optional('repeatable'),
                     'on',
                     seq(

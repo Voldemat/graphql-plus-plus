@@ -9,6 +9,5 @@ export default defineConfig({
         'tsconfig.json',
         'package.json',
         'tree-sitter.json',
-        'src/**/*',
     ],
 })

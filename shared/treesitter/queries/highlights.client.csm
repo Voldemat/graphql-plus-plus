@@ -1,0 +1,18 @@
+(fragment_definition
+    (fragment_name (identifier) @type.definition)
+    (fragment_type (identifier) @type))
+
+(field_selection (identifier) @property)
+(spread_selection (identifier) @type)
+(conditional_spread_selection (identifier) @type)
+
+(operation_definition (operation_name (identifier) @function))
+
+"fragment" @keyword.type
+[
+    "query"
+    "mutation"
+    "subscription"
+] @keyword.function
+
+"..." @punctuation.special

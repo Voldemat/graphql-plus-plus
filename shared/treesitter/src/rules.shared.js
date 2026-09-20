@@ -11,7 +11,8 @@ export function helper(rules) {
 }
 
 export default helper({
-    identifier: () => /[_A-Za-z][_0-9A-Za-z]*/,
+    identifier: () => /[$]?[_A-Za-z][_0-9A-Za-z]*/,
+    comment: (_) => token(seq("#", /.*/)),
     argument_definitions: ($) =>
         seq(
             '(',
@@ -33,11 +34,12 @@ export default helper({
             optional($.default_value),
             optional($.directive_invocations),
         ),
-    documentation: ($) => $.identifier,
+    documentation: ($) => $.string_literal,
     directive_invocations: ($) => repeat1($.directive_invocation),
     directive_invocation: ($) => seq('@', $.identifier, optional($.arguments)),
-    arguments: ($) => seq('(', repeat($.argument), ')'),
-    argument: ($) => seq($.identifier, ':', $.argument_value),
+    arguments: ($) => seq('(', repeat(seq($.argument, optional(','))), ')'),
+    argument: ($) => seq($.argument_name, ':', $.argument_value),
+    argument_name: ($) => $.identifier,
     argument_value: ($) => choice($.argument_ref_value, $.literal_value),
     argument_ref_value: ($) => seq('$', $.identifier),
     field_type: ($) => choice($.named_type, $.list_type),
@@ -53,7 +55,7 @@ export default helper({
             $.null_literal,
             $.enum_literal,
         ),
-    enum_literal: ($) => $.identifier,
+    enum_literal: () => /[_A-Za-z][_0-9A-Za-z]*/,
     string_literal: () =>
         choice(
             seq('"""', /([^"]|\n|""?[^"])*/, '"""'),

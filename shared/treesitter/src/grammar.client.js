@@ -1,6 +1,6 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
-import shared from './rules.shared.js'
+import shared from './rules.shared.js';
 
 /**
  * @template {string} TLocalRuleName
@@ -17,6 +17,7 @@ export function helper(rules) {
 
 export default grammar({
     name: 'gql_client',
+    extras: ($) => [/[\s\uFEFF\u0009\u0020\u000A\u000D]/, $.comment],
     rules: {
         ...helper({
             source_file: ($) => repeat($.node),
@@ -29,26 +30,32 @@ export default grammar({
             operation_definition: ($) =>
                 seq(
                     optional($.documentation),
-                    'operation',
-                    $.identifier,
+                    $.operation_type,
+                    $.operation_name,
                     optional($.argument_definitions),
                     optional($.directive_invocations),
                     $.fragment_spec,
                 ),
+            operation_name: ($) => $.identifier,
+            operation_type: () => choice('query', 'mutation', 'subscription'),
             fragment_definition: ($) =>
                 seq(
                     optional($.documentation),
                     'fragment',
-                    $.identifier,
+                    $.fragment_name,
                     optional($.directive_invocations),
+                    'on',
+                    $.fragment_type,
                     $.fragment_spec,
                 ),
+            fragment_name: ($) => $.identifier,
+            fragment_type: ($) => $.identifier,
             fragment_spec: ($) => seq('{', repeat($.fragment_selection), '}'),
             fragment_selection: ($) =>
                 choice(
                     $.field_selection,
                     $.spread_selection,
-                    $.union_spread_selection,
+                    $.conditional_spread_selection,
                 ),
             field_selection: ($) =>
                 seq(
@@ -58,7 +65,7 @@ export default grammar({
                     optional($.fragment_spec),
                 ),
             spread_selection: ($) => seq('...', $.identifier),
-            union_spread_selection: ($) =>
+            conditional_spread_selection: ($) =>
                 seq('...', 'on', $.identifier, $.fragment_spec),
             directive_definition: ($) =>
                 seq(

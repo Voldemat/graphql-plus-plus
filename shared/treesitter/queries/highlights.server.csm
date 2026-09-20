@@ -1,0 +1,36 @@
+(scalar_definition (identifier) @type.definition)
+
+(enum_type_definition (identifier) @type.definition)
+(enum_value_definition (identifier) @property)
+
+(input_type_definition (identifier) @type.definition)
+
+(object_type_definition (identifier) @type.definition)
+(object_field_definition (identifier) @property)
+
+(interface_type_definition (identifier) @type.definition)
+(implements_interfaces (identifier) @type)
+
+(union_type_definition (identifier) @type.definition)
+
+(directive_definition (identifier) @function)
+(directive_location) @type.builtin
+
+"extend" @keyword.modifier
+
+[
+    "type"
+    "interface"
+    "enum"
+    "input"
+    "union"
+] @keyword.type
+
+[
+  "scalar"
+  "directive"
+  "implements"
+] @keyword
+
+"|" @punctuation.delimiter
+"&" @punctuation.delimiter

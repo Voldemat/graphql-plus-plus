@@ -1,0 +1,44 @@
+(input_field_definition (identifier) @property)
+(argument_definitions (input_field_definition (identifier) @variable.parameter))
+
+(directive_invocation) @function.call
+(argument_name (identifier) @variable.parameter)
+(argument_ref_value) @variable
+
+(documentation) @string.documentation
+(comment) @comment
+
+(named_type
+  (identifier) @type.builtin
+  (#match? @type.builtin "^(Int|Float|String|Boolean|ID)$")
+)
+
+(named_type
+  (identifier) @type
+  (#not-match? @type "^(Int|Float|String|Boolean|ID)$")
+)
+
+(boolean_literal) @boolean
+(string_literal) @string
+(int_literal) @number
+(float_literal) @number.float
+(enum_literal) @constant
+(null_literal) @constant
+
+"on" @keyword
+
+[
+ "("
+ ")"
+ "["
+ "]"
+ "{"
+ "}"
+] @punctuation.bracket
+
+"=" @operator
+
+"," @punctuation.delimiter
+":" @punctuation.delimiter
+"!" @punctuation.special
+"@" @punctuation.special

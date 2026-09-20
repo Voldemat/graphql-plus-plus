@@ -10,13 +10,16 @@ else()
     )
 endif()
 set(PARSERS_DIR "${CMAKE_CURRENT_BINARY_DIR}/parsers")
+set_property(DIRECTORY APPEND PROPERTY 
+    CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/"
+)
 function(add_treesitter_parser GRAMMAR_NAME)
     set(PARSER_DIR "${PARSERS_DIR}/${GRAMMAR_NAME}")
     file(MAKE_DIRECTORY ${PARSER_DIR})
     message(STATUS "Generating parser for ${GRAMMAR_NAME}...")
     execute_process(
         COMMAND "${TREESITTER_CLI}"
-            generate grammar.${GRAMMAR_NAME}.js
+            generate src/grammar.${GRAMMAR_NAME}.js
             --output "${PARSER_DIR}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         RESULT_VARIABLE CLI_RESULT
