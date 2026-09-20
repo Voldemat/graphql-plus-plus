@@ -1,3 +1,5 @@
+use crate::cli::config::CLI_VERSION;
+
 use super::context::ServerContext;
 
 pub type BoxFuture<'a, T> = std::pin::Pin<Box<dyn Future<Output = T> + 'a>>;
@@ -309,7 +311,10 @@ pub fn build_jsonrpc_server<'c>(
                     ),
                     ..Default::default()
                 },
-                server_info: None,
+                server_info: Some(lsp_types::ServerInfo {
+                    name: "gql".to_string(),
+                    version: Some(CLI_VERSION.to_string()),
+                }),
             })
         },
     );
@@ -331,6 +336,10 @@ pub fn build_jsonrpc_server<'c>(
     server.add_handler(
         "textDocument/formatting",
         super::handlers::text_document::formatting::handler,
+    );
+    server.add_handler(
+        "workspace/executeCommand",
+        super::handlers::workspace::execute_command::handler,
     );
     server
 }
