@@ -49,15 +49,27 @@ RUN --mount=type=bind,from=osxcross,source=/osxcross,target=/osxcross \
         cmake -S . -B build-linux-aarch64 && \
         cmake --build build-linux-aarch64 && \
     mkdir targets && \
-    ls build-darwin-x86_64 && \
-    mv build-darwin-x86_64/libgql_server.dylib ./targets/x86_64-darwin-server && \
-    mv build-darwin-x86_64/libgql_client.dylib ./targets/x86_64-darwin-client && \
-    mv build-darwin-aarch64/libgql_server.dylib ./targets/aarch64-darwin-server && \
-    mv build-darwin-aarch64/libgql_client.dylib ./targets/aarch64-darwin-client && \
-    mv build-linux-x86_64/libgql_server.so ./targets/x86_64-linux-server && \
-    mv build-linux-x86_64/libgql_client.so ./targets/x86_64-linux-client && \
-    mv build-linux-aarch64/libgql_server.so ./targets/aarch64-linux-server && \
-    mv build-linux-aarch64/libgql_client.so ./targets/aarch64-linux-client
+    mkdir targets/x86_64-darwin/ && \
+    mkdir targets/arm64-darwin/ && \
+    mkdir targets/x86_64-linux/ && \
+    mkdir targets/arm64-linux/ && \
+    mv build-darwin-x86_64/libgql_server.dylib \
+        ./targets/x86_64-darwin/parser.server.dylib && \
+    mv build-darwin-x86_64/libgql_client.dylib \
+        ./targets/x86_64-darwin/parser.client.dylib && \
+    mv build-darwin-aarch64/libgql_server.dylib \
+        ./targets/arm64-darwin/parser.server.dylib && \
+    mv build-darwin-aarch64/libgql_client.dylib \
+        ./targets/arm64-darwin/parser.client.dylib && \
+    mv build-linux-x86_64/libgql_server.so \
+        ./targets/x86_64-linux/parser.server.so && \
+    mv build-linux-x86_64/libgql_client.so \
+        ./targets/x86_64-linux/parser.client.so && \
+    mv build-linux-aarch64/libgql_server.so \
+        ./targets/arm64-linux/parser.server.so && \
+    mv build-linux-aarch64/libgql_client.so \
+        ./targets/arm64-linux/parser.client.so
 
-FROM scratch AS targets
+FROM scratch
 COPY --from=builder /usr/local/app/shared/treesitter/targets /targets
+COPY --from=builder /usr/local/app/shared/treesitter/queries /queries
