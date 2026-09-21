@@ -1,6 +1,6 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
-import shared from './rules.shared.js';
+import shared from './rules.shared.js'
 
 /**
  * @template {string} TLocalRuleName

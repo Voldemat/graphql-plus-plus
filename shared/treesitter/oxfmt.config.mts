@@ -5,9 +5,5 @@ export default defineConfig({
     tabWidth: 4,
     singleQuote: true,
     semi: false,
-    ignorePatterns: [
-        'tsconfig.json',
-        'package.json',
-        'tree-sitter.json',
-    ],
+    ignorePatterns: ['tsconfig.json', 'package.json', 'tree-sitter.json'],
 })

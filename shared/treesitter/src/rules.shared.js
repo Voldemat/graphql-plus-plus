@@ -12,7 +12,7 @@ export function helper(rules) {
 
 export default helper({
     identifier: () => /[$]?[_A-Za-z][_0-9A-Za-z]*/,
-    comment: (_) => token(seq("#", /.*/)),
+    comment: (_) => token(seq('#', /.*/)),
     argument_definitions: ($) =>
         seq(
             '(',
