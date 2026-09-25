@@ -1,0 +1,14 @@
+name: "rust-gqlcodegen"
+description: ""
+
+runs:
+  using: composite
+  steps:
+  - name: Build
+    working-directory: rust/gqlcodegen
+    shell: sh
+    run: cargo build --profile release
+  - name: Test
+    working-directory: rust/gqlcodegen
+    shell: sh
+    run: cargo test --profile release

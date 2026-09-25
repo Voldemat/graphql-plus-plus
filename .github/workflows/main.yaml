@@ -9,6 +9,7 @@ jobs:
     outputs:
       rust_cli: ${{ steps.filter.outputs.rust_cli }}
       rust_libgql: ${{ steps.filter.outputs.rust_libgql }}
+      rust_gqlcodegen: ${{ steps.filter.outputs.rust_gqlcodegen }}
       shared_treesitter: ${{ steps.filter.outputs.shared_treesitter }}
     steps:
     - name: Checkout code
@@ -19,19 +20,22 @@ jobs:
       with:
         filters: |
           rust_libgql:
-            - 'rust/libgql/**'
-            - '.github/actions/rust/libgql/action.yaml'
+          - 'rust/libgql/**'
+          - '.github/actions/rust/libgql/action.yaml'
+          rust_gqlcodegen:
+          - 'rust/gqlcodegen/**'
+          - '.github/actions/rust/gqlcodegen/action.yaml'
           rust_cli:
-            - 'rust/libgql/**'
-            - 'rust/cli/**'
-            - 'shared/dockerfiles/cli'
-            - 'shared/dockerfiles/cli.dockerignore'
-            - '.github/actions/rust/cli/action.yaml'
+          - 'rust/libgql/**'
+          - 'rust/cli/**'
+          - 'shared/dockerfiles/cli'
+          - 'shared/dockerfiles/cli.dockerignore'
+          - '.github/actions/rust/cli/action.yaml'
           shared_treesitter:
-            - 'shared/treesitter/**'
-            - 'shared/dockerfiles/treesitter'
-            - 'shared/dockerfiles/treesitter.dockerignore'
-            - '.github/actions/shared/treesitter/action.yaml'
+          - 'shared/treesitter/**'
+          - 'shared/dockerfiles/treesitter'
+          - 'shared/dockerfiles/treesitter.dockerignore'
+          - '.github/actions/shared/treesitter/action.yaml'
   rust-cli:
     needs: check-changes
     runs-on: ubuntu-latest
@@ -76,12 +80,27 @@ jobs:
         ref_name: ${{ github.ref_name }}
         ref_type: ${{ github.ref_type }}
         cargo_registry_token: ${{ steps.auth.outputs.token }}
+  rust-gqlcodegen:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.rust_gqlcodegen == 'true' }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Call action
+      uses: ./.github/actions/rust/gqlcodegen
+
   publish-release:
     runs-on: ubuntu-latest
     if: inputs.ref_type == 'tag'
     needs:
     - rust-cli
     - shared-treesitter
+    - rust-gqlcodegen
+    - rust-libgql
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
