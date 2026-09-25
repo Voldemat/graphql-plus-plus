@@ -11,3 +11,26 @@ jobs:
       uses: actions/checkout@v4
     - name: Call action
       uses: ./.github/actions/rust/cli
+      with:
+        dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
+        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+        ref_name: ${{ github.ref_name }}
+        ref_type: ${{ github.ref_type }}
+        commit_sha: ${{ github.sha }}
+  publish-release:
+    runs-on: ubuntu-latest
+    if: inputs.ref_type == 'tag'
+    needs:
+    - rust-cli
+    steps:
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      if: inputs.ref_type == 'tag'
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        title: "Release ${{ github.ref_name }}"
+        prerelease: false
+        files: |
+          gql-linux-x86_64.tar.gz
+          gql-linux-arm64.tar.gz
+          gql-darwin-x86_64.tar.gz
+          gql-darwin-arm64.tar.gz
