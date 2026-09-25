@@ -1,0 +1,43 @@
+name: "typescript gql-client-react"
+description: ""
+inputs:
+  ref_name:
+    description: ''
+    required: true
+  ref_type:
+    description: ''
+    required: true
+
+runs:
+  using: composite
+  steps:
+  - name: node
+    uses: actions/setup-node@v6
+    with:
+      node-version: 25
+      registry-url: https://registry.npmjs.org
+  - name: install
+    working-directory: typescript/gql-client-react
+    shell: sh
+    run: npm i
+  - name: lint
+    shell: sh
+    working-directory: typescript/gql-client-react
+    run: npm run lint:ci
+  - name: test
+    shell: sh
+    working-directory: typescript/gql-client-react
+    env:
+      FORCE_COLOR: 1
+    run: npm run test
+  - name: build
+    shell: sh
+    working-directory: typescript/gql-client-react
+    run: npm run build
+  - name: publish
+    shell: sh
+    if: ${{ inputs.ref_type == 'tag' }}
+    working-directory: typescript/gql-client-react/dist
+    run: |
+      npm version ${{ inputs.ref_name }} --no-git-tag-version --no-commit-hooks
+      npm publish --access public

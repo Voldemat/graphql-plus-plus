@@ -7,18 +7,39 @@ jobs:
   check-changes:
     runs-on: ubuntu-latest
     outputs:
+      golang_gql_codegen: ${{ steps.filter.outputs.golang_gql_codegen }}
+      e2e_tests: ${{ steps.filter.outputs.e2e_tests }}
       rust_cli: ${{ steps.filter.outputs.rust_cli }}
       rust_libgql: ${{ steps.filter.outputs.rust_libgql }}
       rust_gqlcodegen: ${{ steps.filter.outputs.rust_gqlcodegen }}
       shared_treesitter: ${{ steps.filter.outputs.shared_treesitter }}
+      typescript_gql_client: ${{ steps.filter.outputs.typescript_gql_client }}
+      typescript_gql_codegen: ${{ steps.filter.outputs.typescript_gql_codegen }}
+      typescript_gql_client_react: ${{ steps.filter.outputs.typescript_gql_client_react }}
+      typescript_gql_client_vue: ${{ steps.filter.outputs.typescript_gql_client_vue }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Check for file changes
       id: filter
-      uses: dorny/paths-filter@v4
+      uses: dorny/paths-filter@v5
       with:
         filters: |
+          e2e_tests:
+          - 'e2e-tests/**'
+          - '.github/actions/e2e-tests/action.yaml'
+          - 'shared/dockerfiles/e2e-tests/**'
+          - 'rust/libgql/**'
+          - 'rust/cli/**'
+          - 'shared/dockerfiles/cli'
+          - 'shared/dockerfiles/cli.dockerignore'
+          - '.github/actions/rust/cli/action.yaml'
+          - 'rust/gqlcodegen/**'
+          - 'typescript/gql-client/**'
+          - 'typescript/gql-codegen/**'
+          golang_gql_codegen:
+          - 'golang/gql-codegen/**'
+          - '.github/actions/golang/gql-codegen/action.yaml'
           rust_libgql:
           - 'rust/libgql/**'
           - '.github/actions/rust/libgql/action.yaml'
@@ -36,13 +57,26 @@ jobs:
           - 'shared/dockerfiles/treesitter'
           - 'shared/dockerfiles/treesitter.dockerignore'
           - '.github/actions/shared/treesitter/action.yaml'
+          typescript_gql_client:
+          - 'typescript/gql-client/**'
+          - '.github/actions/typescript/gql-client/action.yaml'
+          typescript_gql_codegen:
+          - 'typescript/gql-codegen/**'
+          - '.github/actions/typescript/gql-codegen/action.yaml'
+          typescript_gql_client_react:
+          - 'typescript/gql-client-react/**'
+          - '.github/actions/typescript/gql-client-react/action.yaml'
+          typescript_gql_client_vue:
+          - 'typescript/gql-client-vue/**'
+          - '.github/actions/typescript/gql-client-vue/action.yaml'
+
   rust-cli:
     needs: check-changes
     runs-on: ubuntu-latest
     if: ${{ needs.check-changes.outputs.rust_cli == 'true' }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Call action
       uses: ./.github/actions/rust/cli
       with:
@@ -51,19 +85,21 @@ jobs:
         ref_name: ${{ github.ref_name }}
         ref_type: ${{ github.ref_type }}
         commit_sha: ${{ github.sha }}
+
   shared-treesitter:
     needs: check-changes
     runs-on: ubuntu-latest
     if: ${{ needs.check-changes.outputs.shared_treesitter == 'true' }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Call action
       uses: ./.github/actions/shared/treesitter
       with:
         dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
         dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
         ref_name: ${{ github.ref_name }}
+
   rust-libgql:
     needs: check-changes
     runs-on: ubuntu-latest
@@ -73,13 +109,14 @@ jobs:
       contents: read
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Call action
       uses: ./.github/actions/rust/libgql
       with:
         ref_name: ${{ github.ref_name }}
         ref_type: ${{ github.ref_type }}
         cargo_registry_token: ${{ steps.auth.outputs.token }}
+
   rust-gqlcodegen:
     needs: check-changes
     runs-on: ubuntu-latest
@@ -89,21 +126,99 @@ jobs:
       contents: read
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Call action
       uses: ./.github/actions/rust/gqlcodegen
+
+  typescript-gql-codegen:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.typescript_gql_codegen == 'true' }}
+    permissions:
+      id-token: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+    - name: Call action
+      uses: ./.github/actions/typescript/gql-codegen
+
+  typescript-gql-client:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.typescript_gql_client == 'true' }}
+    permissions:
+      id-token: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+    - name: Call action
+      uses: ./.github/actions/typescript/gql-client
+
+  typescript-gql-client-react:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.typescript_gql_client_react == 'true' }}
+    permissions:
+      id-token: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+    - name: Call action
+      uses: ./.github/actions/typescript/gql-client-react
+
+  typescript-gql-client-vue:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.typescript_gql_client_vue == 'true' }}
+    permissions:
+      id-token: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+    - name: Call action
+      uses: ./.github/actions/typescript/gql-client-vue
+
+  e2e-tests:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.e2e_tests == 'true' }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+    - name: Call action
+      uses: ./.github/actions/e2e-tests
+      with:
+        dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
+        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+        ref_name: ${{ github.ref_name }}
+
+  golang-gql-codegen:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.golang_gql_codegen == 'true' }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+    - name: Call action
+      uses: ./.github/actions/golang/gql-codegen
 
   publish-release:
     runs-on: ubuntu-latest
     if: inputs.ref_type == 'tag'
     needs:
+    - e2e-tests
     - rust-cli
     - shared-treesitter
     - rust-gqlcodegen
     - rust-libgql
+    - typescript-gql-client
+    - typescript-gql-client-react
+    - typescript-gql-client-vue
+    - typescript-gql-codegen
+    - golang-gql-codegen
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Call action
       uses: ./.github/actions/release
       with:

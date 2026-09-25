@@ -1,0 +1,36 @@
+name: "golang gql-codegen"
+description: ""
+
+runs:
+  using: composite
+  steps:
+  - name: Setup Go
+    uses: actions/setup-go@v5
+    with:
+      go-version: 1.23.11
+  - name: install
+    working-directory: golang/gql-codegen
+    shell: sh
+    run: go mod download
+  - name: lint
+    working-directory: golang/gql-codegen
+    shell: sh
+    run: |
+      output=$(gofmt -l .)
+      if [ "$output" != "" ]; then
+        echo "Some files are not formatted"
+        echo "$output"
+        exit 1
+      else
+        exit 0
+      fi
+  - name: build
+    working-directory: golang/gql-codegen
+    shell: sh
+    run: go build ./...
+  - name: test
+    working-directory: golang/gql-codegen
+    env:
+      FORCE_COLOR: 1
+    shell: sh
+    run: go test ./...
