@@ -4,19 +4,19 @@ on:
   push:
 
 jobs:
-  rust-cli:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Call action
-      uses: ./.github/actions/rust/cli
-      with:
-        dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
-        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
-        ref_name: ${{ github.ref_name }}
-        ref_type: ${{ github.ref_type }}
-        commit_sha: ${{ github.sha }}
+  #rust-cli:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #  - name: Checkout code
+  #    uses: actions/checkout@v4
+  #  - name: Call action
+  #    uses: ./.github/actions/rust/cli
+  #    with:
+  #      dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
+  #      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+  #      ref_name: ${{ github.ref_name }}
+  #      ref_type: ${{ github.ref_type }}
+  #      commit_sha: ${{ github.sha }}
   shared-treesitter:
     runs-on: ubuntu-latest
     steps:
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     #if: inputs.ref_type == 'tag'
     needs:
-    - rust-cli
+    #- rust-cli
     - shared-treesitter
     steps:
     - name: Checkout code
