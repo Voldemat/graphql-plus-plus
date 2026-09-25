@@ -59,9 +59,9 @@ jobs:
   publish-release:
     runs-on: ubuntu-latest
     #if: inputs.ref_type == 'tag'
-    needs:
-    - rust-cli
-    - shared-treesitter
+    #needs:
+    #- rust-cli
+    #- shared-treesitter
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
