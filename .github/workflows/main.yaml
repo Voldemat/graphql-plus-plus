@@ -4,21 +4,47 @@ on:
   push:
 
 jobs:
-  #rust-cli:
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #  - name: Checkout code
-  #    uses: actions/checkout@v4
-  #  - name: Call action
-  #    uses: ./.github/actions/rust/cli
-  #    with:
-  #      dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
-  #      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
-  #      ref_name: ${{ github.ref_name }}
-  #      ref_type: ${{ github.ref_type }}
-  #      commit_sha: ${{ github.sha }}
-  shared-treesitter:
+  check-changes:
     runs-on: ubuntu-latest
+    outputs:
+      rust_cli: ${{ steps.filter.outputs.rust_cli_any_changed }}
+      shared_treesitter: ${{ steps.filter.outputs.shared_treesitter_any_changed }}
+    steps:
+    - name: Check for file changes
+      id: filter
+      uses: dorny/paths-filter@v3
+      with:
+        filters: |
+          rust_cli:
+          - 'rust/libgql/**'
+          - 'rust/cli/**'
+          - 'shared/dockerfiles/cli'
+          - 'shared/dockerfiles/cli.dockerignore'
+          - '.github/actions/rust/cli/action.yaml'
+          shared_treesitter:
+          - 'shared/treesitter/**'
+          - 'shared/dockerfiles/treesitter'
+          - 'shared/dockerfiles/treesitter.dockerignore'
+          - '.github/actions/shared/treesitter/action.yaml'
+  rust-cli:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.rust_cli == 'true' }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Call action
+      uses: ./.github/actions/rust/cli
+      with:
+        dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
+        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+        ref_name: ${{ github.ref_name }}
+        ref_type: ${{ github.ref_type }}
+        commit_sha: ${{ github.sha }}
+  shared-treesitter:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.shared_treesitter == 'true' }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -32,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     #if: inputs.ref_type == 'tag'
     needs:
-    #- rust-cli
+    - rust-cli
     - shared-treesitter
     steps:
     - name: Checkout code
