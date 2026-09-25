@@ -28,7 +28,6 @@ runs:
     with:
       file: shared/dockerfiles/treesitter
       push: true
-      target: targets
       tags: vladimirdev635/gql-treesitter-targets:${{ inputs.ref_name }}
       cache-from: type=registry,ref=vladimirdev635/gql-treesitter-targets:buildcache
       cache-to: type=registry,ref=vladimirdev635/gql-treesitter-targets:buildcache,mode=max
