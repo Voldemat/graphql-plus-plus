@@ -142,23 +142,3 @@ runs:
           vladimirdev635/gql-alpine-linux-x86_64:${{ inputs.ref_name }} --os linux --arch=amd64
       docker manifest annotate vladimirdev635/gql-alpine:${{ inputs.ref_name }} vladimirdev635/gql-alpine-linux-arm64:${{ inputs.ref_name }} --os linux --arch=arm64
       docker manifest push vladimirdev635/gql-alpine:${{ inputs.ref_name }}
-  - name: 'Copy all binaries'
-    shell: sh
-    #if: inputs.ref_type == 'tag'
-    run: |
-      container_id=$(docker create --pull always vladimirdev635/gql-targets:${{ inputs.ref_name }} sh)
-      docker cp $container_id:/targets ./cli-targets
-      docker rm $container_id
-
-      container_id=$(docker create --pull always vladimirdev635/gql-treesitter-targets:${{ inputs.ref_name }} sh)
-      docker cp $container_id:/ ./treesitter
-      docker rm $container_id
-
-      mkdir linux-x86_64
-      mkdir linux-arm64
-      mkdir darwin-x86_64
-      mkdir darwin-arm64
-
-      mv ./cli-targets/x86_64-darwin ./darwin-x86_64/cli
-      mv ./treesitter/x86_64-darwin ./darwin-x86_64/cli
-

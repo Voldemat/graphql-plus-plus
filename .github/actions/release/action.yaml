@@ -1,0 +1,48 @@
+name: release
+description: ''
+
+inputs:
+  github_token:
+    description: ''
+    required: true
+  dockerhub_username:
+    description: ''
+    required: true
+  dockerhub_token:
+    description: ''
+    required: true
+  ref_name:
+    description: ''
+    required: true
+runs:
+  using: 'composite'
+  steps:
+  - name: 'Copy all binaries'
+    shell: sh
+    run: |
+      container_id=$(docker create --pull always vladimirdev635/gql-targets:${{ inputs.ref_name }} sh)
+      docker cp $container_id:/targets ./cli-targets
+      docker rm $container_id
+
+      container_id=$(docker create --pull always vladimirdev635/gql-treesitter-targets:${{ inputs.ref_name }} sh)
+      docker cp $container_id:/ ./treesitter
+      docker rm $container_id
+
+      mkdir linux-x86_64
+      mkdir linux-arm64
+      mkdir darwin-x86_64
+      mkdir darwin-arm64
+
+      mv ./cli-targets/x86_64-darwin ./darwin-x86_64/cli
+      mv ./treesitter/x86_64-darwin ./darwin-x86_64/cli
+  - uses: "marvinpinto/action-automatic-releases@latest"
+    if: '${{ "a" == "b" }}'
+    with:
+      repo_token: "${{ inputs.github_token }}"
+      title: "Release ${{ inputs.ref_name }}"
+      prerelease: false
+      files: |
+        gql-linux-x86_64.tar.gz
+        gql-linux-arm64.tar.gz
+        gql-darwin-x86_64.tar.gz
+        gql-darwin-arm64.tar.gz
