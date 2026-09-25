@@ -7,15 +7,15 @@ jobs:
   check-changes:
     runs-on: ubuntu-latest
     outputs:
-      rust_cli: ${{ steps.filter.outputs.rust_cli_any_changed }}
-      rust_libgql: ${{ steps.filter.outputs.rust_libgql_any_changed }}
-      shared_treesitter: ${{ steps.filter.outputs.shared_treesitter_any_changed }}
+      rust_cli: ${{ steps.filter.outputs.rust_cli }}
+      rust_libgql: ${{ steps.filter.outputs.rust_libgql }}
+      shared_treesitter: ${{ steps.filter.outputs.shared_treesitter }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     - name: Check for file changes
       id: filter
-      uses: dorny/paths-filter@v3
+      uses: dorny/paths-filter@v4
       with:
         filters: |
           rust_libgql:
