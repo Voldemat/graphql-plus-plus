@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       rust_cli: ${{ steps.filter.outputs.rust_cli_any_changed }}
+      rust_libgql: ${{ steps.filter.outputs.rust_libgql_any_changed }}
       shared_treesitter: ${{ steps.filter.outputs.shared_treesitter_any_changed }}
     steps:
     - name: Checkout code
@@ -17,6 +18,11 @@ jobs:
       uses: dorny/paths-filter@v3
       with:
         filters: |
+          rust_libgql:
+          - 'rust/libgql/**'
+          - 'shared/dockerfiles/libgql'
+          - 'shared/dockerfiles/libgql.dockerignore'
+          - '.github/actions/rust/libgql/action.yaml'
           rust_cli:
           - 'rust/libgql/**'
           - 'rust/cli/**'
@@ -56,12 +62,30 @@ jobs:
         dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
         dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
         ref_name: ${{ github.ref_name }}
+  rust-libgql:
+    needs: check-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.rust_libgql == 'true' }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Call action
+      uses: ./.github/actions/rust/libgql
+      with:
+        dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
+        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+        ref_name: ${{ github.ref_name }}
+        ref_type: ${{ github.ref_type }}
+        cargo_registry_token: ${{ steps.auth.outputs.token }}
   publish-release:
     runs-on: ubuntu-latest
-    #if: inputs.ref_type == 'tag'
-    #needs:
-    #- rust-cli
-    #- shared-treesitter
+    if: inputs.ref_type == 'tag'
+    needs:
+    - rust-cli
+    - shared-treesitter
     steps:
     - name: Checkout code
       uses: actions/checkout@v4

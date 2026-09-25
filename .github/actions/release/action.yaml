@@ -52,13 +52,13 @@ runs:
       mv ./treesitter/targets/x86_64-linux ./linux-x86_64/treesitter
       cp -r ./treesitter/queries ./linux-x86_64/treesitter/queries
       tar -czvf gql-linux-x86_64.tar.gz ./linux-x86_64
-  #- uses: "marvinpinto/action-automatic-releases@latest"
-  #  with:
-  #    repo_token: "${{ inputs.github_token }}"
-  #    title: "Release ${{ inputs.ref_name }}"
-  #    prerelease: false
-  #    files: |
-  #      gql-linux-x86_64.tar.gz
-  #      gql-linux-arm64.tar.gz
-  #      gql-darwin-x86_64.tar.gz
-  #      gql-darwin-arm64.tar.gz
+  - uses: "marvinpinto/action-automatic-releases@latest"
+    with:
+      repo_token: "${{ inputs.github_token }}"
+      title: "Release ${{ inputs.ref_name }}"
+      prerelease: false
+      files: |
+        gql-linux-x86_64.tar.gz
+        gql-linux-arm64.tar.gz
+        gql-darwin-x86_64.tar.gz
+        gql-darwin-arm64.tar.gz
