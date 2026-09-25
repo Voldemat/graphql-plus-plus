@@ -146,8 +146,7 @@ runs:
     shell: sh
     #if: inputs.ref_type == 'tag'
     run: |
-      container_id=$(docker create --pull always vladimirdev635/gql-targets:${{ inputs.ref_name }})
-      echo "$container_id"
+      container_id=$(docker create --pull always vladimirdev635/gql-targets:${{ inputs.ref_name }} sh)
       docker cp $container_id:/targets ./cli-targets
       docker rm $container_id
 
