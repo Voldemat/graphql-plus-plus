@@ -189,7 +189,13 @@ jobs:
       uses: ./.github/actions/typescript/gql-client-vue
 
   e2e-tests:
-    needs: check-changes
+    needs:
+    - check-changes
+    - rust-cli
+    - rust-libgql
+    - rust-gqlcodegen
+    - typescript-gql-client
+    - typescript-gql-codegen
     runs-on: ubuntu-latest
     if: ${{ needs.check-changes.outputs.e2e_tests == 'true' }}
     steps:
