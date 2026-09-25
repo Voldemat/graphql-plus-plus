@@ -37,38 +37,48 @@ jobs:
           - 'rust/gqlcodegen/**'
           - 'typescript/gql-client/**'
           - 'typescript/gql-codegen/**'
+          - '.github/workflows/main.yaml'
           golang_gql_codegen:
           - 'golang/gql-codegen/**'
           - '.github/actions/golang/gql-codegen/action.yaml'
+          - '.github/workflows/main.yaml'
           rust_libgql:
           - 'rust/libgql/**'
           - '.github/actions/rust/libgql/action.yaml'
+          - '.github/workflows/main.yaml'
           rust_gqlcodegen:
           - 'rust/gqlcodegen/**'
           - '.github/actions/rust/gqlcodegen/action.yaml'
+          - '.github/workflows/main.yaml'
           rust_cli:
           - 'rust/libgql/**'
           - 'rust/cli/**'
           - 'shared/dockerfiles/cli'
           - 'shared/dockerfiles/cli.dockerignore'
           - '.github/actions/rust/cli/action.yaml'
+          - '.github/workflows/main.yaml'
           shared_treesitter:
           - 'shared/treesitter/**'
           - 'shared/dockerfiles/treesitter'
           - 'shared/dockerfiles/treesitter.dockerignore'
           - '.github/actions/shared/treesitter/action.yaml'
+          - '.github/workflows/main.yaml'
           typescript_gql_client:
           - 'typescript/gql-client/**'
           - '.github/actions/typescript/gql-client/action.yaml'
+          - '.github/workflows/main.yaml'
           typescript_gql_codegen:
           - 'typescript/gql-codegen/**'
           - '.github/actions/typescript/gql-codegen/action.yaml'
+          - '.github/workflows/main.yaml'
           typescript_gql_client_react:
           - 'typescript/gql-client-react/**'
           - '.github/actions/typescript/gql-client-react/action.yaml'
+          - '.github/workflows/main.yaml'
           typescript_gql_client_vue:
           - 'typescript/gql-client-vue/**'
           - '.github/actions/typescript/gql-client-vue/action.yaml'
+          - '.github/workflows/main.yaml'
 
   rust-cli:
     needs: check-changes
