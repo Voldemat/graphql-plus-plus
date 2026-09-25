@@ -1,0 +1,13 @@
+name: main
+
+on:
+  push:
+
+jobs:
+  rust-cli:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Call action
+      uses: ./.github/actions/rust/cli
