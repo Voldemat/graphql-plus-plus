@@ -150,7 +150,7 @@ runs:
       docker cp $container_id:/targets ./cli-targets
       docker rm $container_id
 
-      container_id=$(docker create --pull always vladimirdev635/gql-treesitter-targets:${{ inputs.ref_name }})
+      container_id=$(docker create --pull always vladimirdev635/gql-treesitter-targets:${{ inputs.ref_name }} sh)
       docker cp $container_id:/ ./treesitter
       docker rm $container_id
 
