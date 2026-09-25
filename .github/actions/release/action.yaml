@@ -36,22 +36,22 @@ runs:
       mv ./cli-targets/x86_64-darwin ./darwin-x86_64/cli
       mv ./treesitter/targets/x86_64-darwin ./darwin-x86_64/treesitter
       cp -r ./treesitter/queries ./darwin-x86_64/treesitter/queries
+      tar -czvf gql-darwin-x86_64.tar.gz ./darwin-x86_64
 
       mv ./cli-targets/aarch64-darwin ./darwin-arm64/cli
       mv ./treesitter/targets/arm64-darwin ./darwin-arm64/treesitter
       cp -r ./treesitter/queries ./darwin-arm64/treesitter/queries
+      tar -czvf gql-darwin-arm64.tar.gz ./darwin-arm64
 
       mv ./cli-targets/aarch64-linux ./linux-arm64/cli
       mv ./treesitter/targets/arm64-linux ./linux-arm64/treesitter
       cp -r ./treesitter/queries ./linux-arm64/treesitter/queries
+      tar -czvf gql-linux-arm64.tar.gz ./linux-arm64
 
       mv ./cli-targets/x86_64-linux ./linux-x86_64/cli
       mv ./treesitter/targets/x86_64-linux ./linux-x86_64/treesitter
       cp -r ./treesitter/queries ./linux-x86_64/treesitter/queries
-
-      ls ./
-      ls ./darwin-x86_64
-      ls ./darwin-x86_64/treesitter
+      tar -czvf gql-linux-x86_64.tar.gz ./linux-x86_64
   #- uses: "marvinpinto/action-automatic-releases@latest"
   #  with:
   #    repo_token: "${{ inputs.github_token }}"

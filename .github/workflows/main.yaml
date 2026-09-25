@@ -10,6 +10,8 @@ jobs:
       rust_cli: ${{ steps.filter.outputs.rust_cli_any_changed }}
       shared_treesitter: ${{ steps.filter.outputs.shared_treesitter_any_changed }}
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
     - name: Check for file changes
       id: filter
       uses: dorny/paths-filter@v3
