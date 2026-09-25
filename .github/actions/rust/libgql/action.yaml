@@ -2,10 +2,13 @@ name: "rust-libgql"
 description: ""
 inputs:
   ref_name:
-    description: 'Ref name'
+    description: ''
     required: true
   ref_type:
-    description: 'Ref type'
+    description: ''
+    required: true
+  cargo_registry_token:
+    description: ''
     required: true
 
 runs:

@@ -73,8 +73,6 @@ jobs:
     - name: Call action
       uses: ./.github/actions/rust/libgql
       with:
-        dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
-        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
         ref_name: ${{ github.ref_name }}
         ref_type: ${{ github.ref_type }}
         cargo_registry_token: ${{ steps.auth.outputs.token }}

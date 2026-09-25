@@ -2,19 +2,19 @@ name: "rust cli build"
 description: ""
 inputs:
   dockerhub_username:
-    description: 'Dockerhub username'
+    description: ''
     required: true
   dockerhub_token:
-    description: 'Dockerhub token'
+    description: ''
     required: true
   ref_name:
-    description: 'Ref name'
+    description: ''
     required: true
   ref_type:
-    description: 'Ref type'
+    description: ''
     required: true
   commit_sha:
-    description: 'Commit sha'
+    description: ''
     required: true
 
 runs:
