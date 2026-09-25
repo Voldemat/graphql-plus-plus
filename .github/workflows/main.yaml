@@ -19,21 +19,19 @@ jobs:
       with:
         filters: |
           rust_libgql:
-          - 'rust/libgql/**'
-          - 'shared/dockerfiles/libgql'
-          - 'shared/dockerfiles/libgql.dockerignore'
-          - '.github/actions/rust/libgql/action.yaml'
+            - 'rust/libgql/**'
+            - '.github/actions/rust/libgql/action.yaml'
           rust_cli:
-          - 'rust/libgql/**'
-          - 'rust/cli/**'
-          - 'shared/dockerfiles/cli'
-          - 'shared/dockerfiles/cli.dockerignore'
-          - '.github/actions/rust/cli/action.yaml'
+            - 'rust/libgql/**'
+            - 'rust/cli/**'
+            - 'shared/dockerfiles/cli'
+            - 'shared/dockerfiles/cli.dockerignore'
+            - '.github/actions/rust/cli/action.yaml'
           shared_treesitter:
-          - 'shared/treesitter/**'
-          - 'shared/dockerfiles/treesitter'
-          - 'shared/dockerfiles/treesitter.dockerignore'
-          - '.github/actions/shared/treesitter/action.yaml'
+            - 'shared/treesitter/**'
+            - 'shared/dockerfiles/treesitter'
+            - 'shared/dockerfiles/treesitter.dockerignore'
+            - '.github/actions/shared/treesitter/action.yaml'
   rust-cli:
     needs: check-changes
     runs-on: ubuntu-latest
