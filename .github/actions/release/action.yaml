@@ -35,19 +35,19 @@ runs:
 
       mv ./cli-targets/x86_64-darwin ./darwin-x86_64/cli
       mv ./treesitter/targets/x86_64-darwin ./darwin-x86_64/treesitter
-      cp ./treesitter/queries ./darwin-x86_64/treesitter/queries
+      cp -r ./treesitter/queries ./darwin-x86_64/treesitter/queries
 
       mv ./cli-targets/arm64-darwin ./darwin-arm64/cli
       mv ./treesitter/targets/arm64-darwin ./darwin-arm64/treesitter
-      cp ./treesitter/queries ./darwin-arm64/treesitter/queries
+      cp -r ./treesitter/queries ./darwin-arm64/treesitter/queries
 
       mv ./cli-targets/arm64-linux ./linux-arm64/cli
       mv ./treesitter/targets/arm64-linux ./linux-arm64/treesitter
-      cp ./treesitter/queries ./linux-arm64/treesitter/queries
+      cp -r ./treesitter/queries ./linux-arm64/treesitter/queries
 
       mv ./cli-targets/x86_64-linux ./linux-x86_64/cli
       mv ./treesitter/targets/x86_64-linux ./linux-x86_64/treesitter
-      cp ./treesitter/queries ./linux-x86_64/treesitter/queries
+      cp -r ./treesitter/queries ./linux-x86_64/treesitter/queries
 
       ls ./
       ls ./darwin-x86_64
