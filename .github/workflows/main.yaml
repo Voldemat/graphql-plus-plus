@@ -125,7 +125,6 @@ jobs:
       with:
         ref_name: ${{ github.ref_name }}
         ref_type: ${{ github.ref_type }}
-        cargo_registry_token: ${{ steps.auth.outputs.token }}
 
   rust-gqlcodegen:
     needs: check-changes
