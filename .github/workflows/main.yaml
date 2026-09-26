@@ -151,6 +151,9 @@ jobs:
       uses: actions/checkout@v5
     - name: Call action
       uses: ./.github/actions/typescript/gql-codegen
+      with:
+        ref_name: ${{ github.ref_name }}
+        ref_type: ${{ github.ref_type }}
 
   typescript-gql-client:
     needs: check-changes
@@ -163,6 +166,9 @@ jobs:
       uses: actions/checkout@v5
     - name: Call action
       uses: ./.github/actions/typescript/gql-client
+      with:
+        ref_name: ${{ github.ref_name }}
+        ref_type: ${{ github.ref_type }}
 
   typescript-gql-client-react:
     needs: check-changes
@@ -175,6 +181,9 @@ jobs:
       uses: actions/checkout@v5
     - name: Call action
       uses: ./.github/actions/typescript/gql-client-react
+      with:
+        ref_name: ${{ github.ref_name }}
+        ref_type: ${{ github.ref_type }}
 
   typescript-gql-client-vue:
     needs: check-changes
@@ -187,6 +196,9 @@ jobs:
       uses: actions/checkout@v5
     - name: Call action
       uses: ./.github/actions/typescript/gql-client-vue
+      with:
+        ref_name: ${{ github.ref_name }}
+        ref_type: ${{ github.ref_type }}
 
   e2e-tests:
     needs:
