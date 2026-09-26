@@ -231,7 +231,7 @@ jobs:
 
   publish-release:
     runs-on: ubuntu-latest
-    if: inputs.ref_type == 'tag'
+    if: github.ref_type == 'tag'
     needs:
     - e2e-tests
     - rust-cli
