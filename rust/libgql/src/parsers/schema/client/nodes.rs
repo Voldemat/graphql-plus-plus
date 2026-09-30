@@ -36,7 +36,7 @@ fn fragment_spec_from_name<
         .into());
     };
     if registry.has_interface_with_name(name.name) {
-        return Ok(ast::ObjectFragmentSpec {
+        return Ok(ast::InterfaceFragmentSpec {
             r#type: ClientStringType::from_str(name.name),
             selections: Vec::new(),
         }

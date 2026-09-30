@@ -222,7 +222,7 @@ fn parse_object_spread_selection_node<
             spec.r#type.to_str() != r#type.name.to_str()
         }
         ast::FragmentSpec::Interface(spec) => {
-            r#type.implements.contains(spec.r#type.to_str())
+            !r#type.implements.contains(spec.r#type.to_str())
         }
         _ => true,
     };
