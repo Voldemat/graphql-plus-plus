@@ -129,7 +129,7 @@ impl<'buffer, S: shared::ast::AsStr<'buffer>> std::fmt::Display
                 "Unknown fragment: {}",
                 name_node.name
             )),
-            Self::RequiredCallableFieldArgumentIsNotProvided { .. } => f.write_str("Required field argument is not provided"),
+            Self::RequiredCallableFieldArgumentIsNotProvided { argument_field_definition, .. } => f.write_fmt(format_args!("Required field argument {} is not provided", argument_field_definition.name)),
             Self::InvalidFragmentType {
                 selection_node,
                 selection_fragment_type,

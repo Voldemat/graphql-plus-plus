@@ -389,7 +389,10 @@ fn parse_selection_arguments<
         .map(|arg| (arg.name.clone(), arg))
         .collect::<IndexMap<_, _>>();
     for (spec_argument_name, spec_argument) in &spec.arguments {
-        if parsed_arguments.contains_key(spec_argument_name.to_str()) {
+        if parsed_arguments.contains_key(spec_argument_name.to_str())
+            || spec_argument.nullable
+            || spec_argument.spec.has_default_value()
+        {
             continue;
         }
         return Err(
@@ -403,7 +406,7 @@ fn parse_selection_arguments<
             },
         );
     }
-    return Ok(parsed_arguments);
+    Ok(parsed_arguments)
 }
 
 fn parse_selection_argument<
