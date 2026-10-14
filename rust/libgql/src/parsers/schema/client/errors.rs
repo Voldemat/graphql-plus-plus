@@ -13,7 +13,7 @@ pub enum FragmentType<S = String> {
 }
 
 impl<S> FragmentType<S> {
-    fn to_type_tag(self: &Self) -> FragmentSpecTypeTag {
+    fn to_type_tag(&self) -> FragmentSpecTypeTag {
         match self {
             Self::Object(_) => FragmentSpecTypeTag::Object,
             Self::Interface(_) => FragmentSpecTypeTag::Interface,
@@ -46,6 +46,13 @@ pub enum Error<'buffer, S: shared::ast::AsStr<'buffer>> {
     UnknownField {
         r#type: FieldType<S>,
         field: file::shared::ast::NameNode<'buffer>,
+    },
+    RequiredCallableFieldArgumentIsNotProvided {
+        argument_field_definition: shared::ast::runtime::FieldDefinition<
+            shared::ast::runtime::InputFieldSpec<S>,
+            S,
+        >,
+        field_location: file::shared::ast::NodeLocation<'buffer>,
     },
     UnexpectedCallableField {
         field_type: shared::ast::runtime::FieldDefinition<
@@ -122,6 +129,7 @@ impl<'buffer, S: shared::ast::AsStr<'buffer>> std::fmt::Display
                 "Unknown fragment: {}",
                 name_node.name
             )),
+            Self::RequiredCallableFieldArgumentIsNotProvided { .. } => f.write_str("Required field argument is not provided"),
             Self::InvalidFragmentType {
                 selection_node,
                 selection_fragment_type,
@@ -159,7 +167,7 @@ impl<'buffer, S: shared::ast::AsStr<'buffer>> std::fmt::Display
 impl<'buffer, S: shared::ast::AsStr<'buffer>> shared::error::Error<'buffer>
     for Error<'buffer, S>
 {
-    fn get_location(self: &Self) -> &file::shared::ast::NodeLocation<'buffer> {
+    fn get_location(&self) -> &file::shared::ast::NodeLocation<'buffer> {
         match self {
             Self::TypeRegistryError(error) => error.get_location(),
             Self::ServerTypeRegistryError(error) => error.get_location(),
@@ -170,6 +178,10 @@ impl<'buffer, S: shared::ast::AsStr<'buffer>> shared::error::Error<'buffer>
             Self::UnexpectedConditionalSpreadSelectionNode(node) => {
                 &node.location
             }
+            Self::RequiredCallableFieldArgumentIsNotProvided {
+                field_location,
+                ..
+            } => field_location,
             Self::UnknownFragment(name_node) => &name_node.location,
             Self::InvalidFragmentType { selection_node, .. } => {
                 &selection_node.location

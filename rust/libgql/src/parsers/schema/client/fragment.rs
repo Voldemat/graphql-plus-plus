@@ -373,6 +373,7 @@ fn parse_selection_arguments<
     server_registry: &T,
     spec: &'server_buffer server::ast::CallableFieldSpec<ServerStringType>,
     arguments: &[file::shared::ast::Argument<'client_buffer>],
+    field_name_location: &file::shared::ast::NodeLocation<'client_buffer>,
 ) -> Result<
     IndexMap<
         ClientStringType,
@@ -380,13 +381,29 @@ fn parse_selection_arguments<
     >,
     errors::Error<'client_buffer, ClientStringType>,
 > {
-    Ok(arguments
+    let parsed_arguments = arguments
         .iter()
         .map(|arg| parse_selection_argument(server_registry, spec, arg))
         .collect::<Result<Vec<_>, errors::Error<'client_buffer, ClientStringType>>>()?
         .into_iter()
         .map(|arg| (arg.name.clone(), arg))
-        .collect())
+        .collect::<IndexMap<_, _>>();
+    for (spec_argument_name, spec_argument) in &spec.arguments {
+        if parsed_arguments.contains_key(spec_argument_name.to_str()) {
+            continue;
+        }
+        return Err(
+            errors::Error::RequiredCallableFieldArgumentIsNotProvided {
+                argument_field_definition: spec_argument.clone_with_string_type(|s| {
+                    s.clone_with_string_type(
+                        shared::ast::runtime::InputTypeSpec::clone_with_string_type,
+                    )
+                }),
+                field_location: field_name_location.clone()
+            },
+        );
+    }
+    return Ok(parsed_arguments);
 }
 
 fn parse_selection_argument<
@@ -451,7 +468,7 @@ fn parse_object_field_selection_node<
         fields
             .get(field_name.name)
             .ok_or(errors::Error::UnknownField {
-                r#type: r#type,
+                r#type,
                 field: field_name.clone(),
             })?;
     return Ok(ast::FieldSelection {
@@ -488,8 +505,9 @@ fn parse_object_field_selection_node<
                 }?;
                 parse_selection_arguments(
                     server_registry,
-                    &spec,
+                    spec,
                     &callable.arguments,
+                    &node.field.get_name().location,
                 )
             }
         }?,
